@@ -1,0 +1,49 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.urls import reverse
+from django.views.generic import ListView, DetailView, UpdateView, FormView
+
+from .forms import GamedayForm
+from .models import Gameday
+from .service.GamedayService import get_game_schedule
+
+
+class GamedayListView(ListView):
+    model = Gameday
+
+
+class GamedayDetailView(DetailView):
+    model = Gameday
+
+    def get_context_data(self, **kwargs):
+        context = super(GamedayDetailView, self).get_context_data()
+        context['info'] = get_game_schedule(context['gameday'].pk)
+        return context
+
+
+class GamedayCreateView(LoginRequiredMixin, FormView):
+    form_class = GamedayForm
+    template_name = 'gamedays/gameday_form.html'
+    pk = None
+
+    def form_valid(self, form):
+        instance = form.save(self.request.user)
+        self.pk = instance.pk
+        return super(GamedayCreateView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('league-gameday-detail', kwargs={'pk': self.pk})
+
+
+class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Gameday
+    fields = ['name', 'date', 'start']
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def test_func(self):
+        post = self.get_object()
+        if self.request.user == post.author:
+            return True
+        return False

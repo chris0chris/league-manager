@@ -1,0 +1,14 @@
+{% extends "gamedays/base.html" %}
+{% block content %}
+{% for gameday in object_list %}
+<article class="media content-section">
+    <div class="media-body">
+        <div class="article-metadata">
+            <a class="mr-2" href="#">{{ gameday.date }} {{ gameday.start|time:"H:i a" }}</a>
+        </div>
+        <h2><a class="article-title" href="{% url 'league-gameday-detail' gameday.id %}">{{ gameday.name }}</a></h2>
+        <p class="article-content"></p>
+    </div>
+</article>
+{% endfor %}
+{% endblock content %}

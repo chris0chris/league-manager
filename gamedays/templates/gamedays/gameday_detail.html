@@ -1,0 +1,30 @@
+{% extends "gamedays/base.html" %}
+{% block content %}
+<h1>Spielplan "{{ object.name }}"</h1>
+Datum: {{ object.date }} <br/>
+Turnierbeginn: {{ object.start|time:"H:i a" }} <br/>
+
+{{ info.schedule | safe }}
+<hr>
+{{ info.table | safe }}
+
+
+<!--table class="table table-hover">
+    <thead>
+    <tr>
+        <th scope="col">Beginn</th>
+        <th scope="col">Feld</th>
+        <th scope="col">Schiedsrichter</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for game in gameday.games %}
+    <tr>
+        <td>{{ game.time }}</td>
+        <td>{{ game.field }}</td>
+        <td>{{ game.officials }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table-->
+{% endblock content %}
