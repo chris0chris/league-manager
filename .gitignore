@@ -13,7 +13,7 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-.eggs/
+.eggs/s
 lib/
 lib64/
 parts/
