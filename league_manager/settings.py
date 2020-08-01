@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # DEBUG = os.environ.get('DEBUG_VALUE')
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'dffl5er.herokuapp.com']
+ALLOWED_HOSTS = ['127.0.0.1', '172.104.138.159']
 
 # Application definition
 
@@ -120,3 +120,5 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 LOGIN_REDIRECT_URL = 'league-home'
 LOGIN_URL = 'login'
+
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
