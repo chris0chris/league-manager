@@ -4,9 +4,9 @@
 <article class="media content-section">
     <div class="media-body">
         <div class="article-metadata">
-            <a class="mr-2" href="#">{{ gameday.date }} {{ gameday.start|time:"H:i a" }}</a>
+            <a class="mr-2" href="#">{{ gameday.date }} </a>
         </div>
-        <h2><a class="article-title" href="{% url 'league-gameday-detail' gameday.id %}">{{ gameday.name }}</a></h2>
+        <h2><a class="article-title" href="{% url 'league-gamespreads-detail' gameday.id %}">{{ gameday.name }}</a></h2>
         <p class="article-content"></p>
     </div>
 </article>

@@ -1,10 +1,31 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import render
 from django.urls import reverse
+from django.views import View
 from django.views.generic import ListView, DetailView, UpdateView, FormView
 
 from .forms import GamedayForm
 from .models import Gameday
-from .service.GamedayService import get_game_schedule
+from .service.GamedayService import get_game_schedule_and_table
+from .service.GamedaySpreadsheetService import get_spreadsheet, get_gamedays_spreads
+
+
+class GamespreadsDetailView(View):
+    template_name = 'gamedays/gameday_detail.html'
+
+    def get(self, request, *args, **kwargs):
+        context = {}
+        context['info'] = get_spreadsheet(kwargs['index'])
+        return render(request, self.template_name, context)
+
+
+class GamespreadListView(View):
+    template_name = 'gamedays/gameday_list.html'
+
+    def get(self, request, *args, **kwargs):
+        context = {}
+        context['object_list'] = get_gamedays_spreads()
+        return render(request, self.template_name, context)
 
 
 class GamedayListView(ListView):
@@ -16,7 +37,7 @@ class GamedayDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(GamedayDetailView, self).get_context_data()
-        context['info'] = get_game_schedule(context['gameday'].pk)
+        context['info'] = get_game_schedule_and_table(context['gameday'].pk)
         return context
 
 

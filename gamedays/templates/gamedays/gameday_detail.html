@@ -3,7 +3,7 @@
 <h1>Spielplan "{{ object.name }}"</h1>
 Datum: {{ object.date }} <br/>
 Turnierbeginn: {{ object.start|time:"H:i a" }} <br/>
-
+<hr>
 {{ info.schedule | safe }}
 <hr>
 {{ info.table | safe }}

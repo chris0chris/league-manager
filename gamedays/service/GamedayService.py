@@ -4,7 +4,7 @@ import pandas as pd
 from ..models import Gameday, Gameinfo, Gameresult
 
 
-def get_game_schedule(pk):
+def get_game_schedule_and_table(pk):
     gameday = pd.DataFrame(Gameday.objects.filter(pk=pk).values())
     gameInfo = pd.DataFrame(Gameinfo.objects.filter(gameday_id=gameday.id).values())
     gameResult = pd.DataFrame(Gameresult.objects.all().values())
@@ -43,7 +43,8 @@ def _get_qualify_table(gamesWithResult):
     gamesWithResult = gamesWithResult[gamesWithResult['stage'] == 'Vorrunde']
     gamesWithResult = gamesWithResult.groupby(['standing', 'team'], as_index=False)
     gamesWithResult = gamesWithResult.agg({'pf': 'sum', 'points': 'sum', 'pa': 'sum', 'diff': 'sum'})
-    gamesWithResult = gamesWithResult.sort_values(by=['points', 'pf', 'pa', 'diff'], ascending=False)
+    gamesWithResult = gamesWithResult.sort_values(by=['points', 'diff', 'pf', 'pa'], ascending=False)
     gamesWithResult = gamesWithResult.sort_values(by='standing')
 
     return gamesWithResult
+

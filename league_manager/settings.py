@@ -24,7 +24,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = (os.environ.get('DEBUG_VALUE') == 'True')
+# DEBUG = os.environ.get('DEBUG_VALUE')
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'dffl5er.herokuapp.com']
 
