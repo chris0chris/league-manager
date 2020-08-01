@@ -1,12 +1,11 @@
 import numpy as np
 import pandas as pd
-from django.conf import settings
 from gspread_pandas import Spread
 from pandas import DataFrame
 
 
 def get_gamedays_spreads():
-    s = Spread('1aDTA6HVfE6j6TDJn2D3e_zDYs4HO0UVJJSt3BXptuyY', config={'client_id': settings.GOOGLE_CLIENT_ID})
+    s = Spread('1aDTA6HVfE6j6TDJn2D3e_zDYs4HO0UVJJSt3BXptuyY')
     gamedays = []
     for index, sheet in enumerate(s.sheets):
         gameday = {}
@@ -22,11 +21,10 @@ def get_gamedays_spreads():
 
 
 def get_spreadsheet(index):
-    sheet = Spread('1aDTA6HVfE6j6TDJn2D3e_zDYs4HO0UVJJSt3BXptuyY', sheet=index,
-                   config={'client_id': settings.GOOGLE_CLIENT_ID})
-    gspread = {}
-    gspread['schedule'] = _get_schedule(sheet).to_html(index=False)
-    gspread['table'] = _get_qualify_table(sheet).to_html(index=False)
+    sheet = Spread('1aDTA6HVfE6j6TDJn2D3e_zDYs4HO0UVJJSt3BXptuyY', sheet=index)
+    gspread = {'schedule': _get_schedule(sheet).to_html(index=False),
+               'table': _get_qualify_table(sheet).to_html(index=False)
+               }
     return gspread
 
 
