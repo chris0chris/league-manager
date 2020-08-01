@@ -1,1 +1,0 @@
-web: gunicorn league_manager.wsgi
