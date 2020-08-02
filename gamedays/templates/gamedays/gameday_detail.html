@@ -4,7 +4,22 @@
 Datum: {{ object.date }} <br/>
 Turnierbeginn: {{ object.start|time:"H:i a" }} <br/>
 <h2>Spielplan</h2>
+<input class="mb-1" id="search" placeholder="Suche nach Teamname" type="text"><br/>
 {{ info.schedule | safe }}
-<h2>Tabelle</h2>
+<h2>Vorrunden-Tabelle</h2>
 {{ info.table | safe }}
+
+<script>
+var $rows = $('#schedule tr');
+$('#search').keyup(function() {
+    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+    $rows.show().filter(function() {
+        var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+        return !~text.indexOf(val);
+    }).hide();
+});
+
+</script>
+
 {% endblock content %}

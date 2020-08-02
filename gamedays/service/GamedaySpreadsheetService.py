@@ -28,7 +28,7 @@ def get_spreadsheet(index):
         'border': 0,
         'justify': 'left'
     }
-    gspread = {'schedule': _get_schedule(sheet).to_html(**render),
+    gspread = {'schedule': _get_schedule(sheet).to_html(**render, table_id='schedule'),
                'table': _get_qualify_table(sheet).to_html(**render)
                }
     return gspread
