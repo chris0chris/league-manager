@@ -22,8 +22,14 @@ def get_gamedays_spreads():
 
 def get_spreadsheet(index):
     sheet = Spread('1aDTA6HVfE6j6TDJn2D3e_zDYs4HO0UVJJSt3BXptuyY', sheet=index)
-    gspread = {'schedule': _get_schedule(sheet).to_html(index=False),
-               'table': _get_qualify_table(sheet).to_html(index=False)
+    render = {
+        'index': False,
+        'classes': ['table', 'table-hover'],
+        'border': 0,
+        'justify': 'left'
+    }
+    gspread = {'schedule': _get_schedule(sheet).to_html(**render),
+               'table': _get_qualify_table(sheet).to_html(**render)
                }
     return gspread
 
