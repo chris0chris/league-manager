@@ -8,7 +8,7 @@
     <!-- Bootstrap CSS -->
     <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet">
-    <link href='{% static "gamedays/main.css" %}' rel="stylesheet" type="text/css">
+    <link href='{% static "gamedays/css/main.css" %}' rel="stylesheet" type="text/css">
     {% if title %}
     <title>5er DFFL - {{ title }}</title>
     {% else %}
@@ -38,7 +38,6 @@
                 {% else %}
                 <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
                 {% endif %}
-            </div>
             </div>
         </div>
     </nav>

@@ -1,5 +1,9 @@
 {% extends "gamedays/base.html" %}
+{% load static %}
 {% block content %}
+<script src="{% static 'gamedays/js/jquery.bracket.min.js' %}" type="text/javascript"></script>
+<link href="{% static 'gamedays/css/jquery.bracket.min.css' %}" rel="stylesheet" type="text/css"/>
+
 <h1>Spieltag "{{ object.name }}"</h1>
 Datum: {{ object.date }} <br/>
 Turnierbeginn: {{ object.start|time:"H:i a" }} <br/>
@@ -9,8 +13,9 @@ Turnierbeginn: {{ object.start|time:"H:i a" }} <br/>
 <h2>Vorrunden-Tabelle</h2>
 {{ info.table | safe }}
 
+<div class="demo" id="minimal"></div>
 <script>
-var $rows = $('#schedule tr');
+var $rows = $('#schedule tbody tr');
 $('#search').keyup(function() {
     var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
 
@@ -19,6 +24,22 @@ $('#search').keyup(function() {
         return !~text.indexOf(val);
     }).hide();
 });
+
+var minimalData = {
+    teams : [
+      ["Team 1", "Team 2"], /* first matchup */
+      ["Team 3", "Team 4"]  /* second matchup */
+    ],
+    results : [
+      [[1,2], [3,4]],       /* first round */
+      [[4,6], [2,1]]        /* second round */
+    ]
+  }
+
+$(function() {
+    $('#minimal.demo').bracket({
+      init: minimalData /* data to initialize the bracket with */ })
+  })
 
 </script>
 
