@@ -3,10 +3,19 @@
 {% block content %}
 <script src="{% static 'gamedays/js/jquery.bracket.min.js' %}" type="text/javascript"></script>
 <link href="{% static 'gamedays/css/jquery.bracket.min.css' %}" rel="stylesheet" type="text/css"/>
-
 <h1>Spieltag "{{ object.name }}"</h1>
-Datum: {{ object.date }} <br/>
-Turnierbeginn: {{ object.start|time:"H:i a" }} <br/>
+<div class="row mb-1">
+    <div class="col">Datum: {{ object.date }}</div>
+    <div class="col-8">Ort: {{ object.location }}</div>
+</div>
+<div class="row mb-1">
+    <div class="col">Captains-Meeting: {{ object.cap_meeting|time:"H:i a" }}</div>
+    <div class="col-8">Veranstalter: {{object.host }}</div>
+</div>
+<div class="row mb-1">
+    <div class="col">Turnierbeginn: {{ object.start|time:"H:i a" }}</div>
+</div>
+
 <h2>Spielplan</h2>
 <input class="mb-1" id="search" placeholder="Suche nach Teamname" type="text"><br/>
 {{ info.schedule | safe }}
@@ -25,21 +34,65 @@ $('#search').keyup(function() {
     }).hide();
 });
 
-var minimalData = {
-    teams : [
-      ["Team 1", "Team 2"], /* first matchup */
-      ["Team 3", "Team 4"]  /* second matchup */
-    ],
-    results : [
-      [[1,2], [3,4]],       /* first round */
-      [[4,6], [2,1]]        /* second round */
-    ]
+{% if info.final_matchup|length > 2 %}
+var minimalData = {{ info.final_matchup | safe }}
+//var minimalData = {"teams": [[{"name": "Wall"}, null], [{"name": "Stutt"}, {"name": "Rooks"}], [{"name": "Spatzen"}, {"name": "W\u00fcrz"}], [{"name": "Wall"}, null]], results: []}
+
+
+/* Edit function is called when team label is clicked */
+function edit_fn(container, data, doneCb) {
+  var input = $('<input type="text">')
+  input.val(data ? data.flag + ':' + data.name : '')
+  container.html(input)
+  input.focus()
+  input.blur(function() {
+    var inputValue = input.val()
+    if (inputValue.length === 0) {
+      doneCb(null); // Drop the team and replace with BYE
+    } else {
+      var flagAndName = inputValue.split(':') // Expects correct input
+      doneCb({flag: flagAndName[0], name: flagAndName[1]})
+    }
+  })
+}
+
+/* Render function is called for each team label when data is changed, data
+ * contains the data object given in init and belonging to this slot.
+ *
+ * 'state' is one of the following strings:
+ * - empty-bye: No data or score and there won't team advancing to this place
+ * - empty-tbd: No data or score yet. A team will advance here later
+ * - entry-no-score: Data available, but no score given yet
+ * - entry-default-win: Data available, score will never be given as opponent is BYE
+ * - entry-complete: Data and score available
+ */
+function render_fn(container, data, score, state) {
+  switch(state) {
+    case "empty-bye":
+      container.append("No team")
+      return;
+    case "empty-tbd":
+      container.append("Upcoming")
+      return;
+
+    case "entry-no-score":
+    case "entry-default-win":
+    case "entry-complete":
+      container.append(data.name)
+      return;
   }
+}
 
 $(function() {
-    $('#minimal.demo').bracket({
-      init: minimalData /* data to initialize the bracket with */ })
-  })
+  $('#minimal.demo').bracket({
+    init: minimalData,
+   // save: function(){}, /* without save() labels are disabled */
+    decorator: {edit: function(){},
+                render: render_fn}
+    })
+  }
+)
+{% endif %}
 
 </script>
 

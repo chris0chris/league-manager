@@ -7,7 +7,7 @@ from django.views.generic import ListView, DetailView, UpdateView, FormView
 from .forms import GamedayForm
 from .models import Gameday
 from .service.GamedayService import get_game_schedule_and_table
-from .service.GamedaySpreadsheetService import get_spreadsheet, get_gamedays_spreads
+from .service.GamedaySpreadsheetService import get_spreadsheet, get_gamedays_spreads, get_gameday
 
 
 class GamespreadsDetailView(View):
@@ -16,6 +16,7 @@ class GamespreadsDetailView(View):
     def get(self, request, *args, **kwargs):
         context = {}
         context['info'] = get_spreadsheet(kwargs['index'])
+        context['object'] = get_gameday(kwargs['index'])
         return render(request, self.template_name, context)
 
 
