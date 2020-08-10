@@ -16,13 +16,22 @@
     <div class="col">Turnierbeginn: {{ object.start|time:"H:i a" }}</div>
 </div>
 
+
 <h2>Spielplan</h2>
 <input class="mb-1" id="search" placeholder="Suche nach Teamname" type="text"><br/>
 {{ info.schedule | safe }}
-<h2>Vorrunden-Tabelle</h2>
-{{ info.table | safe }}
 
-<div class="demo" id="minimal"></div>
+{% if info.qualify_table != None %}
+<h2>Vorrunden-Tabelle</h2>
+{{ info.qualify_table | safe }}
+{% endif %}
+
+<div id="playoff-bracket"></div>
+
+<h2>Abschlusstabelle</h2>
+{{ info.final_table | safe }}
+
+
 <script>
 var $rows = $('#schedule tbody tr');
 $('#search').keyup(function() {
@@ -34,7 +43,7 @@ $('#search').keyup(function() {
     }).hide();
 });
 
-{% if info.final_matchup|length > 2 %}
+{% if info.final_matchup != None %}
 var minimalData = {{ info.final_matchup | safe }}
 //var minimalData = {"teams": [[{"name": "Wall"}, null], [{"name": "Stutt"}, {"name": "Rooks"}], [{"name": "Spatzen"}, {"name": "W\u00fcrz"}], [{"name": "Wall"}, null]], results: []}
 
@@ -84,7 +93,7 @@ function render_fn(container, data, score, state) {
 }
 
 $(function() {
-  $('#minimal.demo').bracket({
+  $('#playoff-bracket').bracket({
     init: minimalData,
    // save: function(){}, /* without save() labels are disabled */
     decorator: {edit: function(){},

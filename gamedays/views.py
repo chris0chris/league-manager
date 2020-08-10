@@ -14,9 +14,9 @@ class GamespreadsDetailView(View):
     template_name = 'gamedays/gameday_detail.html'
 
     def get(self, request, *args, **kwargs):
-        context = {}
-        context['info'] = get_spreadsheet(kwargs['index'])
-        context['object'] = get_gameday(kwargs['index'])
+        context = {'info': get_spreadsheet(kwargs['index']),
+                   'object': get_gameday(kwargs['index'])
+                   }
         return render(request, self.template_name, context)
 
 

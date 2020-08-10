@@ -1,0 +1,38 @@
+[
+  {
+    "_id": "OzE5vaa3p7",
+    "categories": [
+      {
+        "__type": "Pointer",
+        "className": "Category",
+        "objectId": "nebCwWd2Fr"
+      }
+    ],
+    "isActive": true,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/shopgro-1376.appspot.com/o/Barcode%20Data%20Upload%28II%29%2FAnil_puttu_flour_500g.png?alt=media&token=9cf63197-0925-4360-a31a-4675f4f46ae2",
+    "barcode": "8908001921015",
+    "isFmcg": true,
+    "itemName": "Anil puttu flour 500g",
+    "mrp": 58,
+    "_created_at": "2016-10-02T13:49:03.281Z",
+    "_updated_at": "2017-02-22T08:48:09.548Z"
+  },
+  {
+    "_id": "ENPCL8ph1p",
+    "categories": [
+      {
+        "__type": "Pointer",
+        "className": "Category",
+        "objectId": "B4nZeUHmVK"
+      }
+    ],
+    "isActive": true,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/kirananearby-9eaa8.appspot.com/o/Barcode%20data%20upload%2FYippee_Magic_Masala_Noodles,_70_g.png?alt=media&token=d9e47bd7-f847-4d6f-9460-4be8dbcaae00",
+    "barcode": "8901725181222",
+    "isFmcg": true,
+    "itemName": "Yippee Magic Masala Noodles, 70 G",
+    "mrp": 12,
+    "_created_at": "2016-10-02T13:49:03.284Z",
+    "_updated_at": "2017-02-22T08:48:09.074Z"
+  }
+]
