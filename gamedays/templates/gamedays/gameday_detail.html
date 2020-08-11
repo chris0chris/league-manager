@@ -4,6 +4,7 @@
 <script src="{% static 'gamedays/js/jquery.bracket.min.js' %}" type="text/javascript"></script>
 <link href="{% static 'gamedays/css/jquery.bracket.min.css' %}" rel="stylesheet" type="text/css"/>
 <h1>Spieltag "{{ object.name }}"</h1>
+
 <div class="row mb-1">
     <div class="col">Datum: {{ object.date }}</div>
     <div class="col-8">Ort: {{ object.location }}</div>
@@ -16,23 +17,57 @@
     <div class="col">Turnierbeginn: {{ object.start|time:"H:i a" }}</div>
 </div>
 
-
-<h2>Spielplan</h2>
-<input class="mb-1" id="search" placeholder="Suche nach Teamname" type="text"><br/>
-{{ info.schedule | safe }}
-
+<div class="card">
+    <div aria-controls="collapseSchedule" aria-expanded="true" class="card-header" data-target="#collapseSchedule"
+         data-toggle="collapse" id="headingSchedule" role="button">
+        <h2>Spielplan</h2>
+    </div>
+    <div aria-labelledby="headingSchedule" class="collapse show" id="collapseSchedule">
+        <div class="card-body">
+            <input class="mb-1" id="search" placeholder="Suche nach Teamname" type="text"><br/>
+            {{ info.schedule | safe }}
+        </div>
+    </div>
+</div>
 {% if info.qualify_table != None %}
-<h2>Vorrunden-Tabelle</h2>
-{{ info.qualify_table | safe }}
+<div class="card">
+    <div aria-controls="collapseQualify" aria-expanded="false" class="card-header" data-target="#collapseQualify"
+         data-toggle="collapse" id="headingQualify" role="button">
+        <h2>Vorrunden-Tabelle</h2>
+    </div>
+    <div aria-labelledby="headingQualify" class="collapse" id="collapseQualify">
+        <div class="card-body">
+            {{ info.qualify_table | safe }}
+        </div>
+    </div>
+</div>
 {% endif %}
+<div class="card">
+    <div aria-controls="collapseFinal" aria-expanded="false" class="card-header" data-target="#collapseFinal"
+         data-toggle="collapse" id="headingFinal" role="button">
+        <h2>Abschlusstabelle</h2>
+    </div>
+
+    <div aria-labelledby="headingFinal" class="collapse" id="collapseFinal">
+        <div class="card-body">
+            {% if info.final_table == None %}
+            Abschlusstabelle wird berechnet, sobald alle Spiele fertig sind.
+            {% else %}
+            {{ info.final_table | safe }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
 
 <div id="playoff-bracket"></div>
 
-<h2>Abschlusstabelle</h2>
-{{ info.final_table | safe }}
-
 
 <script>
+    $(function() {
+        $('table tbody tr').addClass('text-nowrap')
+    })
+
 var $rows = $('#schedule tbody tr');
 $('#search').keyup(function() {
     var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();

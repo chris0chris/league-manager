@@ -7,15 +7,16 @@ from django.views.generic import ListView, DetailView, UpdateView, FormView
 from .forms import GamedayForm
 from .models import Gameday
 from .service.GamedayService import get_game_schedule_and_table
-from .service.GamedaySpreadsheetService import get_spreadsheet, get_gamedays_spreads, get_gameday
+from .service.GamedaySpreadsheetService import GamedaySpreadsheetService
 
 
 class GamespreadsDetailView(View):
     template_name = 'gamedays/gameday_detail.html'
 
     def get(self, request, *args, **kwargs):
-        context = {'info': get_spreadsheet(kwargs['index']),
-                   'object': get_gameday(kwargs['index'])
+        gss = GamedaySpreadsheetService(kwargs['index'])
+        context = {'info': gss.get_spreadsheet(),
+                   'object': gss.get_gameday(kwargs['index'])
                    }
         return render(request, self.template_name, context)
 
@@ -24,8 +25,8 @@ class GamespreadListView(View):
     template_name = 'gamedays/gameday_list.html'
 
     def get(self, request, *args, **kwargs):
-        context = {}
-        context['object_list'] = get_gamedays_spreads()
+        gss = GamedaySpreadsheetService()
+        context = {'object_list': gss.get_gamedays_spreads()}
         return render(request, self.template_name, context)
 
 
