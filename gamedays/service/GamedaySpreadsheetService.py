@@ -75,7 +75,7 @@ class GamedaySpreadsheetService:
     def get_spreadsheet(self):
         render = {
             'index': False,
-            'classes': ['table', 'table-hover'],
+            'classes': ['table', 'table-hover', 'table-condensed', 'table-responsive'],
             'border': 0,
             'justify': 'left'
         }
