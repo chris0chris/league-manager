@@ -133,3 +133,6 @@ LOGIN_REDIRECT_URL = 'league-home'
 LOGIN_URL = 'login'
 
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+
+# ToDo deleteMe
+X_FRAME_OPTIONS = 'SAMEORIGIN'
