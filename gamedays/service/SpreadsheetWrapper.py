@@ -35,6 +35,7 @@ class SpreadsheetWrapper:
         else:
             self.spreadsheet = Spread(SPREAD_ID, index)
             self.schedule = self.spreadsheet.sheet_to_df(start_row=99)
+            self.schedule = self.schedule[self.schedule[SCHEDULED_TIME] != '']
 
     def get_sheets(self):
         sheets = []
@@ -64,8 +65,7 @@ class SpreadsheetWrapper:
     def get_qualify_table(self):
         if not self.has_finalround():
             return None
-        all_qualify_teams_score = self._prepare_schedule_to_table()
-        all_qualify_teams_score = all_qualify_teams_score[all_qualify_teams_score[STAGE] == QUALIFY_ROUND]
+        all_qualify_teams_score = self._prepare_schedule_to_table(self.schedule, stage=[QUALIFY_ROUND])
         all_qualify_teams_score = all_qualify_teams_score.groupby([STANDING, TEAM], as_index=False)
         all_qualify_teams_score = all_qualify_teams_score.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
         all_qualify_teams_score = all_qualify_teams_score.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
@@ -73,11 +73,28 @@ class SpreadsheetWrapper:
         all_qualify_teams_score = all_qualify_teams_score[[STANDING, TEAM, POINTS, PF, PA, DIFF]]
         return all_qualify_teams_score
 
-    def _prepare_schedule_to_table(self):
-        home_df = self.schedule[[HOME, HOME_SCORE, AWAY_SCORE, STAGE, STANDING]]
+    def get_table_for(self, standing=None):
+        all_teams_score = self._prepare_schedule_to_table(self.schedule, standing=standing)
+        if standing is not None:
+            all_teams_score = all_teams_score.groupby([STANDING, TEAM], as_index=False)
+        else:
+            all_teams_score = all_teams_score.groupby([TEAM], as_index=False)
+        all_teams_score = all_teams_score.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
+        all_teams_score = all_teams_score.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
+        if standing is not None:
+            all_teams_score = all_teams_score.sort_values(by=STANDING)
+        all_teams_score = all_teams_score[[TEAM, POINTS, PF, PA, DIFF]]
+        return all_teams_score
+
+    def _prepare_schedule_to_table(self, schedule, stage=None, standing=None):
+        if stage is not None:
+            schedule = schedule[schedule[STAGE].isin(stage)]
+        elif standing is not None:
+            schedule = schedule[schedule[STANDING].isin(standing)]
+        home_df = schedule[[HOME, HOME_SCORE, AWAY_SCORE, STAGE, STANDING]]
         home_df = home_df.rename(columns={HOME: TEAM, HOME_SCORE: PF, AWAY_SCORE: PA})
         home_df = home_df[home_df[TEAM] != '']
-        away_df = self.schedule[[AWAY, AWAY_SCORE, HOME_SCORE, STAGE, STANDING]]
+        away_df = schedule[[AWAY, AWAY_SCORE, HOME_SCORE, STAGE, STANDING]]
         away_df = away_df.rename(columns={AWAY: TEAM, AWAY_SCORE: PF, HOME_SCORE: PA})
         away_df = away_df[away_df[TEAM] != '']
         all_teams_score = pd.concat([home_df, away_df])
@@ -112,7 +129,23 @@ class SpreadsheetWrapper:
         return self.schedule[self.schedule[AWAY_SCORE] == ''].empty is True
 
     def get_schedule(self):
-        self.schedule = self.schedule[self.schedule[SCHEDULED_TIME] != '']
         self.schedule = self.schedule[
             [SCHEDULED_TIME, FIELD, OFFICIALS, STAGE, STANDING, HOME, HOME_SCORE, AWAY_SCORE, AWAY]]
         return self.schedule
+
+    def get_table_for_7_teams(self):
+        qualify_table = self.get_qualify_table()
+        group1 = qualify_table[qualify_table[STANDING] == 'Gruppe 1']
+        third_place = group1.iloc[2][TEAM]
+        fourth_place = group1.iloc[3][TEAM]
+        third_vs_fourth = self.schedule[(self.schedule[HOME] == third_place) & (self.schedule[AWAY] == fourth_place)]
+        if third_vs_fourth.empty is True:
+            third_vs_fourth = self.schedule[
+                (self.schedule[AWAY] == third_place) & (self.schedule[HOME] == fourth_place)]
+        p5 = self.schedule[self.schedule[STANDING] == 'P5']
+        fith_place = pd.concat([self.schedule[self.schedule[STANDING] == 'P5'], third_vs_fourth])
+        all_teams_score = self._prepare_schedule_to_table(fith_place)
+        all_teams_score = all_teams_score.groupby([TEAM], as_index=False)
+        all_teams_score = all_teams_score.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
+        all_teams_score = all_teams_score.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
+        return all_teams_score

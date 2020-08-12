@@ -19,6 +19,7 @@ PF = 'PF'
 POINTS = 'Punkte'
 SF = 'HF'
 PO = 'PO'
+QUALIFY = 'Vorrunde'
 
 
 class GamedaySpreadsheetService:
@@ -36,7 +37,7 @@ class GamedaySpreadsheetService:
     def get_final_matchups(self):
         if not self.spreadsheet.has_finalround() or not self.spreadsheet.is_qualify_finished():
             return {}
-        playoff_matchups = self._get_playoff_bracket(self.spreadsheet.get_qualify_table())
+        playoff_matchups = self._get_playoff_bracket(self.spreadsheet.get_table_for())
         if playoff_matchups is None:
             return {}
 
@@ -106,23 +107,17 @@ class GamedaySpreadsheetService:
     def _get_final_table(self):
         if not self.spreadsheet.are_games_finished():
             return None
-        final_standing = []
-        all_teams_score = self.spreadsheet._prepare_schedule_to_table()
+        final_table = self.spreadsheet.get_table_for()
         if self.spreadsheet.has_finalround():
-            final_standing += self._get_game_outcome(self.spreadsheet.get_game_result('P1')[0])
-            final_standing += self._get_game_outcome(self.spreadsheet.get_game_result('P3')[0])
-            final_standing += self._get_game_outcome(self.spreadsheet.get_game_result('P5')[0])
-            final_standing += self._get_game_outcome_by_table(all_teams_score, 'P7')[TEAM].to_list()
-        print(final_standing)
-        all_teams_score = all_teams_score.groupby([TEAM], as_index=False)
-        all_teams_score = all_teams_score.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
-        all_teams_score = all_teams_score.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
-        all_teams_score = all_teams_score[[TEAM, POINTS, PF, PA, DIFF]]
-        if self.spreadsheet.has_finalround():
-            all_teams_score.set_index(TEAM, inplace=True)
-            all_teams_score = all_teams_score.reindex(final_standing).reset_index()
+            if final_table.nunique()[TEAM] == 7:
+                final_standing = self.spreadsheet.get_table_for(standing=['P1', 'P3'])[TEAM].to_list()
+                final_standing += self.spreadsheet.get_table_for_7_teams()[TEAM].to_list()
+            else:
+                final_standing = self.spreadsheet.get_table_for(standing=['P1', 'P3', 'P5', 'P7'])[TEAM].to_list()
+            final_table.set_index(TEAM, inplace=True)
+            final_table = final_table.reindex(final_standing).reset_index()
 
-        return all_teams_score
+        return final_table
 
     def _get_playoff_bracket(self, qualifyTable):
         playoff_matchup = None
