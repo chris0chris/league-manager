@@ -8,7 +8,9 @@
     <!-- Bootstrap CSS -->
     <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet">
+    {% if not request.GET.isExtern %}
     <link href='{% static "gamedays/css/main.css" %}' rel="stylesheet" type="text/css">
+    {% endif %}
     {% if title %}
     <title>5er DFFL - {{ title }}</title>
     {% else %}
@@ -18,6 +20,7 @@
             src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 </head>
 <body>
+{% if not request.GET.isExtern %}
 <header class="site-header">
     <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
         <div class="container">
@@ -42,6 +45,7 @@
         </div>
     </nav>
 </header>
+{% endif %}
 <main class="container" role="main">
     <div class="row">
         <div class="col-md-8">
