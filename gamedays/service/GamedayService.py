@@ -8,6 +8,8 @@ def get_game_schedule_and_table(pk):
     gameday = pd.DataFrame(Gameday.objects.filter(pk=pk).values())
     gameInfo = pd.DataFrame(Gameinfo.objects.filter(gameday_id=gameday.id).values())
     gameResult = pd.DataFrame(Gameresult.objects.all().values())
+    if gameInfo.empty is True:
+        return {'schedule': None, 'final_table': None}
     allGames = pd.merge(gameday, gameInfo, left_on='id', right_on='gameday_id')
     gamesWithResult = pd.merge(allGames, gameResult, left_on='id_y', right_on='gameinfo_id')
     gamesWithResult['pf'] = gamesWithResult.fh + gamesWithResult.sh
@@ -15,7 +17,7 @@ def get_game_schedule_and_table(pk):
     schedule = _get_game_schedule(allGames, gamesWithResult)
     gamedayTable = _get_qualify_table(gamesWithResult)
 
-    return {'schedule': schedule.to_html(), 'table': gamedayTable.to_html()}
+    return {'schedule': schedule.to_html(), 'final_table': gamedayTable.to_html()}
 
 
 def _get_game_schedule(allGames, gamesWithResult):

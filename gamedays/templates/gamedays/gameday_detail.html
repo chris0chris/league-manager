@@ -25,8 +25,12 @@
     </div>
     <div aria-labelledby="headingSchedule" class="collapse show" id="collapseSchedule">
         <div class="card-body">
+            {% if info.schedule == None %}
+            Spielplan wurde noch nicht erstellt.
+            {% else %}
             <input class="mb-1" id="search" placeholder="Suche nach Teamname" type="text"><br/>
             {{ info.schedule | safe }}
+            {% endif %}
         </div>
     </div>
 </div>
