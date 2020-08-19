@@ -34,7 +34,7 @@ class Gameinfo(models.Model):
 
 
 class Gameresult(models.Model):
-    gameinfo = models.ForeignKey(Gameinfo, on_delete=models.CASCADE)
+    gameinfo: Gameinfo = models.ForeignKey(Gameinfo, on_delete=models.CASCADE)
     # ToDo FK für Team
     team = models.CharField(max_length=100)
     fh = models.SmallIntegerField(null=True)

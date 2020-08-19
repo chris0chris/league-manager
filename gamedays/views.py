@@ -2,9 +2,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import ListView, DetailView, UpdateView, FormView
+from django.views.generic import ListView, DetailView, UpdateView, CreateView
 
-from .forms import GamedayForm
+from gamedays.management.schedule_creator import ScheduleCreator, Schedule
+from .forms import GamedayCreateForm, GamedayUpdateForm
 from .models import Gameday
 from .service.GamedayService import get_game_schedule_and_table
 from .service.GamedaySpreadsheetService import GamedaySpreadsheetService
@@ -43,30 +44,56 @@ class GamedayDetailView(DetailView):
         return context
 
 
-class GamedayCreateView(LoginRequiredMixin, FormView):
-    form_class = GamedayForm
+class GamedayCreateView(LoginRequiredMixin, CreateView):
+    form_class = GamedayCreateForm
     template_name = 'gamedays/gameday_form.html'
+    model = Gameday
     pk = None
 
     def form_valid(self, form):
-        instance = form.save(self.request.user)
-        self.pk = instance.pk
+        # instance = form.save(self.request.user)
+        # self.pk = instance.pk
+        form.author = self.request.user
         return super(GamedayCreateView, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse('league-gameday-detail', kwargs={'pk': self.pk})
+        return reverse('league-gameday-detail', kwargs={'pk': self.object.pk})
 
 
 class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    form_class = GamedayUpdateForm
+    template_name = 'gamedays/gameday_form.html'
     model = Gameday
-    fields = ['name', 'date', 'start']
 
     def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
+        # instance = form.save(self.request.user)
+        # self.pk = instance.pk
+        groups = [list for list in [
+            form.cleaned_data['group1'].split(','),
+            form.cleaned_data['group2'].split(','),
+            form.cleaned_data['group3'].split(','),
+            form.cleaned_data['group4'].split(',')] if list != ['']]
+
+        sc = ScheduleCreator(schedule=Schedule(fields=form.cleaned_data['fields'], groups=groups), gameday=self.object)
+        sc.create()
+        return super(GamedayUpdateView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('league-gameday-detail', kwargs={'pk': self.object.pk})
 
     def test_func(self):
-        post = self.get_object()
-        if self.request.user == post.author:
-            return True
-        return False
+        # post = self.get_object()
+        return self.request.user.is_staff
+
+# class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+#     form_class = Gameday
+#     model = Gameday
+#     fields = ['name', 'date', 'start']
+#
+#     def form_valid(self, form):
+#         form.instance.author = self.request.user
+#         return super().form_valid(form)
+#
+#     def test_func(self):
+#         post = self.get_object()
+#         return self.request.user.is_staff
