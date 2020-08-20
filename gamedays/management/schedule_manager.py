@@ -54,6 +54,7 @@ class ScheduleCreator():
         self.schedule = schedule
 
     def create(self):
+        Gameinfo.objects.filter(gameday_id=self.gameday.pk).delete()
         for entry in self.schedule.get_entries():
             gameinfo = Gameinfo()
             gameinfo.gameday = self.gameday

@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import ListView, DetailView, UpdateView, CreateView
 
-from gamedays.management.schedule_creator import ScheduleCreator, Schedule
+from gamedays.management.schedule_manager import ScheduleCreator, Schedule
 from .forms import GamedayCreateForm, GamedayUpdateForm
 from .models import Gameday
 from .service.GamedayService import get_game_schedule_and_table
@@ -89,18 +89,4 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return reverse('league-gameday-detail', kwargs={'pk': self.object.pk})
 
     def test_func(self):
-        # post = self.get_object()
         return self.request.user.is_staff
-
-# class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-#     form_class = Gameday
-#     model = Gameday
-#     fields = ['name', 'date', 'start']
-#
-#     def form_valid(self, form):
-#         form.instance.author = self.request.user
-#         return super().form_valid(form)
-#
-#     def test_func(self):
-#         post = self.get_object()
-#         return self.request.user.is_staff

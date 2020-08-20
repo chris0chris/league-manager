@@ -1,0 +1,361 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "some_password",
+      "last_login": "2020-08-13T12:54:08.011Z",
+      "is_superuser": true,
+      "username": "test_user",
+      "first_name": "",
+      "last_name": "",
+      "email": "some@email.abz",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2020-07-21T07:53:40.011Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "gamedays.gameday",
+    "pk": 1,
+    "fields": {
+      "name": "Test Gameday",
+      "date": "2020-07-21",
+      "start": "10:00:00",
+      "author": 1
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 30,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "10:00:00",
+      "field": 1,
+      "officials": " Team B3",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 31,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "11:10:00",
+      "field": 1,
+      "officials": " Team B2",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 32,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "12:20:00",
+      "field": 1,
+      "officials": "Team B1",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 33,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "10:00:00",
+      "field": 2,
+      "officials": " Team A3",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 2"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 34,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "11:10:00",
+      "field": 2,
+      "officials": " Team A2",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 2"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 35,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "12:20:00",
+      "field": 2,
+      "officials": "Team A1",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 2"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 36,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "13:40:00",
+      "field": 1,
+      "officials": null,
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Finalrunde",
+      "standing": "HF"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 37,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "13:40:00",
+      "field": 2,
+      "officials": null,
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Finalrunde",
+      "standing": "HF"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 38,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "14:50:00",
+      "field": 1,
+      "officials": null,
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Finalrunde",
+      "standing": "P5"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 39,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "16:00:00",
+      "field": 1,
+      "officials": null,
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Finalrunde",
+      "standing": "P1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 40,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "14:50:00",
+      "field": 2,
+      "officials": null,
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Finalrunde",
+      "standing": "P3"
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 37,
+    "fields": {
+      "gameinfo": 30,
+      "team": "Team A1",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 38,
+    "fields": {
+      "gameinfo": 30,
+      "team": " Team A2",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 39,
+    "fields": {
+      "gameinfo": 31,
+      "team": " Team A3",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 40,
+    "fields": {
+      "gameinfo": 31,
+      "team": "Team A1",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 41,
+    "fields": {
+      "gameinfo": 32,
+      "team": " Team A2",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 42,
+    "fields": {
+      "gameinfo": 32,
+      "team": " Team A3",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 43,
+    "fields": {
+      "gameinfo": 33,
+      "team": "Team B1",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 44,
+    "fields": {
+      "gameinfo": 33,
+      "team": " Team B2",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 45,
+    "fields": {
+      "gameinfo": 34,
+      "team": " Team B3",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 46,
+    "fields": {
+      "gameinfo": 34,
+      "team": "Team B1",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 47,
+    "fields": {
+      "gameinfo": 35,
+      "team": " Team B2",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 48,
+    "fields": {
+      "gameinfo": 35,
+      "team": " Team B3",
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  }
+]

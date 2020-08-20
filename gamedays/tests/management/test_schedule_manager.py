@@ -2,7 +2,7 @@ import unittest
 
 from django.test import TestCase
 
-from gamedays.management.schedule_creator import ScheduleCreator, Schedule, ScheduleEntry
+from gamedays.management.schedule_manager import ScheduleCreator, Schedule, ScheduleEntry
 from gamedays.models import Gameinfo, Gameday, Gameresult
 
 
@@ -40,13 +40,20 @@ class TestScheduleCreator(TestCase):
     fixtures = ['testdata.json']
 
     def test_schedule_created(self):
+        gameday_id = 2
         self.assertFalse(Gameinfo.objects.filter(gameday_id=2).exists())
         groups = [['Iser', 'Nieder', 'Wesel'], ['Dort', 'Pandas', 'Rheda']]
-        sc = ScheduleCreator(gameday=Gameday.objects.filter(pk=2).first(), schedule=Schedule(2, groups))
+        sc = ScheduleCreator(gameday=Gameday.objects.filter(pk=gameday_id).first(), schedule=Schedule(2, groups))
         sc.create()
-        gameinfo_set = Gameinfo.objects.filter(gameday_id=2)
+        gameinfo_set = Gameinfo.objects.filter(gameday_id=gameday_id)
         self.assertEqual(gameinfo_set.count(), 11)
         gameinfo = gameinfo_set.first()
         self.assertEqual(gameinfo.officials, 'Rheda')
         self.assertEqual(Gameresult.objects.filter(gameinfo_id=gameinfo.pk).count(), 2)
         self.assertFalse(Gameresult.objects.filter(gameinfo_id=gameinfo_set.last().pk).exists())
+        # schedule will be created again and previous entries will be deleted
+        sc.create()
+        with self.assertRaises(Gameinfo.DoesNotExist):
+            Gameinfo.objects.get(pk=gameinfo.pk)
+        self.assertFalse(Gameresult.objects.filter(gameinfo_id=gameinfo.pk).exists())
+        self.assertEqual(Gameinfo.objects.filter(gameday_id=gameday_id).count(), 11)
