@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.forms import Form
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
@@ -65,7 +66,7 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'gamedays/gameday_form.html'
     model = Gameday
 
-    def form_valid(self, form):
+    def form_valid(self, form: Form):
         # instance = form.save(self.request.user)
         # self.pk = instance.pk
         groups = [list for list in [
@@ -75,7 +76,13 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             form.cleaned_data['group4'].split(',')] if list != ['']]
 
         sc = ScheduleCreator(schedule=Schedule(fields=form.cleaned_data['fields'], groups=groups), gameday=self.object)
-        sc.create()
+        try:
+            sc.create()
+        except FileNotFoundError:
+            form.add_error(None,
+                           'Spielplan konnte nicht erstellt werden, da es die Kombination #Teams und #Felder nicht gibt')
+            return super(GamedayUpdateView, self).form_invalid(form)
+
         return super(GamedayUpdateView, self).form_valid(form)
 
     def get_success_url(self):

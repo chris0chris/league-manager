@@ -269,7 +269,7 @@
             "password": "some_password",
             "last_login": "2020-08-13T12:54:08.011Z",
             "is_superuser": true,
-            "username": "testUser",
+            "username": "test_user",
             "first_name": "",
             "last_name": "",
             "email": "some@email.abz",
