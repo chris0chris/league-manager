@@ -1,4 +1,4 @@
-name: league-manager-CI
+name: Pytest-CI
 
 on:
   push:
