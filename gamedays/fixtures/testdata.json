@@ -1,303 +1,747 @@
 [
-    {
-        "model": "gamedays.gameinfo",
-        "pk": 1,
-        "fields": {
-            "gameday": 1,
-            "scheduled": "10:00:00",
-            "field": 1,
-            "officials": "Bears",
-            "status": "",
-            "pin": 0,
-            "gameStarted": "08:15:50",
-            "gameHalftime": "08:15:50",
-            "gameFinished": "08:15:52",
-            "stage": "Vorrunde",
-            "standing": "Gruppe 1"
-        }
-    },
-    {
-        "model": "gamedays.gameinfo",
-        "pk": 2,
-        "fields": {
-            "gameday": 1,
-            "scheduled": "11:10:00",
-            "field": 1,
-            "officials": "Kelk",
-            "status": "",
-            "pin": 0,
-            "gameStarted": "08:17:04",
-            "gameHalftime": "08:17:05",
-            "gameFinished": "08:17:06",
-            "stage": "Vorrunde",
-            "standing": "Gruppe 1"
-        }
-    },
-    {
-        "model": "gamedays.gameinfo",
-        "pk": 3,
-        "fields": {
-            "gameday": 1,
-            "scheduled": "12:20:00",
-            "field": 1,
-            "officials": "W\u00fcrz",
-            "status": "",
-            "pin": 0,
-            "gameStarted": "08:17:36",
-            "gameHalftime": "08:17:37",
-            "gameFinished": "08:17:37",
-            "stage": "Vorrunde",
-            "standing": "Gruppe 1"
-        }
-    },
-    {
-        "model": "gamedays.gameinfo",
-        "pk": 4,
-        "fields": {
-            "gameday": 1,
-            "scheduled": "12:30:00",
-            "field": 1,
-            "officials": "Kelk",
-            "status": "",
-            "pin": 0,
-            "gameStarted": "08:18:07",
-            "gameHalftime": "08:18:08",
-            "gameFinished": "08:18:08",
-            "stage": "Finalrunde",
-            "standing": "PO1"
-        }
-    },
-    {
-        "model": "gamedays.gameinfo",
-        "pk": 5,
-        "fields": {
-            "gameday": 1,
-            "scheduled": "10:00:00",
-            "field": 2,
-            "officials": "Lions",
-            "status": "",
-            "pin": 0,
-            "gameStarted": "08:18:59",
-            "gameHalftime": "08:19:00",
-            "gameFinished": "08:19:00",
-            "stage": "Vorrunde",
-            "standing": "Gruppe 2"
-        }
-    },
-    {
-        "model": "gamedays.gameinfo",
-        "pk": 6,
-        "fields": {
-            "gameday": 1,
-            "scheduled": "11:10:00",
-            "field": 2,
-            "officials": "Spatzen",
-            "status": "",
-            "pin": 0,
-            "gameStarted": "08:19:26",
-            "gameHalftime": "08:19:26",
-            "gameFinished": "08:19:26",
-            "stage": "Vorrunde",
-            "standing": "Gruppe 2"
-        }
-    },
-    {
-        "model": "gamedays.gameinfo",
-        "pk": 7,
-        "fields": {
-            "gameday": 1,
-            "scheduled": "12:20:00",
-            "field": 2,
-            "officials": "Stutt",
-            "status": "",
-            "pin": 0,
-            "gameStarted": "08:19:45",
-            "gameHalftime": "08:19:45",
-            "gameFinished": "08:19:46",
-            "stage": "Vorrunde",
-            "standing": "Gruppe 2"
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 1,
-        "fields": {
-            "gameinfo": 1,
-            "team": "Wall",
-            "fh": 32,
-            "sh": 41,
-            "pa": 12,
-            "isHome": true
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 2,
-        "fields": {
-            "gameinfo": 1,
-            "team": "Stutt",
-            "fh": 12,
-            "sh": 0,
-            "pa": 73,
-            "isHome": false
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 3,
-        "fields": {
-            "gameinfo": 2,
-            "team": "Stutt",
-            "fh": 31,
-            "sh": 20,
-            "pa": 37,
-            "isHome": true
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 4,
-        "fields": {
-            "gameinfo": 2,
-            "team": "Lions",
-            "fh": 25,
-            "sh": 12,
-            "pa": 51,
-            "isHome": false
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 5,
-        "fields": {
-            "gameinfo": 3,
-            "team": "Lions",
-            "fh": 27,
-            "sh": 14,
-            "pa": 81,
-            "isHome": true
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 6,
-        "fields": {
-            "gameinfo": 3,
-            "team": "Wall",
-            "fh": 48,
-            "sh": 33,
-            "pa": 41,
-            "isHome": false
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 7,
-        "fields": {
-            "gameinfo": 5,
-            "team": "Kelk",
-            "fh": 28,
-            "sh": 20,
-            "pa": 21,
-            "isHome": true
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 8,
-        "fields": {
-            "gameinfo": 5,
-            "team": "Rooks",
-            "fh": 14,
-            "sh": 7,
-            "pa": 48,
-            "isHome": false
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 9,
-        "fields": {
-            "gameinfo": 6,
-            "team": "Rooks",
-            "fh": 27,
-            "sh": 27,
-            "pa": 0,
-            "isHome": true
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 10,
-        "fields": {
-            "gameinfo": 6,
-            "team": "Dragons",
-            "fh": 0,
-            "sh": 0,
-            "pa": 54,
-            "isHome": false
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 11,
-        "fields": {
-            "gameinfo": 7,
-            "team": "Dragons",
-            "fh": 0,
-            "sh": 0,
-            "pa": 51,
-            "isHome": true
-        }
-    },
-    {
-        "model": "gamedays.gameresult",
-        "pk": 12,
-        "fields": {
-            "gameinfo": 7,
-            "team": "Kelk",
-            "fh": 14,
-            "sh": 37,
-            "pa": 0,
-            "isHome": false
-        }
-    },
-    {
-        "model": "auth.user",
-        "pk": 1,
-        "fields": {
-            "password": "some_password",
-            "last_login": "2020-08-13T12:54:08.011Z",
-            "is_superuser": true,
-            "username": "test_user",
-            "first_name": "",
-            "last_name": "",
-            "email": "some@email.abz",
-            "is_staff": true,
-            "is_active": true,
-            "date_joined": "2020-07-21T07:53:40.011Z",
-            "groups": [],
-            "user_permissions": []
-        }
-    },
-    {
-        "model": "gamedays.gameday",
-        "pk": 1,
-        "fields": {
-            "name": "Aux-Bowl III",
-            "date": "2020-07-21",
-            "start": "10:00:00",
-            "author": 1
-        }
-    },
-    {
-        "model": "gamedays.gameday",
-        "pk": 2,
-        "fields": {
-            "name": "Bavaria-Bowl I",
-            "date": "2020-07-21",
-            "start": "12:00:00",
-            "author": 1
-        }
+  {
+    "model": "gamedays.gameresult",
+    "pk": 61,
+    "fields": {
+      "gameinfo": 52,
+      "team": "Iser",
+      "fh": 6,
+      "sh": 0,
+      "pa": 25,
+      "isHome": true
     }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 62,
+    "fields": {
+      "gameinfo": 52,
+      "team": "Nieder",
+      "fh": 13,
+      "sh": 12,
+      "pa": 6,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 63,
+    "fields": {
+      "gameinfo": 53,
+      "team": "Wesel",
+      "fh": 13,
+      "sh": 12,
+      "pa": 52,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 64,
+    "fields": {
+      "gameinfo": 53,
+      "team": "Iser",
+      "fh": 25,
+      "sh": 27,
+      "pa": 25,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 65,
+    "fields": {
+      "gameinfo": 54,
+      "team": "Nieder",
+      "fh": 21,
+      "sh": 27,
+      "pa": 6,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 66,
+    "fields": {
+      "gameinfo": 54,
+      "team": "Wesel",
+      "fh": 6,
+      "sh": 0,
+      "pa": 48,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 67,
+    "fields": {
+      "gameinfo": 55,
+      "team": "Dort",
+      "fh": 33,
+      "sh": 0,
+      "pa": 24,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 68,
+    "fields": {
+      "gameinfo": 55,
+      "team": "Pandas",
+      "fh": 12,
+      "sh": 12,
+      "pa": 33,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 69,
+    "fields": {
+      "gameinfo": 56,
+      "team": "Rheda",
+      "fh": 12,
+      "sh": 12,
+      "pa": 41,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 70,
+    "fields": {
+      "gameinfo": 56,
+      "team": "Dort",
+      "fh": 27,
+      "sh": 14,
+      "pa": 24,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 71,
+    "fields": {
+      "gameinfo": 57,
+      "team": "Pandas",
+      "fh": 19,
+      "sh": 19,
+      "pa": 36,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 72,
+    "fields": {
+      "gameinfo": 57,
+      "team": "Rheda",
+      "fh": 24,
+      "sh": 12,
+      "pa": 38,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 73,
+    "fields": {
+      "gameinfo": 58,
+      "team": "Pandas",
+      "fh": 24,
+      "sh": 6,
+      "pa": 14,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 74,
+    "fields": {
+      "gameinfo": 58,
+      "team": "Nieder",
+      "fh": 0,
+      "sh": 14,
+      "pa": 30,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 75,
+    "fields": {
+      "gameinfo": 59,
+      "team": "Iser",
+      "fh": 7,
+      "sh": 13,
+      "pa": 39,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 76,
+    "fields": {
+      "gameinfo": 59,
+      "team": "Dort",
+      "fh": 20,
+      "sh": 19,
+      "pa": 20,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 77,
+    "fields": {
+      "gameinfo": 60,
+      "team": "Wesel",
+      "fh": 19,
+      "sh": 13,
+      "pa": 53,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 78,
+    "fields": {
+      "gameinfo": 60,
+      "team": "Rheda",
+      "fh": 26,
+      "sh": 27,
+      "pa": 32,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 79,
+    "fields": {
+      "gameinfo": 62,
+      "team": "Nieder",
+      "fh": 19,
+      "sh": 0,
+      "pa": 38,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 80,
+    "fields": {
+      "gameinfo": 62,
+      "team": "Iser",
+      "fh": 25,
+      "sh": 13,
+      "pa": 19,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 81,
+    "fields": {
+      "gameinfo": 61,
+      "team": "Pandas",
+      "fh": 6,
+      "sh": 0,
+      "pa": 34,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 82,
+    "fields": {
+      "gameinfo": 61,
+      "team": "Dort",
+      "fh": 14,
+      "sh": 20,
+      "pa": 6,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 83,
+    "fields": {
+      "gameinfo": 63,
+      "team": "Spatzen",
+      "fh": 12,
+      "sh": 19,
+      "pa": 25,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 84,
+    "fields": {
+      "gameinfo": 63,
+      "team": "Rooks",
+      "fh": 13,
+      "sh": 12,
+      "pa": 2,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 85,
+    "fields": {
+      "gameinfo": 64,
+      "team": "Dragons",
+      "fh": 6,
+      "sh": 0,
+      "pa": 47,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 86,
+    "fields": {
+      "gameinfo": 64,
+      "team": "Lions",
+      "fh": 27,
+      "sh": 20,
+      "pa": 6,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 87,
+    "fields": {
+      "gameinfo": 65,
+      "team": "Lions",
+      "fh": 14,
+      "sh": 13,
+      "pa": 25,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 88,
+    "fields": {
+      "gameinfo": 65,
+      "team": "Spatzen",
+      "fh": 13,
+      "sh": 12,
+      "pa": 27,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 89,
+    "fields": {
+      "gameinfo": 66,
+      "team": "Rooks",
+      "fh": 32,
+      "sh": 43,
+      "pa": 6,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 90,
+    "fields": {
+      "gameinfo": 66,
+      "team": "Dragons",
+      "fh": 6,
+      "sh": 0,
+      "pa": 75,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 91,
+    "fields": {
+      "gameinfo": 67,
+      "team": "Spatzen",
+      "fh": 33,
+      "sh": 36,
+      "pa": 6,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 92,
+    "fields": {
+      "gameinfo": 67,
+      "team": "Dragons",
+      "fh": 6,
+      "sh": 0,
+      "pa": 69,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 93,
+    "fields": {
+      "gameinfo": 68,
+      "team": "Lions",
+      "fh": 14,
+      "sh": 7,
+      "pa": 0,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 94,
+    "fields": {
+      "gameinfo": 68,
+      "team": "Rooks",
+      "fh": 0,
+      "sh": 0,
+      "pa": 21,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 52,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "10:00:00",
+      "field": 1,
+      "officials": " Rheda",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 53,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "11:10:00",
+      "field": 1,
+      "officials": " Pandas",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 54,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "12:20:00",
+      "field": 1,
+      "officials": "Dort",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 55,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "10:00:00",
+      "field": 2,
+      "officials": " Wesel",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 2"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 56,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "11:10:00",
+      "field": 2,
+      "officials": " Nieder",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 2"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 57,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "12:20:00",
+      "field": 2,
+      "officials": "Iser",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Vorrunde",
+      "standing": "Gruppe 2"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 58,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "13:40:00",
+      "field": 1,
+      "officials": null,
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Finalrunde",
+      "standing": "HF"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 59,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "13:40:00",
+      "field": 2,
+      "officials": null,
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Finalrunde",
+      "standing": "HF"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 60,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "14:50:00",
+      "field": 1,
+      "officials": null,
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Finalrunde",
+      "standing": "P5"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 61,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "16:00:00",
+      "field": 1,
+      "officials": null,
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Finalrunde",
+      "standing": "P1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 62,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "14:50:00",
+      "field": 2,
+      "officials": null,
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Finalrunde",
+      "standing": "P3"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 63,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "10:00:00",
+      "field": 1,
+      "officials": " Dragons",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 64,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "11:10:00",
+      "field": 1,
+      "officials": "Spatzen",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 65,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "12:20:00",
+      "field": 1,
+      "officials": " Rooks",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 66,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "14:30:00",
+      "field": 1,
+      "officials": "Spatzen",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 67,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "15:40:00",
+      "field": 1,
+      "officials": " Lions",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 68,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "16:50:00",
+      "field": 1,
+      "officials": " Dragons",
+      "status": "",
+      "pin": null,
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "some_password",
+      "last_login": "2020-08-13T12:54:08.011Z",
+      "is_superuser": true,
+      "username": "test_user",
+      "first_name": "",
+      "last_name": "",
+      "email": "some@email.abz",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2020-07-21T07:53:40.011Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "gamedays.gameday",
+    "pk": 1,
+    "fields": {
+      "name": "Aux-Bowl III",
+      "date": "2020-07-21",
+      "start": "10:00:00",
+      "author": 1
+    }
+  },
+  {
+    "model": "gamedays.gameday",
+    "pk": 2,
+    "fields": {
+      "name": "Fire Bowl I",
+      "date": "2020-07-21",
+      "start": "12:00:00",
+      "author": 1
+    }
+  },
+  {
+    "model": "gamedays.gameday",
+    "pk": 3,
+    "fields": {
+      "name": "Bavaria-Bowl I",
+      "date": "2020-07-21",
+      "start": "12:00:00",
+      "author": 1
+    }
+  }
 ]

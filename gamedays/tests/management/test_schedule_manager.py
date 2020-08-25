@@ -40,8 +40,8 @@ class TestScheduleCreator(TestCase):
     fixtures = ['testdata.json']
 
     def test_schedule_created(self):
-        gameday_id = 2
-        self.assertFalse(Gameinfo.objects.filter(gameday_id=2).exists())
+        gameday_id = 3
+        self.assertFalse(Gameinfo.objects.filter(gameday_id=gameday_id).exists())
         groups = [['Iser', 'Nieder', 'Wesel'], ['Dort', 'Pandas', 'Rheda']]
         sc = ScheduleCreator(gameday=Gameday.objects.filter(pk=gameday_id).first(), schedule=Schedule(2, groups))
         sc.create()

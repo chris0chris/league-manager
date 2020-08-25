@@ -8,8 +8,8 @@ from django.views.generic import ListView, DetailView, UpdateView, CreateView
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule
 from .forms import GamedayCreateForm, GamedayUpdateForm
 from .models import Gameday
-from .service.GamedayService import get_game_schedule_and_table
 from .service.GamedaySpreadsheetService import GamedaySpreadsheetService
+from .service.gameday_service import GamedayService
 
 
 class GamespreadsDetailView(View):
@@ -41,7 +41,8 @@ class GamedayDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(GamedayDetailView, self).get_context_data()
-        context['info'] = get_game_schedule_and_table(context['gameday'].pk)
+        gs = GamedayService()
+        context['info'] = gs.get_game_schedule_and_table(context['gameday'].pk)
         return context
 
 
@@ -52,8 +53,6 @@ class GamedayCreateView(LoginRequiredMixin, CreateView):
     pk = None
 
     def form_valid(self, form):
-        # instance = form.save(self.request.user)
-        # self.pk = instance.pk
         form.author = self.request.user
         return super(GamedayCreateView, self).form_valid(form)
 
@@ -67,20 +66,21 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Gameday
 
     def form_valid(self, form: Form):
-        # instance = form.save(self.request.user)
-        # self.pk = instance.pk
         groups = [list for list in [
             form.cleaned_data['group1'].split(','),
             form.cleaned_data['group2'].split(','),
             form.cleaned_data['group3'].split(','),
             form.cleaned_data['group4'].split(',')] if list != ['']]
 
-        sc = ScheduleCreator(schedule=Schedule(fields=form.cleaned_data['fields'], groups=groups), gameday=self.object)
+        sc = ScheduleCreator(
+            schedule=Schedule(fields=form.cleaned_data['fields'], groups=groups),
+            gameday=self.object)
         try:
             sc.create()
         except FileNotFoundError:
             form.add_error(None,
-                           'Spielplan konnte nicht erstellt werden, da es die Kombination #Teams und #Felder nicht gibt')
+                           'Spielplan konnte nicht erstellt werden, '
+                           'da es die Kombination #Teams und #Felder nicht gibt')
             return super(GamedayUpdateView, self).form_invalid(form)
 
         return super(GamedayUpdateView, self).form_valid(form)

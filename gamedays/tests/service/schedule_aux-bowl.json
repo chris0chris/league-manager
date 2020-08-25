@@ -1,0 +1,199 @@
+{
+  "schema": {
+    "fields": [
+      {
+        "name": "index",
+        "type": "integer"
+      },
+      {
+        "name": "scheduled",
+        "type": "string"
+      },
+      {
+        "name": "field",
+        "type": "integer"
+      },
+      {
+        "name": "officials",
+        "type": "string"
+      },
+      {
+        "name": "stage",
+        "type": "string"
+      },
+      {
+        "name": "standing",
+        "type": "string"
+      },
+      {
+        "name": "Heim",
+        "type": "string"
+      },
+      {
+        "name": "Punkte Heim",
+        "type": "integer"
+      },
+      {
+        "name": "Punkte Gast",
+        "type": "integer"
+      },
+      {
+        "name": "Gast",
+        "type": "string"
+      },
+      {
+        "name": "status",
+        "type": "string"
+      }
+    ],
+    "primaryKey": [
+      "index"
+    ],
+    "pandas_version": "0.20.0"
+  },
+  "data": [
+    {
+      "index": 0,
+      "scheduled": "10:00:00",
+      "field": 1,
+      "officials": " Rheda",
+      "stage": "Vorrunde",
+      "standing": "Gruppe 1",
+      "Heim": "Iser",
+      "Punkte Heim": 6,
+      "Punkte Gast": 25,
+      "Gast": "Nieder",
+      "status": ""
+    },
+    {
+      "index": 1,
+      "scheduled": "11:10:00",
+      "field": 1,
+      "officials": " Pandas",
+      "stage": "Vorrunde",
+      "standing": "Gruppe 1",
+      "Heim": "Wesel",
+      "Punkte Heim": 25,
+      "Punkte Gast": 52,
+      "Gast": "Iser",
+      "status": ""
+    },
+    {
+      "index": 2,
+      "scheduled": "12:20:00",
+      "field": 1,
+      "officials": "Dort",
+      "stage": "Vorrunde",
+      "standing": "Gruppe 1",
+      "Heim": "Nieder",
+      "Punkte Heim": 48,
+      "Punkte Gast": 6,
+      "Gast": "Wesel",
+      "status": ""
+    },
+    {
+      "index": 3,
+      "scheduled": "10:00:00",
+      "field": 2,
+      "officials": " Wesel",
+      "stage": "Vorrunde",
+      "standing": "Gruppe 2",
+      "Heim": "Dort",
+      "Punkte Heim": 33,
+      "Punkte Gast": 24,
+      "Gast": "Pandas",
+      "status": ""
+    },
+    {
+      "index": 4,
+      "scheduled": "11:10:00",
+      "field": 2,
+      "officials": " Nieder",
+      "stage": "Vorrunde",
+      "standing": "Gruppe 2",
+      "Heim": "Rheda",
+      "Punkte Heim": 24,
+      "Punkte Gast": 41,
+      "Gast": "Dort",
+      "status": ""
+    },
+    {
+      "index": 5,
+      "scheduled": "12:20:00",
+      "field": 2,
+      "officials": "Iser",
+      "stage": "Vorrunde",
+      "standing": "Gruppe 2",
+      "Heim": "Pandas",
+      "Punkte Heim": 38,
+      "Punkte Gast": 36,
+      "Gast": "Rheda",
+      "status": ""
+    },
+    {
+      "index": 6,
+      "scheduled": "13:40:00",
+      "field": 1,
+      "officials": "",
+      "stage": "Finalrunde",
+      "standing": "HF",
+      "Heim": "Pandas",
+      "Punkte Heim": 30,
+      "Punkte Gast": 14,
+      "Gast": "Nieder",
+      "status": ""
+    },
+    {
+      "index": 8,
+      "scheduled": "14:50:00",
+      "field": 1,
+      "officials": "",
+      "stage": "Finalrunde",
+      "standing": "P5",
+      "Heim": "Wesel",
+      "Punkte Heim": 32,
+      "Punkte Gast": 53,
+      "Gast": "Rheda",
+      "status": ""
+    },
+    {
+      "index": 9,
+      "scheduled": "16:00:00",
+      "field": 1,
+      "officials": "",
+      "stage": "Finalrunde",
+      "standing": "P1",
+      "Heim": "Pandas",
+      "Punkte Heim": 6,
+      "Punkte Gast": 34,
+      "Gast": "Dort",
+      "status": ""
+    },
+    {
+      "index": 7,
+      "scheduled": "13:40:00",
+      "field": 2,
+      "officials": "",
+      "stage": "Finalrunde",
+      "standing": "HF",
+      "Heim": "Iser",
+      "Punkte Heim": 20,
+      "Punkte Gast": 39,
+      "Gast": "Dort",
+      "status": ""
+    },
+    {
+      "index": 10,
+      "scheduled": "14:50:00",
+      "field": 2,
+      "officials": "",
+      "stage": "Finalrunde",
+      "standing": "P3",
+      "Heim": "Nieder",
+      "Punkte Heim": 19,
+      "Punkte Gast": 38,
+      "Gast": "Iser",
+      "status": ""
+    }
+  ]
+}

@@ -9,10 +9,7 @@ class Gameday(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
 
     def __str__(self):
-        return f'{self.date} {self.name}'
-
-    # def get_absolute_url(self):
-    #     return reverse('league-gameday-detail', kwargs={'pk': self.pk})
+        return f'{self.pk}__{self.date} {self.name}'
 
 
 class Gameinfo(models.Model):
@@ -30,7 +27,7 @@ class Gameinfo(models.Model):
     standing = models.CharField(max_length=100)
 
     def __str__(self):
-        return f'{self.field} - {self.scheduled} - {self.stage} / Gruppe {self.standing} - {self.officials}'
+        return f'{self.gameday.pk}__{self.field} - {self.scheduled} - {self.stage} / {self.standing} - {self.officials}'
 
 
 class Gameresult(models.Model):
@@ -43,4 +40,9 @@ class Gameresult(models.Model):
     isHome = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.gameinfo.field} {self.gameinfo.scheduled}: {self.team} - {self.fh + self.sh} / {self.pa}'
+        if self.fh is None:
+            self.fh = ''
+        if self.sh is None:
+            self.sh = ''
+
+        return f'{self.gameinfo.pk}__{self.gameinfo.field} {self.gameinfo.scheduled}: {self.team} - {self.fh + self.sh} / {self.pa}'

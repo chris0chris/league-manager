@@ -36,7 +36,7 @@ class Schedule():
         self.schedule_version = str(teams) + '_' + str(fields)
 
     def get_entries(self):
-        with open('gamedays/management/schedules/schedule_' + self.schedule_version + '.json') as f:
+        with open('gamedays/management/schedules/schedule_{0}.json'.format(self.schedule_version)) as f:
             data = json.load(f)
         entries = []
         for entry in data:

@@ -1,0 +1,56 @@
+[
+  {
+    "scheduled": "10:00",
+    "field": "1",
+    "stage": "Hauptrunde",
+    "standing": "Gruppe 1",
+    "home": "0_0",
+    "away": "0_1",
+    "official": "0_3"
+  },
+  {
+    "scheduled": "11:10",
+    "field": "1",
+    "stage": "Hauptrunde",
+    "standing": "Gruppe 1",
+    "home": "0_3",
+    "away": "0_2",
+    "official": "0_0"
+  },
+  {
+    "scheduled": "12:20",
+    "field": "1",
+    "stage": "Hauptrunde",
+    "standing": "Gruppe 1",
+    "home": "0_2",
+    "away": "0_0",
+    "official": "0_1"
+  },
+  {
+    "scheduled": "14:30",
+    "field": "1",
+    "stage": "Hauptrunde",
+    "standing": "Gruppe 1",
+    "home": "0_1",
+    "away": "0_3",
+    "official": "0_0"
+  },
+  {
+    "scheduled": "15:40",
+    "field": "1",
+    "stage": "Hauptrunde",
+    "standing": "Gruppe 1",
+    "home": "0_0",
+    "away": "0_3",
+    "official": "0_2"
+  },
+  {
+    "scheduled": "16:50",
+    "field": "1",
+    "stage": "Hauptrunde",
+    "standing": "Gruppe 1",
+    "home": "0_2",
+    "away": "0_1",
+    "official": "0_3"
+  }
+]
