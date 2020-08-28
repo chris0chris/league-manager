@@ -8,19 +8,21 @@ from django_webtest.response import DjangoWebtestResponse
 from webtest.forms import Form
 
 from gamedays.models import Gameday, Gameinfo, Gameresult
+from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
 
 
 class TestGamedayCreateView(WebTest):
     fixtures = ['testdata.json']
 
     def test_create_gameday(self):
+        non_existent_gameday = 5
         self.app.set_user(User.objects.all().first())
         response: DjangoWebtestResponse = self.app.get(reverse('league-gameday-create'))
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertFalse(Gameday.objects.filter(pk=4).exists())
+        self.assertFalse(Gameday.objects.filter(pk=non_existent_gameday).exists())
         response: DjangoWebtestResponse = response.form.submit().follow()
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        gameday_set = Gameday.objects.filter(pk=4)
+        gameday_set = Gameday.objects.filter(pk=non_existent_gameday)
         self.assertTrue(gameday_set.exists())
         self.assertURLEqual(response.request.path, reverse('league-gameday-detail', args=[gameday_set.first().pk]))
 
@@ -37,19 +39,20 @@ class TestGamedayDetailView(TestCase):
         context = resp.context_data
         self.assertEqual(context['object'].pk, self.EXISTING_GAMEDAY)
         self.assertIsNotNone(context['info']['schedule'])
+        assert context['info']['qualify_table'] != ''
         self.assertIsNotNone(context['info']['final_table'])
         self.assertNotContains(resp, 'Spielplan wurde noch nicht erstellt.')
-        self.assertNotContains(resp, 'Abschlusstabelle wird berechnet, sobald alle Spiele fertig sind.')
+        # ToDo fix wenn Abschlusstabelle implementiert ist
+        # self.assertNotContains(resp, 'Abschlusstabelle wird berechnet, sobald alle Spiele beendet sind.')
 
     def test_detail_view_with_empty_gameday(self):
         resp = self.client.get(reverse('league-gameday-detail', args=[self.EMPTY_GAMEDAY]))
         self.assertEqual(resp.status_code, HTTPStatus.OK)
         context = resp.context_data
         self.assertEqual(context['object'].pk, self.EMPTY_GAMEDAY)
-        self.assertIsNone(context['info']['schedule'])
-        self.assertIsNone(context['info']['final_table'])
-        self.assertContains(resp, 'Spielplan wurde noch nicht erstellt.')
-        self.assertContains(resp, 'Abschlusstabelle wird berechnet, sobald alle Spiele fertig sind.')
+        assert context['info']['schedule'] == EmptySchedule.to_html()
+        assert context['info']['qualify_table'] == EmptyQualifyTable.to_html()
+        assert context['info']['final_table'] == EmptyFinalTable.to_html()
 
     def test_detail_view_gameday_not_available(self):
         resp = self.client.get(reverse('league-gameday-detail', args=[self.NOT_EXISTENT_GAMEDAY]))

@@ -41,8 +41,13 @@ class GamedayDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(GamedayDetailView, self).get_context_data()
-        gs = GamedayService()
-        context['info'] = gs.get_game_schedule_and_table(context['gameday'].pk)
+        gs = GamedayService.create(context['gameday'].pk)
+        # ToDo refactor, wenn Spreadsheet abgeschaltet sind
+        context['info'] = {
+            'schedule': gs.get_schedule().to_html(),
+            'qualify_table': gs.get_qualify_table().to_html(),
+            'final_table': gs.get_final_table().to_html()
+        }
         return context
 
 

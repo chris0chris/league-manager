@@ -11,29 +11,65 @@ class EmptySchedule:
         return 'Spielplan wurde noch nicht erstellt'
 
 
+class EmptyQualifyTable:
+    @staticmethod
+    def to_html():
+        return ''
+
+
+class EmptyFinalTable:
+    @staticmethod
+    def to_html():
+        return 'Abschlusstabelle wird berechnet, sobald alle Spiele beendet sind.'
+
+
+class EmptyGamedayService:
+
+    @staticmethod
+    def get_schedule():
+        return EmptySchedule
+
+    @staticmethod
+    def get_qualify_table():
+        return EmptyQualifyTable
+
+    @staticmethod
+    def get_final_table():
+        return EmptyFinalTable
+
+
 class GamedayService:
 
-    def __init__(self):
-        pass
+    def __init__(self, pk):
+        self.gmw = GamedayModelWrapper(pk)
 
     def get_schedule(self):
-        return EmptySchedule.to_html()
+        return EmptySchedule()
 
     def get_game_schedule_and_table(self, pk):
-        gameday = pd.DataFrame(Gameday.objects.filter(pk=pk).values())
-        gameInfo = pd.DataFrame(Gameinfo.objects.filter(gameday_id=gameday.id).values())
-        if gameInfo.empty is True:
-            return {'schedule': None, 'final_table': None}
-        gameResult = pd.DataFrame(Gameresult.objects.filter(id__in=gameInfo['id'].to_numpy()).values())
-        allGames = pd.merge(gameday, gameInfo, left_on='id', right_on='gameday_id')
-        gamesWithResult = pd.merge(allGames, gameResult, left_on='id_y', right_on='gameinfo_id')
-        gamesWithResult['pf'] = gamesWithResult.fh + gamesWithResult.sh
+        # gameday = pd.DataFrame(Gameday.objects.filter(pk=pk).values())
+        # gameInfo = pd.DataFrame(Gameinfo.objects.filter(gameday_id=gameday.id).values())
+        # if gameInfo.empty is True:
+        #     return {'schedule': None, 'final_table': None}
+        # gameResult = pd.DataFrame(Gameresult.objects.filter(id__in=gameInfo['id'].to_numpy()).values())
+        # allGames = pd.merge(gameday, gameInfo, left_on='id', right_on='gameday_id')
+        # gamesWithResult = pd.merge(allGames, gameResult, left_on='id_y', right_on='gameinfo_id')
+        # gamesWithResult['pf'] = gamesWithResult.fh + gamesWithResult.sh
+        # gamedayTable = _get_qualify_table(gamesWithResult)
+        try:
+            gmw = GamedayModelWrapper(pk)
+        except Gameinfo.DoesNotExist:
+            return {
+                'schedule': '',
+                'qualify_table': '',
+                'final_table': ''
+            }
 
-        schedule = _get_game_schedule(allGames, gamesWithResult)
-        gamedayTable = _get_qualify_table(gamesWithResult)
-        gmw = GamedayModelWrapper(pk)
-
-        return {'schedule': gmw.get_schedule().to_html(), 'final_table': gamedayTable.to_html()}
+        return {
+            'schedule': gmw.get_schedule().to_html(),
+            'qualify_table': gmw.get_qualify_table().to_html(),
+            'final_table': gmw.get_final_table().to_html()
+        }
 
     def _get_game_schedule(self, allGames, gamesWithResult):
         gamelist1 = gamesWithResult.groupby('gameinfo_id').nth(0).reset_index()
@@ -52,18 +88,23 @@ class GamedayService:
 
         return schedule
 
-    def _get_qualify_table(self, gamesWithResult):
-        gamesWithResult['points'] = np.where(gamesWithResult.pf == gamesWithResult.pa, 1,
-                                             np.where(gamesWithResult.pf > gamesWithResult.pa, 3, 0))
-        gamesWithResult['diff'] = gamesWithResult.pf - gamesWithResult.pa
+    def get_qualify_table(self):
+        qualify_table = self.gmw.get_qualify_table()
+        if qualify_table is '':
+            return EmptyQualifyTable
+        return qualify_table
 
-        gamesWithResult = gamesWithResult[gamesWithResult['stage'] == 'Vorrunde']
-        gamesWithResult = gamesWithResult.groupby(['standing', 'team'], as_index=False)
-        gamesWithResult = gamesWithResult.agg({'pf': 'sum', 'points': 'sum', 'pa': 'sum', 'diff': 'sum'})
-        gamesWithResult = gamesWithResult.sort_values(by=['points', 'diff', 'pf', 'pa'], ascending=False)
-        gamesWithResult = gamesWithResult.sort_values(by='standing')
+    def get_final_table(self):
+        final_table = self.gmw.get_final_table()
+        if final_table is '':
+            return EmptyFinalTable
 
-        return gamesWithResult
+    @classmethod
+    def create(cls, empty_gameday_pk):
+        try:
+            return cls(empty_gameday_pk)
+        except Gameinfo.DoesNotExist:
+            return EmptyGamedayService
 
 
 def get_game_schedule_and_table(pk):
