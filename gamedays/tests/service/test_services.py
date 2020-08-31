@@ -1,6 +1,5 @@
 import pathlib
 
-import numpy as np
 import pandas as pd
 from django.test import TestCase
 from pandas.testing import assert_frame_equal
@@ -11,6 +10,9 @@ from gamedays.service.model_wrapper import GamedayModelWrapper
 
 TESTDATA_FIXTURE = 'testdata.json'
 
+def get_df_from_json(filename):
+    return pd.read_json(pathlib.Path(__file__).parent / 'testdata/{0}.json'.format(filename),
+                        orient='table')
 
 class TestGamedayService(TestCase):
     fixtures = [TESTDATA_FIXTURE]
@@ -40,10 +42,11 @@ class TestModelWrapper(TestCase):
 
     def test_get_schedule(self):
         gameday_pk = 1
-        expected_schedule = pd.read_json(pathlib.Path(__file__).parent / 'testdata/ts_schedule.json', orient='table')
+        expected_schedule = get_df_from_json('ts_schedule')
         schedule = GamedayModelWrapper(gameday_pk).get_schedule()
-        assert np.array_equal(schedule['Heim'].values, expected_schedule['Heim'].values)
-        assert np.array_equal(schedule['Gast'].values, expected_schedule['Gast'].values)
+        del expected_schedule['Kick-Off']
+        del schedule['Kick-Off']
+        assert_frame_equal(schedule, expected_schedule, check_dtype=False)
 
     def test_empty_get_qualify_table(self):
         gameday_with_no_qualify = 2
@@ -53,8 +56,7 @@ class TestModelWrapper(TestCase):
     def test_get_qualify_table(self):
         gameday_with_qualify = 1
         gmw = GamedayModelWrapper(gameday_with_qualify)
-        expected_qualify_table = pd.read_json(pathlib.Path(__file__).parent / 'testdata/ts_qualify_table.json',
-                                              orient='table')
+        expected_qualify_table = get_df_from_json('ts_qualify_table')
         assert_frame_equal(gmw.get_qualify_table(), expected_qualify_table, check_dtype=False)
 
     def test_empty_get_final_table(self):
@@ -64,4 +66,18 @@ class TestModelWrapper(TestCase):
 
     def test_get_final_table(self):
         gameday_with_final_round = 1
+        expected_final_table = get_df_from_json('ts_final_table_6_teams')
         gmw = GamedayModelWrapper(gameday_with_final_round)
+        assert_frame_equal(gmw.get_final_table(), expected_final_table, check_dtype=False)
+
+    def test_get_final_table_for_7_teams(self):
+        gameday_with_7_teams = 5
+        expected_table = get_df_from_json('ts_final_table_7_teams')
+        gmw = GamedayModelWrapper(gameday_with_7_teams)
+        assert_frame_equal(gmw.get_final_table(), expected_table, check_dtype=False)
+
+    def test_get_final_table_for_main_round(self):
+        gameday_with_main_round = 2
+        expected_table = get_df_from_json('ts_final_table_4_teams')
+        gmw = GamedayModelWrapper(gameday_with_main_round)
+        assert_frame_equal(gmw.get_final_table(), expected_table, check_dtype=False)

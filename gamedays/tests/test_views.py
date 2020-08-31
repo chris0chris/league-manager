@@ -15,11 +15,10 @@ class TestGamedayCreateView(WebTest):
     fixtures = ['testdata.json']
 
     def test_create_gameday(self):
-        non_existent_gameday = 5
+        non_existent_gameday = len(Gameday.objects.all()) + 1
         self.app.set_user(User.objects.all().first())
         response: DjangoWebtestResponse = self.app.get(reverse('league-gameday-create'))
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertFalse(Gameday.objects.filter(pk=non_existent_gameday).exists())
         response: DjangoWebtestResponse = response.form.submit().follow()
         self.assertEqual(response.status_code, HTTPStatus.OK)
         gameday_set = Gameday.objects.filter(pk=non_existent_gameday)

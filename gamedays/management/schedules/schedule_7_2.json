@@ -1,0 +1,137 @@
+[
+  {
+    "scheduled": "10:00",
+    "field": "1",
+    "stage": "Vorrunde",
+    "standing": "Gruppe 1",
+    "home": "0_0",
+    "away": "0_1",
+    "official": "1_2"
+  },
+  {
+    "scheduled": "11:10",
+    "field": "1",
+    "stage": "Vorrunde",
+    "standing": "Gruppe 1",
+    "home": "0_1",
+    "away": "0_2",
+    "official": "1_0"
+  },
+  {
+    "scheduled": "13:30",
+    "field": "1",
+    "stage": "Vorrunde",
+    "standing": "Gruppe 1",
+    "home": "0_3",
+    "away": "0_2",
+    "official": "1_0"
+  },
+  {
+    "scheduled": "14:40",
+    "field": "1",
+    "stage": "Vorrunde",
+    "standing": "Gruppe 1",
+    "home": "0_1",
+    "away": "0_3",
+    "official": "1_1"
+  },
+  {
+    "scheduled": "10:00",
+    "field": "2",
+    "stage": "Vorrunde",
+    "standing": "Gruppe 2",
+    "home": "1_0",
+    "away": "1_1",
+    "official": "0_2"
+  },
+  {
+    "scheduled": "11:10",
+    "field": "2",
+    "stage": "Vorrunde",
+    "standing": "Gruppe 1",
+    "home": "0_3",
+    "away": "0_0",
+    "official": "1_1"
+  },
+  {
+    "scheduled": "12:20",
+    "field": "2",
+    "stage": "Vorrunde",
+    "standing": "Gruppe 2",
+    "home": "1_2",
+    "away": "1_0",
+    "official": "0_1"
+  },
+  {
+    "scheduled": "13:30",
+    "field": "2",
+    "stage": "Vorrunde",
+    "standing": "Gruppe 2",
+    "home": "1_1",
+    "away": "1_2",
+    "official": "0_0"
+  },
+  {
+    "scheduled": "14:40",
+    "field": "2",
+    "stage": "Vorrunde",
+    "standing": "Gruppe 1",
+    "home": "0_2",
+    "away": "0_0",
+    "official": "1_2"
+  },
+  {
+    "scheduled": "16:00",
+    "field": "1",
+    "stage": "Finalrunde",
+    "standing": "HF",
+    "home": "",
+    "away": "",
+    "official": ""
+  },
+  {
+    "scheduled": "16:00",
+    "field": "2",
+    "stage": "Finalrunde",
+    "standing": "HF",
+    "home": "",
+    "away": "",
+    "official": ""
+  },
+  {
+    "scheduled": "17:10",
+    "field": "1",
+    "stage": "Finalrunde",
+    "standing": "P3",
+    "home": "",
+    "away": "",
+    "official": ""
+  },
+  {
+    "scheduled": "17:10",
+    "field": "2",
+    "stage": "Finalrunde",
+    "standing": "P5",
+    "home": "",
+    "away": "",
+    "official": ""
+  },
+  {
+    "scheduled": "18:20",
+    "field": "1",
+    "stage": "Finalrunde",
+    "standing": "P1",
+    "home": "",
+    "away": "",
+    "official": ""
+  },
+  {
+    "scheduled": "18:20",
+    "field": "2",
+    "stage": "Finalrunde",
+    "standing": "P5",
+    "home": "",
+    "away": "",
+    "official": ""
+  }
+]

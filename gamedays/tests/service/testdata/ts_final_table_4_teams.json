@@ -1,0 +1,68 @@
+{
+  "schema": {
+    "fields": [
+      {
+        "name": "index",
+        "type": "integer"
+      },
+      {
+        "name": "team",
+        "type": "string"
+      },
+      {
+        "name": "points",
+        "type": "integer"
+      },
+      {
+        "name": "pf",
+        "type": "integer"
+      },
+      {
+        "name": "pa",
+        "type": "integer"
+      },
+      {
+        "name": "+/-",
+        "type": "integer"
+      }
+    ],
+    "primaryKey": [
+      "index"
+    ],
+    "pandas_version": "0.20.0"
+  },
+  "data": [
+    {
+      "index": 1,
+      "team": "Lions",
+      "points": 9,
+      "pf": 95,
+      "pa": 31,
+      "+/-": 64
+    },
+    {
+      "index": 3,
+      "team": "Spatzen",
+      "points": 6,
+      "pf": 125,
+      "pa": 58,
+      "+/-": 67
+    },
+    {
+      "index": 2,
+      "team": "Rooks",
+      "points": 3,
+      "pf": 100,
+      "pa": 58,
+      "+/-": 42
+    },
+    {
+      "index": 0,
+      "team": "Dragons",
+      "points": 0,
+      "pf": 18,
+      "pa": 191,
+      "+/-": -173
+    }
+  ]
+}

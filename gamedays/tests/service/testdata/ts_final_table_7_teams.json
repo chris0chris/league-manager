@@ -1,0 +1,92 @@
+{
+  "schema": {
+    "fields": [
+      {
+        "name": "index",
+        "type": "integer"
+      },
+      {
+        "name": "team",
+        "type": "string"
+      },
+      {
+        "name": "points",
+        "type": "integer"
+      },
+      {
+        "name": "pf",
+        "type": "integer"
+      },
+      {
+        "name": "pa",
+        "type": "integer"
+      },
+      {
+        "name": "+/-",
+        "type": "integer"
+      }
+    ],
+    "primaryKey": [
+      "index"
+    ],
+    "pandas_version": "0.20.0"
+  },
+  "data": [
+    {
+      "index": 0,
+      "team": "Spatzen",
+      "points": 15,
+      "pf": 165,
+      "pa": 104,
+      "+/-": 61
+    },
+    {
+      "index": 1,
+      "team": "W\u00fcrz",
+      "points": 7,
+      "pf": 121,
+      "pa": 89,
+      "+/-": 32
+    },
+    {
+      "index": 2,
+      "team": "Lions",
+      "points": 7,
+      "pf": 132,
+      "pa": 140,
+      "+/-": -8
+    },
+    {
+      "index": 3,
+      "team": "Rams",
+      "points": 3,
+      "pf": 77,
+      "pa": 111,
+      "+/-": -34
+    },
+    {
+      "index": 4,
+      "team": "Rooks",
+      "points": 7,
+      "pf": 125,
+      "pa": 111,
+      "+/-": 14
+    },
+    {
+      "index": 5,
+      "team": "Essl",
+      "points": 4,
+      "pf": 102,
+      "pa": 129,
+      "+/-": -27
+    },
+    {
+      "index": 6,
+      "team": "Stutt",
+      "points": 0,
+      "pf": 127,
+      "pa": 165,
+      "+/-": -38
+    }
+  ]
+}
