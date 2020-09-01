@@ -1,4 +1,5 @@
 import json
+import pathlib
 
 from gamedays.models import Gameinfo, Gameday, Gameresult
 
@@ -36,7 +37,7 @@ class Schedule():
         self.schedule_version = str(teams) + '_' + str(fields)
 
     def get_entries(self):
-        with open('gamedays/management/schedules/schedule_{0}.json'.format(self.schedule_version)) as f:
+        with open(pathlib.Path(__file__).parent / 'schedules/schedule_{0}.json'.format(self.schedule_version)) as f:
             data = json.load(f)
         entries = []
         for entry in data:
