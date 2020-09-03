@@ -3,7 +3,7 @@ import pandas as pd
 from gspread_pandas import Spread
 from pandas import DataFrame
 
-SPREAD_ID = '1aDTA6HVfE6j6TDJn2D3e_zDYs4HO0UVJJSt3BXptuyY'
+SPREAD_ID = '1xw6Hctcq9WCG1XblJnma4QbJAfAwvVQYh0wgb9nY3jc'
 
 HOME = 'Heim'
 HOME_SCORE = 'Punkte Heim'
