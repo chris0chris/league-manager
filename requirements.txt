@@ -6,3 +6,4 @@ django-pandas==0.6.2
 gspread-pandas==2.2.3
 djangorestframework==3.11.1
 Markdown==3.2.2
+djangorestframework-jwt==1.11.0

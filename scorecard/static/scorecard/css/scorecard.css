@@ -1,0 +1,61 @@
+#manualEntry {
+  margin-top: 10px;
+}
+
+button[name=timeout] {
+  padding: 0px
+}
+
+.timer {
+  text-align: center;
+}
+
+#timer > div {
+  display: inline-block;
+  line-height: 1;
+  font-size: 40px;
+  margin: 10px;
+}
+
+#timer > div > span {
+  display: block;
+  font-size: 20px;
+  color: black;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.col.s2>.card-panel {
+  padding: 2px;
+  text-align: center;
+}
+
+.row {
+  margin-bottom: 0px
+}
+
+th, td {
+  padding: 9px 3px;
+  text-align: center;
+}
+
+[type="radio"]:not(:checked)+span,
+[type="radio"]:checked+span {
+  line-height: 35px;
+  height: 100%;
+  padding: 0px;
+  border: medium solid #26a69a;
+}
+
+[type="radio"]+span:before,
+[type="radio"]+span:after {
+  content: none;
+}
+
+[type="radio"]:not(:checked)+span {
+  border: medium solid #26a69a;
+  background-color: white;
+  color: black;
+}

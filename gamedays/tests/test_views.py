@@ -25,6 +25,11 @@ class TestGamedayCreateView(WebTest):
         self.assertTrue(gameday_set.exists())
         self.assertURLEqual(response.request.path, reverse('league-gameday-detail', args=[gameday_set.first().pk]))
 
+    def test_only_authenticated_user_can_create_gameday(self):
+        response = self.app.get(reverse('league-gameday-create'))
+        assert response.status_code == HTTPStatus.FOUND
+        assert response.url.index('login/?next=')
+
 
 class TestGamedayDetailView(TestCase):
     fixtures = ['testdata.json']
