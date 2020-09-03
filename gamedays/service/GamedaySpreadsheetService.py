@@ -62,7 +62,7 @@ class GamedaySpreadsheetService:
         return playoff_matchups
 
     def get_gameday(self, index):
-        sheet = Spread('1aDTA6HVfE6j6TDJn2D3e_zDYs4HO0UVJJSt3BXptuyY', sheet=index)
+        sheet = Spread('1xw6Hctcq9WCG1XblJnma4QbJAfAwvVQYh0wgb9nY3jc', sheet=index)
         gameday_info: DataFrame = sheet.sheet_to_df(start_row=1, header_rows=0)
         gameday = Gameday()
         gameday.name = gameday_info.iloc[0, 0]
