@@ -148,3 +148,6 @@ GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 
 # ToDo deleteMe
 X_FRAME_OPTIONS = 'ALLOWALL'
+
+# for signals decorator in signals.py
+SUSPEND_SIGNALS = False
