@@ -56,27 +56,27 @@
       "index": 0,
       "Kick-Off": "10:00:00",
       "Feld": 1,
-      "Officials": " Rheda",
+      "Officials": "Rheda",
       "Runde": "Vorrunde",
       "Platz": "Gruppe 1",
       "Heim": "Iser",
       "Punkte Heim": 6,
       "Punkte Gast": 25,
       "Gast": "Nieder",
-      "Status": ""
+      "Status": "beendet"
     },
     {
       "index": 1,
       "Kick-Off": "11:10:00",
       "Feld": 1,
-      "Officials": " Pandas",
+      "Officials": "Pandas",
       "Runde": "Vorrunde",
       "Platz": "Gruppe 1",
       "Heim": "Wesel",
       "Punkte Heim": 25,
       "Punkte Gast": 52,
       "Gast": "Iser",
-      "Status": ""
+      "Status": "beendet"
     },
     {
       "index": 2,
@@ -89,33 +89,33 @@
       "Punkte Heim": 48,
       "Punkte Gast": 6,
       "Gast": "Wesel",
-      "Status": ""
+      "Status": "beendet"
     },
     {
       "index": 3,
       "Kick-Off": "10:00:00",
       "Feld": 2,
-      "Officials": " Wesel",
+      "Officials": "Wesel",
       "Runde": "Vorrunde",
       "Platz": "Gruppe 2",
       "Heim": "Dort",
       "Punkte Heim": 33,
       "Punkte Gast": 24,
       "Gast": "Pandas",
-      "Status": ""
+      "Status": "beendet"
     },
     {
       "index": 4,
       "Kick-Off": "11:10:00",
       "Feld": 2,
-      "Officials": " Nieder",
+      "Officials": "Nieder",
       "Runde": "Vorrunde",
       "Platz": "Gruppe 2",
       "Heim": "Rheda",
       "Punkte Heim": 24,
       "Punkte Gast": 41,
       "Gast": "Dort",
-      "Status": ""
+      "Status": "beendet"
     },
     {
       "index": 5,
@@ -128,7 +128,7 @@
       "Punkte Heim": 38,
       "Punkte Gast": 36,
       "Gast": "Rheda",
-      "Status": ""
+      "Status": "beendet"
     },
     {
       "index": 6,

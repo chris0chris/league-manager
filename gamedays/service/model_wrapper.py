@@ -23,6 +23,7 @@ STATUS = 'status'
 QUALIIFY_ROUND = 'Vorrunde'
 DIFF = '+/-'
 GROUP1 = 'Gruppe 1'
+FINISHED = 'beendet'
 
 QUALIFY_TABLE_HEADERS = {
     STANDING: 'Gruppe',
@@ -155,3 +156,23 @@ class GamedayModelWrapper:
         qualify_round = qualify_round.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
         qualify_round = qualify_round.sort_values(by=STANDING)
         return qualify_round
+
+    def get_qualify_team_by(self, place, standing):
+        qualify_round = self._get_table()
+        return qualify_round.groupby(STANDING).nth(place - 1).loc[standing][TEAM]
+
+    def get_team_by_points(self, place, standing, points):
+        return self._games_with_result[
+            (self._games_with_result[STANDING] == standing) & (self._games_with_result[POINTS] == points)].iloc[
+            place - 1][TEAM]
+
+    def get_team_by(self, place, standing, points=None):
+        if points is None:
+            return self.get_qualify_team_by(place, standing)
+        return self.get_team_by_points(place, standing, points)
+
+    def is_qualify_finished(self):
+        if self.has_finalround():
+            return self._games_with_result[(self._games_with_result[STAGE] == QUALIIFY_ROUND) & (
+                        self._games_with_result[STATUS] != FINISHED)].empty
+        return False

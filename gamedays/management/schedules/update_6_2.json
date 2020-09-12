@@ -1,0 +1,54 @@
+{
+  "sf": {
+    "name": "HF",
+    "games": [
+      {
+        "away": {
+          "standing": "Gruppe 1",
+          "place": 1
+        },
+        "home": {
+          "standing": "Gruppe 2",
+          "place": 2
+        }
+      },
+      {
+        "away": {
+          "standing": "Gruppe 2",
+          "place": 1
+        },
+        "home": {
+          "standing": "Gruppe 1",
+          "place": 2
+        }
+      }
+    ]
+  },
+  "p5": {
+    "name": "P5",
+    "games": [
+      {
+        "home": {
+          "standing": "Gruppe 1",
+          "place": 3
+        },
+        "away": {
+          "standing": "Gruppe 2",
+          "place": 3
+        }
+      }
+    ]
+  },
+  "p3": {
+    "name": "P3",
+    "games": [
+      {
+        "home": {
+          "standing": "HF",
+          "place": 1,
+          "points": 0
+        }
+      }
+    ]
+  }
+}

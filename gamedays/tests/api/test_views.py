@@ -1,3 +1,5 @@
+import json
+import pathlib
 from http import HTTPStatus
 
 from django.test import override_settings
@@ -5,7 +7,7 @@ from django_webtest import WebTest
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from gamedays.api.serializers import GamedaySerializer, ScheduleSerializer
+from gamedays.api.serializers import GamedaySerializer
 from gamedays.models import Gameday, Gameinfo
 
 TESTDATA = 'testdata.json'
@@ -45,8 +47,7 @@ class TestGamedayRetrieveUpdate(WebTest):
         gameday = Gameday.objects.get(id=gameday_id)
         response = self.app.get(reverse('api-gameday-retrieve-update', kwargs={'pk': gameday_id}))
         assert response.status_code == HTTPStatus.OK
-        print(GamedaySerializer(gameday).data)
-        assert GamedaySerializer(gameday).data == response.json
+        assert response.json == GamedaySerializer(gameday).data
 
 
 @override_settings(SUSPEND_SIGNALS=True)
@@ -55,10 +56,11 @@ class TestGamedaySchedule(WebTest):
 
     def test_get_schedule(self):
         gameday_id = 1
-        gameinfo_qs = Gameinfo.objects.filter(gameday_id=gameday_id)
+        with open(pathlib.Path(__file__).parent / 'testdata/schedule_gameday_1.json') as f:
+            expected_schedule = json.load(f)
         response = self.app.get(reverse('api-gameday-schedule', kwargs={'pk': gameday_id}))
         assert response.status_code == HTTPStatus.OK
-        assert ScheduleSerializer(gameinfo_qs, many=True).data == response.json
+        assert response.json == expected_schedule
 
 
 @override_settings(SUSPEND_SIGNALS=True)
@@ -73,4 +75,4 @@ class TestCreateGameday(WebTest):
             "start": "10:00"
         })
         assert response.status_code == HTTPStatus.CREATED
-        assert GamedaySerializer(Gameday.objects.all().last()).data == response.json
+        assert response.json == GamedaySerializer(Gameday.objects.all().last()).data

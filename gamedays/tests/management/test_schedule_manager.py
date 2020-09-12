@@ -1,43 +1,44 @@
-import unittest
-
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, ScheduleEntry
 from gamedays.models import Gameinfo, Gameday, Gameresult
 
+TESTDATA = 'testdata.json'
 
-class TestSchedule(unittest.TestCase):
+
+class TestSchedule:
     def test_schedule_loaded(self):
         groups = [['Iser', 'Nieder', 'Wesel'], ['Dort', 'Pandas', 'Rheda']]
         schedule = Schedule(2, groups)
         entries = schedule.get_entries()
-        self.assertEqual(len(entries), 11)
+        assert len(entries) == 11
         entry = entries[0]
-        self.assertEqual(entry.get_home(), 'Iser')
-        self.assertEqual(entry.get_away(), 'Nieder')
-        self.assertEqual(entry.get_official(), 'Rheda')
+        assert entry.get_home() == 'Iser'
+        assert entry.get_away() == 'Nieder'
+        assert entry.get_official() == 'Rheda'
         entry = entries[5]
-        self.assertEqual(entry.get_home(), 'Pandas')
-        self.assertEqual(entry.get_away(), 'Rheda')
-        self.assertEqual(entry.get_official(), 'Iser')
+        assert entry.get_home() == 'Pandas'
+        assert entry.get_away() == 'Rheda'
+        assert entry.get_official() == 'Iser'
 
 
-class TestScheduleEntry(unittest.TestCase):
+class TestScheduleEntry:
     def test_schedule_entry(self):
         se = ScheduleEntry(
             {"scheduled": "10:00", "stage": "Vorrunde", "standing": "Gruppe 1", "field": "1", "home": "Heim",
              "away": "Gast", "official": "Schiri"})
-        self.assertEqual(se.get_scheduled(), '10:00')
-        self.assertEqual(se.get_stage(), 'Vorrunde')
-        self.assertEqual(se.get_standing(), 'Gruppe 1')
-        self.assertEqual(se.get_field(), '1')
-        self.assertEqual(se.get_home(), 'Heim')
-        self.assertEqual(se.get_away(), 'Gast')
-        self.assertEqual(se.get_official(), 'Schiri')
+        assert se.get_scheduled() == '10:00'
+        assert se.get_stage() == 'Vorrunde'
+        assert se.get_standing() == 'Gruppe 1'
+        assert se.get_field() == '1'
+        assert se.get_home() == 'Heim'
+        assert se.get_away() == 'Gast'
+        assert se.get_official() == 'Schiri'
 
 
+@override_settings(SUSPEND_SIGNALS=True)
 class TestScheduleCreator(TestCase):
-    fixtures = ['testdata.json']
+    fixtures = [TESTDATA]
 
     def test_schedule_created(self):
         gameday_id = 3

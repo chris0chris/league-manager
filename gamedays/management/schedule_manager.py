@@ -4,7 +4,7 @@ import pathlib
 from gamedays.models import Gameinfo, Gameday, Gameresult
 
 
-class ScheduleEntry():
+class ScheduleEntry:
     def __init__(self, entry):
         self.entry = entry
 
@@ -30,7 +30,7 @@ class ScheduleEntry():
         return self.entry["official"]
 
 
-class Schedule():
+class Schedule:
     def __init__(self, fields, groups):
         self.groups = groups
         teams = sum(len(group) for group in groups)
@@ -49,7 +49,7 @@ class Schedule():
         return entries
 
 
-class ScheduleCreator():
+class ScheduleCreator:
     def __init__(self, gameday: Gameday, schedule: Schedule):
         self.gameday = gameday
         self.schedule = schedule

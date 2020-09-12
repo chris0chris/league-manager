@@ -14,9 +14,3 @@ class GameinfoSerializer(ModelSerializer):
     class Meta:
         model = Gameinfo
         fields = ['status', 'gameStarted', 'gameHalftime', 'gameFinished', 'pin']
-
-
-class ScheduleSerializer(ModelSerializer):
-    class Meta:
-        model = Gameinfo
-        fields = '__all__'

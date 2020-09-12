@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django_webtest import WebTest
 from django_webtest.response import DjangoWebtestResponse
@@ -11,6 +11,7 @@ from gamedays.models import Gameday, Gameinfo, Gameresult
 from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
 
 
+@override_settings(SUSPEND_SIGNALS=True)
 class TestGamedayCreateView(WebTest):
     fixtures = ['testdata.json']
 
@@ -31,6 +32,7 @@ class TestGamedayCreateView(WebTest):
         assert response.url.index('login/?next=')
 
 
+@override_settings(SUSPEND_SIGNALS=True)
 class TestGamedayDetailView(TestCase):
     fixtures = ['testdata.json']
     EXISTING_GAMEDAY = 1
@@ -63,6 +65,7 @@ class TestGamedayDetailView(TestCase):
         self.assertEqual(resp.status_code, HTTPStatus.NOT_FOUND)
 
 
+@override_settings(SUSPEND_SIGNALS=True)
 class TestGamedayUpdateView(WebTest):
     fixtures = ['testdata.json']
 

@@ -1,7 +1,13 @@
-from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView
+import json
+from collections import OrderedDict
 
-from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, ScheduleSerializer
+from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
 from gamedays.models import Gameday, Gameinfo
+from gamedays.service.model_wrapper import GamedayModelWrapper
 
 
 class GamedayListAPIView(ListAPIView):
@@ -19,13 +25,13 @@ class GamedayRetrieveUpdate(RetrieveUpdateAPIView):
     queryset = Gameday.objects.all()
 
 
-class GamedayScheduleListView(ListAPIView):
-    serializer_class = ScheduleSerializer
-
-    def get_queryset(self):
-        queryset = Gameinfo.objects.filter(gameday_id=self.kwargs['pk'])
-        return queryset
-
-
 class GamedayCreateView(CreateAPIView):
     serializer_class = GamedaySerializer
+
+
+class GamedayScheduleView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        gmw = GamedayModelWrapper(kwargs['pk'])
+        schedule_json = gmw.get_schedule().to_json(orient='split')
+        return Response(json.loads(schedule_json, object_pairs_hook=OrderedDict))
