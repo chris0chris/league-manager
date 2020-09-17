@@ -1,6 +1,7 @@
-{
-  "sf": {
+[
+  {
     "name": "HF",
+    "pre-finished": "Vorrunde",
     "games": [
       {
         "away": {
@@ -24,8 +25,9 @@
       }
     ]
   },
-  "p5": {
+  {
     "name": "P5",
+    "pre-finished": "Vorrunde",
     "games": [
       {
         "home": {
@@ -39,16 +41,40 @@
       }
     ]
   },
-  "p3": {
+  {
     "name": "P3",
+    "pre-finished": "HF",
     "games": [
       {
         "home": {
           "standing": "HF",
           "place": 1,
           "points": 0
+        },
+        "away": {
+          "standing": "HF",
+          "place": 2,
+          "points": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "P1",
+    "pre-finished": "HF",
+    "games": [
+      {
+        "home": {
+          "standing": "HF",
+          "place": 1,
+          "points": 3
+        },
+        "away": {
+          "standing": "HF",
+          "place": 2,
+          "points": 3
         }
       }
     ]
   }
-}
+]

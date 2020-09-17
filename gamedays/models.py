@@ -8,6 +8,8 @@ class Gameday(models.Model):
     start = models.TimeField()
     author = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
 
+    objects = models.Manager()
+
     def __str__(self):
         return f'{self.pk}__{self.date} {self.name}'
 
@@ -17,7 +19,7 @@ class Gameinfo(models.Model):
     scheduled = models.TimeField()
     field = models.PositiveSmallIntegerField()
     # ToDo FK für Team
-    officials = models.CharField(max_length=100, null=True)
+    officials = models.CharField(max_length=100, default='', blank=True)
     status = models.CharField(max_length=100, default='', blank=True)
     pin = models.PositiveSmallIntegerField(null=True)
     gameStarted = models.TimeField(null=True)
@@ -25,6 +27,8 @@ class Gameinfo(models.Model):
     gameFinished = models.TimeField(null=True)
     stage = models.CharField(max_length=100)
     standing = models.CharField(max_length=100)
+
+    objects = models.Manager()
 
     def __str__(self):
         return f'{self.gameday.pk}__{self.field} - {self.scheduled} - {self.stage} / {self.standing} - {self.officials}'
@@ -38,6 +42,8 @@ class Gameresult(models.Model):
     sh = models.SmallIntegerField(null=True)
     pa = models.PositiveSmallIntegerField(null=True)
     isHome = models.BooleanField(default=False)
+
+    objects = models.Manager()
 
     def __str__(self):
         if self.fh is None:

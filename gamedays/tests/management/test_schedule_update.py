@@ -1,33 +1,51 @@
 from collections.abc import Iterable
 from unittest.mock import patch, MagicMock
 
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
 from gamedays.management.schedule_update import ScheduleUpdate, UpdateGameEntry, UpdateEntry
 from gamedays.models import Gameresult, Gameinfo
+from gamedays.tests.testdata.db_setup import DBSetup
 
-TESTDATA = 'testdata.json'
 
-
-@override_settings(SUSPEND_SIGNALS=True)
 class TestScheduleUpdate(TestCase):
-    fixtures = [TESTDATA]
 
-    def test_update(self):
-        gameinfo_id = 135
-        hf_gameinfo_id = 136
-        assert len(Gameresult.objects.filter(gameinfo_id=hf_gameinfo_id)) == 0
-        su = ScheduleUpdate(4)
-        su.create_sf()
-        assert len(Gameresult.objects.filter(gameinfo_id=hf_gameinfo_id)) == 2
+    def test_update_semifinal_and_p5(self):
+        gameday = DBSetup().g62_qualify_finished()
+        semifinals = Gameinfo.objects.filter(standing='HF')
+        assert len(Gameresult.objects.filter(gameinfo_id=semifinals[0].pk)) == 0
+        assert len(Gameresult.objects.filter(gameinfo_id=semifinals[1].pk)) == 0
+        assert len(Gameresult.objects.filter(gameinfo=Gameinfo.objects.get(standing='P5'))) == 0
+        su = ScheduleUpdate(gameday.pk)
+        su.update()
+        results_sf1_qs = Gameresult.objects.filter(gameinfo_id=semifinals[0].pk)
+        assert len(results_sf1_qs) == 2
+        assert results_sf1_qs[0].team == 'B2'
+        assert results_sf1_qs[0].fh is None
+        assert results_sf1_qs[1].team == 'A1'
+        results_sf2_qs = Gameresult.objects.filter(gameinfo_id=semifinals[1].pk)
+        assert len(results_sf2_qs) == 2
+        assert results_sf2_qs[0].team == 'A2'
+        assert results_sf2_qs[1].team == 'B1'
+        assert len(Gameresult.objects.filter(gameinfo=Gameinfo.objects.get(standing='P5'))) == 2
+        assert len(Gameresult.objects.filter(gameinfo=Gameinfo.objects.get(standing='P3'))) == 0
+        assert len(Gameresult.objects.filter(gameinfo=Gameinfo.objects.get(standing='P1'))) == 0
+
+    @patch.object(ScheduleUpdate, '_create_gameresult')
+    def test_update_semifinal_is_not_overridden(self, create_mock: MagicMock):
+        gameday = DBSetup().g62_finalround(sf='beendet', p5='beendet')
+        su = ScheduleUpdate(gameday.pk)
+        su.update()
+        assert create_mock.call_count == 4, 'only games for P3 and P1 should be created'
+        create_mock.assert_any_call(Gameinfo.objects.get(pk=10), 'B2', True)
+        create_mock.assert_any_call(Gameinfo.objects.get(pk=10), 'A2', False)
+        create_mock.assert_any_call(Gameinfo.objects.get(pk=11), 'A1', True)
+        create_mock.assert_any_call(Gameinfo.objects.get(pk=11), 'B1', False)
 
     @patch.object(ScheduleUpdate, '_create_gameresult')
     def test_update_qualify_not_finished(self, create_mock: MagicMock):
-        gameday_id = 1
-        gi: Gameinfo = Gameinfo.objects.get(id=57)
-        gi.status = 'gestartet'
-        gi.save()
-        su = ScheduleUpdate(gameday_id)
+        gameday = DBSetup().g62_status_empty()
+        su = ScheduleUpdate(gameday.pk)
         su.update()
         create_mock.assert_not_called()
 

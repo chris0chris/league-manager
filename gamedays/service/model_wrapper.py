@@ -57,18 +57,13 @@ class GamedayModelWrapper:
 
         gameresult = pd.DataFrame(Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id'].to_numpy()).values())
         games_with_result = pd.merge(self._gameinfo, gameresult, left_on='id', right_on='gameinfo_id')
-        if len(games_with_result[games_with_result[FH].notnull()]) == 0:
-            games_with_result[PF] = ''
-            games_with_result[DIFF] = ''
-            games_with_result[POINTS] = ''
-            games_with_result = games_with_result.fillna('')
-            self._games_with_result: DataFrame = games_with_result
-            return
-        games_with_result.astype({FH: 'int32', SH: 'int32', PA: 'int32'})
-        games_with_result[PF] = games_with_result.fh + games_with_result.sh
+        games_with_result = games_with_result.convert_dtypes()
+        games_with_result[PF] = games_with_result[FH] + games_with_result[SH]
         games_with_result[DIFF] = games_with_result[PF] - games_with_result[PA]
-        games_with_result[POINTS] = np.where(games_with_result[PF] == games_with_result[PA], 1,
-                                             np.where(games_with_result[PF] > games_with_result[PA], 3, 0))
+        tmp = games_with_result.fillna(0)
+        tmp[POINTS] = np.where(tmp[PF] == tmp[PA], 1,
+                               np.where(tmp[PF] > tmp[PA], 3, 0))
+        games_with_result[POINTS] = tmp[POINTS]
         self._games_with_result: DataFrame = games_with_result
 
     def has_finalround(self):
@@ -94,7 +89,7 @@ class GamedayModelWrapper:
 
     def get_final_table(self):
         # ToDo über status gehen
-        if self._games_with_result[self._games_with_result[PA] == ''].empty is False:
+        if self._games_with_result[self._games_with_result[PA].isnull()].empty is False:
             return ''
         final_table = self._games_with_result.groupby([TEAM], as_index=False)
         final_table = final_table.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
@@ -171,8 +166,10 @@ class GamedayModelWrapper:
             return self.get_qualify_team_by(place, standing)
         return self.get_team_by_points(place, standing, points)
 
-    def is_qualify_finished(self):
-        if self.has_finalround():
-            return self._games_with_result[(self._games_with_result[STAGE] == QUALIIFY_ROUND) & (
-                        self._games_with_result[STATUS] != FINISHED)].empty
-        return False
+    def is_finished(self, check):
+        if self._games_with_result[self._games_with_result[STAGE].isin([check])].empty:
+            return not self._games_with_result[(self._games_with_result[STANDING] == check) & (
+                    self._games_with_result[STATUS] == FINISHED)].empty
+
+        return not self._games_with_result[(self._games_with_result[STAGE] == check) & (
+                self._games_with_result[STATUS] == FINISHED)].empty

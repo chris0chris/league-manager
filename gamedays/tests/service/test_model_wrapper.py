@@ -90,7 +90,15 @@ class TestGamedayModelWrapper(TestCase):
         assert gmw.get_team_by(place=1, standing='HF', points=3) == 'Pandas'
         assert gmw.get_team_by(place=1, standing='Gruppe 1') == 'Nieder'
 
-    def test_is_qualify_finished(self):
-        gameday_id = 1
-        gmw = GamedayModelWrapper(gameday_id)
-        assert gmw.is_qualify_finished()
+    def test_is_finished(self):
+        gameday_with_qualify = 1
+        gmw = GamedayModelWrapper(gameday_with_qualify)
+        assert gmw.is_finished('Vorrunde')
+        assert not gmw.is_finished('HF')
+
+        gi: Gameinfo = Gameinfo.objects.get(id=61)
+        gi.status = 'beendet'
+        gi.save()
+
+        gmw = GamedayModelWrapper(gameday_with_qualify)
+        assert gmw.is_finished('P1')
