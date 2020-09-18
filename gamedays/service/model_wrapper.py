@@ -58,6 +58,7 @@ class GamedayModelWrapper:
         gameresult = pd.DataFrame(Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id'].to_numpy()).values())
         games_with_result = pd.merge(self._gameinfo, gameresult, left_on='id', right_on='gameinfo_id')
         games_with_result = games_with_result.convert_dtypes()
+        games_with_result = games_with_result.astype({FH: 'object', SH: 'object', PA: 'object'})
         games_with_result[PF] = games_with_result[FH] + games_with_result[SH]
         games_with_result[DIFF] = games_with_result[PF] - games_with_result[PA]
         tmp = games_with_result.fillna(0)
@@ -75,7 +76,7 @@ class GamedayModelWrapper:
         schedule = schedule.sort_values(by=STAGE, ascending=False)
         schedule = schedule[
             [SCHEDULED, FIELD, OFFICIALS, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY, STATUS]]
-        schedule.fillna('', inplace=True)
+        schedule = schedule.fillna('')
         schedule = schedule.rename(columns=SCHEDULE_TABLE_HEADERS)
         return schedule
 
@@ -88,8 +89,7 @@ class GamedayModelWrapper:
         return qualify_round
 
     def get_final_table(self):
-        # ToDo über status gehen
-        if self._games_with_result[self._games_with_result[PA].isnull()].empty is False:
+        if self._gameinfo[self._gameinfo[STATUS] != FINISHED].empty is False:
             return ''
         final_table = self._games_with_result.groupby([TEAM], as_index=False)
         final_table = final_table.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
@@ -167,9 +167,9 @@ class GamedayModelWrapper:
         return self.get_team_by_points(place, standing, points)
 
     def is_finished(self, check):
-        if self._games_with_result[self._games_with_result[STAGE].isin([check])].empty:
-            return not self._games_with_result[(self._games_with_result[STANDING] == check) & (
-                    self._games_with_result[STATUS] == FINISHED)].empty
+        if self._gameinfo[self._gameinfo[STAGE].isin([check])].empty:
+            return len(self._gameinfo[(self._gameinfo[STANDING] == check) & (self._gameinfo[STATUS] == FINISHED)]) \
+                   == len(self._gameinfo[(self._gameinfo[STANDING] == check)])
 
-        return not self._games_with_result[(self._games_with_result[STAGE] == check) & (
-                self._games_with_result[STATUS] == FINISHED)].empty
+        return len(self._gameinfo[(self._gameinfo[STAGE] == check) & (self._gameinfo[STATUS] == FINISHED)]) \
+               == len(self._gameinfo[(self._gameinfo[STAGE] == check)])

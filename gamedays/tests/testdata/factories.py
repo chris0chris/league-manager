@@ -1,5 +1,3 @@
-import time
-
 import factory
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -11,9 +9,10 @@ from gamedays.models import Gameday, Gameinfo, Gameresult
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = User
+        django_get_or_create = ('username',)
 
-    username = str(time.time())
-
+    # username = factory.Faker('name')
+    username = 'test_admin'
 
 class GamedayFactory(DjangoModelFactory):
     class Meta:

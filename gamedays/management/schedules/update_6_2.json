@@ -11,6 +11,10 @@
         "home": {
           "standing": "Gruppe 2",
           "place": 2
+        },
+        "officials": {
+          "standing": "Gruppe 2",
+          "place": 3
         }
       },
       {
@@ -21,6 +25,10 @@
         "home": {
           "standing": "Gruppe 1",
           "place": 2
+        },
+        "officials": {
+          "standing": "Gruppe 1",
+          "place": 3
         }
       }
     ]
@@ -37,6 +45,11 @@
         "away": {
           "standing": "Gruppe 2",
           "place": 3
+        },
+        "officials": {
+          "standing": "HF",
+          "place": 1,
+          "points": 3
         }
       }
     ]
@@ -55,6 +68,11 @@
           "standing": "HF",
           "place": 2,
           "points": 0
+        },
+        "officials": {
+          "standing": "HF",
+          "place": 2,
+          "points": 3
         }
       }
     ]
@@ -73,6 +91,10 @@
           "standing": "HF",
           "place": 2,
           "points": 3
+        },
+        "officials": {
+          "standing": "Gruppe 1",
+          "place": 3
         }
       }
     ]

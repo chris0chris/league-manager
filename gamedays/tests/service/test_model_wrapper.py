@@ -6,6 +6,7 @@ from pandas.testing import assert_frame_equal
 
 from gamedays.models import Gameinfo
 from gamedays.service.model_wrapper import GamedayModelWrapper
+from gamedays.tests.testdata.db_setup import DBSetup
 
 TESTDATA = 'testdata.json'
 
@@ -17,88 +18,99 @@ def get_df_from_json(filename):
 
 @override_settings(SUSPEND_SIGNALS=True)
 class TestGamedayModelWrapper(TestCase):
-    fixtures = [TESTDATA]
+    # fixtures = [TESTDATA]
 
     def test_no_gameinfos_for_gameday(self):
+        gameday = DBSetup().create_empty_gameday()
         with self.assertRaises(Gameinfo.DoesNotExist):
-            GamedayModelWrapper(3)
+            GamedayModelWrapper(gameday.pk)
 
     def test_has_finalround(self):
-        gameday_with_finalround = 1
-        gmw = GamedayModelWrapper(gameday_with_finalround)
+        gameday_with_finalround = DBSetup().g62_finalround()
+        gameday_with_main_round = DBSetup().create_main_round_gameday()
+        gmw = GamedayModelWrapper(gameday_with_finalround.pk)
         assert gmw.has_finalround()
-        gameday_without_finalround = 2
-        gmw = GamedayModelWrapper(gameday_without_finalround)
+
+        gmw = GamedayModelWrapper(gameday_with_main_round.pk)
         assert not gmw.has_finalround()
 
-    def test_get_schedule(self):
-        gameday_pk = 1
+    def test_get_schedule2(self):
+        gameday = DBSetup().g62_qualify_finished()
         expected_schedule = get_df_from_json('ts_schedule')
-        schedule = GamedayModelWrapper(gameday_pk).get_schedule()
+        schedule = GamedayModelWrapper(gameday.pk).get_schedule()
         del expected_schedule['Kick-Off']
         del schedule['Kick-Off']
         assert_frame_equal(schedule, expected_schedule, check_dtype=False)
 
     def test_empty_get_qualify_table(self):
-        gameday_with_no_qualify = 2
-        gmw = GamedayModelWrapper(gameday_with_no_qualify)
+        gameday = DBSetup().create_main_round_gameday()
+        gmw = GamedayModelWrapper(gameday.pk)
         assert gmw.get_qualify_table() is ''
 
     def test_get_qualify_table(self):
-        gameday_with_qualify = 1
-        gmw = GamedayModelWrapper(gameday_with_qualify)
+        gameday = DBSetup().g62_qualify_finished()
+        gmw = GamedayModelWrapper(gameday.pk)
         expected_qualify_table = get_df_from_json('ts_qualify_table')
         assert_frame_equal(gmw.get_qualify_table(), expected_qualify_table, check_dtype=False)
 
     def test_empty_get_final_table(self):
-        gameday_with_empty_final_round = 4
-        gmw = GamedayModelWrapper(gameday_with_empty_final_round)
+        gameday = DBSetup().g62_qualify_finished()
+        gmw = GamedayModelWrapper(gameday.pk)
         assert gmw.get_final_table() == ''
 
     def test_get_final_table(self):
-        gameday_with_final_round = 1
+        gameday = DBSetup().g62_finalround(sf='beendet', p5='beendet', p3='beendet', p1='beendet')
         expected_final_table = get_df_from_json('ts_final_table_6_teams')
-        gmw = GamedayModelWrapper(gameday_with_final_round)
+        gmw = GamedayModelWrapper(gameday.pk)
         assert_frame_equal(gmw.get_final_table(), expected_final_table, check_dtype=False)
 
     def test_get_final_table_for_7_teams(self):
-        gameday_with_7_teams = 5
+        gameday = DBSetup().g72_finished()
         expected_table = get_df_from_json('ts_final_table_7_teams')
-        gmw = GamedayModelWrapper(gameday_with_7_teams)
+        gmw = GamedayModelWrapper(gameday.pk)
         assert_frame_equal(gmw.get_final_table(), expected_table, check_dtype=False)
 
     def test_get_final_table_for_main_round(self):
-        gameday_with_main_round = 2
+        gameday = DBSetup().create_main_round_gameday(status='beendet', number_teams=4)
         expected_table = get_df_from_json('ts_final_table_4_teams')
-        gmw = GamedayModelWrapper(gameday_with_main_round)
+        gmw = GamedayModelWrapper(gameday.pk)
         assert_frame_equal(gmw.get_final_table(), expected_table, check_dtype=False)
 
     def test_get_qualify_team_by(self):
-        gameday_id = 1
-        gmw = GamedayModelWrapper(gameday_id)
-        assert gmw.get_qualify_team_by(place=1, standing='Gruppe 1') == 'Nieder'
+        gameday = DBSetup().g62_qualify_finished()
+        gmw = GamedayModelWrapper(gameday.pk)
+        assert gmw.get_qualify_team_by(place=1, standing='Gruppe 1') == 'A1'
+        assert gmw.get_qualify_team_by(place=3, standing='Gruppe 2') == 'B3'
 
     def test_get_team_by_points(self):
-        gameday_id = 1
-        gmw = GamedayModelWrapper(gameday_id)
-        assert gmw.get_team_by_points(place=1, standing='HF', points=3) == 'Pandas'
-        assert gmw.get_team_by_points(place=1, standing='HF', points=0) == 'Nieder'
+        gameday = DBSetup().g62_finalround(sf='beendet')
+        gmw = GamedayModelWrapper(gameday.pk)
+        assert gmw.get_team_by_points(place=1, standing='HF', points=0) == 'B2'
+        assert gmw.get_team_by_points(place=1, standing='HF', points=3) == 'A1'
+        assert gmw.get_team_by_points(place=2, standing='HF', points=0) == 'A2'
+        assert gmw.get_team_by_points(place=2, standing='HF', points=3) == 'B1'
 
     def test_get_team_by(self):
-        gameday_id = 1
-        gmw = GamedayModelWrapper(gameday_id)
-        assert gmw.get_team_by(place=1, standing='HF', points=3) == 'Pandas'
-        assert gmw.get_team_by(place=1, standing='Gruppe 1') == 'Nieder'
+        gameday = DBSetup().g62_finalround(sf='beendet')
+        gmw = GamedayModelWrapper(gameday.pk)
+        assert gmw.get_team_by(place=1, standing='HF', points=3) == 'A1'
+        assert gmw.get_team_by(place=1, standing='Gruppe 1') == 'A1'
 
     def test_is_finished(self):
-        gameday_with_qualify = 1
-        gmw = GamedayModelWrapper(gameday_with_qualify)
+        gameday = DBSetup().g62_qualify_finished()
+        Gameinfo.objects.filter(standing='P1').update(status='beendet')
+
+        gmw = GamedayModelWrapper(gameday.pk)
+
         assert gmw.is_finished('Vorrunde')
         assert not gmw.is_finished('HF')
-
-        gi: Gameinfo = Gameinfo.objects.get(id=61)
-        gi.status = 'beendet'
-        gi.save()
-
-        gmw = GamedayModelWrapper(gameday_with_qualify)
         assert gmw.is_finished('P1')
+
+    def test_is_not_finished(self):
+        gameday = DBSetup().g62_qualify_finished()
+        Gameinfo.objects.filter(standing='Gruppe 1').update(status='some_state')
+        Gameinfo.objects.filter(standing='HF').update(status='beendet')
+
+        gmw = GamedayModelWrapper(gameday.pk)
+        assert not gmw.is_finished('Vorrunde')
+        assert gmw.is_finished('HF')

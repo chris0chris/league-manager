@@ -34,59 +34,59 @@
   "data": [
     {
       "index": 0,
-      "team": "Spatzen",
-      "points": 15,
-      "pf": 165,
-      "pa": 104,
-      "+/-": 61
+      "team": "B1",
+      "points": 12,
+      "pf": 12,
+      "pa": 7,
+      "+/-": 5
     },
     {
       "index": 1,
-      "team": "W\u00fcrz",
-      "points": 7,
-      "pf": 121,
-      "pa": 89,
-      "+/-": 32
+      "team": "A1",
+      "points": 12,
+      "pf": 14,
+      "pa": 8,
+      "+/-": 6
     },
     {
       "index": 2,
-      "team": "Lions",
-      "points": 7,
-      "pf": 132,
-      "pa": 140,
-      "+/-": -8
+      "team": "A2",
+      "points": 9,
+      "pf": 11,
+      "pa": 9,
+      "+/-": 2
     },
     {
       "index": 3,
-      "team": "Rams",
+      "team": "B2",
       "points": 3,
-      "pf": 77,
-      "pa": 111,
-      "+/-": -34
+      "pf": 8,
+      "pa": 10,
+      "+/-": -2
     },
     {
       "index": 4,
-      "team": "Rooks",
-      "points": 7,
-      "pf": 125,
-      "pa": 111,
-      "+/-": 14
+      "team": "B3",
+      "points": 6,
+      "pf": 8,
+      "pa": 9,
+      "+/-": -1
     },
     {
       "index": 5,
-      "team": "Essl",
-      "points": 4,
-      "pf": 102,
-      "pa": 129,
-      "+/-": -27
+      "team": "A3",
+      "points": 3,
+      "pf": 5,
+      "pa": 8,
+      "+/-": -3
     },
     {
       "index": 6,
-      "team": "Stutt",
+      "team": "A4",
       "points": 0,
-      "pf": 127,
-      "pa": 165,
-      "+/-": -38
+      "pf": 2,
+      "pa": 9,
+      "+/-": -7
     }
   ]
 }

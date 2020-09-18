@@ -34,51 +34,51 @@
   "data": [
     {
       "index": 0,
-      "team": "Dort",
+      "team": "B1",
       "points": 12,
-      "pf": 147,
-      "pa": 74,
-      "+/-": 73
+      "pf": 12,
+      "pa": 7,
+      "+/-": 5
     },
     {
       "index": 1,
-      "team": "Pandas",
-      "points": 6,
-      "pf": 98,
-      "pa": 117,
-      "+/-": -19
+      "team": "A1",
+      "points": 9,
+      "pf": 11,
+      "pa": 8,
+      "+/-": 3
     },
     {
       "index": 2,
-      "team": "Iser",
+      "team": "A2",
       "points": 6,
-      "pf": 116,
-      "pa": 108,
-      "+/-": 8
+      "pf": 9,
+      "pa": 9,
+      "+/-": 0
     },
     {
       "index": 3,
-      "team": "Nieder",
-      "points": 6,
-      "pf": 106,
-      "pa": 80,
-      "+/-": 26
+      "team": "B2",
+      "points": 3,
+      "pf": 8,
+      "pa": 10,
+      "+/-": -2
     },
     {
       "index": 4,
-      "team": "Rheda",
+      "team": "B3",
       "points": 3,
-      "pf": 113,
-      "pa": 111,
-      "+/-": 2
+      "pf": 5,
+      "pa": 7,
+      "+/-": -2
     },
     {
       "index": 5,
-      "team": "Wesel",
+      "team": "A3",
       "points": 0,
-      "pf": 63,
-      "pa": 153,
-      "+/-": -90
+      "pf": 4,
+      "pa": 8,
+      "+/-": -4
     }
   ]
 }

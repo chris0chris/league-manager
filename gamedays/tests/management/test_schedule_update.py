@@ -42,12 +42,30 @@ class TestScheduleUpdate(TestCase):
         create_mock.assert_any_call(Gameinfo.objects.get(pk=11), 'A1', True)
         create_mock.assert_any_call(Gameinfo.objects.get(pk=11), 'B1', False)
 
+    def test_update_no_new_games_created_while_already_existent(self):
+        gameday = DBSetup().g62_qualify_finished()
+        semifinal_finished = DBSetup().create_finalround_game(gameday=gameday, standing='HF',
+                                                              status='beendet', home='A2', away='B1')
+        assert len(Gameresult.objects.filter(gameinfo__in=Gameinfo.objects.filter(standing='HF'))) == 2
+        su = ScheduleUpdate(gameday.pk)
+        su.update()
+        assert False, 'test fehlt noch'
+        assert len(Gameresult.objects.filter(gameinfo=Gameinfo.objects.filter(standing='HF'))) == 4
+
     @patch.object(ScheduleUpdate, '_create_gameresult')
     def test_update_qualify_not_finished(self, create_mock: MagicMock):
         gameday = DBSetup().g62_status_empty()
         su = ScheduleUpdate(gameday.pk)
         su.update()
         create_mock.assert_not_called()
+
+    def test_officials_update(self):
+        gameday = DBSetup().g62_qualify_finished()
+        games = Gameinfo.objects.filter(standing='HF') | Gameinfo.objects.filter(standing='P5')
+        assert games.exclude(officials__exact='').count() == 0
+        su = ScheduleUpdate(gameday.pk)
+        su.update()
+        assert games.exclude(officials__exact='').count() == 3
 
 
 class TestUpdateGameEntry:
@@ -62,6 +80,11 @@ class TestUpdateGameEntry:
                 "standing": "Gruppe 2",
                 "points": 0,
                 "place": 1
+            },
+            "officials": {
+                "standing": "HF",
+                "points": 3,
+                "place": 1
             }
         })
         assert uge.get_place('home') == 3
@@ -70,6 +93,9 @@ class TestUpdateGameEntry:
         assert uge.get_place('away') == 1
         assert uge.get_standing('away') == 'Gruppe 2'
         assert uge.get_points('away') == 0
+        assert uge.get_place('officials') == 1
+        assert uge.get_standing('officials') == 'HF'
+        assert uge.get_points('officials') == 3
 
 
 class TestUpdateEntry:

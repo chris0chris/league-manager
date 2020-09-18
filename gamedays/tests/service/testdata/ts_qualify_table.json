@@ -37,58 +37,58 @@
   },
   "data": [
     {
-      "index": 1,
-      "Gruppe": "Gruppe 1",
-      "Team": "Nieder",
-      "Punkte": 6,
-      "PF": 73,
-      "PA": 12,
-      "+/-": 61
-    },
-    {
       "index": 0,
       "Gruppe": "Gruppe 1",
-      "Team": "Iser",
+      "Team": "A1",
+      "Punkte": 6,
+      "PF": 6,
+      "PA": 3,
+      "+/-": 3
+    },
+    {
+      "index": 1,
+      "Gruppe": "Gruppe 1",
+      "Team": "A2",
       "Punkte": 3,
-      "PF": 58,
-      "PA": 50,
-      "+/-": 8
+      "PF": 4,
+      "PA": 4,
+      "+/-": 0
     },
     {
       "index": 2,
       "Gruppe": "Gruppe 1",
-      "Team": "Wesel",
+      "Team": "A3",
       "Punkte": 0,
-      "PF": 31,
-      "PA": 100,
-      "+/-": -69
+      "PF": 2,
+      "PA": 5,
+      "+/-": -3
     },
     {
       "index": 3,
       "Gruppe": "Gruppe 2",
-      "Team": "Dort",
+      "Team": "B1",
       "Punkte": 6,
-      "PF": 74,
-      "PA": 48,
-      "+/-": 26
+      "PF": 6,
+      "PA": 3,
+      "+/-": 3
     },
     {
       "index": 4,
       "Gruppe": "Gruppe 2",
-      "Team": "Pandas",
+      "Team": "B2",
       "Punkte": 3,
-      "PF": 62,
-      "PA": 69,
-      "+/-": -7
+      "PF": 4,
+      "PA": 4,
+      "+/-": 0
     },
     {
       "index": 5,
       "Gruppe": "Gruppe 2",
-      "Team": "Rheda",
+      "Team": "B3",
       "Punkte": 0,
-      "PF": 60,
-      "PA": 79,
-      "+/-": -19
+      "PF": 2,
+      "PA": 5,
+      "+/-": -3
     }
   ]
 }

@@ -63,17 +63,6 @@ class ScheduleUpdate:
         # 6er Spieltag
         # 2 Felder
 
-    def create_sf(self):
-        sf = UpdateEntry(self.data["sf"])
-        qs = Gameinfo.objects.filter(gameday_id=self.gameday_id, standing=sf.get_name())
-        gmw = GamedayModelWrapper(self.gameday_id)
-
-        for gi, game in zip(qs, sf):
-            home = gmw.get_team_by(game.get_place('home'), game.get_standing('home'), game.get_points('home'))
-            self._create_gameresult(gi, home, True)
-            away = gmw.get_team_by(game.get_place('away'), game.get_standing('away'), game.get_points('away'))
-            self._create_gameresult(gi, away, False)
-
     def _create_gameresult(self, gi, team, is_home):
         gameresult = Gameresult()
         gameresult.team = team
@@ -92,3 +81,10 @@ class ScheduleUpdate:
                     self._create_gameresult(gi, home, True)
                     away = gmw.get_team_by(game.get_place('away'), game.get_standing('away'), game.get_points('away'))
                     self._create_gameresult(gi, away, False)
+                    try:
+                        gi.officials = gmw.get_team_by(game.get_place('officials'), game.get_standing('officials'),
+                                                       game.get_points('officials'))
+                        gi.save()
+                    except IndexError:
+
+                        pass
