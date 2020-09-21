@@ -44,13 +44,13 @@ class TestScheduleUpdate(TestCase):
 
     def test_update_no_new_games_created_while_already_existent(self):
         gameday = DBSetup().g62_qualify_finished()
+        v = Gameinfo.objects.filter(standing='HF').first().delete()
         semifinal_finished = DBSetup().create_finalround_game(gameday=gameday, standing='HF',
                                                               status='beendet', home='A2', away='B1')
         assert len(Gameresult.objects.filter(gameinfo__in=Gameinfo.objects.filter(standing='HF'))) == 2
         su = ScheduleUpdate(gameday.pk)
         su.update()
-        assert False, 'test fehlt noch'
-        assert len(Gameresult.objects.filter(gameinfo=Gameinfo.objects.filter(standing='HF'))) == 4
+        assert len(Gameresult.objects.filter(gameinfo__in=Gameinfo.objects.filter(standing='HF'))) == 4
 
     @patch.object(ScheduleUpdate, '_create_gameresult')
     def test_update_qualify_not_finished(self, create_mock: MagicMock):

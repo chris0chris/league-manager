@@ -77,6 +77,7 @@ class ScheduleUpdate:
                 entry = UpdateEntry(s)
                 qs = Gameinfo.objects.filter(gameday_id=self.gameday_id, standing=entry.get_name())
                 for gi, game in zip(qs, entry):
+
                     home = gmw.get_team_by(game.get_place('home'), game.get_standing('home'), game.get_points('home'))
                     self._create_gameresult(gi, home, True)
                     away = gmw.get_team_by(game.get_place('away'), game.get_standing('away'), game.get_points('away'))
