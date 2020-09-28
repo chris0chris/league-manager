@@ -1,13 +1,13 @@
 <template>
-    <div>
-        <h1>
-            Gamedays:
-        </h1>
+    <div class="surrounder">
+        <div class="center">
+            Gamedays
+        </div>
       <table>
         <th> Id </th>
         <th> Date </th>
         <th> Name </th>
-        <GamedayItem v-bind:Gameday="Gameday" v-bind:key="Gameday.id" v-for="Gameday in Gamedays" />
+        <GamedayItem v-bind:Gameday="Gameday" v-bind:key="Gameday.id" v-for="Gameday in Gamedays"/>
       </table>
     </div>
 </template>
@@ -38,6 +38,25 @@ export default {
 <style scoped>
 table{
   size: 110%;
-}
+    line-height:40px ;
 
+}
+th{
+  font-size: 30px;
+  font-weight: bold;
+}
+div.surrounder{
+    padding-top: 10px;
+    padding-left: 10px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+.center{
+    text-decoration: underline;
+    font-size: 30px;
+    font-weight: bold;
+    width: 100%;
+    margin: auto;
+    text-align: center;
+}
 </style>

@@ -21,6 +21,11 @@ const routes = [
     path: '/gamedays',
     name: 'Gamedays',
     component: () => import('../views/Gamedays/Gamedays.vue')
+  },
+  {
+    path: '/gamedays/:id',
+    name: 'gamedayinfo',
+    component: () => import('../views/Gamedayinfo/Gamedayinfo.vue')
   }
 ]
 

@@ -1,9 +1,8 @@
 <template>
-    <tr>
+    <tr @click="route">
       <td>{{Gameday.id}}</td>
       <td>{{Gameday.date}}</td>
       <td>{{Gameday.name}}</td>
-      <td><router-link :to="'/gamedayinfo/'+Gameday.id">view</router-link></td>
       </tr>
 </template>
 
@@ -11,10 +10,21 @@
 
 export default {
   name: 'GamedayItem',
-  props: ['Gameday']
+  props: ['Gameday'],
+  methods: {
+    route: function () {
+      this.$router.push('gamedays/' + this.Gameday.id)
+    }
+  }
 }
 </script>
 
 <style scoped>
+tr{
+  cursor: pointer;
+}
+td{
+  font-size: 30px;
+}
 
 </style>
