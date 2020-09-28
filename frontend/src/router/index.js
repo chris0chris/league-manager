@@ -20,12 +20,17 @@ const routes = [
   {
     path: '/gamedays',
     name: 'Gamedays',
-    component: () => import('../views/Gamedays/Gamedays.vue')
+    component: () => import('../views/Gameday/list/Gamedays.vue')
   },
   {
-    path: '/gamedays/:id',
+    path: '/gamedays/add',
+    name: 'add Gameday',
+    component: () => import('../views/Gameday/add/add.vue')
+  },
+  {
+    path: '/gamedays/info/:id',
     name: 'gamedayinfo',
-    component: () => import('../views/Gamedayinfo/Gamedayinfo.vue')
+    component: () => import('../views/Gameday/info/Gamedayinfo.vue')
   }
 ]
 

@@ -13,7 +13,7 @@ export default {
   props: ['Gameday'],
   methods: {
     route: function () {
-      this.$router.push('gamedays/' + this.Gameday.id)
+      this.$router.push('gamedays/info/' + this.Gameday.id)
     }
   }
 }

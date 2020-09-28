@@ -9,6 +9,9 @@
         <th> Name </th>
         <GamedayItem v-bind:Gameday="Gameday" v-bind:key="Gameday.id" v-for="Gameday in Gamedays"/>
       </table>
+      <md-button class="md-raised" @click="$router.push('gamedays/add')">
+        + add
+      </md-button>
     </div>
 </template>
 
