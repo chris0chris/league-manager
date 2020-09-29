@@ -1,31 +1,22 @@
 <template>
     <div>
-          <md-table>
-            <th v-for="(header,index) in this.Schedule.columns" :key=index>
-              {{header}}
-            </th>
-            <md-table-row v-for="(Game,index) in this.Schedule.data" :key=index>
-              <md-table-cell v-for="(data,index) in Game" :key=index>
-                {{data}}
-              </md-table-cell>
-            </md-table-row>
-          </md-table>
+      <Field v-for="(ScheduleF,index) in Schedule" :key="index" :index="index" :Schedule="ScheduleF"/>
     </div>
 </template>
 
 <script>
 import axios from 'axios'
-//  import Field from './Field'
+import Field from './Field'
 
 export default {
   name: 'Schedule',
   props: ['Gameday'],
-  //  components: {
-  //    Field
-  //  },
+  components: {
+    Field
+  },
   data () {
     return {
-      Schedule: {},
+      Schedule: [],
       Timeslots: undefined,
       Fields: 0
     }
@@ -38,7 +29,28 @@ export default {
   },
   methods: {
     process_Data (Data) {
-      this.Schedule = Data
+      for (var i = 0; i < Data.data.length; i++) {
+        if (Data.data[i][1] > this.Fields) this.Fields = Data.data[i][1]
+      }
+      this.Schedule = new Array(this.Fields)
+      for (i = 0; i < this.Fields; i++) {
+        var cnt = 0
+        for (var z = 0; z < Data.data.length; z++) {
+          if (Data.data[z][1] === (i + 1)) cnt += 1
+        }
+        this.Schedule[i] = new Array(cnt)
+      }
+      for (i = 0; i < this.Schedule.length; i++) {
+        cnt = 0
+        for (z = 0; z < Data.data.length; z++) {
+          if (Data.data[z][1] - 1 === i) {
+            var tmp = Data.data[z]
+            tmp.splice(1, 1)
+            this.Schedule[i][cnt] = tmp
+            cnt += 1
+          }
+        }
+      }
     }
   }
 }
@@ -47,6 +59,9 @@ export default {
 <style scoped>
 .div{
   padding-top: 10px;
+}
+.Field{
+  table-layout: auto;
 }
 
 </style>

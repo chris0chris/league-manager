@@ -3,12 +3,12 @@
         <div class="center">
             Gamedays
         </div>
-      <table>
-        <th> Id </th>
-        <th> Date </th>
-        <th> Name </th>
+      <md-table>
+        <md-table-head> Id   </md-table-head>
+        <md-table-head> Date </md-table-head>
+        <md-table-head> Name </md-table-head>
         <GamedayItem v-bind:Gameday="Gameday" v-bind:key="Gameday.id" v-for="Gameday in Gamedays"/>
-      </table>
+      </md-table>
       <md-button class="md-raised" @click="$router.push('gamedays/add')">
         + add
       </md-button>
@@ -39,15 +39,6 @@ export default {
 </script>
 
 <style scoped>
-table{
-  size: 110%;
-    line-height:40px ;
-
-}
-th{
-  font-size: 30px;
-  font-weight: bold;
-}
 div.surrounder{
     padding-top: 10px;
     padding-left: 10px;
@@ -61,5 +52,6 @@ div.surrounder{
     width: 100%;
     margin: auto;
     text-align: center;
+    line-height: 40px;
 }
 </style>

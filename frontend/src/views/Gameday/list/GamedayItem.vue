@@ -1,9 +1,9 @@
 <template>
-    <tr @click="route">
-      <td>{{Gameday.id}}</td>
-      <td>{{Gameday.date}}</td>
-      <td>{{Gameday.name}}</td>
-      </tr>
+    <md-table-row @click="route">
+      <md-table-cell>{{Gameday.id}}</md-table-cell>
+      <md-table-cell>{{Gameday.date}}</md-table-cell>
+      <md-table-cell>{{Gameday.name}}</md-table-cell>
+    </md-table-row>
 </template>
 
 <script>
@@ -22,9 +22,6 @@ export default {
 <style scoped>
 tr{
   cursor: pointer;
-}
-td{
-  font-size: 30px;
 }
 
 </style>

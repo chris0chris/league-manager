@@ -53,6 +53,7 @@ export default {
 div.wrapper{
     padding-top: 10px;
     padding-left: 10px;
+    overflow: hidden;
 }
 
 div{
