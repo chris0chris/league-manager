@@ -1,5 +1,5 @@
 from gamedays.models import Gameday
-from gamedays.tests.testdata.factories import GameinfoFactory, GameresultFactory, GamedayFactory
+from gamedays.tests.setup_factories.factories import GameinfoFactory, GameresultFactory, GamedayFactory
 
 
 class DBSetup:
@@ -11,6 +11,10 @@ class DBSetup:
 
     def g62_finalround(self, sf='', p5='', p3='', p1=''):
         return self._create_gameday(sf=sf, p5=p5, p3=p3, p1=p1)
+
+    def g62_finished(self):
+        gameday = self._create_gameday(sf='beendet', p5='beendet', p3='beendet', p1='beendet')
+        return gameday
 
     def g72_finished(self):
         gameday = self._create_gameday(group_a=4, sf='beendet', p5='beendet', p3='beendet', p1='beendet')
@@ -71,8 +75,6 @@ class DBSetup:
         return GameinfoFactory(gameday=gameday, stage='Finalrunde', standing=standing, status=status)
 
     def create_empty_gameday(self) -> Gameday:
-        # author = UserFactory()
-        # gameday = GamedayFactory(author=author)
         gameday = GamedayFactory()
         return gameday
 
@@ -81,3 +83,24 @@ class DBSetup:
         self.create_group(gameday=gameday, name='A', stage='Hauptrunde', standing='Gruppe 1',
                           status=status, number_teams=number_teams)
         return gameday
+
+
+def deco_cg(qualify='beendet', sf='', p5='', p3='', p1='', group_a=3, group_b=3) -> Gameday:
+    gameday = GamedayFactory()
+
+    def decorator_function(func):
+        def wrapper_func(*args, **kwargs):
+            gi = GameinfoFactory(gameday=gameday, stage='Vorrunde', standing='Gruppe 1', status='')
+            GameresultFactory(gameinfo=gi, team='A' + '1', fh=2, sh=1, pa=2, isHome=True)
+            GameresultFactory(gameinfo=gi, team='A' + '2', fh=1, sh=1, pa=3)
+            gi = GameinfoFactory(gameday=gameday, stage='Vorrunde', standing='Gruppe 1', status='')
+            GameresultFactory(gameinfo=gi, team='A' + '2', fh=1, sh=1, pa=1, isHome=True)
+            GameresultFactory(gameinfo=gi, team='A' + '3', fh=1, sh=0, pa=2)
+            gi = GameinfoFactory(gameday=gameday, stage='Vorrunde', standing='Gruppe 1', status='')
+            GameresultFactory(gameinfo=gi, team='A' + '3', fh=1, sh=0, pa=3, isHome=True)
+            GameresultFactory(gameinfo=gi, team='A' + '1', fh=2, sh=1, pa=1)
+            return func
+
+        return wrapper_func
+
+    return decorator_function()

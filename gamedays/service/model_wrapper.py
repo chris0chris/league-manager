@@ -25,6 +25,12 @@ DIFF = '+/-'
 GROUP1 = 'Gruppe 1'
 FINISHED = 'beendet'
 
+GAMEINFO_ID = 'gameinfo_id'
+ID = 'id'
+ID_Y = 'id_y'
+ID_HOME = 'id_home'
+ID_AWAY = 'id_away'
+
 QUALIFY_TABLE_HEADERS = {
     STANDING: 'Gruppe',
     TEAM: 'Team',
@@ -45,6 +51,12 @@ SCHEDULE_TABLE_HEADERS = {
     POINTS_AWAY: 'Punkte Gast',
     AWAY: 'Gast',
     STATUS: 'Status'
+}
+
+SCHEDULE_API_HEADERS = {
+    ID_AWAY: ID_AWAY,
+    ID_HOME: ID_HOME,
+    GAMEINFO_ID: GAMEINFO_ID
 }
 
 
@@ -70,13 +82,14 @@ class GamedayModelWrapper:
     def has_finalround(self):
         return QUALIIFY_ROUND in self._gameinfo[STAGE].values
 
-    def get_schedule(self):
+    def get_schedule(self, api=False):
         schedule = self._get_schedule()
         schedule = schedule.sort_values(by=[FIELD, SCHEDULED])
         schedule = schedule.sort_values(by=STAGE, ascending=False)
-        schedule = schedule[
-            [SCHEDULED, FIELD, OFFICIALS, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY, STATUS]]
-        schedule = schedule.fillna('')
+        columns = [SCHEDULED, FIELD, OFFICIALS, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY, STATUS]
+        if api:
+            columns = columns + [ID_HOME, ID_AWAY, 'id']
+        schedule = schedule[columns]
         schedule = schedule.rename(columns=SCHEDULE_TABLE_HEADERS)
         return schedule
 
@@ -135,13 +148,14 @@ class GamedayModelWrapper:
     def _get_schedule(self):
         home_teams = self._games_with_result.groupby('gameinfo_id').nth(0).reset_index()
         away_teams = self._games_with_result.groupby('gameinfo_id').nth(1).reset_index()
-        home_teams = home_teams.rename(columns={TEAM: HOME, PF: POINTS_HOME})
-        away_teams = away_teams.rename(columns={TEAM: AWAY, PF: POINTS_AWAY})
-        away_teams = away_teams[[POINTS_AWAY, AWAY]]
+        home_teams = home_teams.rename(columns={TEAM: HOME, PF: POINTS_HOME, ID_Y: ID_HOME})
+        away_teams = away_teams.rename(columns={TEAM: AWAY, PF: POINTS_AWAY, ID_Y: ID_AWAY})
+        away_teams = away_teams[[ID_AWAY, POINTS_AWAY, AWAY]]
         qualify_round = pd.concat([home_teams, away_teams], axis=1).sort_values(by=[FIELD, SCHEDULED])
-        qualify_round = qualify_round[['gameinfo_id', HOME, POINTS_HOME, POINTS_AWAY, AWAY]]
+        qualify_round = qualify_round[[GAMEINFO_ID, ID_HOME, HOME, POINTS_HOME, POINTS_AWAY, AWAY, ID_AWAY]]
 
-        schedule = self._gameinfo.merge(qualify_round, how='left', right_on='gameinfo_id', left_on='id')
+        schedule = self._gameinfo.merge(qualify_round, how='left', right_on=GAMEINFO_ID, left_on='id')
+        schedule = schedule.astype({ID_HOME: 'object', ID_AWAY: 'object'}).fillna('')
         return schedule
 
     def _get_table(self):

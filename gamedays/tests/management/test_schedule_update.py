@@ -1,13 +1,15 @@
 from collections.abc import Iterable
 from unittest.mock import patch, MagicMock
 
+import pytest
 from django.test import TestCase
 
 from gamedays.management.schedule_update import ScheduleUpdate, UpdateGameEntry, UpdateEntry
 from gamedays.models import Gameresult, Gameinfo
-from gamedays.tests.testdata.db_setup import DBSetup
+from gamedays.tests.setup_factories.db_setup import DBSetup
 
 
+@pytest.mark.django_db
 class TestScheduleUpdate(TestCase):
 
     def test_update_semifinal_and_p5(self):
@@ -66,6 +68,11 @@ class TestScheduleUpdate(TestCase):
         su = ScheduleUpdate(gameday.pk)
         su.update()
         assert games.exclude(officials__exact='').count() == 3
+
+    # @deco_cg()
+    # def test_db_init(self, db):
+    #     v = len(Gameinfo.objects.all())
+    #     p = ''
 
 
 class TestUpdateGameEntry:

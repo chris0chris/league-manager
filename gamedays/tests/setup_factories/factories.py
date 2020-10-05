@@ -11,7 +11,6 @@ class UserFactory(DjangoModelFactory):
         model = User
         django_get_or_create = ('username',)
 
-    # username = factory.Faker('name')
     username = 'test_admin'
 
 class GamedayFactory(DjangoModelFactory):

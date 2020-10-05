@@ -1,12 +1,12 @@
 import pathlib
 
 import pandas as pd
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from pandas.testing import assert_frame_equal
 
 from gamedays.models import Gameinfo
 from gamedays.service.model_wrapper import GamedayModelWrapper
-from gamedays.tests.testdata.db_setup import DBSetup
+from gamedays.tests.setup_factories.db_setup import DBSetup
 
 TESTDATA = 'testdata.json'
 
@@ -16,9 +16,7 @@ def get_df_from_json(filename):
                         orient='table')
 
 
-@override_settings(SUSPEND_SIGNALS=True)
 class TestGamedayModelWrapper(TestCase):
-    # fixtures = [TESTDATA]
 
     def test_no_gameinfos_for_gameday(self):
         gameday = DBSetup().create_empty_gameday()
@@ -36,7 +34,7 @@ class TestGamedayModelWrapper(TestCase):
 
     def test_get_schedule2(self):
         gameday = DBSetup().g62_qualify_finished()
-        expected_schedule = get_df_from_json('ts_schedule')
+        expected_schedule = get_df_from_json('schedule_g62_qualify_finished')
         schedule = GamedayModelWrapper(gameday.pk).get_schedule()
         del expected_schedule['Kick-Off']
         del schedule['Kick-Off']

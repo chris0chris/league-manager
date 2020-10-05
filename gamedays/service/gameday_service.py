@@ -1,17 +1,25 @@
 from gamedays.models import Gameinfo
 from gamedays.service.model_wrapper import GamedayModelWrapper
 
+EMPTY_DATA = '{"data": []}'
 
 class EmptySchedule:
     @staticmethod
     def to_html():
         return 'Spielplan wurde noch nicht erstellt'
 
+    @staticmethod
+    def to_json(*args, **kwargs):
+        return EMPTY_DATA
 
 class EmptyQualifyTable:
     @staticmethod
     def to_html():
         return ''
+
+    @staticmethod
+    def to_json(*args, **kwargs):
+        return EMPTY_DATA
 
 
 class EmptyFinalTable:
@@ -19,11 +27,15 @@ class EmptyFinalTable:
     def to_html():
         return 'Abschlusstabelle wird berechnet, sobald alle Spiele beendet sind.'
 
+    @staticmethod
+    def to_json(*args, **kwargs):
+        return EMPTY_DATA
+
 
 class EmptyGamedayService:
 
     @staticmethod
-    def get_schedule():
+    def get_schedule(*args, **kwargs):
         return EmptySchedule
 
     @staticmethod
@@ -40,8 +52,8 @@ class GamedayService:
     def __init__(self, pk):
         self.gmw = GamedayModelWrapper(pk)
 
-    def get_schedule(self):
-        return self.gmw.get_schedule()
+    def get_schedule(self, api=False):
+        return self.gmw.get_schedule(api)
 
     def get_qualify_table(self):
         qualify_table = self.gmw.get_qualify_table()
@@ -56,8 +68,8 @@ class GamedayService:
         return final_table
 
     @classmethod
-    def create(cls, empty_gameday_pk):
+    def create(cls, gameday_pk):
         try:
-            return cls(empty_gameday_pk)
+            return cls(gameday_pk)
         except Gameinfo.DoesNotExist:
             return EmptyGamedayService
