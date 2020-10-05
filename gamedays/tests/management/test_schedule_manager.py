@@ -21,6 +21,10 @@ class TestSchedule:
         assert entry.get_home() == 'Pandas'
         assert entry.get_away() == 'Rheda'
         assert entry.get_official() == 'Iser'
+        p1 = entries[9]
+        assert p1.get_home() == 'Gewinner HF1'
+        assert p1.get_away() == 'Gewinner HF2'
+        assert p1.get_official() == 'Gewinner P3'
 
 
 class TestScheduleEntry:
@@ -50,10 +54,9 @@ class TestScheduleCreator(TestCase):
         gameinfo = gameinfo_set.first()
         assert gameinfo.officials == 'Rheda'
         assert Gameresult.objects.filter(gameinfo_id=gameinfo.pk).count() == 2
-        assert Gameresult.objects.filter(gameinfo_id=gameinfo_set.last().pk).exists() is False
+        assert Gameresult.objects.all().count() == 22
         # schedule will be created again and previous entries will be deleted
         sc.create()
-        with self.assertRaises(Gameinfo.DoesNotExist):
-            Gameinfo.objects.get(pk=gameinfo.pk)
+        assert Gameinfo.objects.filter(pk=gameinfo.pk).exists() is False
         assert Gameresult.objects.filter(gameinfo_id=gameinfo.pk).exists() is False
         assert Gameinfo.objects.filter(gameday_id=gameday.pk).count() == 11

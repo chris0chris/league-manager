@@ -58,44 +58,44 @@
     "field": "1",
     "stage": "Finalrunde",
     "standing": "HF",
-    "home": "",
-    "away": "",
-    "official": ""
+    "home": "P2 Gruppe 2",
+    "away": "P1 Gruppe 1",
+    "official": "P3 Gruppe 2"
   },
   {
     "scheduled": "13:40",
     "field": "2",
     "stage": "Finalrunde",
     "standing": "HF",
-    "home": "",
-    "away": "",
-    "official": ""
+    "home": "P2 Gruppe 1",
+    "away": "P1 Gruppe 2",
+    "official": "P3 Gruppe 1"
   },
   {
     "scheduled": "14:50",
     "field": "1",
     "stage": "Finalrunde",
     "standing": "P5",
-    "home": "",
-    "away": "",
-    "official": ""
+    "home": "P3 Gruppe 1",
+    "away": "P3 Gruppe 2",
+    "official": "Gewinner HF1"
   },
   {
     "scheduled": "16:00",
     "field": "1",
     "stage": "Finalrunde",
     "standing": "P1",
-    "home": "",
-    "away": "",
-    "official": ""
+    "home": "Gewinner HF1",
+    "away": "Gewinner HF2",
+    "official": "Gewinner P3"
   },
   {
     "scheduled": "14:50",
     "field": "2",
     "stage": "Finalrunde",
     "standing": "P3",
-    "home": "",
-    "away": "",
-    "official": ""
+    "home": "Verlierer HF1",
+    "away": "Verlierer HF2",
+    "official": "Gewinner HF2"
   }
 ]
