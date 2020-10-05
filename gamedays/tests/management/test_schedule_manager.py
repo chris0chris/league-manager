@@ -1,7 +1,8 @@
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, ScheduleEntry
 from gamedays.models import Gameinfo, Gameday, Gameresult
+from gamedays.tests.setup_factories.db_setup import DBSetup
 
 TESTDATA = 'testdata.json'
 
@@ -36,25 +37,23 @@ class TestScheduleEntry:
         assert se.get_official() == 'Schiri'
 
 
-@override_settings(SUSPEND_SIGNALS=True)
 class TestScheduleCreator(TestCase):
-    fixtures = [TESTDATA]
 
     def test_schedule_created(self):
-        gameday_id = 3
-        self.assertFalse(Gameinfo.objects.filter(gameday_id=gameday_id).exists())
+        gameday = DBSetup().create_empty_gameday()
+        assert Gameinfo.objects.filter(gameday_id=gameday.pk).exists() is False
         groups = [['Iser', 'Nieder', 'Wesel'], ['Dort', 'Pandas', 'Rheda']]
-        sc = ScheduleCreator(gameday=Gameday.objects.filter(pk=gameday_id).first(), schedule=Schedule(2, groups))
+        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(2, groups))
         sc.create()
-        gameinfo_set = Gameinfo.objects.filter(gameday_id=gameday_id)
-        self.assertEqual(gameinfo_set.count(), 11)
+        gameinfo_set = Gameinfo.objects.filter(gameday_id=gameday.pk)
+        assert gameinfo_set.count() == 11
         gameinfo = gameinfo_set.first()
-        self.assertEqual(gameinfo.officials, 'Rheda')
-        self.assertEqual(Gameresult.objects.filter(gameinfo_id=gameinfo.pk).count(), 2)
-        self.assertFalse(Gameresult.objects.filter(gameinfo_id=gameinfo_set.last().pk).exists())
+        assert gameinfo.officials == 'Rheda'
+        assert Gameresult.objects.filter(gameinfo_id=gameinfo.pk).count() == 2
+        assert Gameresult.objects.filter(gameinfo_id=gameinfo_set.last().pk).exists() is False
         # schedule will be created again and previous entries will be deleted
         sc.create()
         with self.assertRaises(Gameinfo.DoesNotExist):
             Gameinfo.objects.get(pk=gameinfo.pk)
-        self.assertFalse(Gameresult.objects.filter(gameinfo_id=gameinfo.pk).exists())
-        self.assertEqual(Gameinfo.objects.filter(gameday_id=gameday_id).count(), 11)
+        assert Gameresult.objects.filter(gameinfo_id=gameinfo.pk).exists() is False
+        assert Gameinfo.objects.filter(gameday_id=gameday.pk).count() == 11
