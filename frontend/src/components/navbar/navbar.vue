@@ -5,7 +5,7 @@
       <md-tab id="tab-home" md-label="Home" to="/" exact>
       </md-tab>
 
-      <md-tab id="tab-gamedays" md-label="Gamedays" to="/Gamedays">
+      <md-tab id="tab-gamedays" md-label="Gamedays" to="/gamedays">
       </md-tab>
 
       <md-tab id="tab-posts" md-label="Posts" to="/components/tabs/posts">
