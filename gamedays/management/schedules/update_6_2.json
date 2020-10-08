@@ -13,6 +13,7 @@
           "place": 2
         },
         "officials": {
+          "pre-finished": "Vorrunde",
           "standing": "Gruppe 2",
           "place": 3
         }
@@ -27,6 +28,7 @@
           "place": 2
         },
         "officials": {
+          "pre-finished": "Vorrunde",
           "standing": "Gruppe 1",
           "place": 3
         }
@@ -47,6 +49,7 @@
           "place": 3
         },
         "officials": {
+          "pre-finished": "HF",
           "standing": "HF",
           "place": 1,
           "points": 3
@@ -70,6 +73,7 @@
           "points": 0
         },
         "officials": {
+          "pre-finished": "HF",
           "standing": "HF",
           "place": 2,
           "points": 3
@@ -93,8 +97,10 @@
           "points": 3
         },
         "officials": {
-          "standing": "Gruppe 1",
-          "place": 3
+          "pre-finished": "P3",
+          "standing": "P3",
+          "place": 1,
+          "points": 3
         }
       }
     ]

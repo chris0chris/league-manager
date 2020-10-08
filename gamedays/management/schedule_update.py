@@ -16,6 +16,7 @@ class UpdateGameEntry:
     STANDING = 'standing'
     PLACE = 'place'
     POINTS = 'points'
+    PRE_FINISHED = 'pre-finished'
 
     def __init__(self, entry):
         self.entry = entry
@@ -29,6 +30,11 @@ class UpdateGameEntry:
     def get_points(self, home_away):
         if self.POINTS in self.entry[home_away]:
             return self.entry[home_away][self.POINTS]
+        return None
+
+    def get_pre_finished(self, name):
+        if self.PRE_FINISHED in self.entry[name]:
+            return self.entry[name][self.PRE_FINISHED]
         return None
 
 
@@ -60,11 +66,9 @@ class ScheduleUpdate:
         self.schedule_version = '6_2'
         with open(pathlib.Path(__file__).parent / 'schedules/update_{0}.json'.format(self.schedule_version), 'r') as f:
             self.data = json.loads(f.read())
-        # 6er Spieltag
-        # 2 Felder
 
-    def _create_gameresult(self, gi, team, is_home):
-        gameresult = Gameresult()
+    def _update_gameresult(self, gi, team, is_home):
+        gameresult = Gameresult.objects.get(gameinfo=gi, isHome=is_home)
         gameresult.team = team
         gameresult.isHome = is_home
         gameresult.gameinfo = gi
@@ -72,20 +76,17 @@ class ScheduleUpdate:
 
     def update(self):
         gmw = GamedayModelWrapper(self.gameday_id)
-        for s in self.data:
-            if gmw.is_finished(s['pre-finished']) and not gmw.is_finished(s['name']):
-                entry = UpdateEntry(s)
+        for update_entry in self.data:
+            if gmw.is_finished(update_entry['pre-finished']) and not gmw.is_finished(update_entry['name']):
+                entry = UpdateEntry(update_entry)
                 qs = Gameinfo.objects.filter(gameday_id=self.gameday_id, standing=entry.get_name())
                 for gi, game in zip(qs, entry):
 
                     home = gmw.get_team_by(game.get_place('home'), game.get_standing('home'), game.get_points('home'))
-                    self._create_gameresult(gi, home, True)
+                    self._update_gameresult(gi, home, True)
                     away = gmw.get_team_by(game.get_place('away'), game.get_standing('away'), game.get_points('away'))
-                    self._create_gameresult(gi, away, False)
-                    try:
+                    self._update_gameresult(gi, away, False)
+                    if gmw.is_finished(game.get_pre_finished('officials')):
                         gi.officials = gmw.get_team_by(game.get_place('officials'), game.get_standing('officials'),
                                                        game.get_points('officials'))
                         gi.save()
-                    except IndexError:
-
-                        pass

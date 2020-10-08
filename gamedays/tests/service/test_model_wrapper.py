@@ -32,7 +32,7 @@ class TestGamedayModelWrapper(TestCase):
         gmw = GamedayModelWrapper(gameday_with_main_round.pk)
         assert not gmw.has_finalround()
 
-    def test_get_schedule2(self):
+    def test_get_schedule(self):
         gameday = DBSetup().g62_qualify_finished()
         expected_schedule = get_df_from_json('schedule_g62_qualify_finished')
         schedule = GamedayModelWrapper(gameday.pk).get_schedule()

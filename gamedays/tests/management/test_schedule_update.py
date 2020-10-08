@@ -1,7 +1,6 @@
 from collections.abc import Iterable
 from unittest.mock import patch, MagicMock
 
-import pytest
 from django.test import TestCase
 
 from gamedays.management.schedule_update import ScheduleUpdate, UpdateGameEntry, UpdateEntry
@@ -9,52 +8,43 @@ from gamedays.models import Gameresult, Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
 
-@pytest.mark.django_db
 class TestScheduleUpdate(TestCase):
 
     def test_update_semifinal_and_p5(self):
         gameday = DBSetup().g62_qualify_finished()
-        semifinals = Gameinfo.objects.filter(standing='HF')
-        assert len(Gameresult.objects.filter(gameinfo_id=semifinals[0].pk)) == 0
-        assert len(Gameresult.objects.filter(gameinfo_id=semifinals[1].pk)) == 0
-        assert len(Gameresult.objects.filter(gameinfo=Gameinfo.objects.get(standing='P5'))) == 0
+
+        info_p5 = Gameinfo.objects.get(standing='P5')
+        results_p5 = Gameresult.objects.filter(gameinfo=info_p5)
+        assert results_p5[0].team == 'P5_home'
+        assert results_p5[1].team == 'P5_away'
+
+        info_semifinals = Gameinfo.objects.filter(standing='HF')
+        results_sf1_qs = Gameresult.objects.filter(gameinfo=info_semifinals[0])
+        assert results_sf1_qs[0].team == 'HF_home'
+        assert results_sf1_qs[1].team == 'HF_away'
+
         su = ScheduleUpdate(gameday.pk)
         su.update()
-        results_sf1_qs = Gameresult.objects.filter(gameinfo_id=semifinals[0].pk)
-        assert len(results_sf1_qs) == 2
+
+        assert results_p5[0].team == 'A3'
+        assert results_p5[1].team == 'B3'
+
         assert results_sf1_qs[0].team == 'B2'
-        assert results_sf1_qs[0].fh is None
         assert results_sf1_qs[1].team == 'A1'
-        results_sf2_qs = Gameresult.objects.filter(gameinfo_id=semifinals[1].pk)
-        assert len(results_sf2_qs) == 2
+
+        results_sf2_qs = Gameresult.objects.filter(gameinfo=info_semifinals[1])
         assert results_sf2_qs[0].team == 'A2'
         assert results_sf2_qs[1].team == 'B1'
-        assert len(Gameresult.objects.filter(gameinfo=Gameinfo.objects.get(standing='P5'))) == 2
-        assert len(Gameresult.objects.filter(gameinfo=Gameinfo.objects.get(standing='P3'))) == 0
-        assert len(Gameresult.objects.filter(gameinfo=Gameinfo.objects.get(standing='P1'))) == 0
 
-    @patch.object(ScheduleUpdate, '_create_gameresult')
+    @patch.object(ScheduleUpdate, '_update_gameresult')
     def test_update_semifinal_is_not_overridden(self, create_mock: MagicMock):
         gameday = DBSetup().g62_finalround(sf='beendet', p5='beendet')
+
         su = ScheduleUpdate(gameday.pk)
         su.update()
         assert create_mock.call_count == 4, 'only games for P3 and P1 should be created'
-        create_mock.assert_any_call(Gameinfo.objects.get(pk=10), 'B2', True)
-        create_mock.assert_any_call(Gameinfo.objects.get(pk=10), 'A2', False)
-        create_mock.assert_any_call(Gameinfo.objects.get(pk=11), 'A1', True)
-        create_mock.assert_any_call(Gameinfo.objects.get(pk=11), 'B1', False)
 
-    def test_update_no_new_games_created_while_already_existent(self):
-        gameday = DBSetup().g62_qualify_finished()
-        v = Gameinfo.objects.filter(standing='HF').first().delete()
-        semifinal_finished = DBSetup().create_finalround_game(gameday=gameday, standing='HF',
-                                                              status='beendet', home='A2', away='B1')
-        assert len(Gameresult.objects.filter(gameinfo__in=Gameinfo.objects.filter(standing='HF'))) == 2
-        su = ScheduleUpdate(gameday.pk)
-        su.update()
-        assert len(Gameresult.objects.filter(gameinfo__in=Gameinfo.objects.filter(standing='HF'))) == 4
-
-    @patch.object(ScheduleUpdate, '_create_gameresult')
+    @patch.object(ScheduleUpdate, '_update_gameresult')
     def test_update_qualify_not_finished(self, create_mock: MagicMock):
         gameday = DBSetup().g62_status_empty()
         su = ScheduleUpdate(gameday.pk)
@@ -64,12 +54,18 @@ class TestScheduleUpdate(TestCase):
     def test_officials_update(self):
         gameday = DBSetup().g62_qualify_finished()
         games = Gameinfo.objects.filter(standing='HF') | Gameinfo.objects.filter(standing='P5')
-        assert games.exclude(officials__exact='').count() == 0
+        sf1 = 0
+        sf2 = 1
+        assert games.filter(officials__exact='officials').count() == 3
         su = ScheduleUpdate(gameday.pk)
         su.update()
-        assert games.exclude(officials__exact='').count() == 3
+        assert games[sf1].officials == 'B3'
+        assert games[sf2].officials == 'A3'
+        # P5 will be updated, when SF are finished
+        assert games.filter(officials__exact='officials').count() == 1
 
     # @deco_cg()
+    # @pytest.mark.django_db
     # def test_db_init(self, db):
     #     v = len(Gameinfo.objects.all())
     #     p = ''
@@ -89,6 +85,7 @@ class TestUpdateGameEntry:
                 "place": 1
             },
             "officials": {
+                "pre-finished": "HF",
                 "standing": "HF",
                 "points": 3,
                 "place": 1
@@ -97,12 +94,14 @@ class TestUpdateGameEntry:
         assert uge.get_place('home') == 3
         assert uge.get_standing('home') == 'Gruppe 1'
         assert uge.get_points('home') is None
+        assert uge.get_pre_finished('home') is None
         assert uge.get_place('away') == 1
         assert uge.get_standing('away') == 'Gruppe 2'
         assert uge.get_points('away') == 0
         assert uge.get_place('officials') == 1
         assert uge.get_standing('officials') == 'HF'
         assert uge.get_points('officials') == 3
+        assert uge.get_pre_finished('officials') == 'HF'
 
 
 class TestUpdateEntry:

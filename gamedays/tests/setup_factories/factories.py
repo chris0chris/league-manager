@@ -29,6 +29,7 @@ class GameinfoFactory(DjangoModelFactory):
 
     gameday = factory.SubFactory(GamedayFactory)
     scheduled = '10:00'
+    officials = 'officials'
     field = 1
 
 

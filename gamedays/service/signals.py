@@ -28,7 +28,7 @@ def suspendingreceiver(signal, **decorator_kwargs):
 @receiver(post_save, sender=Gameinfo)
 def update_game_schedule(sender, instance: Gameinfo, created, **kwargs):
     if instance.status == FINISHED:
-        update_schedule = ScheduleUpdate(instance.pk)
-        # update_schedule.update()
+        update_schedule = ScheduleUpdate(instance.gameday_id)
+        update_schedule.update()
         # if qualify finished -> create SF / PO / PD
         # if SF finished -> create P1, P3
