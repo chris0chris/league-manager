@@ -31,13 +31,12 @@ class ScheduleEntry:
 
 
 class Schedule:
-    def __init__(self, fields, groups):
+    def __init__(self, format, groups):
         self.groups = groups
-        teams = sum(len(group) for group in groups)
-        self.schedule_version = str(teams) + '_' + str(fields)
+        self.format = format
 
     def get_entries(self):
-        with open(pathlib.Path(__file__).parent / 'schedules/schedule_{0}.json'.format(self.schedule_version)) as f:
+        with open(pathlib.Path(__file__).parent / 'schedules/schedule_{0}.json'.format(self.format)) as f:
             data = json.load(f)
         entries = []
         for entry in data:

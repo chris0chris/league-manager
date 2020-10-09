@@ -78,14 +78,19 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             form.cleaned_data['group4'].split(',')] if list != ['']]
 
         sc = ScheduleCreator(
-            schedule=Schedule(fields=form.cleaned_data['fields'], groups=groups),
+            schedule=Schedule(format=self.object.format, groups=groups),
             gameday=self.object)
         try:
             sc.create()
         except FileNotFoundError:
             form.add_error(None,
                            'Spielplan konnte nicht erstellt werden, '
-                           'da es die Kombination #Teams und #Felder nicht gibt')
+                           'da es das Format als Spielplan nicht gibt: "{0}"'.format(self.object.format))
+            return super(GamedayUpdateView, self).form_invalid(form)
+        except IndexError:
+            form.add_error(None,
+                           'Spielplan konnte nicht erstellt werden, '
+                           'da die Kombination #Teams und #Felder nicht zum Spielplan passen')
             return super(GamedayUpdateView, self).form_invalid(form)
 
         return super(GamedayUpdateView, self).form_valid(form)

@@ -6,7 +6,9 @@ class Gameday(models.Model):
     name = models.CharField(max_length=100)
     date = models.DateField()
     start = models.TimeField()
+    format = models.CharField(max_length=100, default='6_2', blank=True)
     author = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
+
 
     objects = models.Manager()
 
@@ -21,10 +23,10 @@ class Gameinfo(models.Model):
     # ToDo FK für Team
     officials = models.CharField(max_length=100, default='', blank=True)
     status = models.CharField(max_length=100, default='', blank=True)
-    pin = models.PositiveSmallIntegerField(null=True)
-    gameStarted = models.TimeField(null=True)
-    gameHalftime = models.TimeField(null=True)
-    gameFinished = models.TimeField(null=True)
+    pin = models.PositiveSmallIntegerField(null=True, blank=True)
+    gameStarted = models.TimeField(null=True, blank=True)
+    gameHalftime = models.TimeField(null=True, blank=True)
+    gameFinished = models.TimeField(null=True, blank=True)
     stage = models.CharField(max_length=100)
     standing = models.CharField(max_length=100)
 

@@ -11,7 +11,9 @@ class UserFactory(DjangoModelFactory):
         model = User
         django_get_or_create = ('username',)
 
+
     username = 'test_admin'
+    is_staff = True
 
 class GamedayFactory(DjangoModelFactory):
     class Meta:
@@ -19,6 +21,7 @@ class GamedayFactory(DjangoModelFactory):
 
     date = '2020-10-10'
     start = '10:00'
+    name = 'Test Spieltag'
     author = factory.SubFactory(UserFactory)
 
 

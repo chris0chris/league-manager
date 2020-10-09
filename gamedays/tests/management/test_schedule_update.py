@@ -23,7 +23,7 @@ class TestScheduleUpdate(TestCase):
         assert results_sf1_qs[0].team == 'HF_home'
         assert results_sf1_qs[1].team == 'HF_away'
 
-        su = ScheduleUpdate(gameday.pk)
+        su = ScheduleUpdate(gameday.pk, gameday.format)
         su.update()
 
         assert results_p5[0].team == 'A3'
@@ -40,14 +40,14 @@ class TestScheduleUpdate(TestCase):
     def test_update_semifinal_is_not_overridden(self, create_mock: MagicMock):
         gameday = DBSetup().g62_finalround(sf='beendet', p5='beendet')
 
-        su = ScheduleUpdate(gameday.pk)
+        su = ScheduleUpdate(gameday.pk, gameday.format)
         su.update()
         assert create_mock.call_count == 4, 'only games for P3 and P1 should be created'
 
     @patch.object(ScheduleUpdate, '_update_gameresult')
     def test_update_qualify_not_finished(self, create_mock: MagicMock):
         gameday = DBSetup().g62_status_empty()
-        su = ScheduleUpdate(gameday.pk)
+        su = ScheduleUpdate(gameday.pk, gameday.format)
         su.update()
         create_mock.assert_not_called()
 
@@ -57,7 +57,7 @@ class TestScheduleUpdate(TestCase):
         sf1 = 0
         sf2 = 1
         assert games.filter(officials__exact='officials').count() == 3
-        su = ScheduleUpdate(gameday.pk)
+        su = ScheduleUpdate(gameday.pk, gameday.format)
         su.update()
         assert games[sf1].officials == 'B3'
         assert games[sf2].officials == 'A3'

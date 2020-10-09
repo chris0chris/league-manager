@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from django.contrib.auth.models import User
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 from django_webtest import WebTest
 from django_webtest.response import DjangoWebtestResponse
@@ -9,22 +9,21 @@ from webtest.forms import Form
 
 from gamedays.models import Gameday, Gameinfo, Gameresult
 from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
+from gamedays.tests.setup_factories.db_setup import DBSetup
 
 
-@override_settings(SUSPEND_SIGNALS=True)
 class TestGamedayCreateView(WebTest):
-    fixtures = ['testdata.json']
 
     def test_create_gameday(self):
+        DBSetup().create_empty_gameday()
         non_existent_gameday = len(Gameday.objects.all()) + 1
         self.app.set_user(User.objects.all().first())
         response: DjangoWebtestResponse = self.app.get(reverse('league-gameday-create'))
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        assert response.status_code == HTTPStatus.OK
         response: DjangoWebtestResponse = response.form.submit().follow()
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        gameday_set = Gameday.objects.filter(pk=non_existent_gameday)
-        self.assertTrue(gameday_set.exists())
-        self.assertURLEqual(response.request.path, reverse('league-gameday-detail', args=[gameday_set.first().pk]))
+        assert response.status_code == HTTPStatus.OK
+        Gameday.objects.get(pk=non_existent_gameday)
+        assert response.request.path == reverse('league-gameday-detail', args=[non_existent_gameday])
 
     def test_only_authenticated_user_can_create_gameday(self):
         response = self.app.get(reverse('league-gameday-create'))
@@ -32,45 +31,39 @@ class TestGamedayCreateView(WebTest):
         assert response.url.index('login/?next=')
 
 
-@override_settings(SUSPEND_SIGNALS=True)
 class TestGamedayDetailView(TestCase):
-    fixtures = ['testdata.json']
-    EXISTING_GAMEDAY = 1
-    EMPTY_GAMEDAY = 3
-    NOT_EXISTENT_GAMEDAY = 999
 
     def test_detail_view_with_finished_gameday(self):
-        resp = self.client.get(reverse('league-gameday-detail', args=[self.EXISTING_GAMEDAY]))
-        self.assertEqual(resp.status_code, HTTPStatus.OK)
+        gameday = DBSetup().g62_finished()
+        resp = self.client.get(reverse('league-gameday-detail', args=[gameday.pk]))
+        assert resp.status_code == HTTPStatus.OK
         context = resp.context_data
-        self.assertEqual(context['object'].pk, self.EXISTING_GAMEDAY)
-        self.assertIsNotNone(context['info']['schedule'])
+        assert context['object'].pk == gameday.pk
+        assert context['info']['schedule'] != ''
         assert context['info']['qualify_table'] != ''
-        self.assertIsNotNone(context['info']['final_table'])
-        self.assertNotContains(resp, 'Spielplan wurde noch nicht erstellt.')
-        # ToDo fix wenn Abschlusstabelle implementiert ist
-        # self.assertNotContains(resp, 'Abschlusstabelle wird berechnet, sobald alle Spiele beendet sind.')
+        assert context['info']['final_table'] != ''
 
     def test_detail_view_with_empty_gameday(self):
-        resp = self.client.get(reverse('league-gameday-detail', args=[self.EMPTY_GAMEDAY]))
-        self.assertEqual(resp.status_code, HTTPStatus.OK)
+        gameday = DBSetup().create_empty_gameday()
+        resp = self.client.get(reverse('league-gameday-detail', args=[gameday.pk]))
+        assert resp.status_code == HTTPStatus.OK
         context = resp.context_data
-        self.assertEqual(context['object'].pk, self.EMPTY_GAMEDAY)
+        assert context['object'].pk == gameday.pk
         assert context['info']['schedule'] == EmptySchedule.to_html()
         assert context['info']['qualify_table'] == EmptyQualifyTable.to_html()
         assert context['info']['final_table'] == EmptyFinalTable.to_html()
 
     def test_detail_view_gameday_not_available(self):
-        resp = self.client.get(reverse('league-gameday-detail', args=[self.NOT_EXISTENT_GAMEDAY]))
-        self.assertEqual(resp.status_code, HTTPStatus.NOT_FOUND)
+        resp = self.client.get(reverse('league-gameday-detail', args=[00]))
+        assert resp.status_code == HTTPStatus.NOT_FOUND
 
 
-@override_settings(SUSPEND_SIGNALS=True)
 class TestGamedayUpdateView(WebTest):
-    fixtures = ['testdata.json']
 
     def setUp(self) -> None:
-        self.gameday_id = 3
+        gameday = DBSetup().create_empty_gameday()
+        self.gameday = gameday
+        self.gameday_id = gameday.pk
         self.app.set_user(User.objects.all().first())
         self.form: Form = self.app.get(reverse('league-gameday-update', args=[self.gameday_id])).form
 
@@ -91,5 +84,15 @@ class TestGamedayUpdateView(WebTest):
         form['group1'] = 'too few teams'
         resp = form.submit()
         self.assertFormError(resp, 'form', None, [
-            'Spielplan konnte nicht erstellt werden, da es die Kombination #Teams und #Felder nicht gibt'])
+            'Spielplan konnte nicht erstellt werden, da die Kombination #Teams und #Felder nicht zum Spielplan passen'])
         assert not Gameinfo.objects.filter(gameday_id=self.gameday_id).exists()
+
+    def test_handle_non_existable_schedule_format(self):
+        self.gameday.format = 'not existent schedule'
+        self.gameday.save()
+        form = self.app.get(reverse('league-gameday-update', args=[self.gameday.pk])).form
+        form['group1'] = 'groups doesnt matter'
+        resp = form.submit()
+        self.assertFormError(resp, 'form', None, [
+            'Spielplan konnte nicht erstellt werden, da es das Format als Spielplan nicht gibt: "not existent schedule"'])
+        assert not Gameinfo.objects.filter(gameday_id=self.gameday.pk).exists()

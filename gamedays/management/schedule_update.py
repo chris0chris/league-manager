@@ -61,10 +61,9 @@ class UpdateEntry:
 
 
 class ScheduleUpdate:
-    def __init__(self, gameday_id):
+    def __init__(self, gameday_id, format):
         self.gameday_id = gameday_id
-        self.schedule_version = '6_2'
-        with open(pathlib.Path(__file__).parent / 'schedules/update_{0}.json'.format(self.schedule_version), 'r') as f:
+        with open(pathlib.Path(__file__).parent / 'schedules/update_{0}.json'.format(format), 'r') as f:
             self.data = json.loads(f.read())
 
     def _update_gameresult(self, gi, team, is_home):
@@ -81,7 +80,6 @@ class ScheduleUpdate:
                 entry = UpdateEntry(update_entry)
                 qs = Gameinfo.objects.filter(gameday_id=self.gameday_id, standing=entry.get_name())
                 for gi, game in zip(qs, entry):
-
                     home = gmw.get_team_by(game.get_place('home'), game.get_standing('home'), game.get_points('home'))
                     self._update_gameresult(gi, home, True)
                     away = gmw.get_team_by(game.get_place('away'), game.get_standing('away'), game.get_points('away'))

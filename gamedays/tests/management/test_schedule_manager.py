@@ -10,7 +10,7 @@ TESTDATA = 'testdata.json'
 class TestSchedule:
     def test_schedule_loaded(self):
         groups = [['Iser', 'Nieder', 'Wesel'], ['Dort', 'Pandas', 'Rheda']]
-        schedule = Schedule(2, groups)
+        schedule = Schedule('6_2', groups)
         entries = schedule.get_entries()
         assert len(entries) == 11
         entry = entries[0]
@@ -47,7 +47,7 @@ class TestScheduleCreator(TestCase):
         gameday = DBSetup().create_empty_gameday()
         assert Gameinfo.objects.filter(gameday_id=gameday.pk).exists() is False
         groups = [['Iser', 'Nieder', 'Wesel'], ['Dort', 'Pandas', 'Rheda']]
-        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(2, groups))
+        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
         sc.create()
         gameinfo_set = Gameinfo.objects.filter(gameday_id=gameday.pk)
         assert gameinfo_set.count() == 11
