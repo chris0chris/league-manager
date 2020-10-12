@@ -7,3 +7,4 @@ gspread-pandas==2.2.3
 djangorestframework==3.12.1
 Markdown==3.3
 djangorestframework-jwt==1.11.0
+django-cors-headers==3.5.0
