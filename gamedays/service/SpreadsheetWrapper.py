@@ -129,8 +129,11 @@ class SpreadsheetWrapper:
         return self.schedule[self.schedule[AWAY_SCORE] == ''].empty is True
 
     def get_schedule(self):
+        self.schedule = self.schedule.sort_values(by=[SCHEDULED_TIME])
         self.schedule = self.schedule[
-            [SCHEDULED_TIME, FIELD, OFFICIALS, STAGE, STANDING, HOME, HOME_SCORE, AWAY_SCORE, AWAY]]
+            [SCHEDULED_TIME, FIELD, HOME, HOME_SCORE, AWAY_SCORE, AWAY, OFFICIALS, STAGE, STANDING]]
+        self.schedule[OFFICIALS] = self.schedule[OFFICIALS].apply('<i>{}</i>'.format)
+
         return self.schedule
 
     def get_table_for_7_teams(self):

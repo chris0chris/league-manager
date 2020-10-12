@@ -82,7 +82,7 @@ class GamedaySpreadsheetService:
         }
         qualify_table = self.spreadsheet.get_qualify_table()
         final_table = self._get_final_table()
-        return {'schedule': self.spreadsheet.get_schedule().to_html(**render, table_id='schedule'),
+        return {'schedule': self.spreadsheet.get_schedule().to_html(**render, table_id='schedule', escape=False),
                 'qualify_table': qualify_table if qualify_table is None else qualify_table.to_html(**render),
                 'final_matchup': None,  # if qualify_table is None else json.dumps(
                 #     self.get_final_matchups),
@@ -105,7 +105,7 @@ class GamedaySpreadsheetService:
         return all_teams_score
 
     def _get_final_table(self):
-        if not self.spreadsheet.are_games_finished():
+        if not self.spreadsheet.are_games_finished() and self.spreadsheet.has_finalround():
             return None
         final_table = self.spreadsheet.get_table_for()
         if self.spreadsheet.has_finalround():
