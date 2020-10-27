@@ -37,7 +37,7 @@ class GamedayScheduleView(APIView):
         get = request.query_params.get('get')
         response = '{"error": "Please use parameter - get "}'
         if get == 'schedule':
-            response = gs.get_schedule(api=True).to_json(orient='split')
+            response = gs.get_schedule(api=True).to_json(orient='index')
         elif get == 'qualify':
             response = gs.get_qualify_table().to_json(orient='split')
         elif get == 'final':

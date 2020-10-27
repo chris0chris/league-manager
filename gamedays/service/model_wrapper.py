@@ -8,8 +8,8 @@ TEAM = 'team'
 HOME = 'home'
 AWAY = 'away'
 POINTS = 'points'
-POINTS_HOME = POINTS + ' ' + HOME
-POINTS_AWAY = POINTS + ' ' + AWAY
+POINTS_HOME = POINTS + '_' + HOME
+POINTS_AWAY = POINTS + '_' + AWAY
 PF = 'pf'
 PA = 'pa'
 FH = 'fh'
@@ -88,7 +88,8 @@ class GamedayModelWrapper:
         schedule = schedule.sort_values(by=STAGE, ascending=False)
         columns = [SCHEDULED, FIELD, OFFICIALS, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY, STATUS]
         if api:
-            columns = columns + [ID_HOME, ID_AWAY, 'id']
+            schedule = schedule[columns + [ID_HOME, ID_AWAY, 'id']]
+            return schedule
         schedule = schedule[columns]
         schedule = schedule.rename(columns=SCHEDULE_TABLE_HEADERS)
         return schedule

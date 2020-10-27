@@ -7,8 +7,9 @@ $(document).ready(function () {
 });
 
 function initGamedaysDropdown(gamedays) {
-    console.log(gamedays)
+    console.log('initGamedaysDropdown');
     this.gamedays = Object.assign({}, gamedays);
+    console.log(gamedays);
     // Initialen Text ersetzen
     $('#gamedaySelection').empty().append('<option value="" disabled selected>Bitte einen Spieltag auswählen</option>')
     for (let i = 0; i < gamedays.length; i++) {
@@ -19,24 +20,26 @@ function initGamedaysDropdown(gamedays) {
     }
     $('#gamedaySelection').prop('disabled', false);
     if(gamedays.length == 1) {
-      setTimeout(function() {$('#gamedaySelection').val(0).change()}, 1)
+        setTimeout(function() {$('#gamedaySelection').val(gamedays[0].id).change()}, 1)
     }
     //          $('select').formSelect();
  }
 
-function initGamesDropdown(index) {
-    console.log(index);
-    let gameday = this.gamedays[index]
+function initGamesDropdown(games) {
+    console.log(games)
+    console.log(games.length);
+
     $('#gameSelection').empty();
     $('#gameSelection').append('<option value="" disabled selected>Bitte ein Spiel auswählen</option>')
-    for (var i = 0; i < gameday.games.length; i++) {
+    for (var i = 0 in games) {
+      console.log(games[i]);
       let newOption = document.createElement("option");
-      let name = gameday.games[i].gameTime + " - " + "Feld " + gameday.games[i].field + ": " + gameday.games[i].refTeam;
-      $(newOption).val(gameday.games[i].gameRow);
+      let name = games[i].scheduled + " - Feld " + games[i].field + ": " + games[i].officials;
+      $(newOption).val(games[i].id);
       $(newOption).html(name);
-      $(newOption).attr('data-haspin', gameday.games[i].pin == '' ? 'false' : 'true');
+      $(newOption).attr('data-haspin', /*games.data[i].pin == '' ? 'false' : */ 'true');
       $('#gameSelection').append(newOption);
     }
-    $('#gameSelection').prop('name', gameday.id);
+//    $('#gameSelection').prop('name', gameday.id);
     $('#gameSelection').prop('disabled', false);
 }

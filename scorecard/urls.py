@@ -1,5 +1,7 @@
+from django.conf.urls.static import static
 from django.urls import path
 
+from league_manager import settings
 from scorecard.views import ScorecardSelectView
 
 urlpatterns = [
