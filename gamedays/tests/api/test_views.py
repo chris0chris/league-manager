@@ -6,7 +6,7 @@ from http import HTTPStatus
 from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
-from gamedays.api.serializers import GamedaySerializer
+from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
 from gamedays.models import Gameday, Gameinfo
 from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
@@ -22,26 +22,49 @@ class TestGamedayAPIViews(WebTest):
         assert len(response.json) == len(all_gamedays)
 
 
-class TestGameinfoAPIViews(WebTest):
-
-    def test_update_gameinfo(self):
-        DBSetup().g62_status_empty()
-        gameinfo_pk = 1
-        assert Gameinfo.objects.get(id=gameinfo_pk).status == ''
-        response = self.app.patch_json(reverse('api-gameinfo-retrieve-update', kwargs={'pk': gameinfo_pk}),
-                                       {'status': 'gestartet'})
-        assert response.status_code == HTTPStatus.OK
-        assert Gameinfo.objects.get(id=gameinfo_pk).status == 'gestartet'
-
-
 class TestGamedayRetrieveUpdate(WebTest):
 
     def test_api_retrieve_gameday(self):
         gameday = DBSetup().g62_status_empty()
-        gameday = Gameday.objects.get(id=gameday.pk)
         response = self.app.get(reverse('api-gameday-retrieve-update', kwargs={'pk': gameday.pk}))
         assert response.status_code == HTTPStatus.OK
         assert response.json == GamedaySerializer(gameday).data
+
+
+class TestGameinfoRetrieveUpdate(WebTest):
+
+    def test_api_retrieve_gameinfo(self):
+        gameday = DBSetup().g62_status_empty()
+        gameinfo = Gameinfo.objects.filter(gameday=gameday).first()
+        response = self.app.get(reverse('api-gameinfo-retrieve-update', kwargs={'pk': gameinfo.pk}))
+        assert response.status_code == HTTPStatus.OK
+        assert response.json == GameinfoSerializer(gameinfo).data
+
+    def test_update_gameinfo(self):
+        DBSetup().g62_status_empty()
+        gameinfo_pk = 1
+        gameinfo = Gameinfo.objects.get(id=gameinfo_pk)
+        assert gameinfo.status == ''
+        assert gameinfo.gameStarted is None
+        assert gameinfo.gameHalftime is None
+        assert gameinfo.gameFinished is None
+        assert gameinfo.pin is None
+        response = self.app.patch_json(reverse('api-gameinfo-retrieve-update', kwargs={'pk': gameinfo_pk}),
+                                       {
+                                           "status": 'gestartet',
+                                           "gameStarted": '20:09',
+                                           "gameHalftime": '20:29',
+                                           "gameFinished": '09:00',
+                                           "pin": 2
+                                       })
+        assert response.status_code == HTTPStatus.OK
+
+        gameinfo = Gameinfo.objects.get(id=gameinfo_pk)
+        assert gameinfo.status == 'gestartet'
+        assert str(gameinfo.gameStarted) == '20:09:00'
+        assert str(gameinfo.gameHalftime) == '20:29:00'
+        assert str(gameinfo.gameFinished) == '09:00:00'
+        assert gameinfo.pin == 2
 
 
 class TestGamedaySchedule(WebTest):
