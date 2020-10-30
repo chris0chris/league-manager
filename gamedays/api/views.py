@@ -6,8 +6,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
-from gamedays.models import Gameday, Gameinfo
+from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, GameOfficialSerializer
+from gamedays.models import Gameday, Gameinfo, GameOfficial
 from gamedays.service.gameday_service import GamedayService
 
 
@@ -28,6 +28,14 @@ class GamedayRetrieveUpdate(RetrieveUpdateAPIView):
 
 class GamedayCreateView(CreateAPIView):
     serializer_class = GamedaySerializer
+
+
+class GameOfficialCreateAPIView(CreateAPIView):
+    serializer_class = GameOfficialSerializer
+
+    def create(self, request, *args, **kwargs):
+        GameOfficial.objects.create(gameinfo_id=request.data.get("gameinfo_id"), name=request.data.get("name"), position=request.data.get("position"))
+        return Response(status=201)
 
 
 class GamedayScheduleView(APIView):

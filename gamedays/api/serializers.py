@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from gamedays.models import Gameday, Gameinfo
+from gamedays.models import Gameday, Gameinfo, GameOfficial
 
 
 class GamedaySerializer(ModelSerializer):
@@ -9,6 +9,12 @@ class GamedaySerializer(ModelSerializer):
         fields = '__all__'
         read_only_fields = ['author']
         extra_kwargs = {'start': {'format': '%H:%M'}}
+
+
+class GameOfficialSerializer(ModelSerializer):
+    class Meta:
+        model = GameOfficial
+        fields = '__all__'
 
 
 class GameinfoSerializer(ModelSerializer):
