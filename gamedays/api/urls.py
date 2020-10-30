@@ -9,4 +9,5 @@ urlpatterns = [
     path('gameday/<int:pk>/', GamedayRetrieveUpdate.as_view(), name='api-gameday-retrieve-update'),
     path('gameday/<int:pk>/details', GamedayScheduleView.as_view(), name='api-gameday-schedule'),
     path('gameday/create', GamedayCreateView.as_view(), name='api-gameday-create'),
+    path('gameofficial/<int:pk>/create', GameinfoUpdateAPIView.as_view(), name='api-gameinfo-official'),
 ]
