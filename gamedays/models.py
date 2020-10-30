@@ -54,3 +54,9 @@ class Gameresult(models.Model):
             self.sh = ''
 
         return f'{self.gameinfo.pk}__{self.gameinfo.field} {self.gameinfo.scheduled}: {self.team} - {self.fh + self.sh} / {self.pa}'
+
+
+class GameOfficial(models.Model):
+
+    name = models.CharField(max_length=100)
+    position = models.CharField(max_length=100)

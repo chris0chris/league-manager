@@ -1,4 +1,5 @@
 from django.test import TestCase
+from gamedays.models import GameOfficial
 
 
 class TestGameOfficials(TestCase):
