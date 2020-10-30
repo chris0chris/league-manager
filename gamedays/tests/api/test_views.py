@@ -7,7 +7,7 @@ from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
-from gamedays.models import Gameday, Gameinfo
+from gamedays.models import Gameday, Gameinfo, GameOfficial
 from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
@@ -122,3 +122,19 @@ class TestCreateGameday(WebTest):
         })
         assert response.status_code == HTTPStatus.CREATED
         assert response.json == GamedaySerializer(Gameday.objects.all().last()).data
+
+
+class TestRetrieveUpdateOfficials(WebTest):
+
+    def test_create_officials(self):
+        DBSetup().g62_status_empty()
+        gameinfo = Gameinfo.objects.all().first()
+        assert len(GameOfficial.objects.all()) == 0
+        response = self.app.post_json(reverse('api-gameinfo-official'), {
+            [
+                {"name": "Horst", "position": "scorecard"},
+                {"name": "Saskia", "position": "referee"}
+            ]
+        }, kwargs={'pk': gameinfo.pk})
+        assert response.status_code == HTTPStatus.CREATED
+        assert len(GameOfficial.objects.all()) == 2
