@@ -4,8 +4,6 @@ from gamedays.management.schedule_manager import ScheduleCreator, Schedule, Sche
 from gamedays.models import Gameinfo, Gameday, Gameresult
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
-TESTDATA = 'testdata.json'
-
 
 class TestSchedule:
     def test_schedule_loaded(self):

@@ -33,6 +33,25 @@ class DBSetup:
         return gameday
 
     def create_group(self, gameday, name, standing, stage='Vorrunde', status='beendet', number_teams=3):
+        # teams = [name + str(team) for team in range(number_teams)]
+        # if len(teams) % 2:
+        #     teams.append('Day off')
+        # n = len(teams)
+        # matchs = []
+        # fixtures = []
+        # return_matchs = []
+        # for fixture in range(1, n):
+        #     for i in range(n // 2):
+        #         matchs.append((teams[i], teams[n - 1 - i]))
+        #         # return_matchs.append((teams[n - 1 - i], teams[i]))
+        #     teams.insert(1, teams.pop())
+        #     fixtures.insert(len(fixtures) // 2, matchs)
+        #     # fixtures.append(return_matchs)
+        #     matchs = []
+        #     # return_matchs = []
+        #
+        # for fixture in fixtures:
+        #     print(fixture)
         gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status)
         GameresultFactory(gameinfo=gi, team=name + '1', fh=2, sh=1, pa=2, isHome=True)
         GameresultFactory(gameinfo=gi, team=name + '2', fh=1, sh=1, pa=3)

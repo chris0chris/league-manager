@@ -8,8 +8,6 @@ from gamedays.models import Gameinfo
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
-TESTDATA = 'testdata.json'
-
 
 def get_df_from_json(filename):
     return pd.read_json(pathlib.Path(__file__).parent / 'testdata/{0}.json'.format(filename),

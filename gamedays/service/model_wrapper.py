@@ -3,33 +3,9 @@ import pandas as pd
 from pandas import DataFrame
 
 from gamedays.models import Gameinfo, Gameresult
-
-TEAM = 'team'
-HOME = 'home'
-AWAY = 'away'
-POINTS = 'points'
-POINTS_HOME = POINTS + '_' + HOME
-POINTS_AWAY = POINTS + '_' + AWAY
-PF = 'pf'
-PA = 'pa'
-FH = 'fh'
-SH = 'sh'
-FIELD = 'field'
-SCHEDULED = 'scheduled'
-OFFICIALS = 'officials'
-STAGE = 'stage'
-STANDING = 'standing'
-STATUS = 'status'
-QUALIIFY_ROUND = 'Vorrunde'
-DIFF = '+/-'
-GROUP1 = 'Gruppe 1'
-FINISHED = 'beendet'
-
-GAMEINFO_ID = 'gameinfo_id'
-ID = 'id'
-ID_Y = 'id_y'
-ID_HOME = 'id_home'
-ID_AWAY = 'id_away'
+from gamedays.service.gameday_settings import STANDING, TEAM, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, GROUP1, \
+    GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
+    STATUS, SH, FH, FINISHED
 
 QUALIFY_TABLE_HEADERS = {
     STANDING: 'Gruppe',
