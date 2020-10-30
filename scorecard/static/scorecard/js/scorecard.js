@@ -55,7 +55,9 @@ function loadGameInfo() {
     } else {
         Server.updatePin($('#pin').val(), $('#gameSelection').prop('name'), $('#gameSelection').val());
     }
-    Server.loadGameInformation($('#gameSelection').prop('name'), $('#gameSelection').val());
+    $.get( "/api/gameday/list", initGamedaysDropdown );
+
+    Server.loadGameInformation($('#gameSelection').val());
     $('#selectGame').prop('disabled', true)
     $('#selectGame').text('Spiel wird geladen...')
     $('#errorMessagePin').hide()
