@@ -128,9 +128,8 @@ class TestRetrieveUpdateOfficials(WebTest):
 
     def test_create_officials(self):
         DBSetup().g62_status_empty()
-        gameinfo = Gameinfo.objects.all().first()
         assert len(GameOfficial.objects.all()) == 0
-        response = self.app.post_json(reverse('api-gameinfo-official', kwargs={'pk': gameinfo.pk}),
+        response = self.app.post_json(reverse('api-gameofficial-create'),
                                       {"name": "Saskia", "position": "referee"})
         assert response.status_code == HTTPStatus.CREATED
-        assert len(GameOfficial.objects.all()) == 2
+        assert len(GameOfficial.objects.all()) == 1
