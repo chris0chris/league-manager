@@ -1,7 +1,23 @@
 from gamedays.models import Gameinfo
+from gamedays.service.gameday_settings import STANDING, POINTS_HOME, POINTS_AWAY, SCHEDULED, FIELD, OFFICIALS, STAGE, \
+    HOME, AWAY, STATUS
 from gamedays.service.model_wrapper import GamedayModelWrapper
 
 EMPTY_DATA = '{"data": []}'
+
+SCHEDULE_TABLE_HEADERS = {
+    SCHEDULED: 'Kick-Off',
+    FIELD: 'Feld',
+    OFFICIALS: 'Officials',
+    STAGE: 'Runde',
+    STANDING: 'Platz',
+    HOME: 'Heim',
+    POINTS_HOME: 'Punkte Heim',
+    POINTS_AWAY: 'Punkte Gast',
+    AWAY: 'Gast',
+    STATUS: 'Status'
+}
+
 
 class EmptySchedule:
     @staticmethod
@@ -11,6 +27,7 @@ class EmptySchedule:
     @staticmethod
     def to_json(*args, **kwargs):
         return EMPTY_DATA
+
 
 class EmptyQualifyTable:
     @staticmethod
@@ -53,7 +70,13 @@ class GamedayService:
         self.gmw = GamedayModelWrapper(pk)
 
     def get_schedule(self, api=False):
-        return self.gmw.get_schedule(api)
+        schedule = self.gmw.get_schedule()
+        if api:
+            return schedule
+        schedule = schedule[
+            [SCHEDULED, FIELD, OFFICIALS, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY, STATUS]]
+        schedule = schedule.rename(columns=SCHEDULE_TABLE_HEADERS)
+        return schedule
 
     def get_qualify_table(self):
         qualify_table = self.gmw.get_qualify_table()

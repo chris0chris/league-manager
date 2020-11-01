@@ -4,7 +4,7 @@ from pandas import DataFrame
 
 from gamedays.models import Gameinfo, Gameresult
 from gamedays.service.gameday_settings import STANDING, TEAM, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, GROUP1, \
-    GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
+    GAMEINFO_ID, DIFF, SCHEDULED, FIELD, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
     STATUS, SH, FH, FINISHED
 
 QUALIFY_TABLE_HEADERS = {
@@ -14,19 +14,6 @@ QUALIFY_TABLE_HEADERS = {
     PF: 'PF',
     PA: 'PA',
     DIFF: '+/-'
-}
-
-SCHEDULE_TABLE_HEADERS = {
-    SCHEDULED: 'Kick-Off',
-    FIELD: 'Feld',
-    OFFICIALS: 'Officials',
-    STAGE: 'Runde',
-    STANDING: 'Platz',
-    HOME: 'Heim',
-    POINTS_HOME: 'Punkte Heim',
-    POINTS_AWAY: 'Punkte Gast',
-    AWAY: 'Gast',
-    STATUS: 'Status'
 }
 
 SCHEDULE_API_HEADERS = {
@@ -58,16 +45,10 @@ class GamedayModelWrapper:
     def has_finalround(self):
         return QUALIIFY_ROUND in self._gameinfo[STAGE].values
 
-    def get_schedule(self, api=False):
+    def get_schedule(self):
         schedule = self._get_schedule()
         schedule = schedule.sort_values(by=[FIELD, SCHEDULED])
         schedule = schedule.sort_values(by=STAGE, ascending=False)
-        columns = [SCHEDULED, FIELD, OFFICIALS, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY, STATUS]
-        if api:
-            schedule = schedule[columns + [ID_HOME, ID_AWAY, 'id']]
-            return schedule
-        schedule = schedule[columns]
-        schedule = schedule.rename(columns=SCHEDULE_TABLE_HEADERS)
         return schedule
 
     def get_qualify_table(self):

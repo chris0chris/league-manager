@@ -16,9 +16,6 @@ class GameOfficialSerializer(ModelSerializer):
         model = GameOfficial
         fields = '__all__'
 
-    def create(self, validated_data):
-        pass
-
 
 class GameinfoSerializer(ModelSerializer):
     class Meta:

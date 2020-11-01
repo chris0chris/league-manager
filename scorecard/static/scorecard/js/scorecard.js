@@ -30,15 +30,17 @@ function initGamedaysDropdown(gamedays) {
 function initGamesDropdown(games) {
     $('#gameSelection').empty();
     $('#gameSelection').append('<option value="" disabled selected>Bitte ein Spiel auswählen</option>')
-    for (var i = 0 in games) {
-      let newOption = document.createElement("option");
-      let name = games[i].scheduled + " - Feld " + games[i].field + ": " + games[i].officials;
-      $(newOption).val(games[i].id);
-      $(newOption).html(name);
-      $(newOption).attr('data-haspin', /*games.data[i].pin == '' ? */'false'/* :  'true'*/);
-      $('#gameSelection').append(newOption);
+    for (const i in games) {
+        console.log(games[i])
+        let newOption = document.createElement("option");
+        let name = games[i].scheduled + " - Feld " + games[i].field + ": " + games[i].officials;
+        $(newOption).val(games[i].id);
+        $(newOption).html(name);
+        console.log(games[i].pin)
+        console.log(games[i].pin == '')
+        $(newOption).attr('data-haspin', games[i].pin == '' ? 'false' :  'true');
+        $('#gameSelection').append(newOption);
     }
-//    $('#gameSelection').prop('name', gameday.id);
     $('#gameSelection').prop('disabled', false);
 }
 
@@ -53,11 +55,17 @@ function loadGameInfo() {
         return;
       }
     } else {
-        Server.updatePin($('#pin').val(), $('#gameSelection').prop('name'), $('#gameSelection').val());
+        $.ajax({
+            type: 'put',
+            url: "/api/gameinfo/" + $('#gameSelection').val() + "/",
+            data: {"pin": $('#pin').val()},
+            success: '',
+            dataType: 'json'
+        });
+//        $.get("/api/gameinfo/" + $('#gameSelection').val(), {"pin": $('#pin').val()})
     }
-    $.get( "/api/gameday/list", initGamedaysDropdown );
 
-    Server.loadGameInformation($('#gameSelection').val());
+    $.get( "/api/gameofficial/create?gameinfo=" + $('#gameSelection').val(), initGameSetup);
     $('#selectGame').prop('disabled', true)
     $('#selectGame').text('Spiel wird geladen...')
     $('#errorMessagePin').hide()
@@ -65,9 +73,9 @@ function loadGameInfo() {
 
 function updatePinInput() {
     if ($('#gameSelection').children('option:selected').data('haspin')) {
-      $('#pin').next().text('Korrekten PIN für Spiel eingeben');
+        $('#pin').next().text('Korrekten PIN für Spiel eingeben');
     } else {
-      $('#pin').next().text('Bitte PIN vergeben');
+        $('#pin').next().text('Bitte PIN vergeben');
     }
     $('#pin').show();
     setTimeout(function () { $('#pin').focus(); }, 10);

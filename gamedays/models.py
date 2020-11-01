@@ -60,3 +60,6 @@ class GameOfficial(models.Model):
     gameinfo: Gameinfo = models.ForeignKey(Gameinfo, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     position = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'{self.gameinfo.pk}__{self.name} - {self.position}'

@@ -2,7 +2,7 @@ import json
 from collections import OrderedDict
 from http import HTTPStatus
 
-from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView, ListCreateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -31,17 +31,20 @@ class GamedayCreateView(CreateAPIView):
     serializer_class = GamedaySerializer
 
 
-class GameOfficialCreateAPIView(CreateAPIView):
+class GameOfficialListCreateView(ListCreateAPIView):
     serializer_class = GameOfficialSerializer
 
+    def get_queryset(self):
+        gameinfo_id = self.request.query_params.get('gameinfo')
+        if gameinfo_id:
+            return GameOfficial.objects.filter(gameinfo_id=gameinfo_id)
+        return GameOfficial.objects.all()
+
     def create(self, request, *args, **kwargs):
-        official = GameOfficial(gameinfo=Gameinfo.objects.get(id=request.data.get("gameinfo")))
-        serializer = self.serializer_class(official, data=request.data)
+        serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=HTTPStatus.CREATED)
-        else:
-            return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
 
 
 class GamedayScheduleView(APIView):

@@ -34,8 +34,8 @@ class TestGamedayModelWrapper(TestCase):
         gameday = DBSetup().g62_qualify_finished()
         expected_schedule = get_df_from_json('schedule_g62_qualify_finished')
         schedule = GamedayModelWrapper(gameday.pk).get_schedule()
-        del expected_schedule['Kick-Off']
-        del schedule['Kick-Off']
+        del schedule['scheduled']
+        del expected_schedule['scheduled']
         assert_frame_equal(schedule, expected_schedule, check_dtype=False)
 
     def test_empty_get_qualify_table(self):
