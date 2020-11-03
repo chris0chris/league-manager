@@ -4,18 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
-    <link href='{% static "scorecard/css/scorecard.css" %}' rel="stylesheet" type="text/css">
     <title>5er DFFL - digitale Punktekarte</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src='{% static "scorecard/js/scorecard.js" %}'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src='{% static "scorecard/js/api_scorecard.js" %}'></script>
+    <script src='{% static "scorecard/js/select_scorecard.js" %}'></script>
+    <script src='{% static "scorecard/js/setup_scorecard.js" %}'></script>
+    <script src='{% static "scorecard/js/detail_scorecard.js" %}'></script>
+    <script src='{% static "scorecard/js/finalize_scorecard.js" %}'></script>
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href='{% static "scorecard/css/scorecard.css" %}' rel="stylesheet" type="text/css">
 </head>
 <body>
-{% block content %}
-{% endblock %}
+
+{% include "./select.html" %}
+{% include "./setup.html" %}
+{% include "./scorecard.html" %}
+{% include "./finalize.html" %}
+
 </body>
 <script>
   $(window).bind('beforeunload', function () {

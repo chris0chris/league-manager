@@ -2,8 +2,8 @@
   margin-top: 10px;
 }
 
-button[name=timeout] {
-  padding: 0px
+button[name="timeout"] {
+  padding: 0px;
 }
 
 .timer {
@@ -27,34 +27,35 @@ button[name=timeout] {
   width: 100%;
 }
 
-.col.s2>.card-panel {
+.col.s2 > .card-panel {
   padding: 2px;
   text-align: center;
 }
 
 .row {
-  margin-bottom: 0px
+  margin-bottom: 0px;
 }
 
-th, td {
+th,
+td {
   padding: 9px 3px;
   text-align: center;
 }
 
-[type="radio"]:not(:checked)+span,
-[type="radio"]:checked+span {
+[type="radio"]:not(:checked) + span,
+[type="radio"]:checked + span {
   line-height: 35px;
   height: 100%;
   padding: 0px;
   border: medium solid #26a69a;
 }
 
-[type="radio"]+span:before,
-[type="radio"]+span:after {
+[type="radio"] + span:before,
+[type="radio"] + span:after {
   content: none;
 }
 
-[type="radio"]:not(:checked)+span {
+[type="radio"]:not(:checked) + span {
   border: medium solid #26a69a;
   background-color: white;
   color: black;

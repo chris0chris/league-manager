@@ -36,8 +36,6 @@ function initGamesDropdown(games) {
         let name = games[i].scheduled + " - Feld " + games[i].field + ": " + games[i].officials;
         $(newOption).val(games[i].id);
         $(newOption).html(name);
-        console.log(games[i].pin)
-        console.log(games[i].pin == '')
         $(newOption).attr('data-haspin', games[i].pin == '' ? 'false' :  'true');
         $('#gameSelection').append(newOption);
     }
@@ -47,7 +45,7 @@ function initGamesDropdown(games) {
 function loadGameInfo() {
     if ($('#gameSelection').children('option:selected').data('haspin')) {
       // PIN stimmt
-      if (gamedays[$('#gamedaySelection').val()].games[$('#gameSelection').prop('selectedIndex') - 1].pin == $('#pin').val()) {
+      if (true) {// TODO fix megamedays[$('#gamedaySelection').val()].games[$('#gameSelection').prop('selectedIndex') - 1].pin == $('#pin').val()) {
 
         // PIN stimmt nicht
       } else {

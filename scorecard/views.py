@@ -1,5 +1,5 @@
 from django.views.generic import TemplateView
 
 
-class ScorecardSelectView(TemplateView):
-    template_name = 'scorecard/select.html'
+class ScorecardView(TemplateView):
+    template_name = 'scorecard/base.html'
