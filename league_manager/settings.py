@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'scorecard',
     'league_table',
     'corsheaders',
+    'Teammanager',
 ]
 
 MIDDLEWARE = [

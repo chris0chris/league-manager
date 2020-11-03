@@ -21,13 +21,13 @@ class LeagueTable:
                 all_standings = all_standings.append(gmw.get_final_table(), ignore_index=True)
             except Gameinfo.DoesNotExist:
                 pass
-        print(json.dumps(json.loads(all_standings.to_json(orient='table')), indent=2))
         if all_standings.empty:
             return []
 
         table_standings = self._calculate_standings(all_standings)
-
+        print(json.dumps(json.loads(table_standings.to_json(orient='table')), indent=2))
         return table_standings
+
 
     def _calculate_standings(self, all_standings):
         all_standings = all_standings.groupby([TEAM], as_index=False)
