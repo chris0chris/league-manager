@@ -77,7 +77,9 @@ class TestGamedayUpdateView(WebTest):
         assert resp.request.path == reverse('league-gameday-detail', args=[self.gameday_id])
         gameinfo_set = Gameinfo.objects.filter(gameday_id=self.gameday_id)
         assert gameinfo_set.count() == 11
-        assert Gameresult.objects.filter(gameinfo_id=gameinfo_set.first().pk).count() == 2
+        gameresult_set = Gameresult.objects.filter(gameinfo_id=gameinfo_set.first().pk)
+        assert gameresult_set.count() == 2
+        assert gameresult_set[1].team == 'Team B'
 
     def test_handle_non_existent_schedule_creation(self):
         form = self.form

@@ -72,10 +72,10 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form: Form):
         groups = [list for list in [
-            form.cleaned_data['group1'].split(','),
-            form.cleaned_data['group2'].split(','),
-            form.cleaned_data['group3'].split(','),
-            form.cleaned_data['group4'].split(',')] if list != ['']]
+            self._format_array(form.cleaned_data['group1']),
+            self._format_array(form.cleaned_data['group2']),
+            self._format_array(form.cleaned_data['group3']),
+            self._format_array(form.cleaned_data['group4'])] if list != ['']]
 
         sc = ScheduleCreator(
             schedule=Schedule(format=self.object.format, groups=groups),
@@ -100,3 +100,6 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         return self.request.user.is_staff
+
+    def _format_array(self, data):
+        return [value.strip() for value in data.split(',')]

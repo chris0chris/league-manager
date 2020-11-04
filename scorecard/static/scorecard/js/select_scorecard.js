@@ -1,7 +1,7 @@
 $(document).ready(function () {
-    $.get( "/api/gameday/list", initGamedaysDropdown );
+    API.loadGamedays()
     $('#gamedaySelection').change(function () {
-      $.get( "/api/gameday/" + $(this).val() + "/details?get=schedule", initGamesDropdown );
+        API.loadGames($(this).val())
     });
     $('#gameSelection').change(function () {
         console.log('updatePinInput');
@@ -11,6 +11,7 @@ $(document).ready(function () {
 
 function initGamedaysDropdown(gamedays) {
     console.log('initGamedaysDropdown');
+    console.log(gamedays)
     this.gamedays = Object.assign({}, gamedays);
     // Initialen Text ersetzen
     $('#gamedaySelection').empty().append('<option value="" disabled selected>Bitte einen Spieltag auswählen</option>')
@@ -28,10 +29,11 @@ function initGamedaysDropdown(gamedays) {
  }
 
 function initGamesDropdown(games) {
+    console.log('games')
+    console.log(games)
     $('#gameSelection').empty();
     $('#gameSelection').append('<option value="" disabled selected>Bitte ein Spiel auswählen</option>')
     for (const i in games) {
-        console.log(games[i])
         let newOption = document.createElement("option");
         let name = games[i].scheduled + " - Feld " + games[i].field + ": " + games[i].officials;
         $(newOption).val(games[i].id);
@@ -53,17 +55,9 @@ function loadGameInfo() {
         return;
       }
     } else {
-        $.ajax({
-            type: 'put',
-            url: "/api/gameinfo/" + $('#gameSelection').val() + "/",
-            data: {"pin": $('#pin').val()},
-            success: '',
-            dataType: 'json'
-        });
-//        $.get("/api/gameinfo/" + $('#gameSelection').val(), {"pin": $('#pin').val()})
+        API.updatePin($('#gameSelection').val(), $('#pin').val())
     }
-
-    $.get( "/api/gameofficial/create?gameinfo=" + $('#gameSelection').val(), initGameSetup);
+    API.loadGameInformation($('#gameSelection').val())
     $('#selectGame').prop('disabled', true)
     $('#selectGame').text('Spiel wird geladen...')
     $('#errorMessagePin').hide()
