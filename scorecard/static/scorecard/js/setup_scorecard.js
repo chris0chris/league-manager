@@ -1,4 +1,13 @@
-function initGameSetup(gameInfo) {
+function initOfficials(officialsInfo) {
+  for (index in officialsInfo) {
+    $('#' + officialsInfo[index].position).val(officialsInfo[index].name)
+    $('#' + officialsInfo[index].position).attr('data-id', officialsInfo[index].id)
+  }
+}
+
+function initSetupInfos(gameInfo) {
+  console.log('initSetupInfos')
+  console.log(gameInfo)
   $('#setupTitle').text('Feld ' + gameInfo.field + ': ' + gameInfo.home + ' vs ' + gameInfo.away)
   $('#possHome').val(gameInfo.home);
   $('#possHome').next().text(gameInfo.home);
@@ -14,7 +23,7 @@ function initGameSetup(gameInfo) {
   $('#startDate').append(startDate.getHours() + ":" + minutes);
   setTimeout(function () { $('#scJudge').focus(); }, 10);
   document.body.scrollIntoView()
-  initTeams(gameInfo)
+  // initTeams(gameInfo)
 }
 
 
@@ -24,7 +33,9 @@ function startGame() {
   $('#refBall').text(posessionFh);
   $('#refDir').text(directionFh);
 
-  Server.storeSetup(collectSetup());
+
+  collectSetup()
+  collectOfficials()
 
   initDetails()
   document.body.scrollIntoView()
@@ -32,22 +43,27 @@ function startGame() {
 
 function collectSetup() {
   let setup = {}
-  setup.scJudge = $('#scJudge').val();
-  setup.referee = $('#referee').val();
-  setup.linesman = $('#linesman').val();
-  setup.fieldJudge = $('#fieldjudge').val();
-  setup.sideJudge = $('#sidejudge').val();
-  setup.homeTeam = $('#possHome').val();
-  setup.awayTeam = $('#possAway').val();
-  setup.startDate = $('#startDate').text();
-  setup.htDate = $('#htDate').text();
-  setup.endDate = $('#endDate').text();
-  setup.gameDate = $('#gameDate').text();
   setup.fhPossession = $('input[name="ctWon"]:checked').val();
   setup.fhDirection = $('input[name="direction"]:checked').val();
   setup.ctResult = $('input[name="fhPosession"]:checked').val();
-  setup.gameDayName = master.gameDayName;
+  setup.gameinfo = $('#gameSelection').val()
 
-  return setup
+  API.saveSetup(setup)
+}
 
+function collectOfficials() {
+  let positions = ['scJudge', 'referee', 'linesman', 'fieldjudge', 'sidejudge']
+  let officials = []
+  let gameinfo = $('#gameSelection').val()
+  for(let i in positions) {
+    officials.push({
+      "name": $('#' + positions[i]).val(),
+      "position": positions[i],
+      "gameinfo": gameinfo,
+      "id": $('#' + positions[i]).data('id')
+    })
+  }
+  console.log('officials')
+  console.log(officials)
+  API.saveOfficials(officials)
 }

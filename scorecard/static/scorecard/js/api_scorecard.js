@@ -13,17 +13,59 @@ var API = new (function () {
       dataType: "json",
     });
   };
+  this.saveOfficials = function (id, officials) {
+    console.log("API saveOfficials");
+    // ToDo Url anpassen und data checken
+    // $.ajax({
+    //   type: "put",
+    //   url: "/api/gameofficial/" + id + "/",
+    //   data: { officials },
+    //   success: "",
+    //   dataType: "json",
+    // });
+  };
+
   this.loadGames = function (id) {
       console.log("API loadGames")
       $.get( "/api/gameday/" + id + "/details?get=schedule", initGamesDropdown );
   }
   this.loadGameInformation = function (id) {
     console.log("API loadGameInformation")
-    $.get( "/api/gameofficial/create?gameinfo=" + id, initGameSetup);
+    $.get( "/api/gameofficial/create?gameinfo=" + id, initOfficials);
+    initSetupInfos({
+      'id': 1,
+      'gameday_id': 1,
+      'scheduled': '10:00:00',
+      'field': 1,
+      'officials': 'officials',
+      'status': 'beendet',
+      'pin': '',
+      'gameStarted': '',
+      'gameHalftime': '',
+      'gameFinished': '',
+      'stage': 'Vorrunde',
+      'standing': 'Gruppe 1',
+      'gameinfo_id': 1,
+      'id_home': 1,
+      'home': 'A1',
+      'points_home': 3,
+      'points_away': 2,
+      'away': 'A2',
+      'id_away': 2
+  })
+    // ToDo @Nik - einkommentieren, wenn in der API angepasst und oberen aufruf löschen
+    // $.get("/api/gameinfo/" + id, initSetupInfos)
   };
-  this.storeSetup = function (setup) {
-    console.log("API ");
-    google.script.run.storeSetup(setup);
+  this.saveSetup = function (setup) {
+    console.log("API saveSetup");
+    // ToDo Url anpassen und data checken
+    // $.ajax({
+    //   type: "put",
+    //   url: "/api/gamesetup/" + id + "/",
+    //   data: { setup },
+    //   success: "",
+    //   dataType: "json",
+    // });
   };
   this.saveScore = function (master, text) {
     console.log("API ");

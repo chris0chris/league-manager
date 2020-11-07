@@ -47,7 +47,7 @@ function initGamesDropdown(games) {
 function loadGameInfo() {
     if ($('#gameSelection').children('option:selected').data('haspin')) {
       // PIN stimmt
-      if (true) {// TODO fix megamedays[$('#gamedaySelection').val()].games[$('#gameSelection').prop('selectedIndex') - 1].pin == $('#pin').val()) {
+      if (true) {// TODO fixme - wenn klar ist, wie mit Passwort umgegangen wird megamedays[$('#gamedaySelection').val()].games[$('#gameSelection').prop('selectedIndex') - 1].pin == $('#pin').val()) {
 
         // PIN stimmt nicht
       } else {

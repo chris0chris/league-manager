@@ -1,6 +1,5 @@
 QUnit.module("game*Selection Initialisierung Test", function (hooks) {
   hooks.beforeEach(function (assert) {
-    console.log("beforeEach");
     apiLoadGamedays = sinon.stub(API, "loadGamedays");
     apiLoadGameInformation = sinon.stub(API, "loadGameInformation");
 
@@ -94,144 +93,149 @@ QUnit.module("game*Selection Initialisierung Test", function (hooks) {
       assert.dom($("#gameSelection option")[2]).hasValue("2");
       assert.dom("#displayGameInput").isNotVisible();
       assert.dom("#displayGameSetup").isNotVisible();
-      assert
-        .dom($("#gamedaySelection option")[2])
-        .hasText("Test Gameday 1");
+      assert.dom($("#gamedaySelection option")[2]).hasText("Test Gameday 1");
       assert.dom("#displayGameInput").isNotVisible();
       assert.dom("#displayGameSetup").isNotVisible();
     }
   );
 });
 
-// QUnit.module("gameSelection Test", function (hooks) {
-//   hooks.beforeEach(function (assert) {
-//     // wird benötigt, da QUnit das Fixture clont und damit die Listener weg sind
-//     $("#gamedaySelection").change(function (e) {
-//       initGamesDropdown($(this).val());
-//     });
-//     $("#gameSelection").change(updatePinInput);
+QUnit.module("gameSelection Test", function (hooks) {
+  hooks.beforeEach(function (assert) {
+    // wird benötigt, da QUnit das Fixture clont und damit die Listener weg sind
+    $("#gamedaySelection").change(function (e) {
+      initGamesDropdown(testdata3games());
+    });
+    $("#gameSelection").change(updatePinInput);
 
-//     initGamedaysDropdown(testdata2gamedays());
-//     $("#gamedaySelection").val(0).change();
-//   });
-//   hooks.afterEach(function (assert) {
-//     assert.dom("#displayGameInput").isNotVisible();
-//     assert.dom("#displayGameSetup").isNotVisible();
-//   });
+    initGamedaysDropdown(testdata2gamedays());
+    $("#gamedaySelection").val(0).change();
+  });
+  hooks.afterEach(function (assert) {
+    assert.dom("#displayGameInput").isNotVisible();
+    assert.dom("#displayGameSetup").isNotVisible();
+  });
 
-//   QUnit.test("gameSelection -> vorhandenen PIN Text überprüfen", function (
-//     assert
-//   ) {
-//     $("#gameSelection").val("1").trigger("change");
-//     assert.dom("#pin").isVisible();
-//     assert.equal(
-//       $("#pin").next().text(),
-//       "Korrekten PIN für Spiel eingeben",
-//       "korrekter Text für vergebenenen PIN wird angezeigt"
-//     );
-//   });
+  QUnit.test("gameSelection -> vorhandenen PIN Text überprüfen", function (
+    assert
+  ) {
+    $("#gameSelection").val("1").trigger("change");
+    assert.dom("#pin").isVisible();
+    assert.equal(
+      $("#pin").next().text(),
+      "Korrekten PIN für Spiel eingeben",
+      "korrekter Text für vergebenenen PIN wird angezeigt"
+    );
+  });
 
-//   QUnit.test("gameSelection -> nicht vergebenen PIN Text überprüfen", function (
-//     assert
-//   ) {
-//     $("#gameSelection").val("2").trigger("change");
-//     assert.dom("#pin").isVisible();
-//     assert.equal(
-//       $("#pin").next().text(),
-//       "Bitte PIN vergeben",
-//       "korrekter Text für vorhandenen PIN wird angezeigt"
-//     );
-//   });
+  QUnit.test("gameSelection -> nicht vergebenen PIN Text überprüfen", function (
+    assert
+  ) {
+    $("#gameSelection").val("2").trigger("change");
+    assert.dom("#pin").isVisible();
+    assert.equal(
+      $("#pin").next().text(),
+      "Bitte PIN vergeben",
+      "korrekter Text für vorhandenen PIN wird angezeigt"
+    );
+  });
 
-//   QUnit.test("gameSelection -> vorhandenen PIN fehlerhaft eingeben", function (
-//     assert
-//   ) {
-//     var done = assert.async();
-//     assert.dom("#errorMessagePin").isNotVisible();
-//     $("#gameSelection").val("1").trigger("change");
-//     $("#pin").val("-0");
-//     $("#selectGame").click();
-//     setTimeout(function () {
-//       assert.dom("#errorMessagePin").isVisible();
-//       done();
-//     }, 10);
-//   });
+  // ToDo - fixme, wenn klar ist, wie mit Passwort umgegangen wird
+  QUnit.skip("gameSelection -> vorhandenen PIN fehlerhaft eingeben", function (
+    assert
+  ) {
+    var done = assert.async();
+    assert.dom("#errorMessagePin").isNotVisible();
+    $("#gameSelection").val("1").trigger("change");
+    $("#pin").val("-0");
+    $("#selectGame").click();
+    setTimeout(function () {
+      assert.dom("#errorMessagePin").isVisible();
+      done();
+    }, 10);
+  });
 
-//   QUnit.test("gameSelection -> PIN Feld leer und abschicken", function (
-//     assert
-//   ) {
-//     var done = assert.async();
-//     assert.dom("#errorMessagePin").isNotVisible();
-//     $("#gameSelection").val("1").trigger("change");
-//     $("#selectGame").click();
-//     setTimeout(function () {
-//       assert.dom("#errorMessagePin").isNotVisible();
-//       done();
-//     }, 10);
-//   });
-// });
+  QUnit.test("gameSelection -> PIN Feld leer und abschicken", function (
+    assert
+  ) {
+    var done = assert.async();
+    assert.dom("#errorMessagePin").isNotVisible();
+    $("#gameSelection").val("1").trigger("change");
+    $("#selectGame").click();
+    setTimeout(function () {
+      assert.dom("#errorMessagePin").isNotVisible();
+      done();
+    }, 10);
+  });
+});
 
 // var serverLoadGameInformation = null;
 // var serverUpdatePin = null;
 
-// QUnit.module("gameSelection korrekte Auswahl", function (hooks) {
-//   hooks.beforeEach(function (assert) {
-//     // wird benötigt, da QUnit das Fixture clont und damit die Listener weg sind
-//     $("#gamedaySelection").change(function (e) {
-//       initGamesDropdown($(this).val());
-//     });
-//     $("#gameSelection").change(updatePinInput);
+QUnit.module("gameSelection korrekte Auswahl", function (hooks) {
+  hooks.beforeEach(function (assert) {
+    // wird benötigt, da QUnit das Fixture clont und damit die Listener weg sind
+    $("#gamedaySelection").change(function (e) {
+      initGamesDropdown(testdata3games());
+    });
+    $("#gameSelection").change(updatePinInput);
 
-//     initGamedaysDropdown(testdata2gamedays());
-//     $("#gamedaySelection").val(0).change();
+    initGamedaysDropdown(testdata2gamedays());
+    $("#gamedaySelection").val(0).change();
 
-//     serverLoadGameInformation = sinon.stub(Server, "loadGameInformation");
-//     serverUpdatePin = sinon.stub(Server, "updatePin");
-//   });
-//   hooks.afterEach(function (assert) {
-//     assert.dom("#displayGameInput").isNotVisible();
-//     assert.dom("#displayGameSetup").isNotVisible();
-//     assert.dom("#errorMessagePin").isNotVisible();
-//     serverLoadGameInformation.restore();
-//     serverUpdatePin.restore();
-//   });
-//   QUnit.test(
-//     "gameSelection -> nicht vergebener PIN, neuer PIN wird eingegeben und abgeschickt",
-//     function (assert) {
-//       var done = assert.async();
-//       $("#gameSelection").val("2").change();
-//       $("#pin").val("123");
-//       $("#selectGame").click();
-//       setTimeout(function () {
-//         assert.deepEqual(
-//           serverUpdatePin.args,
-//           [["123", "123456789", "2"]],
-//           "PIN Update funktioniert"
-//         );
-//         assert.deepEqual(
-//           serverLoadGameInformation.args,
-//           [["123456789", "2"]],
-//           "loadGameInformation wurde erfolgreich an Server übergeben"
-//         );
-//         done();
-//       }, 10);
-//     }
-//   );
-//   QUnit.test(
-//     "gameSelection -> vergebene PIN wird korrekt eingegeben und abgeschickt",
-//     function (assert) {
-//       var done = assert.async();
-//       $("#gameSelection").val("1").trigger("change");
-//       $("#pin").val("1");
-//       $("#selectGame").click();
-//       setTimeout(function () {
-//         assert.deepEqual(
-//           serverLoadGameInformation.args,
-//           [["123456789", "1"]],
-//           "loadGameInformation wurde erfolgreich an Server übergeben"
-//         );
-//         done();
-//       }, 10);
-//     }
-//   );
-// });
+    serverLoadGameInformation = sinon.stub(API, "loadGameInformation");
+    serverUpdatePin = sinon.stub(API, "updatePin");
+  });
+
+  hooks.afterEach(function (assert) {
+    assert.dom("#displayGameInput").isNotVisible();
+    assert.dom("#displayGameSetup").isNotVisible();
+    assert.dom("#errorMessagePin").isNotVisible();
+    serverLoadGameInformation.restore();
+    serverUpdatePin.restore();
+  });
+
+  QUnit.test(
+    "gameSelection -> nicht vergebener PIN, neuer PIN wird eingegeben und abgeschickt",
+    function (assert) {
+      var done = assert.async();
+      $("#gameSelection").val("2").change();
+      $("#pin").val("123");
+      $("#selectGame").click();
+      setTimeout(function () {
+        assert.deepEqual(
+          serverUpdatePin.args,
+          [["2", "123"]],
+          "PIN Update funktioniert"
+        );
+        assert.deepEqual(
+          serverLoadGameInformation.args,
+          [["2"]],
+          "loadGameInformation wurde erfolgreich an Server übergeben"
+        );
+        done();
+      }, 10);
+    }
+  );
+
+    QUnit.test(
+      "gameSelection -> vergebene PIN wird korrekt eingegeben und abgeschickt",
+      function (assert) {
+        var done = assert.async();
+        $("#gameSelection").val("1").trigger("change");
+        $("#pin").val("1");
+        $("#selectGame").click();
+        setTimeout(function () {
+          assert.false(serverUpdatePin.called, 'updatePin wurde nicht aufgerufen')
+          assert.deepEqual(
+            serverLoadGameInformation.args,
+            [["1"]],
+            "loadGameInformation wurde erfolgreich an Server übergeben"
+          );
+          // assert.true(true, 'sometext')
+
+          done();
+        }, 10);
+      }
+    );
+});

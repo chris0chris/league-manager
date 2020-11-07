@@ -32,17 +32,41 @@ function testdata1gameday() {
   ];
 }
 
+function testdataGame() {
+  return {
+    id: 1,
+    gameday_id: 1,
+    scheduled: "10:00:00",
+    field: 1,
+    officials: "officials",
+    status: "",
+    pin: "",
+    gameStarted: "",
+    gameHalftime: "",
+    gameFinished: "",
+    stage: "Vorrunde",
+    standing: "Gruppe 1",
+    gameinfo_id: 1,
+    id_home: 1,
+    home: "HOME",
+    points_home: 3,
+    points_away: 2,
+    away: "AWAY",
+    id_away: 2,
+  };
+}
+
 function testdata3games() {
   return [
     {
-      away: "Nieder",
+      away: "AWAY",
       field: 1,
       gameFinished: "",
       gameHalftime: "",
       gameStarted: "11:00:00",
       gameday_id: 1,
       gameinfo_id: 52,
-      home: "Iser",
+      home: "HOME",
       id: 1,
       id_away: 62,
       id_home: 61,
@@ -98,4 +122,49 @@ function testdata3games() {
       status: "",
     },
   ];
+}
+
+function testdataOfficials() {
+  return [
+    {
+      id: 1,
+      name: "Scorecard Judge",
+      position: "scJudge",
+      gameinfo: 1,
+    },
+    {
+      id: 2,
+      name: "Referee",
+      position: "referee",
+      gameinfo: 1,
+    },
+    {
+      id: 3,
+      name: "Linesman",
+      position: "linesman",
+      gameinfo: 1,
+    },
+    {
+      id: 4,
+      name: "Field Judge",
+      position: "fieldjudge",
+      gameinfo: 1,
+    },
+    {
+      id: 5,
+      name: "Side Judge",
+      position: "sidejudge",
+      gameinfo: 1,
+    },
+  ];
+}
+
+function testdataSetup() {
+  return {
+    ctWon: "HOME",
+    direction: "arrow_forward",
+    gameinfo: 1,
+    fhPossession: "HOME",
+    id: 1,
+  };
 }

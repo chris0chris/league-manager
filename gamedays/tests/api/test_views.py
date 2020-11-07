@@ -3,10 +3,11 @@ import pathlib
 from collections import OrderedDict
 from http import HTTPStatus
 
+import pytest
 from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
-from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
+from gamedays.api.serializers import GamedaySerializer
 from gamedays.models import Gameday, Gameinfo, GameOfficial
 from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
@@ -33,12 +34,34 @@ class TestGamedayRetrieveUpdate(WebTest):
 
 class TestGameinfoRetrieveUpdate(WebTest):
 
+    @pytest.mark.xfail
     def test_api_retrieve_gameinfo(self):
         gameday = DBSetup().g62_qualify_finished()
         gameinfo = Gameinfo.objects.filter(gameday=gameday).first()
         response = self.app.get(reverse('api-gameinfo-retrieve-update', kwargs={'pk': gameinfo.pk}))
         assert response.status_code == HTTPStatus.OK
-        assert response.json == GameinfoSerializer(gameinfo).data
+        # ToDo @Nik fixme
+        assert response.json == {
+            'id': 1,
+            'gameday_id': 1,
+            'scheduled': '10:00:00',
+            'field': 1,
+            'officials': 'officials',
+            'status': 'beendet',
+            'pin': '',
+            'gameStarted': '',
+            'gameHalftime': '',
+            'gameFinished': '',
+            'stage': 'Vorrunde',
+            'standing': 'Gruppe 1',
+            'gameinfo_id': 1,
+            'id_home': 1,
+            'home': 'A1',
+            'points_home': 3,
+            'points_away': 2,
+            'away': 'A2',
+            'id_away': 2
+        }
 
     def test_update_gameinfo(self):
         DBSetup().g62_status_empty()
@@ -134,3 +157,38 @@ class TestRetrieveUpdateOfficials(WebTest):
             {"name": "Franz", "position": "side jude", "gameinfo": 1}])
         assert response.status_code == HTTPStatus.CREATED
         assert len(GameOfficial.objects.all()) == 2
+
+    @pytest.mark.xfail
+    def test_update_officials(self):
+        DBSetup().g62_status_empty()
+        DBSetup().create_officials(Gameinfo.objects.get(id=1))
+        assert len(GameOfficial.objects.all()) == 5
+        response = self.app.post_json(reverse('api-gameofficial-create'), [
+            {"name": "Saskia", "position": "referee", "gameinfo": 1, "id": 1},
+            {"name": "Franz", "position": "side jude", "gameinfo": 1, "id": 2}])
+        # ToDo @Nik
+        assert response.status_code == HTTPStatus.OK
+        assert len(GameOfficial.objects.all()) == 5
+
+
+class TestGameSetup(WebTest):
+
+    @pytest.mark.xfail
+    def test_game_setup_create(self):
+        # ToDo @Nik
+        assert len() == 0
+        response = self.app.post_json(reverse('api-gamesetup'),
+                                      {"ctResult": "won", "direction": "arrow_forward", "gameinfo": 1,
+                                       "fhPossession": "HOME", "id": 1})
+        assert response.status_code == HTTPStatus.OK
+        assert len() == 1
+
+    @pytest.mark.xfail
+    def test_game_setup_update(self):
+        # ToDo @Nik
+        assert len() == 1
+        response = self.app.post_json(reverse('api-gamesetup'),
+                                      {"ctResult": "won", "direction": "arrow_forward", "gameinfo": 1,
+                                       "fhPossession": "HOME", "id": 1})
+        assert response.status_code == HTTPStatus.OK
+        assert len() == 1

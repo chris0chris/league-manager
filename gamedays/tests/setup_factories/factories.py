@@ -3,14 +3,21 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from factory.django import DjangoModelFactory
 
-from gamedays.models import Gameday, Gameinfo, Gameresult
+from gamedays.models import Gameday, Gameinfo, Gameresult, GameOfficial
+
+
+class GameOfficialFactory(DjangoModelFactory):
+    class Meta:
+        model = GameOfficial
+
+    name = 'official'
+    position = 'position'
 
 
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = User
         django_get_or_create = ('username',)
-
 
     username = 'test_admin'
     is_staff = True

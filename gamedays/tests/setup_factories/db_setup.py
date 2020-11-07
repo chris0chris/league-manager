@@ -1,5 +1,6 @@
 from gamedays.models import Gameday
-from gamedays.tests.setup_factories.factories import GameinfoFactory, GameresultFactory, GamedayFactory
+from gamedays.tests.setup_factories.factories import GameinfoFactory, GameresultFactory, GamedayFactory, \
+    GameOfficialFactory
 
 
 class DBSetup:
@@ -106,6 +107,10 @@ class DBSetup:
         self.create_group(gameday=gameday, name='A', stage='Hauptrunde', standing='Gruppe 1',
                           status=status, number_teams=number_teams)
         return gameday
+
+    def create_officials(self, gameinfo):
+        for i in list(range(5)):
+            GameOfficialFactory(gameinfo=gameinfo)
 
 # def deco_cg(qualify='beendet', sf='', p5='', p3='', p1='', group_a=3, group_b=3) -> Gameday:
 #     gameday = GamedayFactory()
