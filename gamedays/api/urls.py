@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework.views import APIView
 
 from gamedays.api.views import GamedayListAPIView, GameinfoUpdateAPIView, GamedayRetrieveUpdate, \
     GamedayCreateView, GamedayScheduleView, GameOfficialListCreateView
@@ -10,4 +11,6 @@ urlpatterns = [
     path('gameday/<int:pk>/details', GamedayScheduleView.as_view(), name='api-gameday-schedule'),
     path('gameday/create', GamedayCreateView.as_view(), name='api-gameday-create'),
     path('gameofficial/create', GameOfficialListCreateView.as_view(), name='api-gameofficial-create'),
+    path('gamesetup/<int:pk>/', APIView.as_view(), name='api-api-gamesetup'),
+    path('teamlog/<int:pk>/', APIView.as_view(), name='api-teamlog'),
 ]

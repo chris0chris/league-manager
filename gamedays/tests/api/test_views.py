@@ -192,3 +192,22 @@ class TestGameSetup(WebTest):
                                        "fhPossession": "HOME", "id": 1})
         assert response.status_code == HTTPStatus.OK
         assert len() == 1
+
+
+class TestTeamLog(WebTest):
+
+    @pytest.mark.xfail
+    def test_get_team_log(self):
+        # ToDo @Nik
+        response = self.app.post_json(reverse('api-teamlog'),
+                                      {"gameinfo": 1, "team": 1})
+        assert response.status_code == HTTPStatus.OK
+        assert response.json == [{
+            "id": 1,
+            "counter": 1,
+            "team": 1,
+            "six": "#19",
+            "two": "",
+            "one": "",
+            "hf": 1
+        }]
