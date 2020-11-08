@@ -1,3 +1,6 @@
+# noinspection PyUnresolvedReferences
+import chromedriver_binary
+
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.urls import reverse
 
