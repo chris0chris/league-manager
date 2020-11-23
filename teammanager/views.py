@@ -28,3 +28,12 @@ def createteam(request):
 def showteams(request):
     all_teams = models.Team.objects.all()
     return render(request, 'showTeams.html', {'teams': all_teams})
+
+def teamdetail(request,team_id):
+    team = models.Team.objects.get(pk=team_id)
+    return render(request, 'Teamdetail.html', {'team':team})
+
+def deleteteam(request,team_id):
+    team = models.Team.objects.get(pk=team_id)
+    team.delete()
+    return HttpResponseRedirect('/teammanager/')

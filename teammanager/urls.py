@@ -1,9 +1,11 @@
 from django.urls import path
-from teammanager.views import createteam,showteams
+from teammanager.views import createteam,showteams,teamdetail,deleteteam
 
 
 
 urlpatterns = [
-   path('addTeam/', createteam),
+   path('addteam/', createteam),
    path('', showteams),
+   path('team/<int:team_id>',teamdetail),
+   path('deleteteam/<int:team_id>',deleteteam,name='deleteteam')
 ]

@@ -1,17 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>create Team</title>
-</head>
+{% extends 'base.html' %}
+{% block title %}create Team{% endblock %}
+{% block body %}
 <body>
     <h1>Team hinzufügen</h1>
 
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form }}
+        {{ form.as_p }}
         <p><input type="submit"></p>
     </form>
-
-</body>
-</html>
+{% endblock %}
