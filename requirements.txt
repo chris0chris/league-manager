@@ -8,3 +8,4 @@ djangorestframework==3.12.1
 Markdown==3.3.3
 djangorestframework-jwt==1.11.0
 django-cors-headers==3.5.0
+Pillow==8.0.1

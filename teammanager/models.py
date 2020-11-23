@@ -5,14 +5,14 @@ from django.db import models
 
 
 class Division(models.Model):
-    Region = models.CharField(max_length=20)
-    Name = models.CharField(max_length=20)
+    region = models.CharField(max_length=20)
+    name = models.CharField(max_length=20)
 
 
 class Team(models.Model):
-    Name = models.CharField(max_length=20)
-    Division = models.ForeignKey(Division,on_delete=models.CASCADE)
-    Beschreibung = models.CharField(max_length=20)
-    Ort = models.CharField(max_length=20)
-    Punkte = models.IntegerField
+    name = models.CharField(max_length=20)
+    division = models.ForeignKey(Division,on_delete=models.CASCADE)
+    description = models.CharField(max_length=20)
+    place = models.CharField(max_length=20)
+    logo = models.ImageField('Logo', upload_to="teammanager/logos", blank=True, null=True)
 

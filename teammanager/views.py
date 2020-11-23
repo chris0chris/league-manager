@@ -20,8 +20,11 @@ def createteam(request):
             return HttpResponseRedirect('/')
         else:
             form = Teamform()
-        return render(request, 'createTeam.html', {'form': form})
+    else:
+        form = Teamform()
+    return render(request, 'createTeam.html', {'form': form})
 
 
 def showteams(request):
-    return (request, 'showTeams.html')
+    all_teams = models.Team.objects.all()
+    return render(request, 'showTeams.html', {'teams': all_teams})
