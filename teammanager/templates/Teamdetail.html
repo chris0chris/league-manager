@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}{{ team.name }}{% endblock %}
-{% block body %}
+{% block content%}
     <div>
-        <img src="{{ team.logo.url }}">
+        {% if team.logo %}<img src="{{ team.logo.url }}">{% endif %}
         <h1>{{ team.name }}</h1>
         {{ team.description }}
         {{ team.division.region }}

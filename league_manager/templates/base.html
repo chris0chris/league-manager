@@ -32,6 +32,7 @@
             <div class="collapse navbar-collapse" id="navbarToggle">
                 <div class="navbar-nav mr-auto">
                     <a class="nav-item nav-link" href="{% url 'league-home' %}">Home</a>
+                    <a class="nav-item nav-link" href="{% url 'teammanager' %}">Teammanager</a>
                     {% if object %}
                     <a class="nav-item nav-link" href="{% url 'league-gameday-update' object.id%}">Edit</a>
                     {% endif %}
