@@ -17,7 +17,7 @@ def createteam(request):
         form = Teamform(request.POST, request.FILES)
         if form.is_valid():
             new_Team = form.save()
-            return HttpResponseRedirect('/teamanager/')
+            return HttpResponseRedirect('/teammanager/')
         else:
             form = Teamform()
     else:

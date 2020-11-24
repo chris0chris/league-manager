@@ -14,7 +14,7 @@
         {%  for team in teams %}
             <tr onclick="window.location='team/{{ team.id }}'" style="cursor: pointer">
                 <td style="width : 1%; white-space : nowrap;">
-                    <img style="width: 100px; height: 50px" src="{{ team.logo.url }}"/>
+                    {% if team.logo %}<img style="width: 100px; height: 50px" src="{{ team.logo.url }}"/>{% endif %}
                 </td>
                 <td style="vertical-align: middle">
                     {{ team.name }}
