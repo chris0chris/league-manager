@@ -8,7 +8,10 @@
         {{ team.division.region }}
         {{ team.place }}
     </div>
-    <button type="button" class="btn btn-warning">edit</button>
+    <form action="{% url 'editteam' team.pk %}" method="GET">
+        {% csrf_token %}
+        <input class="btn btn-default btn-warning" type="submit" value="edit"/>
+    </form>
     <form action="{% url 'deleteteam' team.pk %}" method="POST" style="float:right">
         {% csrf_token %}
         <input class="btn btn-default btn-danger" type="submit" value="Delete"/>

@@ -17,7 +17,7 @@ def createteam(request):
         form = Teamform(request.POST, request.FILES)
         if form.is_valid():
             new_Team = form.save()
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect('/teamanager/')
         else:
             form = Teamform()
     else:
@@ -37,3 +37,16 @@ def deleteteam(request,team_id):
     team = models.Team.objects.get(pk=team_id)
     team.delete()
     return HttpResponseRedirect('/teammanager/')
+
+def editteam(request,team_id):
+    team = models.Team.objects.get(pk=team_id)
+    if request.method =='POST':
+        form = Teamform(request.POST,instance=team)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/teammanager/')
+        else:
+            form = Teamform(instance=team)
+    else:
+        form = Teamform(instance=team)
+    return render(request,'editTeam.html',{'form':form,'team':team})
