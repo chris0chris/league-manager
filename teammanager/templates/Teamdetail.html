@@ -19,17 +19,17 @@
     {%  for member in members %}
         <tr>
             <td></td>
-            <td>{{ member.user.firstname }}</td>
-            <td>{{ member.user.lastname }}</td>
+            <td>{{ member.user.first_name }}</td>
+            <td>{{ member.user.last_name }}</td>
         </tr>
 
     {% endfor %}
     </table>
-    <form action="{% url 'editteam' team.pk %}" method="GET">
+    <form action="{% url 'editteam' team.pk %}" method="GET" style="width:min-content ">
         {% csrf_token %}
         <input class="btn btn-default btn-warning" type="submit" value="edit"/>
     </form>
-    <form action="{% url 'deleteteam' team.pk %}" method="POST" style="float:right">
+    <form action="{% url 'deleteteam' team.pk %}" method="POST" style="float:right; width:min-content ">
         {% csrf_token %}
         <input class="btn btn-default btn-danger" type="submit" value="Delete"/>
     </form>

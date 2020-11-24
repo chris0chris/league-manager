@@ -32,7 +32,7 @@ def showteams(request):
 def teamdetail(request,team_id):
     members = []
     team = models.Team.objects.get(pk=team_id)
-    members = models.UserProfile.objects.filter(team=team).all()
+    members = list(models.UserProfile.objects.filter(team=team))
     return render(request, 'Teamdetail.html', {'team':team,'members':members})
 
 def deleteteam(request,team_id):
