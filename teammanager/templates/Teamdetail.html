@@ -8,6 +8,23 @@
         {{ team.division.region }}
         {{ team.place }}
     </div>
+    <table class="table">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col">Firstname</th>
+            <th scope="col">Lastname</th>
+        </tr>
+    </thead>
+    {%  for member in members %}
+        <tr>
+            <td></td>
+            <td>{{ member.user.firstname }}</td>
+            <td>{{ member.user.lastname }}</td>
+        </tr>
+
+    {% endfor %}
+    </table>
     <form action="{% url 'editteam' team.pk %}" method="GET">
         {% csrf_token %}
         <input class="btn btn-default btn-warning" type="submit" value="edit"/>
