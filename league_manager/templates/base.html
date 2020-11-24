@@ -51,7 +51,6 @@
 </header>
 {% endif %}
 <main class="container" role="main">
-    <div class="row">
         <div>
             {% if messages %}
             {% for message in messages %}
@@ -61,7 +60,6 @@
             {% endfor %}
             {% endif %}
             {% block content %}{% endblock %}
-        </div>
         <!--div class="col-md-4">
             <div class="content-section">
                 <h3>Our Sidebar</h3>
