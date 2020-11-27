@@ -19,11 +19,24 @@ class Team(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
     avatar = models.ImageField('Avatar', upload_to="media/teammanager/avatars", blank=True, null=True)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE,null=True)
     firstname = models.CharField(max_length=20,null=True)
     lastname = models.CharField(max_length=20,null=True)
+
+    def get_Permisions(self):
+        permissions = list(UserPermissions.objects.filter(user=self))
+        return permissions
+
+    def check_Teammanager(self):
+        permisssions=self.get_Permisions()
+        is_teammanager=False
+        for permission in permisssions:
+            if(permission.permission.name=='Teammanager'):
+                is_teammanager=True
+        return is_teammanager
+
 
 class Permissions(models.Model):
     name = models.CharField(max_length=20)

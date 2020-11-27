@@ -25,12 +25,18 @@
 
     {% endfor %}
     </table>
-    <form action="{% url 'editteam' team.pk %}" method="GET" style="width:min-content ">
+    <form action="{% url 'createuser' team.pk %}" method="POST" style="float:right; width:min-content ">
         {% csrf_token %}
-        <input class="btn btn-default btn-warning" type="submit" value="edit"/>
+        <input class="btn btn-default btn-success" type="submit" value="+add"/>
     </form>
+    <br>
+    <br>
     <form action="{% url 'deleteteam' team.pk %}" method="POST" style="float:right; width:min-content ">
         {% csrf_token %}
         <input class="btn btn-default btn-danger" type="submit" value="Delete"/>
+    </form><form action="{% url 'editteam' team.pk %}" method="GET" style="width:min-content ">
+        {% csrf_token %}
+        <input class="btn btn-default btn-warning" type="submit" value="edit"/>
     </form>
+
 {% endblock %}
