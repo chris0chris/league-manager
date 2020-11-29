@@ -41,6 +41,8 @@ def teamdetail(request,team_id):
     members = []
     team = models.Team.objects.get(pk=team_id)
     members = list(models.UserProfile.objects.filter(team=team))
+    for member in members:
+        member.permissions = member.get_Permisions();
     return render(request, 'Teamdetail.html', {'team':team,'members':members})
 
 def deleteteam(request,team_id):

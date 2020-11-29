@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}{{ team.name }}{% endblock %}
 {% block content%}
     <div>
@@ -14,6 +15,7 @@
             <th scope="col"></th>
             <th scope="col">Firstname</th>
             <th scope="col">Lastname</th>
+            <th></th>
         </tr>
     </thead>
     {%  for member in members %}
@@ -21,6 +23,7 @@
             <td></td>
             <td>{{ member.firstname }}</td>
             <td>{{ member.lastname }}</td>
+            <td>{% for permission in member.permissions %} <img src="{%  static 'teammanager/icons/'%}{{ permission.permission.name}}.jpg" width="30" height="30">  {% endfor %}</td>
         </tr>
 
     {% endfor %}
