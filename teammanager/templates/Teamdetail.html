@@ -16,6 +16,8 @@
             <th scope="col">Firstname</th>
             <th scope="col">Lastname</th>
             <th></th>
+            <th></th>
+            <th></th>
         </tr>
     </thead>
     {%  for member in members %}
@@ -24,6 +26,18 @@
             <td>{{ member.firstname }}</td>
             <td>{{ member.lastname }}</td>
             <td>{% for permission in member.permissions %} <img src="{%  static 'teammanager/icons/'%}{{ permission.permission.name}}.jpg" width="30" height="30">  {% endfor %}</td>
+            <td>
+                <form action="{% url 'edituser' member.pk %}" method="GET" >
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-warning" type="submit" value="edit"/>
+                </form>
+            </td>
+            <td>
+                <form action="{% url 'deleteuser' member.pk %}" method="POST" >
+                    {% csrf_token %}
+                    <input class="btn btn-default btn-danger" type="submit" value="Delete"/>
+                </form>
+            </td>
         </tr>
 
     {% endfor %}
@@ -37,7 +51,8 @@
     <form action="{% url 'deleteteam' team.pk %}" method="POST" style="float:right; width:min-content ">
         {% csrf_token %}
         <input class="btn btn-default btn-danger" type="submit" value="Delete"/>
-    </form><form action="{% url 'editteam' team.pk %}" method="GET" style="width:min-content ">
+    </form>
+    <form action="{% url 'editteam' team.pk %}" method="GET" style="width:min-content ">
         {% csrf_token %}
         <input class="btn btn-default btn-warning" type="submit" value="edit"/>
     </form>

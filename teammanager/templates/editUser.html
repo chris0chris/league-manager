@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Edit {{ user.firstname }}{{ user.lastname}}{% endblock %}
+{% block content %}
+<h1>{{ user.firstname }} {{ user.lastname }}</h1>
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <p><input type="submit" class="btn btn-success" value="submit"></p>
+    </form>
+{% endblock %}

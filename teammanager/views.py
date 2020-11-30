@@ -98,3 +98,35 @@ def editteam(request,team_id):
         return render(request,'editTeam.html',{'form':form,'team':team})
     else:
         return HttpResponseRedirect('/login/')
+
+def edituser(request,user_id):
+    if request.user.is_authenticated is False:
+        return HttpResponseRedirect('/login/')
+
+    user1 = models.UserProfile.objects.get(user=request.user)
+    user2 = models.UserProfile.objects.get(pk=user_id)
+
+    if request.user.is_superuser | ((user1.team == user2.team) & user1.check_Teammanager()):
+        if request.method == 'POST':
+            form = Userform(request.POST,instance=user2)
+            if form.is_valid():
+                form.save()
+                return HttpResponseRedirect('/teammanager/team/'+str(user2.team_id))
+            else:
+                form=Userform(instance=user2)
+        else:
+            form = Userform(instance=user2)
+        return render(request,'editUser.html',{'form':form,'user':user2})
+    else:
+        return HttpResponseRedirect('/login/')
+
+def deleteuser(request,user_id):
+    if request.user.is_authenticated is False:
+        return HttpResponseRedirect('/login/')
+
+    user1 = models.UserProfile.objects.get(user=request.user)
+    user2 = models.UserProfile.objects.get(pk=user_id)
+
+    if request.user.is_superuser | ((user1.team == user2.team) & user1.check_Teammanager()):
+        user2.delete()
+    return HttpResponseRedirect('/teammanager/team/'+str(user2.team_id))
