@@ -103,20 +103,20 @@ def edituser(request,user_id):
     if request.user.is_authenticated is False:
         return HttpResponseRedirect('/login/')
 
-    user1 = models.UserProfile.objects.get(user=request.user)
-    user2 = models.UserProfile.objects.get(pk=user_id)
+    user_editing = models.UserProfile.objects.get(user=request.user)
+    user_is_being_edited = models.UserProfile.objects.get(pk=user_id)
 
-    if request.user.is_superuser | ((user1.team == user2.team) & user1.check_Teammanager()):
+    if request.user.is_superuser | ((user_editing.team == user_is_being_edited.team) & user_editing.check_Teammanager()):
         if request.method == 'POST':
-            form = Userform(request.POST,instance=user2)
+            form = Userform(request.POST,instance=user_is_being_edited)
             if form.is_valid():
                 form.save()
-                return HttpResponseRedirect('/teammanager/team/'+str(user2.team_id))
+                return HttpResponseRedirect('/teammanager/team/'+str(user_is_being_edited.team_id))
             else:
-                form=Userform(instance=user2)
+                form=Userform(instance=user_is_being_edited)
         else:
-            form = Userform(instance=user2)
-        return render(request,'editUser.html',{'form':form,'user':user2})
+            form = Userform(instance=user_is_being_edited)
+        return render(request,'editUser.html',{'form':form,'user':user_is_being_edited})
     else:
         return HttpResponseRedirect('/login/')
 
@@ -124,9 +124,9 @@ def deleteuser(request,user_id):
     if request.user.is_authenticated is False:
         return HttpResponseRedirect('/login/')
 
-    user1 = models.UserProfile.objects.get(user=request.user)
-    user2 = models.UserProfile.objects.get(pk=user_id)
+    user_deleting = models.UserProfile.objects.get(user=request.user)
+    user_is_being_deleted = models.UserProfile.objects.get(pk=user_id)
 
-    if request.user.is_superuser | ((user1.team == user2.team) & user1.check_Teammanager()):
-        user2.delete()
-    return HttpResponseRedirect('/teammanager/team/'+str(user2.team_id))
+    if request.user.is_superuser | ((user_deleting.team == user_is_being_deleted.team) & user_deleting.check_Teammanager()):
+        user_is_being_deleted.delete()
+    return HttpResponseRedirect('/teammanager/team/'+str(user_is_being_deleted.team_id))
