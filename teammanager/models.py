@@ -9,6 +9,9 @@ class Division(models.Model):
     region = models.CharField(max_length=20)
     name = models.CharField(max_length=20)
 
+    def __str__(self):
+        return self.name
+
 
 class Team(models.Model):
     name = models.CharField(max_length=20)
@@ -16,6 +19,9 @@ class Team(models.Model):
     description = models.CharField(max_length=20)
     place = models.CharField(max_length=20)
     logo = models.ImageField('Logo', upload_to="teammanager/logos", blank=True, null=True)
+
+    def __str__(self):
+        return self.name
 
 
 class UserProfile(models.Model):
@@ -37,11 +43,23 @@ class UserProfile(models.Model):
                 is_teammanager=True
         return is_teammanager
 
+    def __str__(self):
+        return self.firstname + ' ' + self.lastname
+
+
+
 
 class Permissions(models.Model):
     name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
 
 
 class UserPermissions(models.Model):
     permission = models.ForeignKey(Permissions, on_delete=models.CASCADE)
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.user.firstname + ' ' + self.user.lastname + ' ' + self.permission.name
+
