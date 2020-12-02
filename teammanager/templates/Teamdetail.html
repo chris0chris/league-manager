@@ -27,34 +27,46 @@
             <td>{{ member.lastname }}</td>
             <td>{% for permission in member.permissions %} <img src="{%  static 'teammanager/icons/'%}{{ permission.permission.name}}.jpg" width="30" height="30">  {% endfor %}</td>
             <td>
+                {% if allow_button_view %}
                 <form action="{% url 'edituser' member.pk %}" method="GET" >
                     {% csrf_token %}
                     <input class="btn btn-default btn-warning" type="submit" value="edit"/>
                 </form>
+                {% endif %}
             </td>
             <td>
+                {% if allow_button_view %}
                 <form action="{% url 'deleteuser' member.pk %}" method="POST" >
                     {% csrf_token %}
                     <input class="btn btn-default btn-danger" type="submit" value="Delete"/>
                 </form>
+                 {% endif %}
             </td>
         </tr>
 
     {% endfor %}
     </table>
+    {% if allow_button_view %}
     <form action="{% url 'createuser' team.pk %}" method="POST" style="float:right; width:min-content ">
         {% csrf_token %}
         <input class="btn btn-default btn-success" type="submit" value="+add"/>
+
     </form>
+    {% endif %}
     <br>
     <br>
+ {% if allow_button_view %}
     <form action="{% url 'deleteteam' team.pk %}" method="POST" style="float:right; width:min-content ">
         {% csrf_token %}
         <input class="btn btn-default btn-danger" type="submit" value="Delete"/>
+
     </form>
+ {% endif %}
+ {% if allow_button_view %}
     <form action="{% url 'editteam' team.pk %}" method="GET" style="width:min-content ">
         {% csrf_token %}
         <input class="btn btn-default btn-warning" type="submit" value="edit"/>
     </form>
+ {% endif %}
 
 {% endblock %}
