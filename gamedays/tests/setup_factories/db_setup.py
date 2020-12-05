@@ -13,17 +13,17 @@ class DBSetup:
     def g62_finalround(self, sf='', p5='', p3='', p1=''):
         return self._create_gameday(sf=sf, p5=p5, p3=p3, p1=p1)
 
-    def g62_finished(self):
-        gameday = self._create_gameday(sf='beendet', p5='beendet', p3='beendet', p1='beendet')
+    def g62_finished(self, date=''):
+        gameday = self._create_gameday(sf='beendet', p5='beendet', p3='beendet', p1='beendet', date=date)
         return gameday
 
-    def g72_finished(self):
-        gameday = self._create_gameday(group_a=4, sf='beendet', p5='beendet', p3='beendet', p1='beendet')
+    def g72_finished(self, date=''):
+        gameday = self._create_gameday(group_a=4, sf='beendet', p5='beendet', p3='beendet', p1='beendet', date=date)
         self.create_finalround_game(gameday, standing='P5', status='beendet', home='A4', away='B3')
         return gameday
 
-    def _create_gameday(self, qualify='beendet', sf='', p5='', p3='', p1='', group_a=3, group_b=3) -> Gameday:
-        gameday = self.create_empty_gameday()
+    def _create_gameday(self, qualify='beendet', sf='', p5='', p3='', p1='', group_a=3, group_b=3, date='') -> Gameday:
+        gameday = self.create_empty_gameday(date=date)
         self.create_group(gameday=gameday, name="A", standing="Gruppe 1", status=qualify, number_teams=group_a)
         self.create_group(gameday=gameday, name="B", standing="Gruppe 2", status=qualify, number_teams=group_b)
         self.create_finalround_game(gameday=gameday, standing='HF', status=sf, home='B2', away='A1')
@@ -98,8 +98,11 @@ class DBSetup:
             GameresultFactory(gameinfo=gi, team=standing + '_away')
             return gi
 
-    def create_empty_gameday(self) -> Gameday:
-        gameday = GamedayFactory()
+    def create_empty_gameday(self, date='') -> Gameday:
+        if date == '':
+            gameday = GamedayFactory()
+        else:
+            gameday = GamedayFactory(date=date)
         return gameday
 
     def create_main_round_gameday(self, status='', number_teams=5) -> Gameday:

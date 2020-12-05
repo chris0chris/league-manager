@@ -27,11 +27,11 @@ class TestLeagueTable(TestCase):
         assert league_table.get_standing().to_json() == expected_overall_table.to_json()
 
     def test_league_table_2019(self):
-        # ToDo fixme
-        # DBSetup().g62_finished(year='2019')
-        # DBSetup().g72_finished(year='2019')
-        pass
-
-
+        year = 2019
+        DBSetup().g62_finished(date='2019-10-10')
+        DBSetup().g72_finished(date='2019-10-10')
+        expected_overall_table = get_df_from_json('league_table_overall.json')
+        league_table = LeagueTable()
+        assert league_table.get_standing(year).to_json() == expected_overall_table.to_json()
 
     # def test_calculate_table(self):

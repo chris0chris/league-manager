@@ -1,6 +1,7 @@
 import json
 
 import pandas as pd
+import datetime
 
 from gamedays.models import Gameday, Gameinfo
 from gamedays.service.gameday_settings import TEAM, PF, POINTS, PA, DIFF
@@ -12,8 +13,13 @@ class LeagueTable:
     def __init__(self):
         pass
 
-    def get_standing(self):
-        all_gamedays = Gameday.objects.filter(date__gte='2020-01-01', date__lte='2020-12-31')
+    def get_standing(self, year=None):
+        if year is None:
+            year = datetime.date.today().year
+        year_as_str = str(year)
+        start_date = f'{year_as_str}-01-01'
+        end_date = f'{year_as_str}-12-31'
+        all_gamedays = Gameday.objects.filter(date__gte=start_date, date__lte=end_date)
         all_standings = pd.DataFrame()
         for gameday in all_gamedays:
             try:
