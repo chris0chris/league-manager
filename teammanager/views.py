@@ -146,3 +146,18 @@ def deleteuser(request, user_id):
             (user_deleting.team == user_is_being_deleted.team) & user_deleting.check_Teammanager()):
         user_is_being_deleted.delete()
     return HttpResponseRedirect('/teammanager/team/' + str(user_is_being_deleted.team_id))
+
+
+def playerdetail(request, player_id):
+    player = models.UserProfile.objects.get(pk=player_id)
+    if request.user.is_authenticated:
+        user = models.UserProfile.objects.get(user=request.user)
+        if request.user.is_superuser or (player == user.team and user.check_Teammanager):
+            allow_button_view = True
+        else:
+            allow_button_view = False
+    else:
+        allow_button_view = False
+
+    return render(request, 'playerDetail.html',
+                  {'player': player, 'allow_button_view': allow_button_view})

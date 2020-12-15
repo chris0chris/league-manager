@@ -15,16 +15,24 @@
             <th scope="col"></th>
             <th scope="col">Firstname</th>
             <th scope="col">Lastname</th>
+            <th scope="col">Position</th>
+            <th scope="col">#</th>
+            <th scope="col">Birth Date</th>
+            <th scope="col">Location</th>
             <th></th>
             <th></th>
             <th></th>
         </tr>
     </thead>
     {%  for member in members %}
-        <tr>
+        <tr onclick="window.location.href='/teammanager/playerdetail/{{ member.id }}'" style="cursor: pointer">
             <td></td>
             <td>{{ member.firstname }}</td>
             <td>{{ member.lastname }}</td>
+            <td>{{ member.position }}</td>
+            <td>{{ member.playernumber }}</td>
+            <td>{{ member.birth_date }}</td>
+            <td>{{ member.location }}</td>
             <td>{% for permission in member.permissions %} <img src="{%  static 'teammanager/icons/'%}{{ permission.permission.name}}.jpg" width="30" height="30">  {% endfor %}</td>
             <td>
                 {% if allow_button_view %}

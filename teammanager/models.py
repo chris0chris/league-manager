@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from gamedays.models import Gameday
 
 
 # Create your models here.
@@ -25,28 +26,30 @@ class Team(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     avatar = models.ImageField('Avatar', upload_to="media/teammanager/avatars", blank=True, null=True)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE,null=True)
-    firstname = models.CharField(max_length=20,null=True)
-    lastname = models.CharField(max_length=20,null=True)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True)
+    firstname = models.CharField(max_length=20, null=True)
+    lastname = models.CharField(max_length=20, null=True)
+    playernumber = models.IntegerField(null=True)
+    position = models.CharField(max_length=20, blank=True, null=True)
+    location = models.CharField(max_length=20, blank=True, null=True)
+    birth_date = models.DateField(null=True, blank=True)
 
     def get_Permisions(self):
         permissions = list(UserPermissions.objects.filter(user=self))
         return permissions
 
     def check_Teammanager(self):
-        permisssions=self.get_Permisions()
-        is_teammanager=False
+        permisssions = self.get_Permisions()
+        is_teammanager = False
         for permission in permisssions:
-            if(permission.permission.name=='Teammanager'):
-                is_teammanager=True
+            if (permission.permission.name == 'Teammanager'):
+                is_teammanager = True
         return is_teammanager
 
     def __str__(self):
         return self.firstname + ' ' + self.lastname
-
-
 
 
 class Permissions(models.Model):
@@ -63,3 +66,19 @@ class UserPermissions(models.Model):
     def __str__(self):
         return self.user.firstname + ' ' + self.user.lastname + ' ' + self.permission.name
 
+
+class Achievement(models.Model):
+    name = models.CharField(max_length=20, blank=False, null=False)
+
+    def __str__(self):
+        return self.name
+
+
+class PlayerAchievement(models.Model):
+    achievement = models.ForeignKey(Achievement, blank=False, null=False, on_delete=models.CASCADE)
+    player = models.ForeignKey(UserProfile, blank=False, null=False, on_delete=models.CASCADE)
+    value = models.IntegerField(blank=False, null=False)
+    gameday = models.ForeignKey(Gameday, null=False, blank=False, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.achievement.name + ' ' + self.player.lastname + ' ' + self.player.firstname + ' ' + str(self.value)
