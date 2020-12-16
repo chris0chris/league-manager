@@ -1,5 +1,5 @@
 from django.urls import path
-from teammanager.views import createteam, showteams, teamdetail, deleteteam, editteam, createuser, edituser, deleteuser, playerdetail
+from teammanager.views import createteam, showteams, teamdetail, deleteteam, editteam, createuser, edituser, deleteuser, playerdetail,showachievements
 
 urlpatterns = [
     path('addteam/', createteam),
@@ -11,5 +11,5 @@ urlpatterns = [
     path('edituser/<int:user_id>', edituser, name='edituser'),
     path('deleteuser/<int:user_id>', deleteuser, name='deleteuser'),
     path('playerdetail/<int:player_id>', playerdetail, name='playerdetail'),
-
+    path('achievements/',showachievements, name='showachievements'),
 ]

@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from django.db import models
 from gamedays.models import Gameday
 
-
 # Create your models here.
 
 

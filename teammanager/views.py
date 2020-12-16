@@ -2,6 +2,9 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django import forms
 from teammanager import models
+from rest_framework import serializers
+from rest_framework.renderers import JSONRenderer
+
 
 
 # Create your views here.
@@ -16,6 +19,9 @@ class Userform(forms.ModelForm):
     class Meta:
         model = models.UserProfile
         exclude = ['team', 'user']
+
+class AchievementSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=20)
 
 
 def createteam(request):
@@ -149,15 +155,30 @@ def deleteuser(request, user_id):
 
 
 def playerdetail(request, player_id):
+    achievements={}
+    gamedays={'items':{}}
     player = models.UserProfile.objects.get(pk=player_id)
-    if request.user.is_authenticated:
-        user = models.UserProfile.objects.get(user=request.user)
-        if request.user.is_superuser or (player == user.team and user.check_Teammanager):
-            allow_button_view = True
-        else:
-            allow_button_view = False
-    else:
-        allow_button_view = False
+    tmp = list(models.PlayerAchievement.objects.filter(player=player))
+    gamedays['categories']=list(models.Achievement.objects.all())
+    for item in tmp:
+        if item.achievement.name not in achievements.keys():
+            achievements[item.achievement.name]=0
+        achievements[item.achievement.name]+=item.value
+        if item.gameday.name not in gamedays['items'].keys():
+            gamedays['items'][item.gameday.name]={}
+        if item.achievement.name not in gamedays['items'][item.gameday.name].keys():
+            gamedays['items'][item.gameday.name][item.achievement.name]=0
+        gamedays['items'][item.gameday.name][item.achievement.name]+=item.value
+
 
     return render(request, 'playerDetail.html',
-                  {'player': player, 'allow_button_view': allow_button_view})
+                  {'player': player,'gamedays':gamedays,'achievments':achievements})
+
+def showachievements(request):
+    if request.user.is_authenticated is False or request.user.is_superuser is False:
+        return HttpResponseRedirect('/login/')
+    achievements=models.Achievement.objects.first()
+    achievements=AchievementSerializer(achievements)
+    achievements=JSONRenderer().render(achievements.data)
+    return render(request, 'showAchievements.html',{'achievements':achievements})
+

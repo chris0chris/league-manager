@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}achievements{% endblock %}
+{% block content %}
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <div id="app">
+        <div>
+            [[ achievements ]]
+            <table class="table">
+                <tr>
+                    <th> Name </th>
+                </tr>
+                <tr v-for="(achievement,i) in achievements" :key="i">
+                <td>
+                    [[achievement]]
+                </td>
+                </tr>
+        </div>
+    </div>
+
+
+    <script>
+    var app =new Vue({
+        delimiters: ["[[","]]"],
+        el:'#app',
+        data: {
+            achievements:'{{ achievements }}'
+        },
+    });
+    </script>
+{% endblock %}
