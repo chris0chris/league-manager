@@ -25,7 +25,7 @@
         </tr>
     </thead>
     {%  for member in members %}
-        <tr onclick="window.location.href='/teammanager/playerdetail/{{ member.id }}'" style="cursor: pointer">
+        <tr onclick="window.location.href='{% url 'playerdetail' player_id=member.id %}'" style="cursor: pointer">
             <td></td>
             <td>{{ member.firstname }}</td>
             <td>{{ member.lastname }}</td>

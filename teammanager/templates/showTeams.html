@@ -12,7 +12,7 @@
     </thead>
     <tbody>
         {%  for team in teams %}
-            <tr onclick="window.location='team/{{ team.id }}'" style="cursor: pointer">
+            <tr onclick="window.location='{% url 'teamdetail' team_id=team.id %}'" style="cursor: pointer">
                 <td style="width : 1%; white-space : nowrap;">
                     {% if team.logo %}<img style="width: 100px; height: 50px" src="{{ team.logo.url }}"/>{% endif %}
                 </td>
@@ -31,6 +31,6 @@
     </tbody>
 
 </table>
-<button type="button" class="btn btn-success" style="float: right;margin-right: 10px" onclick="window.location='addteam'">add +</button>
+<button type="button" class="btn btn-success" style="float: right;margin-right: 10px" onclick="window.location='{%url 'addteam'%}'">add +</button>
 
 {% endblock %}

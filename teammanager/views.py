@@ -2,8 +2,11 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django import forms
 from teammanager import models
-from rest_framework import serializers
-from rest_framework.renderers import JSONRenderer
+import pandas as pd
+from pandas import DataFrame
+import json
+
+
 
 
 
@@ -19,10 +22,6 @@ class Userform(forms.ModelForm):
     class Meta:
         model = models.UserProfile
         exclude = ['team', 'user']
-
-class AchievementSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=20)
-
 
 def createteam(request):
     if request.user.is_superuser:
@@ -158,27 +157,18 @@ def playerdetail(request, player_id):
     achievements={}
     gamedays={'items':{}}
     player = models.UserProfile.objects.get(pk=player_id)
-    tmp = list(models.PlayerAchievement.objects.filter(player=player))
-    gamedays['categories']=list(models.Achievement.objects.all())
-    for item in tmp:
-        if item.achievement.name not in achievements.keys():
-            achievements[item.achievement.name]=0
-        achievements[item.achievement.name]+=item.value
-        if item.gameday.name not in gamedays['items'].keys():
-            gamedays['items'][item.gameday.name]={}
-        if item.achievement.name not in gamedays['items'][item.gameday.name].keys():
-            gamedays['items'][item.gameday.name][item.achievement.name]=0
-        gamedays['items'][item.gameday.name][item.achievement.name]+=item.value
-
-
+    playerAchievements = pd.DataFrame(models.PlayerAchievement.objects.filter(player=player).values())
+    Achievements=pd.DataFrame(models.Achievement.objects.all().values())
+    merge=pd.merge( Achievements,playerAchievements, left_on='id', right_on='achievement_id')
+    merge.drop(['id_x','id_y','player_id','achievement_id'],axis=1,inplace=True)
+    tmp=merge.groupby(['name','game_id']).sum()
     return render(request, 'playerDetail.html',
                   {'player': player,'gamedays':gamedays,'achievments':achievements})
 
 def showachievements(request):
     if request.user.is_authenticated is False or request.user.is_superuser is False:
         return HttpResponseRedirect('/login/')
-    achievements=models.Achievement.objects.first()
-    achievements=AchievementSerializer(achievements)
-    achievements=JSONRenderer().render(achievements.data)
+    achievements=pd.DataFrame(models.Achievement.objects.all().values()).to_json(orient="split")
+    achievements=json.loads(achievements)
     return render(request, 'showAchievements.html',{'achievements':achievements})
 

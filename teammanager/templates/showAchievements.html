@@ -4,27 +4,56 @@
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <div id="app">
         <div>
-            [[ achievements ]]
             <table class="table">
                 <tr>
                     <th> Name </th>
+                    <th></th>
                 </tr>
-                <tr v-for="(achievement,i) in achievements" :key="i">
-                <td>
-                    [[achievement]]
-                </td>
+                <tr v-for="(achievement,index) in achievements" :key="index">
+                    <td>
+                        [&achievement[1]&]
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger" style="float: right"@click="remove(index)">remove</button>
+                    </td>
                 </tr>
+                <tr>
+                    <td>
+                        <input v-model="newAchievement" class="form-control" >
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-success"  style="float: right" @click="add">add</button>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 
-
+{{ achievements|json_script:"achievements" }}
     <script>
+    var achievements = JSON.parse(document.getElementById('achievements').textContent)
+
     var app =new Vue({
-        delimiters: ["[[","]]"],
+        delimiters: ["[&","&]"],
         el:'#app',
-        data: {
-            achievements:'{{ achievements }}'
+        data () {
+            return {
+                newAchievement:'',
+                achievements: achievements.data
+            }
         },
+        methods: {
+            add() {
+                this.achievements.push([1,this.newAchievement])
+                this.newAchievement = ''
+            },
+            remove(index) {
+                this.achievements.splice(index,1)
+            }
+        }
     });
+
+    Vue.config.devtools = true
+
     </script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from gamedays.models import Gameday
+from gamedays.models import Gameinfo
 
 # Create your models here.
 
@@ -77,7 +77,6 @@ class PlayerAchievement(models.Model):
     achievement = models.ForeignKey(Achievement, blank=False, null=False, on_delete=models.CASCADE)
     player = models.ForeignKey(UserProfile, blank=False, null=False, on_delete=models.CASCADE)
     value = models.IntegerField(blank=False, null=False)
-    gameday = models.ForeignKey(Gameday, null=False, blank=False, on_delete=models.CASCADE)
-
+    game = models.ForeignKey(Gameinfo,null=False, blank=False, on_delete=models.CASCADE)
     def __str__(self):
         return self.achievement.name + ' ' + self.player.lastname + ' ' + self.player.firstname + ' ' + str(self.value)
