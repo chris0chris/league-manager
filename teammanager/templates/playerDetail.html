@@ -6,25 +6,22 @@
 
 <h1>{{ player.firstname }} {{ player.lastname }}</h1>
 
+    {% if achievements %}
 <table class="table">
     <tr>
-        <th>Game Day</th>
-        {% for categorie in gamedays.categories%}
-            <th>{{categorie}}</th>
+        {% for Title in achievements.0%}
+            <th>{{Title}}</th>
         {% endfor %}
-    </tr>
-{% for gameday in gamedays.items %}
+     </tr>
+    {% for game in achievements %}
     <tr>
-    <td>
-        {{ gameday }}
-    </td>
-    {% for item in gameday %}
-        <td>
-        {{item}}
-        </td>
+        {% for item,value in game.items %}
+            <td>{{ value }}</td>
         {% endfor %}
     </tr>
+    {% endfor %}
 
-{% endfor %}
+
 </table>
+    {% endif %}
 {% endblock %}

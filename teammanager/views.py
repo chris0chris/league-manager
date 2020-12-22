@@ -159,11 +159,30 @@ def playerdetail(request, player_id):
     player = models.UserProfile.objects.get(pk=player_id)
     playerAchievements = pd.DataFrame(models.PlayerAchievement.objects.filter(player=player).values())
     Achievements=pd.DataFrame(models.Achievement.objects.all().values())
-    merge=pd.merge( Achievements,playerAchievements, left_on='id', right_on='achievement_id')
-    merge.drop(['id_x','id_y','player_id','achievement_id'],axis=1,inplace=True)
-    tmp=merge.groupby(['name','game_id']).sum()
+    if not playerAchievements.empty:
+        merge=pd.merge( Achievements,playerAchievements, left_on='id', right_on='achievement_id')
+        merge.drop(['id_x','id_y','player_id','achievement_id'],axis=1,inplace=True)
+        game_dict = dict()
+
+        tmp=[]
+
+        for index,item in Achievements.iterrows():
+            tmp.append(item['name'])
+
+        for a in merge.iterrows():
+            if a[1].game_id not in game_dict.keys():
+                game_dict[a[1].game_id] = {key: 0 for key in tmp}
+                game_dict[a[1].game_id]['game']=a[1].game_id
+            game_dict[a[1].game_id][a[1]['name']] += a[1].value
+
+        result = []
+        for x in game_dict.keys():
+            result.append(game_dict[x])
+    else:
+        result={}
     return render(request, 'playerDetail.html',
-                  {'player': player,'gamedays':gamedays,'achievments':achievements})
+                  {'player': player, 'achievements': result})
+
 
 def showachievements(request):
     if request.user.is_authenticated is False or request.user.is_superuser is False:
