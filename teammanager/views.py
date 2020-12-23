@@ -1,10 +1,12 @@
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.shortcuts import render,redirect
+from django.contrib import messages
 from django import forms
 from teammanager import models
 import pandas as pd
+from django.utils.dateparse import parse_date
 from pandas import DataFrame
 import json
+import csv, io
 
 
 
@@ -29,14 +31,14 @@ def createteam(request):
             form = Teamform(request.POST, request.FILES)
             if form.is_valid():
                 new_Team = form.save()
-                return HttpResponseRedirect('/teammanager/')
+                return redirect(showteams)
             else:
                 form = Teamform()
         else:
             form = Teamform()
         return render(request, 'createTeam.html', {'form': form})
     else:
-        return HttpResponseRedirect('/login/')
+        return redirect('login')
 
 
 def showteams(request):
@@ -67,14 +69,14 @@ def deleteteam(request, team_id):
     if request.user.is_superuser:
         team = models.Team.objects.get(pk=team_id)
         team.delete()
-        return HttpResponseRedirect('/teammanager/')
+        return redirect(showteams)
     else:
-        return HttpResponseRedirect('/login/')
+        return redirect('login')
 
 
 def createuser(request, team_id):
     if request.user.is_authenticated is False:
-        return HttpResponseRedirect('/login/')
+        return redirect('login')
     user = models.UserProfile.objects.get(user=request.user)
 
     if request.user.is_superuser | ((user.team.id == team_id) & user.check_Teammanager()):
@@ -85,19 +87,19 @@ def createuser(request, team_id):
                 team = models.Team.objects.get(pk=team_id)
                 obj.team = team
                 obj.save()
-                return HttpResponseRedirect('/teammanager/team/' + str(team_id))
+                return redirect(teamdetail,team_id=team_id)
             else:
                 form = Userform()
         else:
             form = Userform()
         return render(request, 'createUser.html', {'form': form})
     else:
-        return HttpResponseRedirect('/login/')
+        return redirect('login')
 
 
 def editteam(request, team_id):
     if request.user.is_authenticated is False:
-        return HttpResponseRedirect('/login/')
+        return redirect('login')
 
     team = models.Team.objects.get(pk=team_id)
     user = models.UserProfile.objects.get(user=request.user)
@@ -107,19 +109,19 @@ def editteam(request, team_id):
             form = Teamform(request.POST, instance=team)
             if form.is_valid():
                 form.save()
-                return HttpResponseRedirect('/teammanager/')
+                return redirect(showteams)
             else:
                 form = Teamform(instance=team)
         else:
             form = Teamform(instance=team)
         return render(request, 'editTeam.html', {'form': form, 'team': team})
     else:
-        return HttpResponseRedirect('/login/')
+        return redirect('login')
 
 
 def edituser(request, user_id):
     if request.user.is_authenticated is False:
-        return HttpResponseRedirect('/login/')
+        return redirect('login')
 
     user_editing = models.UserProfile.objects.get(user=request.user)
     user_is_being_edited = models.UserProfile.objects.get(pk=user_id)
@@ -130,19 +132,19 @@ def edituser(request, user_id):
             form = Userform(request.POST, instance=user_is_being_edited)
             if form.is_valid():
                 form.save()
-                return HttpResponseRedirect('/teammanager/team/' + str(user_is_being_edited.team_id))
+                return redirect(teamdetail,team_id=user_is_being_edited.team_id)
             else:
                 form = Userform(instance=user_is_being_edited)
         else:
             form = Userform(instance=user_is_being_edited)
         return render(request, 'editUser.html', {'form': form, 'user': user_is_being_edited})
     else:
-        return HttpResponseRedirect('/login/')
+        return redirect('login')
 
 
 def deleteuser(request, user_id):
     if request.user.is_authenticated is False:
-        return HttpResponseRedirect('/login/')
+        return redirect('login')
 
     user_deleting = models.UserProfile.objects.get(user=request.user)
     user_is_being_deleted = models.UserProfile.objects.get(pk=user_id)
@@ -150,7 +152,7 @@ def deleteuser(request, user_id):
     if request.user.is_superuser | (
             (user_deleting.team == user_is_being_deleted.team) & user_deleting.check_Teammanager()):
         user_is_being_deleted.delete()
-    return HttpResponseRedirect('/teammanager/team/' + str(user_is_being_deleted.team_id))
+    return redirect(teamdetail,team_id=user_is_being_deleted.team_id)
 
 
 def playerdetail(request, player_id):
@@ -183,10 +185,43 @@ def playerdetail(request, player_id):
     return render(request, 'playerDetail.html',
                   {'player': player, 'achievements': result})
 
+def uploadplayerscsv(request,team_id):
+    if request.user.is_authenticated is False or request.user.is_superuser is False:
+        return redirect('login')
+    if request.method == "GET":
+        return render(request,'uploadplayerscsv.html')
+
+    team = list(models.Team.objects.filter(pk=team_id))
+    csv_file = request.FILES['file']
+
+    if not csv_file.name.endswith('.csv') and not csv_file.name.endswith('.CSV'):
+        messages.error(request, 'THIS IS NOT A CSV FILE')
+        return render(request, 'uploadplayerscsv.html')
+    elif not team:
+        messages.error(request, 'TEAM not Found')
+        return render(request, 'uploadplayerscsv.html')
+
+    team = models.Team.objects.get(pk=team_id)
+
+
+    data_set = csv_file.read().decode('ANSI')
+
+    io_string = io.StringIO(data_set)
+    next(io_string)
+    for column in csv.reader(io_string, delimiter=';', quotechar="|"):
+        created = models.UserProfile.objects.update_or_create(
+            team = team,
+            firstname= column[0],
+            lastname= column [1],
+            playernumber= column[2],
+            position= column[3],
+            birth_date= parse_date(column[4])
+        )
+
 
 def showachievements(request):
     if request.user.is_authenticated is False or request.user.is_superuser is False:
-        return HttpResponseRedirect('/login/')
+        return redirect('login')
     achievements=pd.DataFrame(models.Achievement.objects.all().values()).to_json(orient="split")
     achievements=json.loads(achievements)
     return render(request, 'showAchievements.html',{'achievements':achievements})
