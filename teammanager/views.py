@@ -4,7 +4,7 @@ from django import forms
 from teammanager import models
 import pandas as pd
 from django.utils.dateparse import parse_date
-from pandas import DataFrame
+from datetime import datetime
 import json
 import csv, io
 
@@ -24,6 +24,9 @@ class Userform(forms.ModelForm):
     class Meta:
         model = models.UserProfile
         exclude = ['team', 'user']
+
+
+
 
 def createteam(request):
     if request.user.is_superuser:
@@ -215,8 +218,9 @@ def uploadplayerscsv(request,team_id):
             lastname= column [1],
             playernumber= column[2],
             position= column[3],
-            birth_date= parse_date(column[4])
+            birth_date= datetime.strptime(column[4],'%d.%m.%Y')
         )
+    return redirect(teamdetail,team_id=team_id)
 
 
 def showachievements(request):
