@@ -34,7 +34,7 @@ class TestGamedayRetrieveUpdate(WebTest):
 
 class TestGameinfoRetrieveUpdate(WebTest):
 
-    @pytest.mark.xfail
+    # @pytest.mark.xfail
     def test_api_retrieve_gameinfo(self):
         gameday = DBSetup().g62_qualify_finished()
         gameinfo = Gameinfo.objects.filter(gameday=gameday).first()
@@ -58,7 +58,11 @@ class TestGameinfoRetrieveUpdate(WebTest):
             'id_home': 1,
             'home': 'A1',
             'points_home': 3,
+            'fh_home': 2,
+            'sh_home': 1,
             'points_away': 2,
+            'fh_away': 1,
+            'sh_away': 1,
             'away': 'A2',
             'id_away': 2
         }
