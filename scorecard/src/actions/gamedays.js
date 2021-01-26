@@ -1,4 +1,5 @@
 import axios from "axios";
+import { returnErrors } from "./messages";
 import { GET_GAMEDAYS } from "./types";
 
 export const getGamedays = () => (dispatch) => {
@@ -11,5 +12,7 @@ export const getGamedays = () => (dispatch) => {
         payload: res.data,
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) =>
+      dispatch(returnErrors(err.response.data, err.response.status))
+    );
 };
