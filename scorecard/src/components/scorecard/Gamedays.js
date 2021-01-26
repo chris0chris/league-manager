@@ -9,13 +9,28 @@ const Gamedays = (props) => {
     props.getGamedays();
   }, []);
   return (
-    <div>
-      {props.gamedays.map((gameday) => (
-        <div key={gameday.id}>
-          {gameday.date} {gameday.name}
-        </div>
-      ))}
-    </div>
+    <>
+      <h3>Bitte einen Spieltag auswählen</h3>
+      <table className="table table-striped">
+        <thead>
+          <th>Datum</th>
+          <th>Name</th>
+          <th />
+          <tr></tr>
+        </thead>
+        <tbody>
+          {props.gamedays.map((gameday) => (
+            <tr key={gameday.id}>
+              <td>{gameday.date}</td>
+              <td>{gameday.name}</td>
+              <td>
+                <button className="btn btn-success btn-sm">Auswählen</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 };
 
