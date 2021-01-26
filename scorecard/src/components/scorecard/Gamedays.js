@@ -13,10 +13,11 @@ const Gamedays = (props) => {
       <h3>Bitte einen Spieltag auswählen</h3>
       <table className="table table-striped">
         <thead>
-          <th>Datum</th>
-          <th>Name</th>
-          <th />
-          <tr></tr>
+          <tr>
+            <th>Datum</th>
+            <th>Name</th>
+            <th />
+          </tr>
         </thead>
         <tbody>
           {props.gamedays.map((gameday) => (
@@ -24,7 +25,7 @@ const Gamedays = (props) => {
               <td>{gameday.date}</td>
               <td>{gameday.name}</td>
               <td>
-                <button className="btn btn-success btn-sm">Auswählen</button>
+                <button className="btn btn-success btn-sm">Auswählen </button>
               </td>
             </tr>
           ))}
@@ -40,6 +41,7 @@ const mapStateToProps = (state) => ({
 
 Gamedays.propTypes = {
   gamedays: PropTypes.array.isRequired,
+  getGamedays: PropTypes.func.isRequired,
 };
 
 export default connect(mapStateToProps, { getGamedays })(Gamedays);
