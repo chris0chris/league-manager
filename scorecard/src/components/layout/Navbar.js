@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
@@ -7,7 +7,7 @@ import { logoutUser } from "../../actions/auth";
 
 const Navbar = (props) => {
   const { isAuthenticated, user } = props.auth;
-
+  const [expanded, setExpanded] = useState(false);
   const authLinks = (
     <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
       <span className="navbar-text mr-3">
@@ -42,17 +42,21 @@ const Navbar = (props) => {
           Menü
         </a>
         <button
-          className="navbar-toggler"
+          className={`navbar-toggler ${expanded ? "" : "collapsed"}`}
           type="button"
           data-toggle="collapse"
           data-target="#navbarNav"
           aria-controls="navbarNav"
-          aria-expanded="false"
+          aria-expanded={expanded}
           aria-label="Toggle navigation"
+          onClick={() => setExpanded(!expanded)}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
+        <div
+          className={`collapse navbar-collapse ${expanded ? "show" : ""}`}
+          id="navbarNav"
+        >
           {isAuthenticated ? authLinks : guestLinks}
         </div>
       </div>
