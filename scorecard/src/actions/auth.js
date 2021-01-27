@@ -6,6 +6,7 @@ import {
   AUTH_ERROR,
   LOGIN_SUCCESS,
   LOGIN_FAIL,
+  LOGOUT_SUCCESS,
 } from "./types";
 
 export const loadUser = () => (dispatch, getState) => {
@@ -60,6 +61,35 @@ export const loginUser = (username, password) => (dispatch) => {
       dispatch(returnErrors(err.response.data, err.response.status));
       dispatch({
         type: LOGIN_FAIL,
+      });
+    });
+};
+
+export const logoutUser = () => (dispatch, getState) => {
+  const token = getState().authReducer.token;
+
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+
+  if (token) {
+    config.headers["Authorization"] = `Token ${token}`;
+  }
+
+  axios
+    .post("/accounts/auth/logout/", null, config)
+    .then((res) => {
+      dispatch({
+        type: LOGOUT_SUCCESS,
+        payload: res.data,
+      });
+    })
+    .catch((err) => {
+      dispatch(returnErrors(err.response.data, err.response.status));
+      dispatch({
+        type: AUTH_ERROR,
       });
     });
 };
