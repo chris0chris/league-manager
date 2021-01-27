@@ -1,18 +1,35 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
-
-import Navbar from "./layout/Navbar";
-
+import {
+  HashRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from "react-router-dom";
 import { Provider } from "react-redux";
+
 import store from "../store";
+import Navbar from "./layout/Navbar";
+import Login from "./accounts/Login";
+import PrivateRoute from "./common/PrivateRoute";
+import { loadUser } from "../actions/auth";
+
 import Gamedays from "./scorecard/Gamedays";
 
-const App = () => {
+const App = (props) => {
+  useEffect(() => {
+    store.dispatch(loadUser());
+  });
   return (
-    <>
-      <Gamedays />
+    <Router>
+      <div className="container">
+        <Switch>
+          <PrivateRoute exact path="/" component={Gamedays} />
+          <Route exact path="/login" component={Login} />
+        </Switch>
+      </div>
       <Navbar />
-    </>
+    </Router>
   );
 };
 

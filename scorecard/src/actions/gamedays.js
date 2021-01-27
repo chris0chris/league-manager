@@ -5,7 +5,7 @@ import { GET_GAMEDAYS } from "./types";
 export const getGamedays = () => (dispatch) => {
   console.log("calling getGamedays");
   axios
-    .get("/api/gameday/list")
+    .get("/api/gameday/list/")
     .then((res) => {
       dispatch({
         type: GET_GAMEDAYS,
