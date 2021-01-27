@@ -138,4 +138,4 @@ server*
 /**/node_modules/
 
 #react
-/**/main.js
+/**/**/main.js
