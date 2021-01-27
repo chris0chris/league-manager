@@ -5,7 +5,6 @@ import { GET_GAMEDAYS } from "./types";
 import { tokenConfig } from "../actions/auth";
 
 export const getGamedays = () => (dispatch, getState) => {
-  console.log("calling getGamedays");
   axios
     .get("/api/gameday/list/", tokenConfig(getState))
     .then((res) => {

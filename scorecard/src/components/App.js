@@ -14,7 +14,8 @@ import Login from "./accounts/Login";
 import PrivateRoute from "./common/PrivateRoute";
 import { loadUser } from "../actions/auth";
 
-import Gamedays from "./scorecard/Gamedays";
+import SelectGame from "./scorecard/SelectGame";
+import Officials from "./scorecard/Officials";
 
 const App = (props) => {
   useEffect(() => {
@@ -24,7 +25,8 @@ const App = (props) => {
     <Router>
       <div className="container">
         <Switch>
-          <PrivateRoute exact path="/" component={Gamedays} />
+          <PrivateRoute exact path="/" component={SelectGame} />
+          <PrivateRoute exact path="/officials" component={Officials} />
           <Route exact path="/login" component={Login} />
         </Switch>
       </div>
