@@ -13,23 +13,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.contrib.auth import views as auth_view
-from django.urls import path, include
-from django.conf.urls.static import static
 from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import path, include
 
 from league_manager.views import homeview
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('gamedays.api.urls')),
-    path('teammanager/', include('teammanager.urls')),
-    path('scorecard/', include('scorecard.urls')),
-    path('leaguetable/', include('league_table.urls')),
-    path('gamedays/', include('gamedays.urls')),
-    path('', homeview),
-    path('login/', auth_view.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('logout/', auth_view.LogoutView.as_view(template_name='registration/logout.html'), name='logout'),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+                  path('admin/', admin.site.urls),
+                  path('api/', include('gamedays.api.urls')),
+                  path('teammanager/', include('teammanager.urls')),
+                  path('scorecard/', include('scorecard.urls')),
+                  path('leaguetable/', include('league_table.urls')),
+                  path('gamedays/', include('gamedays.urls')),
+                  path('', homeview),
+                  # path('login/', auth_view.LoginView.as_view(template_name='registration/login.html'), name='login'),
+                  # path('logout/', auth_view.LogoutView.as_view(template_name='registration/logout.html'), name='logout'),
+                  # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+                  path('accounts/', include('accounts.urls'))
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

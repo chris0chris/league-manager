@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'league_table',
     'corsheaders',
     'teammanager',
+    'accounts',
+    'knox',
 ]
 
 MIDDLEWARE = [
@@ -147,13 +149,14 @@ LOGIN_URL = 'login'
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.IsAuthenticatedOrReadOnly'
-    # ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    # ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'rest_framework.authentication.BasicAuthentication',
+        'knox.auth.TokenAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
-    ]
+    )
 }
 
 # ToDo deleteMe
