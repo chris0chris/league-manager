@@ -9,12 +9,20 @@ const Navbar = (props) => {
   const { isAuthenticated, user } = props.auth;
 
   const authLinks = (
-    <button
-      onClick={props.logoutUser}
-      className="nav-link btn btn-info btn-sm text-light"
-    >
-      Logout
-    </button>
+    <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
+      <span className="navbar-text mr-3">
+        <strong>{user ? `Hallo ${user.username}` : ""}</strong>
+      </span>
+
+      <li className="nav-item">
+        <button
+          onClick={props.logoutUser}
+          className="nav-link btn btn-info btn-sm text-light"
+        >
+          Logout
+        </button>
+      </li>
+    </ul>
   );
 
   const guestLinks = (
@@ -44,8 +52,9 @@ const Navbar = (props) => {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbarNav"></div>
-        {isAuthenticated ? authLinks : guestLinks}
+        <div className="collapse navbar-collapse" id="navbarNav">
+          {isAuthenticated ? authLinks : guestLinks}
+        </div>
       </div>
     </nav>
   );

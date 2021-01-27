@@ -2,10 +2,12 @@ import axios from "axios";
 import { returnErrors } from "./messages";
 import { GET_GAMEDAYS } from "./types";
 
-export const getGamedays = () => (dispatch) => {
+import { tokenConfig } from "../actions/auth";
+
+export const getGamedays = () => (dispatch, getState) => {
   console.log("calling getGamedays");
   axios
-    .get("/api/gameday/list/")
+    .get("/api/gameday/list/", tokenConfig(getState))
     .then((res) => {
       dispatch({
         type: GET_GAMEDAYS,

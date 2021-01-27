@@ -12,20 +12,10 @@ import {
 export const loadUser = () => (dispatch, getState) => {
   dispatch({ type: USER_LOADING });
 
-  const token = getState().authReducer.token;
-
-  const config = {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
-
-  if (token) {
-    config.headers["Authorization"] = `Token ${token}`;
-  }
+  const header = tokenConfig(getState);
 
   axios
-    .get("/accounts/auth/user/", config)
+    .get("/accounts/auth/user/", header)
     .then((res) => {
       dispatch({
         type: USER_LOADED,
@@ -66,20 +56,10 @@ export const loginUser = (username, password) => (dispatch) => {
 };
 
 export const logoutUser = () => (dispatch, getState) => {
-  const token = getState().authReducer.token;
-
-  const config = {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
-
-  if (token) {
-    config.headers["Authorization"] = `Token ${token}`;
-  }
+  const header = tokenConfig(getState);
 
   axios
-    .post("/accounts/auth/logout/", null, config)
+    .post("/accounts/auth/logout/", null, header)
     .then((res) => {
       dispatch({
         type: LOGOUT_SUCCESS,
@@ -92,4 +72,20 @@ export const logoutUser = () => (dispatch, getState) => {
         type: AUTH_ERROR,
       });
     });
+};
+
+export const tokenConfig = (getState) => {
+  const token = getState().authReducer.token;
+
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+
+  if (token) {
+    config.headers["Authorization"] = `Token ${token}`;
+  }
+
+  return config;
 };
