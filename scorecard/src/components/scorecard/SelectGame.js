@@ -4,6 +4,7 @@ import Gamedays from "./Gamedays";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { getGamedays } from "../../actions/gamedays";
+import { getGames } from "../../actions/games";
 
 const SelectGame = (props) => {
   useEffect(() => {
@@ -12,8 +13,12 @@ const SelectGame = (props) => {
   }, [props.gamedays.length]);
   return (
     <>
-      {props.gamedays.length == 1 ? "" : <Gamedays gamedays={props.gamedays} />}
-      <Games />
+      {props.gamedays.length == 1 || props.games.length > 0 ? (
+        ""
+      ) : (
+        <Gamedays gamedays={props.gamedays} onClick={props.getGames} />
+      )}
+      <Games games={props.games} />
     </>
   );
 };
@@ -25,6 +30,7 @@ SelectGame.propTypes = {
 
 const mapStateToProps = (state) => ({
   gamedays: state.gamedaysReducer.gamedays,
+  games: state.gamesReducer.games,
 });
 
-export default connect(mapStateToProps, { getGamedays })(SelectGame);
+export default connect(mapStateToProps, { getGamedays, getGames })(SelectGame);
