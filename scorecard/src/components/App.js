@@ -8,6 +8,8 @@ import {
 } from "react-router-dom";
 import { Provider } from "react-redux";
 
+import "regenerator-runtime/runtime";
+
 import { store } from "../store";
 import Navbar from "./layout/Navbar";
 import Login from "./accounts/Login";

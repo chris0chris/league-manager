@@ -4,8 +4,8 @@ import { GET_GAMES } from "./types";
 
 import { tokenConfig } from "../actions/auth";
 
-export const getGames = (gamedayId) => (dispatch, getState) => {
-  axios
+export const getGames = (gamedayId) => async (dispatch, getState) => {
+  await axios
     .get(`/api/gameday/${gamedayId}/details?get=schedule&orient=records`)
     .then((res) => {
       dispatch({

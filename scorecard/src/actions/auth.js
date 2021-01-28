@@ -9,12 +9,12 @@ import {
   LOGOUT_SUCCESS,
 } from "./types";
 
-export const loadUser = () => (dispatch, getState) => {
+export const loadUser = () => async (dispatch, getState) => {
   dispatch({ type: USER_LOADING });
 
   const header = tokenConfig(getState);
 
-  axios
+  await axios
     .get("/accounts/auth/user/", header)
     .then((res) => {
       dispatch({
@@ -30,7 +30,7 @@ export const loadUser = () => (dispatch, getState) => {
     });
 };
 
-export const loginUser = (username, password) => (dispatch) => {
+export const loginUser = (username, password) => async (dispatch) => {
   const config = {
     headers: {
       "Content-Type": "application/json",
@@ -39,7 +39,7 @@ export const loginUser = (username, password) => (dispatch) => {
 
   const body = JSON.stringify({ username, password });
 
-  axios
+  await axios
     .post("/accounts/auth/login/", body, config)
     .then((res) => {
       dispatch({
@@ -55,10 +55,10 @@ export const loginUser = (username, password) => (dispatch) => {
     });
 };
 
-export const logoutUser = () => (dispatch, getState) => {
+export const logoutUser = () => async (dispatch, getState) => {
   const header = tokenConfig(getState);
 
-  axios
+  await axios
     .post("/accounts/auth/logout/", null, header)
     .then((res) => {
       dispatch({
