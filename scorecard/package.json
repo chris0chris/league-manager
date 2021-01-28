@@ -7,7 +7,8 @@
     "test": "__tests__"
   },
   "scripts": {
-    "dev": "webpack --mode development --watch --entry ./src/index.js --output-path ./static/scorecard/js",
+    "dev": "webpack --mode development --entry ./src/index.js --output-path ./static/scorecard/js",
+    "dev:watch": "webpack --mode development --watch --entry ./src/index.js --output-path ./static/scorecard/js",
     "build": "webpack --mode production --entry ./src/index.js --output-path ./static/scorecard/js",
     "test": "jest --maxWorkers=1",
     "test:watch": "jest --watch --maxWorkers=1"
@@ -25,7 +26,9 @@
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.6.1",
     "jest": "^26.6.3",
+    "moxios": "^0.4.0",
     "redux-mock-store": "^1.5.4",
+    "regenerator-runtime": "^0.11.1",
     "webpack": "^5.17.0",
     "webpack-cli": "^4.4.0"
   },
@@ -42,10 +45,11 @@
   },
   "jest": {
     "setupFilesAfterEnv": [
-      "<rootDir>__tests__/setup/setupEnzyme.js"
+      "<rootDir>/src/__tests__/setup/setupEnzyme.js"
     ],
     "testPathIgnorePatterns": [
-      "<rootDir>/__tests__/setup/"
+      "<rootDir>/src/__tests__/setup/",
+      "<rootDir>/src/__tests__/Utils.js"
     ]
   }
 }

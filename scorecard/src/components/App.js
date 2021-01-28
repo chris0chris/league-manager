@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { Provider } from "react-redux";
 
-import store from "../store";
+import { store } from "../store";
 import Navbar from "./layout/Navbar";
 import Login from "./accounts/Login";
 import PrivateRoute from "./common/PrivateRoute";

@@ -4,8 +4,8 @@ import { GET_GAMEDAYS } from "./types";
 
 import { tokenConfig } from "../actions/auth";
 
-export const getGamedays = () => (dispatch, getState) => {
-  axios
+export const getGamedays = () => async (dispatch, getState) => {
+  await axios
     .get("/api/gameday/list/", tokenConfig(getState))
     .then((res) => {
       dispatch({
