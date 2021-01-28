@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "webpack --mode development --watch --entry ./src/index.js --output-path ./static/scorecard/js",
     "build": "webpack --mode production --entry ./src/index.js --output-path ./static/scorecard/js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +25,7 @@
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.6.1",
     "jest": "^26.6.3",
+    "redux-mock-store": "^1.5.4",
     "webpack": "^5.17.0",
     "webpack-cli": "^4.4.0"
   },
@@ -37,5 +39,13 @@
     "redux": "^4.0.5",
     "redux-devtools-extension": "^2.13.8",
     "redux-thunk": "^2.3.0"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "<rootDir>__tests__/setup/setupEnzyme.js"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/__tests__/setup/"
+    ]
   }
 }
