@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 
 const Gamedays = ({ gamedays, onClick: getGames }) => {
-  console.log(gamedays);
   return (
     <>
       <h3>Bitte einen Spieltag auswählen</h3>
@@ -15,7 +14,7 @@ const Gamedays = ({ gamedays, onClick: getGames }) => {
           </tr>
         </thead>
         <tbody>
-          {/* {gamedays.map((gameday) => (
+          {gamedays.map((gameday) => (
             <tr key={gameday.id}>
               <td>{gameday.date}</td>
               <td>{gameday.name}</td>
@@ -28,7 +27,7 @@ const Gamedays = ({ gamedays, onClick: getGames }) => {
                 </button>
               </td>
             </tr>
-          ))} */}
+          ))}
         </tbody>
       </table>
     </>
@@ -37,6 +36,7 @@ const Gamedays = ({ gamedays, onClick: getGames }) => {
 
 Gamedays.propTypes = {
   gamedays: PropTypes.array.isRequired,
+  onClick: PropTypes.func.isRequired,
 };
 
 export default Gamedays;

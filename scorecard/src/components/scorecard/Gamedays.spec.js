@@ -10,9 +10,9 @@ const setup = (props = {}) => {
 describe("Gamedays Component", () => {
   let component;
   beforeEach(() => {
-    component = setup({ gamedays: null, onClick: null });
+    component = setup({ gamedays: [], onClick: () => {} });
   });
-  fit("It should render without erros", () => {
+  it("It should render without erros", () => {
     const wrapper = component.find("h3");
     expect(wrapper.length).toBe(1);
   });
