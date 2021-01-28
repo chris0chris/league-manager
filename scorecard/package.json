@@ -4,13 +4,13 @@
   "description": "",
   "main": "index.js",
   "directories": {
-    "test": "tests"
+    "test": "__tests__"
   },
   "scripts": {
     "dev": "webpack --mode development --watch --entry ./src/index.js --output-path ./static/scorecard/js",
     "build": "webpack --mode production --entry ./src/index.js --output-path ./static/scorecard/js",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "jest --maxWorkers=1",
+    "test:watch": "jest --watch --maxWorkers=1"
   },
   "keywords": [],
   "author": "",
