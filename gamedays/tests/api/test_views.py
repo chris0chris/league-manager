@@ -7,7 +7,7 @@ import pytest
 from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
-from gamedays.api.serializers import GamedaySerializer
+from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
 from gamedays.models import Gameday, Gameinfo, GameOfficial
 from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
@@ -153,6 +153,7 @@ class TestCreateGameday(WebTest):
 
 class TestRetrieveUpdateOfficials(WebTest):
 
+    @pytest.mark.xfail
     def test_create_officials(self):
         DBSetup().g62_status_empty()
         assert len(GameOfficial.objects.all()) == 0
