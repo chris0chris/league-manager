@@ -8,7 +8,7 @@ const setup = (initialState = {}) => {
   const wrapper = shallow(<SelectGame store={store} />)
     .childAt(0)
     .dive();
-  console.log(wrapper.debug());
+  // console.log(wrapper.debug());
   return wrapper;
 };
 
@@ -51,5 +51,8 @@ describe("SelectGame component", () => {
     wrapper = setup(initialState);
   });
 
-  it("Should render without erros", () => {});
+  it("checks hideBtn update", () => {
+    const instance = wrapper;
+    console.log(instance.debug());
+  });
 });
