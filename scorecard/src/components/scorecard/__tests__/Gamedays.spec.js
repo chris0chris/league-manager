@@ -1,5 +1,7 @@
 import React from "react";
-import { shallow } from "enzyme";
+// import { shallow } from "enzyme";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import Gamedays from "../Gamedays";
 import { ONE_GAMEDAY } from "../../../__tests__/testdata/gamedaysData";
 
@@ -10,22 +12,19 @@ const setup = () => {
     ...ONE_GAMEDAY,
     onClick: mockFunc,
   };
-  const component = shallow(<Gamedays {...initialState} />);
+  const component = render(<Gamedays {...initialState} />);
   return component;
 };
 
-describe("Gamedays Component", () => {
-  it("It should render without erros", () => {
-    let component = setup();
-    const wrapper = component.find("[data-testid='row-entry']");
-    expect(wrapper.length).toBe(1);
+describe("Gamedays component", () => {
+  it("should render component", () => {
+    setup();
+    expect(screen.getAllByRole("row").length).toBe(2);
   });
 
-  it("Should emit callback on click event", () => {
-    let component = setup();
-    const button = component.find("button").at(0);
-    button.simulate("click");
-    const callback = mockFunc.mock.calls.length;
-    expect(callback).toBe(1);
+  it("should emit callback on click event", () => {
+    setup();
+    userEvent.click(screen.getByRole("button"));
+    expect(mockFunc.mock.calls.length).toBe(1);
   });
 });

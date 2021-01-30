@@ -20,6 +20,9 @@
     "@babel/core": "^7.12.10",
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-react": "^7.12.10",
+    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/react": "^11.2.3",
+    "@testing-library/user-event": "^12.6.2",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.4.1",
     "babel-loader": "^8.2.2",
     "babel-plugin-transform-class-properties": "^6.24.1",
@@ -45,7 +48,7 @@
   },
   "jest": {
     "setupFilesAfterEnv": [
-      "<rootDir>/src/__tests__/setup/setupEnzyme.js"
+      "<rootDir>/src/__tests__/setup/jest.setup.js"
     ],
     "testPathIgnorePatterns": [
       "<rootDir>/src/__tests__/setup/",

@@ -5,7 +5,6 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { getGamedays } from "../../actions/gamedays";
 import { getGames } from "../../actions/games";
-import Entry from "../layout/Entry";
 
 const initialState = {
   hideBtn: false,
@@ -24,11 +23,10 @@ const SelectGame = (props) => {
     setHideBtn(!hideBtn);
     props.getGames(id);
   };
-  props.gamedays.splice(2, 2);
-  console.log("gds", props.gamedays);
+  // props.gamedays.splice(2, 2);
+  // console.log("gds", props.gamedays);
   return (
     <>
-      {/* <Entry /> */}
       <Gamedays gamedays={props.gamedays} onClick={meth} />
 
       <Games games={props.games} />
