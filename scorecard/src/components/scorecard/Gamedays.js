@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 
 const Gamedays = ({ gamedays, onClick: getGames }) => {
+  const [activeRow, setActiveRow] = useState(null);
   return (
     <>
       <h3>Bitte einen Spieltag auswählen</h3>
@@ -15,12 +16,19 @@ const Gamedays = ({ gamedays, onClick: getGames }) => {
         </thead>
         <tbody>
           {gamedays.map((gameday) => (
-            <tr key={gameday.id}>
+            <tr
+              key={gameday.id}
+              className={gameday.id === activeRow ? "bg-success" : ""}
+              data-testid="row-entry"
+            >
               <td>{gameday.date}</td>
               <td>{gameday.name}</td>
               <td>
                 <button
-                  onClick={() => getGames(gameday.id)}
+                  onClick={(e) => {
+                    setActiveRow(gameday.id);
+                    getGames(gameday.id);
+                  }}
                   className="btn btn-success btn-sm"
                 >
                   Auswählen

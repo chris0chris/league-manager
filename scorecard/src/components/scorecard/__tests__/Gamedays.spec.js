@@ -1,28 +1,28 @@
 import React from "react";
 import { shallow } from "enzyme";
-import Gamedays from "./Gamedays";
+import Gamedays from "../Gamedays";
+import { ONE_GAMEDAY } from "../../../__tests__/testdata/gamedaysData";
 
-const setup = (props = {}) => {
-  const component = shallow(<Gamedays {...props} />);
+let mockFunc = jest.fn();
+
+const setup = () => {
+  const initialState = {
+    ...ONE_GAMEDAY,
+    onClick: mockFunc,
+  };
+  const component = shallow(<Gamedays {...initialState} />);
   return component;
 };
 
 describe("Gamedays Component", () => {
-  let component;
-  let mockFunc;
-  beforeEach(() => {
-    mockFunc = jest.fn();
-    component = setup({
-      gamedays: [{ id: 0, date: "date", name: "Test Gameday" }],
-      onClick: mockFunc,
-    });
-  });
   it("It should render without erros", () => {
-    const wrapper = component.find("h3");
+    let component = setup();
+    const wrapper = component.find("[data-testid='row-entry']");
     expect(wrapper.length).toBe(1);
   });
 
   it("Should emit callback on click event", () => {
+    let component = setup();
     const button = component.find("button").at(0);
     button.simulate("click");
     const callback = mockFunc.mock.calls.length;
