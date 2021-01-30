@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 
-const Gamedays = ({ gamedays, onClick: getGames }) => {
+const Gamedays = ({ gamedays, onClick: emitEvent }) => {
   const [activeRow, setActiveRow] = useState(null);
   return (
     <>
@@ -19,7 +19,6 @@ const Gamedays = ({ gamedays, onClick: getGames }) => {
             <tr
               key={gameday.id}
               className={gameday.id === activeRow ? "bg-success" : ""}
-              data-testid="row-entry"
             >
               <td>{gameday.date}</td>
               <td>{gameday.name}</td>
@@ -27,7 +26,7 @@ const Gamedays = ({ gamedays, onClick: getGames }) => {
                 <button
                   onClick={(e) => {
                     setActiveRow(gameday.id);
-                    getGames(gameday.id);
+                    emitEvent(gameday.id);
                   }}
                   className="btn btn-success btn-sm"
                 >

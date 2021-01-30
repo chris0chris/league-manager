@@ -1,6 +1,6 @@
 import React from "react";
 
-const Games = ({ games }) => {
+const Games = ({ games, onClick: emitEvent }) => {
   return (
     <>
       <h3>Bitte Spiel auswählen</h3>
@@ -25,7 +25,7 @@ const Games = ({ games }) => {
               </td>
               <td>
                 <button
-                  // onClick={() => getGames(gameday.id)}
+                  onClick={() => emitEvent(game.id)}
                   className="btn btn-success btn-sm"
                 >
                   Start

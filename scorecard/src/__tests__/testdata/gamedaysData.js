@@ -1,12 +1,18 @@
 const GAMEDAY_1 = {
-  id: "1",
+  id: 1,
+  name: "Iron Bowl 1",
   date: "2020-07-12",
-  name: "Test Gameday 1",
+  start: "10:00",
+  format: "62",
+  author: 2,
 };
 const GAMEDAY_2 = {
-  id: "2",
+  id: 33,
+  name: "7 Teams 2 Felder - Aux Bowl II",
   date: "2020-07-12",
-  name: "Test Gameday 2",
+  start: "10:00",
+  format: "62",
+  author: 1,
 };
 
 export const ONE_GAMEDAY = {
