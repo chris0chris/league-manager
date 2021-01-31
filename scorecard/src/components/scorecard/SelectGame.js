@@ -5,31 +5,33 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { getGamedays } from "../../actions/gamedays";
 import { getGames } from "../../actions/games";
+import { Redirect } from "react-router-dom";
+import { OFFICIALS_URL } from "../common/urls";
 
 const initialState = {
   hideBtn: false,
 };
 
 const SelectGame = (props) => {
-  const [hideBtn, setHideBtn] = useState(false);
+  const [isGameLoaded, setLoadGame] = useState(false);
   useEffect(() => {
-    console.log("before getGamedays", props.gamedays);
     props.getGamedays();
-    console.log("after getGamedays", props.gamedays);
   }, [props.gamedays.length]);
 
   const meth = (id) => {
-    console.log("onClick called", id);
-    setHideBtn(!hideBtn);
     props.getGames(id);
   };
-  // props.gamedays.splice(2, 2);
-  // console.log("gds", props.gamedays);
+
+  const loadGame = () => {
+    setLoadGame(!isGameLoaded);
+  };
+  if (isGameLoaded) {
+    return <Redirect to={OFFICIALS_URL} />;
+  }
   return (
     <>
       <Gamedays gamedays={props.gamedays} onClick={meth} />
-
-      <Games games={props.games} />
+      <Games games={props.games} onClick={loadGame} />)
     </>
   );
 };

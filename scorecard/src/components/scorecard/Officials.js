@@ -1,6 +1,6 @@
 import React from "react";
 
-const Officials = () => {
+const Officials = (props) => {
   return (
     <div>
       <h2>Officials :-)</h2>

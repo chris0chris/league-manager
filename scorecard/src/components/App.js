@@ -14,6 +14,7 @@ import { store } from "../store";
 import Navbar from "./layout/Navbar";
 import Login from "./accounts/Login";
 import PrivateRoute from "./common/PrivateRoute";
+import { LOGIN_URL, OFFICIALS_URL, ROOT_URL } from "./common/urls";
 import { loadUser } from "../actions/auth";
 
 import SelectGame from "./scorecard/SelectGame";
@@ -27,9 +28,12 @@ const App = (props) => {
     <Router>
       <div className="container">
         <Switch>
-          <PrivateRoute exact path="/" component={SelectGame} />
-          <PrivateRoute exact path="/officials" component={Officials} />
-          <Route exact path="/login" component={Login} />
+          {console.log("url: /")}
+          <PrivateRoute exact path={ROOT_URL} component={SelectGame} />
+          {console.log("url: /officials")}
+          <PrivateRoute exact path={OFFICIALS_URL} component={Officials} />
+          {console.log("url: /login")}
+          <Route exact path={LOGIN_URL} component={Login} />
         </Switch>
       </div>
       <Navbar />
