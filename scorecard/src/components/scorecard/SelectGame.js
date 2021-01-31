@@ -18,7 +18,7 @@ const SelectGame = (props) => {
     props.getGamedays();
   }, [props.gamedays.length]);
 
-  const meth = (id) => {
+  const loadGamesForGameday = (id) => {
     props.getGames(id);
   };
 
@@ -30,8 +30,8 @@ const SelectGame = (props) => {
   }
   return (
     <>
-      <Gamedays gamedays={props.gamedays} onClick={meth} />
-      <Games games={props.games} onClick={loadGame} />)
+      <Gamedays gamedays={props.gamedays} onClick={loadGamesForGameday} />
+      <Games games={props.games} onClick={loadGame} />
     </>
   );
 };
