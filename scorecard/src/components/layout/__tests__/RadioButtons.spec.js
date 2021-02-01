@@ -42,7 +42,6 @@ describe("RadioButtons component", () => {
   });
   it("should propagate the correct explicit value", () => {
     setup("someValue");
-    console.log("explicit");
     userEvent.click(screen.getByText("textFirstButton"));
     expect(mockFunk.mock.calls[0][0]).toBe("someValue");
   });

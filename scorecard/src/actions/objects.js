@@ -1,5 +1,6 @@
 export class GameSetup {
   constructor(
+    gameId = null,
     scJudge = "",
     referee = "",
     downJudge = "",
@@ -9,6 +10,7 @@ export class GameSetup {
     fhPossession = "",
     direction = ""
   ) {
+    this.gameId = gameId;
     this.scJudge = scJudge;
     this.referee = referee;
     this.downJudge = downJudge;

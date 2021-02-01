@@ -22,6 +22,7 @@ export const Officials = (props) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     const gameSetup = new GameSetup(
+      selectedGame.id,
       scJudge,
       referee,
       downJudge,
@@ -31,7 +32,6 @@ export const Officials = (props) => {
       fhPossession,
       direction
     );
-    console.log("submitting", gameSetup);
     setIsSuccessfulSubmitted(true);
   };
 

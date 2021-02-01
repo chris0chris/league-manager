@@ -12,6 +12,7 @@ import { OFFICIALS_URL } from "../../common/urls";
 
 let container;
 const page_text = "Officials Page";
+let store;
 
 const setup = () => {
   const initialState = {
@@ -22,7 +23,7 @@ const setup = () => {
       ...TWO_GAMES,
     },
   };
-  const store = testStore(initialState);
+  store = testStore(initialState);
   container = render(
     <Router>
       <SelectGame store={store} />
@@ -40,9 +41,8 @@ describe("SelectGame component", () => {
     })[1];
     userEvent.click(firstStartButton);
     expect(screen.getByText(page_text)).toBeTruthy();
-
-    // expect(container).toBeEmptyDOMElement();
-    // expect(wrapper.find("Entry").length).toBe(4);
-    // console.log(instance.debug());
+    expect(store.getState().gamesReducer.selectedGame).toEqual(
+      TWO_GAMES.games[1]
+    );
   });
 });

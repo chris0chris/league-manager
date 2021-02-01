@@ -11,6 +11,7 @@ import { assert } from "chai";
 
 let mockFunc = jest.fn();
 const selectedGame = GAME_PAIR_1;
+let store;
 
 const setup = () => {
   const initialState = {
@@ -21,7 +22,7 @@ const setup = () => {
       selectedGame: GAME_PAIR_1,
     },
   };
-  const store = testStore(initialState);
+  store = testStore(initialState);
   render(
     <Router>
       <Officials store={store} />
@@ -60,11 +61,5 @@ describe("Officials component", () => {
     userEvent.click(screen.getByTitle("directionLeft"));
     userEvent.click(screen.getByText("Spiel starten"));
     expect(screen.getByText("Some Text")).toBeInTheDocument();
-  });
-  it("should test", () => {
-    const g = new GameSetup();
-    g.scJudge = "hello judge";
-    console.log(g.scJudge);
-    // assert(g.scJudge == "", "asldj");
   });
 });
