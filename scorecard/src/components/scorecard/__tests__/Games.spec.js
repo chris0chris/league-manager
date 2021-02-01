@@ -26,6 +26,6 @@ describe("Games component", () => {
     const firstRowButton = screen.getAllByRole("button")[0];
     userEvent.click(firstRowButton);
     expect(mockFunc.mock.calls.length).toBe(1);
-    expect(mockFunc.mock.calls[0][0]).toBe(52);
+    expect(mockFunc.mock.calls[0][0]).toBe(0);
   });
 });

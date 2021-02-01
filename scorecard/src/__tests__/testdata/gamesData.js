@@ -1,4 +1,4 @@
-const GAME_PAIR_1 = {
+export const GAME_PAIR_1 = {
   scheduled: "10:00:00",
   field: 1,
   officials: "Rheda",

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { returnErrors } from "./messages";
-import { GET_GAMES } from "./types";
+import { GET_GAMES, SET_SELECTED_GAME } from "./types";
 
 import { tokenConfig } from "../actions/auth";
 
@@ -16,4 +16,11 @@ export const getGames = (gamedayId) => async (dispatch, getState) => {
     .catch((err) =>
       dispatch(returnErrors(err.response.data, err.response.status))
     );
+};
+
+export const setSelectedGame = (selectedGame) => (dispatch) => {
+  dispatch({
+    type: SET_SELECTED_GAME,
+    payload: selectedGame,
+  });
 };

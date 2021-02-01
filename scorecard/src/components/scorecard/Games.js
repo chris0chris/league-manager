@@ -14,7 +14,7 @@ const Games = ({ games, onClick: emitEvent }) => {
           </tr>
         </thead>
         <tbody>
-          {games.map((game) => (
+          {games.map((game, index) => (
             <tr key={game.id}>
               <td>{game.scheduled}</td>
               <td>{game.field}</td>
@@ -25,7 +25,7 @@ const Games = ({ games, onClick: emitEvent }) => {
               </td>
               <td>
                 <button
-                  onClick={() => emitEvent(game.id)}
+                  onClick={() => emitEvent(index)}
                   className="btn btn-success btn-sm"
                 >
                   Start

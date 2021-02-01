@@ -1,4 +1,4 @@
-import { GET_GAMES } from "../actions/types.js";
+import { GET_GAMES, SET_SELECTED_GAME } from "../actions/types.js";
 
 const initialState = {
   games: [],
@@ -11,7 +11,11 @@ export default (state = initialState, action) => {
         ...state,
         games: action.payload,
       };
-
+    case SET_SELECTED_GAME:
+      return {
+        ...state,
+        selectedGame: action.payload,
+      };
     default:
       return state;
   }

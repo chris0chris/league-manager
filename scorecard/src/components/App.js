@@ -28,11 +28,8 @@ const App = (props) => {
     <Router>
       <div className="container">
         <Switch>
-          {console.log("url: /")}
           <PrivateRoute exact path={ROOT_URL} component={SelectGame} />
-          {console.log("url: /officials")}
           <PrivateRoute exact path={OFFICIALS_URL} component={Officials} />
-          {console.log("url: /login")}
           <Route exact path={LOGIN_URL} component={Login} />
         </Switch>
       </div>
