@@ -1,7 +1,10 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-const RadioButtons = ({ name, buttonInfos }) => {
+const RadioButtons = ({ name, buttonInfos, onChange: setValue }) => {
+  const handleChange = (value) => {
+    setValue(value);
+  };
   return (
     <div className="row mt-3">
       {buttonInfos.map((buttonInfo, index) => (
@@ -12,6 +15,8 @@ const RadioButtons = ({ name, buttonInfos }) => {
             name={name}
             id={buttonInfo.id}
             autoComplete="off"
+            value={buttonInfo.value ? buttonInfo.value : buttonInfo.text}
+            onChange={(ev) => handleChange(ev.target.value)}
             required
           />
           <label className="btn btn-outline-secondary" htmlFor={buttonInfo.id}>
@@ -25,6 +30,7 @@ const RadioButtons = ({ name, buttonInfos }) => {
 
 RadioButtons.propTypes = {
   name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
   buttonInfos: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

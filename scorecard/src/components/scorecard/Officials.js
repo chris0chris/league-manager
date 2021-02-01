@@ -6,13 +6,32 @@ import RadioButtons from "../layout/RadioButtons";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { Redirect } from "react-router-dom";
 import { DETAILS_URL } from "../common/urls";
+import { GameSetup } from "../../actions/objects";
 
 export const Officials = (props) => {
   const selectedGame = props.selectedGame;
   const [isSuccessfulSubmitted, setIsSuccessfulSubmitted] = useState(false);
+  const [scJudge, setScJudge] = useState("");
+  const [referee, setReferee] = useState("");
+  const [downJudge, setDownJudge] = useState("");
+  const [fieldJudge, setFieldJudge] = useState("");
+  const [sideJudge, setSideJudge] = useState("");
+  const [ct, setCt] = useState();
+  const [fhPossession, setFhPossession] = useState("");
+  const [direction, setDirection] = useState("");
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log("submitting");
+    const gameSetup = new GameSetup(
+      scJudge,
+      referee,
+      downJudge,
+      fieldJudge,
+      sideJudge,
+      ct,
+      fhPossession,
+      direction
+    );
+    console.log("submitting", gameSetup);
     setIsSuccessfulSubmitted(true);
   };
 
@@ -25,11 +44,36 @@ export const Officials = (props) => {
         Feld {selectedGame.field}: {selectedGame.home} vs {selectedGame.away}
       </h4>
       <form onSubmit={handleSubmit}>
-        <FloatingInput id="scJudgeName" text="Scorecard Judge-Name" />
-        <FloatingInput id="referee" text="Referee-Name" />
-        <FloatingInput id="downJudge" text="Down Judge-Name" />
-        <FloatingInput id="fieldJudge" text="Field Judge-Name" />
-        <FloatingInput id="sideJudge" text="Side Judge-Name" />
+        <FloatingInput
+          id="scJudgeName"
+          text="Scorecard Judge-Name"
+          value={scJudge}
+          onChange={setScJudge}
+        />
+        <FloatingInput
+          id="referee"
+          text="Referee-Name"
+          value={referee}
+          onChange={setReferee}
+        />
+        <FloatingInput
+          id="downJudge"
+          text="Down Judge-Name"
+          value={downJudge}
+          onChange={setDownJudge}
+        />
+        <FloatingInput
+          id="fieldJudge"
+          text="Field Judge-Name"
+          value={fieldJudge}
+          onChange={setFieldJudge}
+        />
+        <FloatingInput
+          id="sideJudge"
+          text="Side Judge-Name"
+          value={sideJudge}
+          onChange={setSideJudge}
+        />
         <div className="row mt-3">
           <div>
             Münzwahl hat:{" "}
@@ -40,6 +84,7 @@ export const Officials = (props) => {
         </div>
         <RadioButtons
           name="coinToss"
+          onChange={setCt}
           buttonInfos={[
             { id: "ctWon", text: "Gewonnen" },
             { id: "ctLost", text: "Verloren" },
@@ -50,6 +95,7 @@ export const Officials = (props) => {
         </div>
         <RadioButtons
           name="fhPossesion"
+          onChange={setFhPossession}
           buttonInfos={[
             { id: "possessionHome", text: selectedGame.home },
             { id: "possessionAway", text: selectedGame.away },
@@ -60,14 +106,17 @@ export const Officials = (props) => {
         </div>
         <RadioButtons
           name="direction"
+          onChange={setDirection}
           buttonInfos={[
             {
-              id: "directionForward",
-              text: <FaArrowLeft title="directionBackward" />,
+              id: "directionLeft",
+              text: <FaArrowLeft title="directionLeft" />,
+              value: "directionLeft",
             },
             {
-              id: "directionBackward",
-              text: <FaArrowRight title="directionForward" />,
+              id: "directionRight",
+              text: <FaArrowRight title="directionRight" />,
+              value: "directionRight",
             },
           ]}
         />

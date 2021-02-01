@@ -6,6 +6,8 @@ import { testStore } from "../../../__tests__/Utils";
 import { GAME_PAIR_1 } from "../../../__tests__/testdata/gamesData";
 import Officials from "../Officials";
 import { DETAILS_URL } from "../../common/urls";
+import { GameSetup } from "../../../actions/objects";
+import { assert } from "chai";
 
 let mockFunc = jest.fn();
 const selectedGame = GAME_PAIR_1;
@@ -55,8 +57,14 @@ describe("Officials component", () => {
     userEvent.type(screen.getByPlaceholderText("Side Judge-Name"), "SJ Name");
     userEvent.click(screen.getByText("Gewonnen"));
     userEvent.click(screen.getByText(selectedGame.home));
-    userEvent.click(screen.getByTitle("directionBackward"));
+    userEvent.click(screen.getByTitle("directionLeft"));
     userEvent.click(screen.getByText("Spiel starten"));
     expect(screen.getByText("Some Text")).toBeInTheDocument();
+  });
+  it("should test", () => {
+    const g = new GameSetup();
+    g.scJudge = "hello judge";
+    console.log(g.scJudge);
+    // assert(g.scJudge == "", "asldj");
   });
 });

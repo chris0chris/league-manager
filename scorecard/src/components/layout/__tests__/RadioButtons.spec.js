@@ -3,12 +3,16 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RadioButtons from "../RadioButtons";
 
-const setup = () => {
+let mockFunk = jest.fn();
+
+const setup = (value = undefined) => {
+  mockFunk.mockClear();
   const initialState = {
     name: "groupName",
+    onChange: mockFunk,
     buttonInfos: [
-      { id: "idFirstButton", text: "textFirstButton" },
-      { id: "idSecondButton", text: "textSecondButton" },
+      { id: "idFirstButton", text: "textFirstButton", value: value },
+      { id: "idSecondButton", text: "textSecondButton", value: value },
     ],
   };
   render(<RadioButtons {...initialState} />);
@@ -29,5 +33,17 @@ describe("RadioButtons component", () => {
     expect(secondButton).not.toBeChecked();
     expect(secondButton).toBeInvalid();
     expect(screen.getByLabelText("textSecondButton")).toBeInTheDocument();
+  });
+
+  it("should propagate the correct implicit value", () => {
+    setup();
+    userEvent.click(screen.getByText("textFirstButton"));
+    expect(mockFunk.mock.calls[0][0]).toBe("textFirstButton");
+  });
+  it("should propagate the correct explicit value", () => {
+    setup("someValue");
+    console.log("explicit");
+    userEvent.click(screen.getByText("textFirstButton"));
+    expect(mockFunk.mock.calls[0][0]).toBe("someValue");
   });
 });

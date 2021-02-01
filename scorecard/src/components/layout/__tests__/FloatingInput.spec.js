@@ -7,6 +7,8 @@ const setup = () => {
   const initialState = {
     id: "someId",
     text: "someText",
+    value: "",
+    onChange: () => {},
   };
   render(<FloatingInput {...initialState} />);
 };
