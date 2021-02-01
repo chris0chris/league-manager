@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import FloatingInput from "../layout/FloatingInput";
+import RadioButtons from "../layout/RadioButtons";
 
 export const Officials = (props) => {
   const selectedGame = props.selectedGame;
@@ -16,7 +17,13 @@ export const Officials = (props) => {
         <FloatingInput id="downJudge" text="Down Judge-Name" />
         <FloatingInput id="fieldJudge" text="Field Judge-Name" />
         <FloatingInput id="sideJudge" text="Side Judge-Name" />
-
+        <RadioButtons
+          name="fhPossesion"
+          buttonInfos={[
+            { id: "possessionHome", text: "Home" },
+            { id: "possessionAway", text: "Away" },
+          ]}
+        />
         <div className="d-grid mt-3">
           <button className="btn btn-primary" type="submit">
             Spiel starten
