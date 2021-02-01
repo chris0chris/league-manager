@@ -28,7 +28,7 @@ RadioButtons.propTypes = {
   buttonInfos: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
-      text: PropTypes.string.isRequired,
+      text: PropTypes.isRequired,
     })
   ).isRequired,
 };

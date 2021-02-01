@@ -30,12 +30,4 @@ describe("RadioButtons component", () => {
     expect(secondButton).toBeInvalid();
     expect(screen.getByLabelText("textSecondButton")).toBeInTheDocument();
   });
-
-  it("should validate correct", () => {
-    setup();
-    // let inputElement = screen.getByPlaceholderText("someText");
-    // expect(inputElement).toBeInvalid();
-    // userEvent.type(inputElement, "some text");
-    // expect(inputElement).toBeValid();
-  });
 });
