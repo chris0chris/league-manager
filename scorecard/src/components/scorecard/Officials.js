@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import FloatingInput from "../layout/FloatingInput";
 
 export const Officials = (props) => {
   const selectedGame = props.selectedGame;
@@ -10,66 +11,12 @@ export const Officials = (props) => {
         Feld {selectedGame.field}: {selectedGame.home} vs {selectedGame.away}
       </h4>
       <form className="">
-        <div className="form-floating mt-3">
-          <input
-            type="text"
-            className="form-control"
-            id="scJudgeName"
-            placeholder="Scorecard Judge-Name"
-            required
-          />
-          <label htmlFor="scJudgeName" className="form-label">
-            Scorecard Judge-Name
-          </label>
-        </div>
-        <div className="form-floating mt-3">
-          <input
-            type="text"
-            className="form-control"
-            id="referee"
-            placeholder="Referee-Name"
-            required
-          />
-          <label htmlFor="referee" className="form-label">
-            Referee-Name
-          </label>
-        </div>
-        <div className="form-floating mt-3">
-          <input
-            type="text"
-            className="form-control"
-            id="downJudge"
-            placeholder="Down Judge-Name"
-            required
-          />
-          <label htmlFor="downJudge" className="form-label">
-            Down Judge-Name
-          </label>
-        </div>
-        <div className="form-floating mt-3">
-          <input
-            type="text"
-            className="form-control"
-            id="fieldJudge"
-            placeholder="Field Judge-Name"
-            required
-          />
-          <label htmlFor="fieldJudge" className="form-label">
-            Field Judge-Name
-          </label>
-        </div>
-        <div className="form-floating mt-3">
-          <input
-            type="text"
-            className="form-control"
-            id="sideJudge"
-            placeholder="Side Judge-Name"
-            required
-          />
-          <label htmlFor="sideJudge" className="form-label">
-            Side Judge-Name
-          </label>
-        </div>
+        <FloatingInput id="scJudgeName" text="Scorecard Judge-Name" />
+        <FloatingInput id="referee" text="Referee-Name" />
+        <FloatingInput id="downJudge" text="Down Judge-Name" />
+        <FloatingInput id="fieldJudge" text="Field Judge-Name" />
+        <FloatingInput id="sideJudge" text="Side Judge-Name" />
+
         <div className="d-grid mt-3">
           <button className="btn btn-primary" type="submit">
             Spiel starten
