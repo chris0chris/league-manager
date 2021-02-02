@@ -38,7 +38,7 @@ class TestGameinfoRetrieveUpdate(WebTest):
     def test_api_retrieve_gameinfo(self):
         gameday = DBSetup().g62_qualify_finished()
         gameinfo = Gameinfo.objects.filter(gameday=gameday).first()
-        response = self.app.get(reverse('api-gameinfo-retrieve-update', kwargs={'pk': gameinfo.pk}))
+        response = self.app.get(reverse('api-gameinfo-retrieve-update', kwargs={'pk': gameinfo.pk}), )
         assert response.status_code == HTTPStatus.OK
         # ToDo @Nik fixme
         assert response.json == {
