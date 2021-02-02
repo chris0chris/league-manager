@@ -35,7 +35,7 @@ SECRET_KEY = config['SECRET_KEY'] if config['SECRET_KEY'] is not None else 'dumm
 # DEBUG = os.environ.get('DEBUG_VALUE')
 DEBUG = config['DEBUG_VALUE'] == 'True'
 
-ALLOWED_HOSTS = ['127.0.0.1', '172.104.138.159']
+ALLOWED_HOSTS = ['127.0.0.1', '5erdffl.eu.pythonanywhere.com']
 
 CORS_ORIGIN_ALLOW_ALL = True
 

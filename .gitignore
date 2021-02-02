@@ -111,7 +111,6 @@ ENV/
 env.bak/
 venv.bak/
 venv/
-.virtualenvs/
 
 # Spyder project settings
 .spyderproject
@@ -139,4 +138,4 @@ server*
 /**/node_modules/
 
 #react
-/**/**/main.js
+#/**/**/main.js
