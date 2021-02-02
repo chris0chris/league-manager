@@ -7,6 +7,7 @@ import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { Redirect } from "react-router-dom";
 import { DETAILS_URL } from "../common/urls";
 import { GameSetup } from "../../actions/objects";
+import { saveGameSetup } from "../../actions/gamesetup";
 
 export const Officials = (props) => {
   const selectedGame = props.selectedGame;
@@ -32,6 +33,7 @@ export const Officials = (props) => {
       fhPossession,
       direction
     );
+    props.saveGameSetup(gameSetup);
     setIsSuccessfulSubmitted(true);
   };
 
@@ -139,4 +141,4 @@ const mapStateToProps = (state) => ({
   selectedGame: state.gamesReducer.selectedGame,
 });
 
-export default connect(mapStateToProps)(Officials);
+export default connect(mapStateToProps, { saveGameSetup })(Officials);
