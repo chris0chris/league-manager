@@ -61,5 +61,14 @@ class GameOfficial(models.Model):
     name = models.CharField(max_length=100)
     position = models.CharField(max_length=100)
 
+
+# ToDo implement me as Model
+class GameSetup:
+    def __init__(self, *args, **kwargs):
+        self.gameinfo = kwargs.get('gameinfo')
+        self.ctResult = kwargs.get('ctResult')
+        self.direction = kwargs.get('direction')
+        self.fhPossession = kwargs.get('fhPossession')
+
     def __str__(self):
         return f'{self.gameinfo.pk}__{self.name} - {self.position}'

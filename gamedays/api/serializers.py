@@ -1,6 +1,7 @@
+from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from gamedays.models import Gameday, Gameinfo, GameOfficial
+from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
 
 
 class GamedaySerializer(ModelSerializer):
@@ -25,3 +26,13 @@ class GameinfoSerializer(ModelSerializer):
                         'gameHalftime': {'format': '%H:%M'},
                         'gameFinished': {'format': '%H:%M'}
                         }
+
+
+class GameSetupSerializer(serializers.Serializer):
+    ctResult = serializers.CharField()
+    direction = serializers.CharField()
+    gameinfo = serializers.IntegerField()
+    fhPossession = serializers.CharField()
+
+    def create(self, validated_data):
+        return GameSetup(**validated_data)

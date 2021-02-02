@@ -128,7 +128,6 @@ class TestCreateGameday(WebTest):
 
 class TestRetrieveUpdateOfficials(WebTest):
 
-    @pytest.mark.xfail
     def test_create_officials(self):
         DBSetup().g62_status_empty()
         assert len(GameOfficial.objects.all()) == 0
@@ -153,15 +152,12 @@ class TestRetrieveUpdateOfficials(WebTest):
 
 class TestGameSetup(WebTest):
 
-    @pytest.mark.xfail
     def test_game_setup_create(self):
-        # ToDo @Nik
-        assert len() == 0
-        response = self.app.post_json(reverse('api-gamesetup'),
-                                      {"ctResult": "won", "direction": "arrow_forward", "gameinfo": 1,
-                                       "fhPossession": "HOME", "id": 1})
-        assert response.status_code == HTTPStatus.OK
-        assert len() == 1
+        gamesetup = {"ctResult": "won", "direction": "arrow_forward", "gameinfo": 1,
+                     "fhPossession": "HOME"}
+        response = self.app.post_json(reverse('api-gamesetup-create'), gamesetup)
+        assert response.status_code == HTTPStatus.CREATED
+        assert response.json == gamesetup
 
     @pytest.mark.xfail
     def test_game_setup_update(self):
