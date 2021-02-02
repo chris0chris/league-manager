@@ -35,38 +35,12 @@ class TestGamedayRetrieveUpdate(WebTest):
 
 class TestGameinfoRetrieveUpdate(WebTest):
 
-    # @pytest.mark.xfail
     def test_api_retrieve_gameinfo(self):
         gameday = DBSetup().g62_qualify_finished()
         gameinfo = Gameinfo.objects.filter(gameday=gameday).first()
         response = self.app.get(reverse('api-gameinfo-retrieve-update', kwargs={'pk': gameinfo.pk}))
         assert response.status_code == HTTPStatus.OK
-        # ToDo @Nik fixme
-        assert response.json == {
-            'id': 1,
-            'gameday_id': 1,
-            'scheduled': '10:00:00',
-            'field': 1,
-            'officials': 'officials',
-            'status': 'beendet',
-            'pin': '',
-            'gameStarted': '',
-            'gameHalftime': '',
-            'gameFinished': '',
-            'stage': 'Vorrunde',
-            'standing': 'Gruppe 1',
-            'gameinfo_id': 1,
-            'id_home': 1,
-            'home': 'A1',
-            'points_home': 3,
-            'fh_home': 2,
-            'sh_home': 1,
-            'points_away': 2,
-            'fh_away': 1,
-            'sh_away': 1,
-            'away': 'A2',
-            'id_away': 2
-        }
+        assert response.json == GameinfoSerializer(gameinfo).data
 
     def test_update_gameinfo(self):
         DBSetup().g62_status_empty()
