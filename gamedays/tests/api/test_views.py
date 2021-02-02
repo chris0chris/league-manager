@@ -29,6 +29,7 @@ class TestGamedayRetrieveUpdate(WebTest):
         gameday = DBSetup().g62_status_empty()
         response = self.app.get(reverse('api-gameday-retrieve-update', kwargs={'pk': gameday.pk}))
         assert response.status_code == HTTPStatus.OK
+        # circleci problem comparing response with serializer when json contains None values
         assert response.json == GamedaySerializer(gameday).data
 
 
@@ -38,7 +39,7 @@ class TestGameinfoRetrieveUpdate(WebTest):
     def test_api_retrieve_gameinfo(self):
         gameday = DBSetup().g62_qualify_finished()
         gameinfo = Gameinfo.objects.filter(gameday=gameday).first()
-        response = self.app.get(reverse('api-gameinfo-retrieve-update', kwargs={'pk': gameinfo.pk}), )
+        response = self.app.get(reverse('api-gameinfo-retrieve-update', kwargs={'pk': gameinfo.pk}))
         assert response.status_code == HTTPStatus.OK
         # ToDo @Nik fixme
         assert response.json == {
