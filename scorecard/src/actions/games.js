@@ -1,4 +1,4 @@
-import { api_get } from "./helper/api";
+import { api_get } from "./utils/api";
 import { GET_GAMES, SET_SELECTED_GAME } from "./types";
 
 export const getGames = (gamedayId) => {

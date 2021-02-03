@@ -6,7 +6,7 @@ import { testStore } from "../../../__tests__/Utils";
 import { GAME_PAIR_1 } from "../../../__tests__/testdata/gamesData";
 import Officials from "../Officials";
 import { DETAILS_URL } from "../../common/urls";
-import { api_post } from "../../../actions/helper/api";
+import { api_post } from "../../../actions/utils/api";
 
 jest.mock("../../../actions/helper/api");
 api_post.mockImplementation(() => {

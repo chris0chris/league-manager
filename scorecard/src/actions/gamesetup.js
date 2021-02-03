@@ -6,7 +6,7 @@ import {
   GAME_SETUP_OFFICIALS_SUCCESS,
   GAME_SETUP_OFFICIALS_FAIL,
 } from "./types";
-import { api_post, api_create } from "./helper/api";
+import { api_post, api_create } from "./utils/api";
 
 export const saveGameSetup = (gameSetup) => {
   return api_post(

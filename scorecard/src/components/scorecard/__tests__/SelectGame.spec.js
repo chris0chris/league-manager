@@ -10,7 +10,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { OFFICIALS_URL } from "../../common/urls";
 
-import { api_get } from "../../../actions/helper/api";
+import { api_get } from "../../../actions/utils/api";
 import { GET_GAMEDAYS, GET_GAMES } from "../../../actions/types";
 
 jest.mock("../../../actions/helper/api");
