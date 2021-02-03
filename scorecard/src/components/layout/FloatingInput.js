@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 
 const FloatingInput = ({ id, text, value, onChange: setValue }) => {
-  const [inputValue, setInputValue] = useState(value);
+  const [inputValue, setInputValue] = useState(value.name);
   const handleChange = (newValue) => {
-    setValue(newValue);
     setInputValue(newValue);
+    setValue({ ...value, name: newValue });
   };
   return (
     <div className="form-floating mt-3">

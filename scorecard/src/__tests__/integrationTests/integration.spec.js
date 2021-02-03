@@ -12,12 +12,12 @@ describe("getGames action", () => {
   });
 
   test("Store is updated correctly", (done) => {
-    const expectedState = [
-      {
+    const expectedState = {
+      data: {
         date: "2020-07-12",
         name: "Test Gameday",
       },
-    ];
+    };
     const store = testStore();
 
     moxios.wait(() => {
@@ -30,7 +30,7 @@ describe("getGames action", () => {
 
     return store.dispatch(getGamedays()).then(() => {
       const newState = store.getState();
-      expect(newState.gamedays).toBe(expectedState);
+      expect(newState.gamedays).toBe(expectedState.data);
     });
   });
 });

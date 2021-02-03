@@ -8,8 +8,20 @@ import Officials from "../Officials";
 import { DETAILS_URL } from "../../common/urls";
 import { GameSetup } from "../../../actions/objects";
 import { assert } from "chai";
+import { api_post } from "../../../actions/helper/api";
 
-let mockFunc = jest.fn();
+// let sO = jest.mock("../../../actions/gamesetup", () => {
+//   return jest.fn(() => {
+//     return { type: "type", payload: "data" };
+//   });
+// });
+
+// const helper = require("../../../actions/helper/api");
+jest.mock("../../../actions/helper/api");
+api_post.mockImplementation(() => {
+  return () => {};
+});
+
 const selectedGame = GAME_PAIR_1;
 let store;
 
@@ -23,7 +35,7 @@ const setup = () => {
     },
   };
   store = testStore(initialState);
-  render(
+  const component = render(
     <Router>
       <Officials store={store} />
       <Route path={DETAILS_URL}>Some Text</Route>
@@ -40,11 +52,6 @@ describe("Officials component", () => {
     expect(screen.getAllByRole("textbox").length).toBe(5);
     expect(screen.getAllByRole("radio").length).toBe(6);
     expect(screen.getByTestId("ctTeam").textContent).toEqual(selectedGame.away);
-
-    // userEvent.click(screen.getByText("Spiel starten"));
-    // await waitFor(() => {
-    //   expect(screen.getByText("Füllen Sie dieses Feld aus")).toBeVisible();
-    // });
   });
   it("submit form and redirects", () => {
     setup();
@@ -60,6 +67,10 @@ describe("Officials component", () => {
     userEvent.click(screen.getByText(selectedGame.home));
     userEvent.click(screen.getByTitle("directionLeft"));
     userEvent.click(screen.getByText("Spiel starten"));
+
+    expect(api_post.mock.calls[0][0]).toBe("/api/gamesetup/create");
+    expect(api_post.mock.calls[1][0]).toBe("/api/officials/create");
+
     expect(screen.getByText("Some Text")).toBeInTheDocument();
   });
 });

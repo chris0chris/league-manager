@@ -6,17 +6,27 @@ import RadioButtons from "../layout/RadioButtons";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { Redirect } from "react-router-dom";
 import { DETAILS_URL } from "../common/urls";
-import { GameSetup } from "../../actions/objects";
-import { saveGameSetup } from "../../actions/gamesetup";
+import { GameSetup, Official } from "../../actions/objects";
+import { saveGameSetup, saveOfficials } from "../../actions/gamesetup";
 
 export const Officials = (props) => {
   const selectedGame = props.selectedGame;
   const [isSuccessfulSubmitted, setIsSuccessfulSubmitted] = useState(false);
-  const [scJudge, setScJudge] = useState("");
-  const [referee, setReferee] = useState("");
-  const [downJudge, setDownJudge] = useState("");
-  const [fieldJudge, setFieldJudge] = useState("");
-  const [sideJudge, setSideJudge] = useState("");
+  const [scJudge, setScJudge] = useState(
+    new Official(selectedGame.id, "", Official.SCORECARD_JUDGE)
+  );
+  const [referee, setReferee] = useState(
+    new Official(selectedGame.id, "", Official.REFEREE)
+  );
+  const [downJudge, setDownJudge] = useState(
+    new Official(selectedGame.id, "", Official.DOWN_JUDGE)
+  );
+  const [fieldJudge, setFieldJudge] = useState(
+    new Official(selectedGame.id, "", Official.FIELD_JUDGE)
+  );
+  const [sideJudge, setSideJudge] = useState(
+    new Official(selectedGame.id, "", Official.SIDE_JUDGE)
+  );
   const [ct, setCt] = useState();
   const [fhPossession, setFhPossession] = useState("");
   const [direction, setDirection] = useState("");
@@ -24,16 +34,18 @@ export const Officials = (props) => {
     event.preventDefault();
     const gameSetup = new GameSetup(
       selectedGame.id,
-      scJudge,
-      referee,
-      downJudge,
-      fieldJudge,
-      sideJudge,
       ct,
       fhPossession,
       direction
     );
+    const officials = [];
+    officials.push(referee);
+    officials.push(scJudge);
+    officials.push(downJudge);
+    officials.push(fieldJudge);
+    officials.push(sideJudge);
     props.saveGameSetup(gameSetup);
+    props.saveOfficials(officials);
     setIsSuccessfulSubmitted(true);
   };
 
@@ -141,4 +153,6 @@ const mapStateToProps = (state) => ({
   selectedGame: state.gamesReducer.selectedGame,
 });
 
-export default connect(mapStateToProps, { saveGameSetup })(Officials);
+export default connect(mapStateToProps, { saveGameSetup, saveOfficials })(
+  Officials
+);

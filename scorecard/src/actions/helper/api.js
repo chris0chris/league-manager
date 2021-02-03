@@ -7,10 +7,9 @@ export const api_post = (url, body, successType, errorType) => async (
 ) => {
   const header = tokenConfig(getState);
 
-  const content = JSON.stringify({ body });
 
   await axios
-    .post(url, content, header)
+    .post(url, body, header)
     .then((res) => {
       dispatch({
         type: successType,

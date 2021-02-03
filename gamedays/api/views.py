@@ -67,9 +67,3 @@ class GamedayScheduleView(APIView):
 
 class GameSetupCreateView(CreateAPIView):
     serializer_class = GameSetupSerializer
-
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=HTTPStatus.CREATED)
