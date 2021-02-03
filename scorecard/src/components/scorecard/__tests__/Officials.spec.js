@@ -6,35 +6,22 @@ import { testStore } from "../../../__tests__/Utils";
 import { GAME_PAIR_1 } from "../../../__tests__/testdata/gamesData";
 import Officials from "../Officials";
 import { DETAILS_URL } from "../../common/urls";
-import { GameSetup } from "../../../actions/objects";
-import { assert } from "chai";
 import { api_post } from "../../../actions/helper/api";
 
-// let sO = jest.mock("../../../actions/gamesetup", () => {
-//   return jest.fn(() => {
-//     return { type: "type", payload: "data" };
-//   });
-// });
-
-// const helper = require("../../../actions/helper/api");
 jest.mock("../../../actions/helper/api");
 api_post.mockImplementation(() => {
   return () => {};
 });
 
 const selectedGame = GAME_PAIR_1;
-let store;
 
 const setup = () => {
   const initialState = {
-    // gamedaysReducer: {
-    //   ...TWO_GAMEDAYS,
-    // },
     gamesReducer: {
       selectedGame: GAME_PAIR_1,
     },
   };
-  store = testStore(initialState);
+  const store = testStore(initialState);
   const component = render(
     <Router>
       <Officials store={store} />

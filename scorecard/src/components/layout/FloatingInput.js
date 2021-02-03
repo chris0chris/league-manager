@@ -12,7 +12,7 @@ const FloatingInput = ({ id, text, value, onChange: setValue }) => {
         type="text"
         className="form-control"
         id={id}
-        value={inputValue}
+        defaultValue={inputValue}
         onChange={(e) => handleChange(e.target.value)}
         placeholder={text}
         required
