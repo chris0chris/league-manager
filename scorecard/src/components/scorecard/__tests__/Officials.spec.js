@@ -8,7 +8,7 @@ import Officials from "../Officials";
 import { DETAILS_URL } from "../../common/urls";
 import { api_post } from "../../../actions/utils/api";
 
-jest.mock("../../../actions/helper/api");
+jest.mock("../../../actions/utils/api");
 api_post.mockImplementation(() => {
   return () => {};
 });

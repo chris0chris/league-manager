@@ -13,7 +13,7 @@ import { OFFICIALS_URL } from "../../common/urls";
 import { api_get } from "../../../actions/utils/api";
 import { GET_GAMEDAYS, GET_GAMES } from "../../../actions/types";
 
-jest.mock("../../../actions/helper/api");
+jest.mock("../../../actions/utils/api");
 api_get.mockImplementation((...params) => (dispatch) => {
   const actionType = params[1];
   if (actionType == GET_GAMEDAYS) {
