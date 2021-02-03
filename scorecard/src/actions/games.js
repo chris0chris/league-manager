@@ -1,21 +1,11 @@
-import axios from "axios";
-import { returnErrors } from "./messages";
+import { api_get } from "./helper/api";
 import { GET_GAMES, SET_SELECTED_GAME } from "./types";
 
-import { tokenConfig } from "../actions/auth";
-
-export const getGames = (gamedayId) => async (dispatch, getState) => {
-  await axios
-    .get(`/api/gameday/${gamedayId}/details?get=schedule&orient=records`)
-    .then((res) => {
-      dispatch({
-        type: GET_GAMES,
-        payload: res.data,
-      });
-    })
-    .catch((err) =>
-      dispatch(returnErrors(err.response.data, err.response.status))
-    );
+export const getGames = (gamedayId) => {
+  return api_get(
+    `/api/gameday/${gamedayId}/details?get=schedule&orient=records`,
+    GET_GAMES
+  );
 };
 
 export const setSelectedGame = (selectedGame) => (dispatch) => {

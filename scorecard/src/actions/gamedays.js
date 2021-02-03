@@ -1,19 +1,7 @@
-import axios from "axios";
-import { returnErrors } from "./messages";
 import { GET_GAMEDAYS } from "./types";
 
-import { tokenConfig } from "../actions/auth";
+import { api_get } from "./helper/api";
 
-export const getGamedays = () => async (dispatch, getState) => {
-  await axios
-    .get("/api/gameday/list/", tokenConfig(getState))
-    .then((res) => {
-      dispatch({
-        type: GET_GAMEDAYS,
-        payload: res.data,
-      });
-    })
-    .catch((err) =>
-      dispatch(returnErrors(err.response.data, err.response.status))
-    );
+export const getGamedays = () => {
+  return api_get("/api/gameday/list", GET_GAMEDAYS);
 };
