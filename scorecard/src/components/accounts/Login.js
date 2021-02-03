@@ -14,8 +14,8 @@ const Login = (props) => {
     props.loginUser(username, password);
   };
   if (props.isAuthenticated) {
-    // return <Redirect to={ROOT_URL} />;
-    return <Redirect to="/officials" />;
+    // ToDo return <Redirect to={ROOT_URL} />;
+    return <Redirect to="/details" />;
   }
 
   return (
