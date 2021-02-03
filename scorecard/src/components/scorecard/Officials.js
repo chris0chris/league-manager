@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import FloatingInput from "../layout/FloatingInput";
-import RadioButtons from "../layout/RadioButtons";
+import RadioButton from "../layout/RadioButton";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { Redirect } from "react-router-dom";
 import { DETAILS_URL } from "../common/urls";
@@ -96,44 +96,58 @@ export const Officials = (props) => {
             </span>
           </div>
         </div>
-        <RadioButtons
-          name="coinToss"
-          onChange={setCt}
-          buttonInfos={[
-            { id: "ctWon", text: "Gewonnen" },
-            { id: "ctLost", text: "Verloren" },
-          ]}
-        />
+        <div className="row mt-3">
+          <RadioButton
+            id="ctWon"
+            name="coinToss"
+            onChange={setCt}
+            text="Gewonnen"
+          />
+          <RadioButton
+            id="ctLost"
+            name="coinToss"
+            onChange={setCt}
+            text="Verloren"
+          />
+        </div>
         <div className="row mt-3">
           <div>Team mit Ballbesitz in der ersten Halbzeit</div>
         </div>
-        <RadioButtons
-          name="fhPossesion"
-          onChange={setFhPossession}
-          buttonInfos={[
-            { id: "possessionHome", text: selectedGame.home },
-            { id: "possessionAway", text: selectedGame.away },
-          ]}
-        />
+        <div className="row mt-3">
+          <RadioButton
+            id="possessionHome"
+            name="fhPossesion"
+            onChange={setFhPossession}
+            text={selectedGame.home}
+          />
+          <RadioButton
+            id="possessionAway"
+            name="fhPossesion"
+            onChange={setFhPossession}
+            text={selectedGame.away}
+          />
+        </div>
+
         <div className="row mt-3">
           <div>Spielrichtung erste Halbzeit (aus Blick Scorecard Judge)</div>
         </div>
-        <RadioButtons
-          name="direction"
-          onChange={setDirection}
-          buttonInfos={[
-            {
-              id: "directionLeft",
-              text: <FaArrowLeft title="directionLeft" />,
-              value: "directionLeft",
-            },
-            {
-              id: "directionRight",
-              text: <FaArrowRight title="directionRight" />,
-              value: "directionRight",
-            },
-          ]}
-        />
+        <div className="row mt-3">
+          <RadioButton
+            id="directionLeft"
+            name="direction"
+            onChange={setDirection}
+            text={<FaArrowLeft title="directionLeft" />}
+            value="directionLeft"
+          />
+          <RadioButton
+            id="directionRight"
+            name="direction"
+            onChange={setDirection}
+            text={<FaArrowRight title="directionRight" />}
+            value="directionRight"
+          />
+        </div>
+
         <div className="d-grid mt-3">
           <button className="btn btn-primary" type="submit">
             Spiel starten

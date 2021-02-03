@@ -1,21 +1,32 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import RadioButtons from "../RadioButtons";
+import RadioButton from "../RadioButton";
 
 let mockFunk = jest.fn();
 
 const setup = (value = undefined) => {
   mockFunk.mockClear();
-  const initialState = {
+  const firstButton = {
+    id: "idFirstButton",
     name: "groupName",
     onChange: mockFunk,
-    buttonInfos: [
-      { id: "idFirstButton", text: "textFirstButton", value: value },
-      { id: "idSecondButton", text: "textSecondButton", value: value },
-    ],
+    text: "textFirstButton",
+    value: value,
   };
-  render(<RadioButtons {...initialState} />);
+  const secondButton = {
+    id: "idSecondButton",
+    name: "groupName",
+    onChange: mockFunk,
+    text: "textSecondButton",
+    value: value,
+  };
+  render(
+    <>
+      <RadioButton {...firstButton} />
+      <RadioButton {...secondButton} />
+    </>
+  );
 };
 
 describe("RadioButtons component", () => {
