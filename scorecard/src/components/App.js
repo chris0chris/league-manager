@@ -28,14 +28,18 @@ const App = (props) => {
   return (
     <Router>
       <div className="container">
-        <Switch>
-          <PrivateRoute exact path={ROOT_URL} component={SelectGame} />
-          <PrivateRoute exact path={OFFICIALS_URL} component={Officials} />
-          <PrivateRoute exact path={DETAILS_URL} component={Details} />
-          <Route exact path={LOGIN_URL} component={Login} />
-        </Switch>
+        <div className="row">
+          <Switch>
+            <PrivateRoute exact path={ROOT_URL} component={SelectGame} />
+            <PrivateRoute exact path={OFFICIALS_URL} component={Officials} />
+            <PrivateRoute exact path={DETAILS_URL} component={Details} />
+            <Route exact path={LOGIN_URL} component={Login} />
+          </Switch>
+        </div>
       </div>
-      <Navbar />
+      <div className="container my-1 py-4">
+        <Navbar />
+      </div>
     </Router>
   );
 };
