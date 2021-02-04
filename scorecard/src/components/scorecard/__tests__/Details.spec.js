@@ -58,5 +58,8 @@ describe("Details component", () => {
     expect(
       screen.getByRole("button", { name: "Halbzeit" })
     ).toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toHaveLength(5);
+
+    expect(screen.getByRole("table")).toBeInTheDocument();
   });
 });
