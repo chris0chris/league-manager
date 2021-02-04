@@ -16,7 +16,7 @@ class Division(models.Model):
 class Team(models.Model):
     name = models.CharField(max_length=20)
     division = models.ForeignKey(Division, on_delete=models.CASCADE)
-    description = models.CharField(max_length=20)
+    description = models.CharField(max_length=1000)
     place = models.CharField(max_length=20)
     logo = models.ImageField('Logo', upload_to="teammanager/logos", blank=True, null=True)
 
