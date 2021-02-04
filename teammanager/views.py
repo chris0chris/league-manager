@@ -81,11 +81,17 @@ def deleteteam(request, team_id):
 
 
 def createuser(request, team_id):
+    authored = False
     if request.user.is_authenticated is False:
         return redirect('login')
-    user = models.UserProfile.objects.get(user=request.user)
 
-    if request.user.is_superuser | ((user.team.id == team_id) & user.check_Teammanager()):
+    if request.user.is_superuser:
+        authored = True
+    else:
+        user = models.UserProfile.objects.get(user=request.user)
+        if   ((user.team.id == team_id) & user.check_Teammanager()):
+            authored=True
+    if authored:
         if request.method == 'POST':
             form = Userform(request.POST, request.FILES)
             if form.is_valid():
@@ -104,13 +110,19 @@ def createuser(request, team_id):
 
 
 def editteam(request, team_id):
+    authored = False
     if request.user.is_authenticated is False:
         return redirect('login')
 
     team = models.Team.objects.get(pk=team_id)
-    user = models.UserProfile.objects.get(user=request.user)
 
-    if request.user.is_superuser | ((user.team == team) & user.check_Teammanager()):
+    if request.user.is_superuser:
+        authored = True
+    else:
+        user = models.UserProfile.objects.get(user=request.user)
+        if ((user.team == team) & user.check_Teammanager()):
+            authored = True
+    if authored:
         if request.method == 'POST':
             form = Teamform(request.POST, instance=team)
             if form.is_valid():

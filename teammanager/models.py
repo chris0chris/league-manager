@@ -25,7 +25,7 @@ class Team(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True,blank=True)
     avatar = models.ImageField('Avatar', upload_to="media/teammanager/avatars", blank=True, null=True)
     team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True)
     firstname = models.CharField(max_length=20, null=True)
