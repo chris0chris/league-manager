@@ -45,15 +45,15 @@ const Login = (props) => {
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-group d-grid mt-3">
             <button type="submit" className="btn btn-primary">
               Login
             </button>
           </div>
-          <p>
+          <div className="mt-3">
             Du hast keine Login-Daten? Oh, oh ... bitte an dein Teammanagement
-            oder Ligaorganisation wenden.
-          </p>
+            oder die Ligaorganisation wenden.
+          </div>
         </form>
       </div>
     </div>
