@@ -33,7 +33,7 @@ const setup = () => {
   render(
     <Router>
       <Details store={store} />
-      <Route path="/">Redirected Page</Route>
+      <Route path="/someUrl">Redirected Page</Route>
     </Router>
   );
 };
@@ -41,7 +41,22 @@ const setup = () => {
 describe("Details component", () => {
   it("should render correct", () => {
     setup();
-    expect(screen.getByText(GAME_PAIR_1.home)).toBeInTheDocument();
+    expect(
+      screen.getByRole("radio", {
+        name: new RegExp(`\\b${GAME_PAIR_1.home}\\b`, "i"),
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByText(GAME_PAIR_1.points_home)).toBeInTheDocument();
+    expect(
+      screen.getByRole("radio", {
+        name: new RegExp(`\\b${GAME_PAIR_1.away}\\b`, "i"),
+      })
+    ).toBeInTheDocument();
     expect(screen.getByText(GAME_PAIR_1.away)).toBeInTheDocument();
+    expect(screen.getByText(GAME_PAIR_1.points_away)).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Halbzeit" })
+    ).toBeInTheDocument();
   });
 });
