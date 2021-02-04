@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import RadioButton from "../layout/RadioButton";
 import { FaStopwatch } from "react-icons/fa";
+import ScorecardTable from "./ScorecardTable";
 
 const Details = (props) => {
   const selectedGame = props.selectedGame;
@@ -32,8 +33,6 @@ const Details = (props) => {
             }
           />
         </div>
-        {/* <div className="col-2">a</div>
-        <div className="col-2">b</div> */}
         <div className="col-6">
           <RadioButton
             id="away"
@@ -83,6 +82,62 @@ const Details = (props) => {
           <button type="button" className="btn btn-secondary">
             <FaStopwatch />
           </button>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col">
+          <ScorecardTable
+            entries={[
+              {
+                id: 1,
+                number: 1,
+                sixPoints: "#19",
+                twoPoints: "",
+                onePoint: "#7",
+              },
+              {
+                id: 2,
+                number: 2,
+                sixPoints: "",
+                twoPoints: "#4",
+                onePoint: "",
+              },
+              {
+                id: 3,
+                number: 3,
+                sixPoints: "#7",
+                twoPoints: "",
+                onePoint: "#19",
+              },
+            ]}
+          />
+        </div>
+        <div className="col">
+          {/* <ScorecardTable
+            entries={[
+              {
+                id: 1,
+                number: 1,
+                sixPoints: "#19",
+                twoPoints: "",
+                onePoint: "#7",
+              },
+              {
+                id: 2,
+                number: 2,
+                sixPoints: "",
+                twoPoints: "#4",
+                onePoint: "",
+              },
+              {
+                id: 3,
+                number: 3,
+                sixPoints: "#7",
+                twoPoints: "",
+                onePoint: "#19",
+              },
+            ]}
+          /> */}
         </div>
       </div>
     </div>

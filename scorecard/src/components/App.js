@@ -27,7 +27,7 @@ const App = (props) => {
   });
   return (
     <Router>
-      <div className="container">
+      <div className="container mt-2">
         <div className="row">
           <Switch>
             <PrivateRoute exact path={ROOT_URL} component={SelectGame} />
