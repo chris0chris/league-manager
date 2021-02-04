@@ -55,11 +55,14 @@ def teamdetail(request, team_id):
     team = models.Team.objects.get(pk=team_id)
     members = list(models.UserProfile.objects.filter(team=team))
     if request.user.is_authenticated:
-        user = models.UserProfile.objects.get(user=request.user)
-        if request.user.is_superuser or (team == user.team and user.check_Teammanager):
+        if request.user.is_superuser:
             allow_button_view = True
         else:
-            allow_button_view = False
+            user = models.UserProfile.objects.get(user=request.user)
+            if team == user.team and user.check_Teammanager:
+                allow_button_view = True
+            else:
+                allow_button_view = False
     else:
         allow_button_view = False
     for member in members:
