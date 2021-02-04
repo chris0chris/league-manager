@@ -2,7 +2,7 @@
 {% block title %}Edit {{ team.name }}{% endblock %}
 {% block content %}
 
-    <img src="{{ team.logo.url }}">
+    {% if team.logo %}<img src="{{ team.logo.url }}">{% endif %}
     <h1>{{ team.name }}</h1>
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
