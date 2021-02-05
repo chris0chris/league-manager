@@ -1,59 +1,59 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import RadioButton from "../RadioButton";
+import React from 'react';
+import {render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import RadioButton from '../RadioButton';
 
-let mockFunk = jest.fn();
+const mockFunk = jest.fn();
 
 const setup = (value = undefined) => {
   mockFunk.mockClear();
   const firstButton = {
-    id: "idFirstButton",
-    name: "groupName",
+    id: 'idFirstButton',
+    name: 'groupName',
     onChange: mockFunk,
-    text: "textFirstButton",
+    text: 'textFirstButton',
     value: value,
   };
   const secondButton = {
-    id: "idSecondButton",
-    name: "groupName",
+    id: 'idSecondButton',
+    name: 'groupName',
     onChange: mockFunk,
-    text: "textSecondButton",
+    text: 'textSecondButton',
     value: value,
   };
   render(
-    <>
-      <RadioButton {...firstButton} />
-      <RadioButton {...secondButton} />
-    </>
+      <>
+        <RadioButton {...firstButton} />
+        <RadioButton {...secondButton} />
+      </>,
   );
 };
 
-describe("RadioButtons component", () => {
-  it("should render component", () => {
+describe('RadioButtons component', () => {
+  it('should render component', () => {
     setup();
-    const allButtons = screen.getAllByRole("radio");
+    const allButtons = screen.getAllByRole('radio');
     expect(allButtons.length).toBe(2);
 
     const firstButton = allButtons[0];
     expect(firstButton).not.toBeChecked();
     expect(firstButton).toBeInvalid();
-    expect(screen.getByLabelText("textFirstButton")).toBeInTheDocument();
+    expect(screen.getByLabelText('textFirstButton')).toBeInTheDocument();
 
     const secondButton = allButtons[1];
     expect(secondButton).not.toBeChecked();
     expect(secondButton).toBeInvalid();
-    expect(screen.getByLabelText("textSecondButton")).toBeInTheDocument();
+    expect(screen.getByLabelText('textSecondButton')).toBeInTheDocument();
   });
 
-  it("should propagate the correct implicit value", () => {
+  it('should propagate the correct implicit value', () => {
     setup();
-    userEvent.click(screen.getByText("textFirstButton"));
-    expect(mockFunk.mock.calls[0][0]).toBe("textFirstButton");
+    userEvent.click(screen.getByText('textFirstButton'));
+    expect(mockFunk.mock.calls[0][0]).toBe('textFirstButton');
   });
-  it("should propagate the correct explicit value", () => {
-    setup("someValue");
-    userEvent.click(screen.getByText("textFirstButton"));
-    expect(mockFunk.mock.calls[0][0]).toBe("someValue");
+  it('should propagate the correct explicit value', () => {
+    setup('someValue');
+    userEvent.click(screen.getByText('textFirstButton'));
+    expect(mockFunk.mock.calls[0][0]).toBe('someValue');
   });
 });

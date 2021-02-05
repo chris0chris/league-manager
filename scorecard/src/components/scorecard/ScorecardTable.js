@@ -1,10 +1,10 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
-const ScorecardTable = ({ entries }) => {
+const ScorecardTable = ({entries}) => {
   return (
     <div>
-      <table className="table table-striped">
+      <table className='table table-striped'>
         <thead>
           <tr>
             <th>Pkt:</th>
@@ -16,7 +16,7 @@ const ScorecardTable = ({ entries }) => {
         <tbody>
           {entries.map((entry) => (
             <tr key={entry.id}>
-              <td style={{ fontSize: "smaller" }}>{entry.number}</td>
+              <td style={{fontSize: 'smaller'}}>{entry.number}</td>
               <td>{entry.sixPoints}</td>
               <td>{entry.twoPoints}</td>
               <td>{entry.onePoint}</td>
@@ -28,8 +28,8 @@ const ScorecardTable = ({ entries }) => {
   );
 };
 
-// ScorecardTable.propTypes = {
-
-// }
+ScorecardTable.propTypes = {
+  entries: PropTypes.array.isRequired,
+};
 
 export default ScorecardTable;

@@ -1,17 +1,17 @@
 const GAMEDAY_1 = {
   id: 1,
-  name: "Iron Bowl 1",
-  date: "2020-07-12",
-  start: "10:00",
-  format: "62",
+  name: 'Iron Bowl 1',
+  date: '2020-07-12',
+  start: '10:00',
+  format: '62',
   author: 2,
 };
 const GAMEDAY_2 = {
   id: 33,
-  name: "7 Teams 2 Felder - Aux Bowl II",
-  date: "2020-07-12",
-  start: "10:00",
-  format: "62",
+  name: '7 Teams 2 Felder - Aux Bowl II',
+  date: '2020-07-12',
+  start: '10:00',
+  format: '62',
   author: 1,
 };
 

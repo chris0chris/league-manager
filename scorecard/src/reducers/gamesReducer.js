@@ -1,4 +1,4 @@
-import { GET_GAMES, SET_SELECTED_GAME } from "../actions/types.js";
+import {GET_GAMES, SET_SELECTED_GAME} from '../actions/types.js';
 
 const initialState = {
   games: [],

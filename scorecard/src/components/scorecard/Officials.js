@@ -1,42 +1,42 @@
-import React, { useState } from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import FloatingInput from "../layout/FloatingInput";
-import RadioButton from "../layout/RadioButton";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import { Redirect } from "react-router-dom";
-import { DETAILS_URL } from "../common/urls";
-import { GameSetup, Official } from "../../actions/objects";
-import { saveGameSetup, saveOfficials } from "../../actions/gamesetup";
+import React, {useState} from 'react';
+import PropTypes from 'prop-types';
+import {connect} from 'react-redux';
+import FloatingInput from '../layout/FloatingInput';
+import RadioButton from '../layout/RadioButton';
+import {FaArrowLeft, FaArrowRight} from 'react-icons/fa';
+import {Redirect} from 'react-router-dom';
+import {DETAILS_URL} from '../common/urls';
+import {GameSetup, Official} from '../../actions/objects';
+import {saveGameSetup, saveOfficials} from '../../actions/gamesetup';
 
 export const Officials = (props) => {
   const selectedGame = props.selectedGame;
   const [isSuccessfulSubmitted, setIsSuccessfulSubmitted] = useState(false);
   const [scJudge, setScJudge] = useState(
-    new Official(selectedGame.id, "", Official.SCORECARD_JUDGE)
+      new Official(selectedGame.id, '', Official.SCORECARD_JUDGE),
   );
   const [referee, setReferee] = useState(
-    new Official(selectedGame.id, "", Official.REFEREE)
+      new Official(selectedGame.id, '', Official.REFEREE),
   );
   const [downJudge, setDownJudge] = useState(
-    new Official(selectedGame.id, "", Official.DOWN_JUDGE)
+      new Official(selectedGame.id, '', Official.DOWN_JUDGE),
   );
   const [fieldJudge, setFieldJudge] = useState(
-    new Official(selectedGame.id, "", Official.FIELD_JUDGE)
+      new Official(selectedGame.id, '', Official.FIELD_JUDGE),
   );
   const [sideJudge, setSideJudge] = useState(
-    new Official(selectedGame.id, "", Official.SIDE_JUDGE)
+      new Official(selectedGame.id, '', Official.SIDE_JUDGE),
   );
   const [ct, setCt] = useState();
-  const [fhPossession, setFhPossession] = useState("");
-  const [direction, setDirection] = useState("");
+  const [fhPossession, setFhPossession] = useState('');
+  const [direction, setDirection] = useState('');
   const handleSubmit = (event) => {
     event.preventDefault();
     const gameSetup = new GameSetup(
-      selectedGame.id,
-      ct,
-      fhPossession,
-      direction
+        selectedGame.id,
+        ct,
+        fhPossession,
+        direction,
     );
     const officials = [];
     officials.push(referee);
@@ -90,7 +90,7 @@ export const Officials = (props) => {
         />
         <div className="row mt-3">
           <div>
-            Münzwahl hat:{" "}
+            Münzwahl hat:{' '}
             <span className="fw-bold" data-testid="ctTeam">
               {selectedGame.away}
             </span>
@@ -158,15 +158,17 @@ export const Officials = (props) => {
   );
 };
 
-// Officials.propTypes = {
-//   props: PropTypes,
-// };
+Officials.propTypes = {
+  selectedGame: PropTypes.object.isRequired,
+  saveGameSetup: PropTypes.func.isRequired,
+  saveOfficials: PropTypes.func.isRequired,
+};
 
 const mapStateToProps = (state) => ({
   games: state.gamesReducer.games,
   selectedGame: state.gamesReducer.selectedGame,
 });
 
-export default connect(mapStateToProps, { saveGameSetup, saveOfficials })(
-  Officials
+export default connect(mapStateToProps, {saveGameSetup, saveOfficials})(
+    Officials,
 );

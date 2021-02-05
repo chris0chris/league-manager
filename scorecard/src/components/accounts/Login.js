@@ -1,13 +1,12 @@
-import React, { useState } from "react";
-import { Redirect } from "react-router-dom";
-import { connect } from "react-redux";
-import PropTypes from "prop-types";
-import { loginUser } from "../../actions/auth";
-import { ROOT_URL } from "../common/urls";
+import React, {useState} from 'react';
+import {Redirect} from 'react-router-dom';
+import {connect} from 'react-redux';
+import PropTypes from 'prop-types';
+import {loginUser} from '../../actions/auth';
 
 const Login = (props) => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -69,4 +68,4 @@ Login.propTypes = {
   isAuthenticated: PropTypes.bool,
 };
 
-export default connect(mapStateToProps, { loginUser })(Login);
+export default connect(mapStateToProps, {loginUser})(Login);

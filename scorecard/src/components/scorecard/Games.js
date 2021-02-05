@@ -1,6 +1,7 @@
-import React from "react";
+import React from 'react';
+import PropTypes from 'prop-types';
 
-const Games = ({ games, onClick: emitEvent }) => {
+const Games = ({games, onClick: emitEvent}) => {
   return (
     <>
       <h3>Bitte Spiel auswählen</h3>
@@ -37,6 +38,11 @@ const Games = ({ games, onClick: emitEvent }) => {
       </table>
     </>
   );
+};
+
+Games.propTypes = {
+  games: PropTypes.array.isRequired,
+  onClick: PropTypes.func.isRequired,
 };
 
 export default Games;

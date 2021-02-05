@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from "react";
-import Games from "./Games";
-import Gamedays from "./Gamedays";
-import { connect } from "react-redux";
-import PropTypes from "prop-types";
-import { getGamedays } from "../../actions/gamedays";
-import { getGames, setSelectedGame } from "../../actions/games";
-import { Redirect } from "react-router-dom";
-import { OFFICIALS_URL } from "../common/urls";
-
-const initialState = {
-  hideBtn: false,
-};
+import React, {useEffect, useState} from 'react';
+import Games from './Games';
+import Gamedays from './Gamedays';
+import {connect} from 'react-redux';
+import PropTypes from 'prop-types';
+import {getGamedays} from '../../actions/gamedays';
+import {getGames, setSelectedGame} from '../../actions/games';
+import {Redirect} from 'react-router-dom';
+import {OFFICIALS_URL} from '../common/urls';
 
 const SelectGame = (props) => {
   const [isSelectedGameLoaded, setSelectedGameLoaded] = useState(false);
@@ -38,8 +34,11 @@ const SelectGame = (props) => {
 };
 
 SelectGame.propTypes = {
-  gamedays: PropTypes.array,
+  gamedays: PropTypes.array.isRequired,
+  games: PropTypes.array.isRequired,
   getGamedays: PropTypes.func.isRequired,
+  getGames: PropTypes.func.isRequired,
+  setSelectedGame: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({

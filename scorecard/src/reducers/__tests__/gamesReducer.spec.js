@@ -1,15 +1,15 @@
-import { GET_GAMES } from "../../actions/types";
-import gamesReducer from "../gamesReducer";
+import {GET_GAMES} from '../../actions/types';
+import gamesReducer from '../gamesReducer';
 
-describe("Games Reducer", () => {
-  it("Should return empty games", () => {
+describe('Games Reducer', () => {
+  it('Should return empty games', () => {
     const newState = gamesReducer(undefined, {});
     expect(newState).toEqual({
       games: [],
     });
   });
 
-  it("Should return new state if receiving type", () => {
+  it('Should return new state if receiving type', () => {
     const games = {
       games: [
         {

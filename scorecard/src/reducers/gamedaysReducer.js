@@ -1,4 +1,4 @@
-import { GET_GAMEDAYS } from "../actions/types.js";
+import {GET_GAMEDAYS} from '../actions/types.js';
 
 const initialState = {
   gamedays: [],

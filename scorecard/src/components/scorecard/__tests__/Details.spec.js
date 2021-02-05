@@ -1,15 +1,15 @@
-import { testStore } from "../../../__tests__/Utils";
-import React from "react";
-import { HashRouter as Router, Route } from "react-router-dom";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import {testStore} from '../../../__tests__/Utils';
+import React from 'react';
+import {HashRouter as Router, Route} from 'react-router-dom';
+import {render, screen} from '@testing-library/react';
+// import userEvent from '@testing-library/user-event';
 
-import { api_get } from "../../../actions/utils/api";
-import Details from "../Details";
-import { GAME_PAIR_1 } from "../../../__tests__/testdata/gamesData";
+import {apiGet} from '../../../actions/utils/api';
+import Details from '../Details';
+import {GAME_PAIR_1} from '../../../__tests__/testdata/gamesData';
 
-jest.mock("../../../actions/utils/api");
-api_get.mockImplementation((...params) => (dispatch) => {
+jest.mock('../../../actions/utils/api');
+apiGet.mockImplementation((...params) => (dispatch) => {
   const actionType = params[1];
   if (actionType == GET_GAMEDAYS) {
     return () => {};
@@ -23,7 +23,7 @@ api_get.mockImplementation((...params) => (dispatch) => {
 let store;
 
 const setup = () => {
-  api_get.mockClear();
+  apiGet.mockClear();
   const initialState = {
     gamesReducer: {
       selectedGame: GAME_PAIR_1,
@@ -31,35 +31,35 @@ const setup = () => {
   };
   store = testStore(initialState);
   render(
-    <Router>
-      <Details store={store} />
-      <Route path="/someUrl">Redirected Page</Route>
-    </Router>
+      <Router>
+        <Details store={store} />
+        <Route path="/someUrl">Redirected Page</Route>
+      </Router>,
   );
 };
 
-describe("Details component", () => {
-  it("should render correct", () => {
+describe('Details component', () => {
+  it('should render correct', () => {
     setup();
     expect(
-      screen.getByRole("radio", {
-        name: new RegExp(`\\b${GAME_PAIR_1.home}\\b`, "i"),
-      })
+        screen.getByRole('radio', {
+          name: new RegExp(`\\b${GAME_PAIR_1.home}\\b`, 'i'),
+        }),
     ).toBeInTheDocument();
     expect(screen.getByText(GAME_PAIR_1.points_home)).toBeInTheDocument();
     expect(
-      screen.getByRole("radio", {
-        name: new RegExp(`\\b${GAME_PAIR_1.away}\\b`, "i"),
-      })
+        screen.getByRole('radio', {
+          name: new RegExp(`\\b${GAME_PAIR_1.away}\\b`, 'i'),
+        }),
     ).toBeInTheDocument();
     expect(screen.getByText(GAME_PAIR_1.away)).toBeInTheDocument();
     expect(screen.getByText(GAME_PAIR_1.points_away)).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", { name: "Halbzeit" })
+        screen.getByRole('button', {name: 'Halbzeit'}),
     ).toBeInTheDocument();
-    expect(screen.getAllByRole("button")).toHaveLength(5);
+    expect(screen.getAllByRole('button')).toHaveLength(5);
 
-    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.getByRole('table')).toBeInTheDocument();
   });
 });

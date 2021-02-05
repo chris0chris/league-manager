@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import PropTypes from "prop-types";
+import React, {useState} from 'react';
+import PropTypes from 'prop-types';
 
-const Gamedays = ({ gamedays, onClick: emitEvent }) => {
+const Gamedays = ({gamedays, onClick: emitEvent}) => {
   const [activeRow, setActiveRow] = useState(null);
   return (
     <>
@@ -18,7 +18,7 @@ const Gamedays = ({ gamedays, onClick: emitEvent }) => {
           {gamedays.map((gameday) => (
             <tr
               key={gameday.id}
-              className={gameday.id === activeRow ? "bg-success" : ""}
+              className={gameday.id === activeRow ? 'bg-success' : ''}
             >
               <td>{gameday.date}</td>
               <td>{gameday.name}</td>

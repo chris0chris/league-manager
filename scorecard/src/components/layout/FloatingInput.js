@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, {useState} from 'react';
+import PropTypes from 'prop-types';
 
-const FloatingInput = ({ id, text, value, onChange: setValue }) => {
+const FloatingInput = ({id, text, value, onChange: setValue}) => {
   const [inputValue, setInputValue] = useState(value.name);
   const handleChange = (newValue) => {
     setInputValue(newValue);
-    setValue({ ...value, name: newValue });
+    setValue({...value, name: newValue});
   };
   return (
     <div className="form-floating mt-3">
@@ -22,6 +23,13 @@ const FloatingInput = ({ id, text, value, onChange: setValue }) => {
       </label>
     </div>
   );
+};
+
+FloatingInput.propTypes = {
+  id: PropTypes.string.isRequired,
+  text: PropTypes.string.isRequired,
+  value: PropTypes.any.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 
 export default FloatingInput;

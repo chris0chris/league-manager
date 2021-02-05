@@ -1,15 +1,15 @@
-import React from "react";
-import { HashRouter as Router, Route } from "react-router-dom";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { testStore } from "../../../__tests__/Utils";
-import { GAME_PAIR_1 } from "../../../__tests__/testdata/gamesData";
-import Officials from "../Officials";
-import { DETAILS_URL } from "../../common/urls";
-import { api_post } from "../../../actions/utils/api";
+import React from 'react';
+import {HashRouter as Router, Route} from 'react-router-dom';
+import {render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import {testStore} from '../../../__tests__/Utils';
+import {GAME_PAIR_1} from '../../../__tests__/testdata/gamesData';
+import Officials from '../Officials';
+import {DETAILS_URL} from '../../common/urls';
+import {apiPost} from '../../../actions/utils/api';
 
-jest.mock("../../../actions/utils/api");
-api_post.mockImplementation(() => {
+jest.mock('../../../actions/utils/api');
+apiPost.mockImplementation(() => {
   return () => {};
 });
 
@@ -22,42 +22,43 @@ const setup = () => {
     },
   };
   const store = testStore(initialState);
-  const component = render(
-    <Router>
-      <Officials store={store} />
-      <Route path={DETAILS_URL}>Some Text</Route>
-    </Router>
+  render(
+      <Router>
+        <Officials store={store} />
+        <Route path={DETAILS_URL}>Some Text</Route>
+      </Router>,
   );
 };
 
-describe("Officials component", () => {
-  it("should render component", async () => {
+describe('Officials component', () => {
+  it('should render component', async () => {
     setup();
-    expect(screen.getByRole("heading")).toHaveTextContent(
-      `Feld ${selectedGame.field}: ${selectedGame.home} vs ${selectedGame.away}`
+    expect(screen.getByRole('heading')).toHaveTextContent(
+        // eslint-disable-next-line max-len
+        `Feld ${selectedGame.field}: ${selectedGame.home} vs ${selectedGame.away}`,
     );
-    expect(screen.getAllByRole("textbox").length).toBe(5);
-    expect(screen.getAllByRole("radio").length).toBe(6);
-    expect(screen.getByTestId("ctTeam").textContent).toEqual(selectedGame.away);
+    expect(screen.getAllByRole('textbox').length).toBe(5);
+    expect(screen.getAllByRole('radio').length).toBe(6);
+    expect(screen.getByTestId('ctTeam').textContent).toEqual(selectedGame.away);
   });
-  it("submit form and redirects", () => {
+  it('submit form and redirects', () => {
     setup();
     userEvent.type(
-      screen.getByPlaceholderText("Scorecard Judge-Name"),
-      "SC Name"
+        screen.getByPlaceholderText('Scorecard Judge-Name'),
+        'SC Name',
     );
-    userEvent.type(screen.getByPlaceholderText("Referee-Name"), "R Name");
-    userEvent.type(screen.getByPlaceholderText("Down Judge-Name"), "DJ Name");
-    userEvent.type(screen.getByPlaceholderText("Field Judge-Name"), "FJ Name");
-    userEvent.type(screen.getByPlaceholderText("Side Judge-Name"), "SJ Name");
-    userEvent.click(screen.getByText("Gewonnen"));
+    userEvent.type(screen.getByPlaceholderText('Referee-Name'), 'R Name');
+    userEvent.type(screen.getByPlaceholderText('Down Judge-Name'), 'DJ Name');
+    userEvent.type(screen.getByPlaceholderText('Field Judge-Name'), 'FJ Name');
+    userEvent.type(screen.getByPlaceholderText('Side Judge-Name'), 'SJ Name');
+    userEvent.click(screen.getByText('Gewonnen'));
     userEvent.click(screen.getByText(selectedGame.home));
-    userEvent.click(screen.getByTitle("directionLeft"));
-    userEvent.click(screen.getByText("Spiel starten"));
+    userEvent.click(screen.getByTitle('directionLeft'));
+    userEvent.click(screen.getByText('Spiel starten'));
 
-    expect(api_post.mock.calls[0][0]).toBe("/api/gamesetup/create");
-    expect(api_post.mock.calls[1][0]).toBe("/api/officials/create");
+    expect(apiPost.mock.calls[0][0]).toBe('/api/gamesetup/create');
+    expect(apiPost.mock.calls[1][0]).toBe('/api/officials/create');
 
-    expect(screen.getByText("Some Text")).toBeInTheDocument();
+    expect(screen.getByText('Some Text')).toBeInTheDocument();
   });
 });

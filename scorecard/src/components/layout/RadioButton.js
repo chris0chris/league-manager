@@ -1,7 +1,7 @@
-import PropTypes from "prop-types";
-import React from "react";
+import PropTypes from 'prop-types';
+import React from 'react';
 
-const RadioButton = ({ id, name, onChange: setValue, text, value }) => {
+const RadioButton = ({id, name, onChange: setValue, text, value}) => {
   const handleChange = (value) => {
     setValue(value);
   };

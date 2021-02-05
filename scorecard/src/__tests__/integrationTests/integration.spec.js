@@ -1,8 +1,8 @@
-import moxios from "moxios";
-import { testStore } from "../Utils";
-import { getGamedays } from "../../actions/gamedays";
+import moxios from 'moxios';
+import {testStore} from '../Utils';
+import {getGamedays} from '../../actions/gamedays';
 
-describe("getGames action", () => {
+describe('getGames action', () => {
   beforeEach(() => {
     moxios.install();
   });
@@ -11,17 +11,17 @@ describe("getGames action", () => {
     moxios.uninstall();
   });
 
-  test("Store is updated correctly", (done) => {
+  test('Store is updated correctly', (done) => {
     const expectedState = {
       data: {
-        date: "2020-07-12",
-        name: "Test Gameday",
+        date: '2020-07-12',
+        name: 'Test Gameday',
       },
     };
     const store = testStore();
 
     moxios.wait(() => {
-      const request = moxios.requests.mostRecent({
+      moxios.requests.mostRecent({
         status: 200,
         response: expectedState,
       });

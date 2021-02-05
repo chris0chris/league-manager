@@ -1,8 +1,8 @@
-import { createStore, applyMiddleware } from "redux";
-import { composeWithDevTools } from "redux-devtools-extension";
-import thunk from "redux-thunk";
-import rootReducer from "./reducers";
-import { GAME_PAIR_1 } from "./__tests__/testdata/gamesData";
+import {createStore, applyMiddleware} from 'redux';
+import {composeWithDevTools} from 'redux-devtools-extension';
+import thunk from 'redux-thunk';
+import rootReducer from './reducers';
+import {GAME_PAIR_1} from './__tests__/testdata/gamesData';
 
 // const initialState = {};
 
@@ -19,7 +19,7 @@ const initialState = {
 export const middleware = [thunk];
 
 export const store = createStore(
-  rootReducer,
-  initialState,
-  composeWithDevTools(applyMiddleware(...middleware))
+    rootReducer,
+    initialState,
+    composeWithDevTools(applyMiddleware(...middleware)),
 );
