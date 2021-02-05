@@ -51,7 +51,7 @@ jobs:
   scorecard_js:
     executor:
       name: node/default
-      tag: 15.8
+      tag: "15.8"
     working_directory: ~/repo
     steps:
       - checkout
