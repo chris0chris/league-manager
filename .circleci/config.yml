@@ -62,15 +62,9 @@ jobs:
           command: npm --prefix scorecard/ run eslint
       - run:
           name: "JavaScript Test Suite"
-          environment:
-            JEST_JUNIT_OUTPUT: test-reports/js-test-results.xml
           command: npm --prefix scorecard/ run jest
       - store_test_results:
           path: test-reports
-      - codecov/upload:
-          file: js-lint-results.xml
-      - codecov/upload:
-          file: js-test-results.xml
 
 workflows:
   version: 2
