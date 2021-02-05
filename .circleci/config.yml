@@ -1,8 +1,9 @@
 version: 2.1
 orbs:
   codecov: codecov/codecov@1.0.2
+
 jobs:
-  build:
+  python:
     docker:
       - image: circleci/python:3.8.2
 
@@ -14,7 +15,7 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "requirements.txt" }}
+            -v2-dependencies-{{ checksum "requirements.txt" }}
             # fallback to using the latest cache if no exact match is found
             - v2-dependencies-
 
@@ -43,7 +44,45 @@ jobs:
             pytest --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
       - store_test_results:
           path: test-reports
-          destination: test-reports
-
       - codecov/upload:
           file: coverage.xml
+
+  scorecard_js:
+    docker:
+      - image: cicleci/node:15.1
+    working_directory: ~/repo/scorecard
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
+      - run: npm install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: "JavaScript Linter"
+          command: npm lint -- --format junit -o test-reports/js-lint-results.xml
+      - run:
+          name: "JavaScript Test Suite"
+          environment:
+            JEST_JUNIT_OUTPUT: test-reports/js-test-results.xml
+          command: yarn test -- --ci --testResultsProcessor="jest-junit"
+      - store_test_results:
+          path: tst-reports
+      - store_artifacts:
+          path: reports
+      - codecov/upload:
+          file: js-lint-results.xml
+      - codecov/upload:
+          file: js-test-results.xml
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - python
+      - scorecard_js
