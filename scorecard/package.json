@@ -12,8 +12,9 @@
     "build": "webpack --mode production --entry ./src/index.js --output-path ./static/scorecard/js",
     "test": "jest --maxWorkers=1",
     "circleci": "jest",
+    "circleci-lint": "eslint -- -o js-lint-results.xml",
     "test:watch": "jest --watch --maxWorkers=1",
-    "report": "eslint --format junit"
+    "report": "eslint ./src --format junit -o js-lint-results.xml"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +32,8 @@
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.6.1",
     "eslint": "^7.19.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-react": "^7.22.0",
     "jest": "^26.6.3",
     "jest-junit": "^12.0.0",
     "moxios": "^0.4.0",
