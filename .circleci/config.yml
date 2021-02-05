@@ -58,13 +58,11 @@ jobs:
       - node/install-packages:
           app-dir: scorecard/
       - run:
-          name: "JavaScript Linter"
-          command: npm --prefix scorecard/ run eslint
-      - run:
           name: "JavaScript Test Suite"
           command: npm --prefix scorecard/ run jest
-      - store_test_results:
-          path: test-reports
+      - run:
+          name: "JavaScript Linter"
+          command: npm --prefix scorecard/ run eslint
 
 workflows:
   version: 2
