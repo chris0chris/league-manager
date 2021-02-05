@@ -11,7 +11,7 @@
     "dev:watch": "webpack --mode development --watch --entry ./src/index.js --output-path ./static/scorecard/js",
     "build": "webpack --mode production --entry ./src/index.js --output-path ./static/scorecard/js",
     "test": "jest --maxWorkers=1",
-    "jest": "jest --ci --testResultsProcessor='jest-junit'",
+    "jest": "jest --ci --coverage && codecov",
     "eslint": "eslint ./src --format junit -o js-lint-results.xml",
     "test:watch": "jest --watch --maxWorkers=1"
   },
