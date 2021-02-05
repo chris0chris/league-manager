@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   codecov: codecov/codecov@1.0.2
+  node: circleci/node@4.1.0
 
 jobs:
   python:
@@ -48,33 +49,24 @@ jobs:
           file: coverage.xml
 
   scorecard_js:
-    docker:
-      - image: cicleci/node:15.1
-    working_directory: ~/repo/scorecard
-
+    executor:
+      name: node/default
+      tag: 15.8
+    working_directory: ~/repo
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v2-dependencies-{{ checksum "package.json" }}
-            - v2-dependencies-
-      - run: npm install
-      - save_cache:
-          paths:
-            - node_modules
-          key: v2-dependencies-{{ checksum "package.json" }}
+      - node/install-packages:
+          app-dir: scorecard/
       - run:
           name: "JavaScript Linter"
-          command: npm lint -- --format junit -o test-reports/js-lint-results.xml
+          command: npm --prefix scorecard/ run eslint
       - run:
           name: "JavaScript Test Suite"
           environment:
             JEST_JUNIT_OUTPUT: test-reports/js-test-results.xml
-          command: npm run circleci -- --ci --testResultsProcessor="jest-junit"
+          command: npm --prefix scorecard/ run jest
       - store_test_results:
           path: test-reports
-      - store_artifacts:
-          path: reports
       - codecov/upload:
           file: js-lint-results.xml
       - codecov/upload:
