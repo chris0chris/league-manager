@@ -70,7 +70,7 @@ jobs:
           name: "JavaScript Test Suite"
           environment:
             JEST_JUNIT_OUTPUT: test-reports/js-test-results.xml
-          command: yarn test -- --ci --testResultsProcessor="jest-junit"
+          command: npm run circleci -- --ci --testResultsProcessor="jest-junit"
       - store_test_results:
           path: tst-reports
       - store_artifacts:
