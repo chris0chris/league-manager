@@ -9,7 +9,6 @@ class Gameday(models.Model):
     format = models.CharField(max_length=100, default='6_2', blank=True)
     author = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
 
-
     objects = models.Manager()
 
     def __str__(self):
@@ -70,5 +69,16 @@ class GameSetup:
         self.direction = kwargs.get('direction')
         self.fhPossession = kwargs.get('fhPossession')
 
+
+class TeamLog(models.Model):
+    gameinfo: Gameinfo = models.ForeignKey(Gameinfo, on_delete=models.CASCADE)
+    number = models.PositiveSmallIntegerField()
+    sixPoints = models.PositiveSmallIntegerField(null=True, blank=True)
+    twoPoints = models.PositiveSmallIntegerField(null=True, blank=True)
+    onePoint = models.PositiveSmallIntegerField(null=True, blank=True)
+    cop = models.BooleanField(default=False)
+
     def __str__(self):
-        return f'{self.gameinfo.pk}__{self.name} - {self.position}'
+        if self.cop:
+            return f'{self.gameinfo.pk}__{self.number} CoP: {self.cop}'
+        return f'{self.gameinfo.pk}__{self.number} 6: {self.sixPoints} 2: {self.twoPoints} 1: {self.onePoint}'
