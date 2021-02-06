@@ -1,5 +1,5 @@
 import {apiGet} from './utils/api';
-import {GET_GAMES, SET_SELECTED_GAME} from './types';
+import {GET_GAMES, GET_GAME_LOG, SET_SELECTED_GAME} from './types';
 
 export const getGames = (gamedayId) => {
   return apiGet(
@@ -13,4 +13,8 @@ export const setSelectedGame = (selectedGame) => (dispatch) => {
     type: SET_SELECTED_GAME,
     payload: selectedGame,
   });
+};
+
+export const getGameLog = (gameId) => {
+  return apiGet(`/api/gamelog/${gameId}`, GET_GAME_LOG);
 };

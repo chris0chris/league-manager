@@ -6,17 +6,18 @@ import {render, screen} from '@testing-library/react';
 
 import {apiGet} from '../../../actions/utils/api';
 import Details from '../Details';
-import {GAME_PAIR_1} from '../../../__tests__/testdata/gamesData';
+import {GAME_LOG} from '../../../__tests__/testdata/gameLogData';
+import {GET_GAME_LOG} from '../../../actions/types';
 
 jest.mock('../../../actions/utils/api');
 apiGet.mockImplementation((...params) => (dispatch) => {
-  const actionType = params[1];
-  if (actionType == GET_GAMEDAYS) {
-    return () => {};
-  }
+  // const actionType = params[1];
+  // if (actionType == GET_GAMEDAYS) {
+  //   return () => {};
+  // }
   dispatch({
-    type: GET_GAMES,
-    payload: TWO_GAMES.games,
+    type: GET_GAME_LOG,
+    payload: GAME_LOG,
   });
 });
 
@@ -26,7 +27,7 @@ const setup = () => {
   apiGet.mockClear();
   const initialState = {
     gamesReducer: {
-      selectedGame: GAME_PAIR_1,
+      gameLog: GAME_LOG,
     },
   };
   store = testStore(initialState);
@@ -41,19 +42,20 @@ const setup = () => {
 describe('Details component', () => {
   it('should render correct', () => {
     setup();
+    // expect(apiGet.mock.calls).toHaveLength(1);
     expect(
         screen.getByRole('radio', {
-          name: new RegExp(`\\b${GAME_PAIR_1.home}\\b`, 'i'),
+          name: new RegExp(`\\b${GAME_LOG.home.name}\\b`, 'i'),
         }),
     ).toBeInTheDocument();
-    expect(screen.getByText(GAME_PAIR_1.points_home)).toBeInTheDocument();
+    expect(screen.getByText(GAME_LOG.home.score)).toBeInTheDocument();
     expect(
         screen.getByRole('radio', {
-          name: new RegExp(`\\b${GAME_PAIR_1.away}\\b`, 'i'),
+          name: new RegExp(`\\b${GAME_LOG.away.name}\\b`, 'i'),
         }),
     ).toBeInTheDocument();
-    expect(screen.getByText(GAME_PAIR_1.away)).toBeInTheDocument();
-    expect(screen.getByText(GAME_PAIR_1.points_away)).toBeInTheDocument();
+    expect(screen.getByText(GAME_LOG.away.name)).toBeInTheDocument();
+    expect(screen.getByText(GAME_LOG.away.score)).toBeInTheDocument();
 
     expect(
         screen.getByRole('button', {name: 'Halbzeit'}),

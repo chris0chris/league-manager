@@ -1,10 +1,10 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
-import {TEAM_LOG} from '../../../__tests__/testdata/teamLogData';
+import {GAME_LOG} from '../../../__tests__/testdata/gameLogData';
 import ScorecardTable from '../ScorecardTable';
 
 const setup = () => {
-  render(<ScorecardTable entries={TEAM_LOG.home.firsthalf} />);
+  render(<ScorecardTable entries={GAME_LOG.home.firsthalf.entries} />);
 };
 
 describe('ScorecardTable component', () => {

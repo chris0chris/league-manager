@@ -6,10 +6,13 @@ import {testStore} from '../../../__tests__/Utils';
 import {GAME_PAIR_1} from '../../../__tests__/testdata/gamesData';
 import Officials from '../Officials';
 import {DETAILS_URL} from '../../common/urls';
-import {apiPost} from '../../../actions/utils/api';
+import {apiGet, apiPost} from '../../../actions/utils/api';
 
 jest.mock('../../../actions/utils/api');
 apiPost.mockImplementation(() => {
+  return () => {};
+});
+apiGet.mockImplementation(() => {
   return () => {};
 });
 
@@ -58,7 +61,7 @@ describe('Officials component', () => {
 
     expect(apiPost.mock.calls[0][0]).toBe('/api/gamesetup/create');
     expect(apiPost.mock.calls[1][0]).toBe('/api/officials/create');
-
+    expect(apiGet.mock.calls[0][0]).toBe(`/api/gamelog/${selectedGame.id}`);
     expect(screen.getByText('Some Text')).toBeInTheDocument();
   });
 });

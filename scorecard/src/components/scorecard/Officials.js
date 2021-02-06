@@ -8,6 +8,7 @@ import {Redirect} from 'react-router-dom';
 import {DETAILS_URL} from '../common/urls';
 import {GameSetup, Official} from '../../actions/objects';
 import {saveGameSetup, saveOfficials} from '../../actions/gamesetup';
+import {getGameLog} from '../../actions/games';
 
 export const Officials = (props) => {
   const selectedGame = props.selectedGame;
@@ -46,6 +47,7 @@ export const Officials = (props) => {
     officials.push(sideJudge);
     props.saveGameSetup(gameSetup);
     props.saveOfficials(officials);
+    props.getGameLog(selectedGame.id);
     setIsSuccessfulSubmitted(true);
   };
 
@@ -162,6 +164,7 @@ Officials.propTypes = {
   selectedGame: PropTypes.object.isRequired,
   saveGameSetup: PropTypes.func.isRequired,
   saveOfficials: PropTypes.func.isRequired,
+  getGameLog: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -169,6 +172,7 @@ const mapStateToProps = (state) => ({
   selectedGame: state.gamesReducer.selectedGame,
 });
 
-export default connect(mapStateToProps, {saveGameSetup, saveOfficials})(
+export default connect(mapStateToProps,
+    {saveGameSetup, saveOfficials, getGameLog})(
     Officials,
 );

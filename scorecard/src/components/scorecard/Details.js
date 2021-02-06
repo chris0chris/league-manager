@@ -1,4 +1,3 @@
-/* eslint-disable  */
 import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
@@ -7,7 +6,7 @@ import {FaStopwatch} from 'react-icons/fa';
 import ScorecardTable from './ScorecardTable';
 
 const Details = (props) => {
-  const selectedGame = props.selectedGame;
+  const gameLog = props.gameLog;
   return (
     <div className='container'>
       <div className='row'>
@@ -16,10 +15,10 @@ const Details = (props) => {
             id='home'
             name='teamName'
             onChange={() => {}}
-            value={selectedGame.home}
+            value={gameLog.home.name}
             text={
               <>
-                {selectedGame.home}{' '}
+                {gameLog.home.name}{' '}
                 <span
                   className='badge bg-warning'
                   style={{
@@ -28,7 +27,7 @@ const Details = (props) => {
                     fontSize: '15px',
                   }}
                 >
-                  {selectedGame.points_home}
+                  {gameLog.home.score}
                 </span>
               </>
             }
@@ -39,7 +38,7 @@ const Details = (props) => {
             id='away'
             name='teamName'
             onChange={() => {}}
-            value={selectedGame.away}
+            value={gameLog.away.name}
             text={
               <>
                 <span
@@ -50,9 +49,9 @@ const Details = (props) => {
                     fontSize: '15px',
                   }}
                 >
-                  {selectedGame.points_away}
+                  {gameLog.away.score}
                 </span>{' '}
-                {selectedGame.away}
+                {gameLog.away.name}
               </>
             }
           />
@@ -145,12 +144,12 @@ const Details = (props) => {
   );
 };
 
-// Details.propTypes = {
-
-// }
+Details.propTypes = {
+  gameLog: PropTypes.object.isRequired,
+};
 
 const mapStateToProps = (state) => ({
-  selectedGame: state.gamesReducer.selectedGame,
+  gameLog: state.gamesReducer.gameLog,
 });
 
 export default connect(mapStateToProps)(Details);
