@@ -1,4 +1,5 @@
 import json
+import pathlib
 
 from django.test import TestCase
 
@@ -35,46 +36,10 @@ class TestGamelog(TestCase):
     def test_get_gamelog_as_json(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
         gamelog = GameLog(firstGameEntry.pk)
-        assert gamelog.as_json() == json.dumps({
-            'gameId': firstGameEntry.pk,
-            'home': {
-                'name': 'Home',
-                'score': 42,
-                'firsthalf': {
-                    'score': 21,
-                    'entries': [
-                        {'sequence': 1, 'td': 19, },
-                        {'sequence': 2, 'td': 19, 'pat2': 7, },
-                        {'sequence': 3, 'td': 19, 'pat1': 7, },
-                    ]
-                },
-                'secondhalf': {
-                    'score': 21,
-                    'entries': [
-                        {'sequence': 5, 'td': 19, },
-                        {'sequence': 8, 'td': 19, 'pat2': 7, },
-                        {'sequence': 9, 'td': 19, 'pat1': 7, },
-                    ]
-                }
-            },
-            'away': {
-                'name': 'Away',
-                'score': 3,
-                'firsthalf': {
-                    'score': 0,
-                    'entries': [],
-                },
-                'secondhalf': {
-                    'score': 3,
-                    'entries': [
-                        {'sequence': 4, 'Safety': 7},
-                        {'sequence': 6, 'cop': True},
-                        {'sequence': 7, 'Safety': 7},
-                        {'sequence': 10, 'cop': True}
-                    ],
-                }
-            }
-        })
+        with open(pathlib.Path(__file__).parent / 'testdata/teamlog.json') as f:
+            expected_gamelog = json.load(f)
+        expected_gamelog['gameId'] = firstGameEntry.pk
+        assert gamelog.as_json() == json.dumps(expected_gamelog)
 
     def test_json_representation_of_gamelog_object(self):
         g = GameLogObject(81, 'White', 'Red')

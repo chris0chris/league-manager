@@ -2,6 +2,7 @@ import json
 from collections import OrderedDict
 from http import HTTPStatus
 
+from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView, ListCreateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -10,6 +11,7 @@ from rest_framework.views import APIView
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, GameOfficialSerializer, GameSetupSerializer
 from gamedays.models import Gameday, Gameinfo, GameOfficial
 from gamedays.service.gameday_service import GamedayService
+from gamedays.service.gamelog_service import GameLogService
 
 
 class GamedayListAPIView(ListAPIView):
@@ -67,3 +69,14 @@ class GamedayScheduleView(APIView):
 
 class GameSetupCreateView(CreateAPIView):
     serializer_class = GameSetupSerializer
+
+
+class GameLogAPIView(APIView):
+
+    def get(self, request: Request, *args, **kwargs):
+        gameId = kwargs.get('id')
+        try:
+            gamelog = GameLogService.get_gamelog(gameId)
+            return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict))
+        except Gameinfo.DoesNotExist:
+            raise NotFound(detail=f'No game found for gameId {gameId}')

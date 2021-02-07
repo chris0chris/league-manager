@@ -170,20 +170,16 @@ class TestGameSetup(WebTest):
         assert len() == 1
 
 
-class TestTeamLog(WebTest):
+class TestGameLog(WebTest):
+    def test_game_not_found_exception(self):
+        response = self.app.get(reverse('api-gamelog', kwargs={'id': 666}), expect_errors=True)
+        assert response.status_code == HTTPStatus.NOT_FOUND
 
-    @pytest.mark.xfail
     def test_get_team_log(self):
-        # ToDo @Nik
-        response = self.app.post_json(reverse('api-teamlog'),
-                                      {"gameinfo": 1, "team": 1})
+        gameinfo = DBSetup().create_teamlog_home_and_away()
+        response = self.app.get(reverse('api-gamelog', kwargs={'id': gameinfo.pk}))
         assert response.status_code == HTTPStatus.OK
-        assert response.json == [{
-            "id": 1,
-            "counter": 1,
-            "team": 1,
-            "six": "#19",
-            "two": "",
-            "one": "",
-            "hf": 1
-        }]
+        with open(pathlib.Path(__file__).parent / '../service/testdata/teamlog.json') as f:
+            expected_gamelog = json.load(f)
+        expected_gamelog['gameId'] = gameinfo.pk
+        assert response.json == expected_gamelog
