@@ -17,22 +17,24 @@ class TestGameOfficials(TestCase):
 
 class TestTeamlog(TestCase):
 
-    def test_save_touchdown_with_PAT(self):
+    def test_save_score(self):
         DBSetup().g62_status_empty()
-        teamlog = TeamLog(gameinfo=Gameinfo.objects.all().first(), number=1, sixPoints=19, onePoint=7)
+        teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname",
+                          sequence=1, event="td", player=19, value=6, half=1)
         teamlog.save()
         assert len(TeamLog.objects.all()) == 1
-        assert str(teamlog) == f'{teamlog.pk}__1 6: 19 2: None 1: 7'
+        assert str(teamlog) == f'{teamlog.pk}__Teamname#1 Player: 19 Value: 6 - Half: 1'
 
-    def test_save_with_empty_entries(self):
+    def test_save_PAT_no_good(self):
         DBSetup().g62_status_empty()
-        teamlog = TeamLog(gameinfo=Gameinfo.objects.all().first(), number=1)
+        teamlog: TeamLog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname", sequence=1,
+                                   event='pat1', value=0, half=1)
         teamlog.save()
         assert len(TeamLog.objects.all()) == 1
 
     def test_save_with_change_of_possession(self):
         DBSetup().g62_status_empty()
-        teamlog = TeamLog(gameinfo=Gameinfo.objects.all().first(), number=1, cop=True)
+        teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname", sequence=1, cop=True, half=2)
         teamlog.save()
         assert len(TeamLog.objects.all()) == 1
-        assert str(teamlog) == f'{teamlog.pk}__1 CoP: True'
+        assert str(teamlog) == f'{teamlog.pk}__Teamname#1 CoP: True - Half: 2'

@@ -72,13 +72,16 @@ class GameSetup:
 
 class TeamLog(models.Model):
     gameinfo: Gameinfo = models.ForeignKey(Gameinfo, on_delete=models.CASCADE)
-    number = models.PositiveSmallIntegerField()
-    sixPoints = models.PositiveSmallIntegerField(null=True, blank=True)
-    twoPoints = models.PositiveSmallIntegerField(null=True, blank=True)
-    onePoint = models.PositiveSmallIntegerField(null=True, blank=True)
+    team = models.CharField(max_length=100)
+    sequence = models.PositiveSmallIntegerField()
+    player = models.PositiveSmallIntegerField(null=True, blank=True)
+    event = models.CharField(max_length=100, blank=False)
+    value = models.PositiveSmallIntegerField(default=0, blank=True)
     cop = models.BooleanField(default=False)
+    half = models.PositiveSmallIntegerField()
 
     def __str__(self):
         if self.cop:
-            return f'{self.gameinfo.pk}__{self.number} CoP: {self.cop}'
-        return f'{self.gameinfo.pk}__{self.number} 6: {self.sixPoints} 2: {self.twoPoints} 1: {self.onePoint}'
+            return f'{self.gameinfo.pk}__{self.team}#{self.sequence} CoP: {self.cop} - Half: {self.half}'
+        return f'{self.gameinfo.pk}__{self.team}#{self.sequence} Player: {self.player} Value: {self.value} ' \
+               f'- Half: {self.half}'

@@ -13,7 +13,7 @@ class TestSignals(TestCase):
     def test_schedule_is_updated(self, update_mock):
         DBSetup().g62_status_empty()
 
-        gi: Gameinfo = Gameinfo.objects.all().first()
+        gi: Gameinfo = Gameinfo.objects.first()
         gi.status = 'beendet'
         gi.save()
         update_mock.assert_called_once()

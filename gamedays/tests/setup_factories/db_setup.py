@@ -1,6 +1,6 @@
-from gamedays.models import Gameday
+from gamedays.models import Gameday, Gameinfo
 from gamedays.tests.setup_factories.factories import GameinfoFactory, GameresultFactory, GamedayFactory, \
-    GameOfficialFactory
+    GameOfficialFactory, TeamLogFactory
 
 
 class DBSetup:
@@ -115,22 +115,31 @@ class DBSetup:
         for i in list(range(5)):
             GameOfficialFactory(gameinfo=gameinfo)
 
-# def deco_cg(qualify='beendet', sf='', p5='', p3='', p1='', group_a=3, group_b=3) -> Gameday:
-#     gameday = GamedayFactory()
-#
-#     def decorator_function(func):
-#         def wrapper_func(*args, **kwargs):
-#             gi = GameinfoFactory(gameday=gameday, stage='Vorrunde', standing='Gruppe 1', status='')
-#             GameresultFactory(gameinfo=gi, team='A' + '1', fh=2, sh=1, pa=2, isHome=True)
-#             GameresultFactory(gameinfo=gi, team='A' + '2', fh=1, sh=1, pa=3)
-#             gi = GameinfoFactory(gameday=gameday, stage='Vorrunde', standing='Gruppe 1', status='')
-#             GameresultFactory(gameinfo=gi, team='A' + '2', fh=1, sh=1, pa=1, isHome=True)
-#             GameresultFactory(gameinfo=gi, team='A' + '3', fh=1, sh=0, pa=2)
-#             gi = GameinfoFactory(gameday=gameday, stage='Vorrunde', standing='Gruppe 1', status='')
-#             GameresultFactory(gameinfo=gi, team='A' + '3', fh=1, sh=0, pa=3, isHome=True)
-#             GameresultFactory(gameinfo=gi, team='A' + '1', fh=2, sh=1, pa=1)
-#             return func
-#
-#         return wrapper_func
-#
-#     return decorator_function
+    def create_teamlog_home_and_away(self) -> Gameinfo:
+        # score home: 21 + 21 and cop - change of possession
+        # score away: 3 and 2 cop
+        gameday = GamedayFactory()
+        gi = GameinfoFactory(gameday=gameday, stage='Hauptrunde', standing='Gruppe 1')
+        GameresultFactory(gameinfo=gi, team='Home', fh=2, sh=1, pa=2, isHome=True)
+        GameresultFactory(gameinfo=gi, team='Away', fh=1, sh=1, pa=3)
+        self.create_teamlog_home(gi)
+        self.create_teamlog_away(gi)
+        return gi
+
+    def create_teamlog_home(self, gameinfo):
+        TeamLogFactory(gameinfo=gameinfo, team='Home', sequence=1, player=19, event='td', value=6, half=1)
+        TeamLogFactory(gameinfo=gameinfo, team='Home', sequence=2, player=19, event='td', value=6, half=1)
+        TeamLogFactory(gameinfo=gameinfo, team='Home', sequence=2, player=7, event='pat2', value=2, half=1)
+        TeamLogFactory(gameinfo=gameinfo, team='Home', sequence=3, player=19, event='td', value=6, half=1)
+        TeamLogFactory(gameinfo=gameinfo, team='Home', sequence=3, player=7, event='pat1', value=1, half=1)
+        TeamLogFactory(gameinfo=gameinfo, team='Home', sequence=5, player=19, event='td', value=6, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team='Home', sequence=8, player=19, event='td', value=6, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team='Home', sequence=8, player=7, event='pat2', value=2, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team='Home', sequence=9, player=19, event='td', value=6, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team='Home', sequence=9, player=7, event='pat1', value=1, half=2)
+
+    def create_teamlog_away(self, gameinfo):
+        TeamLogFactory(gameinfo=gameinfo, team='Away', sequence=4, player=7, event='Safety', value=2, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team='Away', sequence=6, cop=True, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team='Away', sequence=7, player=7, event='Safety', value=1, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team='Away', sequence=10, cop=True, half=2)
