@@ -8,8 +8,9 @@ export const GAME_LOG_COMPLETE_GAME = {
       'score': 21,
       'entries': [
         {
-          'sequence': 1,
+          'sequence': 3,
           'td': 19,
+          'pat1': 7,
         },
         {
           'sequence': 2,
@@ -17,9 +18,8 @@ export const GAME_LOG_COMPLETE_GAME = {
           'pat2': 7,
         },
         {
-          'sequence': 3,
+          'sequence': 1,
           'td': 19,
-          'pat1': 7,
         },
       ],
     },
@@ -27,8 +27,9 @@ export const GAME_LOG_COMPLETE_GAME = {
       'score': 21,
       'entries': [
         {
-          'sequence': 5,
+          'sequence': 9,
           'td': 19,
+          'pat1': 7,
         },
         {
           'sequence': 8,
@@ -36,9 +37,8 @@ export const GAME_LOG_COMPLETE_GAME = {
           'pat2': 7,
         },
         {
-          'sequence': 9,
+          'sequence': 5,
           'td': 19,
-          'pat1': 7,
         },
       ],
     },
@@ -54,16 +54,7 @@ export const GAME_LOG_COMPLETE_GAME = {
       'score': 3,
       'entries': [
         {
-          'sequence': 4,
-          'td': 7,
-          'pat1': null,
-        },
-        {
-          'sequence': 6,
-          'Safety': 7,
-        },
-        {
-          'sequence': 7,
+          'sequence': 11,
           'cop': true,
         },
         {
@@ -71,8 +62,17 @@ export const GAME_LOG_COMPLETE_GAME = {
           'Safety': null,
         },
         {
-          'sequence': 11,
+          'sequence': 7,
           'cop': true,
+        },
+        {
+          'sequence': 6,
+          'Safety': 7,
+        },
+        {
+          'sequence': 4,
+          'td': 7,
+          'pat1': null,
         },
       ],
     },
@@ -88,8 +88,9 @@ export const GAME_LOG_ONLY_FIRSTHALF = {
       'score': 21,
       'entries': [
         {
-          'sequence': 1,
+          'sequence': 3,
           'td': 19,
+          'pat1': 7,
         },
         {
           'sequence': 2,
@@ -97,9 +98,8 @@ export const GAME_LOG_ONLY_FIRSTHALF = {
           'pat2': 7,
         },
         {
-          'sequence': 3,
+          'sequence': 1,
           'td': 19,
-          'pat1': 7,
         },
       ],
     },
@@ -119,16 +119,7 @@ export const GAME_LOG_ONLY_FIRSTHALF = {
       'score': 3,
       'entries': [
         {
-          'sequence': 4,
-          'td': 7,
-          'pat1': null,
-        },
-        {
-          'sequence': 5,
-          'Safety': 7,
-        },
-        {
-          'sequence': 6,
+          'sequence': 11,
           'cop': true,
         },
         {
@@ -136,8 +127,17 @@ export const GAME_LOG_ONLY_FIRSTHALF = {
           'Safety': null,
         },
         {
-          'sequence': 11,
+          'sequence': 6,
           'cop': true,
+        },
+        {
+          'sequence': 5,
+          'Safety': 7,
+        },
+        {
+          'sequence': 4,
+          'td': 7,
+          'pat1': null,
         },
       ],
     },
