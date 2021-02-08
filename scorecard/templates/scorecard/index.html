@@ -10,11 +10,13 @@
           integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
           rel="stylesheet"
   />
+  {% load static %}
+  <link href='{% static "scorecard/css/score.css" %}' rel="stylesheet"/>
+
   <title>5er DFFL - Scorecard</title>
 </head>
 <body>
 <div id="app"></div>
-{% load static %}
 <script src='{% static "scorecard/js/main.js" %}'></script>
 <script
         crossorigin="anonymous"

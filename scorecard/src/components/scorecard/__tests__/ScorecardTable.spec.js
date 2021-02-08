@@ -1,11 +1,12 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
-import {GAME_LOG} from '../../../__tests__/testdata/gameLogData';
+import {GAME_LOG_COMPLETE_GAME} from '../../../__tests__/testdata/gameLogData';
 import ScorecardTable from '../ScorecardTable';
 
 const setup = () => {
-  render(<ScorecardTable entries={GAME_LOG.home.firsthalf.entries.concat(
-      GAME_LOG.away.secondhalf.entries)} />);
+  render(<ScorecardTable entries={
+    GAME_LOG_COMPLETE_GAME.home.firsthalf.entries.concat(
+        GAME_LOG_COMPLETE_GAME.away.secondhalf.entries)} />);
 };
 
 describe('ScorecardTable component', () => {

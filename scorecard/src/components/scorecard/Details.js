@@ -1,12 +1,18 @@
-import React from 'react';
+/* eslint-disable max-len */
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import RadioButton from '../layout/RadioButton';
 import {FaStopwatch} from 'react-icons/fa';
-import ScorecardTable from './ScorecardTable';
+import GameLog from './GameLog';
 
 const Details = (props) => {
+  const [displayBothTeamLogs, setDisplaybothTeamLogs] = useState(false);
+  const [showHomeTable, setShowHomeTable] = useState(true);
   const gameLog = props.gameLog;
+  const handleSwitch = () => {
+    setDisplaybothTeamLogs(!displayBothTeamLogs);
+  };
   return (
     <div className='container'>
       <div className='row'>
@@ -14,7 +20,7 @@ const Details = (props) => {
           <RadioButton
             id='home'
             name='teamName'
-            onChange={() => {}}
+            onChange={() => setShowHomeTable(true)}
             value={gameLog.home.name}
             text={
               <>
@@ -37,7 +43,7 @@ const Details = (props) => {
           <RadioButton
             id='away'
             name='teamName'
-            onChange={() => {}}
+            onChange={() => setShowHomeTable(false)}
             value={gameLog.away.name}
             text={
               <>
@@ -84,39 +90,19 @@ const Details = (props) => {
           </button>
         </div>
       </div>
-      <div className='row'>
-        <div className='col'>
-          <ScorecardTable
-            entries={gameLog.home.firsthalf.entries.concat(gameLog.away.secondhalf.entries)}
-          />
-        </div>
-        <div className='col'>
-          {/* <ScorecardTable
-            entries={[
-              {
-                id: 1,
-                number: 1,
-                sixPoints: "#19",
-                twoPoints: "",
-                onePoint: "#7",
-              },
-              {
-                id: 2,
-                number: 2,
-                sixPoints: "",
-                twoPoints: "#4",
-                onePoint: "",
-              },
-              {
-                id: 3,
-                number: 3,
-                sixPoints: "#7",
-                twoPoints: "",
-                onePoint: "#19",
-              },
-            ]}
-          /> */}
-        </div>
+      <GameLog homeHalf={gameLog.home.secondhalf} awayHalf={gameLog.away.secondhalf}
+        isFirstHalf={false} displayHome={showHomeTable} displayBothTeams={displayBothTeamLogs}/>
+      <GameLog homeHalf={gameLog.home.firsthalf} awayHalf={gameLog.away.firsthalf}
+        isFirstHalf={true} displayHome={showHomeTable} displayBothTeams={displayBothTeamLogs}/>
+      <div className="form-check form-switch">
+        <input className={`form-check-input ${displayBothTeamLogs ? '' : 'uncheck'}`}
+          onChange={() => handleSwitch()}
+          type="checkbox"
+          id="switch"
+          checked />
+        <label className="form-check-label" htmlFor="switch">
+          {displayBothTeamLogs? 'Zeige Einträge beide Teams' : 'Zeige Einträge ein Team'}
+        </label>
       </div>
     </div>
   );

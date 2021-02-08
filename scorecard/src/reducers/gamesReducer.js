@@ -1,33 +1,35 @@
 import {GET_GAMES, SET_SELECTED_GAME, GET_GAME_LOG} from '../actions/types.js';
+import {GAME_LOG_COMPLETE_GAME} from '../__tests__/testdata/gameLogData.js';
 
 const initialState = {
   games: [],
-  gameLog: {
-    'home': {
-      'name': 'Heim',
-      'score': -1,
-      'firsthalf': {
-        'score:': -1,
-        'entries': [],
-      },
-      'secondhalf': {
-        'score:': -1,
-        'entries': [],
-      },
-    },
-    'away': {
-      'name': 'Gast',
-      'score': -1,
-      'firsthalf': {
-        'score:': -1,
-        'entries': [],
-      },
-      'secondhalf': {
-        'score:': -1,
-        'entries': [],
-      },
-    },
-  },
+  gameLog: GAME_LOG_COMPLETE_GAME,
+  // gameLog: {
+  //   'home': {
+  //     'name': 'Heim',
+  //     'score': -1,
+  //     'firsthalf': {
+  //       'score:': -1,
+  //       'entries': [],
+  //     },
+  //     'secondhalf': {
+  //       'score:': -1,
+  //       'entries': [],
+  //     },
+  //   },
+  //   'away': {
+  //     'name': 'Gast',
+  //     'score': -1,
+  //     'firsthalf': {
+  //       'score:': -1,
+  //       'entries': [],
+  //     },
+  //     'secondhalf': {
+  //       'score:': -1,
+  //       'entries': [],
+  //     },
+  //   },
+  // },
 };
 
 export default (state = initialState, action) => {
