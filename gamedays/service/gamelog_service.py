@@ -24,6 +24,7 @@ class GameLog(object):
         self.gamelog = GameLogObject(gameId, home, away)
 
     def as_json(self):
+        self.gamelog.is_first_half = self.is_firsthalf()
         self.gamelog.home.score = self.get_home_score()
         self.gamelog.away.score = self.get_away_score()
         self.gamelog.home.firsthalf.score = self._calc_score(self.get_entries_home_firsthalf())
@@ -96,6 +97,9 @@ class GameLog(object):
                 result[entry.sequence].update({entry.event: entry.player})
         return list(result.values())
 
+    def is_firsthalf(self):
+        return self.gameinfo.gameHalftime is None
+
 
 class Half(object):
     def __init__(self):
@@ -122,9 +126,10 @@ class GameLogObject(object):
         self.gameId = gameId
         self.home = Team(home)
         self.away = Team(away)
+        self.is_first_half = True
 
     def as_json(self):
-        return dict(gameId=self.gameId, home=self.home, away=self.away)
+        return dict(gameId=self.gameId, isFirstHalf=self.is_first_half, home=self.home, away=self.away)
 
 
 class GameLogEncoder(json.JSONEncoder):

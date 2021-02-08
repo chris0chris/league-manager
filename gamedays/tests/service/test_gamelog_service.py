@@ -41,12 +41,25 @@ class TestGamelog(TestCase):
         expected_gamelog['gameId'] = firstGameEntry.pk
         assert gamelog.as_json() == json.dumps(expected_gamelog)
 
+    def test_firsthalf_is_played(self):
+        firstGameEntry = DBSetup().create_teamlog_home_and_away()
+        gamelog = GameLog(firstGameEntry.pk)
+        assert gamelog.is_firsthalf() == True
+
+    def test_secondhalf_is_played(self):
+        firstGameEntry = DBSetup().create_teamlog_home_and_away()
+        firstGameEntry.gameHalftime = '09:57'
+        firstGameEntry.save()
+        gamelog = GameLog(firstGameEntry.pk)
+        assert gamelog.is_firsthalf() == False
+
     def test_json_representation_of_gamelog_object(self):
         g = GameLogObject(81, 'White', 'Red')
         g.home.score = 18
         g.away.score = 7
         assert json.dumps(g.as_json(), cls=GameLogEncoder) == json.dumps(
             {'gameId': 81,
+             'isFirstHalf': True,
              'home': {
                  'name': 'White',
                  'score': 18,
