@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, {useState} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import ScorecardTable from './ScorecardTable';
 
@@ -34,6 +34,8 @@ GameLog.propTypes = {
   homeHalf: PropTypes.object.isRequired,
   awayHalf: PropTypes.object.isRequired,
   isFirstHalf: PropTypes.bool.isRequired,
+  displayHome: PropTypes.bool.isRequired,
+  displayBothTeams: PropTypes.bool.isRequired,
 };
 
 export default GameLog;
