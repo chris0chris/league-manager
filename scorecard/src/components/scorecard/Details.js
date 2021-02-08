@@ -94,15 +94,14 @@ const Details = (props) => {
         isFirstHalf={false} displayHome={showHomeTable} displayBothTeams={displayBothTeamLogs}/>
       <GameLog homeHalf={gameLog.home.firsthalf} awayHalf={gameLog.away.firsthalf}
         isFirstHalf={true} displayHome={showHomeTable} displayBothTeams={displayBothTeamLogs}/>
-      <div className="form-check form-switch">
-        <input className={`form-check-input ${displayBothTeamLogs ? '' : 'uncheck'}`}
+      <div className="form-check">
+        <input className={`form-check-input ${displayBothTeamLogs ? 'uncheck' : ''}`}
           onChange={() => handleSwitch()}
           type="checkbox"
-          id="switch"
+          id="formCheck"
+          value=""
           checked />
-        <label className="form-check-label" htmlFor="switch">
-          {displayBothTeamLogs? 'Zeige Einträge beide Teams' : 'Zeige Einträge ein Team'}
-        </label>
+        <label className="form-check-label" htmlFor="formCheck">Zeige Einträge ein Team</label>
       </div>
     </div>
   );
