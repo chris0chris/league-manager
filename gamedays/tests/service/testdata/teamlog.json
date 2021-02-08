@@ -8,8 +8,9 @@
       "score": 21,
       "entries": [
         {
-          "sequence": 1,
-          "td": 19
+          "sequence": 3,
+          "td": 19,
+          "pat1": 7
         },
         {
           "sequence": 2,
@@ -17,9 +18,8 @@
           "pat2": 7
         },
         {
-          "sequence": 3,
-          "td": 19,
-          "pat1": 7
+          "sequence": 1,
+          "td": 19
         }
       ]
     },
@@ -27,8 +27,9 @@
       "score": 21,
       "entries": [
         {
-          "sequence": 5,
-          "td": 19
+          "sequence": 9,
+          "td": 19,
+          "pat1": 7
         },
         {
           "sequence": 8,
@@ -36,9 +37,8 @@
           "pat2": 7
         },
         {
-          "sequence": 9,
-          "td": 19,
-          "pat1": 7
+          "sequence": 5,
+          "td": 19
         }
       ]
     }
@@ -54,11 +54,7 @@
       "score": 3,
       "entries": [
         {
-          "sequence": 4,
-          "Safety": 7
-        },
-        {
-          "sequence": 6,
+          "sequence": 10,
           "cop": true
         },
         {
@@ -66,8 +62,12 @@
           "Safety": 7
         },
         {
-          "sequence": 10,
+          "sequence": 6,
           "cop": true
+        },
+        {
+          "sequence": 4,
+          "Safety": 7
         }
       ]
     }

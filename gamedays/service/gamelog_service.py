@@ -68,13 +68,13 @@ class GameLog(object):
         return self.away_secondhalf_entries
 
     def _get_entries_for_team_and_half(self, team, half):
-        return TeamLog.objects.filter(gameinfo=self.gameinfo, team=team, half=half)
+        return TeamLog.objects.filter(gameinfo=self.gameinfo, team=team, half=half).order_by('-sequence')
 
     def get_home_score(self):
-        return self._calc_score(self.get_entries_home_firsthalf().union(self.get_entries_home_secondhalf()))
+        return self._calc_score(list(self.get_entries_home_firsthalf()) + list(self.get_entries_home_secondhalf()))
 
     def get_away_score(self):
-        return self._calc_score(self.get_entries_away_firsthalf().union(self.get_entries_away_secondhalf()))
+        return self._calc_score(list(self.get_entries_away_firsthalf()) + list(self.get_entries_away_secondhalf()))
 
     def _calc_score(self, half_entries):
         sum = 0
