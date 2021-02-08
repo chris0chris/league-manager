@@ -87,29 +87,7 @@ const Details = (props) => {
       <div className='row'>
         <div className='col'>
           <ScorecardTable
-            entries={[
-              {
-                id: 1,
-                number: 1,
-                sixPoints: '#19',
-                twoPoints: '',
-                onePoint: '#7',
-              },
-              {
-                id: 2,
-                number: 2,
-                sixPoints: '',
-                twoPoints: '#4',
-                onePoint: '',
-              },
-              {
-                id: 3,
-                number: 3,
-                sixPoints: '#7',
-                twoPoints: '',
-                onePoint: '#19',
-              },
-            ]}
+            entries={gameLog.home.firsthalf.entries.concat(gameLog.away.secondhalf.entries)}
           />
         </div>
         <div className='col'>
@@ -145,7 +123,7 @@ const Details = (props) => {
 };
 
 Details.propTypes = {
-  gameLog: PropTypes.object.isRequired,
+  gameLog: PropTypes.object,
 };
 
 const mapStateToProps = (state) => ({

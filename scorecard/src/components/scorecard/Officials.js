@@ -173,6 +173,4 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps,
-    {saveGameSetup, saveOfficials, getGameLog})(
-    Officials,
-);
+    {saveGameSetup, saveOfficials, getGameLog})(Officials);

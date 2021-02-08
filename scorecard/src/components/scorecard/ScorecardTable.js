@@ -2,6 +2,34 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const ScorecardTable = ({entries}) => {
+  const handleEntryDisplay = (entry) => {
+    let htmlSnippet = null;
+    if (entry.hasOwnProperty('td')) {
+      let pat2 = '';
+      let pat1 = '';
+      if (entry.hasOwnProperty('pat2')) {
+        pat2 = entry.pat2 ? '#' + entry.pat2 : '-';
+      }
+      if (entry.hasOwnProperty('pat1')) {
+        pat1 = entry.pat1 ? '#' + entry.pat1 : '-';
+      }
+      htmlSnippet = <>
+        <td>{'#' + entry.td }</td>
+        <td>{pat2}</td>
+        <td>{pat1}</td>
+      </>;
+    } else if (entry.cop) {
+      // eslint-disable-next-line max-len
+      htmlSnippet = <td colSpan='3' className='text-center'>Angriffswechsel</td>;
+    } else {
+      const keyValues = Object.entries(entry);
+      const event = keyValues[1][0];
+      const player = keyValues[1][1] ? keyValues[1][1] : '';
+      // eslint-disable-next-line max-len
+      htmlSnippet = <td colSpan="3" className='text-center'>{event}{player ? ` (#${player})` : player}</td>;
+    }
+    return htmlSnippet;
+  };
   return (
     <div>
       <table className='table table-striped'>
@@ -14,12 +42,10 @@ const ScorecardTable = ({entries}) => {
           </tr>
         </thead>
         <tbody>
-          {entries.map((entry) => (
-            <tr key={entry.id}>
-              <td style={{fontSize: 'smaller'}}>{entry.number}</td>
-              <td>{entry.sixPoints}</td>
-              <td>{entry.twoPoints}</td>
-              <td>{entry.onePoint}</td>
+          {entries.map((entry, index) => (
+            <tr key={index}>
+              <td style={{fontSize: 'smaller'}}>{entry.sequence}</td>
+              {handleEntryDisplay(entry)}
             </tr>
           ))}
         </tbody>

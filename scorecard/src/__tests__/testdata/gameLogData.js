@@ -1,62 +1,79 @@
 export const GAME_LOG = {
-  home: {
-    name: 'Home',
-    score: 16,
-    firsthalf: {
-      score: 9,
-      entries: [
+  'gameId': 52,
+  'home': {
+    'name': 'Home',
+    'score': 42,
+    'firsthalf': {
+      'score': 21,
+      'entries': [
         {
-          id: 1,
-          number: 1,
-          sixPoints: '#19',
-          twoPoints: '',
-          onePoint: '#7',
+          'sequence': 1,
+          'td': 19,
         },
         {
-          id: 2,
-          number: 2,
-          sixPoints: '',
-          twoPoints: '#4',
-          onePoint: '',
+          'sequence': 2,
+          'td': 19,
+          'pat2': 7,
+        },
+        {
+          'sequence': 3,
+          'td': 19,
+          'pat1': 7,
         },
       ],
     },
-    secondhalf: {
-      score: 7,
-      entries: [
+    'secondhalf': {
+      'score': 21,
+      'entries': [
         {
-          id: 3,
-          number: 5,
-          sixPoints: '#7',
-          twoPoints: '',
-          onePoint: '#19',
+          'sequence': 5,
+          'td': 19,
+        },
+        {
+          'sequence': 8,
+          'td': 19,
+          'pat2': 7,
+        },
+        {
+          'sequence': 9,
+          'td': 19,
+          'pat1': 7,
         },
       ],
     },
   },
-  away: {
-    name: 'Away',
-    score: 13,
-    firsthalf: {
-      score: 0,
-      entries: []},
-    secondhalf: {
-      score: 13,
-      entries: [
+  'away': {
+    'name': 'Away',
+    'score': 13,
+    'firsthalf': {
+      'score': 0,
+      'entries': [],
+    },
+    'secondhalf': {
+      'score': 3,
+      'entries': [
         {
-          id: 4,
-          number: 3,
-          sixPoints: '#7',
-          twoPoints: '',
-          onePoint: '#19',
+          'sequence': 4,
+          'td': 7,
+          'pat1': null,
         },
         {
-          id: 5,
-          number: 4,
-          sixPoints: '#7',
-          twoPoints: '-',
-          onePoint: '',
+          'sequence': 5,
+          'Safety': 7,
         },
-      ]},
+        {
+          'sequence': 6,
+          'cop': true,
+        },
+        {
+          'sequence': 7,
+          'Safety': null,
+        },
+        {
+          'sequence': 11,
+          'cop': true,
+        },
+      ],
+    },
   },
 };
