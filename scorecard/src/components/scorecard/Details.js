@@ -5,6 +5,7 @@ import {connect} from 'react-redux';
 import RadioButton from '../layout/RadioButton';
 import {FaStopwatch} from 'react-icons/fa';
 import GameLog from './GameLog';
+import AddPoints from './AddPoints';
 
 const Details = (props) => {
   const [displayBothTeamLogs, setDisplaybothTeamLogs] = useState(false);
@@ -63,6 +64,7 @@ const Details = (props) => {
           />
         </div>
       </div>
+      <AddPoints />
       <div className='row'>
         <div className='col-2 mt-2'>
           <button type='button' className='btn btn-secondary'>

@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-const RadioButton = ({id, name, onChange: setValue, text, value}) => {
+// eslint-disable-next-line max-len
+const RadioButton = ({id, name, onChange: setValue, text, value, color = 'secondary', checked = false}) => {
   const handleChange = (value) => {
     setValue(value);
   };
@@ -15,9 +16,10 @@ const RadioButton = ({id, name, onChange: setValue, text, value}) => {
         autoComplete="off"
         defaultValue={value ? value : text}
         onChange={(ev) => handleChange(ev.target.value)}
+        defaultChecked={checked ? true : false}
         required
       />
-      <label className="btn btn-outline-secondary" htmlFor={id}>
+      <label className={`btn btn-outline-${color}`} htmlFor={id}>
         {text}
       </label>
     </div>
@@ -30,6 +32,8 @@ RadioButton.propTypes = {
   id: PropTypes.string.isRequired,
   text: PropTypes.any.isRequired,
   value: PropTypes.string,
+  color: PropTypes.string,
+  checked: PropTypes.bool,
 };
 
 export default RadioButton;

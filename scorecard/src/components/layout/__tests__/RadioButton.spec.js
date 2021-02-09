@@ -20,6 +20,7 @@ const setup = (value = undefined) => {
     onChange: mockFunk,
     text: 'textSecondButton',
     value: value,
+    checked: true,
   };
   render(
       <>
@@ -37,12 +38,12 @@ describe('RadioButtons component', () => {
 
     const firstButton = allButtons[0];
     expect(firstButton).not.toBeChecked();
-    expect(firstButton).toBeInvalid();
+    expect(firstButton).toBeValid();
     expect(screen.getByLabelText('textFirstButton')).toBeInTheDocument();
 
     const secondButton = allButtons[1];
-    expect(secondButton).not.toBeChecked();
-    expect(secondButton).toBeInvalid();
+    expect(secondButton).toBeChecked();
+    expect(secondButton).toBeValid();
     expect(screen.getByLabelText('textSecondButton')).toBeInTheDocument();
   });
 

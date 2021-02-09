@@ -61,7 +61,7 @@ describe('Details component', () => {
     expect(
         screen.getByRole('button', {name: 'Halbzeit'}),
     ).toBeInTheDocument();
-    expect(screen.getAllByRole('button')).toHaveLength(5);
+    expect(screen.getAllByRole('button')).toHaveLength(6);
     expect(screen.getByText(new RegExp('1. Halbzeit'))).toBeInTheDocument();
     expect(screen.getByTestId('home-fh').innerHTML).toBe('21');
     expect(screen.getByTestId('away-fh').innerHTML).toBe('0');
