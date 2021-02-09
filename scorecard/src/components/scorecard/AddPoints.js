@@ -3,6 +3,8 @@ import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import RadioButton from '../layout/RadioButton';
 import Touchdown from './Touchdown';
+import SpecialPoints from './SpecialPoints';
+import GameEvent from './GameEvent';
 
 const AddPoints = (props) => {
   let event = null;
@@ -24,6 +26,7 @@ const AddPoints = (props) => {
     }
   };
   const setEvent = (update) => {
+    // eslint-disable-next-line no-unused-vars
     event = update;
   };
   const setShowStates = (td, special, turnover) => {
@@ -33,28 +36,24 @@ const AddPoints = (props) => {
   };
   const handleSubmit = (formEvent) => {
     formEvent.preventDefault();
-    console.log(event);
+    setShowStates(true, false, false);
     setReset(true);
   };
   return (<form className='form-control' onSubmit={handleSubmit}>
     <div className="row mt-2">
-      <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='td' text='Touchdown' checked={true} value='td'/>
-      <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='otherPoints' text='Spezial' value='spezial'/>
-      <RadioButton name='points' onChange={handlePointsSelection} id='cop' text='Defense' value='turnover'/>
+      <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='td' text='Touchdown' checked={showTD} value='td'/>
+      <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='otherPoints' text='Spezial' checked={showSpecial} value='spezial'/>
+      <RadioButton name='points' onChange={handlePointsSelection} id='cop' text='Defense' checked={showTurnover} value='turnover'/>
     </div>
     { showTD &&
       <Touchdown resetRequested={reset} setResetRequested={setReset} update={setEvent} />
     }
     { showSpecial &&
-      <div className="row">
-        Spezial
-      </div>
+      <SpecialPoints resetRequested={reset} setResetRequested={setReset} update={setEvent} />
     }
     {
       showTurnover &&
-      <div className="row">
-        Turnover
-      </div>
+      <GameEvent update={setEvent}/>
     }
     <div className="row">
       <div className='mt-2 d-grid'>

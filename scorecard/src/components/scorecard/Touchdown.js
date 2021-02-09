@@ -11,7 +11,7 @@ const Touchdown = ( {resetRequested, setResetRequested, update}) => {
     if (resetRequested) {
       setTdInput('');
       setPatInput('');
-      patRadio('pat1');
+      setPatRadio('pat1');
       setPat1Selected(true);
       setResetRequested(false);
     }
@@ -42,7 +42,9 @@ const Touchdown = ( {resetRequested, setResetRequested, update}) => {
       <div className="col-3 d-grid">
         <div className="btn-group" role="group" aria-label="PAT group">
           <input type="radio" id='pat1' name="pat" className="btn-check"
-            onChange={(ev) => setPatRadio(ev.target.value)}
+            onChange={(ev) => {
+              setPatRadio(ev.target.value); setPat1Selected(!pat1Selected);
+            }}
             defaultValue='pat1' checked={pat1Selected} />
           <label className="btn btn-outline-warning" htmlFor='pat1'>1</label>
           <input type="radio" id='pat2' name="pat"

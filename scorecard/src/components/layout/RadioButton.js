@@ -15,8 +15,10 @@ const RadioButton = ({id, name, onChange: setValue, text, value, color = 'second
         id={id}
         autoComplete="off"
         defaultValue={value ? value : text}
-        onChange={(ev) => handleChange(ev.target.value)}
-        defaultChecked={checked ? true : false}
+        onChange={(ev) => {
+          handleChange(ev.target.value);
+        }}
+        checked={checked}
         required
       />
       <label className={`btn btn-outline-${color}`} htmlFor={id}>
