@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 // eslint-disable-next-line max-len
-const RadioButton = ({id, name, onChange: setValue, text, value, color = 'secondary', checked = false}) => {
+const RadioButton = ({id, name, onChange: setValue, text, value, color = 'secondary', checked=false}) => {
   const handleChange = (value) => {
     setValue(value);
   };
@@ -18,7 +18,7 @@ const RadioButton = ({id, name, onChange: setValue, text, value, color = 'second
         onChange={(ev) => {
           handleChange(ev.target.value);
         }}
-        checked={checked}
+        defaultChecked={checked}
         required
       />
       <label className={`btn btn-outline-${color}`} htmlFor={id}>

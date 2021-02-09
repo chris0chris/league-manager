@@ -64,4 +64,14 @@ describe('Officials component', () => {
     expect(apiGet.mock.calls[0][0]).toBe(`/api/gamelog/${selectedGame.id}`);
     expect(screen.getByText('Some Text')).toBeInTheDocument();
   });
+  it('checks if buttons are checked when clicked', () => {
+    setup();
+    const wonButton = screen.getByRole('radio', {name: 'Gewonnen'});
+    const lostButton = screen.getByText('Verloren');
+    expect(wonButton).not.toBeChecked();
+    expect(lostButton).not.toBeChecked();
+    userEvent.click(wonButton);
+    expect(wonButton).toBeChecked();
+    expect(lostButton).not.toBeChecked();
+  });
 });
