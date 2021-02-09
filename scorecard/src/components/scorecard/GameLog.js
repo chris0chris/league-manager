@@ -8,7 +8,7 @@ const GameLog = ({homeHalf, awayHalf, isFirstHalf, displayHome, displayBothTeams
     <>
       {isFirstHalf &&
       <div className="row mt-2">
-        <div className="text-center">1. Halbzeit
+        <div className="text-center">1. Halbzeit {' '}
           <span className="fw-bold" data-testid='home-fh'>{homeHalf.score}</span>{' : '}
           <span className="fw-bold" data-testid='away-fh'>{awayHalf.score}</span></div>
       </div>}
