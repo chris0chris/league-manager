@@ -34,8 +34,10 @@ const setup = () => {
   store = testStore(initialState);
   render(
       <Router>
-        <Details store={store} />
-        <Route path="/someUrl">Redirected Page</Route>
+        <Route path='' location={{search: `?start=${GAME_LOG_COMPLETE_GAME.away.name}`}} >
+          <Details store={store} />
+        </Route>
+        <Route path='/someUrl'>Redirected Page</Route>
       </Router>,
   );
 };
@@ -55,6 +57,11 @@ describe('Details component', () => {
           name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.away.name}\\b`, 'i'),
         }),
     ).toBeInTheDocument();
+    expect(
+        screen.getByRole('radio', {
+          name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.away.name}\\b`, 'i'),
+        }),
+    ).toBeChecked();
     expect(screen.getByText(GAME_LOG_COMPLETE_GAME.away.name)).toBeInTheDocument();
     expect(screen.getByText(GAME_LOG_COMPLETE_GAME.away.score)).toBeInTheDocument();
 

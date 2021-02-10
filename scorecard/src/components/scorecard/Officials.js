@@ -52,7 +52,7 @@ export const Officials = (props) => {
   };
 
   if (isSuccessfulSubmitted) {
-    return <Redirect to={DETAILS_URL} />;
+    return <Redirect to={`${DETAILS_URL}?start=${fhPossession}`} />;
   }
   return (
     <div className="container">

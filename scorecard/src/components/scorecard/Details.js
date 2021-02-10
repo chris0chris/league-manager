@@ -6,6 +6,7 @@ import RadioButton from '../layout/RadioButton';
 import {FaStopwatch} from 'react-icons/fa';
 import GameLog from './GameLog';
 import AddPoints from './AddPoints';
+import {useLocation} from 'react-router-dom';
 
 const Details = (props) => {
   const [displayBothTeamLogs, setDisplaybothTeamLogs] = useState(false);
@@ -14,6 +15,11 @@ const Details = (props) => {
   const handleSwitch = () => {
     setDisplaybothTeamLogs(!displayBothTeamLogs);
   };
+  let isHomeStarting = true;
+  const queryParams = useLocation().search;
+  if (queryParams) {
+    isHomeStarting = queryParams.split('=')[1] == gameLog.home.name ? true : false;
+  }
   return (
     <div className='container'>
       <div className='row'>
@@ -23,6 +29,7 @@ const Details = (props) => {
             name='teamName'
             onChange={() => setShowHomeTable(true)}
             value={gameLog.home.name}
+            checked={isHomeStarting}
             text={
               <>
                 {gameLog.home.name}{' '}
@@ -46,6 +53,7 @@ const Details = (props) => {
             name='teamName'
             onChange={() => setShowHomeTable(false)}
             value={gameLog.away.name}
+            checked={!isHomeStarting}
             text={
               <>
                 <span
@@ -111,6 +119,7 @@ const Details = (props) => {
 
 Details.propTypes = {
   gameLog: PropTypes.object,
+  props: PropTypes.object,
 };
 
 const mapStateToProps = (state) => ({
