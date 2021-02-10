@@ -7,6 +7,7 @@ import {FaStopwatch} from 'react-icons/fa';
 import GameLog from './GameLog';
 import AddPoints from './AddPoints';
 import {useLocation} from 'react-router-dom';
+import {createLogEntry} from '../../actions/games';
 
 const Details = (props) => {
   const gameLog = props.gameLog;
@@ -26,6 +27,12 @@ const Details = (props) => {
   const updateTeam = (teamName) => {
     setTeamInPossession(teamName);
     setShowHomeLog(true);
+  };
+  const createLogEntry = (event) => {
+    console.log('api call', event);
+    props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, event});
+    const nextTeamInPossession = teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
+    setTeamInPossession(nextTeamInPossession);
   };
   return (
     <div className='container'>
@@ -85,7 +92,7 @@ const Details = (props) => {
           />
         </div>
       </div>
-      <AddPoints />
+      <AddPoints onSubmit={createLogEntry} />
       <div className='row'>
         <div className='col-2 mt-2'>
           <button type='button' className='btn btn-secondary'>
@@ -139,4 +146,4 @@ const mapStateToProps = (state) => ({
   gameLog: state.gamesReducer.gameLog,
 });
 
-export default connect(mapStateToProps)(Details);
+export default connect(mapStateToProps, {createLogEntry})(Details);

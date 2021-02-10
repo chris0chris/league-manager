@@ -5,33 +5,23 @@ import {HashRouter as Router, Route} from 'react-router-dom';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import {apiGet} from '../../../actions/utils/api';
+import {apiPost} from '../../../actions/utils/api';
 import Details from '../Details';
-import {GAME_LOG_COMPLETE_GAME, GAME_LOG_ONLY_FIRSTHALF} from '../../../__tests__/testdata/gameLogData';
-import {GET_GAME_LOG} from '../../../actions/types';
+import {GAME_LOG_COMPLETE_GAME} from '../../../__tests__/testdata/gameLogData';
 
 jest.mock('../../../actions/utils/api');
-apiGet.mockImplementation((...params) => (dispatch) => {
-  // const actionType = params[1];
-  // if (actionType == GET_GAMEDAYS) {
-  //   return () => {};
-  // }
-  dispatch({
-    type: GET_GAME_LOG,
-    payload: GAME_LOG_ONLY_FIRSTHALF,
-  });
+apiPost.mockImplementation(() => {
+  return () => {};
 });
 
-let store;
-
 const setup = () => {
-  apiGet.mockClear();
+  apiPost.mockClear();
   const initialState = {
     gamesReducer: {
       gameLog: GAME_LOG_COMPLETE_GAME,
     },
   };
-  store = testStore(initialState);
+  const store = testStore(initialState);
   render(
       <Router>
         <Route path='' location={{search: `?start=${GAME_LOG_COMPLETE_GAME.away.name}`}} >
@@ -81,5 +71,26 @@ describe('Details component', () => {
     userEvent.click(screen.getByRole('checkbox',
         {name: new RegExp('Zeige Einträge')}));
     expect(screen.getAllByRole('table').length).toBe(4);
+  });
+  it('should set the opposit team to be checked, when input was submitted', () => {
+    setup();
+    const homeButton = screen.getByRole('radio', {
+      name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.home.name}\\b`, 'i')});
+    const awayButton = screen.getByRole('radio', {
+      name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.away.name}\\b`, 'i')});
+    expect(homeButton).not.toBeChecked();
+    expect(awayButton).toBeChecked();
+    userEvent.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');
+    userEvent.type(screen.getByRole('spinbutton', {name: 'PAT number'}), '7');
+    userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
+    expect(homeButton).toBeChecked();
+    expect(awayButton).not.toBeChecked();
+  });
+  it('should send a post api call, when input was submitted', () => {
+    setup();
+    userEvent.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');
+    userEvent.type(screen.getByRole('spinbutton', {name: 'PAT number'}), '7');
+    userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
+    expect(apiPost.mock.calls[0][0]).toBe(`/api/gamelog/${GAME_LOG_COMPLETE_GAME.gameId}`);
   });
 });
