@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import FloatingInput from '../layout/FloatingInput';
-import RadioButton from '../layout/RadioButton';
+import RadioButtonDefault from '../layout/RadioButtonDefault';
 import {FaArrowLeft, FaArrowRight} from 'react-icons/fa';
 import {Redirect} from 'react-router-dom';
 import {DETAILS_URL} from '../common/urls';
@@ -99,13 +99,13 @@ export const Officials = (props) => {
           </div>
         </div>
         <div className="row mt-3">
-          <RadioButton
+          <RadioButtonDefault
             id="ctWon"
             name="coinToss"
             onChange={setCt}
             text="Gewonnen"
           />
-          <RadioButton
+          <RadioButtonDefault
             id="ctLost"
             name="coinToss"
             onChange={setCt}
@@ -116,13 +116,13 @@ export const Officials = (props) => {
           <div>Team mit Ballbesitz in der ersten Halbzeit</div>
         </div>
         <div className="row mt-3">
-          <RadioButton
+          <RadioButtonDefault
             id="possessionHome"
             name="fhPossesion"
             onChange={setFhPossession}
             text={selectedGame.home}
           />
-          <RadioButton
+          <RadioButtonDefault
             id="possessionAway"
             name="fhPossesion"
             onChange={setFhPossession}
@@ -134,14 +134,14 @@ export const Officials = (props) => {
           <div>Spielrichtung erste Halbzeit (aus Blick Scorecard Judge)</div>
         </div>
         <div className="row mt-3">
-          <RadioButton
+          <RadioButtonDefault
             id="directionLeft"
             name="direction"
             onChange={setDirection}
             text={<FaArrowLeft title="directionLeft" />}
             value="directionLeft"
           />
-          <RadioButton
+          <RadioButtonDefault
             id="directionRight"
             name="direction"
             onChange={setDirection}
