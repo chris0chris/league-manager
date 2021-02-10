@@ -6,7 +6,7 @@ import Touchdown from './Touchdown';
 import SpecialPoints from './SpecialPoints';
 import GameEvent from './GameEvent';
 
-const AddPoints = (props) => {
+const AddPoints = ({onSubmit: updateParent}) => {
   let event = null;
   const [showTD, setShowTD] = useState(true);
   const [showSpecial, setShowSpecial] = useState(false);
@@ -26,7 +26,6 @@ const AddPoints = (props) => {
     }
   };
   const setEvent = (update) => {
-    // eslint-disable-next-line no-unused-vars
     event = update;
   };
   const setShowStates = (td, special, turnover) => {
@@ -38,6 +37,7 @@ const AddPoints = (props) => {
     formEvent.preventDefault();
     setShowStates(true, false, false);
     setReset(true);
+    updateParent(event);
   };
   return (<form className='form-control' onSubmit={handleSubmit}>
     <div className="row mt-2">
@@ -67,7 +67,7 @@ const AddPoints = (props) => {
 };
 
 AddPoints.propTypes = {
-  props: PropTypes.object,
+  onSubmit: PropTypes.func.isRequired,
 };
 
 export default AddPoints;

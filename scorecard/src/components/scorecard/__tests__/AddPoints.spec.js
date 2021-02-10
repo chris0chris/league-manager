@@ -5,8 +5,9 @@ import {render, screen} from '@testing-library/react';
 import AddPoints from '../AddPoints';
 import userEvent from '@testing-library/user-event';
 
+const mockFunc = jest.fn();
 const setup = () => {
-  render(<AddPoints />);
+  render(<AddPoints onSubmit={mockFunc} />);
 };
 
 describe('AddPoints component', () => {
@@ -22,6 +23,13 @@ describe('AddPoints component', () => {
   it('should display different input field, when selecting another button', () => {
     setup();
     userEvent.click(screen.getByRole('radio', {name: new RegExp('Spezial')}));
-    // expect(screen.getByPlaceholderText('')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Trikotnummer')).toBeInTheDocument();
+  });
+  it('should call callback, when input is submitted', () => {
+    setup();
+    userEvent.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');
+    userEvent.type(screen.getByRole('spinbutton', {name: 'PAT number'}), '7');
+    userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
+    expect(mockFunc.mock.calls).toHaveLength(1);
   });
 });
