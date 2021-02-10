@@ -3,9 +3,6 @@ import React from 'react';
 
 // eslint-disable-next-line max-len
 const RadioButton = ({id, name, onChange: setValue, text, value, color = 'secondary', checked=false}) => {
-  const handleChange = (value) => {
-    setValue(value);
-  };
   return (
     <div className="col d-grid">
       <input
@@ -15,9 +12,7 @@ const RadioButton = ({id, name, onChange: setValue, text, value, color = 'second
         id={id}
         autoComplete="off"
         defaultValue={value ? value : text}
-        onChange={(ev) => {
-          handleChange(ev.target.value);
-        }}
+        onChange={(ev) => setValue(ev.target.value)}
         checked={checked}
         required
       />

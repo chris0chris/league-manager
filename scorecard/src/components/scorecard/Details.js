@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import RadioButton from '../layout/RadioButton';
@@ -9,17 +9,24 @@ import AddPoints from './AddPoints';
 import {useLocation} from 'react-router-dom';
 
 const Details = (props) => {
-  const [displayBothTeamLogs, setDisplaybothTeamLogs] = useState(false);
-  const [showHomeTable, setShowHomeTable] = useState(true);
   const gameLog = props.gameLog;
+  const [displayBothTeamLogs, setDisplaybothTeamLogs] = useState(false);
+  const [showHomeLog, setShowHomeLog] = useState(true);
+  const [teamInPossession, setTeamInPossession] = useState(gameLog.home.name);
+  const queryParams = useLocation().search;
+  useEffect(() => {
+    if (queryParams) {
+      const startingTeam = queryParams.split('=')[1];
+      setTeamInPossession(startingTeam);
+    }
+  }, []);
   const handleSwitch = () => {
     setDisplaybothTeamLogs(!displayBothTeamLogs);
   };
-  let isHomeStarting = true;
-  const queryParams = useLocation().search;
-  if (queryParams) {
-    isHomeStarting = queryParams.split('=')[1] == gameLog.home.name ? true : false;
-  }
+  const updateTeam = (teamName) => {
+    setTeamInPossession(teamName);
+    setShowHomeLog(true);
+  };
   return (
     <div className='container'>
       <div className='row'>
@@ -27,9 +34,12 @@ const Details = (props) => {
           <RadioButton
             id='home'
             name='teamName'
-            onChange={() => setShowHomeTable(true)}
+            onChange={(teamName) => {
+              updateTeam(teamName);
+              setShowHomeLog(true);
+            }}
             value={gameLog.home.name}
-            checked={isHomeStarting}
+            checked={teamInPossession == gameLog.home.name}
             text={
               <>
                 {gameLog.home.name}{' '}
@@ -51,9 +61,12 @@ const Details = (props) => {
           <RadioButton
             id='away'
             name='teamName'
-            onChange={() => setShowHomeTable(false)}
+            onChange={(teamName) => {
+              updateTeam(teamName);
+              setShowHomeLog(false);
+            }}
             value={gameLog.away.name}
-            checked={!isHomeStarting}
+            checked={teamInPossession == gameLog.away.name}
             text={
               <>
                 <span
@@ -101,9 +114,9 @@ const Details = (props) => {
         </div>
       </div>
       <GameLog homeHalf={gameLog.home.secondhalf} awayHalf={gameLog.away.secondhalf}
-        isFirstHalf={false} displayHome={showHomeTable} displayBothTeams={displayBothTeamLogs}/>
+        isFirstHalf={false} displayHome={showHomeLog} displayBothTeams={displayBothTeamLogs}/>
       <GameLog homeHalf={gameLog.home.firsthalf} awayHalf={gameLog.away.firsthalf}
-        isFirstHalf={true} displayHome={showHomeTable} displayBothTeams={displayBothTeamLogs}/>
+        isFirstHalf={true} displayHome={showHomeLog} displayBothTeams={displayBothTeamLogs}/>
       <div className="form-check">
         <input className={`form-check-input ${displayBothTeamLogs ? 'uncheck' : ''}`}
           onChange={() => handleSwitch()}
