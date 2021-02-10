@@ -20,7 +20,7 @@ const ScorecardTable = ({entries}) => {
       </>;
     } else if (entry.cop) {
       // eslint-disable-next-line max-len
-      htmlSnippet = <td colSpan='3' className='text-center'>Angriffswechsel</td>;
+      htmlSnippet = <td colSpan='3' className='text-center'>Turnover</td>;
     } else {
       const keyValues = Object.entries(entry);
       const event = keyValues[1][0];

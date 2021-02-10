@@ -17,7 +17,7 @@ describe('ScorecardTable component', () => {
     expect(screen.getAllByText(new RegExp('#7'))).toHaveLength(4);
     // incomplete PAT
     expect(screen.getAllByText(new RegExp('-'))).toHaveLength(1);
-    expect(screen.getAllByText('Angriffswechsel')).toHaveLength(2);
+    expect(screen.getAllByText('Turnover')).toHaveLength(2);
     expect(screen.getAllByText(new RegExp('Safety'))).toHaveLength(2);
   });
 });
