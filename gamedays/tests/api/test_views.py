@@ -183,3 +183,21 @@ class TestGameLog(WebTest):
             expected_gamelog = json.load(f)
         expected_gamelog['gameId'] = gameinfo.pk
         assert response.json == expected_gamelog
+
+    def test_post_team_log(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        response = self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
+                                      {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+                                       'event': {'td': '19', 'pat1': '7'}})
+        assert response.status_code == HTTPStatus.CREATED
+        assert response.json == {'away': {'firsthalf': {'entries': [], 'score': 0},
+                                          'name': 'A2',
+                                          'score': 0,
+                                          'secondhalf': {'entries': [], 'score': 0}},
+                                 'gameId': 1,
+                                 'home': {'firsthalf': {'entries': [{'pat1': 7, 'sequence': 1, 'td': 19}], 'score': 7},
+                                          'name': 'A1',
+                                          'score': 7,
+                                          'secondhalf': {'entries': [], 'score': 0}},
+                                 'isFirstHalf': True}

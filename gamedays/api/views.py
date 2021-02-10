@@ -80,3 +80,10 @@ class GameLogAPIView(APIView):
             return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict))
         except Gameinfo.DoesNotExist:
             raise NotFound(detail=f'No game found for gameId {gameId}')
+
+    def post(self, request, *args, **kwargs):
+        try:
+            gamelog = GameLogService.create_gamelog(request.data)
+            return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict), status=HTTPStatus.CREATED)
+        except Gameinfo.DoesNotExist:
+            raise NotFound(detail=f'Could not create team logs ... gameId {request.data.get("gameId")} not found')

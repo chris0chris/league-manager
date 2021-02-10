@@ -4,12 +4,8 @@ import pathlib
 from django.test import TestCase
 
 from gamedays.models import Gameinfo, Gameresult, TeamLog
-from gamedays.service.gamelog_service import GameLog, GameLogObject, GameLogEncoder
+from gamedays.service.gamelog_service import GameLog, GameLogObject, GameLogEncoder, GameLogCreator
 from gamedays.tests.setup_factories.db_setup import DBSetup
-
-
-class TestGamelogService(TestCase):
-    pass
 
 
 class TestGamelog(TestCase):
@@ -80,3 +76,22 @@ class TestGamelog(TestCase):
                    {'sequence': 2, 'td': 19, 'pat2': 7, },
                    {'sequence': 3, 'td': 19, 'pat1': 7, }
                ]
+
+
+class TestGamelogCreator(TestCase):
+    def test_gamelog_is_created(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        gamelog_creator = GameLogCreator(firstGame.pk, 'Home', {'+2': '21', '+1': '7'})
+        gamelog_creator.create()
+        gamelog_creator = GameLogCreator(firstGame.pk, 'Home', {'cop': None}, 2)
+        gamelog_creator.create()
+        assert len(TeamLog.objects.all()) == 3
+        teamlog = TeamLog.objects.get(pk=3)
+        assert teamlog.sequence == 2
+        assert teamlog.value == 0
+        assert teamlog.half == 2
+        teamlog = TeamLog.objects.get(pk=1)
+        assert teamlog.sequence == 1
+        assert teamlog.value == 2
+        assert teamlog.half == 1

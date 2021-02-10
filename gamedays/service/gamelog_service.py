@@ -5,10 +5,56 @@ from django.db.models import QuerySet
 from gamedays.models import Gameinfo, Gameresult, TeamLog
 
 
+class GameLogCreator(object):
+    def __init__(self, game_id, team, event, half=1):
+        self.game_id = game_id
+        self.team = team
+        self.half = half
+        self.event = event
+
+    def create(self):
+        print(type(self.event), self.event)
+        sequence = self._getSequence()
+        for attr, value in self.event.items():
+            teamlog = TeamLog()
+            teamlog.gameinfo_id = self.game_id
+            teamlog.team = self.team
+            teamlog.sequence = sequence
+            teamlog.cop = attr is 'cop'
+            teamlog.event = attr
+            teamlog.player = value
+            teamlog.value = self._getValue(attr)
+            teamlog.half = self.half
+            teamlog.save()
+            print(attr, '=', value)
+        return GameLog(self.game_id)
+
+    def _getSequence(self):
+        entryWithLatestSequence: TeamLog = TeamLog.objects.filter(gameinfo_id=self.game_id).order_by(
+            '-sequence').first()
+        if entryWithLatestSequence:
+            return entryWithLatestSequence.sequence + 1
+        return 1
+
+    def _getValue(self, attr):
+        if attr == 'td':
+            return 6
+        if attr in ('pat1', '+1'):
+            return 1
+        if attr in ('pat2', '+2'):
+            return 2
+        return 0
+
+
 class GameLogService(object):
     @staticmethod
     def get_gamelog(gameId):
         return GameLog(gameId)
+
+    @classmethod
+    def create_gamelog(cls, data):
+        gamelog = GameLogCreator(data.get('gameId'), data.get('team'), data.get('event'), data.get('half'))
+        return gamelog.create()
 
 
 class GameLog(object):
