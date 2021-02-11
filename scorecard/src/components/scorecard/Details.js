@@ -8,6 +8,7 @@ import GameLog from './GameLog';
 import AddPoints from './AddPoints';
 import {useLocation} from 'react-router-dom';
 import {createLogEntry} from '../../actions/games';
+import Halftime from './Halftime';
 
 const Details = (props) => {
   const gameLog = props.gameLog;
@@ -96,33 +97,7 @@ const Details = (props) => {
         </div>
       </div>
       <AddPoints onSubmit={createLogEntry} />
-      <div className='row'>
-        <div className='col-2 mt-2'>
-          <button type='button' className='btn btn-secondary'>
-            <FaStopwatch />
-          </button>
-        </div>
-        <div className='col-2 mt-2'>
-          <button type='button' className='btn btn-secondary'>
-            <FaStopwatch />
-          </button>
-        </div>
-        <div className='col-4 mt-2 d-grid'>
-          <button type='button' className='btn btn-primary'>
-            Halbzeit
-          </button>
-        </div>
-        <div className='col-2 mt-2'>
-          <button type='button' className='btn btn-secondary'>
-            <FaStopwatch />
-          </button>
-        </div>
-        <div className='col-2 mt-2'>
-          <button type='button' className='btn btn-secondary'>
-            <FaStopwatch />
-          </button>
-        </div>
-      </div>
+      <Halftime />
       <div className="row mt-3 text-secondary">
         { (displayBothTeamLogs || showHomeLog) &&
         <div className="col text-center">Einträge Heim</div>}
