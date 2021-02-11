@@ -1,9 +1,8 @@
 /* eslint-disable max-len */
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {FaCheck, FaStopwatch, FaTimes} from 'react-icons/fa';
 import Timer from '../layout/Timer';
-import FloatingInput from '../layout/FloatingInput';
 
 
 const Timeout = ({teamName = 'TeamName', modId}) => {
@@ -89,7 +88,8 @@ const Timeout = ({teamName = 'TeamName', modId}) => {
 };
 
 Timeout.propTypes = {
-
+  teamName: PropTypes.string.isRequired,
+  modId: PropTypes.string.isRequired,
 };
 
 export default Timeout;
