@@ -1,5 +1,5 @@
 import {GET_GAMES, SET_SELECTED_GAME, GET_GAME_LOG} from '../actions/types.js';
-import {GAME_LOG_COMPLETE_GAME} from '../__tests__/testdata/gameLogData.js';
+import {GAME_LOG_COMPLETE_GAME, GAME_LOG_ONLY_FIRSTHALF} from '../__tests__/testdata/gameLogData.js';
 
 const initialState = {
   games: [],

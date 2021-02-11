@@ -14,11 +14,13 @@ const Details = (props) => {
   const [displayBothTeamLogs, setDisplaybothTeamLogs] = useState(false);
   const [showHomeLog, setShowHomeLog] = useState(true);
   const [teamInPossession, setTeamInPossession] = useState(gameLog.home.name);
+  const [half, setHalf] = useState(1);
   const queryParams = useLocation().search;
   useEffect(() => {
     if (queryParams) {
       const startingTeam = queryParams.split('=')[1];
       setTeamInPossession(startingTeam);
+      setShowHomeLog(startingTeam == gameLog.home.name);
     }
   }, []);
   const handleSwitch = () => {
@@ -30,9 +32,10 @@ const Details = (props) => {
   };
   const createLogEntry = (event) => {
     console.log('api call', event);
-    props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, event});
+    props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, 'half': half, event});
     const nextTeamInPossession = teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
     setTeamInPossession(nextTeamInPossession);
+    setShowHomeLog(nextTeamInPossession == gameLog.home.name);
   };
   return (
     <div className='container'>
@@ -105,7 +108,7 @@ const Details = (props) => {
           </button>
         </div>
         <div className='col-4 mt-2 d-grid'>
-          <button type='button' className='btn btn-secondary'>
+          <button type='button' className='btn btn-primary'>
             Halbzeit
           </button>
         </div>
@@ -120,8 +123,15 @@ const Details = (props) => {
           </button>
         </div>
       </div>
+      <div className="row mt-3 text-secondary">
+        { (displayBothTeamLogs || showHomeLog) &&
+        <div className="col text-center">Einträge Heim</div>}
+        { (displayBothTeamLogs || !showHomeLog) &&
+        <div className="col text-center">Einträge Gast</div>}
+      </div>
+      { !gameLog.isFirstHalf &&
       <GameLog homeHalf={gameLog.home.secondhalf} awayHalf={gameLog.away.secondhalf}
-        isFirstHalf={false} displayHome={showHomeLog} displayBothTeams={displayBothTeamLogs}/>
+        isFirstHalf={false} displayHome={showHomeLog} displayBothTeams={displayBothTeamLogs}/>}
       <GameLog homeHalf={gameLog.home.firsthalf} awayHalf={gameLog.away.firsthalf}
         isFirstHalf={true} displayHome={showHomeLog} displayBothTeams={displayBothTeamLogs}/>
       <div className="form-check">
@@ -139,7 +149,7 @@ const Details = (props) => {
 
 Details.propTypes = {
   gameLog: PropTypes.object,
-  props: PropTypes.object,
+  createLogEntry: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
