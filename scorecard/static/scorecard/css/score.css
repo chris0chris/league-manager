@@ -6,3 +6,17 @@
     background-position 0.15s ease-in-out, border-color 0.15s ease-in-out,
     box-shadow 0.15s ease-in-out;
 }
+
+.timer {
+  font-size: 40px;
+  font-weight: 700 !important;
+}
+
+.sub-timer {
+  color: #6c757d !important;
+  font-size: 20px;
+}
+
+.timeout {
+  padding: 6px;
+}

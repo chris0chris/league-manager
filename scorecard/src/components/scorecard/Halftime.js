@@ -6,10 +6,10 @@ const Halftime = (props) => {
   return (
     <div className='row mt-2'>
       <div className='col-2'>
-        <Timeout />
+        <Timeout modId="1" />
       </div>
       <div className='col-2'>
-        <Timeout />
+        <Timeout modId="2" />
       </div>
       <div className='col-4 d-grid'>
         <button type='button' className='btn btn-primary'>
@@ -17,10 +17,10 @@ const Halftime = (props) => {
         </button>
       </div>
       <div className='col-2'>
-        <Timeout />
+        <Timeout modId="3" />
       </div>
       <div className='col-2'>
-        <Timeout />
+        <Timeout modId="4" />
       </div>
     </div>
   );
