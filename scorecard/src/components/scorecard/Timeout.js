@@ -1,9 +1,7 @@
-/* eslint-disable max-len */
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {FaCheck, FaStopwatch, FaTimes} from 'react-icons/fa';
 import Timer from '../layout/Timer';
-
 
 const Timeout = ({teamName = 'TeamName', modId}) => {
   const [timerIsOn, setTimerIsOn] = useState(false);
@@ -30,12 +28,13 @@ const Timeout = ({teamName = 'TeamName', modId}) => {
         </button>
       }
       {gameTimeMinutes &&
-      <button type="button" className="btn btn-secondary timeout" disabled data-testid='timeoutButton'>
+      <button type="button" className="btn btn-secondary timeout"
+        disabled data-testid='timeoutButton'>
         {`${gameTimeMinutes}:${gameTimeSeconds}`}
       </button>
       }
-
-      <div className="modal fade" id={`modalId_${modId}`} data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1">
+      <div className="modal fade" id={`modalId_${modId}`}
+        data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1">
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
@@ -64,17 +63,22 @@ const Timeout = ({teamName = 'TeamName', modId}) => {
               </div>
               <hr />
               <Timer isOn={timerIsOn} durationInSeconds={60} />
-
             </form>
             <div className="modal-footer row">
               <div className="col d-grid">
-                <button type="button" onClick={stopTimer} className="btn btn-dark" data-bs-dismiss="modal">
+                <button type="button"
+                  onClick={stopTimer}
+                  className="btn btn-dark"
+                  data-bs-dismiss="modal">
                   Abbrechen
                   <FaTimes className="ms-3" />
                 </button>
               </div>
               <div className="col d-grid">
-                <button type="submit" onClick={() => setTimerIsOn(false)} className="btn btn-success" data-bs-dismiss="modal">
+                <button type="submit"
+                  onClick={() => setTimerIsOn(false)}
+                  className="btn btn-success"
+                  data-bs-dismiss="modal">
                   Fertig
                   <FaCheck className="ms-3" />
                 </button>
