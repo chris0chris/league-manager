@@ -26,13 +26,13 @@ const ScorecardTable = ({entries}) => {
       const event = keyValues[1][0];
       const player = keyValues[1][1] ? keyValues[1][1] : '';
       // eslint-disable-next-line max-len
-      htmlSnippet = <td colSpan="3" className='text-center'>{event}{player ? ` (#${player})` : player}</td>;
+      htmlSnippet = <td colSpan="3" className='text-center'>{event}{player ? ` (#${player})` : ''}</td>;
     }
     return htmlSnippet;
   };
   return (
     <div>
-      <table className='table table-striped'>
+      <table className='table table-sm table-striped text-center'>
         <thead>
           <tr>
             <th>Pkt:</th>

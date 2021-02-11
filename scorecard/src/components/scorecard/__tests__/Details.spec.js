@@ -80,11 +80,13 @@ describe('Details component', () => {
       name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.away.name}\\b`, 'i')});
     expect(homeButton).not.toBeChecked();
     expect(awayButton).toBeChecked();
+    expect(screen.getByText('Einträge Gast')).toBeInTheDocument();
     userEvent.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');
     userEvent.type(screen.getByRole('spinbutton', {name: 'PAT number'}), '7');
     userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
     expect(homeButton).toBeChecked();
     expect(awayButton).not.toBeChecked();
+    expect(screen.getByText('Einträge Heim')).toBeInTheDocument();
   });
   it('should send a post api call, when input was submitted', () => {
     setup();
