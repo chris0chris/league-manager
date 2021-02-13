@@ -8,6 +8,13 @@ import userEvent from '@testing-library/user-event';
 import {apiPost} from '../../../actions/utils/api';
 import Details from '../Details';
 import {GAME_LOG_COMPLETE_GAME} from '../../../__tests__/testdata/gameLogData';
+import $ from 'jquery/src/jquery';
+
+const modalMock = jest.fn();
+jest.mock('jquery/src/jquery', () => jest.fn());
+$.mockImplementation(() => {
+  return {modal: modalMock};
+});
 
 jest.mock('../../../actions/utils/api');
 apiPost.mockImplementation(() => {

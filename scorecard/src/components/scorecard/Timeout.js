@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {FaCheck, FaStopwatch, FaTimes} from 'react-icons/fa';
 import Timer from '../layout/Timer';
+import $ from 'jquery/src/jquery';
 
 const Timeout = ({teamName = 'TeamName', modId}) => {
   const [timerIsOn, setTimerIsOn] = useState(false);
@@ -14,6 +15,8 @@ const Timeout = ({teamName = 'TeamName', modId}) => {
   };
   const handleSubmit = (ev) => {
     ev.preventDefault();
+    $(`#modalId_${modId}`).modal('hide');
+    setTimerIsOn(false);
   };
   return (
     <div>
@@ -33,14 +36,17 @@ const Timeout = ({teamName = 'TeamName', modId}) => {
         {`${gameTimeMinutes}:${gameTimeSeconds}`}
       </button>
       }
-      <div className="modal fade" id={`modalId_${modId}`}
-        data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1">
+      <div className="modal fade"
+        id={`modalId_${modId}`}
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabIndex="-1">
         <div className="modal-dialog">
-          <div className="modal-content">
+          <form className="modal-content" onSubmit={handleSubmit}>
             <div className="modal-header">
               <h5 className="modal-title">Auszeit {teamName}</h5>
             </div>
-            <form className="modal-body" onSubmit={handleSubmit}>
+            <div className="modal-body">
               <div className="row"><div>restliche Spielzeit:</div></div>
               <div className="row mt-2">
                 <div className="col">
@@ -63,7 +69,7 @@ const Timeout = ({teamName = 'TeamName', modId}) => {
               </div>
               <hr />
               <Timer isOn={timerIsOn} durationInSeconds={60} />
-            </form>
+            </div>
             <div className="modal-footer row">
               <div className="col d-grid">
                 <button type="button"
@@ -76,17 +82,16 @@ const Timeout = ({teamName = 'TeamName', modId}) => {
               </div>
               <div className="col d-grid">
                 <button type="submit"
-                  onClick={() => setTimerIsOn(false)}
-                  className="btn btn-success"
-                  data-bs-dismiss="modal">
+                  className="btn btn-success">
                   Fertig
                   <FaCheck className="ms-3" />
                 </button>
               </div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
+
     </div>
   );
 };

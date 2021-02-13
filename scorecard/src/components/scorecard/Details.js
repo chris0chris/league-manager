@@ -97,7 +97,7 @@ const Details = (props) => {
         </div>
       </div>
       <AddPoints onSubmit={createLogEntry} />
-      <Halftime />
+      <Halftime gameLog={gameLog} half={half} setHalf={setHalf} />
       <div className="row mt-3 text-secondary">
         { (displayBothTeamLogs || showHomeLog) &&
         <div className="col text-center">Einträge Heim</div>}
