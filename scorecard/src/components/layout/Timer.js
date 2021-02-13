@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 const Timer = ({isOn: timerIsOn, durationInSeconds}) => {
   const [duration, setDuration] = useState(durationInSeconds);
   const timer = () => setDuration(duration - 1);
-  console.log(duration);
   useEffect(() => {
     if (timerIsOn) {
       const id = setInterval(timer, 1000);

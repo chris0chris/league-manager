@@ -3,7 +3,6 @@ import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import RadioButton from '../layout/RadioButton';
-import {FaStopwatch} from 'react-icons/fa';
 import GameLog from './GameLog';
 import AddPoints from './AddPoints';
 import {useLocation} from 'react-router-dom';
@@ -19,11 +18,9 @@ const Details = (props) => {
   const queryParams = useLocation().search;
   useEffect(() => {
     if (queryParams) {
-      console.log('queryParams', queryParams);
       const startingTeam = queryParams.split('=')[1];
       setTeamInPossession(startingTeam);
       setShowHomeLog(startingTeam == gameLog.home.name);
-      console.log(startingTeam, gameLog.home.name, startingTeam == gameLog.home.name);
     }
   }, [gameLog.home.name]);
   const handleSwitch = () => {
@@ -42,15 +39,11 @@ const Details = (props) => {
     setShowHomeLog(true);
   };
   const createLogEntry = (event) => {
-    console.log('api call', event);
     props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, 'half': half, event});
     const nextTeamInPossession = teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
     setTeamInPossession(nextTeamInPossession);
     setShowHomeLog(nextTeamInPossession == gameLog.home.name);
   };
-  console.log('showHomeLog', showHomeLog);
-  console.log('teamInPoss', teamInPossession);
-  console.log(gameLog);
   return (
     <div className='container'>
       <div className='row'>
@@ -138,6 +131,7 @@ const Details = (props) => {
 Details.propTypes = {
   gameLog: PropTypes.object,
   createLogEntry: PropTypes.func.isRequired,
+  halftime: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
