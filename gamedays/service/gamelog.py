@@ -2,12 +2,12 @@ import json
 
 from django.db.models import QuerySet
 
-from gamedays.models import Gameinfo, Gameresult, TeamLog
+from gamedays.models import Gameresult, TeamLog
 
 
 class GameLogCreator(object):
-    def __init__(self, game_id, team, event, half=1):
-        self.game_id = game_id
+    def __init__(self, gameinfo, team, event, half=1):
+        self.gameinfo = gameinfo
         self.team = team
         self.half = half
         self.event = event
@@ -17,7 +17,7 @@ class GameLogCreator(object):
         sequence = self._getSequence()
         for attr, value in self.event.items():
             teamlog = TeamLog()
-            teamlog.gameinfo_id = self.game_id
+            teamlog.gameinfo = self.gameinfo
             teamlog.team = self.team
             teamlog.sequence = sequence
             teamlog.cop = attr is 'cop'
@@ -27,10 +27,10 @@ class GameLogCreator(object):
             teamlog.half = self.half
             teamlog.save()
             print(attr, '=', value)
-        return GameLog(self.game_id)
+        return GameLog(self.gameinfo)
 
     def _getSequence(self):
-        entryWithLatestSequence: TeamLog = TeamLog.objects.filter(gameinfo_id=self.game_id).order_by(
+        entryWithLatestSequence: TeamLog = TeamLog.objects.filter(gameinfo=self.gameinfo).order_by(
             '-sequence').first()
         if entryWithLatestSequence:
             return entryWithLatestSequence.sequence + 1
@@ -45,29 +45,17 @@ class GameLogCreator(object):
             return 2
         return 0
 
-
-class GameLogService(object):
-    @staticmethod
-    def get_gamelog(gameId):
-        return GameLog(gameId)
-
-    @classmethod
-    def create_gamelog(cls, data):
-        gamelog = GameLogCreator(data.get('gameId'), data.get('team'), data.get('event'), data.get('half'))
-        return gamelog.create()
-
-
 class GameLog(object):
     home_firsthalf_entries: QuerySet[TeamLog] = None
     away_firsthalf_entries: QuerySet[TeamLog] = None
     home_secondhalf_entries: QuerySet[TeamLog] = None
     away_secondhalf_entries: QuerySet[TeamLog] = None
 
-    def __init__(self, gameId):
-        self.gameinfo = Gameinfo.objects.get(id=gameId)
+    def __init__(self, gameinfo):
+        self.gameinfo = gameinfo
         home = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=True).team
         away = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=False).team
-        self.gamelog = GameLogObject(gameId, home, away)
+        self.gamelog = GameLogObject(gameinfo.pk, home, away)
 
     def as_json(self):
         self.gamelog.is_first_half = self.is_firsthalf()

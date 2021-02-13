@@ -8,6 +8,10 @@ from gamedays.tests.setup_factories.db_setup import DBSetup
 
 
 class TestGameService(TestCase):
+    def test_game_not_available(self):
+        with self.assertRaises(Gameinfo.DoesNotExist):
+            GameService(1)
+
     def test_update_game_by_halftime(self):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()

@@ -4,18 +4,14 @@ import pathlib
 from django.test import TestCase
 
 from gamedays.models import Gameinfo, Gameresult, TeamLog
-from gamedays.service.gamelog_service import GameLog, GameLogObject, GameLogEncoder, GameLogCreator
+from gamedays.service.gamelog import GameLog, GameLogObject, GameLogEncoder, GameLogCreator
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
 
 class TestGamelog(TestCase):
-    def test_game_not_available(self):
-        with self.assertRaises(Gameinfo.DoesNotExist):
-            GameLog(1)
-
     def test_get_home_and_away_team(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
-        gamelog = GameLog(firstGameEntry.pk)
+        gamelog = GameLog(firstGameEntry)
         home = Gameresult.objects.get(gameinfo=firstGameEntry, isHome=True).team
         away = Gameresult.objects.get(gameinfo=firstGameEntry, isHome=False).team
         assert gamelog.get_home_team() == home
@@ -23,7 +19,7 @@ class TestGamelog(TestCase):
 
     def test_entries_per_half(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
-        gamelog = GameLog(firstGameEntry.pk)
+        gamelog = GameLog(firstGameEntry)
         assert len(gamelog.get_entries_home_firsthalf()) == 5
         assert len(gamelog.get_entries_home_secondhalf()) == 5
         assert len(gamelog.get_entries_away_firsthalf()) == 0
@@ -31,7 +27,7 @@ class TestGamelog(TestCase):
 
     def test_get_gamelog_as_json(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
-        gamelog = GameLog(firstGameEntry.pk)
+        gamelog = GameLog(firstGameEntry)
         with open(pathlib.Path(__file__).parent / 'testdata/teamlog.json') as f:
             expected_gamelog = json.load(f)
         expected_gamelog['gameId'] = firstGameEntry.pk
@@ -39,14 +35,14 @@ class TestGamelog(TestCase):
 
     def test_firsthalf_is_played(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
-        gamelog = GameLog(firstGameEntry.pk)
+        gamelog = GameLog(firstGameEntry)
         assert gamelog.is_firsthalf() == True
 
     def test_secondhalf_is_played(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
         firstGameEntry.gameHalftime = '09:57'
         firstGameEntry.save()
-        gamelog = GameLog(firstGameEntry.pk)
+        gamelog = GameLog(firstGameEntry)
         assert gamelog.is_firsthalf() == False
 
     def test_json_representation_of_gamelog_object(self):
@@ -69,7 +65,7 @@ class TestGamelog(TestCase):
 
     def test_create_entries(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
-        gamelog = GameLog(firstGameEntry.pk)
+        gamelog = GameLog(firstGameEntry)
         assert gamelog.create_entries_for_half(
             TeamLog.objects.filter(gameinfo=firstGameEntry, team='Home', half=1)) == [
                    {'sequence': 1, 'td': 19, },
@@ -82,9 +78,9 @@ class TestGamelogCreator(TestCase):
     def test_gamelog_is_created(self):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
-        gamelog_creator = GameLogCreator(firstGame.pk, 'Home', {'+2': '21', '+1': '7'})
+        gamelog_creator = GameLogCreator(firstGame, 'Home', {'+2': '21', '+1': '7'})
         gamelog_creator.create()
-        gamelog_creator = GameLogCreator(firstGame.pk, 'Home', {'cop': None}, 2)
+        gamelog_creator = GameLogCreator(firstGame, 'Home', {'cop': None}, 2)
         gamelog_creator.create()
         assert len(TeamLog.objects.all()) == 3
         teamlog = TeamLog.objects.get(pk=3)

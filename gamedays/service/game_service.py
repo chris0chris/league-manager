@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from gamedays.models import Gameinfo, Gameresult
-from gamedays.service.gamelog_service import GameLog
+from gamedays.service.gamelog import GameLog, GameLogCreator
 
 
 class GameService(object):
@@ -26,3 +26,7 @@ class GameService(object):
 
     def get_gamelog(self):
         return GameLog(self.gameinfo)
+
+    def create_gamelog(self, team, event, half):
+        gamelog = GameLogCreator(self.gameinfo, team, event, half)
+        return gamelog.create()

@@ -12,7 +12,6 @@ from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, Game
 from gamedays.models import Gameday, Gameinfo, GameOfficial
 from gamedays.service.game_service import GameService
 from gamedays.service.gameday_service import GamedayService
-from gamedays.service.gamelog_service import GameLogService
 
 
 class GamedayListAPIView(ListAPIView):
@@ -77,14 +76,16 @@ class GameLogAPIView(APIView):
     def get(self, request: Request, *args, **kwargs):
         gameId = kwargs.get('id')
         try:
-            gamelog = GameLogService.get_gamelog(gameId)
+            gamelog = GameService(gameId).get_gamelog()
             return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict))
         except Gameinfo.DoesNotExist:
             raise NotFound(detail=f'No game found for gameId {gameId}')
 
     def post(self, request, *args, **kwargs):
         try:
-            gamelog = GameLogService.create_gamelog(request.data)
+            data = request.data
+            game_service = GameService(data.get('gameId'))
+            gamelog = game_service.create_gamelog(data.get('team'), data.get('event'), data.get('half'))
             return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict), status=HTTPStatus.CREATED)
         except Gameinfo.DoesNotExist:
             raise NotFound(detail=f'Could not create team logs ... gameId {request.data.get("gameId")} not found')
