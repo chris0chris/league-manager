@@ -7,7 +7,7 @@ import {FaStopwatch} from 'react-icons/fa';
 import GameLog from './GameLog';
 import AddPoints from './AddPoints';
 import {useLocation} from 'react-router-dom';
-import {createLogEntry} from '../../actions/games';
+import {createLogEntry, halftime} from '../../actions/games';
 import Halftime from './Halftime';
 
 const Details = (props) => {
@@ -19,13 +19,23 @@ const Details = (props) => {
   const queryParams = useLocation().search;
   useEffect(() => {
     if (queryParams) {
+      console.log('queryParams', queryParams);
       const startingTeam = queryParams.split('=')[1];
       setTeamInPossession(startingTeam);
       setShowHomeLog(startingTeam == gameLog.home.name);
+      console.log(startingTeam, gameLog.home.name, startingTeam == gameLog.home.name);
     }
-  }, []);
+  }, [gameLog.home.name]);
   const handleSwitch = () => {
     setDisplaybothTeamLogs(!displayBothTeamLogs);
+  };
+  const handleHalftime = (half) => {
+    setHalf(half);
+    props.halftime({
+      gameId: gameLog.gameId,
+      homeScore: gameLog.home.firsthalf.score,
+      awayScore: gameLog.away.firsthalf.score,
+    });
   };
   const updateTeam = (teamName) => {
     setTeamInPossession(teamName);
@@ -38,6 +48,9 @@ const Details = (props) => {
     setTeamInPossession(nextTeamInPossession);
     setShowHomeLog(nextTeamInPossession == gameLog.home.name);
   };
+  console.log('showHomeLog', showHomeLog);
+  console.log('teamInPoss', teamInPossession);
+  console.log(gameLog);
   return (
     <div className='container'>
       <div className='row'>
@@ -97,7 +110,7 @@ const Details = (props) => {
         </div>
       </div>
       <AddPoints onSubmit={createLogEntry} />
-      <Halftime gameLog={gameLog} half={half} setHalf={setHalf} />
+      <Halftime gameLog={gameLog} half={half} onSubmit={handleHalftime} />
       <div className="row mt-3 text-secondary">
         { (displayBothTeamLogs || showHomeLog) &&
         <div className="col text-center">Einträge Heim</div>}
@@ -131,4 +144,4 @@ const mapStateToProps = (state) => ({
   gameLog: state.gamesReducer.gameLog,
 });
 
-export default connect(mapStateToProps, {createLogEntry})(Details);
+export default connect(mapStateToProps, {createLogEntry, halftime})(Details);

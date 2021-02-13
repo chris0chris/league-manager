@@ -5,7 +5,7 @@ import {HashRouter as Router, Route} from 'react-router-dom';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import {apiPost} from '../../../actions/utils/api';
+import {apiPost, apiPut} from '../../../actions/utils/api';
 import Details from '../Details';
 import {GAME_LOG_COMPLETE_GAME} from '../../../__tests__/testdata/gameLogData';
 import $ from 'jquery/src/jquery';
@@ -18,6 +18,9 @@ $.mockImplementation(() => {
 
 jest.mock('../../../actions/utils/api');
 apiPost.mockImplementation(() => {
+  return () => {};
+});
+apiPut.mockImplementation(() => {
   return () => {};
 });
 
@@ -42,7 +45,6 @@ const setup = () => {
 describe('Details component', () => {
   it('should render correct', () => {
     setup();
-    // expect(apiGet.mock.calls).toHaveLength(1);
     expect(
         screen.getByRole('radio', {
           name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.home.name}\\b`, 'i'),
@@ -94,11 +96,17 @@ describe('Details component', () => {
     expect(awayButton).not.toBeChecked();
     expect(screen.getByText('Einträge Heim')).toBeInTheDocument();
   });
-  it('should send a post api call, when input was submitted', () => {
+  it('should send a post api call, when points input was submitted', () => {
     setup();
     userEvent.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');
     userEvent.type(screen.getByRole('spinbutton', {name: 'PAT number'}), '7');
     userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
     expect(apiPost.mock.calls[0][0]).toBe(`/api/gamelog/${GAME_LOG_COMPLETE_GAME.gameId}`);
+  });
+  it('shoud send a put api call, when halftime button was clicked', () => {
+    setup();
+    userEvent.click(screen.getByRole('button', {name: 'Halbzeit'}));
+    userEvent.click(screen.getByTestId('halftime-done'));
+    expect(apiPut.mock.calls[0][0]).toBe('/api/game/halftime');
   });
 });

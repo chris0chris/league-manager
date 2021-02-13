@@ -1,6 +1,7 @@
-import {apiGet, apiPost} from './utils/api';
+import {apiGet, apiPost, apiPut} from './utils/api';
 import {GAME_CREATE_LOG_ENTRY_FAIL,
-  GAME_CREATE_LOG_ENTRY_SUCCESS,
+  GAME_HALFTIME_FAIL,
+  GAME_HALFTIME_SUCCESS,
   GET_GAMES,
   GET_GAME_LOG,
   SET_SELECTED_GAME} from './types';
@@ -27,5 +28,12 @@ export const createLogEntry = (event) => {
   console.log(event);
   return apiPost(`/api/gamelog/${event.gameId}`,
       event, GET_GAME_LOG, GAME_CREATE_LOG_ENTRY_FAIL);
-}
-;
+};
+
+export const halftime = (event) => {
+  return apiPut(
+      `/api/game/halftime`,
+      event,
+      GAME_HALFTIME_SUCCESS,
+      GAME_HALFTIME_FAIL);
+};
