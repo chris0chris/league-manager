@@ -1,5 +1,6 @@
 import json
 import pathlib
+import re
 from collections import OrderedDict
 from http import HTTPStatus
 
@@ -201,3 +202,18 @@ class TestGameLog(WebTest):
                                           'score': 7,
                                           'secondhalf': {'entries': [], 'score': 0}},
                                  'isFirstHalf': True}
+
+
+class TestGameHalftime(WebTest):
+    def test_halftime_submitted(self):
+        DBSetup().g62_status_empty()
+        firstGame: Gameinfo = Gameinfo.objects.first()
+        response = self.app.put_json(reverse('api-game-halftime'), {
+            'gameId': firstGame.pk,
+            'homeScore': 12,
+            'awayScore': 9,
+        })
+        assert response.status_code == HTTPStatus.OK
+        firstGame = Gameinfo.objects.first()
+        assert firstGame.status == '2. Halbzeit'
+        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameHalftime))

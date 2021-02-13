@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, GameOfficialSerializer, GameSetupSerializer
 from gamedays.models import Gameday, Gameinfo, GameOfficial
+from gamedays.service.game_service import GameService
 from gamedays.service.gameday_service import GamedayService
 from gamedays.service.gamelog_service import GameLogService
 
@@ -87,3 +88,11 @@ class GameLogAPIView(APIView):
             return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict), status=HTTPStatus.CREATED)
         except Gameinfo.DoesNotExist:
             raise NotFound(detail=f'Could not create team logs ... gameId {request.data.get("gameId")} not found')
+
+
+class GameHalftimeAPIView(APIView):
+    def put(self, request):
+        data = request.data
+        game_service = GameService(data.get('gameId'))
+        game_service.update_halfetime(data.get('homeScore'), data.get('awayScore'))
+        return Response()

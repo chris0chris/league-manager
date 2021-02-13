@@ -1,0 +1,20 @@
+import re
+
+from django.test import TestCase
+
+from gamedays.models import Gameinfo, Gameresult
+from gamedays.service.game_service import GameService
+from gamedays.tests.setup_factories.db_setup import DBSetup
+
+
+class TestGameService(TestCase):
+    def test_update_game_by_halftime(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        game_service = GameService(firstGame.pk)
+        game_service.update_halfetime(home_score=12, away_score=9)
+        firstGame = Gameinfo.objects.first()
+        assert firstGame.status == '2. Halbzeit'
+        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameHalftime))
+        assert Gameresult.objects.get(gameinfo=firstGame, isHome=True).fh == 12
+        assert Gameresult.objects.get(gameinfo=firstGame, isHome=False).fh == 9
