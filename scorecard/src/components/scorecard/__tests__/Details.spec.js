@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 
 import {apiPost, apiPut} from '../../../actions/utils/api';
 import Details from '../Details';
-import {GAME_LOG_COMPLETE_GAME} from '../../../__tests__/testdata/gameLogData';
+import {GAME_LOG_COMPLETE_GAME, GAME_LOG_ONLY_FIRSTHALF} from '../../../__tests__/testdata/gameLogData';
 import $ from 'jquery/src/jquery';
 
 const modalMock = jest.fn();
@@ -24,11 +24,11 @@ apiPut.mockImplementation(() => {
   return () => {};
 });
 
-const setup = () => {
+const setup = (gameLog = GAME_LOG_COMPLETE_GAME) => {
   apiPost.mockClear();
   const initialState = {
     gamesReducer: {
-      gameLog: GAME_LOG_COMPLETE_GAME,
+      gameLog: gameLog,
     },
   };
   const store = testStore(initialState);
@@ -45,27 +45,21 @@ const setup = () => {
 describe('Details component', () => {
   it('should render correct', () => {
     setup();
-    expect(
-        screen.getByRole('radio', {
-          name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.home.name}\\b`, 'i'),
-        }),
-    ).toBeInTheDocument();
+    const homeButton = screen.getByRole('radio', {
+      name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.home.name}\\b`, 'i'),
+    });
+    expect(homeButton).toBeInTheDocument();
+    expect(homeButton).not.toBeChecked();
     expect(screen.getByText(GAME_LOG_COMPLETE_GAME.home.score)).toBeInTheDocument();
-    expect(
-        screen.getByRole('radio', {
-          name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.away.name}\\b`, 'i'),
-        }),
-    ).toBeInTheDocument();
-    expect(
-        screen.getByRole('radio', {
-          name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.away.name}\\b`, 'i'),
-        }),
-    ).toBeChecked();
-    expect(screen.getByText(GAME_LOG_COMPLETE_GAME.away.name)).toBeInTheDocument();
+    const awayButton = screen.getByRole('radio', {
+      name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.away.name}\\b`, 'i'),
+    });
+    expect(awayButton).toBeInTheDocument();
+    expect(awayButton).toBeChecked();
     expect(screen.getByText(GAME_LOG_COMPLETE_GAME.away.score)).toBeInTheDocument();
 
     expect(
-        screen.getByRole('button', {name: 'Halbzeit'}),
+        screen.getByRole('button', {name: 'Ende'}),
     ).toBeInTheDocument();
     expect(screen.getByText(new RegExp('1. Halbzeit'))).toBeInTheDocument();
     expect(screen.getByTestId('home-fh').innerHTML).toBe('21');
@@ -104,7 +98,7 @@ describe('Details component', () => {
     expect(apiPost.mock.calls[0][0]).toBe(`/api/gamelog/${GAME_LOG_COMPLETE_GAME.gameId}`);
   });
   it('shoud send a put api call, when halftime button was clicked', () => {
-    setup();
+    setup(GAME_LOG_ONLY_FIRSTHALF);
     userEvent.click(screen.getByRole('button', {name: 'Halbzeit'}));
     userEvent.click(screen.getByTestId('halftime-done'));
     expect(apiPut.mock.calls[0][0]).toBe('/api/game/halftime');

@@ -13,10 +13,10 @@ $.mockImplementation(() => {
   return {modal: modalMock};
 });
 
-const setup = (half = 1) => {
+const setup = (isFirstHalf = true) => {
   modalMock.mockClear();
   submitMock.mockClear();
-  render(<Halftime gameLog={GAME_LOG_ONLY_FIRSTHALF} half={half} onSubmit={submitMock}/>);
+  render(<Halftime gameLog={GAME_LOG_ONLY_FIRSTHALF} isFirstHalf={isFirstHalf} onSubmit={submitMock}/>);
 };
 
 describe('Halftime component', () => {
@@ -26,7 +26,7 @@ describe('Halftime component', () => {
     expect(screen.getByRole('button', {name: 'Halbzeit'})).toBeInTheDocument();
   });
   it('should render correct final', () => {
-    setup(2);
+    setup(false);
     expect(screen.getAllByTestId('timeoutButton')).toHaveLength(4);
     expect(screen.getByRole('button', {name: 'Ende'})).toBeInTheDocument();
   });
@@ -34,7 +34,7 @@ describe('Halftime component', () => {
     setup();
     userEvent.click(screen.getByRole('button', {name: 'Halbzeit'}));
     userEvent.click(screen.getByTestId('halftime-done'));
-    expect(submitMock.mock.calls[0][0]).toBe(2);
+    expect(submitMock.mock.calls[0][0]).toBe(true);
   });
   it('should do nothing, when halftime button and cancel is clicked', () => {
     setup();

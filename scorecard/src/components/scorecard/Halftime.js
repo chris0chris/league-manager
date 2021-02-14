@@ -6,13 +6,13 @@ import {FaCheck, FaTimes} from 'react-icons/fa';
 import Timer from '../layout/Timer';
 import $ from 'jquery/src/jquery';
 
-const Halftime = ({gameLog, half, onSubmit: handleCallback}) => {
+const Halftime = ({gameLog, isFirstHalf, onSubmit: handleCallback}) => {
   const [timerIsOn, setTimerIsOn] = useState(false);
   const handleSubmit = (ev) => {
     ev.preventDefault();
     setTimerIsOn(false);
     $('#halftimeTimer').modal('hide');
-    handleCallback(2);
+    handleCallback(true);
   };
   return (<>
     <div className='row mt-2'>
@@ -23,7 +23,7 @@ const Halftime = ({gameLog, half, onSubmit: handleCallback}) => {
         <Timeout teamName={gameLog.home.name} modId="2" />
       </div>
       <div className='col-4 d-grid'>
-        { half == 1 &&
+        { isFirstHalf &&
         <button type="button"
           onClick={()=>setTimerIsOn(true)}
           className="btn btn-primary"
@@ -32,8 +32,8 @@ const Halftime = ({gameLog, half, onSubmit: handleCallback}) => {
           data-testid='halftimeButton'>
           Halbzeit
         </button>}
-        { half == 2 &&
-        <button type='button' className='btn btn-primary' onClick={() => setHalf(2)} data-testid='halftimeButton'>
+        { !isFirstHalf &&
+        <button type='button' className='btn btn-primary' onClick={() => {}} data-testid='halftimeButton'>
             Ende
         </button>}
       </div>
@@ -82,7 +82,7 @@ const Halftime = ({gameLog, half, onSubmit: handleCallback}) => {
 
 Halftime.propTypes = {
   gameLog: PropTypes.object.isRequired,
-  half: PropTypes.number.isRequired,
+  isFirstHalf: PropTypes.bool.isRequired,
   onSubmit: PropTypes.func.isRequired,
 };
 
