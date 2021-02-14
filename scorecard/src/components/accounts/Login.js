@@ -15,7 +15,7 @@ const Login = (props) => {
   };
   if (props.isAuthenticated) {
     // return <Redirect to={ROOT_URL} />;
-    return <Redirect to="/details?start=Away" />;
+    return <Redirect to="/finalize" />;
   }
 
   return (
