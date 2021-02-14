@@ -33,7 +33,7 @@ const Halftime = ({gameLog, isFirstHalf, onSubmit: handleCallback}) => {
           Halbzeit
         </button>}
         { !isFirstHalf &&
-        <button type='button' className='btn btn-primary' onClick={() => {}} data-testid='halftimeButton'>
+        <button type='button' className='btn btn-primary' onClick={() => handleCallback(false)} data-testid='finalizeButton'>
             Ende
         </button>}
       </div>

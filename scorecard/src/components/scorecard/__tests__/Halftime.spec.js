@@ -36,6 +36,11 @@ describe('Halftime component', () => {
     userEvent.click(screen.getByTestId('halftime-done'));
     expect(submitMock.mock.calls[0][0]).toBe(true);
   });
+  it('should send false, when final button is clicked', () => {
+    setup(false);
+    userEvent.click(screen.getByRole('button', {name: 'Ende'}));
+    expect(submitMock.mock.calls[0][0]).toBe(false);
+  });
   it('should do nothing, when halftime button and cancel is clicked', () => {
     setup();
     userEvent.click(screen.getByRole('button', {name: 'Halbzeit'}));

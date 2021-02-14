@@ -9,6 +9,7 @@ import {apiPost, apiPut} from '../../../actions/utils/api';
 import Details from '../Details';
 import {GAME_LOG_COMPLETE_GAME, GAME_LOG_ONLY_FIRSTHALF} from '../../../__tests__/testdata/gameLogData';
 import $ from 'jquery/src/jquery';
+import {FINALIZE_URL} from '../../common/urls';
 
 const modalMock = jest.fn();
 jest.mock('jquery/src/jquery', () => jest.fn());
@@ -37,7 +38,7 @@ const setup = (gameLog = GAME_LOG_COMPLETE_GAME) => {
         <Route path='' location={{search: `?start=${GAME_LOG_COMPLETE_GAME.away.name}`}} >
           <Details store={store} />
         </Route>
-        <Route path='/someUrl'>Redirected Page</Route>
+        <Route path={FINALIZE_URL}>Finalize Page</Route>
       </Router>,
   );
 };
@@ -102,5 +103,10 @@ describe('Details component', () => {
     userEvent.click(screen.getByRole('button', {name: 'Halbzeit'}));
     userEvent.click(screen.getByTestId('halftime-done'));
     expect(apiPut.mock.calls[0][0]).toBe('/api/game/halftime');
+  });
+  it('should redirect ton finalize page, when final button is clicked', () => {
+    setup();
+    userEvent.click(screen.getByRole('button', {name: 'Ende'}));
+    expect(screen.getByText('Finalize Page')).toBeInTheDocument();
   });
 });

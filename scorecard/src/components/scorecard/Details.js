@@ -5,9 +5,10 @@ import {connect} from 'react-redux';
 import RadioButton from '../layout/RadioButton';
 import GameLog from './GameLog';
 import AddPoints from './AddPoints';
-import {useLocation} from 'react-router-dom';
+import {Redirect, useLocation} from 'react-router-dom';
 import {createLogEntry, halftime} from '../../actions/games';
 import Halftime from './Halftime';
+import {FINALIZE_URL} from '../common/urls';
 
 const Details = (props) => {
   const gameLog = props.gameLog;
@@ -15,6 +16,7 @@ const Details = (props) => {
   const [showHomeLog, setShowHomeLog] = useState(true);
   const [teamInPossession, setTeamInPossession] = useState(gameLog.home.name);
   const [half, setHalf] = useState(1);
+  const [isFinal, setIsFinal] = useState(false);
   const queryParams = useLocation().search;
   useEffect(() => {
     if (queryParams) {
@@ -34,6 +36,8 @@ const Details = (props) => {
         homeScore: gameLog.home.firsthalf.score,
         awayScore: gameLog.away.firsthalf.score,
       });
+    } else {
+      setIsFinal(true);
     }
   };
   const updateTeam = (teamName) => {
@@ -46,6 +50,9 @@ const Details = (props) => {
     setTeamInPossession(nextTeamInPossession);
     setShowHomeLog(nextTeamInPossession == gameLog.home.name);
   };
+  if (isFinal) {
+    return <Redirect to={FINALIZE_URL} />;
+  }
   return (
     <div className='container'>
       <div className='row'>
