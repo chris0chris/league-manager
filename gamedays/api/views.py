@@ -95,5 +95,5 @@ class GameHalftimeAPIView(APIView):
     def put(self, request):
         data = request.data
         game_service = GameService(data.get('gameId'))
-        game_service.update_halfetime(data.get('homeScore'), data.get('awayScore'))
+        game_service.update_halftime(data.get('homeScore'), data.get('awayScore'))
         return Response()

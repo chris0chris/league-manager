@@ -16,7 +16,7 @@ class TestGameService(TestCase):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         game_service = GameService(firstGame.pk)
-        game_service.update_halfetime(home_score=12, away_score=9)
+        game_service.update_halftime(home_score=12, away_score=9)
         firstGame = Gameinfo.objects.first()
         assert firstGame.status == '2. Halbzeit'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameHalftime))

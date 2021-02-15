@@ -8,8 +8,8 @@ class GameService(object):
         self.gameinfo: GameinfoWrapper = GameinfoWrapper(game_id)
         self.gameresult: GameresultWrapper = GameresultWrapper(self.gameinfo.gameinfo)
 
-    def update_halfetime(self, home_score, away_score):
-        self.gameinfo.set_halfetime_to_now()
+    def update_halftime(self, home_score, away_score):
+        self.gameinfo.set_halftime_to_now()
         self.gameresult.save_home_first_half(home_score, away_score)
         self.gameresult.save_away_first_half(away_score, home_score)
 

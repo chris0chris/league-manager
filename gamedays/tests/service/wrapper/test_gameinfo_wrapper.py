@@ -12,7 +12,7 @@ class TestGameinfoWrapper(TestCase):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         game_service = GameinfoWrapper(firstGame.pk)
-        game_service.set_halfetime_to_now()
+        game_service.set_halftime_to_now()
         firstGame = Gameinfo.objects.first()
         assert firstGame.status == '2. Halbzeit'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameHalftime))
