@@ -8,7 +8,7 @@ from gamedays.tests.setup_factories.db_setup import DBSetup
 
 
 class TestGameinfoWrapper(TestCase):
-    def test_halftime_value_is_saved(self):
+    def test_halftime_value_is_set(self):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         game_service = GameinfoWrapper(firstGame.pk)
@@ -16,3 +16,12 @@ class TestGameinfoWrapper(TestCase):
         firstGame = Gameinfo.objects.first()
         assert firstGame.status == '2. Halbzeit'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameHalftime))
+
+    def test_gamestarted_value_is_set(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        game_service = GameinfoWrapper(firstGame.pk)
+        game_service.update_gamestart()
+        firstGame: Gameinfo = Gameinfo.objects.first()
+        assert firstGame.status == 'gestartet'
+        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameStarted))

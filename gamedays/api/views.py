@@ -70,6 +70,11 @@ class GamedayScheduleView(APIView):
 class GameSetupCreateView(CreateAPIView):
     serializer_class = GameSetupSerializer
 
+    def create(self, request, *args, **kwargs):
+        game_service = GameService(request.data.get('gameinfo'))
+        game_service.update_gamestart()
+        return super(GameSetupCreateView, self).create(request, *args, **kwargs)
+
 
 class GameLogAPIView(APIView):
 

@@ -22,3 +22,12 @@ class TestGameService(TestCase):
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameHalftime))
         assert Gameresult.objects.get(gameinfo=firstGame, isHome=True).fh == 12
         assert Gameresult.objects.get(gameinfo=firstGame, isHome=False).fh == 9
+
+    def test_gamestart_is_updated(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        game_service = GameService(firstGame.pk)
+        game_service.update_gamestart()
+        firstGame: Gameinfo = Gameinfo.objects.first()
+        assert firstGame.status == 'gestartet'
+        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameStarted))

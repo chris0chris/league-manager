@@ -13,6 +13,9 @@ class GameService(object):
         self.gameresult.save_home_first_half(home_score, away_score)
         self.gameresult.save_away_first_half(away_score, home_score)
 
+    def update_gamestart(self):
+        self.gameinfo.set_gamestarted_to_now()
+
     def get_gamelog(self):
         return GameLog(self.gameinfo.gameinfo)
 

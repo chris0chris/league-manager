@@ -154,11 +154,15 @@ class TestRetrieveUpdateOfficials(WebTest):
 class TestGameSetup(WebTest):
 
     def test_game_setup_create(self):
-        gamesetup = {"ctResult": "won", "direction": "arrow_forward", "gameinfo": 1,
+        DBSetup().g62_status_empty()
+        first_game = Gameinfo.objects.first()
+        gamesetup = {"ctResult": "won", "direction": "arrow_forward", "gameinfo": first_game.pk,
                      "fhPossession": "HOME"}
         response = self.app.post_json(reverse('api-gamesetup-create'), gamesetup)
         assert response.status_code == HTTPStatus.CREATED
         assert response.json == gamesetup
+        first_game: Gameinfo = Gameinfo.objects.first()
+        assert first_game.status == 'gestartet'
 
     @pytest.mark.xfail
     def test_game_setup_update(self):
