@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import QuerySet
 
 
 class Gameday(models.Model):
@@ -9,7 +10,7 @@ class Gameday(models.Model):
     format = models.CharField(max_length=100, default='6_2', blank=True)
     author = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
 
-    objects = models.Manager()
+    objects: QuerySet = models.Manager()
 
     def __str__(self):
         return f'{self.pk}__{self.date} {self.name}'
@@ -29,7 +30,7 @@ class Gameinfo(models.Model):
     stage = models.CharField(max_length=100)
     standing = models.CharField(max_length=100)
 
-    objects = models.Manager()
+    objects: QuerySet = models.Manager()
 
     def __str__(self):
         return f'{self.gameday.pk}__{self.pk}__{self.field} - {self.scheduled} - {self.stage} / {self.standing} - {self.officials}'
@@ -44,7 +45,7 @@ class Gameresult(models.Model):
     pa = models.PositiveSmallIntegerField(null=True)
     isHome = models.BooleanField(default=False)
 
-    objects = models.Manager()
+    objects: QuerySet = models.Manager()
 
     def __str__(self):
         if self.fh is None:
@@ -59,6 +60,8 @@ class GameOfficial(models.Model):
     gameinfo: Gameinfo = models.ForeignKey(Gameinfo, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     position = models.CharField(max_length=100)
+
+    objects: QuerySet = models.Manager()
 
 
 # ToDo implement me as Model
@@ -79,6 +82,8 @@ class TeamLog(models.Model):
     value = models.PositiveSmallIntegerField(default=0, blank=True)
     cop = models.BooleanField(default=False)
     half = models.PositiveSmallIntegerField()
+
+    objects: QuerySet = models.Manager()
 
     def __str__(self):
         if self.cop:
