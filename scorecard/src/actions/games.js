@@ -31,9 +31,9 @@ export const createLogEntry = (event) => {
       event, GET_GAME_LOG, GAME_CREATE_LOG_ENTRY_FAIL);
 };
 
-export const halftime = (event) => {
+export const halftime = (gameId, event) => {
   return apiPut(
-      `/api/game/halftime`,
+      `/api/game/${gameId}/halftime`,
       event,
       GAME_HALFTIME_SUCCESS,
       GAME_HALFTIME_FAIL);

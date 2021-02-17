@@ -59,7 +59,7 @@ describe('Officials component', () => {
     userEvent.click(screen.getByTitle('directionLeft'));
     userEvent.click(screen.getByText('Spiel starten'));
 
-    expect(apiPost.mock.calls[0][0]).toBe('/api/gamesetup/create');
+    expect(apiPost.mock.calls[0][0]).toBe(`/api/game/${selectedGame.id}/setup`);
     expect(apiPost.mock.calls[1][0]).toBe('/api/officials/create');
     expect(apiGet.mock.calls[0][0]).toBe(`/api/gamelog/${selectedGame.id}`);
     expect(screen.getByText('Some Text')).toBeInTheDocument();

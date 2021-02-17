@@ -6,9 +6,9 @@ import {
 } from './types';
 import {apiPost} from './utils/api';
 
-export const saveGameSetup = (gameSetup) => {
+export const saveGameSetup = (gameId, gameSetup) => {
   return apiPost(
-      '/api/gamesetup/create',
+      `/api/game/${gameId}/setup`,
       gameSetup,
       GAME_SETUP_SUCCESS,
       GAME_SETUP_FAIL,

@@ -102,7 +102,7 @@ describe('Details component', () => {
     setup(GAME_LOG_ONLY_FIRSTHALF);
     userEvent.click(screen.getByRole('button', {name: 'Halbzeit'}));
     userEvent.click(screen.getByTestId('halftime-done'));
-    expect(apiPut.mock.calls[0][0]).toBe('/api/game/halftime');
+    expect(apiPut.mock.calls[0][0]).toBe(`/api/game/${GAME_LOG_ONLY_FIRSTHALF.gameId}/halftime`);
   });
   it('should redirect ton finalize page, when final button is clicked', () => {
     setup();

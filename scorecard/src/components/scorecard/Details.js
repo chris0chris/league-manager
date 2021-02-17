@@ -31,8 +31,7 @@ const Details = (props) => {
   const handleHalftime = (isFirstHalfOver) => {
     if (isFirstHalfOver) {
       setHalf(2);
-      props.halftime({
-        gameId: gameLog.gameId,
+      props.halftime(gameLog.gameId, {
         homeScore: gameLog.home.firsthalf.score,
         awayScore: gameLog.away.firsthalf.score,
       });
