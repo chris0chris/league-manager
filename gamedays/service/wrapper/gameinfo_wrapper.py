@@ -16,3 +16,8 @@ class GameinfoWrapper(object):
         self.gameinfo.status = 'gestartet'
         self.gameinfo.gameStarted = datetime.now()
         self.gameinfo.save()
+
+    def set_game_finished_to_now(self):
+        self.gameinfo.status = 'beendet'
+        self.gameinfo.gameFinished = datetime.now()
+        self.gameinfo.save()

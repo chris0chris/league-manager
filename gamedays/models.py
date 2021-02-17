@@ -64,13 +64,16 @@ class GameOfficial(models.Model):
     objects: QuerySet = models.Manager()
 
 
-# ToDo implement me as Model
-class GameSetup:
-    def __init__(self, *args, **kwargs):
-        self.gameinfo = kwargs.get('gameinfo')
-        self.ctResult = kwargs.get('ctResult')
-        self.direction = kwargs.get('direction')
-        self.fhPossession = kwargs.get('fhPossession')
+class GameSetup(models.Model):
+    gameinfo = models.ForeignKey(Gameinfo, on_delete=models.CASCADE)
+    ctResult = models.CharField(max_length=100)
+    direction = models.CharField(max_length=100)
+    fhPossession = models.CharField(max_length=100)
+    homeCaptain = models.CharField(max_length=100, blank=True)
+    awayCaptain = models.CharField(max_length=100, blank=True)
+    hasFinalScoreChanged = models.BooleanField(default=False)
+
+    objects: QuerySet = models.Manager()
 
 
 class TeamLog(models.Model):

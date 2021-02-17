@@ -1,6 +1,6 @@
 from gamedays.models import Gameday, Gameinfo
 from gamedays.tests.setup_factories.factories import GameinfoFactory, GameresultFactory, GamedayFactory, \
-    GameOfficialFactory, TeamLogFactory
+    GameOfficialFactory, TeamLogFactory, GameSetupFactory
 
 
 class DBSetup:
@@ -143,3 +143,6 @@ class DBSetup:
         TeamLogFactory(gameinfo=gameinfo, team='Away', sequence=6, cop=True, half=2)
         TeamLogFactory(gameinfo=gameinfo, team='Away', sequence=7, player=7, event='Safety', value=1, half=2)
         TeamLogFactory(gameinfo=gameinfo, team='Away', sequence=10, cop=True, half=2)
+
+    def create_gamesetup(self, gameinfo):
+        return GameSetupFactory(gameinfo=gameinfo, ctResult='won', direction='arrow_forward', fhPossession='AWAY')

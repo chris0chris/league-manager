@@ -3,13 +3,14 @@ from collections import OrderedDict
 from http import HTTPStatus
 
 from rest_framework.exceptions import NotFound
-from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView, ListCreateAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView, ListCreateAPIView, UpdateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, GameOfficialSerializer, GameSetupSerializer
-from gamedays.models import Gameday, Gameinfo, GameOfficial
+from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, GameOfficialSerializer, GameSetupSerializer, \
+    GameFinalizer
+from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
 from gamedays.service.game_service import GameService
 from gamedays.service.gameday_service import GamedayService
 
@@ -28,9 +29,6 @@ class GamedayRetrieveUpdate(RetrieveUpdateAPIView):
     serializer_class = GamedaySerializer
     queryset = Gameday.objects.all()
 
-
-class GamedayCreateView(CreateAPIView):
-    serializer_class = GamedaySerializer
 
 
 class GameOfficialListCreateView(ListCreateAPIView):
@@ -67,6 +65,9 @@ class GamedayScheduleView(APIView):
         return Response(json.loads(response, object_pairs_hook=OrderedDict))
 
 
+class GamedayCreateView(CreateAPIView):
+    serializer_class = GamedaySerializer
+
 class GameSetupCreateView(CreateAPIView):
     serializer_class = GameSetupSerializer
 
@@ -102,3 +103,13 @@ class GameHalftimeAPIView(APIView):
         game_service = GameService(data.get('gameId'))
         game_service.update_halftime(data.get('homeScore'), data.get('awayScore'))
         return Response()
+
+
+class GameFinalizeUpdateView(UpdateAPIView):
+    serializer_class = GameFinalizer
+    queryset = GameSetup.objects.all()
+
+    def put(self, request, *args, **kwargs):
+        game_service = GameService(kwargs.get('pk'))
+        game_service.update_game_finished()
+        return super(GameFinalizeUpdateView, self).update(request, *args, **kwargs)

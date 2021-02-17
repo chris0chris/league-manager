@@ -16,6 +16,9 @@ class GameService(object):
     def update_gamestart(self):
         self.gameinfo.set_gamestarted_to_now()
 
+    def update_game_finished(self):
+        self.gameinfo.set_game_finished_to_now()
+
     def get_gamelog(self):
         return GameLog(self.gameinfo.gameinfo)
 

@@ -31,3 +31,12 @@ class TestGameService(TestCase):
         firstGame: Gameinfo = Gameinfo.objects.first()
         assert firstGame.status == 'gestartet'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameStarted))
+
+    def test_gamefinished_is_updated(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        game_service = GameService(firstGame.pk)
+        game_service.update_game_finished()
+        firstGame: Gameinfo = Gameinfo.objects.first()
+        assert firstGame.status == 'beendet'
+        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameFinished))

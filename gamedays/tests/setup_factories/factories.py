@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from factory.django import DjangoModelFactory
 
-from gamedays.models import Gameday, Gameinfo, Gameresult, GameOfficial, TeamLog
+from gamedays.models import Gameday, Gameinfo, Gameresult, GameOfficial, TeamLog, GameSetup
 
 
 class GameOfficialFactory(DjangoModelFactory):
@@ -53,5 +53,12 @@ class GameresultFactory(DjangoModelFactory):
 class TeamLogFactory(DjangoModelFactory):
     class Meta:
         model = TeamLog
+
+    gameinfo = factory.SubFactory(GameinfoFactory)
+
+
+class GameSetupFactory(DjangoModelFactory):
+    class Meta:
+        model = GameSetup
 
     gameinfo = factory.SubFactory(GameinfoFactory)

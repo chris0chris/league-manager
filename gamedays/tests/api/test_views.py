@@ -9,7 +9,7 @@ from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
-from gamedays.models import Gameday, Gameinfo, GameOfficial
+from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
 from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
@@ -151,6 +151,21 @@ class TestRetrieveUpdateOfficials(WebTest):
         assert len(GameOfficial.objects.all()) == 5
 
 
+class TestGamedayCreate(WebTest):
+    def test_game_is_finalized(self):
+        DBSetup().create_empty_gameday()
+        response = self.app.post_json(reverse('api-gameday-create'), {
+            'name': 'Test Gameday',
+            'date': '2021-02-17',
+            'start': '11:00'
+        })
+        assert response.status_code == HTTPStatus.CREATED
+        gameday = Gameday.objects.last()
+        assert gameday.name == 'Test Gameday'
+        assert str(gameday.date) == '2021-02-17'
+        assert str(gameday.start) == '11:00:00'
+
+
 class TestGameSetup(WebTest):
 
     def test_game_setup_create(self):
@@ -221,3 +236,23 @@ class TestGameHalftime(WebTest):
         firstGame = Gameinfo.objects.first()
         assert firstGame.status == '2. Halbzeit'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameHalftime))
+
+
+class TestGameFinalize(WebTest):
+    def test_game_is_finalized(self):
+        DBSetup().g62_status_empty()
+        firstGame: Gameinfo = Gameinfo.objects.first()
+        DBSetup().create_gamesetup(firstGame)
+        response = self.app.put_json(reverse('api-game-finalize', kwargs={'pk': firstGame.pk}), {
+            'homeCaptain': 'Home Captain',
+            'awayCaptain': 'Away Captain',
+            'hasFinalScoreChanged': True,
+        })
+        assert response.status_code == HTTPStatus.OK
+        gamesetup = GameSetup.objects.get(gameinfo=firstGame)
+        assert gamesetup.homeCaptain == 'Home Captain'
+        assert gamesetup.awayCaptain == 'Away Captain'
+        assert gamesetup.hasFinalScoreChanged == True
+        firstGame: Gameinfo = Gameinfo.objects.first()
+        assert firstGame.status == 'beendet'
+        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameFinished))

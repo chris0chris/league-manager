@@ -1,4 +1,3 @@
-from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
 from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
@@ -28,11 +27,13 @@ class GameinfoSerializer(ModelSerializer):
                         }
 
 
-class GameSetupSerializer(serializers.Serializer):
-    ctResult = serializers.CharField()
-    direction = serializers.CharField()
-    gameinfo = serializers.IntegerField()
-    fhPossession = serializers.CharField()
+class GameSetupSerializer(ModelSerializer):
+    class Meta:
+        model = GameSetup
+        fields = ['ctResult', 'direction', 'fhPossession', 'gameinfo']
 
-    def create(self, validated_data):
-        return GameSetup(**validated_data)
+
+class GameFinalizer(ModelSerializer):
+    class Meta:
+        model = GameSetup
+        fields = ['homeCaptain', 'awayCaptain', 'hasFinalScoreChanged']
