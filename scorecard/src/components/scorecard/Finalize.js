@@ -5,6 +5,7 @@ import {connect} from 'react-redux';
 import {FaCheck, FaPaperPlane} from 'react-icons/fa';
 import {Link} from 'react-router-dom';
 import {DETAILS_URL} from '../common/urls';
+import {gameFinalize} from '../../actions/games';
 import GameLog from './GameLog';
 
 const Finalize = (props) => {
@@ -19,6 +20,13 @@ const Finalize = (props) => {
       console.log('handlelink');
       ev.preventDefault();
     }
+  };
+  const handleSubmit = (ev) => {
+    ev.preventDefault();
+    props.gameFinalize(gameLog.gameId, {
+      homeCaptain: homeCaptain,
+      awayCaptain: awayCaptain,
+    });
   };
   return (<div className="container">
     <div className="row">
@@ -36,7 +44,7 @@ const Finalize = (props) => {
         </Link>
       </div>
     </div>
-    <form>
+    <form onSubmit={(ev) => handleSubmit(ev)}>
       <div className="input-group mt-5">
         <input type="text" className="form-control" placeholder={`${gameLog.home.name}-Captain Name`} aria-describedby="confirmHomeCaptain" required
           disabled={isHomeConfirmed} value={homeCaptain} onChange={(ev) => setHomeCaptain(ev.target.value)}/>
@@ -72,7 +80,7 @@ const Finalize = (props) => {
       </div>
       <div className="row mt-2">
         <div className="d-grid mt-3">
-          <button type='submit' className='btn btn-primary' onClick={() => {}}>
+          <button type='submit' className='btn btn-primary'>
             Ergebnis abschicken <FaPaperPlane className="ms-5"/>
           </button>
         </div>
@@ -98,6 +106,7 @@ const Finalize = (props) => {
 
 Finalize.propTypes = {
   gameLog: PropTypes.object.isRequired,
+  gameFinalize: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -105,4 +114,4 @@ const mapStateToProps = (state) => ({
 });
 
 
-export default connect(mapStateToProps)(Finalize);
+export default connect(mapStateToProps, {gameFinalize})(Finalize);

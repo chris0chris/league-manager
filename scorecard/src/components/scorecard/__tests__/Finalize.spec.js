@@ -5,7 +5,7 @@ import {HashRouter as Router, Route} from 'react-router-dom';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-// import {apiPost, apiPut} from '../../../actions/utils/api';
+import {apiPost, apiPut} from '../../../actions/utils/api';
 import {GAME_LOG_COMPLETE_GAME} from '../../../__tests__/testdata/gameLogData';
 import Finalize from '../Finalize';
 import {DETAILS_URL} from '../../common/urls';
@@ -17,13 +17,13 @@ import {DETAILS_URL} from '../../common/urls';
 //   return {modal: modalMock};
 // });
 
-// jest.mock('../../../actions/utils/api');
-// apiPost.mockImplementation(() => {
-//   return () => {};
-// });
-// apiPut.mockImplementation(() => {
-//   return () => {};
-// });
+jest.mock('../../../actions/utils/api');
+apiPost.mockImplementation(() => {
+  return () => {};
+});
+apiPut.mockImplementation(() => {
+  return () => {};
+});
 
 const setup = (gameLog = GAME_LOG_COMPLETE_GAME) => {
   // apiPost.mockClear();
@@ -86,5 +86,10 @@ describe('Finalize component', () => {
     setup();
     userEvent.click(screen.getByRole('checkbox'));
     expect(screen.getAllByRole('table')).toHaveLength(4);
+  });
+  it('should call apiPut, when submit final score button is clicked', () => {
+    setup();
+    userEvent.click(screen.getByRole('button', {name: 'Ergebnis abschicken'}));
+    expect(apiPut.mock.calls[0][0]).toBe(`/api/game/${GAME_LOG_COMPLETE_GAME.gameId}/finalize`);
   });
 });

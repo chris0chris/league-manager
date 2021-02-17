@@ -1,5 +1,6 @@
 import {apiGet, apiPost, apiPut} from './utils/api';
 import {GAME_CREATE_LOG_ENTRY_FAIL,
+  GAME_FINALIZE_FAIL, GAME_FINALIZE_SUCCESS,
   GAME_HALFTIME_FAIL,
   GAME_HALFTIME_SUCCESS,
   GET_GAMES,
@@ -36,4 +37,13 @@ export const halftime = (event) => {
       event,
       GAME_HALFTIME_SUCCESS,
       GAME_HALFTIME_FAIL);
+};
+
+export const gameFinalize = (gameId, data) => {
+  return apiPut(
+      `/api/game/${gameId}/finalize`,
+      data,
+      GAME_FINALIZE_SUCCESS,
+      GAME_FINALIZE_FAIL,
+  );
 };

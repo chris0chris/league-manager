@@ -39,7 +39,7 @@ const AddPoints = ({onSubmit: updateParent}) => {
     setReset(true);
     updateParent(event);
   };
-  return (<form className='form-control' onSubmit={handleSubmit}>
+  return (<form className='form-control' onSubmit={(ev) => handleSubmit(ev)}>
     <div className="row mt-2">
       <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='td' text='Touchdown' checked={showTD} value='td'/>
       <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='otherPoints' text='Spezial' checked={showSpecial} value='spezial'/>
