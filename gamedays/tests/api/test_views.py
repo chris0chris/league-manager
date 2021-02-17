@@ -236,8 +236,7 @@ class TestGameHalftime(WebTest):
     def test_halftime_submitted(self):
         DBSetup().g62_status_empty()
         firstGame: Gameinfo = Gameinfo.objects.first()
-        response = self.app.put_json(reverse('api-game-halftime'), {
-            'gameId': firstGame.pk,
+        response = self.app.put_json(reverse('api-game-halftime', kwargs={'pk': firstGame.pk}), {
             'homeScore': 12,
             'awayScore': 9,
         })

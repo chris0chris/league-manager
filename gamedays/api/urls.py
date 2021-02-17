@@ -14,7 +14,7 @@ urlpatterns = [
     path('officials/create', GameOfficialListCreateView.as_view(), name='api-gameofficial-create'),
     path('gamesetup/<int:pk>/', APIView.as_view(), name='api-api-gamesetup'),
     path('gamelog/<int:id>', GameLogAPIView.as_view(), name='api-gamelog'),
-    path('game/halftime', GameHalftimeAPIView.as_view(), name='api-game-halftime'),
+    path('game/<int:pk>/halftime', GameHalftimeAPIView.as_view(), name='api-game-halftime'),
     path('game/<int:pk>/finalize', GameFinalizeUpdateView.as_view(), name='api-game-finalize'),
     path('game/<int:pk>/setup', GameSetupCreateOrUpdateView.as_view(), name='api-game-setup'),
 ]
