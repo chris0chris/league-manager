@@ -68,14 +68,6 @@ class GamedayScheduleView(APIView):
 class GamedayCreateView(CreateAPIView):
     serializer_class = GamedaySerializer
 
-class GameSetupCreateView(CreateAPIView):
-    serializer_class = GameSetupSerializer
-
-    def create(self, request, *args, **kwargs):
-        game_service = GameService(request.data.get('gameinfo'))
-        game_service.update_gamestart()
-        return super(GameSetupCreateView, self).create(request, *args, **kwargs)
-
 
 class GameLogAPIView(APIView):
 
@@ -109,7 +101,23 @@ class GameFinalizeUpdateView(UpdateAPIView):
     serializer_class = GameFinalizer
     queryset = GameSetup.objects.all()
 
-    def put(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         game_service = GameService(kwargs.get('pk'))
         game_service.update_game_finished()
         return super(GameFinalizeUpdateView, self).update(request, *args, **kwargs)
+
+
+class GameSetupCreateOrUpdateView(UpdateAPIView):
+
+    def update(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        game_setup, is_game_setup_created = GameSetup.objects.get_or_create(gameinfo_id=pk)
+        serializer = GameSetupSerializer(instance=game_setup, data=request.data)
+        if is_game_setup_created:
+            game_service = GameService(pk)
+            game_service.update_gamestart()
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=HTTPStatus.OK)
+        else:
+            return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)

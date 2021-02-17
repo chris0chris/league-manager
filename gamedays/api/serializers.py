@@ -30,7 +30,7 @@ class GameinfoSerializer(ModelSerializer):
 class GameSetupSerializer(ModelSerializer):
     class Meta:
         model = GameSetup
-        fields = ['ctResult', 'direction', 'fhPossession', 'gameinfo']
+        fields = ['ctResult', 'direction', 'fhPossession']
 
 
 class GameFinalizer(ModelSerializer):

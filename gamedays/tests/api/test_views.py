@@ -171,23 +171,32 @@ class TestGameSetup(WebTest):
     def test_game_setup_create(self):
         DBSetup().g62_status_empty()
         first_game = Gameinfo.objects.first()
-        gamesetup = {"ctResult": "won", "direction": "arrow_forward", "gameinfo": first_game.pk,
-                     "fhPossession": "HOME"}
-        response = self.app.post_json(reverse('api-gamesetup-create'), gamesetup)
-        assert response.status_code == HTTPStatus.CREATED
+        gamesetup = {"ctResult": "won", "direction": "arrow_forward", "fhPossession": "HOME"}
+        assert len(GameSetup.objects.all()) == 0
+        response = self.app.put_json(reverse('api-game-setup', kwargs={'pk': first_game.pk}), gamesetup)
+        assert len(GameSetup.objects.all()) == 1
+        assert response.status_code == HTTPStatus.OK
         assert response.json == gamesetup
         first_game: Gameinfo = Gameinfo.objects.first()
         assert first_game.status == 'gestartet'
 
-    @pytest.mark.xfail
     def test_game_setup_update(self):
-        # ToDo @Nik
-        assert len() == 1
-        response = self.app.post_json(reverse('api-gamesetup'),
-                                      {"ctResult": "won", "direction": "arrow_forward", "gameinfo": 1,
-                                       "fhPossession": "HOME", "id": 1})
+        DBSetup().g62_status_empty()
+        first_game = Gameinfo.objects.first()
+        first_game.status = '2. Halbzeit'
+        first_game.gameStarted = '11:00'
+        first_game.save()
+        DBSetup().create_gamesetup(first_game)
+
+        gamesetup = {"ctResult": "won", "direction": "arrow_forward", "fhPossession": "HOME"}
+        assert len(GameSetup.objects.all()) == 1
+        response = self.app.put_json(reverse('api-game-setup', kwargs={'pk': first_game.pk}), gamesetup)
+        assert len(GameSetup.objects.all()) == 1
         assert response.status_code == HTTPStatus.OK
-        assert len() == 1
+        assert response.json == gamesetup
+        first_game: Gameinfo = Gameinfo.objects.first()
+        assert first_game.status == '2. Halbzeit'
+        assert str(first_game.gameStarted) == '11:00:00'
 
 
 class TestGameLog(WebTest):
