@@ -114,7 +114,15 @@ class GameFinalizeUpdateView(UpdateAPIView):
             return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
 
 
-class GameSetupCreateOrUpdateView(UpdateAPIView):
+class GameSetupCreateOrUpdateView(RetrieveUpdateAPIView):
+    def get(self, request, *args, **kwargs):
+        game_id = kwargs.get('pk')
+        try:
+            game_setup = GameSetup.objects.get(gameinfo_id=game_id)
+            serializer = GameSetupSerializer(game_setup)
+            return Response(serializer.data, status=HTTPStatus.OK)
+        except GameSetup.DoesNotExist:
+            raise NotFound(detail=f'No game found for gameId {game_id}')
 
     def update(self, request, *args, **kwargs):
         pk = kwargs.get('pk')

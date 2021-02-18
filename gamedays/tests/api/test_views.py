@@ -4,7 +4,6 @@ import re
 from collections import OrderedDict
 from http import HTTPStatus
 
-import pytest
 from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
@@ -138,17 +137,6 @@ class TestRetrieveUpdateOfficials(WebTest):
         assert response.status_code == HTTPStatus.CREATED
         assert len(GameOfficial.objects.all()) == 2
 
-    @pytest.mark.xfail
-    def test_update_officials(self):
-        DBSetup().g62_status_empty()
-        DBSetup().create_officials(Gameinfo.objects.get(id=1))
-        assert len(GameOfficial.objects.all()) == 5
-        response = self.app.post_json(reverse('api-gameofficial-create'), [
-            {"name": "Saskia", "position": "referee", "gameinfo": 1, "id": 1},
-            {"name": "Franz", "position": "side jude", "gameinfo": 1, "id": 2}])
-        # ToDo @Nik
-        assert response.status_code == HTTPStatus.OK
-        assert len(GameOfficial.objects.all()) == 5
 
 
 class TestGamedayCreate(WebTest):
@@ -197,6 +185,18 @@ class TestGameSetup(WebTest):
         first_game: Gameinfo = Gameinfo.objects.last()
         assert first_game.status == '2. Halbzeit'
         assert str(first_game.gameStarted) == '11:00:00'
+
+    def test_game_setup_get(self):
+        DBSetup().g62_status_empty()
+        last_game = Gameinfo.objects.last()
+        DBSetup().create_gamesetup(last_game)
+        response = self.app.get(reverse('api-game-setup', kwargs={'pk': last_game.pk}))
+        assert response.status_code == HTTPStatus.OK
+        assert response.json == {"ctResult": "won", "direction": "arrow_forward", "fhPossession": "AWAY"}
+
+    def test_game_setup_not_found_exception(self):
+        response = self.app.get(reverse('api-game-setup', kwargs={'pk': 666}), expect_errors=True)
+        assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 class TestGameLog(WebTest):
