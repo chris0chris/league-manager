@@ -6,10 +6,13 @@ import {testStore} from '../../../__tests__/Utils';
 import {GAME_PAIR_1} from '../../../__tests__/testdata/gamesData';
 import Officials from '../Officials';
 import {DETAILS_URL} from '../../common/urls';
-import {apiGet, apiPost} from '../../../actions/utils/api';
+import {apiGet, apiPost, apiPut} from '../../../actions/utils/api';
 
 jest.mock('../../../actions/utils/api');
 apiPost.mockImplementation(() => {
+  return () => {};
+});
+apiPut.mockImplementation(() => {
   return () => {};
 });
 apiGet.mockImplementation(() => {
@@ -59,8 +62,8 @@ describe('Officials component', () => {
     userEvent.click(screen.getByTitle('directionLeft'));
     userEvent.click(screen.getByText('Spiel starten'));
 
-    expect(apiPost.mock.calls[0][0]).toBe(`/api/game/${selectedGame.id}/setup`);
-    expect(apiPost.mock.calls[1][0]).toBe('/api/officials/create');
+    expect(apiPut.mock.calls[0][0]).toBe(`/api/game/${selectedGame.id}/setup`);
+    expect(apiPost.mock.calls[0][0]).toBe('/api/officials/create');
     expect(apiGet.mock.calls[0][0]).toBe(`/api/gamelog/${selectedGame.id}`);
     expect(screen.getByText('Some Text')).toBeInTheDocument();
   });
