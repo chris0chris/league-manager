@@ -102,9 +102,16 @@ class GameFinalizeUpdateView(UpdateAPIView):
     queryset = GameSetup.objects.all()
 
     def update(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
         game_service = GameService(kwargs.get('pk'))
         game_service.update_game_finished()
-        return super(GameFinalizeUpdateView, self).update(request, *args, **kwargs)
+        game_setup, _ = GameSetup.objects.get_or_create(gameinfo_id=pk)
+        serializer = GameFinalizer(instance=game_setup, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=HTTPStatus.OK)
+        else:
+            return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
 
 
 class GameSetupCreateOrUpdateView(UpdateAPIView):

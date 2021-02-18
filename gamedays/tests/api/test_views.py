@@ -170,19 +170,19 @@ class TestGameSetup(WebTest):
 
     def test_game_setup_create(self):
         DBSetup().g62_status_empty()
-        first_game = Gameinfo.objects.first()
+        first_game = Gameinfo.objects.last()
         gamesetup = {"ctResult": "won", "direction": "arrow_forward", "fhPossession": "HOME"}
         assert len(GameSetup.objects.all()) == 0
         response = self.app.put_json(reverse('api-game-setup', kwargs={'pk': first_game.pk}), gamesetup)
         assert len(GameSetup.objects.all()) == 1
         assert response.status_code == HTTPStatus.OK
         assert response.json == gamesetup
-        first_game: Gameinfo = Gameinfo.objects.first()
+        first_game: Gameinfo = Gameinfo.objects.last()
         assert first_game.status == 'gestartet'
 
     def test_game_setup_update(self):
         DBSetup().g62_status_empty()
-        first_game = Gameinfo.objects.first()
+        first_game = Gameinfo.objects.last()
         first_game.status = '2. Halbzeit'
         first_game.gameStarted = '11:00'
         first_game.save()
@@ -194,7 +194,7 @@ class TestGameSetup(WebTest):
         assert len(GameSetup.objects.all()) == 1
         assert response.status_code == HTTPStatus.OK
         assert response.json == gamesetup
-        first_game: Gameinfo = Gameinfo.objects.first()
+        first_game: Gameinfo = Gameinfo.objects.last()
         assert first_game.status == '2. Halbzeit'
         assert str(first_game.gameStarted) == '11:00:00'
 
@@ -249,18 +249,18 @@ class TestGameHalftime(WebTest):
 class TestGameFinalize(WebTest):
     def test_game_is_finalized(self):
         DBSetup().g62_status_empty()
-        firstGame: Gameinfo = Gameinfo.objects.first()
+        firstGame: Gameinfo = Gameinfo.objects.last()
         DBSetup().create_gamesetup(firstGame)
         response = self.app.put_json(reverse('api-game-finalize', kwargs={'pk': firstGame.pk}), {
             'homeCaptain': 'Home Captain',
             'awayCaptain': 'Away Captain',
-            'hasFinalScoreChanged': True,
+            'hasFinalScoreChanged': True
         })
         assert response.status_code == HTTPStatus.OK
         gamesetup = GameSetup.objects.get(gameinfo=firstGame)
         assert gamesetup.homeCaptain == 'Home Captain'
         assert gamesetup.awayCaptain == 'Away Captain'
         assert gamesetup.hasFinalScoreChanged == True
-        firstGame: Gameinfo = Gameinfo.objects.first()
+        firstGame: Gameinfo = Gameinfo.objects.last()
         assert firstGame.status == 'beendet'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameFinished))
