@@ -214,9 +214,10 @@ class TestGameSetup(WebTest):
         assert response.status_code == HTTPStatus.OK
         assert response.json == {"ctResult": "won", "direction": "arrow_forward", "fhPossession": "AWAY"}
 
-    def test_game_setup_not_found_exception(self):
-        response = self.app.get(reverse('api-game-setup', kwargs={'pk': 666}), expect_errors=True)
-        assert response.status_code == HTTPStatus.NOT_FOUND
+    def test_game_setup_not_found_(self):
+        response = self.app.get(reverse('api-game-setup', kwargs={'pk': 666}))
+        assert response.status_code == HTTPStatus.OK
+        assert response.json == {}
 
 
 class TestGameLog(WebTest):
