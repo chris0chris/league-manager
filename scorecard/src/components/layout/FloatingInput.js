@@ -1,11 +1,14 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 
 const FloatingInput = ({id, text, value, onChange: setValue}) => {
-  const [inputValue, setInputValue] = useState(value.name);
+  const [inputValue, setInputValue] = useState(value);
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
   const handleChange = (newValue) => {
     setInputValue(newValue);
-    setValue({...value, name: newValue});
+    setValue(newValue);
   };
   return (
     <div className="form-floating mt-3">
@@ -13,7 +16,7 @@ const FloatingInput = ({id, text, value, onChange: setValue}) => {
         type="text"
         className="form-control"
         id={id}
-        defaultValue={inputValue}
+        value={inputValue}
         onChange={(e) => handleChange(e.target.value)}
         placeholder={text}
         required

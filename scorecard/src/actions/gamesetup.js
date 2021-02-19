@@ -1,10 +1,11 @@
 import {
+  GET_GAME_OFFICIALS,
   GAME_SETUP_SUCCESS,
   GAME_SETUP_FAIL,
   GAME_SETUP_OFFICIALS_SUCCESS,
   GAME_SETUP_OFFICIALS_FAIL,
 } from './types';
-import {apiPut} from './utils/api';
+import {apiGet, apiPut} from './utils/api';
 
 export const saveGameSetup = (gameId, gameSetup) => {
   return apiPut(
@@ -12,6 +13,13 @@ export const saveGameSetup = (gameId, gameSetup) => {
       gameSetup,
       GAME_SETUP_SUCCESS,
       GAME_SETUP_FAIL,
+  );
+};
+
+export const getOfficials = (gameId) => {
+  return apiGet(
+      `/api/game/${gameId}/officials`,
+      GET_GAME_OFFICIALS,
   );
 };
 
