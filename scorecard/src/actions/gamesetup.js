@@ -4,7 +4,7 @@ import {
   GAME_SETUP_OFFICIALS_SUCCESS,
   GAME_SETUP_OFFICIALS_FAIL,
 } from './types';
-import {apiPost, apiPut} from './utils/api';
+import {apiPut} from './utils/api';
 
 export const saveGameSetup = (gameId, gameSetup) => {
   return apiPut(
@@ -15,9 +15,9 @@ export const saveGameSetup = (gameId, gameSetup) => {
   );
 };
 
-export const saveOfficials = (officials) => {
-  return apiPost(
-      '/api/officials/create',
+export const saveOfficials = (gameId, officials) => {
+  return apiPut(
+      `/api/game/${gameId}/officials`,
       officials,
       GAME_SETUP_OFFICIALS_SUCCESS,
       GAME_SETUP_OFFICIALS_FAIL,

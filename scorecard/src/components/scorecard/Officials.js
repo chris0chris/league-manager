@@ -46,7 +46,7 @@ export const Officials = (props) => {
     officials.push(fieldJudge);
     officials.push(sideJudge);
     props.saveGameSetup(selectedGame.id, gameSetup);
-    props.saveOfficials(officials);
+    props.saveOfficials(selectedGame.id, officials);
     props.getGameLog(selectedGame.id);
     setIsSuccessfulSubmitted(true);
   };

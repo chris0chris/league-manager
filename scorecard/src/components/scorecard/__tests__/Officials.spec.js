@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React from 'react';
 import {HashRouter as Router, Route} from 'react-router-dom';
 import {render, screen} from '@testing-library/react';
@@ -61,9 +62,9 @@ describe('Officials component', () => {
     userEvent.click(screen.getByText(selectedGame.home));
     userEvent.click(screen.getByTitle('directionLeft'));
     userEvent.click(screen.getByText('Spiel starten'));
-
+    console.log(apiPut.mock);
     expect(apiPut.mock.calls[0][0]).toBe(`/api/game/${selectedGame.id}/setup`);
-    expect(apiPost.mock.calls[0][0]).toBe('/api/officials/create');
+    expect(apiPut.mock.calls[1][0]).toBe(`/api/game/${selectedGame.id}/officials`);
     expect(apiGet.mock.calls[0][0]).toBe(`/api/gamelog/${selectedGame.id}`);
     expect(screen.getByText('Some Text')).toBeInTheDocument();
   });
