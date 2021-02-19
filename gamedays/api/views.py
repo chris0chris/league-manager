@@ -114,7 +114,7 @@ class GameFinalizeUpdateView(UpdateAPIView):
     def update(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         game_service = GameService(kwargs.get('pk'))
-        game_service.update_game_finished()
+        game_service.update_game_finished(request.data.get('homeScore'), request.data.get('awayScore'))
         game_setup, _ = GameSetup.objects.get_or_create(gameinfo_id=pk)
         serializer = GameFinalizer(instance=game_setup, data=request.data)
         if serializer.is_valid():

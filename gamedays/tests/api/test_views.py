@@ -158,7 +158,6 @@ class TestRetrieveUpdateOfficials(WebTest):
         assert len(response.json) == 5
 
 
-
 class TestGamedayCreate(WebTest):
     def test_game_is_finalized(self):
         DBSetup().create_empty_gameday()
@@ -252,6 +251,52 @@ class TestGameLog(WebTest):
                                           'secondhalf': {'entries': [], 'score': 0}},
                                  'isFirstHalf': True}
 
+    def test_post_team_log_with_empty_pat(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        response = self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
+                                      {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+                                       'event': {'td': '19', 'pat1': ''}})
+        assert response.status_code == HTTPStatus.CREATED
+        assert response.json == {'gameId': 1,
+                                 'away': {
+                                     'name': 'A2',
+                                     'score': 0,
+                                     'firsthalf': {'entries': [], 'score': 0},
+                                     'secondhalf': {'entries': [], 'score': 0}},
+                                 'home': {
+                                     'name': 'A1',
+                                     'score': 6,
+                                     'firsthalf': {
+                                         'score': 6,
+                                         'entries': [{'pat1': None, 'sequence': 1, 'td': 19}],
+                                     },
+                                     'secondhalf': {'entries': [], 'score': 0}},
+                                 'isFirstHalf': True}
+
+    def test_post_team_log_change_of_possession(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        response = self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
+                                      {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+                                       'event': {'cop': True, }})
+        assert response.status_code == HTTPStatus.CREATED
+        assert response.json == {'gameId': 1,
+                                 'isFirstHalf': True,
+                                 'home': {
+                                     'name': 'A1',
+                                     'score': 0,
+                                     'firsthalf': {
+                                         'score': 0,
+                                         'entries': [{'sequence': 1, 'cop': True}]},
+                                     'secondhalf': {'score': 0, 'entries': []}},
+                                 'away': {
+                                     'name': 'A2',
+                                     'score': 0,
+                                     'firsthalf': {'score': 0, 'entries': []},
+                                     'secondhalf': {'score': 0, 'entries': []}
+                                 }}
+
 
 class TestGameHalftime(WebTest):
     def test_halftime_submitted(self):
@@ -275,6 +320,8 @@ class TestGameFinalize(WebTest):
         response = self.app.put_json(reverse('api-game-finalize', kwargs={'pk': firstGame.pk}), {
             'homeCaptain': 'Home Captain',
             'awayCaptain': 'Away Captain',
+            'homeScore': 19,
+            'awayScore': 12,
             'hasFinalScoreChanged': True
         })
         assert response.status_code == HTTPStatus.OK

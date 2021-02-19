@@ -20,10 +20,10 @@ class GameLogCreator(object):
             teamlog.gameinfo = self.gameinfo
             teamlog.team = self.team
             teamlog.sequence = sequence
-            teamlog.cop = attr is 'cop'
+            teamlog.cop = attr == 'cop'
             teamlog.event = attr
-            teamlog.player = value
-            teamlog.value = self._getValue(attr)
+            teamlog.player = self._get_player(value)
+            teamlog.value = self._getValue(attr) if teamlog.player is not None else 0
             teamlog.half = self.half
             teamlog.save()
             print(attr, '=', value)
@@ -44,6 +44,13 @@ class GameLogCreator(object):
         if attr in ('pat2', '+2'):
             return 2
         return 0
+
+    def _get_player(self, value):
+        try:
+            return value if value.isdigit() else None
+        except:
+            return None
+
 
 class GameLog(object):
     home_firsthalf_entries: QuerySet[TeamLog] = None

@@ -36,7 +36,9 @@ class TestGameService(TestCase):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         game_service = GameService(firstGame.pk)
-        game_service.update_game_finished()
+        game_service.update_game_finished(home_score=6, away_score=8)
         firstGame: Gameinfo = Gameinfo.objects.first()
         assert firstGame.status == 'beendet'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameFinished))
+        assert Gameresult.objects.get(gameinfo=firstGame, isHome=True).sh == 6
+        assert Gameresult.objects.get(gameinfo=firstGame, isHome=False).sh == 8

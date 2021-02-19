@@ -35,7 +35,7 @@ const Touchdown = ( {resetRequested, setResetRequested, update}) => {
           <input type="number"
             className="form-control" placeholder="Trikotnummer PAT"
             aria-label="PAT number" aria-describedby="btnGroupAddon"
-            onChange={(ev) => setPatInput(ev.target.value)} required
+            onChange={(ev) => setPatInput(ev.target.value)}
             value={patInput} />
         </div>
       </div>

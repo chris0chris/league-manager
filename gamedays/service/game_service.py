@@ -16,8 +16,10 @@ class GameService(object):
     def update_gamestart(self):
         self.gameinfo.set_gamestarted_to_now()
 
-    def update_game_finished(self):
+    def update_game_finished(self, home_score, away_score):
         self.gameinfo.set_game_finished_to_now()
+        self.gameresult.save_home_second_half(home_score, away_score)
+        self.gameresult.save_away_second_half(away_score, home_score)
 
     def get_gamelog(self):
         return GameLog(self.gameinfo.gameinfo)
