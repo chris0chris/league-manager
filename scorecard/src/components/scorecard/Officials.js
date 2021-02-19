@@ -2,15 +2,17 @@ import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import FloatingInput from '../layout/FloatingInput';
-import RadioButtonDefault from '../layout/RadioButtonDefault';
 import {FaArrowLeft, FaArrowRight} from 'react-icons/fa';
 import {Redirect} from 'react-router-dom';
 import {DETAILS_URL} from '../common/urls';
 import {GameSetup, Official} from '../../actions/objects';
-import {saveGameSetup,
+import {
+  getGameSetup,
+  saveGameSetup,
   getOfficials,
   saveOfficials} from '../../actions/gamesetup';
 import {getGameLog} from '../../actions/games';
+import RadioButton from '../layout/RadioButton';
 
 export const Officials = (props) => {
   const selectedGame = props.selectedGame;
@@ -26,6 +28,7 @@ export const Officials = (props) => {
 
   useEffect(() => {
     props.getOfficials(selectedGame.id);
+    props.getGameSetup(selectedGame.id);
   }, []);
   useEffect(() => {
     if (props.gameSetupOfficials.length == 0) {
@@ -58,6 +61,11 @@ export const Officials = (props) => {
       });
     }
   }, [JSON.stringify(props.gameSetupOfficials)]);
+  useEffect(() => {
+    setCt(props.gameSetup.ctResult);
+    setDirection(props.gameSetup.direction);
+    setFhPossession(props.gameSetup.fhPossession);
+  }, [JSON.stringify(props.gameSetup)]);
   const handleSubmit = (event) => {
     event.preventDefault();
     const gameSetup = new GameSetup(
@@ -80,6 +88,7 @@ export const Officials = (props) => {
   if (isSuccessfulSubmitted) {
     return <Redirect to={`${DETAILS_URL}?start=${fhPossession}`} />;
   }
+  console.log('SC Judge: ', scJudge);
   return (
     <div className="container">
       <h4 className="mt-2">
@@ -125,34 +134,42 @@ export const Officials = (props) => {
           </div>
         </div>
         <div className="row mt-3">
-          <RadioButtonDefault
+          <RadioButton
             id="ctWon"
             name="coinToss"
+            color="secondary"
             onChange={setCt}
             text="Gewonnen"
+            checked={ct == 'Gewonnen'}
           />
-          <RadioButtonDefault
+          <RadioButton
             id="ctLost"
             name="coinToss"
+            color="secondary"
             onChange={setCt}
             text="Verloren"
+            checked={ct == 'Verloren'}
           />
         </div>
         <div className="row mt-3">
           <div>Team mit Ballbesitz in der ersten Halbzeit</div>
         </div>
         <div className="row mt-3">
-          <RadioButtonDefault
+          <RadioButton
             id="possessionHome"
             name="fhPossesion"
+            color="secondary"
             onChange={setFhPossession}
             text={selectedGame.home}
+            checked={fhPossession == selectedGame.home}
           />
-          <RadioButtonDefault
+          <RadioButton
             id="possessionAway"
             name="fhPossesion"
+            color="secondary"
             onChange={setFhPossession}
             text={selectedGame.away}
+            checked={fhPossession == selectedGame.away}
           />
         </div>
 
@@ -160,19 +177,23 @@ export const Officials = (props) => {
           <div>Spielrichtung erste Halbzeit (aus Blick Scorecard Judge)</div>
         </div>
         <div className="row mt-3">
-          <RadioButtonDefault
+          <RadioButton
             id="directionLeft"
             name="direction"
+            color="secondary"
             onChange={setDirection}
             text={<FaArrowLeft title="directionLeft" />}
             value="directionLeft"
+            checked={direction == 'directionLeft'}
           />
-          <RadioButtonDefault
+          <RadioButton
             id="directionRight"
             name="direction"
+            color="secondary"
             onChange={setDirection}
             text={<FaArrowRight title="directionRight" />}
             value="directionRight"
+            checked={direction == 'directionRight'}
           />
         </div>
 
@@ -199,7 +220,12 @@ const mapStateToProps = (state) => ({
   games: state.gamesReducer.games,
   selectedGame: state.gamesReducer.selectedGame,
   gameSetupOfficials: state.gamesReducer.gameSetupOfficials,
+  gameSetup: state.gamesReducer.gameSetup,
 });
 
 export default connect(mapStateToProps,
-    {saveGameSetup, getOfficials, saveOfficials, getGameLog})(Officials);
+    {getGameSetup,
+      saveGameSetup,
+      getOfficials,
+      saveOfficials,
+      getGameLog})(Officials);

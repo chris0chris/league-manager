@@ -2,7 +2,7 @@ import {
   GET_GAMES,
   SET_SELECTED_GAME,
   GET_GAME_LOG,
-  GET_GAME_OFFICIALS} from '../actions/types.js';
+  GET_GAME_OFFICIALS, GET_GAME_SETUP} from '../actions/types.js';
 import {GAME_LOG_COMPLETE_GAME} from '../__tests__/testdata/gameLogData.js';
 // import {GAME_LOG_ONLY_FIRSTHALF} from '../__tests__/testdata/gameLogData.js';
 
@@ -10,6 +10,11 @@ const initialState = {
   games: [],
   gameLog: GAME_LOG_COMPLETE_GAME,
   gameSetupOfficials: [],
+  gameSetup: {
+    ctResult: '',
+    direction: '',
+    fhPossession: '',
+  },
   // gameLog: {
   //   'home': {
   //     'name': 'Heim',
@@ -59,6 +64,11 @@ export default (state = initialState, action) => {
       return {
         ...state,
         gameSetupOfficials: action.payload,
+      };
+    case GET_GAME_SETUP:
+      return {
+        ...state,
+        gameSetup: action.payload,
       };
     default:
       return state;

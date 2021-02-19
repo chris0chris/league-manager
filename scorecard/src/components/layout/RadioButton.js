@@ -15,6 +15,7 @@ const RadioButton = ({id, name, onChange: setValue, text, value, color = 'primar
         onChange={(ev) => setValue(ev.target.value)}
         checked={checked}
         required
+        data-testid={value ? value : text}
       />
       <label className={`btn btn-outline-${color}`} htmlFor={id}>
         {text}
