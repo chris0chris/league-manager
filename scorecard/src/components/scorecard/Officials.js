@@ -88,7 +88,6 @@ export const Officials = (props) => {
   if (isSuccessfulSubmitted) {
     return <Redirect to={`${DETAILS_URL}?start=${fhPossession}`} />;
   }
-  console.log('SC Judge: ', scJudge);
   return (
     <div className="container">
       <h4 className="mt-2">
@@ -210,8 +209,10 @@ export const Officials = (props) => {
 Officials.propTypes = {
   selectedGame: PropTypes.object.isRequired,
   gameSetupOfficials: PropTypes.array.isRequired,
-  getOfficials: PropTypes.func.isRequired,
+  gameSetup: PropTypes.object.isRequired,
+  getGameSetup: PropTypes.func.isRequired,
   saveGameSetup: PropTypes.func.isRequired,
+  getOfficials: PropTypes.func.isRequired,
   saveOfficials: PropTypes.func.isRequired,
   getGameLog: PropTypes.func.isRequired,
 };

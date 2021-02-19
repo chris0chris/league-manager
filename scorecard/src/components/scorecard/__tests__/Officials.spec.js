@@ -9,7 +9,7 @@ import Officials from '../Officials';
 import {DETAILS_URL} from '../../common/urls';
 import {apiGet, apiPut} from '../../../actions/utils/api';
 import {GET_GAME_OFFICIALS, GET_GAME_SETUP} from '../../../actions/types';
-import {GAME_OFFICIALS, GAME_SETUP} from '../../../__tests__/testdata/gameSetupData';
+import {GAME_OFFICIALS} from '../../../__tests__/testdata/gameSetupData';
 
 const selectedGame = GAME_PAIR_1;
 let isInitEmpty = false;
