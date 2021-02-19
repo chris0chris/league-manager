@@ -14,7 +14,7 @@ class GamedaySerializer(ModelSerializer):
 class GameOfficialSerializer(ModelSerializer):
     class Meta:
         model = GameOfficial
-        fields = '__all__'
+        exclude = ('gameinfo',)
 
 
 class GameinfoSerializer(ModelSerializer):

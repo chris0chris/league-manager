@@ -130,12 +130,32 @@ class TestRetrieveUpdateOfficials(WebTest):
 
     def test_create_officials(self):
         DBSetup().g62_status_empty()
+        last_game = Gameinfo.objects.last()
         assert len(GameOfficial.objects.all()) == 0
-        response = self.app.post_json(reverse('api-gameofficial-create'), [
-            {"name": "Saskia", "position": "referee", "gameinfo": 1},
-            {"name": "Franz", "position": "side jude", "gameinfo": 1}])
-        assert response.status_code == HTTPStatus.CREATED
+        response = self.app.put_json(reverse('api-game-officials', kwargs={'pk': last_game.pk}), [
+            {"name": "Saskia", "position": "referee"},
+            {"name": "Franz", "position": "side jude"}])
+        assert response.status_code == HTTPStatus.OK
         assert len(GameOfficial.objects.all()) == 2
+
+    def test_officials_will_be_updated(self):
+        DBSetup().g62_status_empty()
+        last_game = Gameinfo.objects.last()
+        DBSetup().create_officials(last_game)
+        assert len(GameOfficial.objects.all()) == 5
+        response = self.app.put_json(reverse('api-game-officials', kwargs={'pk': last_game.pk}), [
+            {"name": "Saskia", "position": "referee"},
+            {"name": "Franz", "position": "side judge"}])
+        assert response.status_code == HTTPStatus.OK
+        assert len(GameOfficial.objects.all()) == 5
+
+    def test_officials_get(self):
+        DBSetup().g62_status_empty()
+        last_game = Gameinfo.objects.last()
+        DBSetup().create_officials(last_game)
+        response = self.app.get(reverse('api-game-officials', kwargs={'pk': last_game.pk}))
+        assert response.status_code == HTTPStatus.OK
+        assert len(response.json) == 5
 
 
 

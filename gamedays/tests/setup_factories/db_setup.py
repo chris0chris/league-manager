@@ -112,8 +112,9 @@ class DBSetup:
         return gameday
 
     def create_officials(self, gameinfo):
-        for i in list(range(5)):
-            GameOfficialFactory(gameinfo=gameinfo)
+        officials_positions = ['referee', 'scorecard jude', 'down judge', 'field judge', 'side judge']
+        for position in officials_positions:
+            GameOfficialFactory(gameinfo=gameinfo, position=position)
 
     def create_teamlog_home_and_away(self) -> Gameinfo:
         # score home: 21 + 21 and cop - change of possession
