@@ -58,6 +58,7 @@ const Timeout = ({teamName = 'TeamName', modId, isSecondHalf}) => {
                 <div className="col">
                   <input type="number"
                     max="19"
+                    min="0"
                     className="form-control text-end"
                     placeholder="Minuten"
                     value={gameTimeMinutes}
@@ -66,6 +67,8 @@ const Timeout = ({teamName = 'TeamName', modId, isSecondHalf}) => {
                 </div>
                 <div className="col">
                   <input type="number"
+                    max="59"
+                    min="0"
                     className="form-control"
                     placeholder="Sekunden"
                     value={gameTimeSeconds}
