@@ -73,6 +73,14 @@ class TestGamelog(TestCase):
                    {'sequence': 3, 'td': 19, 'pat1': 7, }
                ]
 
+    def test_get_half_score(self):
+        firstGameEntry = DBSetup().create_teamlog_home_and_away()
+        gamelog = GameLog(firstGameEntry)
+        assert gamelog.get_home_firsthalf_score() == 21
+        assert gamelog.get_home_secondhalf_score() == 21
+        assert gamelog.get_away_firsthalf_score() == 0
+        assert gamelog.get_away_secondhalf_score() == 3
+
 
 class TestGamelogCreator(TestCase):
     def test_gamelog_is_created(self):

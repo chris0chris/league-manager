@@ -8,7 +8,7 @@ from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
-from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
+from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup, Gameresult
 from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
@@ -297,15 +297,46 @@ class TestGameLog(WebTest):
                                      'secondhalf': {'score': 0, 'entries': []}
                                  }}
 
+    def test_post_team_log_updates_score(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        response = self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
+                                      {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+                                       'event': {'td': '19', 'pat1': '7'}})
+        assert response.status_code == HTTPStatus.CREATED
+        home: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=True)
+        away: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=False)
+        assert home.fh == 7
+        assert away.fh == 0
+
+    def test_score_is_updated_with_multiple_entries(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
+                           {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+                            'event': {'td': '19', 'pat1': '7'}})
+        self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
+                           {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+                            'event': {'td': '19', '+2': '7'}})
+        self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
+                           {'team': 'A2', 'gameId': firstGame.pk, 'half': 2,
+                            'event': {'td': '19', 'pat1': None}})
+        self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
+                           {'team': 'A2', 'gameId': firstGame.pk, 'half': 2,
+                            'event': {'cop': True}})
+        home: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=True)
+        away: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=False)
+        assert home.fh == 15
+        assert home.sh == 0
+        assert away.fh == 0
+        assert away.sh == 6
+
 
 class TestGameHalftime(WebTest):
     def test_halftime_submitted(self):
         DBSetup().g62_status_empty()
         firstGame: Gameinfo = Gameinfo.objects.first()
-        response = self.app.put_json(reverse('api-game-halftime', kwargs={'pk': firstGame.pk}), {
-            'homeScore': 12,
-            'awayScore': 9,
-        })
+        response = self.app.put_json(reverse('api-game-halftime', kwargs={'pk': firstGame.pk}))
         assert response.status_code == HTTPStatus.OK
         firstGame = Gameinfo.objects.first()
         assert firstGame.status == '2. Halbzeit'
@@ -320,8 +351,6 @@ class TestGameFinalize(WebTest):
         response = self.app.put_json(reverse('api-game-finalize', kwargs={'pk': firstGame.pk}), {
             'homeCaptain': 'Home Captain',
             'awayCaptain': 'Away Captain',
-            'homeScore': 19,
-            'awayScore': 12,
             'hasFinalScoreChanged': True
         })
         assert response.status_code == HTTPStatus.OK

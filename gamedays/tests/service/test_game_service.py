@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from gamedays.models import Gameinfo, Gameresult
 from gamedays.service.game_service import GameService
+from gamedays.service.gamelog import GameLog
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
 
@@ -16,12 +17,10 @@ class TestGameService(TestCase):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         game_service = GameService(firstGame.pk)
-        game_service.update_halftime(home_score=12, away_score=9)
+        game_service.update_halftime()
         firstGame = Gameinfo.objects.first()
         assert firstGame.status == '2. Halbzeit'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameHalftime))
-        assert Gameresult.objects.get(gameinfo=firstGame, isHome=True).fh == 12
-        assert Gameresult.objects.get(gameinfo=firstGame, isHome=False).fh == 9
 
     def test_gamestart_is_updated(self):
         DBSetup().g62_status_empty()
@@ -36,9 +35,18 @@ class TestGameService(TestCase):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         game_service = GameService(firstGame.pk)
-        game_service.update_game_finished(home_score=6, away_score=8)
+        game_service.update_game_finished()
         firstGame: Gameinfo = Gameinfo.objects.first()
         assert firstGame.status == 'beendet'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameFinished))
-        assert Gameresult.objects.get(gameinfo=firstGame, isHome=True).sh == 6
-        assert Gameresult.objects.get(gameinfo=firstGame, isHome=False).sh == 8
+
+    def test_update_score(self):
+        DBSetup().g62_status_empty()
+        game = DBSetup().create_teamlog_home_and_away(home='A1', away='A2')
+        gamelog = GameLog(game)
+        game_service = GameService(game.pk)
+        game_service.update_score(gamelog)
+        assert Gameresult.objects.get(gameinfo=game, team='A1').fh == 21
+        assert Gameresult.objects.get(gameinfo=game, team='A1').sh == 21
+        assert Gameresult.objects.get(gameinfo=game, team='A2').fh == 0
+        assert Gameresult.objects.get(gameinfo=game, team='A2').sh == 3

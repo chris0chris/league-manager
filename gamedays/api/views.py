@@ -94,6 +94,7 @@ class GameLogAPIView(APIView):
             data = request.data
             game_service = GameService(data.get('gameId'))
             gamelog = game_service.create_gamelog(data.get('team'), data.get('event'), data.get('half'))
+            game_service.update_score(gamelog)
             return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict), status=HTTPStatus.CREATED)
         except Gameinfo.DoesNotExist:
             raise NotFound(detail=f'Could not create team logs ... gameId {request.data.get("gameId")} not found')
@@ -103,7 +104,7 @@ class GameHalftimeAPIView(APIView):
     def put(self, request, *args, **kwargs):
         data = request.data
         game_service = GameService(kwargs.get('pk'))
-        game_service.update_halftime(data.get('homeScore'), data.get('awayScore'))
+        game_service.update_halftime()
         return Response()
 
 
@@ -114,7 +115,7 @@ class GameFinalizeUpdateView(UpdateAPIView):
     def update(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         game_service = GameService(kwargs.get('pk'))
-        game_service.update_game_finished(request.data.get('homeScore'), request.data.get('awayScore'))
+        game_service.update_game_finished()
         game_setup, _ = GameSetup.objects.get_or_create(gameinfo_id=pk)
         serializer = GameFinalizer(instance=game_setup, data=request.data)
         if serializer.is_valid():
