@@ -151,7 +151,7 @@ export const Officials = (props) => {
           />
         </div>
         <div className="row mt-3">
-          <div>Team mit Ballbesitz in der ersten Halbzeit</div>
+          <div>Team mit Ballbesitz in der 1. Halbzeit</div>
         </div>
         <div className="row mt-3">
           <RadioButton
@@ -173,7 +173,7 @@ export const Officials = (props) => {
         </div>
 
         <div className="row mt-3">
-          <div>Spielrichtung erste Halbzeit (aus Blick Scorecard Judge)</div>
+          <div>Spielrichtung 1. Halbzeit (aus Blick Scorecard Judge)</div>
         </div>
         <div className="row mt-3">
           <RadioButton

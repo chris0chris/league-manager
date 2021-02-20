@@ -130,7 +130,7 @@ const Details = (props) => {
           id="formCheck"
           value=""
           checked />
-        <label className="form-check-label" htmlFor="formCheck">Zeige Einträge ein Team</label>
+        <label className="form-check-label" htmlFor="formCheck">Zeige Einträge aktuelles Team</label>
       </div>
     </div>
   );
