@@ -23,6 +23,7 @@ const Details = (props) => {
       const startingTeam = queryParams.split('=')[1];
       setTeamInPossession(startingTeam);
       setShowHomeLog(startingTeam == gameLog.home.name);
+      setHalf(gameLog.isFirstHalf ? 1 : 2);
     }
   }, [gameLog.home.name]);
   const handleSwitch = () => {
