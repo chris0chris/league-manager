@@ -17,10 +17,10 @@ const Halftime = ({gameLog, isFirstHalf, onSubmit: handleCallback}) => {
   return (<>
     <div className='row mt-2'>
       <div className='col-2'>
-        <Timeout teamName={gameLog.home.name} modId="1" />
+        <Timeout teamName={gameLog.home.name} isSecondHalf={!isFirstHalf} modId="1" />
       </div>
       <div className='col-2'>
-        <Timeout teamName={gameLog.home.name} modId="2" />
+        <Timeout teamName={gameLog.home.name} isSecondHalf={!isFirstHalf} modId="2" />
       </div>
       <div className='col-4 d-grid'>
         { isFirstHalf &&
@@ -38,10 +38,10 @@ const Halftime = ({gameLog, isFirstHalf, onSubmit: handleCallback}) => {
         </button>}
       </div>
       <div className='col-2'>
-        <Timeout teamName={gameLog.away.name} modId="3" />
+        <Timeout teamName={gameLog.away.name} isSecondHalf={!isFirstHalf} modId="3" />
       </div>
       <div className='col-2'>
-        <Timeout teamName={gameLog.away.name} modId="4" />
+        <Timeout teamName={gameLog.away.name} isSecondHalf={!isFirstHalf} modId="4" />
       </div>
     </div>
     <div className="modal fade" id='halftimeTimer'

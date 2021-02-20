@@ -1,13 +1,19 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {FaCheck, FaStopwatch, FaTimes} from 'react-icons/fa';
 import Timer from '../layout/Timer';
 import $ from 'jquery/src/jquery';
 
-const Timeout = ({teamName = 'TeamName', modId}) => {
+const Timeout = ({teamName = 'TeamName', modId, isSecondHalf}) => {
   const [timerIsOn, setTimerIsOn] = useState(false);
   const [gameTimeMinutes, setGameTimeMinutes] = useState('');
   const [gameTimeSeconds, setGameTimeSeconds] = useState('');
+  useEffect(() => {
+    if (isSecondHalf) {
+      setGameTimeSeconds('');
+      setGameTimeMinutes('');
+    }
+  }, [isSecondHalf]);
   const stopTimer = () => {
     setGameTimeSeconds('');
     setGameTimeMinutes('');
@@ -99,6 +105,7 @@ const Timeout = ({teamName = 'TeamName', modId}) => {
 Timeout.propTypes = {
   teamName: PropTypes.string.isRequired,
   modId: PropTypes.string.isRequired,
+  isSecondHalf: PropTypes.bool,
 };
 
 export default Timeout;

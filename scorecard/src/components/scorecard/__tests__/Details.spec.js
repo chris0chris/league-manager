@@ -111,4 +111,15 @@ describe('Details component', () => {
     userEvent.click(screen.getByRole('button', {name: 'Ende'}));
     expect(screen.getByText('Finalize Page')).toBeInTheDocument();
   });
+  it('should enable taken timeouts, when second half starts', () => {
+    setup(GAME_LOG_ONLY_FIRSTHALF);
+    userEvent.click(screen.getAllByTestId('timeoutButton')[0]);
+    userEvent.type(screen.getAllByPlaceholderText('Minuten')[0], '00');
+    userEvent.type(screen.getAllByPlaceholderText('Sekunden')[0], '01');
+    userEvent.click(screen.getAllByRole('button', {name: 'Fertig'})[0]);
+    expect(screen.getAllByTestId('timeoutButton')[0]).toBeDisabled();
+    userEvent.click(screen.getByRole('button', {name: 'Halbzeit'}));
+    userEvent.click(screen.getByTestId('halftime-done'));
+    expect(screen.getAllByTestId('timeoutButton')[0]).toBeEnabled();
+  });
 });
