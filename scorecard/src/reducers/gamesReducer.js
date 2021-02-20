@@ -3,44 +3,44 @@ import {
   SET_SELECTED_GAME,
   GET_GAME_LOG,
   GET_GAME_OFFICIALS, GET_GAME_SETUP} from '../actions/types.js';
-import {GAME_LOG_COMPLETE_GAME} from '../__tests__/testdata/gameLogData.js';
+// import {GAME_LOG_COMPLETE_GAME} from '../__tests__/testdata/gameLogData.js';
 // import {GAME_LOG_ONLY_FIRSTHALF} from '../__tests__/testdata/gameLogData.js';
 
 const initialState = {
   games: [],
-  gameLog: GAME_LOG_COMPLETE_GAME,
+  // gameLog: GAME_LOG_COMPLETE_GAME,
   gameSetupOfficials: [],
   gameSetup: {
     ctResult: '',
     direction: '',
     fhPossession: '',
   },
-  // gameLog: {
-  //   'home': {
-  //     'name': 'Heim',
-  //     'score': -1,
-  //     'firsthalf': {
-  //       'score:': -1,
-  //       'entries': [],
-  //     },
-  //     'secondhalf': {
-  //       'score:': -1,
-  //       'entries': [],
-  //     },
-  //   },
-  //   'away': {
-  //     'name': 'Gast',
-  //     'score': -1,
-  //     'firsthalf': {
-  //       'score:': -1,
-  //       'entries': [],
-  //     },
-  //     'secondhalf': {
-  //       'score:': -1,
-  //       'entries': [],
-  //     },
-  //   },
-  // },
+  gameLog: {
+    'home': {
+      'name': 'Heim',
+      'score': -1,
+      'firsthalf': {
+        'score:': -1,
+        'entries': [],
+      },
+      'secondhalf': {
+        'score:': -1,
+        'entries': [],
+      },
+    },
+    'away': {
+      'name': 'Gast',
+      'score': -1,
+      'firsthalf': {
+        'score:': -1,
+        'entries': [],
+      },
+      'secondhalf': {
+        'score:': -1,
+        'entries': [],
+      },
+    },
+  },
 };
 
 export default (state = initialState, action) => {

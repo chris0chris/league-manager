@@ -2,10 +2,16 @@ import {GET_GAMES} from '../../actions/types';
 import gamesReducer from '../gamesReducer';
 
 describe('Games Reducer', () => {
-  it.skip('Should return initial state', () => {
+  it('Should return initial state', () => {
     const newState = gamesReducer(undefined, {});
     expect(newState).toEqual({
       games: [],
+      gameSetupOfficials: [],
+      gameSetup: {
+        ctResult: '',
+        direction: '',
+        fhPossession: '',
+      },
       gameLog: {
         'home': {
           'name': 'Heim',
