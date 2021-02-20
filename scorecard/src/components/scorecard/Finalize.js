@@ -26,8 +26,6 @@ const Finalize = (props) => {
     props.gameFinalize(gameLog.gameId, {
       homeCaptain: homeCaptain,
       awayCaptain: awayCaptain,
-      homeScore: gameLog.home.secondhalf.score,
-      awayScore: gameLog.away.secondhalf.score,
     });
   };
   return (<div className="container">
