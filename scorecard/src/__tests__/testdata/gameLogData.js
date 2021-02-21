@@ -60,6 +60,7 @@ export const GAME_LOG_COMPLETE_GAME = {
         {
           'sequence': 10,
           'Safety': null,
+          'isDeleted': true,
         },
         {
           'sequence': 7,
@@ -83,7 +84,7 @@ export const GAME_LOG_ONLY_FIRSTHALF = {
   'isFirstHalf': true,
   'home': {
     'name': 'Wesel',
-    'score': 42,
+    'score': 21,
     'firsthalf': {
       'score': 21,
       'entries': [
@@ -110,7 +111,7 @@ export const GAME_LOG_ONLY_FIRSTHALF = {
   },
   'away': {
     'name': 'Iser',
-    'score': 13,
+    'score': 3,
     'secondhalf': {
       'score': 0,
       'entries': [],
@@ -119,12 +120,13 @@ export const GAME_LOG_ONLY_FIRSTHALF = {
       'score': 3,
       'entries': [
         {
-          'sequence': 11,
+          'sequence': 8,
           'cop': true,
         },
         {
           'sequence': 7,
           'Safety': null,
+          'isDeleted': true,
         },
         {
           'sequence': 6,
