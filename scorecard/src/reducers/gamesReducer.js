@@ -16,6 +16,7 @@ const initialState = {
     fhPossession: '',
   },
   gameLog: {
+    'isFirstHalf': true,
     'home': {
       'name': 'Heim',
       'score': -1,
