@@ -1,7 +1,43 @@
-import React from 'react';
+/* eslint-disable max-len */
+import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
+import $ from 'jquery/src/jquery';
+import {connect} from 'react-redux';
 
-const ScorecardTable = ({entries}) => {
+const ScorecardTable = (props) => {
+  const {entries, delay = 250} = props;
+  const [click, setClick] = useState({count: 0, event: null});
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // simple click
+      if (click.count === 1) handleClick(click.event);
+      setClick({count: 0, event: null});
+    }, delay);
+
+    // the duration between this click and the previous one
+    // is less than the value of delay = double-click
+    if (click.count === 2) handleDoubleClick(click.event);
+
+    return () => clearTimeout(timer);
+  }, [click.count]);
+  const handleDoubleClick = (ev) => {
+    const entryToDelete = {
+      ...entries[ev.target.parentNode.dataset.index],
+      __html: ev.target.parentNode.innerHTML,
+    };
+    if (entryToDelete.isDeleted) {
+      // do nothing, because entry is alreay deleted
+      return;
+    }
+    props.dispatch({
+      type: 'DELETE_ENTRY',
+      payload: entryToDelete,
+    });
+    $(`#modalDeleteEntry`).modal('show');
+  };
+  const handleClick = (ev) => {
+    console.log('click', ev.target.parentNode);
+  };
   const handleEntryDisplay = (entry) => {
     let htmlSnippet = null;
     if (entry.hasOwnProperty('td')) {
@@ -43,7 +79,14 @@ const ScorecardTable = ({entries}) => {
         </thead>
         <tbody>
           {entries.map((entry, index) => (
-            <tr key={index}>
+            <tr key={index}
+              data-index={`${index}`}
+              className={entry.isDeleted?'text-decoration-line-through':''}
+              onClick={(ev) => {
+                setClick((prev) => {
+                  return {count: (prev.count + 1), event: ev};
+                });
+              }}>
               <td style={{fontSize: 'smaller'}}>{entry.sequence}</td>
               {handleEntryDisplay(entry)}
             </tr>
@@ -56,6 +99,8 @@ const ScorecardTable = ({entries}) => {
 
 ScorecardTable.propTypes = {
   entries: PropTypes.array.isRequired,
+  delay: PropTypes.number,
+  dispatch: PropTypes.func.isRequired,
 };
 
-export default ScorecardTable;
+export default connect()(ScorecardTable);

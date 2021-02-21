@@ -9,13 +9,13 @@ import {apiPost, apiPut} from '../../../actions/utils/api';
 import {GAME_LOG_COMPLETE_GAME} from '../../../__tests__/testdata/gameLogData';
 import Finalize from '../Finalize';
 import {DETAILS_URL} from '../../common/urls';
-// import $ from 'jquery/src/jquery';
+import $ from 'jquery/src/jquery';
 
-// const modalMock = jest.fn();
-// jest.mock('jquery/src/jquery', () => jest.fn());
-// $.mockImplementation(() => {
-//   return {modal: modalMock};
-// });
+const modalMock = jest.fn();
+jest.mock('jquery/src/jquery', () => jest.fn());
+$.mockImplementation(() => {
+  return {modal: modalMock};
+});
 
 jest.mock('../../../actions/utils/api');
 apiPost.mockImplementation(() => {

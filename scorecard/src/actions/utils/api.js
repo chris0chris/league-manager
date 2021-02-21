@@ -23,6 +23,28 @@ export const apiPost = (url, body, successType, errorType) => async (
       });
 };
 
+export const apiDelete = (url, body, successType, errorType) => async (
+    dispatch,
+    getState,
+) => {
+  const header = tokenConfig(getState);
+
+  await axios
+      .delete(url, body, header)
+      .then((res) => {
+        dispatch({
+          type: successType,
+          payload: res.data,
+        });
+      })
+      .catch((err) => {
+        dispatch(returnErrors(err.response.data, err.response.status));
+        dispatch({
+          type: errorType,
+        });
+      });
+};
+
 export const apiPut = (url, body, successType, errorType) => async (
     dispatch,
     getState,

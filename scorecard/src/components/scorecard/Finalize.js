@@ -95,9 +95,9 @@ const Finalize = (props) => {
     </div>
     {showGameLog &&
     <>
-      <GameLog homeHalf={gameLog.home.secondhalf} awayHalf={gameLog.away.secondhalf}
+      <GameLog {...props} homeHalf={gameLog.home.secondhalf} awayHalf={gameLog.away.secondhalf}
         isFirstHalf={false} displayHome={true} displayBothTeams={true}/>
-      <GameLog homeHalf={gameLog.home.firsthalf} awayHalf={gameLog.away.firsthalf}
+      <GameLog {...props} homeHalf={gameLog.home.firsthalf} awayHalf={gameLog.away.firsthalf}
         isFirstHalf={true} displayHome={true} displayBothTeams={true}/>
     </>}
   </div>

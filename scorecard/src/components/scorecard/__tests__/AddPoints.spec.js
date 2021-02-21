@@ -16,9 +16,9 @@ describe('AddPoints component', () => {
     const touchdownButton = screen.getByRole('radio', {name: new RegExp('Touchdown')});
     expect(touchdownButton).toBeInTheDocument();
     expect(touchdownButton).toBeChecked();
-    expect(screen.getByRole('radio', {name: new RegExp('Spezial')})).toBeInTheDocument();
-    expect(screen.getByRole('radio', {name: new RegExp('Defense')})).toBeInTheDocument();
-    expect(screen.getByRole('button', {name: new RegExp('Eintrag speichern')})).toBeInTheDocument();
+    expect(screen.getByRole('radio', {name: 'Spezial'})).toBeInTheDocument();
+    expect(screen.getByRole('radio', {name: 'Defense'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Eintrag speichern'})).toBeInTheDocument();
   });
   it('should display different input field, when selecting another button', () => {
     setup();

@@ -1,5 +1,6 @@
-import {apiGet, apiPost, apiPut} from './utils/api';
+import {apiGet, apiPost, apiPut, apiDelete} from './utils/api';
 import {GAME_CREATE_LOG_ENTRY_FAIL,
+  GAME_DELETE_LOG_ENTRY_FAIL,
   GAME_FINALIZE_FAIL, GAME_FINALIZE_SUCCESS,
   GAME_HALFTIME_FAIL,
   GAME_HALFTIME_SUCCESS,
@@ -29,6 +30,11 @@ export const createLogEntry = (event) => {
   console.log(event);
   return apiPost(`/api/gamelog/${event.gameId}`,
       event, GET_GAME_LOG, GAME_CREATE_LOG_ENTRY_FAIL);
+};
+
+export const deleteLogEntry = (gameId, entryToDelete) => {
+  return apiDelete(`/api/gamelog/${gameId}`,
+      entryToDelete, GET_GAME_LOG, GAME_DELETE_LOG_ENTRY_FAIL);
 };
 
 export const halftime = (gameId, event) => {

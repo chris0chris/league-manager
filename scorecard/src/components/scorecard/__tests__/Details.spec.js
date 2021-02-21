@@ -30,6 +30,7 @@ const setup = (gameLog = GAME_LOG_COMPLETE_GAME) => {
   const initialState = {
     gamesReducer: {
       gameLog: gameLog,
+      deleteEntry: {__html: ''},
     },
   };
   const store = testStore(initialState);
@@ -73,7 +74,7 @@ describe('Details component', () => {
     setup();
     userEvent.click(screen.getByRole('checkbox',
         {name: new RegExp('Zeige Einträge')}));
-    expect(screen.getAllByRole('table').length).toBe(4);
+    expect(screen.getAllByRole('table').length).toBe(5);
   });
   it('should set the opposit team to be checked, when input was submitted', () => {
     setup();

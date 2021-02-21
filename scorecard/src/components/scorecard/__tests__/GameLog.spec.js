@@ -3,14 +3,22 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import {GAME_LOG_COMPLETE_GAME} from '../../../__tests__/testdata/gameLogData';
 import GameLog from '../GameLog';
+import {Provider} from 'react-redux';
+import {testStore} from '../../../__tests__/Utils';
 
 const setup = (showHomeTable=true, displayBothTeamLogs=false) => {
-  render(<>
+  const initialState = {
+    gamesReducer: {
+      deleteEntry: {},
+    },
+  };
+  const store = testStore(initialState);
+  render(<Provider store={store}>
     <GameLog homeHalf={GAME_LOG_COMPLETE_GAME.away.secondhalf} awayHalf={GAME_LOG_COMPLETE_GAME.home.secondhalf}
       isFirstHalf={false} displayHome={showHomeTable} displayBothTeams={displayBothTeamLogs} />
     <GameLog homeHalf={GAME_LOG_COMPLETE_GAME.home.firsthalf} awayHalf={GAME_LOG_COMPLETE_GAME.away.firsthalf}
       isFirstHalf={true} displayHome={showHomeTable} displayBothTeams={displayBothTeamLogs}/>
-  </>);
+  </Provider>);
 };
 
 describe('ScorecardTable component', () => {

@@ -9,6 +9,7 @@ import {Redirect, useLocation} from 'react-router-dom';
 import {createLogEntry, halftime} from '../../actions/games';
 import Halftime from './Halftime';
 import {FINALIZE_URL} from '../common/urls';
+import ModalDeleteEntry from './ModalDeleteEntry';
 
 const Details = (props) => {
   const gameLog = props.gameLog;
@@ -117,9 +118,9 @@ const Details = (props) => {
         <div className="col text-center">Einträge Gast</div>}
       </div>
       { !gameLog.isFirstHalf &&
-      <GameLog homeHalf={gameLog.home.secondhalf} awayHalf={gameLog.away.secondhalf}
+      <GameLog {...props} homeHalf={gameLog.home.secondhalf} awayHalf={gameLog.away.secondhalf}
         isFirstHalf={false} displayHome={showHomeLog} displayBothTeams={displayBothTeamLogs}/>}
-      <GameLog homeHalf={gameLog.home.firsthalf} awayHalf={gameLog.away.firsthalf}
+      <GameLog {...props} homeHalf={gameLog.home.firsthalf} awayHalf={gameLog.away.firsthalf}
         isFirstHalf={true} displayHome={showHomeLog} displayBothTeams={displayBothTeamLogs}/>
       <div className="form-check">
         <input className={`form-check-input ${displayBothTeamLogs ? 'uncheck' : ''}`}
@@ -130,6 +131,7 @@ const Details = (props) => {
           checked />
         <label className="form-check-label" htmlFor="formCheck">Zeige Einträge aktuelles Team</label>
       </div>
+      <ModalDeleteEntry {...props} test='someText' />
     </div>
   );
 };

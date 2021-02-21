@@ -3,7 +3,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ScorecardTable from './ScorecardTable';
 
-const GameLog = ({homeHalf, awayHalf, isFirstHalf, displayHome, displayBothTeams}) => {
+const GameLog = (props) => {
+  const {homeHalf, awayHalf, isFirstHalf, displayHome, displayBothTeams} = props;
   return (
     <>
       {isFirstHalf &&
@@ -15,13 +16,13 @@ const GameLog = ({homeHalf, awayHalf, isFirstHalf, displayHome, displayBothTeams
       <div className='row'>
         { (displayBothTeams || displayHome) &&
         <div className='col'>
-          <ScorecardTable
+          <ScorecardTable {...props}
             entries={homeHalf.entries}
           />
         </div>}
         { (displayBothTeams || !displayHome) &&
         <div className='col'>
-          <ScorecardTable
+          <ScorecardTable {...props}
             entries={awayHalf.entries}
           />
         </div>}
