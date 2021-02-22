@@ -30,7 +30,7 @@ export const apiDelete = (url, body, successType, errorType) => async (
   const header = tokenConfig(getState);
 
   await axios
-      .delete(url, body, header)
+      .delete(url, {...header, data: body})
       .then((res) => {
         dispatch({
           type: successType,
