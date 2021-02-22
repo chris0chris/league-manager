@@ -16,14 +16,13 @@ class TestGameOfficials(TestCase):
 
 
 class TestTeamlog(TestCase):
-
     def test_save_score(self):
         DBSetup().g62_status_empty()
         teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname",
                           sequence=1, event="td", player=19, value=6, half=1)
         teamlog.save()
         assert len(TeamLog.objects.all()) == 1
-        assert str(teamlog) == f'{teamlog.pk}__Teamname#1 Player: 19 Value: 6 - Half: 1'
+        assert str(teamlog) == '1__Teamname#1 Player: 19 Value: 6 - Half: 1'
 
     def test_save_PAT_no_good(self):
         DBSetup().g62_status_empty()
@@ -37,4 +36,15 @@ class TestTeamlog(TestCase):
         teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname", sequence=1, cop=True, half=2)
         teamlog.save()
         assert len(TeamLog.objects.all()) == 1
-        assert str(teamlog) == f'{teamlog.pk}__Teamname#1 CoP: True - Half: 2'
+        assert str(teamlog) == '1__Teamname#1 CoP: True - Half: 2'
+
+    def test_score_is_marked_as_deleted(self):
+        DBSetup().g62_status_empty()
+        teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname",
+                          sequence=1, event="td", player=19, value=6, half=1, isDeleted=True)
+        teamlog.save()
+        assert str(teamlog) == '1__Teamname#1 Player: 19 Value: 6 - Half: 1 [DELETED]'
+        teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname", sequence=2, cop=True,
+                          half=2, isDeleted=True)
+        teamlog.save()
+        assert str(teamlog) == '1__Teamname#2 CoP: True - Half: 2 [DELETED]'
