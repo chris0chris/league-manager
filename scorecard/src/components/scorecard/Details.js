@@ -10,6 +10,7 @@ import {createLogEntry, halftime} from '../../actions/games';
 import Halftime from './Halftime';
 import {FINALIZE_URL} from '../common/urls';
 import ModalDeleteEntry from './ModalDeleteEntry';
+import {FaTrash} from 'react-icons/fa';
 
 const Details = (props) => {
   const gameLog = props.gameLog;
@@ -130,6 +131,9 @@ const Details = (props) => {
           value=""
           checked />
         <label className="form-check-label" htmlFor="formCheck">Zeige Einträge aktuelles Team</label>
+      </div>
+      <div className="row mt-2">
+        <div className="col fw-light"><FaTrash className="me-1"/> Zum Löschen doppelt auf Zeileneintrag tippen</div>
       </div>
       <ModalDeleteEntry {...props} test='someText' />
     </div>
