@@ -36,14 +36,14 @@ class TestGamelog(TestCase):
     def test_firsthalf_is_played(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
         gamelog = GameLog(firstGameEntry)
-        assert gamelog.is_firsthalf() == True
+        assert gamelog.is_firsthalf()
 
     def test_secondhalf_is_played(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
         firstGameEntry.gameHalftime = '09:57'
         firstGameEntry.save()
         gamelog = GameLog(firstGameEntry)
-        assert gamelog.is_firsthalf() == False
+        assert not gamelog.is_firsthalf()
 
     def test_json_representation_of_gamelog_object(self):
         g = GameLogObject(81, 'White', 'Red')
@@ -80,6 +80,23 @@ class TestGamelog(TestCase):
         assert gamelog.get_home_secondhalf_score() == 21
         assert gamelog.get_away_firsthalf_score() == 0
         assert gamelog.get_away_secondhalf_score() == 3
+
+    def test_mark_log_deleted(self):
+        gameinfo = DBSetup().create_teamlog_home_and_away()
+        sequence = 2
+        gamelog = GameLog(gameinfo)
+        gamelog.mark_entries_as_deleted(sequence)
+        gamelog_list = TeamLog.objects.filter(sequence=sequence)
+        assert gamelog_list[0].isDeleted
+        assert gamelog_list[1].isDeleted
+        assert gamelog.create_entries_for_half(
+            TeamLog.objects.filter(gameinfo=gameinfo, team='Home', half=1)) == [
+                   {'sequence': 1, 'td': 19, },
+                   {'sequence': 2, 'td': 19, 'pat2': 7, 'isDeleted': True},
+                   {'sequence': 3, 'td': 19, 'pat1': 7, }
+               ]
+        assert gamelog.get_home_firsthalf_score() == 13
+        assert gamelog.get_home_score() == 34
 
 
 class TestGamelogCreator(TestCase):

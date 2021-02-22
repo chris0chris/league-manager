@@ -29,3 +29,8 @@ class GameService(object):
         self.gameresult.save_away_first_half(gamelog.get_away_firsthalf_score(), gamelog.get_home_firsthalf_score())
         self.gameresult.save_home_second_half(gamelog.get_home_secondhalf_score(), gamelog.get_away_secondhalf_score())
         self.gameresult.save_away_second_half(gamelog.get_away_secondhalf_score(), gamelog.get_home_secondhalf_score())
+
+    def delete_gamelog(self, sequence):
+        gamelog = GameLog(self.gameinfo.gameinfo)
+        gamelog.mark_entries_as_deleted(sequence)
+        return gamelog

@@ -99,6 +99,16 @@ class GameLogAPIView(APIView):
         except Gameinfo.DoesNotExist:
             raise NotFound(detail=f'Could not create team logs ... gameId {request.data.get("gameId")} not found')
 
+    def delete(self, request: Request, *args, **kwargs):
+        game_id = kwargs.get('id')
+        try:
+            game_service = GameService(game_id)
+            gamelog = game_service.delete_gamelog(request.data.get('sequence'))
+            game_service.update_score(gamelog)
+            return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict), status=HTTPStatus.OK)
+        except Gameinfo.DoesNotExist:
+            raise NotFound(detail=f'Could not delete team logs ... gameId {game_id} not found')
+
 
 class GameHalftimeAPIView(APIView):
     def put(self, request, *args, **kwargs):

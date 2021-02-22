@@ -121,7 +121,8 @@ class GameLog(object):
         sum = 0
         entry: TeamLog
         for entry in half_entries:
-            sum = sum + entry.value
+            if not entry.isDeleted:
+                sum = sum + entry.value
         return sum
 
     def create_entries_for_half(self, half_entries):
@@ -136,6 +137,8 @@ class GameLog(object):
                 result[entry.sequence].update({'cop': entry.cop})
             else:
                 result[entry.sequence].update({entry.event: entry.player})
+            if entry.isDeleted:
+                result[entry.sequence].update({'isDeleted': True})
         return list(result.values())
 
     def is_firsthalf(self):
@@ -152,6 +155,9 @@ class GameLog(object):
 
     def get_away_secondhalf_score(self):
         return self._calc_score(self.get_entries_away_secondhalf())
+
+    def mark_entries_as_deleted(self, sequence):
+        TeamLog.objects.filter(gameinfo=self.gameinfo, sequence=sequence).update(isDeleted=True)
 
 
 class Half(object):

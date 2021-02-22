@@ -50,3 +50,11 @@ class TestGameService(TestCase):
         assert Gameresult.objects.get(gameinfo=game, team='A1').sh == 21
         assert Gameresult.objects.get(gameinfo=game, team='A2').fh == 0
         assert Gameresult.objects.get(gameinfo=game, team='A2').sh == 3
+
+    def test_delete_entry(self):
+        DBSetup().g62_status_empty()
+        game = DBSetup().create_teamlog_home_and_away(home='A1', away='A2')
+        game_service = GameService(game.pk)
+        gamelog = game_service.delete_gamelog(2)
+        assert gamelog.get_home_score() == 34
+        assert gamelog.get_home_firsthalf_score() == 13

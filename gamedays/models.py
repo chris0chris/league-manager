@@ -85,6 +85,7 @@ class TeamLog(models.Model):
     value = models.PositiveSmallIntegerField(default=0, blank=True)
     cop = models.BooleanField(default=False)
     half = models.PositiveSmallIntegerField()
+    isDeleted = models.BooleanField(default=False)
 
     objects: QuerySet = models.Manager()
 

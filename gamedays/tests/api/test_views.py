@@ -331,6 +331,16 @@ class TestGameLog(WebTest):
         assert away.fh == 0
         assert away.sh == 6
 
+    def test_team_log_entry_is_deleted(self):
+        gameinfo = DBSetup().create_teamlog_home_and_away()
+        response = self.app.delete_json(reverse('api-gamelog', kwargs={'id': gameinfo.pk}), {
+            'sequence': 2
+        })
+        assert response.status_code == HTTPStatus.OK
+        json_response = response.json
+        assert json_response['home']['score'] == 34
+        assert json_response['home']['firsthalf']['entries'][1]['isDeleted']
+
 
 class TestGameHalftime(WebTest):
     def test_halftime_submitted(self):
