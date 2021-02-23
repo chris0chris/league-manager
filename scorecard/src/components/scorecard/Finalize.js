@@ -3,14 +3,15 @@ import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {FaCheck, FaPaperPlane} from 'react-icons/fa';
-import {Link} from 'react-router-dom';
-import {DETAILS_URL} from '../common/urls';
+import {Link, Redirect} from 'react-router-dom';
+import {DETAILS_URL, ROOT_URL} from '../common/urls';
 import {gameFinalize} from '../../actions/games';
 import GameLog from './GameLog';
 
 const Finalize = (props) => {
   const [isHomeConfirmed, setIsHomeConfirmed] = useState(false);
   const [isAwayConfirmed, setIsAwayConfirmed] = useState(false);
+  const [isSuccessfulSubmitted, setIsSuccessfulSubmitted] = useState(false);
   const [showGameLog, setShowGameLog] = useState(false);
   const [homeCaptain, setHomeCaptain] = useState('');
   const [awayCaptain, setAwayCaptain] = useState('');
@@ -27,7 +28,11 @@ const Finalize = (props) => {
       homeCaptain: homeCaptain,
       awayCaptain: awayCaptain,
     });
+    setIsSuccessfulSubmitted(true);
   };
+  if (isSuccessfulSubmitted) {
+    return <Redirect to={ROOT_URL} />;
+  }
   return (<div className="container">
     <div className="row">
       <div className="col text-end">{gameLog.home.name}</div>
