@@ -1,8 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 
-const Games = ({games, onClick: emitEvent}) => {
-  console.log(games);
+const Games = ({games, onClick: emitEvent, loadAllGames}) => {
+  const [loadAll, setLoadAll] = useState(true);
   return (
     <>
       <h3>Bitte Spiel auswählen</h3>
@@ -42,6 +42,21 @@ const Games = ({games, onClick: emitEvent}) => {
           ))}
         </tbody>
       </table>
+      <div className="mt-5 row">
+        <div className="form-check">
+          <input className={`form-check-input`}
+            onChange={() => {
+              setLoadAll(!loadAll);
+              loadAllGames(loadAll);
+            }}
+            type="checkbox"
+            id="formCheck"
+            value="" />
+          <label className="form-check-label" htmlFor="formCheck">
+            Zeige alle Spiele
+          </label>
+        </div>
+      </div>
     </>
   );
 };
@@ -49,6 +64,7 @@ const Games = ({games, onClick: emitEvent}) => {
 Games.propTypes = {
   games: PropTypes.array.isRequired,
   onClick: PropTypes.func.isRequired,
+  loadAllGames: PropTypes.func.isRequired,
 };
 
 export default Games;
