@@ -5,19 +5,6 @@ from gamedays.service.model_wrapper import GamedayModelWrapper
 
 EMPTY_DATA = '[]'
 
-SCHEDULE_TABLE_HEADERS = {
-    SCHEDULED: 'Kick-Off',
-    FIELD: 'Feld',
-    OFFICIALS: 'Officials',
-    STAGE: 'Runde',
-    STANDING: 'Platz',
-    HOME: 'Heim',
-    POINTS_HOME: 'Punkte Heim',
-    POINTS_AWAY: 'Punkte Gast',
-    AWAY: 'Gast',
-    STATUS: 'Status'
-}
-
 class EmptySchedule:
     @staticmethod
     def to_html():
@@ -106,5 +93,4 @@ class GamedayService:
         columns = [SCHEDULED, FIELD, OFFICIALS, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY,
                    STATUS, ID_HOME, ID_AWAY, 'id']
         games_to_whistle = games_to_whistle[columns]
-        games_to_whistle = games_to_whistle.rename(columns=SCHEDULE_TABLE_HEADERS)
         return games_to_whistle
