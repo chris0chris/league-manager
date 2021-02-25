@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const Games = ({games, onClick: emitEvent}) => {
+  console.log(games);
   return (
     <>
       <h3>Bitte Spiel auswählen</h3>
@@ -15,6 +16,11 @@ const Games = ({games, onClick: emitEvent}) => {
           </tr>
         </thead>
         <tbody>
+          {games.length == 0 &&
+            <tr className="text-center fw-bold">
+              <td colSpan="4">Keine Spiele zu pfeifen</td>
+            </tr>
+          }
           {games.map((game, index) => (
             <tr key={game.id}>
               <td>{game.scheduled}</td>

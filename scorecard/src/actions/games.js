@@ -8,9 +8,9 @@ import {GAME_CREATE_LOG_ENTRY_FAIL,
   GET_GAME_LOG,
   SET_SELECTED_GAME} from './types';
 
-export const getGames = (gamedayId) => {
+export const getGames = (gamedayId, team) => {
   return apiGet(
-      `/api/gameday/${gamedayId}/details?get=schedule&orient=records`,
+      `/api/gameday/${gamedayId}/officials/${team}`,
       GET_GAMES,
   );
 };

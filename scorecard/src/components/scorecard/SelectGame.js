@@ -10,12 +10,15 @@ import {OFFICIALS_URL} from '../common/urls';
 
 const SelectGame = (props) => {
   const [isSelectedGameLoaded, setSelectedGameLoaded] = useState(false);
+  const [gamesForGamedayLoaded, setGamesForGamedayLoaded] = useState(false);
+  console.log(props.games);
   useEffect(() => {
     props.getGamedays();
   }, [props.gamedays.length]);
 
   const loadGamesForGameday = (id) => {
-    props.getGames(id);
+    props.getGames(id, props.user.username);
+    setGamesForGamedayLoaded(true);
   };
 
   const loadGame = (index) => {
@@ -28,7 +31,8 @@ const SelectGame = (props) => {
   return (
     <div className="row">
       <Gamedays gamedays={props.gamedays} onClick={loadGamesForGameday} />
-      <Games games={props.games} onClick={loadGame} />
+      {gamesForGamedayLoaded &&
+      <Games games={props.games} onClick={loadGame} />}
     </div>
   );
 };
@@ -36,6 +40,7 @@ const SelectGame = (props) => {
 SelectGame.propTypes = {
   gamedays: PropTypes.array.isRequired,
   games: PropTypes.array.isRequired,
+  user: PropTypes.object.isRequired,
   getGamedays: PropTypes.func.isRequired,
   getGames: PropTypes.func.isRequired,
   setSelectedGame: PropTypes.func.isRequired,
@@ -44,6 +49,7 @@ SelectGame.propTypes = {
 const mapStateToProps = (state) => ({
   gamedays: state.gamedaysReducer.gamedays,
   games: state.gamesReducer.games,
+  user: state.authReducer.user,
 });
 
 export default connect(mapStateToProps, {

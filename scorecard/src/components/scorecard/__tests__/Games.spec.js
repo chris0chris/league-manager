@@ -20,7 +20,10 @@ describe('Games component', () => {
     setup();
     expect(screen.getAllByRole('row').length).toBe(4);
   });
-
+  it('should display no games to whistlye', () => {
+    render(<Games games={[]} onClick={()=>{}} />);
+    expect(screen.getByText('Keine Spiele zu pfeifen')).toBeInTheDocument();
+  });
   it('should emit callback on click event', () => {
     setup();
     const firstRowButton = screen.getAllByRole('button')[0];

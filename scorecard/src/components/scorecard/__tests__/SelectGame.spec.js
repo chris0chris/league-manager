@@ -34,6 +34,14 @@ const setup = () => {
     gamedaysReducer: {
       ...TWO_GAMEDAYS,
     },
+    gamesReducer: {
+      games: [],
+    },
+    authReducer: {
+      user: {
+        username: 'OfficialsTeam',
+      },
+    },
   };
   store = testStore(initialState);
   render(
@@ -45,12 +53,11 @@ const setup = () => {
 };
 
 describe('SelectGame component', () => {
-  it('it should render correct', () => {
+  it('it should render correct with empty games', () => {
     setup();
     expect(screen.getAllByRole('button').length).toBe(2);
-    apiGet.cl;
+    expect(screen.getAllByRole('table')).toHaveLength(1);
   });
-
   it('should redirect to officials page', () => {
     setup();
     const firstMockCall = apiGet.mock.calls[0][0];
@@ -60,6 +67,7 @@ describe('SelectGame component', () => {
     const secondSelectGamedayButton = screen.getAllByRole('button')[1];
     userEvent.click(secondSelectGamedayButton);
     expect(screen.getAllByRole('button').length).toBe(4);
+    expect(screen.getAllByRole('table')).toHaveLength(2);
 
     const firstStartGameButton = screen.getAllByRole('button', {
       name: /start/i,
@@ -68,7 +76,7 @@ describe('SelectGame component', () => {
     const secondMockCall = apiGet.mock.calls[1][0];
     expect(secondMockCall).toBe(
         // eslint-disable-next-line max-len
-        `/api/gameday/${TWO_GAMEDAYS.gamedays[1].id}/details?get=schedule&orient=records`,
+        `/api/gameday/${TWO_GAMEDAYS.gamedays[1].id}/officials/OfficialsTeam`,
     );
     const selectedGameStateInStore = store.getState().gamesReducer.selectedGame;
     expect(selectedGameStateInStore).toEqual(TWO_GAMES.games[0]);
