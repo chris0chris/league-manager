@@ -148,5 +148,6 @@ class GamedayModelWrapper:
 
     def get_games_to_whistle(self, team):
         games_to_whistle = self._get_schedule()
+        games_to_whistle = games_to_whistle.sort_values(by=[SCHEDULED, FIELD])
         return games_to_whistle[
             (games_to_whistle[OFFICIALS].str.contains(team)) & (games_to_whistle[GAME_FINISHED] == '')]
