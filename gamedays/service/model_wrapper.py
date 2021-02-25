@@ -145,3 +145,8 @@ class GamedayModelWrapper:
 
         return len(self._gameinfo[(self._gameinfo[STAGE] == check) & (self._gameinfo[STATUS] == FINISHED)]) \
                == len(self._gameinfo[(self._gameinfo[STAGE] == check)])
+
+    def get_games_to_whistle(self, team):
+        games_to_whistle = self._get_schedule()
+        return games_to_whistle[
+            (games_to_whistle[OFFICIALS].str.contains(team)) & (games_to_whistle[GAME_FINISHED] == '')]

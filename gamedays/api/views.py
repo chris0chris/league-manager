@@ -160,3 +160,12 @@ class GameSetupCreateOrUpdateView(RetrieveUpdateAPIView):
             return Response(serializer.data, status=HTTPStatus.OK)
         else:
             return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
+
+
+class GamesToWhistleAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        gs = GamedayService.create(kwargs['pk'])
+        games_to_whistle = gs.get_games_to_whistle(kwargs.get('team'))
+        games_to_whistle = games_to_whistle.to_json(orient='records')
+        print(json.dumps(json.loads(games_to_whistle), indent=2))
+        return Response(json.loads(games_to_whistle, object_pairs_hook=OrderedDict))

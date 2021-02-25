@@ -18,6 +18,7 @@ QUALIIFY_ROUND = 'Vorrunde'
 DIFF = '+/-'
 GROUP1 = 'Gruppe 1'
 FINISHED = 'beendet'
+GAME_FINISHED = 'gameFinished'
 
 GAMEINFO_ID = 'gameinfo_id'
 ID = 'id'

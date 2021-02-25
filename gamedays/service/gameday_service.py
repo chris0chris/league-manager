@@ -3,7 +3,7 @@ from gamedays.service.gameday_settings import STANDING, POINTS_HOME, POINTS_AWAY
     HOME, AWAY, STATUS
 from gamedays.service.model_wrapper import GamedayModelWrapper
 
-EMPTY_DATA = '{"data": []}'
+EMPTY_DATA = '[]'
 
 SCHEDULE_TABLE_HEADERS = {
     SCHEDULED: 'Kick-Off',
@@ -17,7 +17,6 @@ SCHEDULE_TABLE_HEADERS = {
     AWAY: 'Gast',
     STATUS: 'Status'
 }
-
 
 class EmptySchedule:
     @staticmethod
@@ -56,6 +55,10 @@ class EmptyGamedayService:
         return EmptySchedule
 
     @staticmethod
+    def get_games_to_whistle(*args, **kwargs):
+        return EmptySchedule
+
+    @staticmethod
     def get_qualify_table():
         return EmptyQualifyTable
 
@@ -65,6 +68,12 @@ class EmptyGamedayService:
 
 
 class GamedayService:
+    @classmethod
+    def create(cls, gameday_pk):
+        try:
+            return cls(gameday_pk)
+        except Gameinfo.DoesNotExist:
+            return EmptyGamedayService
 
     def __init__(self, pk):
         self.gmw = GamedayModelWrapper(pk)
@@ -90,9 +99,12 @@ class GamedayService:
             return EmptyFinalTable
         return final_table
 
-    @classmethod
-    def create(cls, gameday_pk):
-        try:
-            return cls(gameday_pk)
-        except Gameinfo.DoesNotExist:
-            return EmptyGamedayService
+    def get_games_to_whistle(self, team):
+        if team == '*':
+            team = ''
+        games_to_whistle = self.gmw.get_games_to_whistle(team)
+        columns = [SCHEDULED, FIELD, OFFICIALS, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY,
+                   STATUS, ID_HOME, ID_AWAY, 'id']
+        games_to_whistle = games_to_whistle[columns]
+        games_to_whistle = games_to_whistle.rename(columns=SCHEDULE_TABLE_HEADERS)
+        return games_to_whistle

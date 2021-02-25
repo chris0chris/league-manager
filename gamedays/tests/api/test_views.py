@@ -29,7 +29,6 @@ class TestGamedayRetrieveUpdate(WebTest):
         gameday = DBSetup().g62_status_empty()
         response = self.app.get(reverse('api-gameday-retrieve-update', kwargs={'pk': gameday.pk}))
         assert response.status_code == HTTPStatus.OK
-        # circleci problem comparing response with serializer when json contains None values
         assert response.json == GamedaySerializer(gameday).data
 
 
@@ -68,9 +67,7 @@ class TestGameinfoRetrieveUpdate(WebTest):
         assert str(gameinfo.gameFinished) == '09:00:00'
         assert gameinfo.pin == 2
 
-
 class TestGamedaySchedule(WebTest):
-
     def test_get_schedule(self):
         gameday = DBSetup().g62_qualify_finished()
         with open(pathlib.Path(__file__).parent / 'testdata/schedule_g62_qualify_finished.json') as f:
@@ -371,3 +368,18 @@ class TestGameFinalize(WebTest):
         firstGame: Gameinfo = Gameinfo.objects.last()
         assert firstGame.status == 'beendet'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameFinished))
+
+class TestGamesToWhistleAPIView(WebTest):
+    def test_get_games_to_whistle_for_specific_team(self):
+        gameday = DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(id=1).update(gameFinished='13:00')
+        Gameinfo.objects.filter(id=2).update(officials='differentTeam')
+        response = self.app.get(reverse('api-gameday-whistlegames', kwargs={'pk': gameday.pk, 'team': 'officials'}))
+        assert len(response.json) == 4
+
+    def test_get_all_games_to_whistle_for_all_teams(self):
+        gameday = DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(id=1).update(gameFinished='13:00')
+        Gameinfo.objects.filter(id=2).update(officials='differentTeam')
+        response = self.app.get(reverse('api-gameday-whistlegames', kwargs={'pk': gameday.pk, 'team': '*'}))
+        assert len(response.json) == 10

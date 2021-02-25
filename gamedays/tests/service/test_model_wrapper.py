@@ -110,3 +110,16 @@ class TestGamedayModelWrapper(TestCase):
         gmw = GamedayModelWrapper(gameday.pk)
         assert not gmw.is_finished('Vorrunde')
         assert gmw.is_finished('HF')
+
+    def test_get_games_to_whistle(self):
+        gameday = DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(id=1).update(gameFinished='12:00')
+        gmw = GamedayModelWrapper(gameday.pk)
+        assert len(gmw.get_games_to_whistle('officials').index) == 5
+
+    def test_get_games_to_whistle_for_all_teams(self):
+        gameday = DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(id=1).update(gameFinished='12:00')
+        Gameinfo.objects.filter(id=2).update(officials='refs')
+        gmw = GamedayModelWrapper(gameday.pk)
+        assert len(gmw.get_games_to_whistle('').index) == 10
