@@ -17,8 +17,11 @@ from gamedays.service.gameday_service import GamedayService
 
 class GamedayListAPIView(ListAPIView):
     serializer_class = GamedaySerializer
-    queryset = Gameday.objects.all()
 
+    def get_queryset(self):
+        # return Gameday.objects.filter(date=datetime.today())
+        # ToDo deleteMe when Live
+        return Gameday.objects.all()
 
 class GameinfoUpdateAPIView(RetrieveUpdateAPIView):
     serializer_class = GameinfoSerializer

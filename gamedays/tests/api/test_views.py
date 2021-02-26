@@ -2,6 +2,7 @@ import json
 import pathlib
 import re
 from collections import OrderedDict
+from datetime import datetime
 from http import HTTPStatus
 
 from django_webtest import WebTest
@@ -16,11 +17,14 @@ from gamedays.tests.setup_factories.db_setup import DBSetup
 class TestGamedayAPIViews(WebTest):
 
     def test_gameday_list(self):
-        all_gamedays = [DBSetup().create_empty_gameday(), DBSetup().create_empty_gameday(),
-                        DBSetup().create_empty_gameday()]
+        for i in range(3):
+            DBSetup().create_empty_gameday()
+        # YYYY-MM-DD
+        today = datetime.today().strftime('%Y-%m-%d')
+        Gameday.objects.filter(id__lt=3).update(date=today)
         response = self.app.get(reverse('api-gameday-list'))
         assert response.status_code == HTTPStatus.OK
-        assert len(response.json) == len(all_gamedays)
+        assert len(response.json) == 2
 
 
 class TestGamedayRetrieveUpdate(WebTest):
