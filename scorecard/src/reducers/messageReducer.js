@@ -1,4 +1,4 @@
-import {GET_ERRORS} from '../actions/types';
+import {GET_ERRORS, MESSAGE_GAME_LOG} from '../actions/types';
 
 const initialState = {
   msg: {},
@@ -12,6 +12,13 @@ export default (state = initialState, action) => {
         msg: action.payload.msg,
         status: action.payload.status,
       };
+    case MESSAGE_GAME_LOG: {
+      console.log(MESSAGE_GAME_LOG, action.payload, 200);
+      return {
+        msg: action.payload,
+        status: 200,
+      };
+    }
     default:
       return state;
   }

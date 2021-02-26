@@ -10,6 +10,7 @@ export const apiPost = (url, body, successType, errorType) => async (
   await axios
       .post(url, body, header)
       .then((res) => {
+        console.log('api dispatch', successType, res.data);
         dispatch({
           type: successType,
           payload: res.data,
@@ -32,6 +33,7 @@ export const apiDelete = (url, body, successType, errorType) => async (
   await axios
       .delete(url, {...header, data: body})
       .then((res) => {
+        console.log('api delete', successType, res.data);
         dispatch({
           type: successType,
           payload: res.data,

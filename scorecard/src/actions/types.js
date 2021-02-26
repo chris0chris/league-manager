@@ -15,6 +15,7 @@ export const GAME_SETUP_FAIL = 'GAME_SETUP_FAIL';
 export const GAME_SETUP_SUCCESS = 'GAME_SETUP_SUCCESS';
 export const GET_GAMEDAYS = 'GET_GAMEDAYS';
 export const GET_GAMES = 'GET_GAMES';
+export const MESSAGE_GAME_LOG = 'MESSAGE_GAME_LOG';
 export const SET_SELECTED_GAME = 'SET_SELECTED_GAME';
 export const GET_ERRORS = 'GET_ERRORS';
 export const USER_LOADING = 'USER_LOADING';

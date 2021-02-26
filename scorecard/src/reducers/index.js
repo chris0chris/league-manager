@@ -1,12 +1,12 @@
 import {combineReducers} from 'redux';
 import gamedays from './gamedaysReducer';
-import errors from './errorsReducer';
+import message from './messageReducer';
 import auth from './authReducer';
 import games from './gamesReducer';
 
 export default combineReducers({
   gamedaysReducer: gamedays,
   gamesReducer: games,
-  errorsReducer: errors,
+  messageReducer: message,
   authReducer: auth,
 });

@@ -37,7 +37,7 @@ const SelectGame = (props) => {
     return <Redirect to={OFFICIALS_URL} />;
   }
   return (
-    <div className="row">
+    <div>
       <Gamedays gamedays={props.gamedays} onClick={loadGamesForGameday} />
       {gamesForGamedayLoaded &&
       <Games games={props.games}

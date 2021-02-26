@@ -6,3 +6,10 @@ export const returnErrors = (msg, status) => {
     payload: {msg, status},
   };
 };
+
+export const sendMessage = (type, payload) => (dispatch) => {
+  dispatch({
+    type: type,
+    payload: payload,
+  });
+};

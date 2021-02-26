@@ -24,6 +24,7 @@ import SelectGame from './scorecard/SelectGame';
 import Officials from './scorecard/Officials';
 import Details from './scorecard/Details';
 import Finalize from './scorecard/Finalize';
+import MessageToaster from './scorecard/MessageToaster';
 
 const App = (props) => {
   useEffect(() => {
@@ -40,6 +41,9 @@ const App = (props) => {
             <PrivateRoute exact path={FINALIZE_URL} component={Finalize} />
             <Route exact path={LOGIN_URL} component={Login} />
           </Switch>
+        </div>
+        <div className="row">
+          <MessageToaster />
         </div>
       </div>
       <div className="container my-1 py-4">
