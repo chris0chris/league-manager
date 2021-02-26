@@ -1,38 +1,42 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {FaCheck, FaInfo} from 'react-icons/fa';
+import {FaCheck, FaInfo, FaUserInjured} from 'react-icons/fa';
 import {connect} from 'react-redux';
 
 const MessageToaster = (props) => {
   const [duration, setDuration] = useState(3);
   const [timerIsOn, setTimerIsOn] = useState(false);
+  const [keepShowingToast, setKeepShowingToast] = useState(false);
   const timer = () => setDuration(duration - 1);
   useEffect(() => {
     if (!timerIsOn || duration <= 0) {
       setDuration(3);
       setTimerIsOn(false);
-      setShowToast(false);
+      setShowToast(keepShowingToast);
     } else if (timerIsOn) {
       const id = setInterval(timer, 1000);
       return () => clearInterval(id);
     }
   }, [duration, timerIsOn]);
   useEffect(() => {
-    console.log('props.msg', props.msg);
-    setShowToast(true),
-    setTimerIsOn(true);
+    if (props.status != null && props.status != 200) {
+      setKeepShowingToast(true);
+      setTimerIsOn(false);
+    } else {
+      setKeepShowingToast(false);
+      setTimerIsOn(true);
+    }
     setDuration(3);
+    setShowToast(true);
   }, [props.msg]);
   const [showToast, setShowToast] = useState(true);
-  console.log(props.status, props.status==200);
   return (
     <div className="container">
-      <button type="button" className="btn btn-primary" id="liveToastBtn" onClick={() => {
-        setShowToast(!showToast); setTimerIsOn(true);
-      }}>Show live toast</button>
       {props.status != null &&
-      <div className="position-fixed bottom-0 start-50 translate-middle-x mb-2" style={{zIndex: 10000}}>
-        <div id="liveToast" className={`toast ${showToast ? 'show' : 'hide'}`} role="alert" aria-live="assertive" aria-atomic="true">
+      <div className="position-fixed bottom-0 start-50 translate-middle-x mb-2"
+        style={{zIndex: 10000}}>
+        <div className={`toast ${showToast ? 'show' : 'hide'}`}
+          role="alert" aria-live="assertive" aria-atomic="true">
           {props.status == 200 &&
           <>
             <div className="toast-header bg-success text-white">
@@ -45,13 +49,22 @@ const MessageToaster = (props) => {
             </div>
             <div className="toast-body">
               Eintrag gespeichert <FaCheck />
-            </div></>
-          }
+            </div>
+          </>}
           {props.status != 200 &&
-          <div>Error!</div>
-          }
-
-
+          <>
+            <div className="toast-header bg-danger text-white">
+              <FaUserInjured className="me-2"/>
+              <strong className="me-auto">Fehler</strong>
+              <button type="button" className="btn-close" onClick={() => {
+                setShowToast(!showToast); setTimerIsOn(false)
+                ;
+              }} aria-label="Close"></button>
+            </div>
+            <div className="toast-body">
+              {JSON.stringify(props.msg)}
+            </div>
+          </>}
         </div>
       </div>}
     </div>
@@ -59,7 +72,8 @@ const MessageToaster = (props) => {
 };
 
 MessageToaster.propTypes = {
-
+  msg: PropTypes.any.isRequired,
+  status: PropTypes.number,
 };
 
 const mapStateToProps = (state) => ({

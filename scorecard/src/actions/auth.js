@@ -23,7 +23,7 @@ export const loadUser = () => async (dispatch, getState) => {
         });
       })
       .catch((err) => {
-        dispatch(returnErrors(err.response.data, err.response.status));
+        dispatch(returnErrors(err.response.data.detail, err.response.status));
         dispatch({
           type: AUTH_ERROR,
         });
@@ -67,7 +67,7 @@ export const logoutUser = () => async (dispatch, getState) => {
         });
       })
       .catch((err) => {
-        dispatch(returnErrors(err.response.data, err.response.status));
+        dispatch(returnErrors(err.response.data.detail, err.response.status));
         dispatch({
           type: AUTH_ERROR,
         });

@@ -1,7 +1,5 @@
-/* eslint-disable max-len */
 import React from 'react';
 import {render, screen} from '@testing-library/react';
-import {GAME_LOG_COMPLETE_GAME} from '../../../__tests__/testdata/gameLogData';
 import MessageToaster from '../MessageToaster';
 import {testStore} from '../../../__tests__/Utils';
 
@@ -20,5 +18,9 @@ describe('MessageToaster component', () => {
   it('should render correct', () => {
     setup();
     expect(screen.getByText('Eintrag gespeichert')).toBeInTheDocument();
+  });
+  it('should render for error status', () => {
+    setup(400);
+    expect(screen.getByText('Fehler')).toBeInTheDocument();
   });
 });
