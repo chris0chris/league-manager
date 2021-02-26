@@ -15,6 +15,11 @@ const Gamedays = ({gamedays, onClick: emitEvent}) => {
           </tr>
         </thead>
         <tbody>
+          {gamedays.length == 0 &&
+            <tr className="text-center fw-bold">
+              <td colSpan="3">Keine Spieltage verfügbar</td>
+            </tr>
+          }
           {gamedays.map((gameday) => (
             <tr
               key={gameday.id}
