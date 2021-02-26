@@ -33,9 +33,11 @@ const Details = (props) => {
   const handleSwitch = () => {
     setDisplaybothTeamLogs(!displayBothTeamLogs);
   };
-  const handleHalftime = (isFirstHalfOver) => {
+  const handleHalftime = (isFirstHalfOver, teamName) => {
     if (isFirstHalfOver) {
       setHalf(2);
+      teamName == gameLog.home.name ? setShowHomeLog(true) : setShowHomeLog(false);
+      setTeamInPossession(teamName);
       props.halftime(gameLog.gameId, {});
     } else {
       setIsFinal(true);
@@ -43,7 +45,6 @@ const Details = (props) => {
   };
   const updateTeam = (teamName) => {
     setTeamInPossession(teamName);
-    setShowHomeLog(true);
   };
   const createLogEntry = (event) => {
     props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, 'half': half, event});
@@ -114,7 +115,7 @@ const Details = (props) => {
         </div>
       </div>
       <AddPoints onSubmit={createLogEntry} />
-      <Halftime gameLog={gameLog} isFirstHalf={gameLog.isFirstHalf && half == 1} onSubmit={handleHalftime} />
+      <Halftime {...props} gameLog={gameLog} isFirstHalf={gameLog.isFirstHalf && half == 1} onSubmit={handleHalftime} />
       <div className="row mt-3 text-secondary">
         { (displayBothTeamLogs || showHomeLog) &&
         <div className="col text-center">Einträge Heim</div>}

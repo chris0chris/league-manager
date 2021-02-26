@@ -5,7 +5,7 @@ import {HashRouter as Router, Route} from 'react-router-dom';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import {apiPost, apiPut} from '../../../actions/utils/api';
+import {apiGet, apiPost, apiPut} from '../../../actions/utils/api';
 import Details from '../Details';
 import {GAME_LOG_COMPLETE_GAME, GAME_LOG_ONLY_FIRSTHALF} from '../../../__tests__/testdata/gameLogData';
 import $ from 'jquery/src/jquery';
@@ -24,6 +24,9 @@ apiPost.mockImplementation(() => {
 apiPut.mockImplementation(() => {
   return () => {};
 });
+apiGet.mockImplementation(() => {
+  return () => {};
+});
 
 const setup = (gameLog = GAME_LOG_COMPLETE_GAME) => {
   apiPost.mockClear();
@@ -31,6 +34,11 @@ const setup = (gameLog = GAME_LOG_COMPLETE_GAME) => {
     gamesReducer: {
       gameLog: gameLog,
       deleteEntry: {__html: ''},
+      gameSetup: {
+        ctResult: '',
+        direction: '',
+        fhPossession: '',
+      },
     },
   };
   const store = testStore(initialState);
