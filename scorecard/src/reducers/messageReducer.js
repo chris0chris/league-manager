@@ -13,7 +13,6 @@ export default (state = initialState, action) => {
         status: action.payload.status,
       };
     case MESSAGE_GAME_LOG: {
-      console.log(MESSAGE_GAME_LOG, action.payload, 200);
       return {
         msg: action.payload,
         status: 200,
