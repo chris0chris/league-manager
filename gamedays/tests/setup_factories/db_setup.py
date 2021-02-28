@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User
+
 from gamedays.models import Gameday, Gameinfo
 from gamedays.tests.setup_factories.factories import GameinfoFactory, GameresultFactory, GamedayFactory, \
     GameOfficialFactory, TeamLogFactory, GameSetupFactory
@@ -147,3 +149,11 @@ class DBSetup:
 
     def create_gamesetup(self, gameinfo):
         return GameSetupFactory(gameinfo=gameinfo, ctResult='won', direction='arrow_forward', fhPossession='AWAY')
+
+    def get_token_header(self):
+        from knox.models import AuthToken
+        token = AuthToken.objects.create(User.objects.first())
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': 'Token ' + token[1],
+        }
