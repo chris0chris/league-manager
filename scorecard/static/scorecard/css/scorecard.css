@@ -1,62 +1,22 @@
-#manualEntry {
-  margin-top: 10px;
-}
-
-button[name="timeout"] {
-  padding: 0px;
+#formCheck.uncheck {
+  background-position: left;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  transition: background-color 0.15s ease-in-out,
+    background-position 0.15s ease-in-out, border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
 }
 
 .timer {
-  text-align: center;
-}
-
-#timer > div {
-  display: inline-block;
-  line-height: 1;
   font-size: 40px;
-  margin: 10px;
+  font-weight: 700 !important;
 }
 
-#timer > div > span {
-  display: block;
+.sub-timer {
+  color: #6c757d !important;
   font-size: 20px;
-  color: black;
 }
 
-.btn-block {
-  width: 100%;
-}
-
-.col.s2 > .card-panel {
-  padding: 2px;
-  text-align: center;
-}
-
-.row {
-  margin-bottom: 0px;
-}
-
-th,
-td {
-  padding: 9px 3px;
-  text-align: center;
-}
-
-[type="radio"]:not(:checked) + span,
-[type="radio"]:checked + span {
-  line-height: 35px;
-  height: 100%;
-  padding: 0px;
-  border: medium solid #26a69a;
-}
-
-[type="radio"] + span:before,
-[type="radio"] + span:after {
-  content: none;
-}
-
-[type="radio"]:not(:checked) + span {
-  border: medium solid #26a69a;
-  background-color: white;
-  color: black;
+.timeout {
+  padding: 6px;
 }
