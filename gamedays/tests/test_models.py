@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from gamedays.models import GameOfficial, Gameinfo, TeamLog
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from teammanager.models import Gameinfo, GameOfficial, TeamLog, Team
 
 
 class TestGameOfficials(TestCase):
@@ -18,33 +18,37 @@ class TestGameOfficials(TestCase):
 class TestTeamlog(TestCase):
     def test_save_score(self):
         DBSetup().g62_status_empty()
-        teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname",
+        team = Team.objects.first()
+        teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team=team,
                           sequence=1, event="td", player=19, value=6, half=1)
         teamlog.save()
         assert len(TeamLog.objects.all()) == 1
-        assert str(teamlog) == '1__Teamname#1 Player: 19 Value: 6 - Half: 1'
+        assert str(teamlog) == '1__A1#1 Player: 19 Value: 6 - Half: 1'
 
     def test_save_PAT_no_good(self):
         DBSetup().g62_status_empty()
-        teamlog: TeamLog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname", sequence=1,
+        team = Team.objects.first()
+        teamlog: TeamLog = TeamLog(gameinfo=Gameinfo.objects.first(), team=team, sequence=1,
                                    event='pat1', value=0, half=1)
         teamlog.save()
         assert len(TeamLog.objects.all()) == 1
 
     def test_save_with_change_of_possession(self):
         DBSetup().g62_status_empty()
-        teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname", sequence=1, cop=True, half=2)
+        team = Team.objects.first()
+        teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team=team, sequence=1, cop=True, half=2)
         teamlog.save()
         assert len(TeamLog.objects.all()) == 1
-        assert str(teamlog) == '1__Teamname#1 CoP: True - Half: 2'
+        assert str(teamlog) == '1__A1#1 CoP: True - Half: 2'
 
     def test_score_is_marked_as_deleted(self):
         DBSetup().g62_status_empty()
-        teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname",
+        team = Team.objects.first()
+        teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team=team,
                           sequence=1, event="td", player=19, value=6, half=1, isDeleted=True)
         teamlog.save()
-        assert str(teamlog) == '1__Teamname#1 Player: 19 Value: 6 - Half: 1 [DELETED]'
+        assert str(teamlog) == '1__A1#1 Player: 19 Value: 6 - Half: 1 [DELETED]'
         teamlog = TeamLog(gameinfo=Gameinfo.objects.first(), team="Teamname", sequence=2, cop=True,
                           half=2, isDeleted=True)
         teamlog.save()
-        assert str(teamlog) == '1__Teamname#2 CoP: True - Half: 2 [DELETED]'
+        assert str(teamlog) == '1__A1#2 CoP: True - Half: 2 [DELETED]'

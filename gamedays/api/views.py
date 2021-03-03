@@ -10,9 +10,9 @@ from rest_framework.views import APIView
 
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, GameOfficialSerializer, GameSetupSerializer, \
     GameFinalizer
-from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
 from gamedays.service.game_service import GameService
 from gamedays.service.gameday_service import GamedayService
+from teammanager.models import Gameday, Gameinfo, GameOfficial, GameSetup
 
 
 class GamedayListAPIView(ListAPIView):

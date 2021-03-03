@@ -2,8 +2,8 @@ import json
 import pathlib
 from abc import ABC, abstractmethod
 
-from gamedays.models import Gameinfo, Gameresult
 from gamedays.service.model_wrapper import GamedayModelWrapper
+from teammanager.models import Gameinfo, Gameresult
 
 
 class Abstract(ABC):

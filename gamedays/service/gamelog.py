@@ -2,7 +2,7 @@ import json
 
 from django.db.models import QuerySet
 
-from gamedays.models import Gameresult, TeamLog
+from teammanager.models import Gameresult, TeamLog
 
 
 class GameLogCreator(object):

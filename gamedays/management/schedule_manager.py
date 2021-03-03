@@ -1,7 +1,7 @@
 import json
 import pathlib
 
-from gamedays.models import Gameinfo, Gameday, Gameresult
+from teammanager.models import Gameday, Gameinfo, Gameresult
 
 
 class ScheduleEntry:

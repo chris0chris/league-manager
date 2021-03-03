@@ -2,9 +2,9 @@ import re
 
 from django.test import TestCase
 
-from gamedays.models import Gameinfo
 from gamedays.service.wrapper.gameinfo_wrapper import GameinfoWrapper
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from teammanager.models import Gameinfo
 
 
 class TestGameinfoWrapper(TestCase):

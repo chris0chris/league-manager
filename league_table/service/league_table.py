@@ -1,11 +1,11 @@
+import datetime
 import json
 
 import pandas as pd
-import datetime
 
-from gamedays.models import Gameday, Gameinfo
 from gamedays.service.gameday_settings import TEAM, PF, POINTS, PA, DIFF
 from gamedays.service.model_wrapper import GamedayModelWrapper
+from teammanager.models import Gameday, Gameinfo
 
 
 class LeagueTable:

@@ -3,7 +3,7 @@ from datetime import datetime
 from gspread_pandas import Spread
 from pandas import DataFrame
 
-from gamedays.models import Gameday
+from teammanager.models import Gameday
 from .SpreadsheetWrapper import SpreadsheetWrapper
 
 HOME = 'Heim'

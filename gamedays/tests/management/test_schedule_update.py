@@ -4,8 +4,8 @@ from unittest.mock import patch, MagicMock
 from django.test import TestCase
 
 from gamedays.management.schedule_update import ScheduleUpdate, UpdateGameEntry, UpdateEntry
-from gamedays.models import Gameresult, Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from teammanager.models import Gameinfo, Gameresult
 
 
 class TestScheduleUpdate(TestCase):

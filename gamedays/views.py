@@ -6,8 +6,8 @@ from django.views import View
 from django.views.generic import ListView, DetailView, UpdateView, CreateView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule
+from teammanager.models import Gameday
 from .forms import GamedayCreateForm, GamedayUpdateForm
-from .models import Gameday
 from .service.GamedaySpreadsheetService import GamedaySpreadsheetService
 from .service.gameday_service import GamedayService
 
@@ -38,6 +38,7 @@ class GamedayListView(ListView):
 
 class GamedayDetailView(DetailView):
     model = Gameday
+    template_name = 'gamedays/gameday_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super(GamedayDetailView, self).get_context_data()

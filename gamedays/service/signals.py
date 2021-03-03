@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from gamedays.management.schedule_update import ScheduleUpdate
-from gamedays.models import Gameinfo
+from teammanager.models import Gameinfo
 
 FINISHED = 'beendet'
 

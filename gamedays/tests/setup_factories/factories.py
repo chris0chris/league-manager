@@ -3,7 +3,23 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from factory.django import DjangoModelFactory
 
-from gamedays.models import Gameday, Gameinfo, Gameresult, GameOfficial, TeamLog, GameSetup
+from teammanager.models import Team, Gameday, Gameinfo, Gameresult, GameOfficial, GameSetup, TeamLog, Division
+
+
+class DivisionFactory(DjangoModelFactory):
+    class Meta:
+        model = Division
+        django_get_or_create = ('name',)
+
+    name = 'division_name'
+    region = 'region'
+
+
+class TeamFactory(DjangoModelFactory):
+    class Meta:
+        model = Team
+
+    division = factory.SubFactory(DivisionFactory)
 
 
 class GameOfficialFactory(DjangoModelFactory):
@@ -39,8 +55,9 @@ class GameinfoFactory(DjangoModelFactory):
 
     gameday = factory.SubFactory(GamedayFactory)
     scheduled = '10:00'
-    officials = 'officials'
+    officials = factory.SubFactory(TeamFactory)
     field = 1
+
 
 
 class GameresultFactory(DjangoModelFactory):
@@ -48,6 +65,7 @@ class GameresultFactory(DjangoModelFactory):
         model = Gameresult
 
     gameinfo = factory.SubFactory(GameinfoFactory)
+    team = factory.SubFactory(TeamFactory)
 
 
 class TeamLogFactory(DjangoModelFactory):
@@ -62,3 +80,4 @@ class GameSetupFactory(DjangoModelFactory):
         model = GameSetup
 
     gameinfo = factory.SubFactory(GameinfoFactory)
+

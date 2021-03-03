@@ -1,7 +1,7 @@
-from gamedays.models import Gameinfo
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS, STAGE, STANDING, HOME, POINTS_HOME, \
     POINTS_AWAY, AWAY, STATUS, ID_HOME
 from gamedays.service.model_wrapper import GamedayModelWrapper
+from teammanager.models import Gameinfo
 
 EMPTY_DATA = '[]'
 

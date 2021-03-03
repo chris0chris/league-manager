@@ -7,9 +7,9 @@ from django_webtest import WebTest
 from django_webtest.response import DjangoWebtestResponse
 from webtest.forms import Form
 
-from gamedays.models import Gameday, Gameinfo, Gameresult
 from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from teammanager.models import Gameday, Gameinfo, Gameresult
 
 
 class TestGamedayCreateView(WebTest):

@@ -4,9 +4,9 @@ import pandas as pd
 from django.test import TestCase
 from pandas.testing import assert_frame_equal
 
-from gamedays.models import Gameinfo
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from teammanager.models import Gameinfo
 
 
 def get_df_from_json(filename):

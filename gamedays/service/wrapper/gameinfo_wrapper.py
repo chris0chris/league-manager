@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from gamedays.models import Gameinfo
+from teammanager.models import Gameinfo
 
 
 class GameinfoWrapper(object):

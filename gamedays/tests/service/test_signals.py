@@ -3,8 +3,8 @@ from unittest.mock import patch
 from django.test import TestCase
 
 from gamedays.management.schedule_update import ScheduleUpdate
-from gamedays.models import Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from teammanager.models import Gameinfo
 
 
 class TestSignals(TestCase):

@@ -3,9 +3,9 @@ import pathlib
 
 from django.test import TestCase
 
-from gamedays.models import Gameinfo, Gameresult, TeamLog
 from gamedays.service.gamelog import GameLog, GameLogObject, GameLogEncoder, GameLogCreator
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from teammanager.models import Gameinfo, Gameresult, TeamLog
 
 
 class TestGamelog(TestCase):

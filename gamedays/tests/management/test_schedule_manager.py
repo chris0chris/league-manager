@@ -1,8 +1,8 @@
 from django.test import TestCase
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, ScheduleEntry
-from gamedays.models import Gameinfo, Gameday, Gameresult
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from teammanager.models import Gameday, Gameinfo, Gameresult
 
 
 class TestSchedule:

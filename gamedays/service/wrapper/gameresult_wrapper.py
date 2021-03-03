@@ -1,4 +1,4 @@
-from gamedays.models import Gameresult
+from teammanager.models import Gameresult
 
 
 class GameresultWrapper(object):
