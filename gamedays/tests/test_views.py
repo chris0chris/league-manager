@@ -69,9 +69,12 @@ class TestGamedayUpdateView(WebTest):
 
     def test_creates_schedule(self):
         assert not Gameinfo.objects.filter(gameday_id=self.gameday_id).exists()
+        DBSetup().create_playoff_placeholder_teams()
+        DBSetup().create_teams('A', 3)
+        DBSetup().create_teams('B', 3)
         form = self.form
-        form['group1'] = 'Team A, Team B, Team C'
-        form['group2'] = 'Team D, Team E, Team F'
+        form['group1'] = 'A1, A2, A3'
+        form['group2'] = 'B1, B2, B3'
         resp = form.submit().follow()
         assert resp.status_code == HTTPStatus.OK
         assert resp.request.path == reverse('league-gameday-detail', args=[self.gameday_id])
@@ -79,7 +82,7 @@ class TestGamedayUpdateView(WebTest):
         assert gameinfo_set.count() == 11
         gameresult_set = Gameresult.objects.filter(gameinfo_id=gameinfo_set.first().pk)
         assert gameresult_set.count() == 2
-        assert gameresult_set[1].team == 'Team B'
+        assert gameresult_set[1].team.name == 'A2'
 
     def test_handle_non_existent_schedule_creation(self):
         form = self.form

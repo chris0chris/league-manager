@@ -21,7 +21,9 @@ class DBSetup:
 
     def g72_finished(self, date=''):
         gameday = self._create_gameday(group_a=4, sf='beendet', p5='beendet', p3='beendet', p1='beendet', date=date)
-        self.create_finalround_game(gameday, standing='P5', status='beendet', home='A4', away='B3')
+        home = TeamFactory(name='A4', description='Description', place='place')
+        away = TeamFactory(name='B3', description='Description', place='place')
+        self.create_finalround_game(gameday, standing='P5', status='beendet', home=home, away=away)
         return gameday
 
     def _create_gameday(self, qualify='beendet', sf='', p5='', p3='', p1='', group_a=3, group_b=3, date='') -> Gameday:
@@ -43,9 +45,8 @@ class DBSetup:
         return gameday
 
     def create_group(self, gameday, name, standing, stage='Vorrunde', status='beendet', number_teams=3):
-        teams = []
-        for i in range(number_teams):
-            teams.append(TeamFactory(name=(name + str(i + 1)), description='Description', place='place'))
+        official = TeamFactory(name='officials', description='Description', place='Place')
+        teams = self.create_teams(name, number_teams)
         # teams = [name + str(team) for team in range(number_teams)]
         # if len(teams) % 2:
         #     teams.append('Day off')
@@ -66,39 +67,58 @@ class DBSetup:
         # for fixture in fixtures:
         #     print(fixture)
 
-        gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status)
+        gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
         GameresultFactory(gameinfo=gi, team=teams[0], fh=2, sh=1, pa=2, isHome=True)
         GameresultFactory(gameinfo=gi, team=teams[1], fh=1, sh=1, pa=3)
-        gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status)
+        gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
         GameresultFactory(gameinfo=gi, team=teams[1], fh=1, sh=1, pa=1, isHome=True)
         GameresultFactory(gameinfo=gi, team=teams[2], fh=1, sh=0, pa=2)
-        gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status)
+        gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
         GameresultFactory(gameinfo=gi, team=teams[2], fh=1, sh=0, pa=3, isHome=True)
         GameresultFactory(gameinfo=gi, team=teams[0], fh=2, sh=1, pa=1)
         if number_teams > 3:
-            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status)
+            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
             GameresultFactory(gameinfo=gi, team=teams[3], fh=0, sh=0, pa=3, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[0], fh=2, sh=1, pa=0)
-            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status)
+            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
             GameresultFactory(gameinfo=gi, team=teams[1], fh=1, sh=1, pa=0, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[3], fh=0, sh=0, pa=2)
-            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status)
+            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
             GameresultFactory(gameinfo=gi, team=teams[3], fh=0, sh=0, pa=1, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[2], fh=1, sh=0, pa=0)
         if number_teams > 4:
-            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status)
+            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
             GameresultFactory(gameinfo=gi, team=teams[4], fh=0, sh=0, pa=3, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[0], fh=2, sh=1, pa=0)
-            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status)
+            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
             GameresultFactory(gameinfo=gi, team=teams[1], fh=1, sh=1, pa=0, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[4], fh=0, sh=0, pa=2)
-            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status)
+            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
             GameresultFactory(gameinfo=gi, team=teams[4], fh=0, sh=0, pa=1, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[2], fh=1, sh=0, pa=0)
-            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status)
+            gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
             GameresultFactory(gameinfo=gi, team=teams[3], fh=1, sh=0, pa=0, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[4], fh=0, sh=0, pa=1)
         return teams
+
+    def create_teams(self, name, number_teams):
+        teams = []
+        for i in range(number_teams):
+            teams.append(TeamFactory(name=(name + str(i + 1))))
+        return teams
+
+    def create_playoff_placeholder_teams(self):
+        TeamFactory(name='P3 Gruppe 2')
+        TeamFactory(name='P3 Gruppe 1')
+        TeamFactory(name='P2 Gruppe 2')
+        TeamFactory(name='P2 Gruppe 1')
+        TeamFactory(name='P1 Gruppe 2')
+        TeamFactory(name='P1 Gruppe 1')
+        TeamFactory(name='Gewinner HF1')
+        TeamFactory(name='Gewinner HF2')
+        TeamFactory(name='Gewinner P3')
+        TeamFactory(name='Verlierer HF1')
+        TeamFactory(name='Verlierer HF2')
 
     def create_finalround_game(self, gameday, standing, status, home, away):
         if status == 'beendet':
@@ -130,7 +150,11 @@ class DBSetup:
         for position in officials_positions:
             GameOfficialFactory(gameinfo=gameinfo, position=position)
 
-    def create_teamlog_home_and_away(self, home='Home', away='Away') -> Gameinfo:
+    def create_teamlog_home_and_away(self, home=None, away=None) -> Gameinfo:
+        if home is None:
+            home = TeamFactory(name='Home')
+        if away is None:
+            away = TeamFactory(name='Away')
         # score home: 21 + 21 and cop - change of possession
         # score away: 3 and 2 cop
         gameday = GamedayFactory()

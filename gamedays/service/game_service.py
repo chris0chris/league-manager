@@ -1,6 +1,7 @@
 from gamedays.service.gamelog import GameLog, GameLogCreator
 from gamedays.service.wrapper.gameinfo_wrapper import GameinfoWrapper
 from gamedays.service.wrapper.gameresult_wrapper import GameresultWrapper
+from teammanager.models import Team
 
 
 class GameService(object):
@@ -20,7 +21,9 @@ class GameService(object):
     def get_gamelog(self):
         return GameLog(self.gameinfo.gameinfo)
 
-    def create_gamelog(self, team, event, half):
+    def create_gamelog(self, team_name, event, half):
+        # ToDo extract to TeamWrapper
+        team = Team.objects.get(name=team_name)
         gamelog = GameLogCreator(self.gameinfo.gameinfo, team, event, half)
         return gamelog.create()
 

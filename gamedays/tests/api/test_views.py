@@ -382,14 +382,15 @@ class TestGamesToWhistleAPIView(WebTest):
     def test_get_games_to_whistle_for_specific_team(self):
         gameday = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(id=1).update(gameFinished='13:00')
-        Gameinfo.objects.filter(id=2).update(officials='differentTeam')
+        Gameinfo.objects.filter(id=2).update(officials=2)
         response = self.app.get(reverse('api-gameday-whistlegames', kwargs={'pk': gameday.pk, 'team': 'officials'})
                                 , headers=DBSetup().get_token_header())
         assert len(response.json) == 4
 
     def test_get_all_games_to_whistle_for_all_teams(self):
         gameday = DBSetup().g62_status_empty()
+
         Gameinfo.objects.filter(id=1).update(gameFinished='13:00')
-        Gameinfo.objects.filter(id=2).update(officials='differentTeam')
+        Gameinfo.objects.filter(id=2).update(officials=2)
         response = self.app.get(reverse('api-gameday-whistlegames', kwargs={'pk': gameday.pk, 'team': '*'}))
         assert len(response.json) == 10

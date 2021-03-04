@@ -137,10 +137,10 @@
       "Officials": "",
       "Runde": "Finalrunde",
       "Platz": "HF",
-      "Heim": "HF_home",
+      "Heim": "B2",
       "Punkte Heim": "",
       "Punkte Gast": "",
-      "Gast": "HF_away",
+      "Gast": "A1",
       "Status": ""
     },
     {
@@ -150,10 +150,10 @@
       "Officials": "",
       "Runde": "Finalrunde",
       "Platz": "HF",
-      "Heim": "HF_home",
+      "Heim": "A2",
       "Punkte Heim": "",
       "Punkte Gast": "",
-      "Gast": "HF_away",
+      "Gast": "B1",
       "Status": ""
     },
     {
@@ -163,10 +163,10 @@
       "Officials": "",
       "Runde": "Finalrunde",
       "Platz": "P5",
-      "Heim": "P5_home",
+      "Heim": "A3",
       "Punkte Heim": "",
       "Punkte Gast": "",
-      "Gast": "P5_away",
+      "Gast": "B3",
       "Status": ""
     },
     {
@@ -176,10 +176,10 @@
       "Officials": "",
       "Runde": "Finalrunde",
       "Platz": "P3",
-      "Heim": "P3_home",
+      "Heim": "B2",
       "Punkte Heim": "",
       "Punkte Gast": "",
-      "Gast": "P3_away",
+      "Gast": "A2",
       "Status": ""
     },
     {
@@ -189,10 +189,10 @@
       "Officials": "",
       "Runde": "Finalrunde",
       "Platz": "P1",
-      "Heim": "P1_home",
+      "Heim": "A1",
       "Punkte Heim": "",
       "Punkte Gast": "",
-      "Gast": "P1_away",
+      "Gast": "B1",
       "Status": ""
     }
   ]

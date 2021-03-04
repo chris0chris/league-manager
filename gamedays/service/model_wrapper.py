@@ -39,12 +39,15 @@ SCHEDULE_API_HEADERS = {
 class GamedayModelWrapper:
 
     def __init__(self, pk):
-        self._gameinfo: DataFrame = pd.DataFrame(Gameinfo.objects.filter(gameday_id=pk).values())
+        self._gameinfo: DataFrame = pd.DataFrame(Gameinfo.objects.filter(gameday_id=pk).values(
+            *([f.name for f in Gameinfo._meta.local_fields] + ['officials__name'])))
         if self._gameinfo.empty:
             raise Gameinfo.DoesNotExist
 
-        gameresult = pd.DataFrame(Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id'].to_numpy()).values())
-        games_with_result = pd.merge(self._gameinfo, gameresult, left_on='id', right_on='gameinfo_id')
+        gameresult = pd.DataFrame(Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id']).values(
+            *([f.name for f in Gameresult._meta.local_fields] + ['team__name'])))
+        games_with_result = pd.merge(self._gameinfo, gameresult, left_on='id', right_on=GAMEINFO_ID)
+        # ', '.join([f.name for f in Gameresult._meta.local_fields]) + ', team__name'
         games_with_result = games_with_result.convert_dtypes()
         games_with_result = games_with_result.astype({FH: 'object', SH: 'object', PA: 'object'})
         games_with_result[PF] = games_with_result[FH] + games_with_result[SH]
@@ -102,7 +105,7 @@ class GamedayModelWrapper:
                 p5 = schedule[schedule[STANDING] == 'P5']
                 games_for_fith_place = pd.concat([third_vs_fourth_group1, p5])
                 table_fith_place = self._games_with_result[
-                    self._games_with_result['gameinfo_id'].isin(games_for_fith_place['gameinfo_id'].values)]
+                    self._games_with_result[GAMEINFO_ID].isin(games_for_fith_place[GAMEINFO_ID].values)]
                 table_fith_place = table_fith_place.groupby([TEAM], as_index=False)
                 table_fith_place = table_fith_place.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
                 table_fith_place = table_fith_place.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
@@ -123,8 +126,8 @@ class GamedayModelWrapper:
         return final_standing
 
     def _get_schedule(self):
-        home_teams = self._games_with_result.groupby('gameinfo_id').nth(0).reset_index()
-        away_teams = self._games_with_result.groupby('gameinfo_id').nth(1).reset_index()
+        home_teams = self._games_with_result.groupby(GAMEINFO_ID).nth(0).reset_index()
+        away_teams = self._games_with_result.groupby(GAMEINFO_ID).nth(1).reset_index()
         home_teams = home_teams.rename(columns={TEAM: HOME, PF: POINTS_HOME, ID_Y: ID_HOME})
         away_teams = away_teams.rename(columns={TEAM: AWAY, PF: POINTS_AWAY, ID_Y: ID_AWAY})
         away_teams = away_teams[[ID_AWAY, POINTS_AWAY, AWAY]]

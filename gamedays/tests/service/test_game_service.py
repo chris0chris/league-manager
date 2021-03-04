@@ -5,7 +5,7 @@ from django.test import TestCase
 from gamedays.service.game_service import GameService
 from gamedays.service.gamelog import GameLog
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo, Gameresult
+from teammanager.models import Gameinfo, Gameresult, Team
 
 
 class TestGameService(TestCase):
@@ -42,18 +42,20 @@ class TestGameService(TestCase):
 
     def test_update_score(self):
         DBSetup().g62_status_empty()
-        game = DBSetup().create_teamlog_home_and_away(home='A1', away='A2')
+        team_A1 = Team.objects.get(name='A1')
+        team_A2 = Team.objects.get(name='A2')
+        game = DBSetup().create_teamlog_home_and_away(home=team_A1, away=team_A2)
         gamelog = GameLog(game)
         game_service = GameService(game.pk)
         game_service.update_score(gamelog)
-        assert Gameresult.objects.get(gameinfo=game, team='A1').fh == 21
-        assert Gameresult.objects.get(gameinfo=game, team='A1').sh == 21
-        assert Gameresult.objects.get(gameinfo=game, team='A2').fh == 0
-        assert Gameresult.objects.get(gameinfo=game, team='A2').sh == 3
+        assert Gameresult.objects.get(gameinfo=game, team=team_A1).fh == 21
+        assert Gameresult.objects.get(gameinfo=game, team=team_A1).sh == 21
+        assert Gameresult.objects.get(gameinfo=game, team=team_A2).fh == 0
+        assert Gameresult.objects.get(gameinfo=game, team=team_A2).sh == 3
 
     def test_delete_entry(self):
         DBSetup().g62_status_empty()
-        game = DBSetup().create_teamlog_home_and_away(home='A1', away='A2')
+        game = DBSetup().create_teamlog_home_and_away()
         game_service = GameService(game.pk)
         gamelog = game_service.delete_gamelog(2)
         assert gamelog.get_home_score() == 34

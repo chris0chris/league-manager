@@ -3,7 +3,7 @@ import pathlib
 from abc import ABC, abstractmethod
 
 from gamedays.service.model_wrapper import GamedayModelWrapper
-from teammanager.models import Gameinfo, Gameresult
+from teammanager.models import Gameinfo, Gameresult, Team
 
 
 class Abstract(ABC):
@@ -66,7 +66,8 @@ class ScheduleUpdate:
         with open(pathlib.Path(__file__).parent / 'schedules/update_{0}.json'.format(format), 'r') as f:
             self.data = json.loads(f.read())
 
-    def _update_gameresult(self, gi, team, is_home):
+    def _update_gameresult(self, gi, teamName, is_home):
+        team = Team.objects.get(name=teamName)
         gameresult = Gameresult.objects.get(gameinfo=gi, isHome=is_home)
         gameresult.team = team
         gameresult.isHome = is_home
@@ -85,6 +86,8 @@ class ScheduleUpdate:
                     away = gmw.get_team_by(game.get_place('away'), game.get_standing('away'), game.get_points('away'))
                     self._update_gameresult(gi, away, False)
                     if gmw.is_finished(game.get_pre_finished('officials')):
-                        gi.officials = gmw.get_team_by(game.get_place('officials'), game.get_standing('officials'),
-                                                       game.get_points('officials'))
+                        officialsTeamName = gmw.get_team_by(game.get_place('officials'), game.get_standing('officials'),
+                                                            game.get_points('officials'))
+                        officials = Team.objects.get(name=officialsTeamName)
+                        gi.officials = officials
                         gi.save()

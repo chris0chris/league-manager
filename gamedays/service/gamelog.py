@@ -60,8 +60,8 @@ class GameLog(object):
 
     def __init__(self, gameinfo):
         self.gameinfo = gameinfo
-        home = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=True).team
-        away = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=False).team
+        home = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=True).team.name
+        away = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=False).team.name
         self.gamelog = GameLogObject(gameinfo.pk, home, away)
 
     def as_json(self):
@@ -109,7 +109,7 @@ class GameLog(object):
         return self.away_secondhalf_entries
 
     def _get_entries_for_team_and_half(self, team, half):
-        return TeamLog.objects.filter(gameinfo=self.gameinfo, team=team, half=half).order_by('-sequence')
+        return TeamLog.objects.filter(gameinfo=self.gameinfo, team__name=team, half=half).order_by('-sequence')
 
     def get_home_score(self):
         return self.get_home_firsthalf_score() + self.get_home_secondhalf_score()

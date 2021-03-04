@@ -5,15 +5,15 @@ from django.test import TestCase
 
 from gamedays.service.gamelog import GameLog, GameLogObject, GameLogEncoder, GameLogCreator
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo, Gameresult, TeamLog
+from teammanager.models import Gameinfo, Gameresult, TeamLog, Team
 
 
 class TestGamelog(TestCase):
     def test_get_home_and_away_team(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
         gamelog = GameLog(firstGameEntry)
-        home = Gameresult.objects.get(gameinfo=firstGameEntry, isHome=True).team
-        away = Gameresult.objects.get(gameinfo=firstGameEntry, isHome=False).team
+        home = Gameresult.objects.get(gameinfo=firstGameEntry, isHome=True).team.name
+        away = Gameresult.objects.get(gameinfo=firstGameEntry, isHome=False).team.name
         assert gamelog.get_home_team() == home
         assert gamelog.get_away_team() == away
 
@@ -66,8 +66,9 @@ class TestGamelog(TestCase):
     def test_create_entries(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
         gamelog = GameLog(firstGameEntry)
+
         assert gamelog.create_entries_for_half(
-            TeamLog.objects.filter(gameinfo=firstGameEntry, team='Home', half=1)) == [
+            TeamLog.objects.filter(gameinfo=firstGameEntry, team=1, half=1)) == [
                    {'sequence': 1, 'td': 19, },
                    {'sequence': 2, 'td': 19, 'pat2': 7, },
                    {'sequence': 3, 'td': 19, 'pat1': 7, }
@@ -90,7 +91,7 @@ class TestGamelog(TestCase):
         assert gamelog_list[0].isDeleted
         assert gamelog_list[1].isDeleted
         assert gamelog.create_entries_for_half(
-            TeamLog.objects.filter(gameinfo=gameinfo, team='Home', half=1)) == [
+            TeamLog.objects.filter(gameinfo=gameinfo, team=1, half=1)) == [
                    {'sequence': 1, 'td': 19, },
                    {'sequence': 2, 'td': 19, 'pat2': 7, 'isDeleted': True},
                    {'sequence': 3, 'td': 19, 'pat1': 7, }
@@ -103,9 +104,10 @@ class TestGamelogCreator(TestCase):
     def test_gamelog_is_created(self):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
-        gamelog_creator = GameLogCreator(firstGame, 'Home', {'+2': '21', '+1': '7'})
+        team = Team.objects.first()
+        gamelog_creator = GameLogCreator(firstGame, team, {'+2': '21', '+1': '7'})
         gamelog_creator.create()
-        gamelog_creator = GameLogCreator(firstGame, 'Home', {'cop': None}, 2)
+        gamelog_creator = GameLogCreator(firstGame, team, {'cop': None}, 2)
         gamelog_creator.create()
         assert len(TeamLog.objects.all()) == 3
         teamlog = TeamLog.objects.get(pk=3)

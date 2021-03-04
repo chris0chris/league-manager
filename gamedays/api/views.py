@@ -12,7 +12,7 @@ from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, Game
     GameFinalizer
 from gamedays.service.game_service import GameService
 from gamedays.service.gameday_service import GamedayService
-from teammanager.models import Gameday, Gameinfo, GameOfficial, GameSetup
+from teammanager.models import Gameday, Gameinfo, GameOfficial, GameSetup, Team
 
 
 class GamedayListAPIView(ListAPIView):
@@ -101,6 +101,8 @@ class GameLogAPIView(APIView):
             return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict), status=HTTPStatus.CREATED)
         except Gameinfo.DoesNotExist:
             raise NotFound(detail=f'Could not create team logs ... gameId {request.data.get("gameId")} not found')
+        except Team.DoesNotExist:
+            raise NotFound(detail=f'Could not create team logs ... team {request.data.get("team")} not found')
 
     def delete(self, request: Request, *args, **kwargs):
         game_id = kwargs.get('id')

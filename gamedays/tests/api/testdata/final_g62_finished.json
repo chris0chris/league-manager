@@ -1,6 +1,6 @@
 {
   "columns": [
-    "team",
+    "team__name",
     "points",
     "pf",
     "pa",

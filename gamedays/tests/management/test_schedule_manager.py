@@ -43,18 +43,21 @@ class TestScheduleCreator(TestCase):
 
     def test_schedule_created(self):
         gameday = DBSetup().create_empty_gameday()
+        DBSetup().create_playoff_placeholder_teams()
+        group_A = DBSetup().create_teams('A', 3)
+        group_B = DBSetup().create_teams('B', 3)
         assert Gameinfo.objects.filter(gameday_id=gameday.pk).exists() is False
-        groups = [['Iser', 'Nieder', 'Wesel'], ['Dort', 'Pandas', 'Rheda']]
+        groups = [group_A, group_B]
         sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
         sc.create()
         gameinfo_set = Gameinfo.objects.filter(gameday_id=gameday.pk)
         assert gameinfo_set.count() == 11
         gameinfo = gameinfo_set.first()
-        assert gameinfo.officials == 'Rheda'
-        assert Gameresult.objects.filter(gameinfo_id=gameinfo.pk).count() == 2
+        assert gameinfo.officials.name == 'B3'
+        assert Gameresult.objects.filter(gameinfo=gameinfo).count() == 2
         assert Gameresult.objects.all().count() == 22
         # schedule will be created again and previous entries will be deleted
         sc.create()
         assert Gameinfo.objects.filter(pk=gameinfo.pk).exists() is False
-        assert Gameresult.objects.filter(gameinfo_id=gameinfo.pk).exists() is False
-        assert Gameinfo.objects.filter(gameday_id=gameday.pk).count() == 11
+        assert Gameresult.objects.filter(gameinfo=gameinfo).exists() is False
+        assert Gameinfo.objects.filter(gameday=gameday).count() == 11

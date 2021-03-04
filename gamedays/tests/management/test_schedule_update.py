@@ -15,26 +15,26 @@ class TestScheduleUpdate(TestCase):
 
         info_p5 = Gameinfo.objects.get(standing='P5')
         results_p5 = Gameresult.objects.filter(gameinfo=info_p5)
-        assert results_p5[0].team == 'P5_home'
-        assert results_p5[1].team == 'P5_away'
+        assert results_p5[0].team.name == 'A3'
+        assert results_p5[1].team.name == 'B3'
 
         info_semifinals = Gameinfo.objects.filter(standing='HF')
         results_sf1_qs = Gameresult.objects.filter(gameinfo=info_semifinals[0])
-        assert results_sf1_qs[0].team == 'HF_home'
-        assert results_sf1_qs[1].team == 'HF_away'
+        assert results_sf1_qs[0].team.name == 'B2'
+        assert results_sf1_qs[1].team.name == 'A1'
 
         su = ScheduleUpdate(gameday.pk, gameday.format)
         su.update()
 
-        assert results_p5[0].team == 'A3'
-        assert results_p5[1].team == 'B3'
+        assert results_p5[0].team.name == 'A3'
+        assert results_p5[1].team.name == 'B3'
 
-        assert results_sf1_qs[0].team == 'B2'
-        assert results_sf1_qs[1].team == 'A1'
+        assert results_sf1_qs[0].team.name == 'B2'
+        assert results_sf1_qs[1].team.name == 'A1'
 
         results_sf2_qs = Gameresult.objects.filter(gameinfo=info_semifinals[1])
-        assert results_sf2_qs[0].team == 'A2'
-        assert results_sf2_qs[1].team == 'B1'
+        assert results_sf2_qs[0].team.name == 'A2'
+        assert results_sf2_qs[1].team.name == 'B1'
 
     @patch.object(ScheduleUpdate, '_update_gameresult')
     def test_update_semifinal_is_not_overridden(self, create_mock: MagicMock):
@@ -56,13 +56,13 @@ class TestScheduleUpdate(TestCase):
         games = Gameinfo.objects.filter(standing='HF') | Gameinfo.objects.filter(standing='P5')
         sf1 = 0
         sf2 = 1
-        assert games.filter(officials__exact='').count() == 3
+        assert games.filter(officials__name__exact='').count() == 3
         su = ScheduleUpdate(gameday.pk, gameday.format)
         su.update()
-        assert games[sf1].officials == 'B3'
-        assert games[sf2].officials == 'A3'
+        assert games[sf1].officials.name == 'B3'
+        assert games[sf2].officials.name == 'A3'
         # P5 will be updated, when SF are finished
-        assert games.filter(officials__exact='').count() == 1
+        assert games.filter(officials__name__exact='').count() == 1
 
 
 class TestUpdateGameEntry:

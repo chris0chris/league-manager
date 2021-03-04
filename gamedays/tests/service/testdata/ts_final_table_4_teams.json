@@ -6,7 +6,7 @@
         "type": "integer"
       },
       {
-        "name": "team",
+        "name": "team__name",
         "type": "string"
       },
       {
@@ -34,7 +34,7 @@
   "data": [
     {
       "index": 0,
-      "team": "A1",
+      "team__name": "A1",
       "points": 9,
       "pf": 9,
       "pa": 3,
@@ -42,7 +42,7 @@
     },
     {
       "index": 1,
-      "team": "A2",
+      "team__name": "A2",
       "points": 6,
       "pf": 6,
       "pa": 4,
@@ -50,7 +50,7 @@
     },
     {
       "index": 2,
-      "team": "A3",
+      "team__name": "A3",
       "points": 3,
       "pf": 3,
       "pa": 5,
@@ -58,7 +58,7 @@
     },
     {
       "index": 3,
-      "team": "A4",
+      "team__name": "A4",
       "points": 0,
       "pf": 0,
       "pa": 6,
