@@ -34,6 +34,7 @@ class GamespreadListView(View):
 
 class GamedayListView(ListView):
     model = Gameday
+    template_name = 'gamedays/gameday_list.html'
 
 
 class GamedayDetailView(DetailView):
