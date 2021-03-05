@@ -103,7 +103,8 @@ class Gameinfo(models.Model):
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.gameday.pk}__{self.pk}__{self.field} - {self.scheduled} - {self.stage} / {self.standing} - {self.officials}'
+        return f'{self.gameday.pk}__{self.pk}__{self.field} - {self.scheduled} - {self.stage} / {self.standing} ' \
+               f'- {self.officials} [{self.status}]'
 
 
 class Gameresult(models.Model):

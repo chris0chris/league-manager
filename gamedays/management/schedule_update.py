@@ -89,5 +89,6 @@ class ScheduleUpdate:
                         officialsTeamName = gmw.get_team_by(game.get_place('officials'), game.get_standing('officials'),
                                                             game.get_points('officials'))
                         officials = Team.objects.get(name=officialsTeamName)
-                        gi.officials = officials
-                        gi.save()
+                        if gi.officials != officials:
+                            gi.officials = officials
+                            gi.save()
