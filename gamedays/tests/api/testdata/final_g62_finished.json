@@ -1,9 +1,9 @@
 {
   "columns": [
-    "team__name",
-    "points",
-    "pf",
-    "pa",
+    "Team",
+    "Punkte",
+    "PF",
+    "PA",
     "+/-"
   ],
   "index": [

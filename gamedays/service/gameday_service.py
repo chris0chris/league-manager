@@ -6,6 +6,28 @@ from teammanager.models import Gameinfo
 
 EMPTY_DATA = '[]'
 
+TABLE_HEADERS = {
+    STANDING: 'Gruppe',
+    TEAM_NAME: 'Team',
+    POINTS: 'Punkte',
+    PF: 'PF',
+    PA: 'PA',
+    DIFF: '+/-'
+}
+
+SCHEDULE_TABLE_HEADERS = {
+    SCHEDULED: 'Kick-Off',
+    FIELD: 'Feld',
+    OFFICIALS_NAME: 'Officials',
+    STAGE: 'Runde',
+    STANDING: 'Platz',
+    HOME: 'Heim',
+    POINTS_HOME: 'Punkte Heim',
+    POINTS_AWAY: 'Punkte Gast',
+    AWAY: 'Gast',
+    STATUS: 'Status'
+}
+
 
 class EmptySchedule:
     @staticmethod
@@ -68,18 +90,26 @@ class GamedayService:
         self.gmw = GamedayModelWrapper(pk)
 
     def get_schedule(self):
-        return self.gmw.get_schedule()
+        schedule = self.gmw.get_schedule()
+        columns = [SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY, STATUS]
+        schedule = schedule[columns]
+        schedule = schedule.rename(columns=SCHEDULE_TABLE_HEADERS)
+        return schedule
 
     def get_qualify_table(self):
         qualify_table = self.gmw.get_qualify_table()
         if qualify_table is '':
             return EmptyQualifyTable
+        qualify_table = qualify_table[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
+        qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
         return qualify_table
 
     def get_final_table(self):
         final_table = self.gmw.get_final_table()
         if final_table is '':
             return EmptyFinalTable
+        final_table = final_table[[TEAM_NAME, POINTS, PF, PA, DIFF]]
+        final_table = final_table.rename(columns=TABLE_HEADERS)
         return final_table
 
     def get_games_to_whistle(self, team):

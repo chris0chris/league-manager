@@ -6,23 +6,23 @@
         "type": "integer"
       },
       {
-        "name": "Gruppe",
+        "name": "standing",
         "type": "string"
       },
       {
-        "name": "Team",
+        "name": "team__name",
         "type": "string"
       },
       {
-        "name": "Punkte",
+        "name": "points",
         "type": "integer"
       },
       {
-        "name": "PF",
+        "name": "pf",
         "type": "integer"
       },
       {
-        "name": "PA",
+        "name": "pa",
         "type": "integer"
       },
       {
@@ -38,56 +38,56 @@
   "data": [
     {
       "index": 0,
-      "Gruppe": "Gruppe 1",
-      "Team": "A1",
-      "Punkte": 6,
-      "PF": 6,
-      "PA": 3,
+      "standing": "Gruppe 1",
+      "team__name": "A1",
+      "points": 6,
+      "pf": 6,
+      "pa": 3,
       "+/-": 3
     },
     {
       "index": 1,
-      "Gruppe": "Gruppe 1",
-      "Team": "A2",
-      "Punkte": 3,
-      "PF": 4,
-      "PA": 4,
+      "standing": "Gruppe 1",
+      "team__name": "A2",
+      "points": 3,
+      "pf": 4,
+      "pa": 4,
       "+/-": 0
     },
     {
       "index": 2,
-      "Gruppe": "Gruppe 1",
-      "Team": "A3",
-      "Punkte": 0,
-      "PF": 2,
-      "PA": 5,
+      "standing": "Gruppe 1",
+      "team__name": "A3",
+      "points": 0,
+      "pf": 2,
+      "pa": 5,
       "+/-": -3
     },
     {
       "index": 3,
-      "Gruppe": "Gruppe 2",
-      "Team": "B1",
-      "Punkte": 6,
-      "PF": 6,
-      "PA": 3,
+      "standing": "Gruppe 2",
+      "team__name": "B1",
+      "points": 6,
+      "pf": 6,
+      "pa": 3,
       "+/-": 3
     },
     {
       "index": 4,
-      "Gruppe": "Gruppe 2",
-      "Team": "B2",
-      "Punkte": 3,
-      "PF": 4,
-      "PA": 4,
+      "standing": "Gruppe 2",
+      "team__name": "B2",
+      "points": 3,
+      "pf": 4,
+      "pa": 4,
       "+/-": 0
     },
     {
       "index": 5,
-      "Gruppe": "Gruppe 2",
-      "Team": "B3",
-      "Punkte": 0,
-      "PF": 2,
-      "PA": 5,
+      "standing": "Gruppe 2",
+      "team__name": "B3",
+      "points": 0,
+      "pf": 2,
+      "pa": 5,
       "+/-": -3
     }
   ]

@@ -73,14 +73,8 @@ class TestGameinfoRetrieveUpdate(WebTest):
         assert str(gameinfo.gameFinished) == '09:00:00'
         assert gameinfo.pin == 2
 
+
 class TestGamedaySchedule(WebTest):
-    def test_get_schedule(self):
-        gameday = DBSetup().g62_qualify_finished()
-        with open(pathlib.Path(__file__).parent / 'testdata/schedule_g62_qualify_finished.json') as f:
-            expected_schedule = json.load(f)
-        response = self.app.get(reverse('api-gameday-schedule', kwargs={'pk': gameday.pk}) + '?get=schedule')
-        assert response.status_code == HTTPStatus.OK
-        assert response.json == expected_schedule
 
     def test_get_empty_schedule(self):
         response = self.app.get(reverse('api-gameday-schedule', kwargs={'pk': 1}) + '?get=schedule')
@@ -377,6 +371,7 @@ class TestGameFinalize(WebTest):
         firstGame: Gameinfo = Gameinfo.objects.last()
         assert firstGame.status == 'beendet'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameFinished))
+
 
 class TestGamesToWhistleAPIView(WebTest):
     def test_get_games_to_whistle_for_specific_team(self):

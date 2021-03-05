@@ -7,34 +7,6 @@ from gamedays.service.gameday_settings import STANDING, TEAM_NAME, POINTS, POINT
     STATUS, SH, FH, FINISHED, GAME_FINISHED
 from teammanager.models import Gameinfo, Gameresult
 
-QUALIFY_TABLE_HEADERS = {
-    STANDING: 'Gruppe',
-    TEAM_NAME: 'Team',
-    POINTS: 'Punkte',
-    PF: 'PF',
-    PA: 'PA',
-    DIFF: '+/-'
-}
-
-SCHEDULE_TABLE_HEADERS = {
-    SCHEDULED: 'Kick-Off',
-    FIELD: 'Feld',
-    OFFICIALS_NAME: 'Officials',
-    STAGE: 'Runde',
-    STANDING: 'Platz',
-    HOME: 'Heim',
-    POINTS_HOME: 'Punkte Heim',
-    POINTS_AWAY: 'Punkte Gast',
-    AWAY: 'Gast',
-    STATUS: 'Status'
-}
-
-SCHEDULE_API_HEADERS = {
-    ID_AWAY: ID_AWAY,
-    ID_HOME: ID_HOME,
-    GAMEINFO_ID: GAMEINFO_ID
-}
-
 
 class GamedayModelWrapper:
 
@@ -63,28 +35,21 @@ class GamedayModelWrapper:
 
     def get_schedule(self):
         schedule = self._get_schedule()
-        schedule = schedule.sort_values(by=[FIELD, SCHEDULED])
-        schedule = schedule.sort_values(by=STAGE, ascending=False)
-        columns = [SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY, STATUS]
-        schedule = schedule[columns]
-        schedule = schedule.rename(columns=SCHEDULE_TABLE_HEADERS)
+        schedule = schedule.sort_values(by=[SCHEDULED, FIELD])
         return schedule
 
     def get_qualify_table(self):
         if not self.has_finalround():
             return ''
         qualify_round = self._get_table()
-        qualify_round = qualify_round[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
-        qualify_round = qualify_round.rename(columns=QUALIFY_TABLE_HEADERS)
         return qualify_round
 
     def get_final_table(self):
         if self._gameinfo[self._gameinfo[STATUS] != FINISHED].empty is False:
             return ''
         final_table = self._games_with_result.groupby([TEAM_NAME], as_index=False)
-        final_table = final_table.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
+        final_table = final_table.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'})
         final_table = final_table.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
-        final_table = final_table[[TEAM_NAME, POINTS, PF, PA, DIFF]]
 
         if self.has_finalround():
             if self._games_with_result.nunique()[TEAM_NAME] == 7:
@@ -138,7 +103,7 @@ class GamedayModelWrapper:
     def _get_table(self):
         qualify_round = self._games_with_result[self._games_with_result[STAGE] == QUALIIFY_ROUND]
         qualify_round = qualify_round.groupby([STANDING, TEAM_NAME], as_index=False)
-        qualify_round = qualify_round.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
+        qualify_round = qualify_round.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'})
         qualify_round = qualify_round.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
         qualify_round = qualify_round.sort_values(by=STANDING)
         return qualify_round
