@@ -3,7 +3,7 @@ import pandas as pd
 from pandas import DataFrame
 
 from gamedays.service.gameday_settings import STANDING, TEAM, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, GROUP1, \
-    GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
+    GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
     STATUS, SH, FH, FINISHED, GAME_FINISHED
 from teammanager.models import Gameinfo, Gameresult
 
@@ -19,7 +19,7 @@ QUALIFY_TABLE_HEADERS = {
 SCHEDULE_TABLE_HEADERS = {
     SCHEDULED: 'Kick-Off',
     FIELD: 'Feld',
-    OFFICIALS: 'Officials',
+    OFFICIALS_NAME: 'Officials',
     STAGE: 'Runde',
     STANDING: 'Platz',
     HOME: 'Heim',
@@ -65,7 +65,7 @@ class GamedayModelWrapper:
         schedule = self._get_schedule()
         schedule = schedule.sort_values(by=[FIELD, SCHEDULED])
         schedule = schedule.sort_values(by=STAGE, ascending=False)
-        columns = [SCHEDULED, FIELD, OFFICIALS, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY, STATUS]
+        columns = [SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY, STATUS]
         if api:
             schedule = schedule[columns + [ID_HOME, ID_AWAY, 'id']]
             return schedule
@@ -172,4 +172,4 @@ class GamedayModelWrapper:
         games_to_whistle = self._get_schedule()
         games_to_whistle = games_to_whistle.sort_values(by=[SCHEDULED, FIELD])
         return games_to_whistle[
-            (games_to_whistle[OFFICIALS].str.contains(team)) & (games_to_whistle[GAME_FINISHED] == '')]
+            (games_to_whistle[OFFICIALS_NAME].str.contains(team)) & (games_to_whistle[GAME_FINISHED] == '')]
