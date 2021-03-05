@@ -1,3 +1,7 @@
+from django.urls import path
+
+from league_table.views import OverallLeagueTableView
+
 urlpatterns = [
-    # path('', GamedayListView.as_view(), name='league-home'),
+    path('', OverallLeagueTableView.as_view(), name='league-table-overall'),
 ]
