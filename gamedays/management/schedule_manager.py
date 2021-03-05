@@ -85,4 +85,5 @@ class ScheduleCreator:
         try:
             return Team.objects.get(name=teamName)
         except Team.DoesNotExist:
+            Gameinfo.objects.filter(gameday_id=self.gameday.pk).delete()
             raise TeamNotExistent(teamName)

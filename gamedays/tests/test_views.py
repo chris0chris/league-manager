@@ -103,11 +103,14 @@ class TestGamedayUpdateView(WebTest):
         assert not Gameinfo.objects.filter(gameday_id=self.gameday.pk).exists()
 
     def test_team_not_found_while_creating_schedule(self):
+        DBSetup().create_playoff_placeholder_teams()
+        DBSetup().create_teams('A', 3)
+        DBSetup().create_teams('B', 3)
         form = self.form
-        form['group1'] = 'A1, A2, A3'
-        form['group2'] = 'B1, B2, unknown team'
+        form['group1'] = 'unknown team, A2, A3'
+        form['group2'] = 'B1, B2, B3'
         resp = form.submit()
         assert resp.status_code == HTTPStatus.OK
         self.assertFormError(resp, 'form', None, [
             'Spielplan konnte nicht erstellt werden, da dass Team "unknown team" nicht gefunden wurde.'])
-        assert not Gameinfo.objects.filter(gameday_id=self.gameday_id).exists()
+        assert Gameinfo.objects.all().count() == 0

@@ -1,6 +1,7 @@
+import pytest
 from django.test import TestCase
 
-from gamedays.management.schedule_manager import ScheduleCreator, Schedule, ScheduleEntry
+from gamedays.management.schedule_manager import ScheduleCreator, Schedule, ScheduleEntry, TeamNotExistent
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from teammanager.models import Gameday, Gameinfo, Gameresult
 
@@ -61,3 +62,17 @@ class TestScheduleCreator(TestCase):
         assert Gameinfo.objects.filter(pk=gameinfo.pk).exists() is False
         assert Gameresult.objects.filter(gameinfo=gameinfo).exists() is False
         assert Gameinfo.objects.filter(gameday=gameday).count() == 11
+
+    def test_schedule_not_created_while_team_not_existent(self):
+        gameday = DBSetup().create_empty_gameday()
+        DBSetup().create_playoff_placeholder_teams()
+        DBSetup().create_teams('A', 3)
+        DBSetup().create_teams('B', 3)
+        assert Gameinfo.objects.filter(gameday_id=gameday.pk).exists() is False
+        groups = [['A1', 'A2', 'unknown team'], ['B1', 'B2', 'B3']]
+        with pytest.raises(TeamNotExistent) as err:
+            sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
+            sc.create()
+        assert str(err.value) == 'unknown team'
+        assert Gameinfo.objects.all().count() == 0
+        assert Gameresult.objects.all().count() == 0
