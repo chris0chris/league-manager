@@ -1,12 +1,13 @@
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     POINTS_HOME, \
-    POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF
+    POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from teammanager.models import Gameinfo
 
 EMPTY_DATA = '[]'
 
 TABLE_HEADERS = {
+    DFFL: 'DFFL-Punkte',
     STANDING: 'Gruppe',
     TEAM_NAME: 'Team',
     POINTS: 'Punkte',
@@ -108,7 +109,7 @@ class GamedayService:
         final_table = self.gmw.get_final_table()
         if final_table is '':
             return EmptyFinalTable
-        final_table = final_table[[TEAM_NAME, POINTS, PF, PA, DIFF]]
+        final_table = final_table[[DFFL, TEAM_NAME, POINTS, PF, PA, DIFF]]
         final_table = final_table.rename(columns=TABLE_HEADERS)
         return final_table
 

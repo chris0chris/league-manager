@@ -4,8 +4,30 @@ from pandas import DataFrame
 
 from gamedays.service.gameday_settings import STANDING, TEAM_NAME, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, GROUP1, \
     GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
-    STATUS, SH, FH, FINISHED, GAME_FINISHED
+    STATUS, SH, FH, FINISHED, GAME_FINISHED, DFFL
 from teammanager.models import Gameinfo, Gameresult
+
+
+class DfflPoints(object):
+
+    @classmethod
+    def for_number_teams(cls, number_of_teams):
+        dffl_points = [0] * number_of_teams
+        if number_of_teams == 3:
+            dffl_points = [6, 4, 2]
+        if number_of_teams == 4:
+            dffl_points = [8, 6, 4, 2]
+        if number_of_teams == 5:
+            dffl_points = [10, 8, 6, 4, 2]
+        if number_of_teams == 6:
+            dffl_points = [11, 9, 7, 5, 3, 2]
+        if number_of_teams == 7:
+            dffl_points = [12, 10, 8, 6, 4, 3, 2]
+        if number_of_teams == 8:
+            dffl_points = [13, 11, 9, 7, 5, 4, 3, 2]
+        if number_of_teams == 9:
+            dffl_points = [14, 12, 10, 8, 6, 5, 4, 3, 2]
+        return dffl_points
 
 
 class GamedayModelWrapper:
@@ -77,7 +99,7 @@ class GamedayModelWrapper:
                 final_standing = self._get_standing_list(standing)
             final_table.set_index(TEAM_NAME, inplace=True)
             final_table = final_table.reindex(final_standing).reset_index()
-
+        final_table[DFFL] = DfflPoints.for_number_teams(final_table.shape[0])
         return final_table
 
     def _get_standing_list(self, standing):
