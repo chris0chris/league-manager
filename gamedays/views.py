@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import ListView, DetailView, UpdateView, CreateView
 
-from gamedays.management.schedule_manager import ScheduleCreator, Schedule
+from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent
 from teammanager.models import Gameday
 from .forms import GamedayCreateForm, GamedayUpdateForm
 from .service.GamedaySpreadsheetService import GamedaySpreadsheetService
@@ -93,6 +93,10 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             form.add_error(None,
                            'Spielplan konnte nicht erstellt werden, '
                            'da die Kombination #Teams und #Felder nicht zum Spielplan passen')
+            return super(GamedayUpdateView, self).form_invalid(form)
+        except TeamNotExistent as err:
+            form.add_error(None,
+                           f'Spielplan konnte nicht erstellt werden, da dass Team "{err}" nicht gefunden wurde.')
             return super(GamedayUpdateView, self).form_invalid(form)
 
         return super(GamedayUpdateView, self).form_valid(form)

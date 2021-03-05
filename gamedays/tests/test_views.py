@@ -101,3 +101,13 @@ class TestGamedayUpdateView(WebTest):
         self.assertFormError(resp, 'form', None, [
             'Spielplan konnte nicht erstellt werden, da es das Format als Spielplan nicht gibt: "not existent schedule"'])
         assert not Gameinfo.objects.filter(gameday_id=self.gameday.pk).exists()
+
+    def test_team_not_found_while_creating_schedule(self):
+        form = self.form
+        form['group1'] = 'A1, A2, A3'
+        form['group2'] = 'B1, B2, unknown team'
+        resp = form.submit()
+        assert resp.status_code == HTTPStatus.OK
+        self.assertFormError(resp, 'form', None, [
+            'Spielplan konnte nicht erstellt werden, da dass Team "unknown team" nicht gefunden wurde.'])
+        assert not Gameinfo.objects.filter(gameday_id=self.gameday_id).exists()

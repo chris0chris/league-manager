@@ -48,6 +48,10 @@ class Schedule:
         return entries
 
 
+class TeamNotExistent(BaseException):
+    pass
+
+
 class ScheduleCreator:
     def __init__(self, gameday: Gameday, schedule: Schedule):
         self.gameday = gameday
@@ -63,16 +67,22 @@ class ScheduleCreator:
             gameinfo.field = entry.get_field()
             gameinfo.standing = entry.get_standing()
             if entry.get_official() != '':
-                gameinfo.officials = Team.objects.get(name=entry.get_official())
+                gameinfo.officials = self._get_team(entry.get_official())
             gameinfo.save()
 
             if entry.get_home() != '' and entry.get_away() != '':
                 home = Gameresult()
                 home.gameinfo = gameinfo
-                home.team = Team.objects.get(name=entry.get_home())
+                home.team = self._get_team(entry.get_home())
                 home.isHome = True
                 home.save()
                 away = Gameresult()
                 away.gameinfo = gameinfo
-                away.team = Team.objects.get(name=entry.get_away())
+                away.team = self._get_team(entry.get_away())
                 away.save()
+
+    def _get_team(self, teamName):
+        try:
+            return Team.objects.get(name=teamName)
+        except Team.DoesNotExist:
+            raise TeamNotExistent(teamName)
