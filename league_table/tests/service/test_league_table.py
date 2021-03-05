@@ -1,7 +1,7 @@
+import datetime
 import pathlib
 
 import pandas as pd
-import pytest
 from django.test import TestCase
 
 from gamedays.tests.setup_factories.db_setup import DBSetup
@@ -20,10 +20,10 @@ class TestLeagueTable(TestCase):
         league_table = LeagueTable()
         assert league_table.get_standing() == []
 
-    @pytest.mark.xfail
     def test_league_table(self):
-        DBSetup().g72_finished()
-        DBSetup().g62_finished()
+        today = datetime.date.today()
+        DBSetup().g72_finished(date=today)
+        DBSetup().g62_finished(date=today)
         expected_overall_table = get_df_from_json('league_table_overall.json')
         league_table = LeagueTable()
         assert league_table.get_standing().to_json() == expected_overall_table.to_json()

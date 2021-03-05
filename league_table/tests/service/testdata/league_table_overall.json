@@ -10,11 +10,15 @@
         "type": "string"
       },
       {
-        "name": "pf",
+        "name": "dffl",
         "type": "integer"
       },
       {
         "name": "points",
+        "type": "integer"
+      },
+      {
+        "name": "pf",
         "type": "integer"
       },
       {
@@ -35,56 +39,63 @@
     {
       "index": 4,
       "team__name": "B1",
-      "pf": 24,
+      "dffl": 23,
       "points": 24,
+      "pf": 24,
       "pa": 14,
       "+/-": 10
     },
     {
       "index": 0,
       "team__name": "A1",
-      "pf": 25,
+      "dffl": 19,
       "points": 21,
+      "pf": 25,
       "pa": 16,
       "+/-": 9
     },
     {
       "index": 1,
       "team__name": "A2",
-      "pf": 20,
+      "dffl": 15,
       "points": 15,
+      "pf": 20,
       "pa": 18,
       "+/-": 2
     },
     {
-      "index": 6,
-      "team__name": "B3",
-      "pf": 13,
-      "points": 9,
-      "pa": 16,
-      "+/-": -3
-    },
-    {
       "index": 5,
       "team__name": "B2",
-      "pf": 16,
+      "dffl": 11,
       "points": 6,
+      "pf": 16,
       "pa": 20,
       "+/-": -4
     },
     {
+      "index": 6,
+      "team__name": "B3",
+      "dffl": 7,
+      "points": 9,
+      "pf": 13,
+      "pa": 16,
+      "+/-": -3
+    },
+    {
       "index": 2,
       "team__name": "A3",
-      "pf": 9,
+      "dffl": 5,
       "points": 3,
+      "pf": 9,
       "pa": 16,
       "+/-": -7
     },
     {
       "index": 3,
       "team__name": "A4",
-      "pf": 2,
+      "dffl": 2,
       "points": 0,
+      "pf": 2,
       "pa": 9,
       "+/-": -7
     }
