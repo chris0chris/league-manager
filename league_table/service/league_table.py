@@ -3,7 +3,7 @@ import json
 
 import pandas as pd
 
-from gamedays.service.gameday_settings import TEAM, PF, POINTS, PA, DIFF
+from gamedays.service.gameday_settings import TEAM_NAME, PF, POINTS, PA, DIFF
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from teammanager.models import Gameday, Gameinfo
 
@@ -36,7 +36,7 @@ class LeagueTable:
 
 
     def _calculate_standings(self, all_standings):
-        all_standings = all_standings.groupby([TEAM], as_index=False)
+        all_standings = all_standings.groupby([TEAM_NAME], as_index=False)
         all_standings = all_standings.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
         all_standings = all_standings.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
         return all_standings

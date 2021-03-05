@@ -1,4 +1,4 @@
-TEAM = 'team__name'
+TEAM_NAME = 'team__name'
 HOME = 'home'
 AWAY = 'away'
 POINTS = 'points'

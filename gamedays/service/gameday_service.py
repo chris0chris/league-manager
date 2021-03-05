@@ -1,6 +1,6 @@
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     POINTS_HOME, \
-    POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS
+    POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from teammanager.models import Gameinfo
 
@@ -67,8 +67,8 @@ class GamedayService:
     def __init__(self, pk):
         self.gmw = GamedayModelWrapper(pk)
 
-    def get_schedule(self, api=False):
-        return self.gmw.get_schedule(api)
+    def get_schedule(self):
+        return self.gmw.get_schedule()
 
     def get_qualify_table(self):
         qualify_table = self.gmw.get_qualify_table()

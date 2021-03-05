@@ -69,7 +69,7 @@ class GamedayScheduleView(APIView):
         orient = request.query_params.get('orient')
         orient = 'index' if orient is None else orient
         if get == 'schedule':
-            response = gs.get_schedule(api=True).to_json(orient=orient)
+            response = gs.get_schedule().to_json(orient=orient)
         elif get == 'qualify':
             response = gs.get_qualify_table().to_json(orient='split')
         elif get == 'final':
