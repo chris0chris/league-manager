@@ -23,7 +23,7 @@ class Team(models.Model):
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.name} - {self.division.name}'
+        return self.name
 
 
 class UserProfile(models.Model):
