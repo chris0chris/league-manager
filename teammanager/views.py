@@ -1,15 +1,14 @@
-from django.shortcuts import render,redirect
-from django.contrib import messages
-from django import forms
-from teammanager import models
-import pandas as pd
-from django.utils.dateparse import parse_date
-from datetime import datetime
+import csv
+import io
 import json
-import csv, io
+from datetime import datetime
 
+import pandas as pd
+from django import forms
+from django.contrib import messages
+from django.shortcuts import render, redirect
 
-
+from teammanager import models
 
 
 # Create your views here.
@@ -59,14 +58,14 @@ def teamdetail(request, team_id):
             allow_button_view = True
         else:
             user = models.UserProfile.objects.get(user=request.user)
-            if team == user.team and user.check_Teammanager:
+            if team == user.team and user.check_teammanager:
                 allow_button_view = True
             else:
                 allow_button_view = False
     else:
         allow_button_view = False
     for member in members:
-        member.permissions = member.get_Permisions();
+        member.permissions = member.get_permisions();
     return render(request, 'Teamdetail.html',
                   {'team': team, 'members': members, 'allow_button_view': allow_button_view})
 
@@ -89,8 +88,8 @@ def createuser(request, team_id):
         authored = True
     else:
         user = models.UserProfile.objects.get(user=request.user)
-        if   ((user.team.id == team_id) & user.check_Teammanager()):
-            authored=True
+        if ((user.team.id == team_id) & user.check_teammanager()):
+            authored = True
     if authored:
         if request.method == 'POST':
             form = Userform(request.POST, request.FILES)
@@ -120,7 +119,7 @@ def editteam(request, team_id):
         authored = True
     else:
         user = models.UserProfile.objects.get(user=request.user)
-        if ((user.team == team) & user.check_Teammanager()):
+        if ((user.team == team) & user.check_teammanager()):
             authored = True
     if authored:
         if request.method == 'POST':
@@ -145,12 +144,12 @@ def edituser(request, user_id):
     user_is_being_edited = models.UserProfile.objects.get(pk=user_id)
 
     if request.user.is_superuser | (
-            (user_editing.team == user_is_being_edited.team) & user_editing.check_Teammanager()):
+            (user_editing.team == user_is_being_edited.team) & user_editing.check_teammanager()):
         if request.method == 'POST':
             form = Userform(request.POST, instance=user_is_being_edited)
             if form.is_valid():
                 form.save()
-                return redirect(teamdetail,team_id=user_is_being_edited.team_id)
+                return redirect(teamdetail, team_id=user_is_being_edited.team_id)
             else:
                 form = Userform(instance=user_is_being_edited)
         else:
@@ -168,7 +167,7 @@ def deleteuser(request, user_id):
     user_is_being_deleted = models.UserProfile.objects.get(pk=user_id)
 
     if request.user.is_superuser | (
-            (user_deleting.team == user_is_being_deleted.team) & user_deleting.check_Teammanager()):
+            (user_deleting.team == user_is_being_deleted.team) & user_deleting.check_teammanager()):
         user_is_being_deleted.delete()
     return redirect(teamdetail,team_id=user_is_being_deleted.team_id)
 

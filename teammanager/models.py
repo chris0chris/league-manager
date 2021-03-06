@@ -39,15 +39,15 @@ class UserProfile(models.Model):
 
     objects: QuerySet = models.Manager()
 
-    def get_Permisions(self):
+    def get_permisions(self):
         permissions = list(UserPermissions.objects.filter(user=self))
         return permissions
 
-    def check_Teammanager(self):
-        permisssions = self.get_Permisions()
+    def check_teammanager(self):
+        permisssions = self.get_permisions()
         is_teammanager = False
         for permission in permisssions:
-            if (permission.permission.name == 'Teammanager'):
+            if permission.permission.name == 'Teammanager':
                 is_teammanager = True
         return is_teammanager
 
