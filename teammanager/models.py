@@ -23,7 +23,7 @@ class Team(models.Model):
     object: QuerySet = models.Manager()
 
     def __str__(self):
-        return self.name
+        return f'{self.name} - {self.division.name}'
 
 
 class UserProfile(models.Model):
@@ -52,7 +52,7 @@ class UserProfile(models.Model):
         return is_teammanager
 
     def __str__(self):
-        return self.firstname + ' ' + self.lastname
+        return f'{self.team.name}: {self.firstname} {self.lastname}'
 
 
 class Permissions(models.Model):
@@ -71,7 +71,7 @@ class UserPermissions(models.Model):
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return self.user.firstname + ' ' + self.user.lastname + ' ' + self.permission.name
+        return f'{self.permission.name}: {self.user.firstname} {self.user.lastname}'
 
 
 class Achievement(models.Model):
@@ -112,7 +112,7 @@ class Gameinfo(models.Model):
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.gameday.pk}__{self.pk}__{self.field} - {self.scheduled} - {self.stage} / {self.standing} ' \
+        return f'{self.gameday.pk}__{self.pk}__{self.field} - {self.scheduled}: {self.stage} / {self.standing} ' \
                f'- {self.officials} [{self.status}]'
 
 
@@ -142,6 +142,9 @@ class GameOfficial(models.Model):
 
     objects: QuerySet = models.Manager()
 
+    def __str__(self):
+        return f'{self.gameinfo.pk}__{self.name} - {self.position}'
+
 
 class GameSetup(models.Model):
     gameinfo = models.ForeignKey(Gameinfo, on_delete=models.CASCADE)
@@ -153,6 +156,9 @@ class GameSetup(models.Model):
     hasFinalScoreChanged = models.BooleanField(default=False)
 
     objects: QuerySet = models.Manager()
+
+    def __str__(self):
+        return f'{self.gameinfo.pk}'
 
 
 class TeamLog(models.Model):
