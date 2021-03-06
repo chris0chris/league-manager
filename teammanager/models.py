@@ -3,12 +3,11 @@ from django.db import models
 from django.db.models import QuerySet
 
 
-# Create your models here.
-
-
 class Division(models.Model):
     region = models.CharField(max_length=20)
     name = models.CharField(max_length=20)
+
+    objects: QuerySet = models.Manager()
 
     def __str__(self):
         return self.name
@@ -21,12 +20,14 @@ class Team(models.Model):
     place = models.CharField(max_length=20)
     logo = models.ImageField('Logo', upload_to="teammanager/logos", blank=True, null=True)
 
+    object: QuerySet = models.Manager()
+
     def __str__(self):
         return self.name
 
 
 class UserProfile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True,blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     avatar = models.ImageField('Avatar', upload_to="media/teammanager/avatars", blank=True, null=True)
     team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True)
     firstname = models.CharField(max_length=20, null=True)
@@ -35,6 +36,8 @@ class UserProfile(models.Model):
     position = models.CharField(max_length=20, blank=True, null=True)
     location = models.CharField(max_length=20, blank=True, null=True)
     birth_date = models.DateField(null=True, blank=True)
+
+    objects: QuerySet = models.Manager()
 
     def get_Permisions(self):
         permissions = list(UserPermissions.objects.filter(user=self))
@@ -55,6 +58,8 @@ class UserProfile(models.Model):
 class Permissions(models.Model):
     name = models.CharField(max_length=20)
 
+    objects: QuerySet = models.Manager()
+
     def __str__(self):
         return self.name
 
@@ -63,12 +68,16 @@ class UserPermissions(models.Model):
     permission = models.ForeignKey(Permissions, on_delete=models.CASCADE)
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
+    objects: QuerySet = models.Manager()
+
     def __str__(self):
         return self.user.firstname + ' ' + self.user.lastname + ' ' + self.permission.name
 
 
 class Achievement(models.Model):
     name = models.CharField(max_length=20, blank=False, null=False)
+
+    objects: QuerySet = models.Manager()
 
     def __str__(self):
         return self.name
