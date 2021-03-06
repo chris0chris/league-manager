@@ -4,7 +4,7 @@ from pandas import DataFrame
 
 from gamedays.service.gameday_settings import STANDING, TEAM_NAME, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, GROUP1, \
     GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
-    STATUS, SH, FH, FINISHED, GAME_FINISHED, DFFL
+    STATUS, SH, FH, FINISHED, GAME_FINISHED, DFFL, DIVISION_NAME
 from teammanager.models import Gameinfo, Gameresult
 
 
@@ -39,9 +39,8 @@ class GamedayModelWrapper:
             raise Gameinfo.DoesNotExist
 
         gameresult = pd.DataFrame(Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id']).values(
-            *([f.name for f in Gameresult._meta.local_fields] + ['team__name'])))
+            *([f.name for f in Gameresult._meta.local_fields] + [TEAM_NAME, DIVISION_NAME])))
         games_with_result = pd.merge(self._gameinfo, gameresult, left_on='id', right_on=GAMEINFO_ID)
-        # ', '.join([f.name for f in Gameresult._meta.local_fields]) + ', team__name'
         games_with_result = games_with_result.convert_dtypes()
         games_with_result = games_with_result.astype({FH: 'object', SH: 'object', PA: 'object'})
         games_with_result[PF] = games_with_result[FH] + games_with_result[SH]
@@ -70,7 +69,7 @@ class GamedayModelWrapper:
         if self._gameinfo[self._gameinfo[STATUS] != FINISHED].empty is False:
             return ''
         final_table = self._games_with_result.groupby([TEAM_NAME], as_index=False)
-        final_table = final_table.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'})
+        final_table = final_table.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum', DIVISION_NAME: 'first'})
         final_table = final_table.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
 
         if self.has_finalround():

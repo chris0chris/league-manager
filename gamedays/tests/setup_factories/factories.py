@@ -11,7 +11,7 @@ class DivisionFactory(DjangoModelFactory):
         model = Division
         django_get_or_create = ('name',)
 
-    name = 'division_name'
+    name = 'some_division'
     region = 'region'
 
 

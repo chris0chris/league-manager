@@ -3,6 +3,7 @@ HOME = 'home'
 AWAY = 'away'
 POINTS = 'points'
 DFFL = 'dffl'
+DIVISION_NAME = 'team__division__name'
 POINTS_HOME = POINTS + '_' + HOME
 POINTS_AWAY = POINTS + '_' + AWAY
 PF = 'pf'

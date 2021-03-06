@@ -6,6 +6,7 @@ from django.test import TestCase
 
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from league_table.service.league_table import LeagueTable
+from teammanager.models import Team, Division
 
 
 def get_df_from_json(filename):
@@ -35,3 +36,14 @@ class TestLeagueTable(TestCase):
         expected_overall_table = get_df_from_json('league_table_overall.json')
         league_table = LeagueTable()
         assert league_table.get_standing(year).to_json() == expected_overall_table.to_json()
+
+    def test_league_table_by_division(self):
+        today = datetime.date.today()
+        DBSetup().g72_finished(date=today)
+        DBSetup().g62_finished(date=today)
+        division = Division(region='some region', name='south')
+        division.save()
+        Team.objects.filter(name__startswith='A').update(division=division)
+        expected_overall_table = get_df_from_json('league_table_division_south.json')
+        league_table = LeagueTable()
+        assert league_table.get_standing(division='south').to_json() == expected_overall_table.to_json()
