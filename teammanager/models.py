@@ -20,7 +20,7 @@ class Team(models.Model):
     place = models.CharField(max_length=20)
     logo = models.ImageField('Logo', upload_to="teammanager/logos", blank=True, null=True)
 
-    object: QuerySet = models.Manager()
+    objects: QuerySet = models.Manager()
 
     def __str__(self):
         return f'{self.name} - {self.division.name}'
