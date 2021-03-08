@@ -33,7 +33,8 @@ class LeagueTable:
         table_standings = self._calculate_standings(all_standings)
         if league is not None:
             season_league_team_mapping = pd.DataFrame(
-                SeasonLeagueTeam.objects.filter(season__name=season, league__name=league).values('team__name'))
+                SeasonLeagueTeam.objects.filter(season__name__iexact=season, league__name__iexact=league).values(
+                    TEAM_NAME))
             if season_league_team_mapping.empty:
                 return season_league_team_mapping
             table_standings = pd.merge(table_standings, season_league_team_mapping, how='right')
