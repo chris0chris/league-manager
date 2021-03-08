@@ -3,8 +3,16 @@ from django.db import models
 from django.db.models import QuerySet
 
 
-class Division(models.Model):
-    region = models.CharField(max_length=20)
+class Season(models.Model):
+    name = models.CharField(max_length=20)
+
+    objects: QuerySet = models.Manager()
+
+    def __str__(self):
+        return self.name
+
+
+class League(models.Model):
     name = models.CharField(max_length=20)
 
     objects: QuerySet = models.Manager()
@@ -15,9 +23,8 @@ class Division(models.Model):
 
 class Team(models.Model):
     name = models.CharField(max_length=20)
-    division = models.ForeignKey(Division, on_delete=models.CASCADE)
     description = models.CharField(max_length=1000)
-    place = models.CharField(max_length=20)
+    location = models.CharField(max_length=20)
     logo = models.ImageField('Logo', upload_to="teammanager/logos", blank=True, null=True)
 
     objects: QuerySet = models.Manager()
@@ -26,10 +33,21 @@ class Team(models.Model):
         return self.name
 
 
+class SeasonLeagueTeam(models.Model):
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    league = models.ForeignKey(League, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+
+    objects: QuerySet = models.Manager()
+
+    def __str__(self):
+        return f'{self.season.name} {self.league} {self.team}'
+
+
 class UserProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     avatar = models.ImageField('Avatar', upload_to="media/teammanager/avatars", blank=True, null=True)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True)
+    team = models.ForeignKey(Team, on_delete=models.PROTECT, null=True)
     firstname = models.CharField(max_length=20, null=True)
     lastname = models.CharField(max_length=20, null=True)
     playernumber = models.IntegerField(null=True)
@@ -102,7 +120,6 @@ class Gameinfo(models.Model):
     field = models.PositiveSmallIntegerField()
     officials = models.ForeignKey(Team, on_delete=models.PROTECT, blank=True)
     status = models.CharField(max_length=100, default='', blank=True)
-    pin = models.PositiveSmallIntegerField(null=True, blank=True)
     gameStarted = models.TimeField(null=True, blank=True)
     gameHalftime = models.TimeField(null=True, blank=True)
     gameFinished = models.TimeField(null=True, blank=True)

@@ -3,24 +3,42 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from factory.django import DjangoModelFactory
 
-from teammanager.models import Team, Gameday, Gameinfo, Gameresult, GameOfficial, GameSetup, TeamLog, Division
+from teammanager.models import Team, Gameday, Gameinfo, Gameresult, GameOfficial, GameSetup, TeamLog, League, Season, \
+    SeasonLeagueTeam
 
 
-class DivisionFactory(DjangoModelFactory):
+class LeagueFactory(DjangoModelFactory):
     class Meta:
-        model = Division
+        model = League
         django_get_or_create = ('name',)
 
     name = 'some_division'
-    region = 'region'
+
+
+class SeasonFactory(DjangoModelFactory):
+    class Meta:
+        model = Season
+
+    name = 'some_season'
 
 
 class TeamFactory(DjangoModelFactory):
     class Meta:
         model = Team
+        django_get_or_create = ('name',)
 
-    division = factory.SubFactory(DivisionFactory)
+    name = 'teamName'
+    description = 'team description'
+    location = 'team location'
 
+
+class SeasonLeagueTeamFactory(DjangoModelFactory):
+    class Meta:
+        model = SeasonLeagueTeam
+
+    season = factory.SubFactory(SeasonFactory)
+    league = factory.SubFactory(LeagueFactory)
+    team = factory.SubFactory(TeamFactory)
 
 class GameOfficialFactory(DjangoModelFactory):
     class Meta:

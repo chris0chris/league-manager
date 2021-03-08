@@ -28,10 +28,6 @@
       {
         "name": "+/-",
         "type": "integer"
-      },
-      {
-        "name": "team__division__name",
-        "type": "string"
       }
     ],
     "primaryKey": [
@@ -47,8 +43,7 @@
       "points": 24,
       "pf": 24,
       "pa": 14,
-      "+/-": 10,
-      "team__division__name": "some_division"
+      "+/-": 10
     },
     {
       "index": 0,
@@ -57,8 +52,7 @@
       "points": 21,
       "pf": 25,
       "pa": 16,
-      "+/-": 9,
-      "team__division__name": "some_division"
+      "+/-": 9
     },
     {
       "index": 1,
@@ -67,8 +61,7 @@
       "points": 15,
       "pf": 20,
       "pa": 18,
-      "+/-": 2,
-      "team__division__name": "some_division"
+      "+/-": 2
     },
     {
       "index": 5,
@@ -77,8 +70,7 @@
       "points": 6,
       "pf": 16,
       "pa": 20,
-      "+/-": -4,
-      "team__division__name": "some_division"
+      "+/-": -4
     },
     {
       "index": 6,
@@ -87,8 +79,7 @@
       "points": 9,
       "pf": 13,
       "pa": 16,
-      "+/-": -3,
-      "team__division__name": "some_division"
+      "+/-": -3
     },
     {
       "index": 2,
@@ -97,8 +88,7 @@
       "points": 3,
       "pf": 9,
       "pa": 16,
-      "+/-": -7,
-      "team__division__name": "some_division"
+      "+/-": -7
     },
     {
       "index": 3,
@@ -107,8 +97,7 @@
       "points": 0,
       "pf": 2,
       "pa": 9,
-      "+/-": -7,
-      "team__division__name": "some_division"
+      "+/-": -7
     }
   ]
 }

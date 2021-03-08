@@ -55,14 +55,12 @@ class TestGameinfoRetrieveUpdate(WebTest):
         assert gameinfo.gameStarted is None
         assert gameinfo.gameHalftime is None
         assert gameinfo.gameFinished is None
-        assert gameinfo.pin is None
         response = self.app.patch_json(reverse('api-gameinfo-retrieve-update', kwargs={'pk': gameinfo_pk}),
                                        {
                                            "status": 'gestartet',
                                            "gameStarted": '20:09',
                                            "gameHalftime": '20:29',
                                            "gameFinished": '09:00',
-                                           "pin": 2,
                                        }, headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.OK
 
@@ -71,7 +69,6 @@ class TestGameinfoRetrieveUpdate(WebTest):
         assert str(gameinfo.gameStarted) == '20:09:00'
         assert str(gameinfo.gameHalftime) == '20:29:00'
         assert str(gameinfo.gameFinished) == '09:00:00'
-        assert gameinfo.pin == 2
 
 
 class TestGamedaySchedule(WebTest):

@@ -20,7 +20,7 @@ class GameOfficialSerializer(ModelSerializer):
 class GameinfoSerializer(ModelSerializer):
     class Meta:
         model = Gameinfo
-        fields = ['status', 'gameStarted', 'gameHalftime', 'gameFinished', 'pin']
+        fields = ['status', 'gameStarted', 'gameHalftime', 'gameFinished']
         extra_kwargs = {'gameStarted': {'format': '%H:%M'},
                         'gameHalftime': {'format': '%H:%M'},
                         'gameFinished': {'format': '%H:%M'}

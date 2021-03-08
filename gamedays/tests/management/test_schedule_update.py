@@ -56,13 +56,13 @@ class TestScheduleUpdate(TestCase):
         games = Gameinfo.objects.filter(standing='HF') | Gameinfo.objects.filter(standing='P5')
         sf1 = 0
         sf2 = 1
-        assert games.filter(officials__name__exact='').count() == 3
+        assert games.filter(officials__name__exact='teamName').count() == 3
         su = ScheduleUpdate(gameday.pk, gameday.format)
         su.update()
         assert games[sf1].officials.name == 'B3'
         assert games[sf2].officials.name == 'A3'
         # P5 will be updated, when SF are finished
-        assert games.filter(officials__name__exact='').count() == 1
+        assert games.filter(officials__name__exact='teamName').count() == 1
 
 
 class TestUpdateGameEntry:

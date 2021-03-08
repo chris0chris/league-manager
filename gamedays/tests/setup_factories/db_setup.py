@@ -21,8 +21,8 @@ class DBSetup:
 
     def g72_finished(self, date=''):
         gameday = self._create_gameday(group_a=4, sf='beendet', p5='beendet', p3='beendet', p1='beendet', date=date)
-        home = TeamFactory(name='A4', description='Description', place='place')
-        away = TeamFactory(name='B3', description='Description', place='place')
+        home = TeamFactory(name='A4')
+        away = TeamFactory(name='B3')
         self.create_finalround_game(gameday, standing='P5', status='beendet', home=home, away=away)
         return gameday
 
@@ -45,7 +45,7 @@ class DBSetup:
         return gameday
 
     def create_group(self, gameday, name, standing, stage='Vorrunde', status='beendet', number_teams=3):
-        official = TeamFactory(name='officials', description='Description', place='Place')
+        official = TeamFactory(name='officials')
         teams = self.create_teams(name, number_teams)
         # teams = [name + str(team) for team in range(number_teams)]
         # if len(teams) % 2:

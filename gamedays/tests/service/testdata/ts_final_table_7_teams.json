@@ -26,10 +26,6 @@
         "type": "integer"
       },
       {
-        "name": "team__division__name",
-        "type": "string"
-      },
-      {
         "name": "dffl",
         "type": "integer"
       }
@@ -47,7 +43,6 @@
       "pf": 12,
       "pa": 7,
       "+/-": 5,
-      "team__division__name": "some_division",
       "dffl": 12
     },
     {
@@ -57,7 +52,6 @@
       "pf": 14,
       "pa": 8,
       "+/-": 6,
-      "team__division__name": "some_division",
       "dffl": 10
     },
     {
@@ -67,7 +61,6 @@
       "pf": 11,
       "pa": 9,
       "+/-": 2,
-      "team__division__name": "some_division",
       "dffl": 8
     },
     {
@@ -77,7 +70,6 @@
       "pf": 8,
       "pa": 10,
       "+/-": -2,
-      "team__division__name": "some_division",
       "dffl": 6
     },
     {
@@ -87,7 +79,6 @@
       "pf": 8,
       "pa": 9,
       "+/-": -1,
-      "team__division__name": "some_division",
       "dffl": 4
     },
     {
@@ -97,7 +88,6 @@
       "pf": 5,
       "pa": 8,
       "+/-": -3,
-      "team__division__name": "some_division",
       "dffl": 3
     },
     {
@@ -107,7 +97,6 @@
       "pf": 2,
       "pa": 9,
       "+/-": -7,
-      "team__division__name": "some_division",
       "dffl": 2
     }
   ]

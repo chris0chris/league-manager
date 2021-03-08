@@ -36,7 +36,7 @@ class TestGamedayModelWrapper(TestCase):
         schedule = GamedayModelWrapper(gameday.pk).get_schedule()
         del expected_schedule['scheduled']
         del schedule['scheduled']
-        assert_frame_equal(schedule, expected_schedule, check_dtype=False)
+        assert schedule.to_json() == expected_schedule.to_json()
 
     def test_empty_get_qualify_table(self):
         gameday = DBSetup().create_main_round_gameday()
@@ -58,7 +58,7 @@ class TestGamedayModelWrapper(TestCase):
         gameday = DBSetup().g62_finalround(sf='beendet', p5='beendet', p3='beendet', p1='beendet')
         expected_final_table = get_df_from_json('ts_final_table_6_teams')
         gmw = GamedayModelWrapper(gameday.pk)
-        assert_frame_equal(gmw.get_final_table(), expected_final_table, check_dtype=False)
+        assert gmw.get_final_table().to_json() == expected_final_table.to_json()
 
     def test_get_final_table_for_7_teams(self):
         gameday = DBSetup().g72_finished()
