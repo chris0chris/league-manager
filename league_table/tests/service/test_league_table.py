@@ -20,7 +20,7 @@ class TestLeagueTable(TestCase):
     def test_empty_league_table(self):
         DBSetup().create_empty_gameday()
         league_table = LeagueTable()
-        assert league_table.get_standing() == []
+        assert league_table.get_standing().empty
 
     def test_league_table(self):
         today = datetime.date.today()
@@ -91,3 +91,10 @@ class TestLeagueTable(TestCase):
         league_table = LeagueTable()
         assert league_table.get_standing(league='south',
                                          season=year_plus_one).to_json() == expected_overall_table.to_json()
+
+    def test_league_table_by_illegal_league_name(self):
+        today = datetime.date.today()
+        DBSetup().g72_finished(date=today)
+        DBSetup().g62_finished(date=today)
+        league_table = LeagueTable()
+        assert league_table.get_standing(league='non existent league').empty

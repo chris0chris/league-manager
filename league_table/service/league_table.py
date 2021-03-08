@@ -28,12 +28,14 @@ class LeagueTable:
             except Gameinfo.DoesNotExist:
                 pass
         if all_standings.empty:
-            return []
+            return all_standings
 
         table_standings = self._calculate_standings(all_standings)
         if league is not None:
             season_league_team_mapping = pd.DataFrame(
                 SeasonLeagueTeam.objects.filter(season__name=season, league__name=league).values('team__name'))
+            if season_league_team_mapping.empty:
+                return season_league_team_mapping
             table_standings = pd.merge(table_standings, season_league_team_mapping, how='right')
         print(json.dumps(json.loads(table_standings.to_json(orient='table')), indent=2))
         return table_standings
