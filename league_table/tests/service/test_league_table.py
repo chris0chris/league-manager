@@ -9,6 +9,7 @@ from league_table.service.league_table import LeagueTable
 from teammanager.models import Team, League, SeasonLeagueTeam, Season
 
 
+# ToDo extract method for reuseability
 def get_df_from_json(filename):
     return pd.read_json(pathlib.Path(__file__).parent / 'testdata/{0}'.format(filename),
                         orient='table')

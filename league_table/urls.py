@@ -1,7 +1,8 @@
 from django.urls import path
 
-from league_table.views import OverallLeagueTableView
+from league_table.views import LeagueTableView
 
 urlpatterns = [
-    path('', OverallLeagueTableView.as_view(), name='league-table-overall'),
+    path('', LeagueTableView.as_view(), name='league-table-overall'),
+    path('<str:season>/<str:league>', LeagueTableView.as_view(), name='league-table-league'),
 ]
