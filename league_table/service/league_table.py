@@ -4,7 +4,7 @@ import pandas as pd
 
 from gamedays.service.gameday_settings import TEAM_NAME, PF, POINTS, PA, DIFF, DFFL
 from gamedays.service.model_wrapper import GamedayModelWrapper
-from teammanager.models import Gameday, Gameinfo, SeasonLeagueTeam
+from teammanager.models import Gameday, Gameinfo, SeasonLeagueTeam, Season
 
 
 class LeagueTable:
@@ -12,7 +12,9 @@ class LeagueTable:
     def __init__(self):
         pass
 
-    def get_standing(self, season, league=None):
+    def get_standing(self, season=None, league=None):
+        if season is None:
+            season = Season.objects.last()
         all_gamedays = Gameday.objects.filter(season__name=season)
         all_standings = pd.DataFrame()
         for gameday in all_gamedays:
