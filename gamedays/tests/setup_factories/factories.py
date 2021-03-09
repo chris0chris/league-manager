@@ -18,6 +18,7 @@ class LeagueFactory(DjangoModelFactory):
 class SeasonFactory(DjangoModelFactory):
     class Meta:
         model = Season
+        django_get_or_create = ('name',)
 
     name = 'some_season'
 
@@ -63,6 +64,8 @@ class GamedayFactory(DjangoModelFactory):
     date = '2020-10-10'
     start = '10:00'
     name = 'Test Spieltag'
+    season = factory.SubFactory(SeasonFactory)
+    league = factory.SubFactory(LeagueFactory)
     author = factory.SubFactory(UserFactory)
 
 

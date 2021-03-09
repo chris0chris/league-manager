@@ -1,13 +1,15 @@
 from django import forms
 from django.utils import timezone
 
-from teammanager.models import Gameday
+from teammanager.models import Gameday, Season, League
 
 
 class GamedayCreateForm(forms.ModelForm):
     name = forms.CharField(max_length=100, initial=f'test {timezone.now()}')
     date = forms.DateField(initial='2020-10-10')
     start = forms.TimeField(initial='10:00')
+    season = forms.ModelChoiceField(queryset=Season.objects.all(), initial=1)
+    league = forms.ModelChoiceField(queryset=League.objects.all(), initial=1)
 
     class Meta:
         model = Gameday

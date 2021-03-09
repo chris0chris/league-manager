@@ -15,19 +15,20 @@ class DBSetup:
     def g62_finalround(self, sf='', p5='', p3='', p1=''):
         return self._create_gameday(sf=sf, p5=p5, p3=p3, p1=p1)
 
-    def g62_finished(self, date=''):
-        gameday = self._create_gameday(sf='beendet', p5='beendet', p3='beendet', p1='beendet', date=date)
+    def g62_finished(self, season=None):
+        gameday = self._create_gameday(sf='beendet', p5='beendet', p3='beendet', p1='beendet', season=season)
         return gameday
 
-    def g72_finished(self, date=''):
-        gameday = self._create_gameday(group_a=4, sf='beendet', p5='beendet', p3='beendet', p1='beendet', date=date)
+    def g72_finished(self, season=None):
+        gameday = self._create_gameday(group_a=4, sf='beendet', p5='beendet', p3='beendet', p1='beendet', season=season)
         home = TeamFactory(name='A4')
         away = TeamFactory(name='B3')
         self.create_finalround_game(gameday, standing='P5', status='beendet', home=home, away=away)
         return gameday
 
-    def _create_gameday(self, qualify='beendet', sf='', p5='', p3='', p1='', group_a=3, group_b=3, date='') -> Gameday:
-        gameday = self.create_empty_gameday(date=date)
+    def _create_gameday(self, qualify='beendet', sf='', p5='', p3='', p1='', group_a=3, group_b=3,
+                        season=None) -> Gameday:
+        gameday = self.create_empty_gameday(season=season)
         teams_group_a = self.create_group(gameday=gameday, name="A", standing="Gruppe 1", status=qualify,
                                           number_teams=group_a)
         teams_group_b = self.create_group(gameday=gameday, name="B", standing="Gruppe 2", status=qualify,
@@ -132,11 +133,11 @@ class DBSetup:
             GameresultFactory(gameinfo=gi, team=away)
             return gi
 
-    def create_empty_gameday(self, date='') -> Gameday:
-        if date == '':
+    def create_empty_gameday(self, season=None) -> Gameday:
+        if season is None:
             gameday = GamedayFactory()
         else:
-            gameday = GamedayFactory(date=date)
+            gameday = GamedayFactory(season=season)
         return gameday
 
     def create_main_round_gameday(self, status='', number_teams=5) -> Gameday:

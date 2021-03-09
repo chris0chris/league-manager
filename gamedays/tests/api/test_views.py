@@ -107,19 +107,6 @@ class TestGamedaySchedule(WebTest):
         assert response.json == json.loads(EmptyFinalTable.to_json(), object_pairs_hook=OrderedDict)
 
 
-class TestCreateGameday(WebTest):
-
-    def test_create_gameday(self):
-        DBSetup().create_empty_gameday()
-        response = self.app.post_json(reverse('api-gameday-create'), {
-            "name": "Test Gameday",
-            "date": "2010-10-22",
-            "start": "10:00"
-        }, headers=DBSetup().get_token_header())
-        assert response.status_code == HTTPStatus.CREATED
-        assert response.json == GamedaySerializer(Gameday.objects.all().last()).data
-
-
 class TestRetrieveUpdateOfficials(WebTest):
 
     def test_create_officials(self):
@@ -151,20 +138,6 @@ class TestRetrieveUpdateOfficials(WebTest):
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 5
 
-
-class TestGamedayCreate(WebTest):
-    def test_gameday_is_created(self):
-        DBSetup().create_empty_gameday()
-        response = self.app.post_json(reverse('api-gameday-create'), {
-            'name': 'Test Gameday',
-            'date': '2021-02-17',
-            'start': '11:00'
-        }, headers=DBSetup().get_token_header())
-        assert response.status_code == HTTPStatus.CREATED
-        gameday = Gameday.objects.last()
-        assert gameday.name == 'Test Gameday'
-        assert str(gameday.date) == '2021-02-17'
-        assert str(gameday.start) == '11:00:00'
 
 
 class TestGameSetup(WebTest):

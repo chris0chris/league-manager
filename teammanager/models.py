@@ -103,6 +103,8 @@ class Achievement(models.Model):
 
 class Gameday(models.Model):
     name = models.CharField(max_length=100)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    league = models.ForeignKey(League, on_delete=models.CASCADE)
     date = models.DateField()
     start = models.TimeField()
     format = models.CharField(max_length=100, default='6_2', blank=True)

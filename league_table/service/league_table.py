@@ -1,4 +1,3 @@
-import datetime
 import json
 
 import pandas as pd
@@ -13,13 +12,8 @@ class LeagueTable:
     def __init__(self):
         pass
 
-    def get_standing(self, season=None, league=None):
-        if season is None:
-            season = datetime.date.today().year
-        year_as_str = str(season)
-        start_date = f'{year_as_str}-01-01'
-        end_date = f'{year_as_str}-12-31'
-        all_gamedays = Gameday.objects.filter(date__gte=start_date, date__lte=end_date)
+    def get_standing(self, season, league=None):
+        all_gamedays = Gameday.objects.filter(season__name=season)
         all_standings = pd.DataFrame()
         for gameday in all_gamedays:
             try:
@@ -40,7 +34,6 @@ class LeagueTable:
             table_standings = pd.merge(table_standings, season_league_team_mapping, how='right')
         print(json.dumps(json.loads(table_standings.to_json(orient='table')), indent=2))
         return table_standings
-
 
     def _calculate_standings(self, all_standings):
         all_standings = all_standings.groupby([TEAM_NAME], as_index=False)
