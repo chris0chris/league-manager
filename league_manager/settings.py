@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'league_manager',
     'rest_framework',
     'scorecard',
+    'liveticker',
     'league_table',
     'corsheaders',
     'teammanager',

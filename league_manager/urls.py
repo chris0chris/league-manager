@@ -26,6 +26,7 @@ urlpatterns = [
                   path('api/', include('gamedays.api.urls')),
                   path('teammanager/', include('teammanager.urls')),
                   path('scorecard/', include('scorecard.urls')),
+                  path('liveticker/', include('liveticker.urls')),
                   path('leaguetable/', include('league_table.urls')),
                   path('gamedays/', include('gamedays.urls')),
                   path('', homeview),
