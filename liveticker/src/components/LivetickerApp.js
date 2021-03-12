@@ -4,7 +4,7 @@ import {Provider} from 'react-redux';
 import {store} from '../store';
 
 
-const App = (props) => {
+const LivetickerApp = (props) => {
   return (
     <div className="container mt-2">
       <div className="row">
@@ -14,12 +14,12 @@ const App = (props) => {
   );
 };
 
-export default App;
+export default LivetickerApp;
 
 ReactDOM.render(
     <React.StrictMode>
       <Provider store={store}>
-        <App />
+        <LivetickerApp />
       </Provider>
     </React.StrictMode>,
     document.getElementById('liveticker-app'),
