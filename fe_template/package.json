@@ -1,5 +1,5 @@
 {
-  "name": "liveticker",
+  "name": "scorecard",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,9 +7,9 @@
     "test": "__tests__"
   },
   "scripts": {
-    "dev": "webpack --config webpack.config.js",
-    "dev:watch": "webpack --watch --config webpack.config.js",
-    "build": "webpack --mode production --entry ./src/index.js --output-path ./static/liveticker/js",
+    "dev": "webpack --mode development --entry ./src/index.js --output-path ./static/scorecard/js",
+    "dev:watch": "webpack --mode development --watch --entry ./src/index.js --output-path ./static/scorecard/js",
+    "build": "webpack --mode production --entry ./src/index.js --output-path ./static/scorecard/js",
     "test": "jest --maxWorkers=1",
     "jest": "jest --ci --coverage && codecov",
     "eslint": "eslint ./src --format junit -o js-lint-results.xml",
@@ -33,6 +33,7 @@
     "eslint-plugin-react": "^7.22.0",
     "jest": "^26.6.3",
     "jest-junit": "^12.0.0",
+    "moxios": "^0.4.0",
     "redux-mock-store": "^1.5.4",
     "regenerator-runtime": "^0.11.1",
     "webpack": "^5.17.0",
@@ -53,7 +54,8 @@
   },
   "jest": {
     "setupFilesAfterEnv": [
-      "<rootDir>/src/__tests__/setup/jest.setup.js"
+      "<rootDir>/src/__tests__/setup/jest.setup.js",
+      "<rootDir>/src/__tests__/setup/jest.warnings.js"
     ],
     "testPathIgnorePatterns": [
       "<rootDir>/src/__tests__/setup/",
