@@ -16,13 +16,13 @@ describe('AddPoints component', () => {
     const touchdownButton = screen.getByRole('radio', {name: new RegExp('Touchdown')});
     expect(touchdownButton).toBeInTheDocument();
     expect(touchdownButton).toBeChecked();
-    expect(screen.getByRole('radio', {name: 'Spezial'})).toBeInTheDocument();
-    expect(screen.getByRole('radio', {name: 'Defense'})).toBeInTheDocument();
+    expect(screen.getByRole('radio', {name: 'Safety'})).toBeInTheDocument();
+    expect(screen.getByRole('radio', {name: 'Turnover'})).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Eintrag speichern'})).toBeInTheDocument();
   });
   it('should display different input field, when selecting another button', () => {
     setup();
-    userEvent.click(screen.getByRole('radio', {name: new RegExp('Spezial')}));
+    userEvent.click(screen.getByRole('radio', {name: new RegExp('Safety')}));
     expect(screen.getByPlaceholderText('Trikotnummer')).toBeInTheDocument();
   });
   it('should call callback, when input is submitted', () => {
