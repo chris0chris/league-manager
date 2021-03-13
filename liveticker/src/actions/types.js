@@ -1,0 +1,1 @@
+export const GET_LIVETICKER = 'GET_LIVETICKER';
