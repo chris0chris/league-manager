@@ -2,6 +2,7 @@ import json
 
 from django.db.models import QuerySet
 
+from gamedays.service.utils import AsJsonEncoder
 from teammanager.models import Gameresult, TeamLog
 
 
@@ -76,7 +77,7 @@ class GameLog(object):
         self.gamelog.home.secondhalf.entries = self.create_entries_for_half(self.get_entries_home_secondhalf())
         self.gamelog.away.secondhalf.score = self._calc_score(self.get_entries_away_secondhalf())
         self.gamelog.away.secondhalf.entries = self.create_entries_for_half(self.get_entries_away_secondhalf())
-        return json.dumps(self.gamelog, cls=(GameLogEncoder))
+        return json.dumps(self.gamelog, cls=(AsJsonEncoder))
 
     def get_home_team(self):
         return self.gamelog.home.name
@@ -136,7 +137,15 @@ class GameLog(object):
             if entry.cop:
                 result[entry.sequence].update({'cop': entry.cop})
             else:
-                result[entry.sequence].update({entry.event: entry.player})
+                if entry.event == 'Touchdown':
+                    key = 'td'
+                elif entry.event == '1-Extra-Punkt':
+                    key = 'pat1'
+                elif entry.event == '2-Extra-Punkte':
+                    key = 'pat2'
+                else:
+                    key = entry.event
+                result[entry.sequence].update({key: entry.player})
             if entry.isDeleted:
                 result[entry.sequence].update({'isDeleted': True})
         return list(result.values())
@@ -189,10 +198,3 @@ class GameLogObject(object):
 
     def as_json(self):
         return dict(gameId=self.gameId, isFirstHalf=self.is_first_half, home=self.home, away=self.away)
-
-
-class GameLogEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if hasattr(obj, 'as_json'):
-            return obj.as_json()
-        return json.JSONEncoder.default(self, obj)

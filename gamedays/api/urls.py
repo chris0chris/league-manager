@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 
 from gamedays.api.views import GamedayListAPIView, GameinfoUpdateAPIView, GamedayRetrieveUpdate, \
     GamedayScheduleView, GameOfficialCreateOrUpdateView, GameSetupCreateOrUpdateView, GameLogAPIView, \
-    GameHalftimeAPIView, GameFinalizeUpdateView, GamesToWhistleAPIView
+    GameHalftimeAPIView, GameFinalizeUpdateView, GamesToWhistleAPIView, LivetickerAPIView
 
 urlpatterns = [
     path('gameday/list/', GamedayListAPIView.as_view(), name='api-gameday-list'),
@@ -17,4 +17,5 @@ urlpatterns = [
     path('game/<int:pk>/officials', GameOfficialCreateOrUpdateView.as_view(), name='api-game-officials'),
     path('game/<int:pk>/halftime', GameHalftimeAPIView.as_view(), name='api-game-halftime'),
     path('game/<int:pk>/finalize', GameFinalizeUpdateView.as_view(), name='api-game-finalize'),
+    path('liveticker', LivetickerAPIView.as_view(), name='api-liveticker-all'),
 ]

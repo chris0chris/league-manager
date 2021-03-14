@@ -151,38 +151,39 @@ class DBSetup:
         for position in officials_positions:
             GameOfficialFactory(gameinfo=gameinfo, position=position)
 
-    def create_teamlog_home_and_away(self, home=None, away=None) -> Gameinfo:
+    def create_teamlog_home_and_away(self, home=None, away=None, gameinfo=None) -> Gameinfo:
         if home is None:
             home = TeamFactory(name='Home')
         if away is None:
             away = TeamFactory(name='Away')
         # score home: 21 + 21 and cop - change of possession
         # score away: 3 and 2 cop
-        gameday = GamedayFactory()
-        gi = GameinfoFactory(gameday=gameday, stage='Hauptrunde', standing='Gruppe 1')
-        GameresultFactory(gameinfo=gi, team=home, fh=2, sh=1, pa=2, isHome=True)
-        GameresultFactory(gameinfo=gi, team=away, fh=1, sh=1, pa=3)
-        self.create_teamlog_home(gi, home)
-        self.create_teamlog_away(gi, away)
-        return gi
+        if gameinfo is None:
+            gameday = GamedayFactory()
+            gameinfo = GameinfoFactory(gameday=gameday, stage='Hauptrunde', standing='Gruppe 1')
+            GameresultFactory(gameinfo=gameinfo, team=home, fh=2, sh=1, pa=2, isHome=True)
+            GameresultFactory(gameinfo=gameinfo, team=away, fh=1, sh=1, pa=3)
+        self.create_teamlog_home(gameinfo, home)
+        self.create_teamlog_away(gameinfo, away)
+        return gameinfo
 
     def create_teamlog_home(self, gameinfo, home):
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=1, player=19, event='td', value=6, half=1)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=2, player=19, event='td', value=6, half=1)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=2, player=7, event='pat2', value=2, half=1)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=3, player=19, event='td', value=6, half=1)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=3, player=7, event='pat1', value=1, half=1)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=5, player=19, event='td', value=6, half=2)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=8, player=19, event='td', value=6, half=2)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=8, player=7, event='pat2', value=2, half=2)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=9, player=19, event='td', value=6, half=2)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=9, player=7, event='pat1', value=1, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=1, player=19, event='Touchdown', value=6, half=1)
+        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=2, player=19, event='Touchdown', value=6, half=1)
+        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=2, player=7, event='2-Extra-Punkte', value=2, half=1)
+        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=3, player=19, event='Touchdown', value=6, half=1)
+        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=3, player=7, event='1-Extra-Punkt', value=1, half=1)
+        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=5, player=19, event='Touchdown', value=6, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=8, player=19, event='Touchdown', value=6, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=8, player=7, event='2-Extra-Punkte', value=2, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=9, player=19, event='Touchdown', value=6, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=9, player=7, event='1-Extra-Punkt', value=1, half=2)
 
     def create_teamlog_away(self, gameinfo, away):
         TeamLogFactory(gameinfo=gameinfo, team=away, sequence=4, player=7, event='Safety', value=2, half=2)
-        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=6, cop=True, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=6, event='Turnover', cop=True, half=2)
         TeamLogFactory(gameinfo=gameinfo, team=away, sequence=7, player=7, event='Safety', value=1, half=2)
-        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=10, cop=True, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=10, event='Turnover', cop=True, half=2)
 
     def create_gamesetup(self, gameinfo):
         return GameSetupFactory(gameinfo=gameinfo, ctResult='won', direction='arrow_forward', fhPossession='AWAY')

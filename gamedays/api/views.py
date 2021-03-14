@@ -1,5 +1,5 @@
 import json
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 from http import HTTPStatus
 
 from rest_framework.exceptions import NotFound
@@ -12,6 +12,8 @@ from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, Game
     GameFinalizer
 from gamedays.service.game_service import GameService
 from gamedays.service.gameday_service import GamedayService
+from gamedays.service.liveticker_service import LivetickerService
+from gamedays.service.utils import AsJsonEncoder
 from teammanager.models import Gameday, Gameinfo, GameOfficial, GameSetup, Team
 
 
@@ -174,3 +176,10 @@ class GamesToWhistleAPIView(APIView):
         games_to_whistle = games_to_whistle.to_json(orient='records')
         print(json.dumps(json.loads(games_to_whistle), indent=2))
         return Response(json.loads(games_to_whistle, object_pairs_hook=OrderedDict))
+
+class LivetickerAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        ls = LivetickerService()
+        liveticker = ls.getLiveticker()
+        liveticker_as_json = [entry.as_json() for entry in liveticker]
+        return Response(liveticker_as_json)

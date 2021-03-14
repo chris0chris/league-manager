@@ -3,7 +3,8 @@ import pathlib
 
 from django.test import TestCase
 
-from gamedays.service.gamelog import GameLog, GameLogObject, GameLogEncoder, GameLogCreator
+from gamedays.service.gamelog import GameLog, GameLogObject, GameLogCreator
+from gamedays.service.utils import AsJsonEncoder
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from teammanager.models import Gameinfo, Gameresult, TeamLog, Team
 
@@ -49,7 +50,7 @@ class TestGamelog(TestCase):
         g = GameLogObject(81, 'White', 'Red')
         g.home.score = 18
         g.away.score = 7
-        assert json.dumps(g.as_json(), cls=GameLogEncoder) == json.dumps(
+        assert json.dumps(g.as_json(), cls=AsJsonEncoder) == json.dumps(
             {'gameId': 81,
              'isFirstHalf': True,
              'home': {

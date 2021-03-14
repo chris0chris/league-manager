@@ -12,7 +12,7 @@ from rest_framework.reverse import reverse
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
 from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameday, Gameinfo, Gameresult, GameOfficial, GameSetup
+from teammanager.models import Gameday, Gameinfo, Gameresult, GameOfficial, GameSetup, TeamLog
 
 
 class TestGamedayAPIViews(WebTest):
@@ -137,7 +137,6 @@ class TestRetrieveUpdateOfficials(WebTest):
         response = self.app.get(reverse('api-game-officials', kwargs={'pk': last_game.pk}))
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 5
-
 
 
 class TestGameSetup(WebTest):
@@ -359,3 +358,92 @@ class TestGamesToWhistleAPIView(WebTest):
         Gameinfo.objects.filter(id=2).update(officials=2)
         response = self.app.get(reverse('api-gameday-whistlegames', kwargs={'pk': gameday.pk, 'team': '*'}))
         assert len(response.json) == 10
+
+
+class TestLivetickerAPIView(WebTest):
+    def test_get_all_livetickers_only_scheduled(self):
+        gameday_one = DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(gameday=gameday_one, pk__gt=2).update(scheduled='11:00')
+        gameday_two = DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(gameday=gameday_two, pk__gt=13).update(scheduled='11:00')
+        Gameday.objects.all().update(date=datetime.today())
+        response = self.app.get(reverse('api-liveticker-all'))
+        assert response.status_code == HTTPStatus.OK
+        assert len(response.json) == 4
+        expected_result = {
+            "status": "Geplant",
+            "time": "10:00",
+            "home": {
+                "name": "A1",
+                "score": 3,
+            },
+            "away": {
+                "name": "A2",
+                "score": 2,
+            },
+            "ticks": []
+        }
+        assert response.json[0] == expected_result
+        assert response.json[2] == expected_result
+
+    @pytest.mark.skip
+    def test_get_livetickers_for_one_gameday(self):
+        DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(pk__gt=2).update(scheduled='11:00')
+        response = self.app.get(reverse('api-liveticker-all'))
+        assert response.status_code == HTTPStatus.OK
+        assert len(response.json) == 2
+        assert response.json[0] == {
+            "status": "Geplant",
+            "time": "10:00",
+            "home": {
+                "name": "A1",
+                "score": 3,
+            },
+            "away": {
+                "name": "A2",
+                "score": 2,
+            },
+            "ticks": []
+        }
+#   {
+#     status: '1. Halbzeit',
+#     time: '11:30',
+#     home: {
+#       name: 'Baltic Blue Stars Rostock',
+#       score: '12',
+#     },
+#     away: {
+#       name: 'Munich Mules',
+#       score: '0',
+#     },
+#     ticks: [
+#       {text: 'Turnover', isHome: true, time: '12:05'},
+#       {text: 'Touchdown: #19 Extra-Punkt: #7', isHome: true, time: '12:10'},
+#       {text: 'Auszeit - 12:00', isHome: false, time: '12:12'},
+#       {text: 'Safety: #12', isHome: true, time: '13:10'},
+#       {text: 'Touchdown: #7 Extra-Punkt: -', isHome: false, time: '13:20'},
+#     ],
+#   },
+#   {
+#     status: '2. Halbzeit',
+#     time: '12:30',
+#     home: {
+#       name: 'Munich Mules',
+#       img: 'https://dffl.flag-coaching.info/dffl/wp-content/uploads/2018/03/Logo-Munich-Mules.png',
+#       score: '0',
+#     },
+#     away: {
+#       name: 'Team Deutschland',
+#       img: 'https://dffl.flag-coaching.info/dffl/wp-content/uploads/2018/02/TD-FlagFootball-Logo-Kopie.png',
+#       score: '12',
+#     },
+#     ticks: [
+#       {text: 'Turnover [12:00]', isHome: false, time: '13:00'},
+#       {text: 'Touchdown: #19 Extra-Punkt: #7', isHome: true, time: '13:05'},
+#       {text: 'Auszeit - 12:00', isHome: true, time: '13:30'},
+#       {text: 'Safety: #12', isHome: true, time: '13:31'},
+#       {text: 'Touchdown: #7 Extra-Punkt: -', isHome: false, time: '13:59'},
+#     ],
+#   },
+# ];
