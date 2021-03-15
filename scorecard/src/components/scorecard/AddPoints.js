@@ -14,10 +14,10 @@ const AddPoints = ({onSubmit: updateParent}) => {
   const [reset, setReset] = useState(false);
   const handlePointsSelection = (value) => {
     switch (value) {
-      case 'safety':
+      case 'Safety':
         setShowStates(false, true, false);
         break;
-      case 'turnover':
+      case 'Turnover':
         setShowStates(false, false, true);
         break;
       default:
@@ -41,9 +41,9 @@ const AddPoints = ({onSubmit: updateParent}) => {
   };
   return (<form className='form-control' onSubmit={(ev) => handleSubmit(ev)}>
     <div className="row mt-2">
-      <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='td' text='Touchdown' checked={showTD} value='td'/>
-      <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='otherPoints' text='Safety' checked={showSpecial} value='safety'/>
-      <RadioButton color='secondary' name='points' onChange={handlePointsSelection} id='cop' text='Turnover' checked={showTurnover} value='turnover'/>
+      <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='td' text='Touchdown' checked={showTD} value='Touchdown'/>
+      <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='otherPoints' text='Safety' checked={showSpecial} value='Safety'/>
+      <RadioButton color='secondary' name='points' onChange={handlePointsSelection} id='cop' text='Turnover' checked={showTurnover} value='Turnover'/>
     </div>
     { showTD &&
       <Touchdown resetRequested={reset} setResetRequested={setReset} update={setEvent} />

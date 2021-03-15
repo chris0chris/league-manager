@@ -21,7 +21,7 @@ class GameLogCreator(object):
             teamlog.gameinfo = self.gameinfo
             teamlog.team = self.team
             teamlog.sequence = sequence
-            teamlog.cop = attr == 'cop'
+            teamlog.cop = attr == 'Turnover'
             teamlog.event = attr
             teamlog.player = self._get_player(value)
             teamlog.value = self._getValue(attr) if teamlog.player is not None else 0

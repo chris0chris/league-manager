@@ -5,19 +5,19 @@ import PropTypes from 'prop-types';
 const Touchdown = ( {resetRequested, setResetRequested, update}) => {
   const [tdInput, setTdInput] = useState('');
   const [patInput, setPatInput] = useState('');
-  const [patRadio, setPatRadio] = useState('pat1');
+  const [patRadio, setPatRadio] = useState('1-Extra-Punkt');
   const [pat1Selected, setPat1Selected] = useState(true);
   useEffect(() => {
     if (resetRequested) {
       setTdInput('');
       setPatInput('');
-      setPatRadio('pat1');
+      setPatRadio('1-Extra-Punkt');
       setPat1Selected(true);
       setResetRequested(false);
     }
   }, [resetRequested]);
 
-  update({'td': tdInput, [patRadio]: patInput});
+  update({'Touchdown': tdInput, [patRadio]: patInput});
 
   return (
     <><div className="input-group mt-2">
@@ -48,7 +48,7 @@ const Touchdown = ( {resetRequested, setResetRequested, update}) => {
             defaultValue='pat1' checked={pat1Selected} />
           <label className="btn btn-outline-warning" htmlFor='pat1'>1</label>
           <input type="radio" id='pat2' name="pat"
-            className="btn-check" defaultValue='pat2' checked={!pat1Selected}
+            className="btn-check" defaultValue='2-Extra-Punkte' checked={!pat1Selected}
             onChange={(ev) => {
               setPatRadio(ev.target.value); setPat1Selected(!pat1Selected);
             }}/>

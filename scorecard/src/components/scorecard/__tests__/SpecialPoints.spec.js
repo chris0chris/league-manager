@@ -21,11 +21,11 @@ describe('Touchdown component', () => {
     setup();
     userEvent.type(screen.getByRole('spinbutton', {name: 'number'}), '19');
     userEvent.click(screen.getByRole('radio', {name: '1'}));
-    expect(mockFunc.mock.calls[mockFunc.mock.calls.length-1][0]).toEqual({'+1': '19'});
+    expect(mockFunc.mock.calls[mockFunc.mock.calls.length-1][0]).toEqual({'Safety (+1)': '19'});
   });
   it('should call update function with +2', () => {
     setup();
     userEvent.type(screen.getByRole('spinbutton', {name: 'number'}), '19');
-    expect(mockFunc.mock.calls[mockFunc.mock.calls.length-1][0]).toEqual({'+2': '19'});
+    expect(mockFunc.mock.calls[mockFunc.mock.calls.length-1][0]).toEqual({'Safety (+2)': '19'});
   });
 });

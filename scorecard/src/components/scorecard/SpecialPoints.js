@@ -4,12 +4,12 @@ import PropTypes from 'prop-types';
 
 const SpecialPoints = ({resetRequested, setResetRequested, update}) => {
   const [pointsInput, setPointsInput] = useState('');
-  const [pointsRadio, setPointsRadio] = useState('+2');
+  const [pointsRadio, setPointsRadio] = useState('Safety (+2)');
   const [twoPointsSelected, setTwoPointsSelected] = useState(true);
   useEffect(() => {
     if (resetRequested) {
       setPointsInput('');
-      setPointsRadio('+2');
+      setPointsRadio('Safety (+2)');
       setTwoPointsSelected(true);
       setResetRequested(false);
     }
@@ -37,10 +37,10 @@ const SpecialPoints = ({resetRequested, setResetRequested, update}) => {
                 setPointsRadio(ev.target.value);
                 setTwoPointsSelected(!twoPointsSelected);
               }}
-              defaultValue='+1' checked={!twoPointsSelected} />
+              defaultValue='Safety (+1)' checked={!twoPointsSelected} />
             <label className="btn btn-outline-warning" htmlFor='point1'>1</label>
             <input type="radio" id='point2' name="specialPoints"
-              className="btn-check" defaultValue='+2' checked={twoPointsSelected}
+              className="btn-check" defaultValue='Safety (+2)' checked={twoPointsSelected}
               onChange={(ev) => {
                 setPointsRadio(ev.target.value);
                 setTwoPointsSelected(!twoPointsSelected);
