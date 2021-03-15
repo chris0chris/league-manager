@@ -64,7 +64,7 @@ class Liveticker(object):
         game_log_entry: TeamLog
         for game_log_entry in TeamLog.objects.filter(gameinfo=self.game):
             is_home = True if game_log_entry.team.name == self.home_name else False
-            ticks.append(Tick(game_log_entry, is_home))
+            ticks.append(Tick(game_log_entry, is_home).as_json())
         return ticks
 
     def __repr__(self):
