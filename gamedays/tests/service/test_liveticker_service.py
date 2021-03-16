@@ -77,14 +77,15 @@ class TestLiveticker(TestCase):
         home = Gameresult.objects.get(gameinfo=lastGame, isHome=True)
         away = Gameresult.objects.get(gameinfo=lastGame, isHome=False)
         DBSetup().create_teamlog_home_and_away(home=home.team, away=away.team, gameinfo=lastGame)
-
+        teamlog_entry: TeamLog = TeamLog.objects.first()
+        expected_time = teamlog_entry.created_time.strftime("%H:%M")
         liveticker = Liveticker(lastGame)
         ticks = liveticker.get_ticks()
         assert len(ticks) == 14
-        assert ticks[0].as_json() == {
+        assert ticks[0] == {
             "text": "Touchdown: #19",
             "isHome": True,
-            "time": None,
+            "time": expected_time,
         }
 
 
@@ -112,6 +113,13 @@ class TestTick(TestCase):
     #     tick = Tick(TeamLog.objects.last())
     #     assert tick.get_time() ==
 
+    def test_get_time(self):
+        DBSetup().create_teamlog_home_and_away()
+        teamlog_entry: TeamLog = TeamLog.objects.first()
+        expected_time = teamlog_entry.created_time.strftime("%H:%M")
+        tick = Tick(teamlog_entry, False)
+        assert tick.get_time() == expected_time
+
     def test_get_text_for_touchdown(self):
         DBSetup().create_teamlog_home_and_away()
         tick = Tick(TeamLog.objects.first(), False)
@@ -135,9 +143,11 @@ class TestTick(TestCase):
     def test_get_as_json(self):
         DBSetup().create_teamlog_home_and_away()
         tick = Tick(TeamLog.objects.filter(event='Touchdown').first(), False)
+        teamlog_entry: TeamLog = TeamLog.objects.first()
+        expected_time = teamlog_entry.created_time.strftime("%H:%M")
         assert tick.as_json() == {
             "text":  "Touchdown: #19",
             "isHome": False,
-            "time": None,
+            "time": expected_time,
         }
 

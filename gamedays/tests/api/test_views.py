@@ -247,7 +247,7 @@ class TestGameLog(WebTest):
         firstGame = Gameinfo.objects.first()
         response = self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
                                       {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
-                                       'event': {'cop': True, }}, headers=DBSetup().get_token_header())
+                                       'event': {'Turnover': True, }}, headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.CREATED
         assert response.json == {'gameId': 1,
                                  'isFirstHalf': True,
@@ -361,6 +361,10 @@ class TestGamesToWhistleAPIView(WebTest):
 
 
 class TestLivetickerAPIView(WebTest):
+    def test_empty_liveticker(self):
+        response = self.app.get(reverse('api-liveticker-all'))
+        assert response.json == []
+
     def test_get_all_livetickers_only_scheduled(self):
         gameday_one = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(gameday=gameday_one, pk__gt=2).update(scheduled='11:00')

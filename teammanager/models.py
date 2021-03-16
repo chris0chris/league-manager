@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import QuerySet
+from django.utils import timezone
 
 
 class Season(models.Model):
@@ -190,6 +191,9 @@ class TeamLog(models.Model):
     cop = models.BooleanField(default=False)
     half = models.PositiveSmallIntegerField()
     isDeleted = models.BooleanField(default=False)
+    created_time = models.TimeField(default=timezone.now)
+    author = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
+
 
     objects: QuerySet = models.Manager()
 

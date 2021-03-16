@@ -12,7 +12,7 @@ class Tick(object):
         self.is_home = is_home
 
     def as_json(self):
-        return dict(text=self.get_text(), isHome=self.is_home, time=None)
+        return dict(text=self.get_text(), isHome=self.is_home, time=self.get_time())
 
     def get_text(self):
         text = self.game_log.event
@@ -22,6 +22,9 @@ class Tick(object):
 
     def __repr__(self):
         return self.as_json()
+
+    def get_time(self):
+        return self.game_log.created_time.strftime("%H:%M")
 
 
 class Liveticker(object):
@@ -75,7 +78,9 @@ class Liveticker(object):
 class LivetickerService(object):
     def __init__(self, gameday_id=None):
         if gameday_id is None:
-            today_gamedays = Gameday.objects.filter(date=datetime.today())
+            # today_gamedays = Gameday.objects.filter(date=datetime.today())
+            # ToDo deleteMe when live
+            today_gamedays = Gameday.objects.all()
             self.gameday_ids = [gameday.pk for gameday in today_gamedays]
         else:
             self.gameday_ids = [gameday_id]
