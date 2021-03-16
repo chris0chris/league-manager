@@ -21,10 +21,10 @@ class GameService(object):
     def get_gamelog(self):
         return GameLog(self.gameinfo.gameinfo)
 
-    def create_gamelog(self, team_name, event, half):
+    def create_gamelog(self, team_name, event, user, half):
         # ToDo extract to TeamWrapper
         team = Team.objects.get(name=team_name)
-        gamelog = GameLogCreator(self.gameinfo.gameinfo, team, event, half)
+        gamelog = GameLogCreator(self.gameinfo.gameinfo, team, event, user, half)
         return gamelog.create()
 
     def update_score(self, gamelog: GameLog):

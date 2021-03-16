@@ -7,11 +7,12 @@ from teammanager.models import Gameresult, TeamLog
 
 
 class GameLogCreator(object):
-    def __init__(self, gameinfo, team, event, half=1):
+    def __init__(self, gameinfo, team, event, user, half=1):
         self.gameinfo = gameinfo
         self.team = team
         self.half = half
         self.event = event
+        self.user = user
 
     def create(self):
         print(type(self.event), self.event)
@@ -26,6 +27,7 @@ class GameLogCreator(object):
             teamlog.player = self._get_player(value)
             teamlog.value = self._getValue(attr) if teamlog.player is not None else 0
             teamlog.half = self.half
+            teamlog.author = self.user
             teamlog.save()
             print(attr, '=', value)
         return GameLog(self.gameinfo)

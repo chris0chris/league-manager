@@ -81,10 +81,10 @@ class TestLiveticker(TestCase):
         expected_time = teamlog_entry.created_time.strftime("%H:%M")
         liveticker = Liveticker(lastGame)
         ticks = liveticker.get_ticks()
-        assert len(ticks) == 14
+        assert len(ticks) == 5
         assert ticks[0] == {
-            "text": "Touchdown: #19",
-            "isHome": True,
+            "text": "Turnover",
+            "isHome": False,
             "time": expected_time,
         }
 

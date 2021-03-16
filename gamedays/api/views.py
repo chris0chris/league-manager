@@ -98,7 +98,7 @@ class GameLogAPIView(APIView):
         try:
             data = request.data
             game_service = GameService(data.get('gameId'))
-            gamelog = game_service.create_gamelog(data.get('team'), data.get('event'), data.get('half'))
+            gamelog = game_service.create_gamelog(data.get('team'), data.get('event'), request.user, data.get('half'))
             game_service.update_score(gamelog)
             return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict), status=HTTPStatus.CREATED)
         except Gameinfo.DoesNotExist:

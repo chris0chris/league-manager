@@ -1,6 +1,7 @@
 import json
 import pathlib
 
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 from gamedays.service.gamelog import GameLog, GameLogObject, GameLogCreator
@@ -106,9 +107,10 @@ class TestGamelogCreator(TestCase):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         team = Team.objects.first()
-        gamelog_creator = GameLogCreator(firstGame, team, {'+2': '21', '+1': '7'})
+        user = User.objects.first()
+        gamelog_creator = GameLogCreator(firstGame, team, {'+2': '21', '+1': '7'}, user)
         gamelog_creator.create()
-        gamelog_creator = GameLogCreator(firstGame, team, {'cop': None}, 2)
+        gamelog_creator = GameLogCreator(firstGame, team, {'cop': None}, user, 2)
         gamelog_creator.create()
         assert len(TeamLog.objects.all()) == 3
         teamlog = TeamLog.objects.get(pk=3)

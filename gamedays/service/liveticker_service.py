@@ -62,12 +62,13 @@ class Liveticker(object):
             time = self.game.gameStarted
         return time.strftime("%H:%M")
 
-    def get_ticks(self):
+    def get_ticks(self, number_of_ticks=5):
         ticks = []
-        game_log_entry: TeamLog
-        for game_log_entry in TeamLog.objects.filter(gameinfo=self.game):
-            is_home = True if game_log_entry.team.name == self.home_name else False
-            ticks.append(Tick(game_log_entry, is_home).as_json())
+        relevant_ticks = TeamLog.objects.filter(gameinfo=self.game).order_by('-created_time')[:number_of_ticks]
+        tick: TeamLog
+        for tick in relevant_ticks:
+            is_home = True if tick.team.name == self.home_name else False
+            ticks.append(Tick(tick, is_home).as_json())
         return ticks
 
     def __repr__(self):
