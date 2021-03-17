@@ -40,11 +40,12 @@ class GameLogCreator(object):
         return 1
 
     def _getValue(self, attr):
-        if attr == 'td':
+        # ToDo deleteMe ... info should come via API request
+        if attr == 'Touchdown':
             return 6
-        if attr in ('pat1', '+1'):
+        if attr in ('1-Extra-Punkt', 'Safety (+1)'):
             return 1
-        if attr in ('pat2', '+2'):
+        if attr in ('2-Extra-Punkte', 'Safety (+2)'):
             return 2
         return 0
 

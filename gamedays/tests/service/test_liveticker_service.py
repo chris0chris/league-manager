@@ -77,16 +77,11 @@ class TestLiveticker(TestCase):
         home = Gameresult.objects.get(gameinfo=lastGame, isHome=True)
         away = Gameresult.objects.get(gameinfo=lastGame, isHome=False)
         DBSetup().create_teamlog_home_and_away(home=home.team, away=away.team, gameinfo=lastGame)
-        teamlog_entry: TeamLog = TeamLog.objects.first()
-        expected_time = teamlog_entry.created_time.strftime("%H:%M")
+        teamlog_entry: TeamLog = TeamLog.objects.filter(gameinfo=lastGame).order_by('-created_time').first()
         liveticker = Liveticker(lastGame)
         ticks = liveticker.get_ticks()
         assert len(ticks) == 5
-        assert ticks[0] == {
-            "text": "Turnover",
-            "isHome": False,
-            "time": expected_time,
-        }
+        assert ticks[0] == Tick(teamlog_entry, False).as_json()
 
 
     def test_game_with_no_team_logs(self):

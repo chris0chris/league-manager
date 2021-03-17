@@ -108,12 +108,17 @@ class TestGamelogCreator(TestCase):
         firstGame = Gameinfo.objects.first()
         team = Team.objects.first()
         user = User.objects.first()
-        gamelog_creator = GameLogCreator(firstGame, team, {'+2': '21', '+1': '7'}, user)
+        gamelog_creator = GameLogCreator(firstGame, team, {
+            'Safety (+2)': '21',
+            '2-Extra-Punkte': '7',
+            '1-Extra-Punkt': '7',
+            'Touchdown': None,
+        }, user)
         gamelog_creator.create()
-        gamelog_creator = GameLogCreator(firstGame, team, {'cop': None}, user, 2)
+        gamelog_creator = GameLogCreator(firstGame, team, {'Turnover': True}, user, 2)
         gamelog_creator.create()
-        assert len(TeamLog.objects.all()) == 3
-        teamlog = TeamLog.objects.get(pk=3)
+        assert len(TeamLog.objects.all()) == 5
+        teamlog = TeamLog.objects.get(pk=5)
         assert teamlog.sequence == 2
         assert teamlog.value == 0
         assert teamlog.half == 2
