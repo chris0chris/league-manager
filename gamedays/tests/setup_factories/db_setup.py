@@ -156,7 +156,7 @@ class DBSetup:
             home = TeamFactory(name='Home')
         if away is None:
             away = TeamFactory(name='Away')
-        # score home: 21 + 21 and cop - change of possession
+        # score home: 21 + 20
         # score away: 3 and 2 cop
         if gameinfo is None:
             gameday = GamedayFactory()
@@ -177,7 +177,7 @@ class DBSetup:
         TeamLogFactory(gameinfo=gameinfo, team=home, sequence=8, player=19, event='Touchdown', value=6, half=2)
         TeamLogFactory(gameinfo=gameinfo, team=home, sequence=8, player=7, event='2-Extra-Punkte', value=2, half=2)
         TeamLogFactory(gameinfo=gameinfo, team=home, sequence=9, player=19, event='Touchdown', value=6, half=2)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=9, player=7, event='1-Extra-Punkt', value=1, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=9, event='1-Extra-Punkt', value=1, half=2)
 
     def create_teamlog_away(self, gameinfo, away):
         TeamLogFactory(gameinfo=gameinfo, team=away, sequence=4, player=7, event='Safety', value=2, half=2)

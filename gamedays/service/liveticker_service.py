@@ -18,6 +18,8 @@ class Tick(object):
         text = self.game_log.event
         if self.game_log.player is not None:
             text = f'{text}: #{self.game_log.player}'
+        if self.game_log.player is None and 'Extra' in self.game_log.event:
+            text = f'{text}: -'
         return text
 
     def __repr__(self):

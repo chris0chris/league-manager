@@ -125,6 +125,11 @@ class TestTick(TestCase):
         tick = Tick(TeamLog.objects.filter(event='1-Extra-Punkt').first(), False)
         assert tick.get_text() == '1-Extra-Punkt: #7'
 
+    def test_get_text_for_incomplete_pat(self):
+        DBSetup().create_teamlog_home_and_away()
+        tick = Tick(TeamLog.objects.filter(event='1-Extra-Punkt', player=None).first(), False)
+        assert tick.get_text() == '1-Extra-Punkt: -'
+
     def test_get_text_for_safety(self):
         DBSetup().create_teamlog_home_and_away()
         tick = Tick(TeamLog.objects.filter(event='Safety').first(), False)
