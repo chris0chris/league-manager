@@ -63,6 +63,8 @@ jobs:
       - run:
           name: "JavaScript Linter"
           command: npm --prefix scorecard/ run eslint
+      - store_test_results:
+          path: /tmp/test-results
 
   liveticker_js:
     executor:
@@ -79,6 +81,8 @@ jobs:
       - run:
           name: "JavaScript Linter"
           command: npm --prefix liveticker/ run eslint
+      - store_test_results:
+          path: /tmp/test-results
 
 workflows:
   version: 2
