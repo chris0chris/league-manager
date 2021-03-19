@@ -1,14 +1,21 @@
-import React, { useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { getLiveticker } from '../../actions/liveticker';
+import {connect} from 'react-redux';
+import {getLiveticker} from '../../actions/liveticker';
 
 import GameTicker from './GameTicker';
 
 const Liveticker = (props) => {
+  const [endlessCounter, setEndlessCounter] = useState(0);
+  const timer = () => setEndlessCounter(endlessCounter + 1);
+  const minute = 60 * 1000;
+  const refreshTime = 2 * minute;
   useEffect(() => {
     props.getLiveticker();
-  }, []);
+    console.log('useEffect', endlessCounter);
+    const id = setInterval(timer, refreshTime);
+    return () => clearInterval(id);
+  }, [endlessCounter]);
   return (
     <>
       {props.liveticker.map((teamEntry, index) => (
@@ -18,9 +25,12 @@ const Liveticker = (props) => {
   );
 };
 
-Liveticker.propTypes = {};
+Liveticker.propTypes = {
+  liveticker: PropTypes.array.isRequired,
+  getLiveticker: PropTypes.func.isRequired,
+};
 const mapStateToProps = (state) => ({
   liveticker: state.livetickerReducer.liveticker,
 });
 
-export default connect(mapStateToProps, { getLiveticker })(Liveticker);
+export default connect(mapStateToProps, {getLiveticker})(Liveticker);
