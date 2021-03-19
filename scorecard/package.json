@@ -12,7 +12,7 @@
     "build": "webpack --mode production --entry ./src/index.js --output-path ./static/scorecard/js",
     "test": "jest --maxWorkers=1",
     "jest": "jest --ci --coverage && codecov",
-    "eslint": "eslint ./src --format junit -o js-lint-results.xml",
+    "eslint": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-scorecard.xml",
     "test:watch": "jest --watch --maxWorkers=1"
   },
   "keywords": [],
