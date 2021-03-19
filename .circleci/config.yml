@@ -64,9 +64,26 @@ jobs:
           name: "JavaScript Linter"
           command: npm --prefix scorecard/ run eslint
 
+  liveticker_js:
+    executor:
+      name: node/default
+      tag: "15.8"
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - node/install-packages:
+          app-dir: liveticker/
+      - run:
+          name: "JavaScript Test Suite"
+          command: npm --prefix liveticker/ run jest
+      - run:
+          name: "JavaScript Linter"
+          command: npm --prefix liveticker/ run eslint
+
 workflows:
   version: 2
   build_and_test:
     jobs:
       - python
       - scorecard_js
+      - liveticker_js
