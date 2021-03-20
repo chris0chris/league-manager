@@ -9,7 +9,7 @@ const GameEvent = ({update}) => {
   });
   return (
     <div className="row">
-      <div className="text-center">
+      <div className="mt-2 text-center">
       Angriffswechsel? Bitte speichern klicken.</div>
     </div>
   );

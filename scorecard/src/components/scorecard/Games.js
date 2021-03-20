@@ -42,9 +42,9 @@ const Games = ({games, onClick: emitEvent, loadAllGames}) => {
           ))}
         </tbody>
       </table>
-      <div className="mt-5 row">
+      <div className="mt-5">
         <div className="form-check">
-          <input className={`form-check-input`}
+          <input className='form-check-input'
             onChange={() => {
               setLoadAll(!loadAll);
               loadAllGames(loadAll);
