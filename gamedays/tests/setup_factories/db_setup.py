@@ -184,6 +184,7 @@ class DBSetup:
         TeamLogFactory(gameinfo=gameinfo, team=away, sequence=6, event='Turnover', cop=True, half=2)
         TeamLogFactory(gameinfo=gameinfo, team=away, sequence=7, player=7, event='Safety', value=1, half=2)
         TeamLogFactory(gameinfo=gameinfo, team=away, sequence=10, event='Turnover', cop=True, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=10, event='Auszeit', input='00:01', value=0, half=2)
 
     def create_gamesetup(self, gameinfo):
         return GameSetupFactory(gameinfo=gameinfo, ctResult='won', direction='arrow_forward', fhPossession='AWAY')

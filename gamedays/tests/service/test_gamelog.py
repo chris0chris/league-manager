@@ -103,20 +103,35 @@ class TestGamelog(TestCase):
 
 
 class TestGamelogCreator(TestCase):
+    def test_gamelog_with_timeout(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        team = Team.objects.first()
+        user = User.objects.first()
+        gamelog_creator = GameLogCreator(firstGame, team, [{"name": "Auszeit", "input": "00:01"}], user)
+        gamelog_creator.create()
+        assert len(TeamLog.objects.all()) == 1
+        teamlog = TeamLog.objects.first()
+        assert teamlog.sequence == 1
+        assert teamlog.input == '00:01'
+        assert teamlog.value == 0
+        assert teamlog.half == 1
+
+
     def test_gamelog_is_created(self):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         team = Team.objects.first()
         user = User.objects.first()
         gamelog_creator = GameLogCreator(firstGame, team,
-            [
-                {"name": "Touchdown", "player": "7"},
-                {"name": "1-Extra-Punkt", "player": ""},
-                {"name": "2-Extra-Punkte", "player": "19"},
-                {"name": "Safety (+1)", "player": "22"},
-                {"name": "Safety (+2)", "player": "12"},
-            ]
-        , user)
+                                         [
+                                             {"name": "Touchdown", "player": "7"},
+                                             {"name": "1-Extra-Punkt", "player": ""},
+                                             {"name": "2-Extra-Punkte", "player": "19"},
+                                             {"name": "Safety (+1)", "player": "22"},
+                                             {"name": "Safety (+2)", "player": "12"},
+                                         ]
+                                         , user)
         gamelog_creator.create()
         gamelog_creator = GameLogCreator(firstGame, team, [{'name': 'Turnover'}], user, 2)
         gamelog_creator.create()
@@ -133,4 +148,3 @@ class TestGamelogCreator(TestCase):
         assert teamlog.sequence == 1
         assert teamlog.value == 6
         assert teamlog.half == 1
-
