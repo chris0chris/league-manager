@@ -29,7 +29,6 @@ class TestLivetickerService(TestCase):
         assert ls.getLiveticker()[0].get_status() == 'Geplant'
         assert ls.getLiveticker()[2].get_status() == 'beendet'
 
-
     def test_multiple_gamedays_are_live(self):
         gameday_one = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(gameday=gameday_one, pk__gt=2).update(scheduled='11:00')
@@ -112,11 +111,6 @@ class TestLiveticker(TestCase):
 
 
 class TestTick(TestCase):
-    # ToDo implement me
-    # def test_get_time(self):
-    #     DBSetup().create_teamlog_home_and_away()
-    #     tick = Tick(TeamLog.objects.last())
-    #     assert tick.get_time() ==
 
     def test_get_time(self):
         DBSetup().create_teamlog_home_and_away()
