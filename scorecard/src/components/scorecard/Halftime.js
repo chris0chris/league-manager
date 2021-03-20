@@ -6,6 +6,7 @@ import {FaArrowLeft, FaArrowRight, FaCheck, FaTimes} from 'react-icons/fa';
 import Timer from '../layout/Timer';
 import $ from 'jquery/src/jquery';
 import {getGameSetup} from '../../actions/gamesetup';
+import {createLogEntry} from '../../actions/games';
 import {connect} from 'react-redux';
 
 const Halftime = (props) => {
@@ -21,13 +22,16 @@ const Halftime = (props) => {
   const itIsHalftime = () => {
     props.getGameSetup(gameLog.gameId);
   };
+  const handleTimeout = (entry) => {
+    props.createLogEntry({...entry, gameId: gameLog.gameId, half: (isFirstHalf? 1: 2)});
+  };
   return (<>
     <div className='row mt-2'>
       <div className='col-2'>
-        <Timeout teamName={gameLog.home.name} isSecondHalf={!isFirstHalf} modId="1" />
+        <Timeout teamName={gameLog.home.name} isSecondHalf={!isFirstHalf} modId="1" onSubmit={handleTimeout} />
       </div>
       <div className='col-2'>
-        <Timeout teamName={gameLog.home.name} isSecondHalf={!isFirstHalf} modId="2" />
+        <Timeout teamName={gameLog.home.name} isSecondHalf={!isFirstHalf} modId="2" onSubmit={handleTimeout} />
       </div>
       <div className='col-4 d-grid'>
         { isFirstHalf &&
@@ -48,10 +52,10 @@ const Halftime = (props) => {
         </button>}
       </div>
       <div className='col-2'>
-        <Timeout teamName={gameLog.away.name} isSecondHalf={!isFirstHalf} modId="3" />
+        <Timeout teamName={gameLog.away.name} isSecondHalf={!isFirstHalf} modId="3" onSubmit={handleTimeout} />
       </div>
       <div className='col-2'>
-        <Timeout teamName={gameLog.away.name} isSecondHalf={!isFirstHalf} modId="4" />
+        <Timeout teamName={gameLog.away.name} isSecondHalf={!isFirstHalf} modId="4" onSubmit={handleTimeout} />
       </div>
     </div>
     <div className="modal fade" id='halftimeTimer'
@@ -101,10 +105,11 @@ Halftime.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   gameSetup: PropTypes.object.isRequired,
   getGameSetup: PropTypes.func.isRequired,
+  createLogEntry: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
   gameSetup: state.gamesReducer.gameSetup,
 });
 
-export default connect(mapStateToProps, {getGameSetup})(Halftime);
+export default connect(mapStateToProps, {getGameSetup, createLogEntry})(Halftime);

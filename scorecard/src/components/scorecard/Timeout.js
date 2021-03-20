@@ -1,10 +1,12 @@
+/* eslint-disable max-len */
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {FaCheck, FaStopwatch, FaTimes} from 'react-icons/fa';
 import Timer from '../layout/Timer';
 import $ from 'jquery/src/jquery';
 
-const Timeout = ({teamName = 'TeamName', modId, isSecondHalf}) => {
+const Timeout = (props) => {
+  const {teamName = 'TeamName', modId, isSecondHalf, onSubmit: updateParent} = props;
   const [timerIsOn, setTimerIsOn] = useState(false);
   const [gameTimeMinutes, setGameTimeMinutes] = useState('');
   const [gameTimeSeconds, setGameTimeSeconds] = useState('');
@@ -22,6 +24,13 @@ const Timeout = ({teamName = 'TeamName', modId, isSecondHalf}) => {
   const handleSubmit = (ev) => {
     ev.preventDefault();
     $(`#modalId_${modId}`).modal('hide');
+    updateParent({
+      team: teamName,
+      event: [
+        {name: 'Auszeit', value: `${gameTimeMinutes}:${gameTimeSeconds}`},
+      ],
+    });
+
     setTimerIsOn(false);
   };
   return (
@@ -109,6 +118,7 @@ Timeout.propTypes = {
   teamName: PropTypes.string.isRequired,
   modId: PropTypes.string.isRequired,
   isSecondHalf: PropTypes.bool,
+  onSubmit: PropTypes.func.isRequired,
 };
 
 export default Timeout;

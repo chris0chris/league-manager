@@ -11,9 +11,11 @@ $.mockImplementation(() => {
   return {modal: modalMock};
 });
 
+const onSubmitMock = jest.fn();
+
 
 const setup = () => {
-  render(<Timeout teamName="TeamName" modId="1" />);
+  render(<Timeout teamName="TeamName" modId="1" onSubmit={onSubmitMock} />);
 };
 
 describe('Timeout component', () => {
@@ -34,6 +36,12 @@ describe('Timeout component', () => {
     expect(modalMock.mock.calls[0][0]).toBe('hide');
     expect(screen.getByTestId('timeoutButton')).toBeDisabled();
     expect(screen.getByText('00:01')).toBeInTheDocument();
+    expect(onSubmitMock.mock.calls[0][0]).toEqual({
+      team: 'TeamName',
+      event: [
+        {name: 'Auszeit', value: '00:01'},
+      ],
+    });
   });
   it('should do nothing, when clicked on done', () => {
     setup();
