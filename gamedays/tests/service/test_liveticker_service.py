@@ -147,7 +147,7 @@ class TestTick(TestCase):
     def test_get_text_for_turnover(self):
         DBSetup().create_teamlog_home_and_away()
         tick = Tick(TeamLog.objects.filter(event='Turnover').first(), False)
-        assert tick.get_text() == 'Turnover'
+        assert tick.get_text() == 'Ballabgabe'
 
     def test_get_as_json(self):
         DBSetup().create_teamlog_home_and_away()
