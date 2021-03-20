@@ -28,7 +28,7 @@ class TestGameService(TestCase):
         game_service = GameService(firstGame.pk)
         game_service.update_gamestart()
         firstGame: Gameinfo = Gameinfo.objects.first()
-        assert firstGame.status == 'gestartet'
+        assert firstGame.status == '1. Halbzeit'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameStarted))
 
     def test_gamefinished_is_updated(self):

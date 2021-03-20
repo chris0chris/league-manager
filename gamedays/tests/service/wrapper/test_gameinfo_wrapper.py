@@ -23,7 +23,7 @@ class TestGameinfoWrapper(TestCase):
         gameinfo_wrapper = GameinfoWrapper(firstGame.pk)
         gameinfo_wrapper.set_gamestarted_to_now()
         firstGame: Gameinfo = Gameinfo.objects.first()
-        assert firstGame.status == 'gestartet'
+        assert firstGame.status == '1. Halbzeit'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameStarted))
 
     def test_game_finished_value_is_set(self):

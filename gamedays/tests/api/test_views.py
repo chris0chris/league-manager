@@ -152,7 +152,7 @@ class TestGameSetup(WebTest):
         assert response.status_code == HTTPStatus.OK
         assert response.json == gamesetup
         first_game: Gameinfo = Gameinfo.objects.last()
-        assert first_game.status == 'gestartet'
+        assert first_game.status == '1. Halbzeit'
 
     def test_game_setup_update(self):
         DBSetup().g62_status_empty()
