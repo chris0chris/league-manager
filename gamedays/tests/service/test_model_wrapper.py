@@ -52,7 +52,7 @@ class TestGamedayModelWrapper(TestCase):
     def test_empty_get_final_table(self):
         gameday = DBSetup().g62_qualify_finished()
         gmw = GamedayModelWrapper(gameday.pk)
-        assert gmw.get_final_table() == ''
+        assert gmw.get_final_table().empty
 
     def test_get_final_table(self):
         gameday = DBSetup().g62_finalround(sf='beendet', p5='beendet', p3='beendet', p1='beendet')

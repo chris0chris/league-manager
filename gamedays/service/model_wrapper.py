@@ -67,7 +67,7 @@ class GamedayModelWrapper:
 
     def get_final_table(self):
         if self._gameinfo[self._gameinfo[STATUS] != FINISHED].empty is False:
-            return ''
+            return pd.DataFrame()
         final_table = self._games_with_result.groupby([TEAM_NAME], as_index=False)
         final_table = final_table.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'})
         final_table = final_table.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)

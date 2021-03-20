@@ -104,7 +104,8 @@ class TestGamedaySchedule(WebTest):
         gameday = DBSetup().g62_qualify_finished()
         response = self.app.get(reverse('api-gameday-schedule', kwargs={'pk': gameday.pk}) + '?get=final')
         assert response.status_code == HTTPStatus.OK
-        assert response.json == json.loads(EmptyFinalTable.to_json(), object_pairs_hook=OrderedDict)
+        import pandas as pd
+        assert response.json == json.loads(pd.DataFrame().to_json(orient='split'))
 
 
 class TestRetrieveUpdateOfficials(WebTest):
