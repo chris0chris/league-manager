@@ -187,6 +187,7 @@ class TeamLog(models.Model):
     sequence = models.PositiveSmallIntegerField()
     player = models.PositiveSmallIntegerField(null=True, blank=True)
     event = models.CharField(max_length=100, blank=False)
+    input = models.CharField(max_length=100, default='', null=True)
     value = models.PositiveSmallIntegerField(default=0, blank=True)
     cop = models.BooleanField(default=False)
     half = models.PositiveSmallIntegerField()
