@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+from gamedays.service.gameday_settings import SCHEDULED
 from gamedays.service.utils import AsJsonEncoder
 from gamedays.service.wrapper.gameresult_wrapper import GameresultWrapper
 from teammanager.models import Gameinfo, Gameresult, TeamLog, Gameday
@@ -89,7 +90,16 @@ class LivetickerService(object):
             self.gameday_ids = [gameday_id]
 
     def getLiveticker(self):
-        games = Gameinfo.objects.filter(gameday__in=self.gameday_ids, gameFinished__isnull=True).order_by('scheduled')
+        next_games = Gameinfo.objects.filter(
+            gameday__in=self.gameday_ids, gameFinished__isnull=True).order_by(SCHEDULED)
+        previously_finished_games = Gameinfo.objects.filter(
+            gameday__in=self.gameday_ids, gameFinished__isnull=False).order_by(f'-{SCHEDULED}')
+        liveticker = []
+        liveticker = liveticker + self._filter_games(next_games)
+        liveticker = liveticker + self._filter_games(previously_finished_games)
+        return liveticker
+
+    def _filter_games(self, games):
         liveticker = []
         next_scheduled = None
         for game in games:

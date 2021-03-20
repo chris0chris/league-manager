@@ -19,6 +19,17 @@ class TestLivetickerService(TestCase):
         ls = LivetickerService(gameday.pk)
         assert len(ls.getLiveticker()) == 2
 
+    def test_get_livetickers_for_last_done_and_coming_up_games(self):
+        gameday = DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(pk__lt=3).update(gameStarted='10:00', gameFinished='10:59', status='beendet')
+        Gameinfo.objects.filter(pk__gt=2).update(scheduled='11:00:00')
+        Gameinfo.objects.filter(pk__gt=4).update(scheduled='12:00:00')
+        ls = LivetickerService(gameday.pk)
+        assert len(ls.getLiveticker()) == 4
+        assert ls.getLiveticker()[0].get_status() == 'Geplant'
+        assert ls.getLiveticker()[2].get_status() == 'beendet'
+
+
     def test_multiple_gamedays_are_live(self):
         gameday_one = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(gameday=gameday_one, pk__gt=2).update(scheduled='11:00')
