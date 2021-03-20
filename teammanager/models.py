@@ -199,9 +199,9 @@ class TeamLog(models.Model):
 
     def __str__(self):
         if self.cop:
-            return f'{self.gameinfo.pk}__{self.team}#{self.sequence} CoP: {self.cop} - Half: {self.half}' \
+            return f'{self.gameinfo.pk}__{self.team}#{self.sequence} {self.event} - Half: {self.half}' \
                    f'{" [DELETED]" if self.isDeleted else ""}'
-        return f'{self.gameinfo.pk}__{self.team}#{self.sequence} Player: {self.player} Value: {self.value} ' \
+        return f'{self.gameinfo.pk}__{self.team}#{self.sequence} {self.event} Player: {self.player} Value: {self.value} ' \
                f'- Half: {self.half}{" [DELETED]" if self.isDeleted else ""}'
 
 
