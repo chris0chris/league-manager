@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
 import {render, screen} from '@testing-library/react';
-// import {GAME_LOG_COMPLETE_GAME} from '../../../__tests__/testdata/gameLogData';
 import AddPoints from '../AddPoints';
 import userEvent from '@testing-library/user-event';
 

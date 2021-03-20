@@ -100,6 +100,30 @@ describe('Details component', () => {
     expect(awayButton).not.toBeChecked();
     expect(screen.getByText('Einträge Heim')).toBeInTheDocument();
   });
+  it('should set points for opposit team, when safety was submitted', () => {
+    setup();
+    const homeButton = screen.getByRole('radio', {
+      name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.home.name}\\b`, 'i')});
+    const awayButton = screen.getByRole('radio', {
+      name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.away.name}\\b`, 'i')});
+    expect(homeButton).not.toBeChecked();
+    expect(awayButton).toBeChecked();
+    expect(screen.getByText('Einträge Gast')).toBeInTheDocument();
+    userEvent.click(screen.getByRole('radio', {name: /safety/i}));
+    userEvent.type(screen.getByRole('spinbutton', {name: 'number'}), '91');
+    userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
+    expect(homeButton).toBeChecked();
+    expect(awayButton).not.toBeChecked();
+    /* [0][
+      0 - "/api/gamelog/53",
+      1 - {"event": [{"name": "Safety (+2)", "player": "91"}], "gameId": 53, "half": 2, "team": "Home"},
+      2 - "GET_GAME_LOG",
+      3 - "GAME_CREATE_LOG_ENTRY_FAIL"] */
+    expect(apiPost.mock.calls[0][1]['team']).toEqual('Home');
+
+    expect(screen.getByText('Einträge Heim')).toBeInTheDocument();
+  });
+
   it('should send a post api call with correct half, when points input was submitted', () => {
     setup();
     userEvent.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');

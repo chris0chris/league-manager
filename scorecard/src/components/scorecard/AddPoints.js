@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import RadioButton from '../layout/RadioButton';
 import Touchdown from './Touchdown';
-import SpecialPoints from './SpecialPoints';
+import Safety from './Safety';
 import GameEvent from './GameEvent';
 
 const AddPoints = ({onSubmit: updateParent}) => {
@@ -49,7 +49,7 @@ const AddPoints = ({onSubmit: updateParent}) => {
       <Touchdown resetRequested={reset} setResetRequested={setReset} update={setEvent} />
     }
     { showSpecial &&
-      <SpecialPoints resetRequested={reset} setResetRequested={setReset} update={setEvent} />
+      <Safety resetRequested={reset} setResetRequested={setReset} update={setEvent} />
     }
     {
       showTurnover &&

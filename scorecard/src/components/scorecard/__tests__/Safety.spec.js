@@ -2,12 +2,12 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import SpecialPoints from '../SpecialPoints';
+import Safety from '../Safety';
 
 const mockFunc = jest.fn();
 
 const setup = () => {
-  render(<SpecialPoints resetRequested={false} setResetRequested={()=>{}} update={mockFunc} />);
+  render(<Safety resetRequested={false} setResetRequested={()=>{}} update={mockFunc} />);
 };
 
 describe('Touchdown component', () => {
