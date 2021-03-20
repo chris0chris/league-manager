@@ -7,7 +7,7 @@ from gamedays.tests.setup_factories.db_setup import DBSetup
 from teammanager.models import Gameinfo, Gameresult, TeamLog, Gameday
 
 
-class TestGameService(TestCase):
+class TestLivetickerService(TestCase):
     def test_no_liveticker_available(self):
         gameday = DBSetup().create_empty_gameday()
         ls = LivetickerService(gameday.pk)
@@ -19,7 +19,6 @@ class TestGameService(TestCase):
         ls = LivetickerService(gameday.pk)
         assert len(ls.getLiveticker()) == 2
 
-class TestLivetickerService(TestCase):
     def test_multiple_gamedays_are_live(self):
         gameday_one = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(gameday=gameday_one, pk__gt=2).update(scheduled='11:00')
@@ -29,12 +28,12 @@ class TestLivetickerService(TestCase):
         liveticker_service = LivetickerService()
         assert len(liveticker_service.getLiveticker()) == 4
 
-
     def test_only_one_gameday_is_live(self):
         gameday = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(pk__gt=2).update(scheduled='11:00')
         liveticker_service = LivetickerService(gameday.pk)
         assert len(liveticker_service.getLiveticker()) == 2
+
 
 class TestLiveticker(TestCase):
     def test_liveticker_get_status_when_gameStarted_empty(self):
@@ -44,25 +43,25 @@ class TestLiveticker(TestCase):
 
     def test_liveticker_get_status_when_gameStarted_is_set(self):
         DBSetup().g62_status_empty()
-        lastGame = Gameinfo.objects.last()
-        lastGame.gameStarted = '10:00'
-        lastGame.status = '1st Half'
-        lastGame.save()
-        liveticker = Liveticker(lastGame)
+        last_game = Gameinfo.objects.last()
+        last_game.gameStarted = '10:00'
+        last_game.status = '1st Half'
+        last_game.save()
+        liveticker = Liveticker(last_game)
         assert liveticker.get_status() == '1st Half'
 
     def test_liveticker_get_time_when_gameStarted_empty(self):
         DBSetup().g62_status_empty()
-        lastGame = Gameinfo.objects.last()
-        liveticker = Liveticker(lastGame)
+        last_game = Gameinfo.objects.last()
+        liveticker = Liveticker(last_game)
         assert liveticker.get_time() == '10:00'
 
     def test_liveticker_get_time_when_gameStarted_is_set(self):
         DBSetup().g62_status_empty()
-        lastGame = Gameinfo.objects.last()
-        lastGame.gameStarted = '12:00'
-        lastGame.status = '1st Half'
-        lastGame.save()
+        last_game = Gameinfo.objects.last()
+        last_game.gameStarted = '12:00'
+        last_game.status = '1st Half'
+        last_game.save()
         liveticker = Liveticker(Gameinfo.objects.last())
         assert liveticker.get_time() == '12:00'
 
@@ -73,16 +72,15 @@ class TestLiveticker(TestCase):
 
     def test_liveticker_get_ticks(self):
         DBSetup().g62_status_empty()
-        lastGame = Gameinfo.objects.last()
-        home = Gameresult.objects.get(gameinfo=lastGame, isHome=True)
-        away = Gameresult.objects.get(gameinfo=lastGame, isHome=False)
-        DBSetup().create_teamlog_home_and_away(home=home.team, away=away.team, gameinfo=lastGame)
-        teamlog_entry: TeamLog = TeamLog.objects.filter(gameinfo=lastGame).order_by('-created_time').first()
-        liveticker = Liveticker(lastGame)
+        last_game = Gameinfo.objects.last()
+        home = Gameresult.objects.get(gameinfo=last_game, isHome=True)
+        away = Gameresult.objects.get(gameinfo=last_game, isHome=False)
+        DBSetup().create_teamlog_home_and_away(home=home.team, away=away.team, gameinfo=last_game)
+        teamlog_entry: TeamLog = TeamLog.objects.filter(gameinfo=last_game).order_by('-created_time').first()
+        liveticker = Liveticker(last_game)
         ticks = liveticker.get_ticks()
         assert len(ticks) == 5
         assert ticks[0] == Tick(teamlog_entry, False).as_json()
-
 
     def test_game_with_no_team_logs(self):
         DBSetup().g62_status_empty()
@@ -100,6 +98,7 @@ class TestLiveticker(TestCase):
             },
             "ticks": [],
         }
+
 
 class TestTick(TestCase):
     # ToDo implement me
@@ -146,8 +145,7 @@ class TestTick(TestCase):
         teamlog_entry: TeamLog = TeamLog.objects.first()
         expected_time = teamlog_entry.created_time.strftime("%H:%M")
         assert tick.as_json() == {
-            "text":  "Touchdown: #19",
+            "text": "Touchdown: #19",
             "isHome": False,
             "time": expected_time,
         }
-
