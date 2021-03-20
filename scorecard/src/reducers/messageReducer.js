@@ -1,18 +1,27 @@
-import {GET_ERRORS, MESSAGE_GAME_LOG} from '../actions/types';
+import {GET_ERRORS, GET_GAME_LOG, MESSAGE_GAME_LOG} from '../actions/types';
 
 const initialState = {
   msg: {},
   status: null,
+  firstCall: true,
 };
 
 export default (state = initialState, action) => {
   switch (action.type) {
     case GET_ERRORS:
       return {
+        ...state,
         msg: action.payload.msg,
         status: action.payload.status,
       };
-    case MESSAGE_GAME_LOG: {
+    case GET_GAME_LOG: {
+      console.log('messageReducer GET_GAME_LOG', state);
+      if (state.firstCall) {
+        return {
+          msg: '',
+          status: null,
+        };
+      }
       return {
         msg: action.payload,
         status: 200,

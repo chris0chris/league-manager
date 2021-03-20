@@ -84,7 +84,7 @@ describe('Details component', () => {
         {name: new RegExp('Zeige Einträge')}));
     expect(screen.getAllByRole('table').length).toBe(5);
   });
-  it('should set the opposit team to be checked, when input was submitted', () => {
+  it('should set the opposite team to be checked, when input was submitted', () => {
     setup();
     const homeButton = screen.getByRole('radio', {
       name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.home.name}\\b`, 'i')});
@@ -100,7 +100,7 @@ describe('Details component', () => {
     expect(awayButton).not.toBeChecked();
     expect(screen.getByText('Einträge Heim')).toBeInTheDocument();
   });
-  it('should set points for opposit team, when safety was submitted', () => {
+  it('should set points for opposite team, when safety was submitted', () => {
     setup();
     const homeButton = screen.getByRole('radio', {
       name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.home.name}\\b`, 'i')});

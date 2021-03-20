@@ -11,8 +11,6 @@ import Halftime from './Halftime';
 import {FINALIZE_URL} from '../common/urls';
 import ModalDeleteEntry from './ModalDeleteEntry';
 import {FaTrash} from 'react-icons/fa';
-import {MESSAGE_GAME_LOG} from '../../actions/types';
-import {sendMessage} from '../../actions/messages';
 
 const Details = (props) => {
   const gameLog = props.gameLog;
@@ -53,7 +51,6 @@ const Details = (props) => {
     } else {
       props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, 'half': half, ...event});
     }
-    props.sendMessage(MESSAGE_GAME_LOG, event);
     setTeamInPossession(nextTeamInPossession);
     setShowHomeLog(nextTeamInPossession == gameLog.home.name);
   };
@@ -152,11 +149,10 @@ Details.propTypes = {
   gameLog: PropTypes.object,
   createLogEntry: PropTypes.func.isRequired,
   halftime: PropTypes.func.isRequired,
-  sendMessage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
   gameLog: state.gamesReducer.gameLog,
 });
 
-export default connect(mapStateToProps, {createLogEntry, halftime, sendMessage})(Details);
+export default connect(mapStateToProps, {createLogEntry, halftime})(Details);
