@@ -15,6 +15,7 @@ const onSubmitMock = jest.fn();
 
 
 const setup = () => {
+  onSubmitMock.mockClear();
   render(<Timeout teamName="TeamName" modId="1" onSubmit={onSubmitMock} />);
 };
 
@@ -39,7 +40,7 @@ describe('Timeout component', () => {
     expect(onSubmitMock.mock.calls[0][0]).toEqual({
       team: 'TeamName',
       event: [
-        {name: 'Auszeit', value: '00:01'},
+        {name: 'Auszeit', input: '00:01'},
       ],
     });
   });
@@ -52,5 +53,6 @@ describe('Timeout component', () => {
     userEvent.click(screen.getByRole('button', {name: 'Abbrechen'}));
     expect(screen.getByTestId('timeoutButton')).toBeEnabled();
     expect(screen.queryByText('00:01')).not.toBeInTheDocument();
+    expect(onSubmitMock.mock.calls).toHaveLength(0);
   });
 });

@@ -27,7 +27,7 @@ const Timeout = (props) => {
     updateParent({
       team: teamName,
       event: [
-        {name: 'Auszeit', value: `${gameTimeMinutes}:${gameTimeSeconds}`},
+        {name: 'Auszeit', input: `${gameTimeMinutes}:${gameTimeSeconds}`},
       ],
     });
 
