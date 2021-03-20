@@ -6,27 +6,25 @@ import {connect} from 'react-redux';
 const MessageToaster = (props) => {
   const [duration, setDuration] = useState(3);
   const [timerIsOn, setTimerIsOn] = useState(false);
-  const [keepShowingToast, setKeepShowingToast] = useState(false);
   const timer = () => setDuration(duration - 1);
   useEffect(() => {
     if (!timerIsOn || duration <= 0) {
       setDuration(3);
       setTimerIsOn(false);
-      setShowToast(keepShowingToast);
+      setShowToast(false);
     } else if (timerIsOn) {
       const id = setInterval(timer, 1000);
       return () => clearInterval(id);
     }
   }, [duration, timerIsOn]);
   useEffect(() => {
-    if (props.status != null && props.status != 200) {
-      setKeepShowingToast(true);
-      setTimerIsOn(false);
-    } else {
-      setKeepShowingToast(false);
+    if (props.status != null && props.status == 200) {
       setTimerIsOn(true);
+      setDuration(3);
+    } else {
+      setTimerIsOn(true);
+      setDuration(7);
     }
-    setDuration(3);
     setShowToast(true);
   }, [props.msg]);
   const [showToast, setShowToast] = useState(true);
