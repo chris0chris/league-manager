@@ -31,7 +31,6 @@ class Tick(object):
 
 
 class Liveticker(object):
-    SCHEDULED = 'Geplant'
 
     def __init__(self, game):
         self.game: Gameinfo = game
@@ -54,8 +53,6 @@ class Liveticker(object):
             ticks=self.get_ticks())
 
     def get_status(self):
-        if self.game.gameStarted is None:
-            return self.SCHEDULED
         return self.game.status
 
     def get_time(self):
@@ -76,7 +73,6 @@ class Liveticker(object):
 
     def __repr__(self):
         self.as_json()
-
 
 
 class LivetickerService(object):

@@ -49,7 +49,7 @@ class TestLivetickerService(TestCase):
 class TestLiveticker(TestCase):
     def test_liveticker_get_status_when_gameStarted_empty(self):
         DBSetup().g62_status_empty()
-        liveticker = Liveticker(Gameinfo.objects.last())
+        liveticker = Liveticker(Gameinfo.objects.filter(status='Geplant').last())
         assert liveticker.get_status() == 'Geplant'
 
     def test_liveticker_get_status_when_gameStarted_is_set(self):
@@ -95,17 +95,17 @@ class TestLiveticker(TestCase):
 
     def test_game_with_no_team_logs(self):
         DBSetup().g62_status_empty()
-        liveticker = Liveticker(Gameinfo.objects.last())
+        liveticker = Liveticker(Gameinfo.objects.filter(status='Geplant').last())
         assert liveticker.as_json() == {
             "status": "Geplant",
             "time": "10:00",
             "home": {
-                "name": "A1",
-                "score": 0,
+                "name": "B3",
+                "score": 1,
             },
             "away": {
                 "name": "B1",
-                "score": 0,
+                "score": 3,
             },
             "ticks": [],
         }

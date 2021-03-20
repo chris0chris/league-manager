@@ -10,7 +10,7 @@ class DBSetup:
         return self._create_gameday()
 
     def g62_status_empty(self):
-        return self._create_gameday(qualify='')
+        return self._create_gameday(qualify='Geplant')
 
     def g62_finalround(self, sf='', p5='', p3='', p1=''):
         return self._create_gameday(sf=sf, p5=p5, p3=p3, p1=p1)

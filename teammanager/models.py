@@ -122,7 +122,7 @@ class Gameinfo(models.Model):
     scheduled = models.TimeField()
     field = models.PositiveSmallIntegerField()
     officials = models.ForeignKey(Team, on_delete=models.PROTECT, blank=True)
-    status = models.CharField(max_length=100, default='', blank=True)
+    status = models.CharField(max_length=100, default='Geplant')
     gameStarted = models.TimeField(null=True, blank=True)
     gameHalftime = models.TimeField(null=True, blank=True)
     gameFinished = models.TimeField(null=True, blank=True)

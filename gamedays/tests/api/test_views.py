@@ -51,7 +51,7 @@ class TestGameinfoRetrieveUpdate(WebTest):
         DBSetup().g62_status_empty()
         gameinfo_pk = 1
         gameinfo = Gameinfo.objects.get(id=gameinfo_pk)
-        assert gameinfo.status == ''
+        assert gameinfo.status == 'Geplant'
         assert gameinfo.gameStarted is None
         assert gameinfo.gameHalftime is None
         assert gameinfo.gameFinished is None
