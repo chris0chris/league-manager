@@ -3,7 +3,8 @@ import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 
 // eslint-disable-next-line max-len
-const Touchdown = ( {resetRequested, setResetRequested, update}) => {
+const Touchdown = (props) => {
+  const {resetRequested, setResetRequested, update} = props;
   const [tdInput, setTdInput] = useState('');
   const [patInput, setPatInput] = useState('');
   const [patRadio, setPatRadio] = useState('1-Extra-Punkt');
@@ -18,7 +19,12 @@ const Touchdown = ( {resetRequested, setResetRequested, update}) => {
     }
   }, [resetRequested]);
 
-  update({'Touchdown': tdInput, [patRadio]: patInput});
+  update({
+    event: [
+      {name: 'Touchdown', player: tdInput},
+      {name: patRadio, player: patInput},
+    ],
+  });
 
   return (
     <><div className="input-group mt-2">

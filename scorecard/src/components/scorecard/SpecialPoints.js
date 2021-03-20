@@ -15,7 +15,11 @@ const SpecialPoints = ({resetRequested, setResetRequested, update}) => {
     }
   }, [resetRequested]);
 
-  update({[pointsRadio]: pointsInput});
+  update({
+    event: [
+      {name: pointsRadio, player: pointsInput},
+    ],
+  });
 
   return (
     <>

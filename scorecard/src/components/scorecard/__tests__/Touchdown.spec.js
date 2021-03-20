@@ -22,13 +22,23 @@ describe('Touchdown component', () => {
     setup();
     userEvent.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');
     userEvent.type(screen.getByRole('spinbutton', {name: 'PAT number'}), '7');
-    expect(mockFunc.mock.calls[mockFunc.mock.calls.length-1][0]).toEqual({'Touchdown': '19', '1-Extra-Punkt': '7'});
+    expect(mockFunc.mock.calls[mockFunc.mock.calls.length-1][0]).toEqual({
+      event: [
+        {name: 'Touchdown', player: '19'},
+        {name: '1-Extra-Punkt', player: '7'},
+      ],
+    });
   });
   it('should call update function with pat2', () => {
     setup();
     userEvent.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');
     userEvent.type(screen.getByRole('spinbutton', {name: 'PAT number'}), '7');
     userEvent.click(screen.getByRole('radio', {name: '2'}));
-    expect(mockFunc.mock.calls[mockFunc.mock.calls.length-1][0]).toEqual({'Touchdown': '19', '2-Extra-Punkte': '7'});
+    expect(mockFunc.mock.calls[mockFunc.mock.calls.length-1][0]).toEqual({
+      event: [
+        {name: 'Touchdown', player: '19'},
+        {name: '2-Extra-Punkte', player: '7'},
+      ],
+    });
   });
 });

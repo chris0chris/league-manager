@@ -2,7 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const GameEvent = ({update}) => {
-  update({Turnover: true});
+  update({
+    event: [
+      {name: 'Turnover'},
+    ],
+  });
   return (
     <div className="row">
       <div className="text-center">
