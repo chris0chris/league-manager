@@ -108,21 +108,29 @@ class TestGamelogCreator(TestCase):
         firstGame = Gameinfo.objects.first()
         team = Team.objects.first()
         user = User.objects.first()
-        gamelog_creator = GameLogCreator(firstGame, team, {
-            'Safety (+2)': '21',
-            '2-Extra-Punkte': '7',
-            '1-Extra-Punkt': '7',
-            'Touchdown': None,
-        }, user)
+        gamelog_creator = GameLogCreator(firstGame, team,
+            [
+                {"name": "Touchdown", "player": "7"},
+                {"name": "1-Extra-Punkt", "player": ""},
+                {"name": "2-Extra-Punkte", "player": "19"},
+                {"name": "Safety (+1)", "player": "22"},
+                {"name": "Safety (+2)", "player": "12"},
+            ]
+        , user)
         gamelog_creator.create()
-        gamelog_creator = GameLogCreator(firstGame, team, {'Turnover': True}, user, 2)
+        gamelog_creator = GameLogCreator(firstGame, team, [{'name': 'Turnover'}], user, 2)
         gamelog_creator.create()
-        assert len(TeamLog.objects.all()) == 5
-        teamlog = TeamLog.objects.get(pk=5)
+        assert len(TeamLog.objects.all()) == 6
+        teamlog = TeamLog.objects.get(pk=6)
         assert teamlog.sequence == 2
         assert teamlog.value == 0
         assert teamlog.half == 2
+        teamlog = TeamLog.objects.get(pk=2)
+        assert teamlog.sequence == 1
+        assert teamlog.value == 0
+        assert teamlog.half == 1
         teamlog = TeamLog.objects.get(pk=1)
         assert teamlog.sequence == 1
-        assert teamlog.value == 2
+        assert teamlog.value == 6
         assert teamlog.half == 1
+

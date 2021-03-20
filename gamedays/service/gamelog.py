@@ -17,19 +17,18 @@ class GameLogCreator(object):
     def create(self):
         print(type(self.event), self.event)
         sequence = self._getSequence()
-        for attr, value in self.event.items():
+        for entry in self.event:
             teamlog = TeamLog()
             teamlog.gameinfo = self.gameinfo
             teamlog.team = self.team
             teamlog.sequence = sequence
-            teamlog.cop = attr == 'Turnover'
-            teamlog.event = attr
-            teamlog.player = self._get_player(value)
-            teamlog.value = self._getValue(attr) if teamlog.player is not None else 0
+            teamlog.cop = entry.get('name') == 'Turnover'
+            teamlog.event = entry.get('name')
+            teamlog.player = entry.get('player') if entry.get('player') != '' else None
+            teamlog.value = self._getValue(entry.get('name')) if teamlog.player is not None else 0
             teamlog.half = self.half
             teamlog.author = self.user
             teamlog.save()
-            print(attr, '=', value)
         return GameLog(self.gameinfo)
 
     def _getSequence(self):
@@ -39,13 +38,13 @@ class GameLogCreator(object):
             return entryWithLatestSequence.sequence + 1
         return 1
 
-    def _getValue(self, attr):
+    def _getValue(self, name):
         # ToDo deleteMe ... info should come via API request
-        if attr == 'Touchdown':
+        if name == 'Touchdown':
             return 6
-        if attr in ('1-Extra-Punkt', 'Safety (+1)'):
+        if name in ('1-Extra-Punkt', 'Safety (+1)'):
             return 1
-        if attr in ('2-Extra-Punkte', 'Safety (+2)'):
+        if name in ('2-Extra-Punkte', 'Safety (+2)'):
             return 2
         return 0
 

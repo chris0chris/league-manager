@@ -207,7 +207,9 @@ class TestGameLog(WebTest):
         firstGame = Gameinfo.objects.first()
         response = self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
                                       {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
-                                       'event': {'Touchdown': '19', '1-Extra-Punkt': '7'}},
+                                       'event': [
+                                           {'name': 'Touchdown', 'player': '19'},
+                                           {'name': '1-Extra-Punkt', 'player': '7'}]},
                                       headers=DBSetup().get_token_header(another_user))
         assert response.status_code == HTTPStatus.CREATED
         assert TeamLog.objects.first().author == another_user
@@ -227,7 +229,10 @@ class TestGameLog(WebTest):
         firstGame = Gameinfo.objects.first()
         response = self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
                                       {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
-                                       'event': {'Touchdown': '19', '1-Extra-Punkt': ''}}, headers=DBSetup().get_token_header())
+                                       'event': [
+                                           {'name': 'Touchdown', 'player': '19'},
+                                           {'name': '1-Extra-Punkt', 'player': ''}]},
+                                      headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.CREATED
         assert response.json == {'gameId': 1,
                                  'away': {
@@ -250,7 +255,7 @@ class TestGameLog(WebTest):
         firstGame = Gameinfo.objects.first()
         response = self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
                                       {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
-                                       'event': {'Turnover': True, }}, headers=DBSetup().get_token_header())
+                                       'event': [{'name': 'Turnover'}]}, headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.CREATED
         assert response.json == {'gameId': 1,
                                  'isFirstHalf': True,
@@ -273,7 +278,10 @@ class TestGameLog(WebTest):
         firstGame = Gameinfo.objects.first()
         response = self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
                                       {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
-                                       'event': {'Touchdown': '19', '2-Extra-Punkte': '7'}}, headers=DBSetup().get_token_header())
+                                       'event': [
+                                           {'name': 'Touchdown', 'player': '19'},
+                                           {'name': '2-Extra-Punkte', 'player': '7'}]},
+                                      headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.CREATED
         home: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=True)
         away: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=False)
@@ -285,16 +293,22 @@ class TestGameLog(WebTest):
         firstGame = Gameinfo.objects.first()
         self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
                            {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
-                            'event': {'Touchdown': '19', '1-Extra-Punkt': '7'}}, headers=DBSetup().get_token_header())
+                            'event': [
+                                {'name': 'Touchdown', 'player': '19'},
+                                {'name': '1-Extra-Punkt', 'player': '7'}]}, headers=DBSetup().get_token_header())
         self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
                            {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
-                            'event': {'Touchdown': '19', 'Safety (+2)': '7'}}, headers=DBSetup().get_token_header())
+                            'event': [
+                                {'name': 'Touchdown', 'player': '19'},
+                                {'name': 'Safety (+2)', 'player': '7'}]}, headers=DBSetup().get_token_header())
         self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
                            {'team': 'A2', 'gameId': firstGame.pk, 'half': 2,
-                            'event': {'Touchdown': '19', '2-Extra-Punkte': None}}, headers=DBSetup().get_token_header())
+                            'event': [
+                                {'name': 'Touchdown', 'player': '19'},
+                                {'name': '2-Extra-Punkte', 'player': ''}]}, headers=DBSetup().get_token_header())
         self.app.post_json(reverse('api-gamelog', kwargs={'id': firstGame.pk}),
                            {'team': 'A2', 'gameId': firstGame.pk, 'half': 2,
-                            'event': {'Turnover': True}}, headers=DBSetup().get_token_header())
+                            'event': [{'name': 'Turnover'}]}, headers=DBSetup().get_token_header())
         home: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=True)
         away: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=False)
         assert home.fh == 15
