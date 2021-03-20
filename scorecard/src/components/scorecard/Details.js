@@ -47,7 +47,7 @@ const Details = (props) => {
     setTeamInPossession(teamName);
   };
   const createLogEntry = (event) => {
-    props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, 'half': half, event});
+    props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, 'half': half, ...event});
     props.sendMessage(MESSAGE_GAME_LOG, event);
     const nextTeamInPossession = teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
     setTeamInPossession(nextTeamInPossession);
