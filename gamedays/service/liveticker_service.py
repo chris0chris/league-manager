@@ -8,12 +8,12 @@ from teammanager.models import Gameinfo, Gameresult, TeamLog, Gameday
 
 
 class Tick(object):
-    def __init__(self, game_log: TeamLog, is_home):
+    def __init__(self, game_log: TeamLog, team):
         self.game_log = game_log
-        self.is_home = is_home
+        self.team = team
 
     def as_json(self):
-        return dict(text=self.get_text(), isHome=self.is_home, time=self.get_time())
+        return dict(text=self.get_text(), team=self.team, time=self.get_time())
 
     def get_text(self):
         text = self.game_log.event
@@ -71,7 +71,10 @@ class Liveticker(object):
         relevant_ticks = TeamLog.objects.filter(gameinfo=self.game).order_by('-created_time')[:number_of_ticks]
         tick: TeamLog
         for tick in relevant_ticks:
-            is_home = True if tick.team.name == self.home_name else False
+            if tick.team is None:
+                is_home = None
+            else:
+                is_home = 'home' if tick.team.name == self.home_name else 'away'
             ticks.append(Tick(tick, is_home).as_json())
         return ticks
 

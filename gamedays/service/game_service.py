@@ -1,22 +1,26 @@
 from gamedays.service.gamelog import GameLog, GameLogCreator
 from gamedays.service.wrapper.gameinfo_wrapper import GameinfoWrapper
 from gamedays.service.wrapper.gameresult_wrapper import GameresultWrapper
-from teammanager.models import Team
+from teammanager.models import Team, TeamLog
 
 
 class GameService(object):
     def __init__(self, game_id):
+        self.game_id = game_id
         self.gameinfo: GameinfoWrapper = GameinfoWrapper(game_id)
         self.gameresult: GameresultWrapper = GameresultWrapper(self.gameinfo.gameinfo)
 
     def update_halftime(self):
         self.gameinfo.set_halftime_to_now()
+        self._create_log_entry('2. Halbzeit gestartet')
 
     def update_gamestart(self):
         self.gameinfo.set_gamestarted_to_now()
+        self._create_log_entry('Spiel gestartet')
 
     def update_game_finished(self):
         self.gameinfo.set_game_finished_to_now()
+        self._create_log_entry('Spiel beendet')
 
     def get_gamelog(self):
         return GameLog(self.gameinfo.gameinfo)
@@ -37,3 +41,11 @@ class GameService(object):
         gamelog = GameLog(self.gameinfo.gameinfo)
         gamelog.mark_entries_as_deleted(sequence)
         return gamelog
+
+    def _create_log_entry(self, event_text):
+        TeamLog.objects.get_or_create(
+            gameinfo_id=self.game_id,
+            event=event_text,
+            half=0,
+            sequence=0,
+        )
