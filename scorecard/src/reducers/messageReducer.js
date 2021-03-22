@@ -1,4 +1,4 @@
-import {GET_ERRORS, GET_GAME_LOG, MESSAGE_GAME_LOG} from '../actions/types';
+import {GET_ERRORS, GET_GAME_LOG} from '../actions/types';
 
 const initialState = {
   msg: {},
