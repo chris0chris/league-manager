@@ -183,7 +183,7 @@ class GameSetup(models.Model):
 
 class TeamLog(models.Model):
     gameinfo: Gameinfo = models.ForeignKey(Gameinfo, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.PROTECT, blank=True)
+    team = models.ForeignKey(Team, on_delete=models.PROTECT, blank=True, null=True)
     sequence = models.PositiveSmallIntegerField()
     player = models.PositiveSmallIntegerField(null=True, blank=True)
     event = models.CharField(max_length=100, blank=False)
