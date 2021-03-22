@@ -11,11 +11,11 @@ export const LIVETICKER_DATA = [
       score: '0',
     },
     ticks: [
-      {text: 'Turnover', isHome: true, time: '12:05'},
-      {text: 'Touchdown: #19 Extra-Punkt: #7', isHome: true, time: '12:10'},
-      {text: 'Auszeit - 12:00', isHome: false, time: '12:12'},
-      {text: 'Safety: #12', isHome: true, time: '13:10'},
-      {text: 'Touchdown: #7 Extra-Punkt: -', isHome: false, time: '13:20'},
+      {text: 'Turnover', team: 'home', time: '12:05'},
+      {text: 'Touchdown: #19 Extra-Punkt: #7', team: 'home', time: '12:10'},
+      {text: 'Auszeit - 12:00', team: 'away', time: '12:12'},
+      {text: 'Safety: #12', team: 'home', time: '13:10'},
+      {text: 'Touchdown: #7 Extra-Punkt: -', team: 'away', time: '13:20'},
     ],
   },
   {
@@ -32,11 +32,11 @@ export const LIVETICKER_DATA = [
       score: '12',
     },
     ticks: [
-      {text: 'Turnover [12:00]', isHome: false, time: '13:00'},
-      {text: 'Touchdown: #19 Extra-Punkt: #7', isHome: true, time: '13:05'},
-      {text: 'Auszeit - 12:00', isHome: true, time: '13:30'},
-      {text: 'Safety: #12', isHome: true, time: '13:31'},
-      {text: 'Touchdown: #7 Extra-Punkt: -', isHome: false, time: '13:59'},
+      {text: 'Turnover [12:00]', team: 'away', time: '13:00'},
+      {text: 'Touchdown: #19 Extra-Punkt: #7', team: 'home', time: '13:05'},
+      {text: 'Auszeit - 12:00', team: 'home', time: '13:30'},
+      {text: 'Safety: #12', team: 'home', time: '13:31'},
+      {text: 'Touchdown: #7 Extra-Punkt: -', team: 'away', time: '13:59'},
     ],
   },
 ];
