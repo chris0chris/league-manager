@@ -43,7 +43,7 @@ const AddPoints = ({onSubmit: updateParent}) => {
     <div className="row mt-2">
       <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='td' text='Touchdown' checked={showTD} value='Touchdown'/>
       <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='otherPoints' text='Safety' checked={showSpecial} value='Safety'/>
-      <RadioButton color='secondary' name='points' onChange={handlePointsSelection} id='cop' text='Turnover' checked={showTurnover} value='Turnover'/>
+      <RadioButton color='secondary' name='points' onChange={handlePointsSelection} id='gameEvent' text='Turnover' checked={showTurnover} value='Turnover'/>
     </div>
     { showTD &&
       <Touchdown resetRequested={reset} setResetRequested={setReset} update={setEvent} />
