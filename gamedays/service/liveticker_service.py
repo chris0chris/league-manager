@@ -21,7 +21,7 @@ class Tick(object):
             text = f'{text}: #{self.game_log.player}'
         if self.game_log.player is None and 'Extra' in self.game_log.event:
             text = f'{text}: -'
-        if 'Auszeit' in self.game_log.event:
+        if self.game_log.event in ['Auszeit', 'Spielzeit']:
             text = f'{text} - {self.game_log.input}'
         if 'Turnover' == self.game_log.event:
             text = 'Ballabgabe'

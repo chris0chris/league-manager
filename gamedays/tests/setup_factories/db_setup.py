@@ -186,6 +186,7 @@ class DBSetup:
         TeamLogFactory(gameinfo=gameinfo, team=away, sequence=6, event='Turnover', cop=True, half=2)
         TeamLogFactory(gameinfo=gameinfo, team=away, sequence=7, player=7, event='Safety', value=1, half=2)
         TeamLogFactory(gameinfo=gameinfo, team=away, sequence=10, event='Turnover', cop=True, half=2)
+        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=0, event='Spielzeit', input='12:10', value=0, half=2)
         TeamLogFactory(gameinfo=gameinfo, team=away, sequence=10, event='Auszeit', input='00:01', value=0, half=2)
         TeamLogFactory(gameinfo=gameinfo, team=None, sequence=0, event='Spiel beendet', half=2)
 

@@ -113,7 +113,8 @@ class GameLog(object):
         return self.away_secondhalf_entries
 
     def _get_entries_for_team_and_half(self, team, half):
-        return TeamLog.objects.filter(gameinfo=self.gameinfo, team__name=team, half=half).exclude(event='Auszeit').order_by('-sequence')
+        return TeamLog.objects.filter(gameinfo=self.gameinfo, team__name=team, half=half)\
+            .exclude(event__in=['Auszeit','Spielzeit']).order_by('-sequence')
 
     def get_home_score(self):
         return self.get_home_firsthalf_score() + self.get_home_secondhalf_score()

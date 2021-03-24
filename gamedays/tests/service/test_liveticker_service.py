@@ -134,6 +134,11 @@ class TestTick(TestCase):
         tick = Tick(TeamLog.objects.filter(event='Auszeit').first(), False)
         assert tick.get_text() == 'Auszeit - 00:01'
 
+    def test_get_text_for_game_time(self):
+        DBSetup().create_teamlog_home_and_away()
+        tick = Tick(TeamLog.objects.filter(event='Spielzeit').first(), False)
+        assert tick.get_text() == 'Spielzeit - 12:10'
+
     def test_get_text_for_incomplete_pat(self):
         DBSetup().create_teamlog_home_and_away()
         tick = Tick(TeamLog.objects.filter(event='1-Extra-Punkt', player=None).first(), False)
