@@ -2,9 +2,9 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import RadioButton from '../layout/RadioButton';
-import Safety from './Safety';
 import Turnover from './gameEvent/Turnover';
 import GameTime from './gameEvent/GameTime';
+import Penalty from './gameEvent/Penalty';
 
 const GameEvent = (props) => {
   const {update} = props;
@@ -44,8 +44,7 @@ const GameEvent = (props) => {
       <GameTime update={update} />
       }
       { showPenalty &&
-      // <Safety resetRequested={reset} setResetRequested={setReset} update={update} />
-      <div>Strafe</div>
+      <Penalty update={update} />
       }
     </div>
   );
