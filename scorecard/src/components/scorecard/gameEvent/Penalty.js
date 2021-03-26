@@ -9,9 +9,7 @@ const Penalty = (props) => {
   const [displaySearchInput, setDisplaySearchInput] = useState(true);
   const [selectedPenalty, setSelectedPenalty] = useState('');
   const [playerNumber, setPlayerNumber] = useState('');
-  const searchInputElement = useRef({
-    setCustomValidity: 'Bitte auf eine Strafe tippen!',
-  });
+  const searchInputElement = useRef();
   const PENALTY_DATA = [
     {name: 'illegaler Kontakt'},
     {name: 'Offense Pass Behinderung'},
@@ -29,7 +27,6 @@ const Penalty = (props) => {
   };
   const handleSearchInput = (input) => {
     if (!selectedPenalty) {
-      console.log(searchInputElement.current);
       searchInputElement.current.setCustomValidity(
         'Bitte auf eine Strafe tippen!'
       );
@@ -44,8 +41,8 @@ const Penalty = (props) => {
       'Bitte auf eine Strafe tippen!'
     );
   };
-  const checkName = (item) => {
-    const pattern = searchInput
+  const checkName = (item, input) => {
+    const pattern = input
       .split('')
       .map((character) => `${character}.*`)
       .join('');
@@ -58,7 +55,6 @@ const Penalty = (props) => {
   const filteredItems = PENALTY_DATA.filter((item) => {
     return checkName(item, searchInput);
   });
-
   const itemsToDisplay = searchInput ? filteredItems : PENALTY_DATA;
   return (
     <div>
@@ -83,9 +79,8 @@ const Penalty = (props) => {
             <input
               className='form-control'
               placeholder='Ausgewählte Strafe'
-              value={selectedPenalty}
+              value={selectedPenalty || ''}
               readOnly
-              aria-invalid='true'
             />
           </div>
           <div className='col-3 d-grid'>
@@ -103,7 +98,7 @@ const Penalty = (props) => {
           placeholder='Strafe eingeben und auswählen...'
           value={searchInput}
           onChange={(ev) => {
-            handleSearchInput(ev.target.innerText);
+            handleSearchInput(ev.target.value);
           }}
           ref={searchInputElement}
           required
@@ -122,7 +117,9 @@ const Penalty = (props) => {
             <li
               key={index}
               className='list-group-item'
-              onClick={(ev) => handleSearchSelection(ev.target.innerText)}
+              onClick={(ev) => {
+                handleSearchSelection(ev.target.innerHTML);
+              }}
             >
               {option.name}
             </li>
