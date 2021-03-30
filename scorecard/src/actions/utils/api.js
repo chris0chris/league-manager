@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {returnErrors} from '../messages';
+import {GET_PENALTIES} from '../types';
 
 export const apiPost = (url, body, successType, errorType) => async (
     dispatch,

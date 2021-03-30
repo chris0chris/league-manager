@@ -1,8 +1,11 @@
 import React, {useRef, useState} from 'react';
 import PropTypes from 'prop-types';
 import {FaTrashAlt} from 'react-icons/fa';
+import {connect} from 'react-redux';
+import {getPenalties} from '../../../actions/config';
 
 const Penalty = (props) => {
+  const LIMIT_DISPLAYED_PENALTIES = 5;
   const {update} = props;
   const [searchInput, setSearchInput] = useState('');
   const [displaySuggestionBox, setDisplaySuggestionBox] = useState(true);
@@ -10,13 +13,6 @@ const Penalty = (props) => {
   const [selectedPenalty, setSelectedPenalty] = useState('');
   const [playerNumber, setPlayerNumber] = useState('');
   const searchInputElement = useRef();
-  const PENALTY_DATA = [
-    {name: 'illegaler Kontakt'},
-    {name: 'Offense Pass Behinderung'},
-    {name: 'Fehlstart'},
-    {name: 'Defense Offside'},
-    {name: 'illegale Ballübergabe'},
-  ];
   const handleSearchSelection = (text) => {
     setSearchInput('');
     setSelectedPenalty(text);
@@ -52,10 +48,11 @@ const Penalty = (props) => {
   update({
     event: [{name: 'Strafe', player: playerNumber, input: selectedPenalty}],
   });
-  const filteredItems = PENALTY_DATA.filter((item) => {
+  const filteredItems = props.penalties.filter((item) => {
     return checkName(item, searchInput);
   });
-  const itemsToDisplay = searchInput ? filteredItems : PENALTY_DATA;
+  let itemsToDisplay = searchInput ? filteredItems : props.penalties;
+  itemsToDisplay = itemsToDisplay.slice(0, LIMIT_DISPLAYED_PENALTIES);
   return (
     <div>
       <div className='mt-2' style={{position: 'relative'}}>
@@ -74,26 +71,29 @@ const Penalty = (props) => {
             value={playerNumber}
           />
         </div>
-        <div className='row mt-2'>
-          <div className='col'>
-            <input
-              className='form-control'
-              placeholder='Ausgewählte Strafe'
-              value={selectedPenalty || ''}
-              readOnly
-            />
+        {!displaySearchInput && (
+          <div className='row mt-2'>
+            <div className='col'>
+              <input
+                className='form-control'
+                placeholder='Ausgewählte Strafe'
+                value={selectedPenalty || ''}
+                readOnly
+              />
+            </div>
+            <div className='col-3 d-grid'>
+              <button
+                type='reset'
+                className='btn btn-danger'
+                onClick={clearSearchInput}
+              >
+                <FaTrashAlt />
+              </button>
+            </div>
           </div>
-          <div className='col-3 d-grid'>
-            <button
-              type='reset'
-              className='btn btn-danger'
-              onClick={clearSearchInput}
-            >
-              <FaTrashAlt />
-            </button>
-          </div>
-        </div>
+        )}
         <input
+          type='text'
           className='form-control mt-1'
           placeholder='Strafe eingeben und auswählen...'
           value={searchInput}
@@ -117,11 +117,19 @@ const Penalty = (props) => {
             <li
               key={index}
               className='list-group-item'
-              onClick={(ev) => {
-                handleSearchSelection(ev.target.innerHTML);
+              onClick={() => {
+                handleSearchSelection(option.name);
               }}
             >
-              {option.name}
+              <div className='row'>
+                <div className='col-9'>{option.name}</div>
+                <div
+                  className='col-3 text-end text-muted ps-0 pe-0'
+                  style={{fontSize: 'x-small'}}
+                >
+                  {option.subtext}
+                </div>
+              </div>
             </li>
           ))}
         </ul>
@@ -130,6 +138,13 @@ const Penalty = (props) => {
   );
 };
 
-Penalty.propTypes = {};
+Penalty.propTypes = {
+  penalties: PropTypes.array.isRequired,
+  update: PropTypes.func.isRequired,
+};
 
-export default Penalty;
+const mapStateToProps = (state) => ({
+  penalties: state.configReducer.penalties,
+});
+
+export default connect(mapStateToProps, {getPenalties})(Penalty);

@@ -19,6 +19,7 @@ import {DETAILS_URL,
   OFFICIALS_URL,
   ROOT_URL} from './common/urls';
 import {loadUser} from '../actions/auth';
+import {getPenalties} from '../actions/config';
 
 import SelectGame from './scorecard/SelectGame';
 import Officials from './scorecard/Officials';
@@ -30,6 +31,9 @@ const App = (props) => {
   useEffect(() => {
     store.dispatch(loadUser());
   });
+  useEffect(() => {
+    store.dispatch(getPenalties());
+  }, []);
   return (
     <Router>
       <div className="container mt-2">
