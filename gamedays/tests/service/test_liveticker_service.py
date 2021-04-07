@@ -90,7 +90,7 @@ class TestLiveticker(TestCase):
         liveticker = Liveticker(last_game)
         ticks = liveticker.get_ticks()
         assert len(ticks) == 5
-        assert ticks[0] == Tick(teamlog_entry, None).as_json()
+        assert ticks[0] == Tick(teamlog_entry, teamlog_entry.team).as_json()
 
     def test_game_with_no_team_logs(self):
         DBSetup().g62_status_empty()
