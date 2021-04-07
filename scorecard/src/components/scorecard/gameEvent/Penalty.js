@@ -24,7 +24,7 @@ const Penalty = (props) => {
   const handleSearchInput = (input) => {
     if (!selectedPenalty) {
       searchInputElement.current.setCustomValidity(
-        'Bitte auf eine Strafe tippen!'
+          'Bitte auf eine Strafe tippen!',
       );
     }
     setSearchInput(input);
@@ -34,14 +34,14 @@ const Penalty = (props) => {
     setDisplaySuggestionBox(true);
     setSelectedPenalty('');
     searchInputElement.current.setCustomValidity(
-      'Bitte auf eine Strafe tippen!'
+        'Bitte auf eine Strafe tippen!',
     );
   };
   const checkName = (item, input) => {
     const pattern = input
-      .split('')
-      .map((character) => `${character}.*`)
-      .join('');
+        .split('')
+        .map((character) => `${character}.*`)
+        .join('');
     const regex = new RegExp(pattern, 'gi');
     return item.name.match(regex);
   };
