@@ -2,8 +2,9 @@ from django.urls import path
 from rest_framework.views import APIView
 
 from gamedays.api.views import GamedayListAPIView, GameinfoUpdateAPIView, GamedayRetrieveUpdate, \
-    GamedayScheduleView, GameOfficialCreateOrUpdateView, GameSetupCreateOrUpdateView, GameLogAPIView, \
-    GameHalftimeAPIView, GameFinalizeUpdateView, GamesToWhistleAPIView, LivetickerAPIView
+    GamedayScheduleView, GameOfficialCreateOrUpdateView, LivetickerAPIView
+from gamedays.api.scorecard_views import GameLogAPIView, GameHalftimeAPIView, GameFinalizeUpdateView, \
+    GameSetupCreateOrUpdateView, GamesToWhistleAPIView
 
 urlpatterns = [
     path('gameday/list/', GamedayListAPIView.as_view(), name='api-gameday-list'),

@@ -8,9 +8,9 @@ import GameEvent from './GameEvent';
 
 const AddPoints = ({onSubmit: updateParent}) => {
   let event = null;
-  const [showTD, setShowTD] = useState(true);
+  const [showTD, setShowTD] = useState(false);
   const [showSpecial, setShowSpecial] = useState(false);
-  const [showTurnover, setShowTurnover] = useState(false);
+  const [showTurnover, setShowTurnover] = useState(true);
   const [reset, setReset] = useState(false);
   const handlePointsSelection = (value) => {
     switch (value) {
