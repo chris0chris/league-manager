@@ -8,9 +8,9 @@ import Penalty from './gameEvent/Penalty';
 
 const GameEvent = (props) => {
   const {update} = props;
-  const [showTurnover, setShowTurnover] = useState(false);
+  const [showTurnover, setShowTurnover] = useState(true);
   const [showGameTime, setShowGameTime] = useState(false);
-  const [showPenalty, setShowPenalty] = useState(true);
+  const [showPenalty, setShowPenalty] = useState(false);
   const handleGameEventSelection = (value) => {
     switch (value) {
       case 'GameTime':

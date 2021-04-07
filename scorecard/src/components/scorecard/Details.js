@@ -46,12 +46,11 @@ const Details = (props) => {
   };
   const createLogEntry = (event) => {
     const nextTeamInPossession = teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
-    console.log(event);
-    // if (event.event[0].name.startsWith('Safety')) {
-    //   props.createLogEntry({'team': nextTeamInPossession, 'gameId': gameLog.gameId, 'half': half, ...event});
-    // } else {
-    //   props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, 'half': half, ...event});
-    // }
+    if (event.event[0].name.startsWith('Safety')) {
+      props.createLogEntry({'team': nextTeamInPossession, 'gameId': gameLog.gameId, 'half': half, ...event});
+    } else {
+      props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, 'half': half, ...event});
+    }
     setTeamInPossession(nextTeamInPossession);
     setShowHomeLog(nextTeamInPossession == gameLog.home.name);
   };
