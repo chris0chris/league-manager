@@ -278,3 +278,9 @@ class TestGamesToWhistleAPIView(WebTest):
         Gameinfo.objects.filter(id=2).update(officials=2)
         response = self.app.get(reverse('api-gameday-whistlegames', kwargs={'pk': gameday.pk, 'team': '*'}))
         assert len(response.json) == 10
+
+class TestConfigPenaltiesAPIView(WebTest):
+    def test_get_penalty_list(self):
+        response = self.app.get(reverse('api-scorecard-config-penalties'))
+        assert response.status_code == HTTPStatus.OK
+        assert len(response.json) >= 1

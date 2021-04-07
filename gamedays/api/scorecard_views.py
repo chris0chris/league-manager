@@ -105,3 +105,46 @@ class GamesToWhistleAPIView(APIView):
         games_to_whistle = games_to_whistle.to_json(orient='records')
         print(json.dumps(json.loads(games_to_whistle), indent=2))
         return Response(json.loads(games_to_whistle, object_pairs_hook=OrderedDict))
+
+class ConfigPenalties(APIView):
+    def get(self, request, *args, **kwargs):
+        penalty_list = [
+            {'name': 'illegaler Kontakt Defense', 'subtext': 'BS/aFD 10'},
+            {'name': 'Flag Guarding', 'subtext': 'SF/LoD 5'},
+            {'name': 'Fehlstart', 'subtext': 'DB/5'},
+            {'name': 'Abschirmen (Blocken)', 'subtext': 'BS/5'},
+            {'name': 'illegaler Kontakt Offense', 'subtext': 'BS/LoD 10'},
+            {'name': 'Defense Passbehinderung', 'subtext': 'BS/aFD 10'},
+            {'name': 'Behinderung Spieldurchführung Defense', 'subtext': 'BS/aFD 10'},
+            {'name': 'Passverzögerung', 'subtext': 'SL/LoD'},
+            {'name': 'illegale Ballübergabe', 'subtext': 'SF/LoD'},
+            {'name': 'illegaler Rückwärtspass', 'subtext': 'SF/LoD 5'},
+            {'name': 'illegales Touching', 'subtext': 'SL/LoD'},
+            {'name': 'illegaler Vorwärtspass', 'subtext': 'SF/LoD 5'},
+            {'name': 'Offense Passbehinderung', 'subtext': 'BS/LoD 10'},
+            {'name': 'Behinderung Spieldurchführung Offense', 'subtext': 'BS/LoD 10'},
+            {'name': 'Springen', 'subtext': 'SF/LoD 5'},
+            {'name': 'Hechten', 'subtext': 'SF/LoD 5'},
+            {'name': 'illegales Kicken des Balls durch Runner', 'subtext': 'DB/5'},
+            {'name': 'illegaler Snap', 'subtext': 'DB/5'},
+            {'name': 'Spielverzögerung', 'subtext': 'DB/5'},
+            {'name': 'Encroachment', 'subtext': 'DB/5'},
+            {'name': 'illegaler Shift', 'subtext': 'SL/5'},
+            {'name': 'illegale Motion', 'subtext': 'SL/5'},
+            {'name': 'illegaler Lauf', 'subtext': 'SL/5'},
+            {'name': 'illegaler Laufspielzug', 'subtext': 'SL/5'},
+            {'name': 'Defense Offside', 'subtext': 'DB/5'},
+            {'name': 'Störende Signale', 'subtext': 'DB/5'},
+            {'name': 'illegales Blitzersignal', 'subtext': 'DB/5'},
+            {'name': 'illegaler Blitz', 'subtext': 'SL/5'},
+            {'name': 'illegales Flaggenziehen', 'subtext': 'BS/5'},
+            {'name': 'illegales Kicken eines Pass', 'subtext': 'BS/5'},
+            {'name': 'Behinderung an der Seitenlinie', 'subtext': 'SL/5'},
+            {'name': 'illegale Spielteilnahme', 'subtext': 'SL/5'},
+            {'name': 'illegale Auswechslung', 'subtext': 'SL/5'},
+            {'name': 'Unsportliches Verhalten', 'subtext': 'DB/10 Notiz'},
+            {'name': 'Person mit illegaler Ausrüstung verlässt nicht das Feld', 'subtext': 'DB/TO'},
+            {'name': 'Person mit fehlender vorgeschriebener Ausrüstung verlässt nicht das Feld', 'subtext': 'DB/TO'},
+            {'name': 'Person mit blutender Wunde verlässt nicht das Feld', 'subtext': 'DB/TO'},
+        ]
+        return Response(penalty_list)
