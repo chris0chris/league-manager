@@ -11,13 +11,13 @@ class TestLivetickerService(TestCase):
     def test_no_liveticker_available(self):
         gameday = DBSetup().create_empty_gameday()
         ls = LivetickerService(gameday.pk)
-        assert ls.getLiveticker() == []
+        assert ls.get_liveticker() == []
 
     def test_get_all_livetickers(self):
         gameday = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(pk__gt=2).update(scheduled='11:00:00')
         ls = LivetickerService(gameday.pk)
-        assert len(ls.getLiveticker()) == 2
+        assert len(ls.get_liveticker()) == 2
 
     def test_get_livetickers_for_last_done_and_coming_up_games(self):
         gameday = DBSetup().g62_status_empty()
@@ -25,9 +25,9 @@ class TestLivetickerService(TestCase):
         Gameinfo.objects.filter(pk__gt=2).update(scheduled='11:00:00')
         Gameinfo.objects.filter(pk__gt=4).update(scheduled='12:00:00')
         ls = LivetickerService(gameday.pk)
-        assert len(ls.getLiveticker()) == 4
-        assert ls.getLiveticker()[0].get_status() == 'Geplant'
-        assert ls.getLiveticker()[2].get_status() == 'beendet'
+        assert len(ls.get_liveticker()) == 4
+        assert ls.get_liveticker()[0].get_status() == 'Geplant'
+        assert ls.get_liveticker()[2].get_status() == 'beendet'
 
     def test_multiple_gamedays_are_live(self):
         gameday_one = DBSetup().g62_status_empty()
@@ -36,13 +36,13 @@ class TestLivetickerService(TestCase):
         Gameinfo.objects.filter(gameday=gameday_two, pk__gt=13).update(scheduled='11:00')
         Gameday.objects.all().update(date=datetime.today())
         liveticker_service = LivetickerService()
-        assert len(liveticker_service.getLiveticker()) == 4
+        assert len(liveticker_service.get_liveticker()) == 4
 
     def test_only_one_gameday_is_live(self):
         gameday = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(pk__gt=2).update(scheduled='11:00')
         liveticker_service = LivetickerService(gameday.pk)
-        assert len(liveticker_service.getLiveticker()) == 2
+        assert len(liveticker_service.get_liveticker()) == 2
 
 
 class TestLiveticker(TestCase):
@@ -87,10 +87,15 @@ class TestLiveticker(TestCase):
         away = Gameresult.objects.get(gameinfo=last_game, isHome=False)
         DBSetup().create_teamlog_home_and_away(home=home.team, away=away.team, gameinfo=last_game)
         teamlog_entry: TeamLog = TeamLog.objects.filter(gameinfo=last_game).order_by('-created_time').first()
+        # workaround to get test stable due to fast creation of teamlog entries
+        if teamlog_entry.team is None:
+            is_home = None
+        else:
+            is_home = 'home' if teamlog_entry.team.name == home.team.name else 'away'
         liveticker = Liveticker(last_game)
         ticks = liveticker.get_ticks()
         assert len(ticks) == 5
-        assert ticks[0] == Tick(teamlog_entry, teamlog_entry.team).as_json()
+        assert ticks[0] == Tick(teamlog_entry, is_home).as_json()
 
     def test_game_with_no_team_logs(self):
         DBSetup().g62_status_empty()

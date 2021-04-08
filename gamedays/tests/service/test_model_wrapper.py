@@ -41,7 +41,7 @@ class TestGamedayModelWrapper(TestCase):
     def test_empty_get_qualify_table(self):
         gameday = DBSetup().create_main_round_gameday()
         gmw = GamedayModelWrapper(gameday.pk)
-        assert gmw.get_qualify_table() is ''
+        assert gmw.get_qualify_table() == ''
 
     def test_get_qualify_table(self):
         gameday = DBSetup().g62_qualify_finished()

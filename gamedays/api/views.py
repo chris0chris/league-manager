@@ -84,6 +84,6 @@ class GamedayCreateView(CreateAPIView):
 class LivetickerAPIView(APIView):
     def get(self, request, *args, **kwargs):
         ls = LivetickerService()
-        liveticker = ls.getLiveticker()
+        liveticker = ls.get_liveticker()
         liveticker_as_json = [entry.as_json() for entry in liveticker]
         return Response(liveticker_as_json)

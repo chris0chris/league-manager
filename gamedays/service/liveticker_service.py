@@ -1,10 +1,6 @@
-import json
-from datetime import datetime
-
 from gamedays.service.gameday_settings import SCHEDULED
-from gamedays.service.utils import AsJsonEncoder
 from gamedays.service.wrapper.gameresult_wrapper import GameresultWrapper
-from teammanager.models import Gameinfo, Gameresult, TeamLog, Gameday
+from teammanager.models import Gameinfo, TeamLog, Gameday
 
 
 class Tick(object):
@@ -21,7 +17,7 @@ class Tick(object):
             text = f'{text}: #{self.game_log.player}'
         if self.game_log.player is None and 'Extra' in self.game_log.event:
             text = f'{text}: -'
-        if self.game_log.event in ['Auszeit', 'Spielzeit']:
+        if self.game_log.event in ['Auszeit', 'Spielzeit', 'Strafe']:
             text = f'{text} - {self.game_log.input}'
         if 'Turnover' == self.game_log.event:
             text = 'Ballabgabe'
@@ -92,7 +88,7 @@ class LivetickerService(object):
         else:
             self.gameday_ids = [gameday_id]
 
-    def getLiveticker(self):
+    def get_liveticker(self):
         next_games = Gameinfo.objects.filter(
             gameday__in=self.gameday_ids, gameFinished__isnull=True).order_by(SCHEDULED)
         previously_finished_games = Gameinfo.objects.filter(
