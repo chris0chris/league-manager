@@ -7,7 +7,7 @@ import {testStore} from '../../../__tests__/Utils';
 import {GAME_PAIR_1} from '../../../__tests__/testdata/gamesData';
 import Officials from '../Officials';
 import {DETAILS_URL} from '../../common/urls';
-import {apiGet, apiPut} from '../../../actions/utils/api';
+import {apiGet, apiPut, apiPost} from '../../../actions/utils/api';
 import {GET_GAME_OFFICIALS, GET_GAME_SETUP} from '../../../actions/types';
 import {GAME_OFFICIALS} from '../../../__tests__/testdata/gameSetupData';
 
@@ -15,7 +15,9 @@ const selectedGame = GAME_PAIR_1;
 let isInitEmpty = false;
 
 jest.mock('../../../actions/utils/api');
-
+apiPost.mockImplementation(() => {
+  return () => {};
+});
 apiPut.mockImplementation(() => {
   return () => {};
 });

@@ -37,6 +37,7 @@ const Details = (props) => {
       teamName == gameLog.home.name ? setShowHomeLog(true) : setShowHomeLog(false);
       setTeamInPossession(teamName);
       props.halftime(gameLog.gameId, {});
+      props.createLogEntry({'team': teamName, 'gameId': gameLog.gameId, 'half': 2, 'event': [{name: 'Turnover'}]});
     } else {
       setIsFinal(true);
     }

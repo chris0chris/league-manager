@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
@@ -11,7 +12,7 @@ import {
   saveGameSetup,
   getOfficials,
   saveOfficials} from '../../actions/gamesetup';
-import {getGameLog} from '../../actions/games';
+import {getGameLog, createLogEntry} from '../../actions/games';
 import RadioButton from '../layout/RadioButton';
 
 export const Officials = (props) => {
@@ -82,6 +83,7 @@ export const Officials = (props) => {
     officials.push({name: sideJudge, position: Official.SIDE_JUDGE});
     props.saveGameSetup(selectedGame.id, gameSetup);
     props.saveOfficials(selectedGame.id, officials);
+    props.createLogEntry({'team': fhPossession, 'gameId': selectedGame.id, 'half': 1, 'event': [{name: 'Turnover'}]});
     props.getGameLog(selectedGame.id);
     setIsSuccessfulSubmitted(true);
   };
@@ -229,4 +231,5 @@ export default connect(mapStateToProps,
       saveGameSetup,
       getOfficials,
       saveOfficials,
-      getGameLog})(Officials);
+      getGameLog,
+      createLogEntry})(Officials);
