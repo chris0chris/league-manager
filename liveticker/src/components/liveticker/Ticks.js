@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 import PropTypes from 'prop-types';
 
 const Ticks = (props) => {
@@ -16,10 +16,13 @@ const Ticks = (props) => {
   return (
     <ul className='list-group list-group-flush'>
       {entries.map((entry, index) => (
-        <li key={index} className={`list-group-item`}>
-          <div className='text-center text-muted smaller'>{entry.time} Uhr</div>
-          <div className={getAlignmentFor(entry.team)}>{entry.text}</div>
-        </li>
+        <Fragment key={index}>
+          { (entry.text != 'Ballabgabe') &&
+          <li className={`list-group-item`}>
+            <div className='text-center text-muted smaller'>{entry.time} Uhr</div>
+            <div className={getAlignmentFor(entry.team)}>{entry.text}</div>
+          </li>
+          }</Fragment>
       ))}
     </ul>
   );

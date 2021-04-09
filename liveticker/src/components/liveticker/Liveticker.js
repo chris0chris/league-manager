@@ -12,7 +12,6 @@ const Liveticker = (props) => {
   const refreshTime = 2 * minute;
   useEffect(() => {
     props.getLiveticker();
-    console.log('useEffect', endlessCounter);
     const id = setInterval(timer, refreshTime);
     return () => clearInterval(id);
   }, [endlessCounter]);

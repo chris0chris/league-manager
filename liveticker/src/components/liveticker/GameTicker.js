@@ -1,10 +1,20 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import TeamBox from './TeamBox';
 import Ticks from './Ticks';
+import {FaFootballBall} from 'react-icons/fa';
 
 const GameTicker = (props) => {
   const {home, away, status, time, ticks} = props;
+  const [isHomeInPossession, setIsHomeInPossession] = useState(true);
+  useEffect(() => {
+    ticks.map((entry) => {
+      if (entry) {
+        setIsHomeInPossession(entry.team == 'home' ? true : false);
+        return;
+      }
+    });
+  }, [JSON.stringify(ticks)]);
   return (
     <div className='card mb-4'>
       <div className='card-header'>
@@ -17,9 +27,23 @@ const GameTicker = (props) => {
             <br />
             <span className='fs-6'>{status}</span>
             <br />
-            <span className='text-muted smaller'>({time} Uhr)</span>
           </div>
           <TeamBox img={away.img} name={away.name} />
+        </div>
+        <div className='row text-center'>
+          <div className='col-4'>
+            { isHomeInPossession &&
+            <FaFootballBall size='17' />
+            }
+          </div>
+          <div className="col-4 text-center">
+            <span className='text-muted smaller'>({time} Uhr)</span>
+          </div>
+          <div className='col-4'>
+            { !isHomeInPossession &&
+              <FaFootballBall size='17' />
+            }
+          </div>
         </div>
       </div>
       <Ticks entries={ticks} />
