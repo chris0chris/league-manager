@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React, {useRef, useState} from 'react';
 import PropTypes from 'prop-types';
 import {FaTrashAlt} from 'react-icons/fa';
@@ -11,11 +12,14 @@ const Penalty = (props) => {
   const [displaySuggestionBox, setDisplaySuggestionBox] = useState(true);
   const [displaySearchInput, setDisplaySearchInput] = useState(true);
   const [selectedPenalty, setSelectedPenalty] = useState('');
+  const [isPenaltyAgainstOpponent, setIsPenaltyAgainstOpponent] = useState(false);
   const [playerNumber, setPlayerNumber] = useState('');
   const searchInputElement = useRef();
-  const handleSearchSelection = (text) => {
+  const handleSearchSelection = (text, isPenaltyAgainstOpp) => {
     setSearchInput('');
     setSelectedPenalty(text);
+    setIsPenaltyAgainstOpponent(isPenaltyAgainstOpp);
+    console.log(isPenaltyAgainstOpponent);
     setDisplaySuggestionBox(false);
     setDisplaySearchInput(false);
     searchInputElement.current.setCustomValidity('');
@@ -47,7 +51,7 @@ const Penalty = (props) => {
   };
   update({
     event: [{name: 'Strafe', player: playerNumber, input: selectedPenalty}],
-  });
+  }, isPenaltyAgainstOpponent);
   const filteredItems = props.penalties.filter((item) => {
     return checkName(item, searchInput);
   });
@@ -118,7 +122,7 @@ const Penalty = (props) => {
               key={index}
               className='list-group-item'
               onClick={() => {
-                handleSearchSelection(option.name);
+                handleSearchSelection(option.name, option.isPenaltyAgainstOpponent);
               }}
             >
               <div className='row'>

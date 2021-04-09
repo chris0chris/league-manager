@@ -17,7 +17,7 @@ const Safety = ({resetRequested, setResetRequested, update}) => {
 
   update({
     event: [{name: pointsRadio, player: pointsInput}],
-  });
+  }, true);
 
   return (
     <>

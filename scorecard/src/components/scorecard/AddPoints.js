@@ -6,8 +6,10 @@ import Touchdown from './Touchdown';
 import Safety from './Safety';
 import GameEvent from './GameEvent';
 
-const AddPoints = ({onSubmit: updateParent}) => {
+const AddPoints = (props) => {
   let event = null;
+  let isAgainstOpponent = false;
+  const {onSubmit: updateParent} = props;
   const [showTD, setShowTD] = useState(true);
   const [showSpecial, setShowSpecial] = useState(false);
   const [showTurnover, setShowTurnover] = useState(false);
@@ -25,8 +27,9 @@ const AddPoints = ({onSubmit: updateParent}) => {
         break;
     }
   };
-  const setEvent = (update) => {
+  const setEvent = (update, isAgainstOpp) => {
     event = update;
+    isAgainstOpponent = isAgainstOpp;
   };
   const setShowStates = (td, special, turnover) => {
     setShowTD(td);
@@ -37,7 +40,7 @@ const AddPoints = ({onSubmit: updateParent}) => {
     formEvent.preventDefault();
     setShowStates(true, false, false);
     setReset(true);
-    updateParent(event);
+    updateParent(event, isAgainstOpponent);
   };
   return (<form className='form-control' onSubmit={(ev) => handleSubmit(ev)}>
     <div className="row mt-2">

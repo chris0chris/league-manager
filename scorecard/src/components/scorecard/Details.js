@@ -44,9 +44,9 @@ const Details = (props) => {
   const updateTeam = (teamName) => {
     setTeamInPossession(teamName);
   };
-  const createLogEntry = (event) => {
+  const createLogEntry = (event, isAgainstOpponent=false) => {
     const nextTeamInPossession = teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
-    if (event.event[0].name.startsWith('Safety')) {
+    if (isAgainstOpponent) {
       props.createLogEntry({'team': nextTeamInPossession, 'gameId': gameLog.gameId, 'half': half, ...event});
     } else {
       props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, 'half': half, ...event});

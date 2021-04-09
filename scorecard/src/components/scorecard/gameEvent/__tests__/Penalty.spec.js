@@ -13,15 +13,15 @@ const setup = () => {
   const initialState = {
     configReducer: {
       penalties: [
-        {name: 'illegaler Kontakt Offense', subtext: 'BS/LoD 10'},
-        {name: 'Offense Pass Behinderung', subtext: 'BS/LoD 10'},
-        {name: 'Fehlstart', subtext: 'DB/5'},
-        {name: 'Defense Offside', subtext: 'DB/5'},
-        {name: 'illegale Ballübergabe', subtext: 'SF/LoD 5'},
-        {name: 'illegale Ballübergabe', subtext: 'SF/LoD 5'},
-        {name: 'illegale Ballübergabe', subtext: 'SF/LoD 5'},
-        {name: 'illegale Ballübergabe', subtext: 'SF/LoD 5'},
-        {name: 'illegale Ballübergabe', subtext: 'SF/LoD 5'},
+        {'name': 'illegaler Kontakt Defense', 'subtext': 'BS/LoD 10', 'isPenaltyAgainstOpponent': true},
+        {'name': 'Offense Pass Behinderung', 'subtext': 'BS/LoD 10', 'isPenaltyAgainstOpponent': false},
+        {'name': 'Fehlstart', 'subtext': 'DB/5', 'isPenaltyAgainstOpponent': false},
+        {'name': 'Defense Offside', 'subtext': 'DB/5', 'isPenaltyAgainstOpponent': true},
+        {'name': 'illegale Ballübergabe', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': false},
+        {'name': 'illegale Ballübergabe', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': false},
+        {'name': 'illegale Ballübergabe', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': false},
+        {'name': 'illegale Ballübergabe', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': false},
+        {'name': 'illegale Ballübergabe', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': false},
         {
           name: 'ill/fehl obligatorisches Equipment, nicht verlassen Spielfeld',
           subtext: 'DB/TO',
@@ -44,12 +44,13 @@ describe('Penalty component', () => {
     setup();
     userEvent.type(screen.getByPlaceholderText('Trikotnummer'), '42');
     userEvent.type(screen.getByPlaceholderText('Strafe eingeben und auswählen...'), 'ik');
-    userEvent.click(screen.getByText('illegaler Kontakt Offense'));
+    userEvent.click(screen.getByText('illegaler Kontakt Defense'));
     const illegalContactText = screen.getByRole('textbox');
     expect(illegalContactText).toBeInTheDocument();
     const lastMockCall = updateMock.mock.calls.length - 1;
     expect(updateMock.mock.calls[lastMockCall][0]).toEqual({
-      event: [{name: 'Strafe', player: '42', input: 'illegaler Kontakt Offense'}],
+      event: [{name: 'Strafe', player: '42', input: 'illegaler Kontakt Defense'}],
     });
+    expect(updateMock.mock.calls[lastMockCall][1]).toEqual(true);
   });
 });
