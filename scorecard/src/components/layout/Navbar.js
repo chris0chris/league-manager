@@ -11,10 +11,14 @@ const Navbar = (props) => {
   const [expanded, setExpanded] = useState(false);
   const authLinks = (
     <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
-      <span className="navbar-text mr-3">
-        <strong>{user ? `Hallo ${user.username}` : ''}</strong>
-      </span>
-
+      <li className="nav-item">
+        <span className="navbar-text mr-3">
+          <strong>{user ? `Hallo ${user.username}` : ''}</strong>
+        </span>
+      </li>
+      <li className="nav-item text-muted" style={{fontSize: 'x-small'}}>
+        {VERSION}
+      </li>
       <li className="nav-item">
         <button
           onClick={props.logoutUser}

@@ -34,6 +34,7 @@ const App = (props) => {
   useEffect(() => {
     store.dispatch(getPenalties());
   }, []);
+  console.log(VERSION);
   return (
     <Router>
       <div className="container mt-2">
