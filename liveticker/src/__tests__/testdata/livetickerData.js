@@ -5,10 +5,12 @@ export const LIVETICKER_DATA = [
     home: {
       name: 'Baltic Blue Stars Rostock',
       score: '12',
+      isInPossession: true,
     },
     away: {
       name: 'Munich Mules',
       score: '0',
+      isInPossession: false,
     },
     ticks: [
       {text: 'Turnover', team: 'home', time: '12:05'},
@@ -25,11 +27,13 @@ export const LIVETICKER_DATA = [
       name: 'Munich Mules',
       img: 'https://dffl.flag-coaching.info/dffl/wp-content/uploads/2018/03/Logo-Munich-Mules.png',
       score: '0',
+      isInPossession: false,
     },
     away: {
       name: 'Team Deutschland',
       img: 'https://dffl.flag-coaching.info/dffl/wp-content/uploads/2018/02/TD-FlagFootball-Logo-Kopie.png',
       score: '12',
+      isInPossession: true,
     },
     ticks: [
       {text: 'Turnover [12:00]', team: 'away', time: '13:00'},

@@ -17,5 +17,6 @@ describe('GameTicker component', () => {
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.time))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.home.name))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.away.name))).toBeInTheDocument();
+    expect(screen.getByTitle('Team hat Ballbesitz')).toBeInTheDocument();
   });
 });

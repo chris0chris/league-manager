@@ -36,16 +36,16 @@ const GameTicker = (props) => {
         </div>
         <div className='row text-center'>
           <div className='col-4'>
-            { isHomeInPossession &&
-            <FaFootballBall size='17' />
+            { home.isInPossession &&
+            <FaFootballBall title='Team hat Ballbesitz' size='17' />
             }
           </div>
           <div className="col-4 text-center">
             <span className='text-muted smaller'>({time} Uhr)</span>
           </div>
           <div className='col-4'>
-            { !isHomeInPossession &&
-              <FaFootballBall size='17' />
+            { away.isInPossession &&
+              <FaFootballBall title='Team hat Ballbesitz' size='17' />
             }
           </div>
         </div>

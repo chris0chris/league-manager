@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React, {Fragment} from 'react';
 import PropTypes from 'prop-types';
 
@@ -20,7 +21,7 @@ const Ticks = (props) => {
           { (entry.text != 'Ballabgabe') &&
           <li className={`list-group-item`}>
             <div className='text-center text-muted smaller'>{entry.time} Uhr</div>
-            <div className={getAlignmentFor(entry.team)}>{entry.text}</div>
+            <div className={getAlignmentFor(entry.text.includes('Spielzeit') ? null : entry.team)}>{entry.text}</div>
           </li>
           }</Fragment>
       ))}
