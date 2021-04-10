@@ -137,5 +137,9 @@ server*
 
 /**/node_modules/
 
+#Versioning
+/**/static/**/COMMITHASH
+/**/static/**/VERSION
+
 #react
 #/**/**/main.js
