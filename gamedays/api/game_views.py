@@ -117,7 +117,7 @@ class GamePossessionAPIView(APIView):
 class ConfigPenalties(APIView):
     def get(self, request, *args, **kwargs):
         penalty_list = [
-            {'name': 'illegaler Kontakt Defense', 'subtext': 'BS/aFD 10', 'isPenaltyAgainstOpponent': True},
+            {'name': 'illegaler Kontakt Defense', 'subtext': 'BS/aFD 10', 'i sPenaltyAgainstOpponent': True},
             {'name': 'Flag Guarding', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': False},
             {'name': 'Fehlstart', 'subtext': 'DB/5', 'isPenaltyAgainstOpponent': False},
             {'name': 'Abschirmen (Blocken) Offense', 'subtext': 'BS/5', 'isPenaltyAgainstOpponent': False},
@@ -131,7 +131,8 @@ class ConfigPenalties(APIView):
             {'name': 'illegales Touching', 'subtext': 'SL/LoD', 'isPenaltyAgainstOpponent': False},
             {'name': 'illegaler Vorwärtspass', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': False},
             {'name': 'Offense Passbehinderung', 'subtext': 'BS/LoD 10', 'isPenaltyAgainstOpponent': False},
-            {'name': 'Behinderung Spieldurchführung Offense', 'subtext': 'BS/LoD 10', 'isPenaltyAgainstOpponent': False},
+            {'name': 'Behinderung Spieldurchführung Offense', 'subtext': 'BS/LoD 10',
+             'isPenaltyAgainstOpponent': False},
             {'name': 'Springen', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': False},
             {'name': 'Hechten', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': False},
             {'name': 'illegales Kicken des Balls durch Runner', 'subtext': 'DB/5', 'isPenaltyAgainstOpponent': False},
@@ -158,11 +159,17 @@ class ConfigPenalties(APIView):
             {'name': 'illegale Auswechslung Defense', 'subtext': 'SL/5', 'isPenaltyAgainstOpponent': True},
             {'name': 'Unsportliches Verhalten Offense', 'subtext': 'DB/10 Notiz', 'isPenaltyAgainstOpponent': False},
             {'name': 'Unsportliches Verhalten Defense', 'subtext': 'DB/10 Notiz', 'isPenaltyAgainstOpponent': True},
-            {'name': 'Person mit illegaler Ausrüstung verlässt nicht das Feld Offense', 'subtext': 'DB/TO', 'isPenaltyAgainstOpponent': False},
-            {'name': 'Person mit illegaler Ausrüstung verlässt nicht das Feld Defense', 'subtext': 'DB/TO', 'isPenaltyAgainstOpponent': True},
-            {'name': 'Person mit fehlender vorgeschriebener Ausrüstung verlässt nicht das Feld Offense', 'subtext': 'DB/TO', 'isPenaltyAgainstOpponent': False},
-            {'name': 'Person mit fehlender vorgeschriebener Ausrüstung verlässt nicht das Feld Defense', 'subtext': 'DB/TO', 'isPenaltyAgainstOpponent': True},
-            {'name': 'Person mit blutender Wunde verlässt nicht das Feld Offense', 'subtext': 'DB/TO', 'isPenaltyAgainstOpponent': False},
-            {'name': 'Person mit blutender Wunde verlässt nicht das Feld Defense', 'subtext': 'DB/TO', 'isPenaltyAgainstOpponent': True},
+            {'name': 'Person mit illegaler Ausrüstung verlässt nicht das Feld Offense', 'subtext': 'DB/TO',
+             'isPenaltyAgainstOpponent': False},
+            {'name': 'Person mit illegaler Ausrüstung verlässt nicht das Feld Defense', 'subtext': 'DB/TO',
+             'isPenaltyAgainstOpponent': True},
+            {'name': 'Person mit fehlender vorgeschriebener Ausrüstung verlässt nicht das Feld Offense',
+             'subtext': 'DB/TO', 'isPenaltyAgainstOpponent': False},
+            {'name': 'Person mit fehlender vorgeschriebener Ausrüstung verlässt nicht das Feld Defense',
+             'subtext': 'DB/TO', 'isPenaltyAgainstOpponent': True},
+            {'name': 'Person mit blutender Wunde verlässt nicht das Feld Offense', 'subtext': 'DB/TO',
+             'isPenaltyAgainstOpponent': False},
+            {'name': 'Person mit blutender Wunde verlässt nicht das Feld Defense', 'subtext': 'DB/TO',
+             'isPenaltyAgainstOpponent': True},
         ]
         return Response(penalty_list)

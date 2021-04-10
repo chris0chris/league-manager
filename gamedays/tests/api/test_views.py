@@ -115,8 +115,10 @@ class TestLivetickerAPIView(WebTest):
     def test_get_all_livetickers_only_scheduled(self):
         gameday_one = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(gameday=gameday_one, pk__gt=2).update(scheduled='11:00')
+        Gameinfo.objects.filter(gameday=gameday_one, pk__lt=3).update(in_possession='A1')
         gameday_two = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(gameday=gameday_two, pk__gt=13).update(scheduled='11:00')
+        Gameinfo.objects.filter(gameday=gameday_two, pk__gt=11, pk__lt=14).update(in_possession='A1')
         Gameday.objects.all().update(date=datetime.today())
         response = self.app.get(reverse('api-liveticker-all'))
         assert response.status_code == HTTPStatus.OK
@@ -127,10 +129,12 @@ class TestLivetickerAPIView(WebTest):
             "home": {
                 "name": "A1",
                 "score": 3,
+                "isInPossession": True,
             },
             "away": {
                 "name": "A2",
                 "score": 2,
+                "isInPossession": False,
             },
             "ticks": []
         }

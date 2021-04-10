@@ -75,7 +75,7 @@ class TestLiveticker(TestCase):
         liveticker = Liveticker(Gameinfo.objects.last())
         assert liveticker.get_time() == '12:00'
 
-    def test_liveticker_get_empty_ticks_when_no_team_logs(self):
+    def test_liveticker_get_empty_ticks_with_no_team_logs(self):
         DBSetup().g62_status_empty()
         liveticker = Liveticker(Gameinfo.objects.last())
         assert liveticker.get_ticks() == []
@@ -106,14 +106,23 @@ class TestLiveticker(TestCase):
             "home": {
                 "name": "B3",
                 "score": 1,
+                "isInPossession": False,
             },
             "away": {
                 "name": "B1",
                 "score": 3,
+                "isInPossession": False,
             },
             "ticks": [],
         }
 
+    def test_is_home_in_possession(self):
+        DBSetup().g62_status_empty()
+        lastGame: Gameinfo = Gameinfo.objects.last()
+        lastGame.in_possession = 'A1'
+        liveticker = Liveticker(lastGame)
+        assert liveticker.is_home_in_possession()
+        assert not liveticker.is_away_in_possession()
 
 class TestTick(TestCase):
 

@@ -36,6 +36,7 @@ class TestGamedayModelWrapper(TestCase):
         schedule = GamedayModelWrapper(gameday.pk).get_schedule()
         del expected_schedule['scheduled']
         del schedule['scheduled']
+        del schedule['in_possession']
         assert schedule.to_json() == expected_schedule.to_json()
 
     def test_empty_get_qualify_table(self):

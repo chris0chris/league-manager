@@ -45,10 +45,12 @@ class Liveticker(object):
             home={
                 "name": self.home_name,
                 "score": self.gameresult_wrapper.get_home_score(),
+                "isInPossession": self.is_home_in_possession(),
             },
             away={
                 "name": self.away_name,
                 "score": self.gameresult_wrapper.get_away_score(),
+                "isInPossession": self.is_away_in_possession(),
             },
             ticks=self.get_ticks())
 
@@ -76,6 +78,12 @@ class Liveticker(object):
 
     def __repr__(self):
         self.as_json()
+
+    def is_home_in_possession(self):
+        return self.game.in_possession == self.home_name
+
+    def is_away_in_possession(self):
+        return self.game.in_possession == self.away_name
 
 
 class LivetickerService(object):
