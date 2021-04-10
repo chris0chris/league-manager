@@ -128,6 +128,7 @@ class Gameinfo(models.Model):
     gameFinished = models.TimeField(null=True, blank=True)
     stage = models.CharField(max_length=100)
     standing = models.CharField(max_length=100)
+    in_possession = models.CharField(max_length=100, blank=True, null=True, default=None)
 
     objects: QuerySet = models.Manager()
 
