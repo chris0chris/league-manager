@@ -284,3 +284,13 @@ class TestConfigPenaltiesAPIView(WebTest):
         response = self.app.get(reverse('api-scorecard-config-penalties'))
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) >= 1
+
+class TestGamePossessionAPIView(WebTest):
+    def test_put_game_possession(self):
+        DBSetup().g62_status_empty()
+        last_game: Gameinfo = Gameinfo.objects.last()
+        assert last_game.in_possession == None
+        response = self.app.put_json(reverse('api-game-possession', kwargs={'pk': last_game.pk}),
+            {'team': 'name of team'}, headers=DBSetup().get_token_header())
+        assert response.status_code == HTTPStatus.OK
+        assert Gameinfo.objects.last().in_possession == 'name of team'

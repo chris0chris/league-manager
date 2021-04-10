@@ -21,3 +21,7 @@ class GameinfoWrapper(object):
         self.gameinfo.status = 'beendet'
         self.gameinfo.gameFinished = datetime.now()
         self.gameinfo.save()
+
+    def update_team_in_possession(self, team_name):
+        self.gameinfo.in_possession = team_name
+        self.gameinfo.save()

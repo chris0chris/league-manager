@@ -49,3 +49,6 @@ class GameService(object):
             half=0,
             sequence=0,
         )
+
+    def update_team_in_possesion(self, team_name):
+        self.gameinfo.update_team_in_possession(team_name)

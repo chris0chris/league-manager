@@ -34,3 +34,11 @@ class TestGameinfoWrapper(TestCase):
         firstGame: Gameinfo = Gameinfo.objects.first()
         assert firstGame.status == 'beendet'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameFinished))
+
+    def test_team_in_possesion_is_updated(self):
+        DBSetup().g62_status_empty()
+        lastGame: Gameinfo = Gameinfo.objects.last()
+        gameinfo_wrapper = GameinfoWrapper(lastGame.pk)
+        assert lastGame.in_possession is None
+        gameinfo_wrapper.update_team_in_possession('a team')
+        assert Gameinfo.objects.last().in_possession == 'a team'

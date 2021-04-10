@@ -60,7 +60,7 @@ class GameFinalizeUpdateView(UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
-        game_service = GameService(kwargs.get('pk'))
+        game_service = GameService(pk)
         game_service.update_game_finished()
         game_setup, _ = GameSetup.objects.get_or_create(gameinfo_id=pk)
         serializer = GameFinalizer(instance=game_setup, data=request.data)
@@ -105,6 +105,14 @@ class GamesToWhistleAPIView(APIView):
         games_to_whistle = games_to_whistle.to_json(orient='records')
         print(json.dumps(json.loads(games_to_whistle), indent=2))
         return Response(json.loads(games_to_whistle, object_pairs_hook=OrderedDict))
+
+
+class GamePossessionAPIView(APIView):
+    def put(self, request, *args, **kwargs):
+        game_service = GameService(kwargs.get('pk'))
+        game_service.update_team_in_possesion(request.data.get('team'))
+        return Response()
+
 
 class ConfigPenalties(APIView):
     def get(self, request, *args, **kwargs):
