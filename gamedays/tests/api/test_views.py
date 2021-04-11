@@ -9,6 +9,7 @@ from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
+from gamedays.api.urls import API_GAMEDAY_LIST, API_GAMEDAY_WHISTLEGAMES, API_LIVETICKER_ALL
 from gamedays.service.gameday_service import EmptySchedule, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from teammanager.models import Gameday, Gameinfo
@@ -23,7 +24,7 @@ class TestGamedayAPIViews(WebTest):
         # YYYY-MM-DD
         today = datetime.today().strftime('%Y-%m-%d')
         Gameday.objects.filter(id__lt=3).update(date=today)
-        response = self.app.get(reverse('api-gameday-list'))
+        response = self.app.get(reverse(API_GAMEDAY_LIST))
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 2
 
@@ -109,7 +110,7 @@ class TestGamedaySchedule(WebTest):
 
 class TestLivetickerAPIView(WebTest):
     def test_empty_liveticker(self):
-        response = self.app.get(reverse('api-liveticker-all'))
+        response = self.app.get(reverse(API_LIVETICKER_ALL))
         assert response.json == []
 
     def test_get_all_livetickers_only_scheduled(self):
@@ -120,7 +121,7 @@ class TestLivetickerAPIView(WebTest):
         Gameinfo.objects.filter(gameday=gameday_two, pk__gt=13).update(scheduled='11:00')
         Gameinfo.objects.filter(gameday=gameday_two, pk__gt=11, pk__lt=14).update(in_possession='A1')
         Gameday.objects.all().update(date=datetime.today())
-        response = self.app.get(reverse('api-liveticker-all'))
+        response = self.app.get(reverse(API_LIVETICKER_ALL))
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 4
         expected_result = {
@@ -141,11 +142,11 @@ class TestLivetickerAPIView(WebTest):
         assert response.json[0] == expected_result
         assert response.json[2] == expected_result
 
-    @pytest.mark.skip
+
     def test_get_livetickers_for_one_gameday(self):
         DBSetup().g62_status_empty()
         Gameinfo.objects.filter(pk__gt=2).update(scheduled='11:00')
-        response = self.app.get(reverse('api-liveticker-all'))
+        response = self.app.get(reverse(API_LIVETICKER_ALL))
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 2
         assert response.json[0] == {
@@ -154,10 +155,30 @@ class TestLivetickerAPIView(WebTest):
             "home": {
                 "name": "A1",
                 "score": 3,
+                "isInPossession": True,
             },
             "away": {
                 "name": "A2",
                 "score": 2,
+                "isInPossession": False,
             },
             "ticks": []
         }
+
+
+class TestGamesToWhistleAPIView(WebTest):
+    def test_get_games_to_whistle_for_specific_team(self):
+        gameday = DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(id=1).update(gameFinished='13:00')
+        Gameinfo.objects.filter(id=2).update(officials=2)
+        response = self.app.get(reverse(API_GAMEDAY_WHISTLEGAMES, kwargs={'pk': gameday.pk, 'team': 'officials'})
+                                , headers=DBSetup().get_token_header())
+        assert len(response.json) == 4
+
+    def test_get_all_games_to_whistle_for_all_teams(self):
+        gameday = DBSetup().g62_status_empty()
+
+        Gameinfo.objects.filter(id=1).update(gameFinished='13:00')
+        Gameinfo.objects.filter(id=2).update(officials=2)
+        response = self.app.get(reverse(API_GAMEDAY_WHISTLEGAMES, kwargs={'pk': gameday.pk, 'team': '*'}))
+        assert len(response.json) == 10

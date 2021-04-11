@@ -1,24 +1,36 @@
 from django.urls import path
-from rest_framework.views import APIView
 
-from gamedays.api.views import GamedayListAPIView, GameinfoUpdateAPIView, GamedayRetrieveUpdate, \
-    GamedayScheduleView, GameOfficialCreateOrUpdateView, LivetickerAPIView
 from gamedays.api.game_views import GameLogAPIView, GameHalftimeAPIView, GameFinalizeUpdateView, \
     GameSetupCreateOrUpdateView, GamesToWhistleAPIView, ConfigPenalties, GamePossessionAPIView
+from gamedays.api.views import GamedayListAPIView, GameinfoUpdateAPIView, GamedayRetrieveUpdate, \
+    GamedayScheduleView, GameOfficialCreateOrUpdateView, LivetickerAPIView
+
+API_GAMEDAY_WHISTLEGAMES = 'api-gameday-whistlegames'
+
+API_GAMEDAY_LIST = 'api-gameday-list'
+
+API_GAMELOG = 'api-gamelog'
+
+API_CONFIG_SCORECARD_PENALTIES = 'api-config-scorecard-penalties'
+API_LIVETICKER_ALL = 'api-liveticker-all'
+API_GAME_POSSESSION = 'api-game-possession'
+API_GAME_FINALIZE = 'api-game-finalize'
+API_GAME_HALFTIME = 'api-game-halftime'
+API_GAME_OFFICIALS = 'api-game-officials'
+API_GAME_SETUP = 'api-game-setup'
 
 urlpatterns = [
-    path('gameday/list/', GamedayListAPIView.as_view(), name='api-gameday-list'),
+    path('gameday/list/', GamedayListAPIView.as_view(), name=API_GAMEDAY_LIST),
     path('gameinfo/<int:pk>/', GameinfoUpdateAPIView.as_view(), name='api-gameinfo-retrieve-update'),
     path('gameday/<int:pk>/', GamedayRetrieveUpdate.as_view(), name='api-gameday-retrieve-update'),
     path('gameday/<int:pk>/details', GamedayScheduleView.as_view(), name='api-gameday-schedule'),
-    path('gameday/<int:pk>/officials/<str:team>', GamesToWhistleAPIView.as_view(), name='api-gameday-whistlegames'),
-    path('gamesetup/<int:pk>/', APIView.as_view(), name='api-api-gamesetup'),
-    path('gamelog/<int:id>', GameLogAPIView.as_view(), name='api-gamelog'),
-    path('game/<int:pk>/setup', GameSetupCreateOrUpdateView.as_view(), name='api-game-setup'),
-    path('game/<int:pk>/officials', GameOfficialCreateOrUpdateView.as_view(), name='api-game-officials'),
-    path('game/<int:pk>/halftime', GameHalftimeAPIView.as_view(), name='api-game-halftime'),
-    path('game/<int:pk>/finalize', GameFinalizeUpdateView.as_view(), name='api-game-finalize'),
-    path('game/<int:pk>/possession', GamePossessionAPIView.as_view(), name='api-game-possession'),
-    path('liveticker', LivetickerAPIView.as_view(), name='api-liveticker-all'),
-    path('config/scorecard/penalties', ConfigPenalties.as_view(), name='api-scorecard-config-penalties')
+    path('gameday/<int:pk>/officials/<str:team>', GamesToWhistleAPIView.as_view(), name=API_GAMEDAY_WHISTLEGAMES),
+    path('gamelog/<int:id>', GameLogAPIView.as_view(), name=API_GAMELOG),
+    path('game/<int:pk>/setup', GameSetupCreateOrUpdateView.as_view(), name=API_GAME_SETUP),
+    path('game/<int:pk>/officials', GameOfficialCreateOrUpdateView.as_view(), name=API_GAME_OFFICIALS),
+    path('game/<int:pk>/halftime', GameHalftimeAPIView.as_view(), name=API_GAME_HALFTIME),
+    path('game/<int:pk>/finalize', GameFinalizeUpdateView.as_view(), name=API_GAME_FINALIZE),
+    path('game/<int:pk>/possession', GamePossessionAPIView.as_view(), name=API_GAME_POSSESSION),
+    path('liveticker', LivetickerAPIView.as_view(), name=API_LIVETICKER_ALL),
+    path('config/scorecard/penalties', ConfigPenalties.as_view(), name=API_CONFIG_SCORECARD_PENALTIES)
 ]

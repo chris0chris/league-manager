@@ -117,6 +117,19 @@ class TestGamelogCreator(TestCase):
         assert teamlog.value == 0
         assert teamlog.half == 1
 
+    def test_gamelog_with_penalty(self):
+        DBSetup().g62_status_empty()
+        firstGame = Gameinfo.objects.first()
+        team = Team.objects.first()
+        user = User.objects.first()
+        gamelog_creator = GameLogCreator(firstGame, team, [{"name": "Strafe", "input": "illegaler Kontakt"}], user)
+        gamelog_creator.create()
+        assert len(TeamLog.objects.all()) == 1
+        teamlog = TeamLog.objects.first()
+        assert teamlog.sequence == 0
+        assert teamlog.input == 'illegaler Kontakt'
+        assert teamlog.value == 0
+        assert teamlog.half == 1
 
     def test_gamelog_is_created(self):
         DBSetup().g62_status_empty()
