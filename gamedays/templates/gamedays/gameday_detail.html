@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<script src="{% static 'gamedays/js/jquery.bracket.min.js' %}" type="text/javascript"></script>
-<link href="{% static 'gamedays/css/jquery.bracket.min.css' %}" rel="stylesheet" type="text/css"/>
+<!--<script src="{% static 'gamedays/js/jquery.bracket.min.js' %}" type="text/javascript"></script>-->
+<!--<link href="{% static 'gamedays/css/jquery.bracket.min.css' %}" rel="stylesheet" type="text/css"/>-->
 {% if not request.GET.isExtern %}
 <h1>Spieltag "{{ object.name }}"</h1>
 {% endif %}
@@ -18,7 +18,7 @@
     <div class="col">Turnierbeginn: {{ object.start|time:"H:i a" }}</div>
 </div>
 
-<div class="card">
+<div class="card" style="overflow: auto">
     <div aria-controls="collapseSchedule" aria-expanded="true" class="card-header" data-target="#collapseSchedule"
          data-toggle="collapse" id="headingSchedule" role="button">
         <h2>Spielplan</h2>
@@ -35,7 +35,7 @@
     </div>
 </div>
 {% if info.qualify_table != None %}
-<div class="card">
+<div class="card" style="overflow: auto">
     <div aria-controls="collapseQualify" aria-expanded="false" class="card-header" data-target="#collapseQualify"
          data-toggle="collapse" id="headingQualify" role="button">
         <h2>Vorrunden-Tabelle</h2>
@@ -47,7 +47,7 @@
     </div>
 </div>
 {% endif %}
-<div class="card">
+<div class="card" style="overflow: auto">
     <div aria-controls="collapseFinal" aria-expanded="false" class="card-header" data-target="#collapseFinal"
          data-toggle="collapse" id="headingFinal" role="button">
         <h2>Abschlusstabelle</h2>
