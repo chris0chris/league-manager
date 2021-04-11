@@ -30,6 +30,8 @@ apiGet.mockImplementation(() => {
 
 const setup = (gameLog = GAME_LOG_COMPLETE_GAME) => {
   apiPost.mockClear();
+  apiPut.mockClear();
+  apiGet.mockClear();
   const initialState = {
     gamesReducer: {
       gameLog: gameLog,
@@ -137,6 +139,7 @@ describe('Details component', () => {
     userEvent.click(screen.getByRole('button', {name: 'Halbzeit'}));
     userEvent.click(screen.getByTestId('halftime-done'));
     expect(apiPut.mock.calls[0][0]).toBe(`/api/game/${GAME_LOG_ONLY_FIRSTHALF.gameId}/halftime`);
+    expect(apiPut.mock.calls[1][0]).toBe(`/api/game/${GAME_LOG_ONLY_FIRSTHALF.gameId}/possession`);
     expect(screen.getByRole('button', {name: 'Ende'})).toBeInTheDocument();
   });
   it('should redirect ton finalize page, when final button is clicked', () => {

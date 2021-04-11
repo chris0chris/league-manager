@@ -6,7 +6,9 @@ import {GAME_CREATE_LOG_ENTRY_FAIL,
   GAME_HALFTIME_SUCCESS,
   GET_GAMES,
   GET_GAME_LOG,
-  SET_SELECTED_GAME} from './types';
+  SET_SELECTED_GAME,
+  UPDATE_TEAM_IN_FAIL,
+  UPDATE_TEAM_IN_POSSESSION} from './types';
 
 export const getGames = (gamedayId, team) => {
   return apiGet(
@@ -32,11 +34,10 @@ export const createLogEntry = (event) => {
       event, GET_GAME_LOG, GAME_CREATE_LOG_ENTRY_FAIL);
 };
 
-// export const createLogEntry = (event) => {
-//   console.log(event);
-//   return apiPost(`/api/gamelog/${event.gameId}`,
-//       event, GET_GAME_LOG, GAME_CREATE_LOG_ENTRY_FAIL);
-// };
+export const updateTeamInPossession = (gameId, teamName) => {
+  return apiPut(`/api/game/${gameId}/possession`,
+      {team: teamName}, UPDATE_TEAM_IN_POSSESSION, UPDATE_TEAM_IN_FAIL);
+};
 
 export const deleteLogEntry = (gameId, entryToDelete) => {
   return apiDelete(`/api/gamelog/${gameId}`,

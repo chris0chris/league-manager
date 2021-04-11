@@ -6,7 +6,7 @@ import RadioButton from '../layout/RadioButton';
 import GameLog from './GameLog';
 import AddPoints from './AddPoints';
 import {Redirect, useLocation} from 'react-router-dom';
-import {createLogEntry, halftime} from '../../actions/games';
+import {createLogEntry, halftime, updateTeamInPossession} from '../../actions/games';
 import Halftime from './Halftime';
 import {FINALIZE_URL} from '../common/urls';
 import ModalDeleteEntry from './ModalDeleteEntry';
@@ -37,7 +37,7 @@ const Details = (props) => {
       teamName == gameLog.home.name ? setShowHomeLog(true) : setShowHomeLog(false);
       setTeamInPossession(teamName);
       props.halftime(gameLog.gameId, {});
-      props.createLogEntry({'team': teamName, 'gameId': gameLog.gameId, 'half': 2, 'event': [{name: 'Turnover'}]});
+      props.updateTeamInPossession(gameLog.gameId, teamName);
     } else {
       setIsFinal(true);
     }
@@ -46,12 +46,24 @@ const Details = (props) => {
     setTeamInPossession(teamName);
   };
   const createLogEntry = (event, isAgainstOpponent=false) => {
-    const nextTeamInPossession = teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
+    let nextTeamInPossession = null;
+    console.log('isAgainstOpponent', isAgainstOpponent);
+    switch (event.event[0].name) {
+      case 'Strafe':
+      case 'Spielzeit':
+        nextTeamInPossession = teamInPossession;
+        break;
+      default:
+        nextTeamInPossession = teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
+    }
     if (isAgainstOpponent) {
-      props.createLogEntry({'team': nextTeamInPossession, 'gameId': gameLog.gameId, 'half': half, ...event});
+      const opponentTeam = teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
+      props.createLogEntry({'team': opponentTeam, 'gameId': gameLog.gameId, 'half': half, ...event});
     } else {
       props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, 'half': half, ...event});
     }
+    console.log('nextTiP', nextTeamInPossession);
+    props.updateTeamInPossession(gameLog.gameId, nextTeamInPossession);
     setTeamInPossession(nextTeamInPossession);
     setShowHomeLog(nextTeamInPossession == gameLog.home.name);
   };
@@ -150,10 +162,11 @@ Details.propTypes = {
   gameLog: PropTypes.object,
   createLogEntry: PropTypes.func.isRequired,
   halftime: PropTypes.func.isRequired,
+  updateTeamInPossession: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
   gameLog: state.gamesReducer.gameLog,
 });
 
-export default connect(mapStateToProps, {createLogEntry, halftime})(Details);
+export default connect(mapStateToProps, {createLogEntry, halftime, updateTeamInPossession})(Details);

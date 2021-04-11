@@ -12,7 +12,7 @@ import {
   saveGameSetup,
   getOfficials,
   saveOfficials} from '../../actions/gamesetup';
-import {getGameLog, createLogEntry} from '../../actions/games';
+import {getGameLog, updateTeamInPossession} from '../../actions/games';
 import RadioButton from '../layout/RadioButton';
 
 export const Officials = (props) => {
@@ -83,7 +83,7 @@ export const Officials = (props) => {
     officials.push({name: sideJudge, position: Official.SIDE_JUDGE});
     props.saveGameSetup(selectedGame.id, gameSetup);
     props.saveOfficials(selectedGame.id, officials);
-    props.createLogEntry({'team': fhPossession, 'gameId': selectedGame.id, 'half': 1, 'event': [{name: 'Turnover'}]});
+    props.updateTeamInPossession(selectedGame.id, fhPossession);
     props.getGameLog(selectedGame.id);
     setIsSuccessfulSubmitted(true);
   };
@@ -217,6 +217,7 @@ Officials.propTypes = {
   getOfficials: PropTypes.func.isRequired,
   saveOfficials: PropTypes.func.isRequired,
   getGameLog: PropTypes.func.isRequired,
+  updateTeamInPossession: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -232,4 +233,4 @@ export default connect(mapStateToProps,
       getOfficials,
       saveOfficials,
       getGameLog,
-      createLogEntry})(Officials);
+      updateTeamInPossession})(Officials);
