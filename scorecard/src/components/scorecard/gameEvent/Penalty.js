@@ -19,7 +19,6 @@ const Penalty = (props) => {
     setSearchInput('');
     setSelectedPenalty(text);
     setIsPenaltyAgainstOpponent(isPenaltyAgainstOpp);
-    console.log(isPenaltyAgainstOpponent);
     setDisplaySuggestionBox(false);
     setDisplaySearchInput(false);
     searchInputElement.current.setCustomValidity('');
