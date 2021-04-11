@@ -39,6 +39,6 @@ class TestGameinfoWrapper(TestCase):
         DBSetup().g62_status_empty()
         lastGame: Gameinfo = Gameinfo.objects.last()
         gameinfo_wrapper = GameinfoWrapper(lastGame.pk)
-        assert lastGame.in_possession is None
+        assert lastGame.in_possession == 'A1'
         gameinfo_wrapper.update_team_in_possession('a team')
         assert Gameinfo.objects.last().in_possession == 'a team'

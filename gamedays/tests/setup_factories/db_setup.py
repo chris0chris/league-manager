@@ -68,7 +68,7 @@ class DBSetup:
         # for fixture in fixtures:
         #     print(fixture)
 
-        gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
+        gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official, in_possession=teams[0].name)
         GameresultFactory(gameinfo=gi, team=teams[0], fh=2, sh=1, pa=2, isHome=True)
         GameresultFactory(gameinfo=gi, team=teams[1], fh=1, sh=1, pa=3)
         gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
@@ -123,12 +123,12 @@ class DBSetup:
 
     def create_finalround_game(self, gameday, standing, status, home, away):
         if status == 'beendet':
-            gi = GameinfoFactory(gameday=gameday, stage='Finalrunde', standing=standing, status=status)
+            gi = GameinfoFactory(gameday=gameday, stage='Finalrunde', standing=standing, status=status, in_possession=home.name)
             GameresultFactory(gameinfo=gi, team=home, fh=1, sh=1, pa=3, isHome=True)
             GameresultFactory(gameinfo=gi, team=away, fh=2, sh=1, pa=2)
             return gi
         else:
-            gi = GameinfoFactory(gameday=gameday, stage='Finalrunde', standing=standing, status=status)
+            gi = GameinfoFactory(gameday=gameday, stage='Finalrunde', standing=standing, status=status, in_possession=home.name)
             GameresultFactory(gameinfo=gi, team=home, isHome=True)
             GameresultFactory(gameinfo=gi, team=away)
             return gi
