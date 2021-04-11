@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, {Fragment} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 const Ticks = (props) => {
