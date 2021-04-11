@@ -42,30 +42,31 @@ const AddPoints = (props) => {
     setReset(true);
     updateParent(event, isAgainstOpponent);
   };
-  return (<form className='form-control' onSubmit={(ev) => handleSubmit(ev)}>
-    <div className="row mt-2">
-      <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='td' text='Touchdown' checked={showTD} value='Touchdown'/>
-      <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='otherPoints' text='Safety' checked={showSpecial} value='Safety'/>
-      <RadioButton color='secondary' name='points' onChange={handlePointsSelection} id='gameEvent' text='Turnover' checked={showTurnover} value='Turnover'/>
-    </div>
-    { showTD &&
-      <Touchdown resetRequested={reset} setResetRequested={setReset} update={setEvent} />
-    }
-    { showSpecial &&
-      <Safety resetRequested={reset} setResetRequested={setReset} update={setEvent} />
-    }
-    {
-      showTurnover &&
-      <GameEvent update={setEvent}/>
-    }
-    <div className="row">
-      <div className='mt-2 d-grid'>
-        <button type='submit' className='btn btn-secondary'>
-            Eintrag speichern
-        </button>
+  return (
+    <form className='form-control' onSubmit={(ev) => handleSubmit(ev)}>
+      <div className="row mt-2">
+        <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='td' text='Touchdown' checked={showTD} value='Touchdown'/>
+        <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='otherPoints' text='Safety' checked={showSpecial} value='Safety'/>
+        <RadioButton color='secondary' name='points' onChange={handlePointsSelection} id='gameEvent' text='Turnover' checked={showTurnover} value='Turnover'/>
       </div>
-    </div>
-  </form>
+      { showTD &&
+      <Touchdown resetRequested={reset} setResetRequested={setReset} update={setEvent} />
+      }
+      { showSpecial &&
+      <Safety resetRequested={reset} setResetRequested={setReset} update={setEvent} />
+      }
+      {
+        showTurnover &&
+      <GameEvent update={setEvent}/>
+      }
+      <div className="row">
+        <div className='mt-2 d-grid'>
+          <button type='submit' className='btn btn-secondary'>
+            Eintrag speichern
+          </button>
+        </div>
+      </div>
+    </form>
   );
 };
 
