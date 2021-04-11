@@ -17,13 +17,10 @@ const Ticks = (props) => {
   return (
     <ul className='list-group list-group-flush'>
       {entries.map((entry, index) => (
-        <Fragment key={index}>
-          { (entry.text != 'Ballabgabe') &&
-          <li className={`list-group-item`}>
-            <div className='text-center text-muted smaller'>{entry.time} Uhr</div>
-            <div className={getAlignmentFor(entry.text.includes('Spielzeit') ? null : entry.team)}>{entry.text}</div>
-          </li>
-          }</Fragment>
+        <li key={index} className={`list-group-item`}>
+          <div className='text-center text-muted smaller'>{entry.time} Uhr</div>
+          <div className={getAlignmentFor(entry.team)}>{entry.text}</div>
+        </li>
       ))}
     </ul>
   );
