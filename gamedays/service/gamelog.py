@@ -21,7 +21,7 @@ class GameLogCreator(object):
             teamlog = TeamLog()
             teamlog.gameinfo = self.gameinfo
             teamlog.team = self.team
-            teamlog.sequence = sequence
+            teamlog.sequence = sequence if entry.get('name') not in ['Strafe', 'Spielzeit', 'Auszeit'] else 0
             teamlog.cop = entry.get('name') == 'Turnover'
             teamlog.event = entry.get('name')
             teamlog.input = entry.get('input')
@@ -114,7 +114,7 @@ class GameLog(object):
 
     def _get_entries_for_team_and_half(self, team, half):
         return TeamLog.objects.filter(gameinfo=self.gameinfo, team__name=team, half=half)\
-            .exclude(event__in=['Auszeit','Spielzeit']).order_by('-sequence')
+            .exclude(event__in=['Auszeit','Spielzeit','Strafe']).order_by('-sequence')
 
     def get_home_score(self):
         return self.get_home_firsthalf_score() + self.get_home_secondhalf_score()

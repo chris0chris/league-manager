@@ -69,7 +69,7 @@ class Liveticker(object):
         relevant_ticks = TeamLog.objects.filter(gameinfo=self.game).order_by('-created_time')[:number_of_ticks]
         tick: TeamLog
         for tick in relevant_ticks:
-            if tick.team is None:
+            if tick.team is None or tick.event == 'Spielzeit':
                 is_home = None
             else:
                 is_home = 'home' if tick.team.name == self.home_name else 'away'
