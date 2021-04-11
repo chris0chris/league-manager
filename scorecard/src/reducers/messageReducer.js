@@ -15,7 +15,6 @@ export default (state = initialState, action) => {
         status: action.payload.status,
       };
     case GET_GAME_LOG: {
-      console.log('messageReducer GET_GAME_LOG', state);
       if (state.firstCall) {
         return {
           msg: '',
