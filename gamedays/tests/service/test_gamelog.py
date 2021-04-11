@@ -112,7 +112,7 @@ class TestGamelogCreator(TestCase):
         gamelog_creator.create()
         assert len(TeamLog.objects.all()) == 1
         teamlog = TeamLog.objects.first()
-        assert teamlog.sequence == 1
+        assert teamlog.sequence == 0
         assert teamlog.input == '00:01'
         assert teamlog.value == 0
         assert teamlog.half == 1
