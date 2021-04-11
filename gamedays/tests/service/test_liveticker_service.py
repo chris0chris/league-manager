@@ -88,7 +88,7 @@ class TestLiveticker(TestCase):
         DBSetup().create_teamlog_home_and_away(home=home.team, away=away.team, gameinfo=last_game)
         teamlog_entry: TeamLog = TeamLog.objects.filter(gameinfo=last_game).order_by('-created_time').first()
         # workaround to get test stable due to fast creation of teamlog entries
-        if teamlog_entry.team is None:
+        if teamlog_entry.team is None or teamlog_entry.event == 'Spielzeit':
             is_home = None
         else:
             is_home = 'home' if teamlog_entry.team.name == home.team.name else 'away'
@@ -118,11 +118,12 @@ class TestLiveticker(TestCase):
 
     def test_is_home_in_possession(self):
         DBSetup().g62_status_empty()
-        lastGame: Gameinfo = Gameinfo.objects.last()
-        lastGame.in_possession = 'A1'
-        liveticker = Liveticker(lastGame)
+        last_game: Gameinfo = Gameinfo.objects.last()
+        last_game.in_possession = 'A1'
+        liveticker = Liveticker(last_game)
         assert liveticker.is_home_in_possession()
         assert not liveticker.is_away_in_possession()
+
 
 class TestTick(TestCase):
 
