@@ -117,7 +117,7 @@ class GamePossessionAPIView(APIView):
 class ConfigPenalties(APIView):
     def get(self, request, *args, **kwargs):
         penalty_list = [
-            {'name': 'illegaler Kontakt Defense', 'subtext': 'BS/aFD 10', 'i sPenaltyAgainstOpponent': True},
+            {'name': 'illegaler Kontakt Defense', 'subtext': 'BS/aFD 10', 'isPenaltyAgainstOpponent': True},
             {'name': 'Flag Guarding', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': False},
             {'name': 'Fehlstart', 'subtext': 'DB/5', 'isPenaltyAgainstOpponent': False},
             {'name': 'Abschirmen (Blocken) Offense', 'subtext': 'BS/5', 'isPenaltyAgainstOpponent': False},
