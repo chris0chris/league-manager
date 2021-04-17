@@ -19,8 +19,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_view
 from django.urls import path, include
-
-from league_manager.views import homeview
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail.core import urls as wagtail_urls
+from wagtail.documents import urls as wagtaildocs_urls
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -30,12 +31,13 @@ urlpatterns = [
                   path('liveticker/', include('liveticker.urls')),
                   path('leaguetable/', include('league_table.urls')),
                   path('gamedays/', include('gamedays.urls')),
-                  path('', homeview),
                   path('login/', auth_view.LoginView.as_view(template_name='registration/login.html'), name='login'),
                   path('logout/', auth_view.LogoutView.as_view(template_name='registration/logout.html'),
                        name='logout'),
-                  # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-                  path('accounts/', include('accounts.urls'))
+                  path('accounts/', include('accounts.urls')),
+                  path('cms/', include(wagtailadmin_urls)),
+                  path('documents/', include(wagtaildocs_urls)),
+                  path('', include(wagtail_urls)),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
