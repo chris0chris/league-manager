@@ -1,7 +1,9 @@
 import json
 from collections import OrderedDict
+from datetime import datetime
 from http import HTTPStatus
 
+from django.conf import settings
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.request import Request
@@ -18,9 +20,10 @@ class GamedayListAPIView(ListAPIView):
     serializer_class = GamedaySerializer
 
     def get_queryset(self):
-        # return Gameday.objects.filter(date=datetime.today())
-        # ToDo deleteMe when Live
-        return Gameday.objects.all()
+        # ToDo Dummyscorecard
+        if settings.DEBUG:
+            return Gameday.objects.all()
+        return Gameday.objects.filter(date=datetime.today())
 
 class GameinfoUpdateAPIView(RetrieveUpdateAPIView):
     serializer_class = GameinfoSerializer
