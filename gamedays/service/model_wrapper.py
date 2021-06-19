@@ -86,12 +86,13 @@ class GamedayModelWrapper:
                 if third_vs_fourth_group1.empty is True:
                     third_vs_fourth_group1 = schedule[
                         (schedule[AWAY] == third) & (schedule[HOME] == fourth)]
-                p5 = schedule[schedule[STANDING] == 'P5']
+                p5 = schedule[(schedule[STANDING] == 'P5-1') | (schedule[STANDING] == 'P5-2')]
                 games_for_fith_place = pd.concat([third_vs_fourth_group1, p5])
                 table_fith_place = self._games_with_result[
                     self._games_with_result[GAMEINFO_ID].isin(games_for_fith_place[GAMEINFO_ID].values)]
                 table_fith_place = table_fith_place.groupby([TEAM_NAME], as_index=False)
                 table_fith_place = table_fith_place.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
+                # ToDo handle DIFF ascending
                 table_fith_place = table_fith_place.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
                 final_standing = self._get_standing_list(standing) + table_fith_place[TEAM_NAME].to_list()
             else:
@@ -135,9 +136,9 @@ class GamedayModelWrapper:
         return qualify_round.groupby(STANDING).nth(place - 1).loc[standing][TEAM_NAME]
 
     def get_team_by_points(self, place, standing, points):
-        return self._games_with_result[
-            (self._games_with_result[STANDING] == standing) & (self._games_with_result[POINTS] == points)].iloc[
-            place - 1][TEAM_NAME]
+        results_with_standing = self._games_with_result[self._games_with_result[STANDING] == standing]
+        results_with_standing_and_according_points = results_with_standing[self._games_with_result[POINTS] == points]
+        return results_with_standing_and_according_points.iloc[place - 1][TEAM_NAME]
 
     def get_team_by(self, place, standing, points=None):
         if points is None:
@@ -145,7 +146,7 @@ class GamedayModelWrapper:
         return self.get_team_by_points(place, standing, points)
 
     def is_finished(self, check):
-        if self._gameinfo[self._gameinfo[STAGE].isin([check])].empty:
+        if self._has_standing(check):
             return len(self._gameinfo[(self._gameinfo[STANDING] == check) & (self._gameinfo[STATUS] == FINISHED)]) \
                    == len(self._gameinfo[(self._gameinfo[STANDING] == check)])
 
@@ -157,3 +158,6 @@ class GamedayModelWrapper:
         games_to_whistle = games_to_whistle.sort_values(by=[SCHEDULED, FIELD])
         return games_to_whistle[
             (games_to_whistle[OFFICIALS_NAME].str.contains(team)) & (games_to_whistle[GAME_FINISHED] == '')]
+
+    def _has_standing(self, check):
+        return self._gameinfo[self._gameinfo[STAGE].isin([check])].empty
