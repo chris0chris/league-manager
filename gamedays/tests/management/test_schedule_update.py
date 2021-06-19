@@ -3,12 +3,70 @@ from unittest.mock import patch, MagicMock
 
 from django.test import TestCase
 
+from gamedays.management.schedule_manager import ScheduleCreator, Schedule
 from gamedays.management.schedule_update import ScheduleUpdate, UpdateGameEntry, UpdateEntry
+from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo, Gameresult
+from teammanager.models import Gameinfo, Gameresult, Gameday, Team
 
 
 class TestScheduleUpdate(TestCase):
+    def test_update_7_teams_2_fields(self):
+        gameday = DBSetup().create_empty_gameday()
+        gameday.format = "7_2"
+        gameday.save()
+        group_B = DBSetup().create_teams('B', 3)
+        group_A = DBSetup().create_teams('A', 4)
+        groups = [group_A, group_B]
+        DBSetup().create_playoff_placeholder_teams()
+        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
+        sc.create()
+        all_games = Gameresult.objects.all()
+        index = 0
+
+        Gameinfo.objects.filter(stage='Vorrunde').update(status='beendet')
+        finished_games = Gameinfo.objects.filter(status='beendet')
+        t = list(Team.objects.all())
+        for game in finished_games:
+            self.update_gameresults(game)
+        su = ScheduleUpdate(gameday.pk, gameday.format)
+        su.update()
+        semifinals = Gameinfo.objects.filter(standing='HF')
+        for hf in semifinals:
+            self.update_gameresults(hf)
+        semifinals.update(status='beendet')
+        su.update()
+
+        p5_first = Gameinfo.objects.filter(standing__in=['P5-1', 'P3'])
+        for game in p5_first:
+            self.update_gameresults(game)
+        p5_first.update(status='beendet')
+        su = ScheduleUpdate(gameday.pk, gameday.format)
+        su.update()
+
+        p5_first = Gameinfo.objects.filter(standing__in=['P5-2', 'P1'])
+        for game in p5_first:
+            self.update_gameresults(game)
+        p5_first.update(status='beendet')
+
+        gmw = GamedayModelWrapper(gameday.pk)
+        qt = gmw.get_schedule()
+        f = gmw.get_final_table()
+        s = ''
+
+    def update_gameresults(self, game):
+        results = Gameresult.objects.filter(gameinfo=game)
+        assert results.count() == 2
+        result_1: Gameresult = results[0]
+        result_2: Gameresult = results[1]
+        result_1.fh = result_1.team.pk
+        result_1.sh = result_1.team.pk
+        result_1.pa = 2 * result_2.team.pk
+        result_1.save()
+        result_2.fh = result_2.team.pk
+        result_2.sh = result_2.team.pk
+        result_2.pa = 2 * result_1.team.pk
+        result_2.save()
 
     def test_update_semifinal_and_p5(self):
         gameday = DBSetup().g62_qualify_finished()
