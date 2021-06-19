@@ -41,6 +41,29 @@ class TestScheduleEntry:
 
 
 class TestScheduleCreator(TestCase):
+    def test_schedule_created_for_4_teams_1_group(self):
+        gameday = DBSetup().create_empty_gameday()
+        DBSetup().create_playoff_placeholder_teams()
+        group_A = DBSetup().create_teams('A', 4)
+        # group_B = DBSetup().create_teams('B', 3)
+        assert Gameinfo.objects.filter(gameday_id=gameday.pk).exists() is False
+        groups = [group_A]
+        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule("4_1", groups))
+        sc.create()
+        gameinfo_set = Gameinfo.objects.filter(gameday_id=gameday.pk)
+        assert gameinfo_set.count() == 6
+        gameinfo: Gameinfo = gameinfo_set.first()
+        assert gameinfo.officials.name == 'A4'
+        assert str(gameinfo.scheduled) == '10:00:00'
+        assert str(gameinfo_set.last().scheduled) == '15:50:00'
+        assert Gameresult.objects.filter(gameinfo=gameinfo).count() == 2
+        assert Gameresult.objects.all().count() == 12
+        # schedule will be created again and previous entries will be deleted
+        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule("4_1", groups))
+        sc.create()
+        assert Gameinfo.objects.filter(pk=gameinfo.pk).exists() is False
+        assert Gameresult.objects.filter(gameinfo=gameinfo).exists() is False
+        assert Gameinfo.objects.filter(gameday=gameday).count() == 6
 
     def test_schedule_created(self):
         gameday = DBSetup().create_empty_gameday()
@@ -55,9 +78,12 @@ class TestScheduleCreator(TestCase):
         assert gameinfo_set.count() == 11
         gameinfo = gameinfo_set.first()
         assert gameinfo.officials.name == 'B3'
+        assert str(gameinfo.scheduled) == '10:00:00'
         assert Gameresult.objects.filter(gameinfo=gameinfo).count() == 2
         assert Gameresult.objects.all().count() == 22
+        assert str(gameinfo_set.get(standing='P1').scheduled) == '15:50:00'
         # schedule will be created again and previous entries will be deleted
+        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
         sc.create()
         assert Gameinfo.objects.filter(pk=gameinfo.pk).exists() is False
         assert Gameresult.objects.filter(gameinfo=gameinfo).exists() is False
