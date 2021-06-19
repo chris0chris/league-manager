@@ -67,8 +67,10 @@ class TestGameService(TestCase):
         game_service.update_score(gamelog)
         assert Gameresult.objects.get(gameinfo=game, team=team_A1).fh == 21
         assert Gameresult.objects.get(gameinfo=game, team=team_A1).sh == 21
+        assert Gameresult.objects.get(gameinfo=game, team=team_A1).pa == 3
         assert Gameresult.objects.get(gameinfo=game, team=team_A2).fh == 0
         assert Gameresult.objects.get(gameinfo=game, team=team_A2).sh == 3
+        assert Gameresult.objects.get(gameinfo=game, team=team_A2).pa == 42
 
     def test_delete_entry(self):
         DBSetup().g62_status_empty()
