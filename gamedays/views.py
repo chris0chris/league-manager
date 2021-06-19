@@ -79,10 +79,10 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             self._format_array(form.cleaned_data['group3']),
             self._format_array(form.cleaned_data['group4'])] if list != ['']]
 
-        sc = ScheduleCreator(
-            schedule=Schedule(format=self.object.format, groups=groups),
-            gameday=self.object)
         try:
+            sc = ScheduleCreator(
+                schedule=Schedule(format=self.object.format, groups=groups),
+                gameday=self.object)
             sc.create()
         except FileNotFoundError:
             form.add_error(None,
