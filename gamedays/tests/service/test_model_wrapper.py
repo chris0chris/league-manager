@@ -1,3 +1,4 @@
+import json
 import pathlib
 
 import pandas as pd
@@ -65,6 +66,7 @@ class TestGamedayModelWrapper(TestCase):
         gameday = DBSetup().g72_finished()
         expected_table = get_df_from_json('ts_final_table_7_teams')
         gmw = GamedayModelWrapper(gameday.pk)
+        print(json.dumps(json.loads(gmw.get_final_table().to_json(orient='table')), indent=2))
         assert_frame_equal(gmw.get_final_table(), expected_table, check_dtype=False)
 
     def test_get_final_table_for_main_round(self):

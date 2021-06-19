@@ -2,12 +2,15 @@ from django.contrib.auth.models import User
 
 from gamedays.tests.setup_factories.factories import GameinfoFactory, GameresultFactory, GamedayFactory, \
     GameOfficialFactory, TeamLogFactory, GameSetupFactory, TeamFactory, UserFactory
-from teammanager.models import Gameday, Gameinfo
+from teammanager.models import Gameday, Gameinfo, Team
 
 
 class DBSetup:
     def g62_qualify_finished(self):
         return self._create_gameday()
+
+    def g72_qualify_finished(self):
+        return self._create_gameday(group_a=4, group_b=3)
 
     def g62_status_empty(self):
         return self._create_gameday(qualify='Geplant')
@@ -21,9 +24,11 @@ class DBSetup:
 
     def g72_finished(self, season=None):
         gameday = self._create_gameday(group_a=4, sf='beendet', p5='beendet', p3='beendet', p1='beendet', season=season)
-        home = TeamFactory(name='A4')
-        away = TeamFactory(name='B3')
-        self.create_finalround_game(gameday, standing='P5', status='beendet', home=home, away=away)
+        a3 = Team.objects.filter(name='A3').first()
+        a4 = Team.objects.filter(name='A4').first()
+        b3 = Team.objects.filter(name='B3').first()
+        self.create_finalround_game(gameday, standing='P5-1', status='beendet', home=b3, away=a3)
+        self.create_finalround_game(gameday, standing='P5-2', status='beendet', home=a4, away=b3)
         return gameday
 
     def _create_gameday(self, qualify='beendet', sf='', p5='', p3='', p1='', group_a=3, group_b=3,
@@ -111,6 +116,8 @@ class DBSetup:
     def create_playoff_placeholder_teams(self):
         TeamFactory(name='P3 Gruppe 2')
         TeamFactory(name='P3 Gruppe 1')
+        TeamFactory(name='P4 Gruppe 1')
+        TeamFactory(name='P4 Gruppe 2')
         TeamFactory(name='P2 Gruppe 2')
         TeamFactory(name='P2 Gruppe 1')
         TeamFactory(name='P1 Gruppe 2')
@@ -120,6 +127,9 @@ class DBSetup:
         TeamFactory(name='Gewinner P3')
         TeamFactory(name='Verlierer HF1')
         TeamFactory(name='Verlierer HF2')
+        TeamFactory(name='Verlierer P3')
+        TeamFactory(name='Verlierer P5')
+        TeamFactory(name='Gewinner P5')
 
     def create_finalround_game(self, gameday, standing, status, home, away):
         if status == 'beendet':

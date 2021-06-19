@@ -74,20 +74,20 @@
     },
     {
       "index": 4,
-      "team__name": "B3",
+      "team__name": "A3",
       "points": 6,
       "pf": 8,
-      "pa": 9,
-      "+/-": -1,
+      "pa": 10,
+      "+/-": -2,
       "dffl": 4
     },
     {
       "index": 5,
-      "team__name": "A3",
-      "points": 3,
-      "pf": 5,
-      "pa": 8,
-      "+/-": -3,
+      "team__name": "B3",
+      "points": 6,
+      "pf": 10,
+      "pa": 12,
+      "+/-": -2,
       "dffl": 3
     },
     {
