@@ -1,6 +1,6 @@
 [
   {
-    "scheduled": "10:00",
+    "scheduled": "start",
     "field": "1",
     "stage": "Vorrunde",
     "standing": "Gruppe 1",
@@ -9,7 +9,7 @@
     "official": "1_2"
   },
   {
-    "scheduled": "11:10",
+    "scheduled": "0",
     "field": "1",
     "stage": "Vorrunde",
     "standing": "Gruppe 1",
@@ -18,7 +18,7 @@
     "official": "1_1"
   },
   {
-    "scheduled": "12:20",
+    "scheduled": "1",
     "field": "1",
     "stage": "Vorrunde",
     "standing": "Gruppe 1",
@@ -27,7 +27,7 @@
     "official": "1_0"
   },
   {
-    "scheduled": "10:00",
+    "scheduled": "0",
     "field": "2",
     "stage": "Vorrunde",
     "standing": "Gruppe 2",
@@ -36,7 +36,7 @@
     "official": "0_2"
   },
   {
-    "scheduled": "11:10",
+    "scheduled": "1",
     "field": "2",
     "stage": "Vorrunde",
     "standing": "Gruppe 2",
@@ -45,7 +45,7 @@
     "official": "0_1"
   },
   {
-    "scheduled": "12:20",
+    "scheduled": "1",
     "field": "2",
     "stage": "Vorrunde",
     "standing": "Gruppe 2",
@@ -54,7 +54,7 @@
     "official": "0_0"
   },
   {
-    "scheduled": "13:40",
+    "scheduled": "2",
     "field": "1",
     "stage": "Finalrunde",
     "standing": "HF",
@@ -63,7 +63,7 @@
     "official": "P3 Gruppe 2"
   },
   {
-    "scheduled": "13:40",
+    "scheduled": "2",
     "field": "2",
     "stage": "Finalrunde",
     "standing": "HF",
@@ -72,7 +72,7 @@
     "official": "P3 Gruppe 1"
   },
   {
-    "scheduled": "14:50",
+    "scheduled": "6",
     "field": "1",
     "stage": "Finalrunde",
     "standing": "P5",
@@ -81,7 +81,7 @@
     "official": "Gewinner HF1"
   },
   {
-    "scheduled": "16:00",
+    "scheduled": "8",
     "field": "1",
     "stage": "Finalrunde",
     "standing": "P1",
@@ -90,7 +90,7 @@
     "official": "Gewinner P3"
   },
   {
-    "scheduled": "14:50",
+    "scheduled": "6",
     "field": "2",
     "stage": "Finalrunde",
     "standing": "P3",
