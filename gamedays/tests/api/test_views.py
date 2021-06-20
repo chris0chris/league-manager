@@ -5,6 +5,7 @@ from datetime import datetime
 from http import HTTPStatus
 
 import pytest
+from django.conf import settings
 from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
@@ -142,8 +143,9 @@ class TestLivetickerAPIView(WebTest):
         assert response.json[0] == expected_result
         assert response.json[2] == expected_result
 
-
     def test_get_livetickers_for_one_gameday(self):
+        tmp_settings_debug = settings.DEBUG
+        settings.DEBUG = True
         DBSetup().g62_status_empty()
         Gameinfo.objects.filter(pk__gt=2).update(scheduled='11:00')
         response = self.app.get(reverse(API_LIVETICKER_ALL))
@@ -164,6 +166,7 @@ class TestLivetickerAPIView(WebTest):
             },
             "ticks": []
         }
+        settings.DEBUG = tmp_settings_debug
 
 
 class TestGamesToWhistleAPIView(WebTest):
