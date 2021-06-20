@@ -20,7 +20,10 @@ class TestGamedayCreateView(WebTest):
         self.app.set_user(User.objects.all().first())
         response: DjangoWebtestResponse = self.app.get(reverse('league-gameday-create'))
         assert response.status_code == HTTPStatus.OK
-        response: DjangoWebtestResponse = response.form.submit().follow()
+        form = response.form
+        form['name'] = 'New Test Gameday'
+        form['date'] = '2021-07-22'
+        response: DjangoWebtestResponse = form.submit().follow()
         assert response.status_code == HTTPStatus.OK
         Gameday.objects.get(pk=non_existent_gameday)
         assert response.request.path == reverse('league-gameday-detail', args=[non_existent_gameday])
@@ -89,18 +92,8 @@ class TestGamedayUpdateView(WebTest):
         form['group1'] = 'too few teams'
         resp = form.submit()
         self.assertFormError(resp, 'form', None, [
-            'Spielplan konnte nicht erstellt werden, da die Kombination #Teams und #Felder nicht zum Spielplan passen'])
+            'Spielplan konnte nicht erstellt werden, da die Kombination #Teams und #Format nicht zum Spielplan passen'])
         assert not Gameinfo.objects.filter(gameday_id=self.gameday_id).exists()
-
-    def test_handle_non_existable_schedule_format(self):
-        self.gameday.format = 'not existent schedule'
-        self.gameday.save()
-        form = self.app.get(reverse('league-gameday-update', args=[self.gameday.pk])).form
-        form['group1'] = 'groups doesnt matter'
-        resp = form.submit()
-        self.assertFormError(resp, 'form', None, [
-            'Spielplan konnte nicht erstellt werden, da es das Format als Spielplan nicht gibt: "not existent schedule"'])
-        assert not Gameinfo.objects.filter(gameday_id=self.gameday.pk).exists()
 
     def test_team_not_found_while_creating_schedule(self):
         DBSetup().create_playoff_placeholder_teams()

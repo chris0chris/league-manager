@@ -26,7 +26,7 @@ class TestSchedule:
         assert entry.get_home() == 'Pandas'
         assert entry.get_away() == 'Rheda'
         assert entry.get_official() == 'Iser'
-        p1 = entries[9]
+        p1 = entries[10]
         assert p1.get_home() == 'Gewinner HF1'
         assert p1.get_away() == 'Gewinner HF2'
         assert p1.get_official() == 'Gewinner P3'
