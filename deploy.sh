@@ -2,6 +2,8 @@ echo "activating venv"
 source ../.virtualenvs/venv/bin/activate
 echo "checkout git"
 git pull
+echo "installing requirements"
+pip install -r requirements.txt
 echo "doing django stuff"
 python manage.py migrate
 rm -rf league_manager/static
