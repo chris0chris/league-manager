@@ -1,12 +1,18 @@
 import pytest
 from django.test import TestCase
 
-from gamedays.management.schedule_manager import ScheduleCreator, Schedule, ScheduleEntry, TeamNotExistent
+from gamedays.management.schedule_manager import ScheduleCreator, Schedule, ScheduleEntry, TeamNotExistent, \
+    ScheduleTeamMismatchError
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from teammanager.models import Gameday, Gameinfo, Gameresult
 
 
 class TestSchedule:
+    def test_schedule_throws_exception_format_and_groups_dont_fit(self):
+        groups = [['A1', 'A2', 'A3', 'A4'], ['B1', 'B2', 'B3']]
+        with pytest.raises(ScheduleTeamMismatchError):
+            schedule = Schedule('6_2', groups)
+
     def test_schedule_loaded(self):
         groups = [['Iser', 'Nieder', 'Wesel'], ['Dort', 'Pandas', 'Rheda']]
         schedule = Schedule('6_2', groups)
