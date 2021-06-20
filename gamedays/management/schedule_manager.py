@@ -38,7 +38,7 @@ class Schedule:
     def __init__(self, format: str, groups):
         self.groups = groups
         self.format = format
-        if format.split('_')[0] != sum(len(group) for group in groups):
+        if int(format.split('_')[0]) != sum(len(group) for group in groups):
             raise ScheduleTeamMismatchError
         self.entries = self._get_entries()
 
