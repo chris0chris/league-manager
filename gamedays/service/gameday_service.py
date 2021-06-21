@@ -34,7 +34,7 @@ SCHEDULE_TABLE_HEADERS = {
 
 class EmptySchedule:
     @staticmethod
-    def to_html():
+    def to_html(*args, **kwargs):
         return 'Spielplan wurde noch nicht erstellt'
 
     @staticmethod
@@ -44,7 +44,7 @@ class EmptySchedule:
 
 class EmptyQualifyTable:
     @staticmethod
-    def to_html():
+    def to_html(*args, **kwargs):
         return ''
 
     @staticmethod
@@ -54,7 +54,7 @@ class EmptyQualifyTable:
 
 class EmptyFinalTable:
     @staticmethod
-    def to_html():
+    def to_html(*args, **kwargs):
         return 'Abschlusstabelle wird berechnet, sobald alle Spiele beendet sind.'
 
     @staticmethod
