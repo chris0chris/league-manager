@@ -1,3 +1,5 @@
+import pandas as pd
+
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     POINTS_HOME, \
     POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL
@@ -17,15 +19,15 @@ TABLE_HEADERS = {
 }
 
 SCHEDULE_TABLE_HEADERS = {
-    SCHEDULED: 'Kick-Off',
+    SCHEDULED: 'Start',
     FIELD: 'Feld',
-    OFFICIALS_NAME: 'Officials',
-    STAGE: 'Runde',
-    STANDING: 'Platz',
     HOME: 'Heim',
-    POINTS_HOME: 'Punkte Heim',
-    POINTS_AWAY: 'Punkte Gast',
+    POINTS_HOME: 'Pkt',
+    POINTS_AWAY: 'Pkt',
     AWAY: 'Gast',
+    OFFICIALS_NAME: 'Officials',
+    STANDING: 'Platz',
+    STAGE: 'Runde',
     STATUS: 'Status'
 }
 
@@ -92,8 +94,11 @@ class GamedayService:
 
     def get_schedule(self):
         schedule = self.gmw.get_schedule()
-        columns = [SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY, STATUS]
+        columns = [SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, STANDING, STAGE, STATUS]
         schedule = schedule[columns]
+        schedule[OFFICIALS_NAME] = schedule[OFFICIALS_NAME].apply('<i>{}</i>'.format)
+        schedule[SCHEDULED] = pd.to_datetime(schedule[SCHEDULED], format='%H:%M:%S').dt.strftime('%H:%M')
+
         schedule = schedule.rename(columns=SCHEDULE_TABLE_HEADERS)
         return schedule
 
