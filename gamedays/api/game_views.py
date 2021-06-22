@@ -117,14 +117,14 @@ class GamePossessionAPIView(APIView):
 class ConfigPenalties(APIView):
     def get(self, request, *args, **kwargs):
         penalty_list = [
-            {'name': 'illegaler Kontakt Defense', 'subtext': 'BS/aFD 10', 'isPenaltyAgainstOpponent': True},
+            {'name': 'illegaler Kontakt Defense', 'subtext': 'BS/1st 10', 'isPenaltyAgainstOpponent': True},
             {'name': 'Flag Guarding', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': False},
             {'name': 'Fehlstart', 'subtext': 'DB/5', 'isPenaltyAgainstOpponent': False},
             {'name': 'Abschirmen (Blocken) Offense', 'subtext': 'BS/5', 'isPenaltyAgainstOpponent': False},
             {'name': 'illegaler Kontakt Offense', 'subtext': 'BS/LoD 10', 'isPenaltyAgainstOpponent': False},
             {'name': 'Abschirmen (Blocken) Defense', 'subtext': 'BS/5', 'isPenaltyAgainstOpponent': True},
-            {'name': 'Defense Passbehinderung', 'subtext': 'BS/aFD 10', 'isPenaltyAgainstOpponent': True},
-            {'name': 'Behinderung Spieldurchführung Defense', 'subtext': 'BS/aFD 10', 'isPenaltyAgainstOpponent': True},
+            {'name': 'Defense Passbehinderung', 'subtext': 'BS/1st 10', 'isPenaltyAgainstOpponent': True},
+            {'name': 'Behinderung Spieldurchführung Defense', 'subtext': 'BS/1st 10', 'isPenaltyAgainstOpponent': True},
             {'name': 'Passverzögerung', 'subtext': 'SL/LoD', 'isPenaltyAgainstOpponent': False},
             {'name': 'illegale Ballübergabe', 'subtext': 'SF/LoD', 'isPenaltyAgainstOpponent': False},
             {'name': 'illegaler Rückwärtspass', 'subtext': 'SF/LoD 5', 'isPenaltyAgainstOpponent': False},
