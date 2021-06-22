@@ -21,5 +21,12 @@
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
 ></script>
 <script src='{% static "scorecard/js/scorecard.js" %}'></script>
+<script>
+    const DEBUG = false;
+    if(!DEBUG){
+        $(window).bind('beforeunload', function () {return '';});
+    }
+
+</script>
 </body>
 </html>
