@@ -13,30 +13,30 @@
         "stage": "Hauptrunde",
         "standing": "Gruppe 1",
         "home": "0_3",
-        "away": "0_2",
-        "official": "0_0"
-      },
-      {
-        "stage": "Hauptrunde",
-        "standing": "Gruppe 1",
-        "home": "0_2",
-        "away": "0_0",
-        "official": "0_1"
-      },
-      {
-        "stage": "Hauptrunde",
-        "standing": "Gruppe 1",
-        "home": "0_1",
-        "away": "0_3",
-        "official": "0_2"
-      },
-      {
-        "stage": "Hauptrunde",
-        "standing": "Gruppe 1",
-        "home": "0_2",
-        "away": "0_1",
-        "official": "0_3"
-      },
+    "away": "0_2",
+    "official": "0_0"
+  },
+  {
+    "stage": "Hauptrunde",
+    "standing": "Gruppe 1",
+    "home": "0_2",
+    "away": "0_0",
+    "official": "0_1"
+  },
+  {
+    "stage": "Hauptrunde",
+    "standing": "Gruppe 1",
+    "home": "0_1",
+    "away": "0_3",
+    "official": "0_2"
+  },
+  {
+    "stage": "Hauptrunde",
+    "standing": "Gruppe 1",
+    "home": "0_2",
+    "away": "0_1",
+    "official": "0_3"
+  },
       {
         "stage": "Hauptrunde",
         "standing": "Gruppe 1",

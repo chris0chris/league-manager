@@ -102,15 +102,15 @@
       {
         "stage": "Finalrunde",
         "standing": "P5-1",
-        "home": "P4 Gruppe 1",
-        "away": "P3 Gruppe 2",
+        "home": "P3 Gruppe 2",
+        "away": "P3 Gruppe 1",
         "official": "Gewinner HF2"
       },
       {
         "stage": "Finalrunde",
         "standing": "P5-2",
-        "home": "P3 Gruppe 2",
-        "away": "P3 Gruppe 1",
+        "home": "P4 Gruppe 1",
+        "away": "P3 Gruppe 2",
         "official": "Verlierer P3"
       }
     ]
