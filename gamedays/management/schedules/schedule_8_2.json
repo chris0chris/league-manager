@@ -7,28 +7,42 @@
         "standing": "Gruppe 1",
         "home": "0_0",
         "away": "0_1",
-        "official": "1_2"
+        "official": "1_3"
       },
       {
         "stage": "Vorrunde",
         "standing": "Gruppe 2",
-        "home": "1_2",
-        "away": "1_3",
+        "home": "1_3",
+        "away": "1_0",
+        "official": "0_0"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 1",
+        "home": "0_3",
+        "away": "0_0",
+        "official": "1_1"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 2",
+        "home": "1_0",
+        "away": "1_2",
+        "official": "0_2"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 1",
+        "home": "0_0",
+        "away": "0_2",
         "official": "1_0"
       },
       {
         "stage": "Vorrunde",
         "standing": "Gruppe 2",
-        "home": "1_1",
-        "away": "1_3",
+        "home": "1_0",
+        "away": "1_1",
         "official": "0_1"
-      },
-      {
-        "stage": "Vorrunde",
-        "standing": "Gruppe 1",
-        "home": "0_1",
-        "away": "0_2",
-        "official": "0_3"
       },
       {
         "stage": "Finalrunde",
@@ -58,30 +72,44 @@
     "games": [
       {
         "stage": "Vorrunde",
-        "standing": "Gruppe 2",
-        "home": "1_0",
-        "away": "1_1",
-        "official": "1_3"
-      },
-      {
-        "stage": "Vorrunde",
         "standing": "Gruppe 1",
-        "home": "0_0",
-        "away": "0_2",
+        "home": "0_2",
+        "away": "0_3",
         "official": "1_0"
       },
       {
         "stage": "Vorrunde",
         "standing": "Gruppe 2",
-        "home": "1_0",
+        "home": "1_1",
         "away": "1_2",
         "official": "0_1"
       },
       {
         "stage": "Vorrunde",
+        "standing": "Gruppe 1",
+        "home": "0_1",
+        "away": "0_2",
+        "official": "1_2"
+      },
+      {
+        "stage": "Vorrunde",
         "standing": "Gruppe 2",
         "home": "1_3",
-        "away": "1_0",
+        "away": "1_1",
+        "official": "0_3"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 1",
+        "home": "0_3",
+        "away": "0_1",
+        "official": "1_3"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 2",
+        "home": "1_2",
+        "away": "1_3",
         "official": "0_0"
       },
       {
@@ -104,39 +132,6 @@
         "home": "Verlierer HF1",
         "away": "Verlierer HF2",
         "official": "Verlierer P5"
-      }
-    ]
-  },
-  {
-    "field": "3",
-    "games": [
-      {
-        "stage": "Vorrunde",
-        "standing": "Gruppe 1",
-        "home": "0_2",
-        "away": "0_3",
-        "official": "1_3"
-      },
-      {
-        "stage": "Vorrunde",
-        "standing": "Gruppe 1",
-        "home": "0_1",
-        "away": "0_3",
-        "official": "1_1"
-      },
-      {
-        "stage": "Vorrunde",
-        "standing": "Gruppe 1",
-        "home": "0_3",
-        "away": "0_0",
-        "official": "0_2"
-      },
-      {
-        "stage": "Vorrunde",
-        "standing": "Gruppe 2",
-        "home": "1_2",
-        "away": "1_1",
-        "official": "0_0"
       }
     ]
   }
