@@ -1,25 +1,22 @@
 [
   {
-    "scheduled": "start",
     "field": "1",
-    "stage": "Hauptrunde",
-    "standing": "Gruppe 1",
-    "home": "0_0",
-    "away": "0_1",
-    "official": "0_3"
-  },
-  {
-    "scheduled": "0",
-    "field": "1",
-    "stage": "Hauptrunde",
-    "standing": "Gruppe 1",
-    "home": "0_3",
+    "games": [
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe 1",
+        "home": "0_0",
+        "away": "0_1",
+        "official": "0_3"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe 1",
+        "home": "0_3",
     "away": "0_2",
     "official": "0_0"
   },
   {
-    "scheduled": "1",
-    "field": "1",
     "stage": "Hauptrunde",
     "standing": "Gruppe 1",
     "home": "0_2",
@@ -27,8 +24,6 @@
     "official": "0_1"
   },
   {
-    "scheduled": "2",
-    "field": "1",
     "stage": "Hauptrunde",
     "standing": "Gruppe 1",
     "home": "0_1",
@@ -36,21 +31,19 @@
     "official": "0_2"
   },
   {
-    "scheduled": "3",
-    "field": "1",
     "stage": "Hauptrunde",
     "standing": "Gruppe 1",
     "home": "0_2",
     "away": "0_1",
     "official": "0_3"
   },
-  {
-    "scheduled": "4",
-    "field": "1",
-    "stage": "Hauptrunde",
-    "standing": "Gruppe 1",
-    "home": "0_0",
-    "away": "0_3",
-    "official": "0_1"
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe 1",
+        "home": "0_0",
+        "away": "0_3",
+        "official": "0_1"
+      }
+    ]
   }
 ]
