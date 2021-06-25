@@ -89,7 +89,7 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
         try:
             sc = ScheduleCreator(
-                schedule=Schedule(format=self.object.format, groups=groups),
+                schedule=Schedule(gameday_format=self.object.format, groups=groups),
                 gameday=self.object)
             sc.create()
         except FileNotFoundError:
