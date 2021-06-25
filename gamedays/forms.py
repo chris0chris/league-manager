@@ -3,15 +3,19 @@ from django.utils import timezone
 
 from teammanager.models import Gameday, Season, League
 
+SCHEDULE_CHOICES = (
+    ("4_1", "4 Teams 1 Feld"),
+    ("6_2", "6 Teams 2 Felder"),
+    ("7_2", "7 Teams 2 Felder"),
+    ("8_3", "8 Teams 3 Felder"),
+)
+
 
 class GamedayCreateForm(forms.ModelForm):
     name = forms.CharField(max_length=100)
     season = forms.ModelChoiceField(queryset=Season.objects.all(), initial=1)
     league = forms.ModelChoiceField(queryset=League.objects.all(), initial=1)
-    format = forms.ChoiceField(choices=(
-        ("6_2", "6 Teams 2 Felder"),
-        ("7_2", "7 Teams 2 Felder"),
-    ))
+    format = forms.ChoiceField(choices=SCHEDULE_CHOICES)
 
     class Meta:
         model = Gameday
@@ -37,10 +41,7 @@ class GamedayUpdateForm(forms.ModelForm):
         attrs={'type': 'date'}
     ))
     start = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}))
-    format = forms.ChoiceField(choices=(
-        ("6_2", "6 Teams 2 Felder"),
-        ("7_2", "7 Teams 2 Felder"),
-    ))
+    format = forms.ChoiceField(choices=SCHEDULE_CHOICES)
     group1 = forms.CharField(max_length=100, label='Gruppe 1', help_text='Bitte Teams mit Komma separieren')
     group2 = forms.CharField(max_length=100, label='Gruppe 2', required=False,
                              help_text='Bitte Teams mit Komma separieren')
