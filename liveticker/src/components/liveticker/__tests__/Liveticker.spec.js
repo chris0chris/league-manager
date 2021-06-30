@@ -28,7 +28,6 @@ describe('Liveticker component', () => {
     const GAME_TICKER_DATA = LIVETICKER_DATA[0];
     expect(screen.getAllByRole('listitem')).toHaveLength(10);
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.status))).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(GAME_TICKER_DATA.time))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.home.name))).toBeInTheDocument();
     expect(screen.getAllByText(new RegExp(GAME_TICKER_DATA.away.name))).toHaveLength(2);
   });
