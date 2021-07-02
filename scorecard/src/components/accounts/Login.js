@@ -13,8 +13,9 @@ const Login = (props) => {
     e.preventDefault();
     props.loginUser(username, password);
   };
+  const ENTRY_FROM_START = true;
   if (props.isAuthenticated) {
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' || ENTRY_FROM_START) {
       return <Redirect to={ROOT_URL} />;
     } else {
       return <Redirect to="/details" />;

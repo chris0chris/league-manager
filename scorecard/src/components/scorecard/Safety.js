@@ -1,19 +1,12 @@
 /* eslint-disable max-len */
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 
-const Safety = ({resetRequested, setResetRequested, update}) => {
+const Safety = (props) => {
+  const {update} = props;
   const [pointsInput, setPointsInput] = useState('');
   const [pointsRadio, setPointsRadio] = useState('Safety (+2)');
   const [twoPointsSelected, setTwoPointsSelected] = useState(true);
-  useEffect(() => {
-    if (resetRequested) {
-      setPointsInput('');
-      setPointsRadio('Safety (+2)');
-      setTwoPointsSelected(true);
-      setResetRequested(false);
-    }
-  }, [resetRequested]);
 
   update({
     event: [{name: pointsRadio, player: pointsInput}],
@@ -84,8 +77,6 @@ const Safety = ({resetRequested, setResetRequested, update}) => {
 };
 
 Safety.propTypes = {
-  resetRequested: PropTypes.bool.isRequired,
-  setResetRequested: PropTypes.func.isRequired,
   update: PropTypes.func.isRequired,
 };
 

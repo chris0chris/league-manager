@@ -68,8 +68,8 @@ const Halftime = (props) => {
           <div className="modal-body">
             <Timer isOn={timerIsOn} durationInSeconds={120} />
             <div className="row mt-2">
-              <div>Spielrichtung 2. HZ: <strong>{props.gameSetup.direction == 'directionLeft' ?
-                    <FaArrowRight title="directionRight" /> : <FaArrowLeft title="directionLeft" />}</strong></div>
+              <div>Spielrichtung 2. HZ: {props.gameSetup.direction == 'directionLeft' ?
+                    <FaArrowLeft title="directionLeft" /> : <FaArrowRight title="directionRight" />}</div>
               <div>Ball hat: <strong>{props.gameSetup.fhPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name}</strong></div>
             </div>
           </div>

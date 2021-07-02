@@ -4,26 +4,26 @@ import PropTypes from 'prop-types';
 import RadioButton from '../layout/RadioButton';
 import Touchdown from './Touchdown';
 import GameEvent from './GameEvent';
-import Turnover from './gameEvent/Turnover';
+import Series from './gameEvent/Series';
 
 const AddPoints = (props) => {
   let event = null;
   let isAgainstOpponent = false;
   const {onSubmit: updateParent} = props;
-  const [showTD, setShowTD] = useState(true);
-  const [showTurnover, setShowTurnover] = useState(false);
+  const [showTD, setShowTD] = useState(false);
+  const [showSerie, setShowSerie] = useState(true);
   const [showGameEvent, setShowGameEvent] = useState(false);
   const [reset, setReset] = useState(false);
   const handlePointsSelection = (value) => {
     switch (value) {
-      case 'Turnover':
-        setShowStates(false, true, false);
+      case 'Touchdown':
+        setShowStates(true, false, false);
         break;
       case 'GameEvent':
         setShowStates(false, false, true);
         break;
       default:
-        setShowStates(true, false, false);
+        setShowStates(false, true, false);
         break;
     }
   };
@@ -33,12 +33,12 @@ const AddPoints = (props) => {
   };
   const setShowStates = (td, special, gameEvent) => {
     setShowTD(td);
-    setShowTurnover(special);
+    setShowSerie(special);
     setShowGameEvent(gameEvent);
   };
   const handleSubmit = (formEvent) => {
     formEvent.preventDefault();
-    setShowStates(true, false, false);
+    setShowStates(false, true, false);
     setReset(true);
     updateParent(event, isAgainstOpponent);
   };
@@ -46,14 +46,14 @@ const AddPoints = (props) => {
     <form className='form-control' onSubmit={(ev) => handleSubmit(ev)}>
       <div className="row mt-2">
         <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='td' text='Touchdown' checked={showTD} value='Touchdown'/>
-        <RadioButton color='secondary' name='points' onChange={handlePointsSelection} id='turnover' text='Turnover' checked={showTurnover} value='Turnover'/>
+        <RadioButton color='secondary' name='points' onChange={handlePointsSelection} id='serie' text='Serie' checked={showSerie} value='Serie'/>
         <RadioButton color='secondary' name='points' onChange={handlePointsSelection} id='gameEvent' text='Mehr...' checked={showGameEvent} value='GameEvent'/>
       </div>
       { showTD &&
       <Touchdown resetRequested={reset} setResetRequested={setReset} update={setEvent} />
       }
-      { showTurnover &&
-      <Turnover update={setEvent}/>
+      { showSerie &&
+      <Series update={setEvent}/>
       }
       {
         showGameEvent &&
