@@ -62,7 +62,7 @@ describe('Halftime component', () => {
     userEvent.click(screen.getByRole('button', {name: 'Halbzeit'}));
     expect(apiGet.mock.calls[0][0]).toBe(`/api/game/${GAME_LOG_ONLY_FIRSTHALF.gameId}/setup`);
     expect(screen.getByText(GAME_LOG_ONLY_FIRSTHALF.home.name)).toBeInTheDocument();
-    expect(screen.getByTitle('directionRight')).toBeInTheDocument();
+    expect(screen.getByTitle('directionLeft')).toBeInTheDocument();
     userEvent.click(screen.getByTestId('halftime-done'));
     expect(submitMock.mock.calls[0][0]).toBe(true);
   });
