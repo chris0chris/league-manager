@@ -1,4 +1,3 @@
-import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import TeamBox from './TeamBox';
 import Ticks from './Ticks';
