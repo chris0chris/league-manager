@@ -50,10 +50,11 @@ const Details = (props) => {
     switch (event.event[0].name) {
       case 'Strafe':
       case 'Spielzeit':
+      case 'First Down':
         nextTeamInPossession = teamInPossession;
         break;
       default:
-        nextTeamInPossession = teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
+        nextTeamInPossession = getOppositeTeam();
     }
     if (isAgainstOpponent) {
       const opponentTeam = teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
@@ -68,6 +69,9 @@ const Details = (props) => {
   if (isFinal) {
     return <Redirect to={FINALIZE_URL} />;
   }
+  const getOppositeTeam = () => {
+    return teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
+  };
   return (
     <div className='container'>
       <div className='row'>
