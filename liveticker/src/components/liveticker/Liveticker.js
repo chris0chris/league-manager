@@ -9,7 +9,7 @@ const Liveticker = (props) => {
   const [endlessCounter, setEndlessCounter] = useState(0);
   const timer = () => setEndlessCounter(endlessCounter + 1);
   const minute = 60 * 1000;
-  const refreshTime = 2 * minute;
+  const refreshTime = 0.5 * minute;
   useEffect(() => {
     props.getLiveticker();
     const id = setInterval(timer, refreshTime);
@@ -17,6 +17,9 @@ const Liveticker = (props) => {
   }, [endlessCounter]);
   return (
     <>
+      {props.liveticker.length == 0 &&
+        <div>Aktuell finden keine Spiele statt.</div>
+      }
       {props.liveticker.map((teamEntry, index) => (
         <GameTicker {...teamEntry} key={index} />
       ))}
