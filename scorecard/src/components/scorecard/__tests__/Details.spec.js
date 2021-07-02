@@ -73,6 +73,7 @@ describe('Details component', () => {
     expect(
         screen.getByRole('button', {name: 'Ende'}),
     ).toBeInTheDocument();
+    expect(screen.getAllByRole('radio').filter((node)=>node.name == 'points')).toHaveLength(3);
     expect(screen.getByText(new RegExp('1. Halbzeit'))).toBeInTheDocument();
     expect(screen.getByTestId('home-fh').innerHTML).toBe('21');
     expect(screen.getByTestId('away-fh').innerHTML).toBe('0');
@@ -102,7 +103,7 @@ describe('Details component', () => {
     expect(awayButton).not.toBeChecked();
     expect(screen.getByText('Einträge Heim')).toBeInTheDocument();
   });
-  it('should set points for opposite team, when safety was submitted', () => {
+  it('should set focused opposite team, when turnover was submitted', () => {
     setup();
     const homeButton = screen.getByRole('radio', {
       name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.home.name}\\b`, 'i')});
@@ -111,17 +112,16 @@ describe('Details component', () => {
     expect(homeButton).not.toBeChecked();
     expect(awayButton).toBeChecked();
     expect(screen.getByText('Einträge Gast')).toBeInTheDocument();
-    userEvent.click(screen.getByRole('radio', {name: /safety/i}));
-    userEvent.type(screen.getByRole('spinbutton', {name: 'number'}), '91');
+    userEvent.click(screen.getByRole('radio', {name: /turnover/i}));
     userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
     expect(homeButton).toBeChecked();
     expect(awayButton).not.toBeChecked();
     /* [0][
       0 - "/api/gamelog/53",
-      1 - {"event": [{"name": "Safety (+2)", "player": "91"}], "gameId": 53, "half": 2, "team": "Home"},
+      1 - {"event": [{"name": "Turnover"}], "gameId": 53, "half": 2, "team": "Away"},
       2 - "GET_GAME_LOG",
       3 - "GAME_CREATE_LOG_ENTRY_FAIL"] */
-    expect(apiPost.mock.calls[0][1]['team']).toEqual('Home');
+    expect(apiPost.mock.calls[0][1]['team']).toEqual('Away');
 
     expect(screen.getByText('Einträge Heim')).toBeInTheDocument();
   });

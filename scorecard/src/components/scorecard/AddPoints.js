@@ -3,20 +3,20 @@ import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import RadioButton from '../layout/RadioButton';
 import Touchdown from './Touchdown';
-import Safety from './Safety';
 import GameEvent from './GameEvent';
+import Turnover from './gameEvent/Turnover';
 
 const AddPoints = (props) => {
   let event = null;
   let isAgainstOpponent = false;
   const {onSubmit: updateParent} = props;
   const [showTD, setShowTD] = useState(true);
-  const [showSpecial, setShowSpecial] = useState(false);
+  const [showTurnover, setShowTurnover] = useState(false);
   const [showGameEvent, setShowGameEvent] = useState(false);
   const [reset, setReset] = useState(false);
   const handlePointsSelection = (value) => {
     switch (value) {
-      case 'Safety':
+      case 'Turnover':
         setShowStates(false, true, false);
         break;
       case 'GameEvent':
@@ -33,7 +33,7 @@ const AddPoints = (props) => {
   };
   const setShowStates = (td, special, gameEvent) => {
     setShowTD(td);
-    setShowSpecial(special);
+    setShowTurnover(special);
     setShowGameEvent(gameEvent);
   };
   const handleSubmit = (formEvent) => {
@@ -46,14 +46,14 @@ const AddPoints = (props) => {
     <form className='form-control' onSubmit={(ev) => handleSubmit(ev)}>
       <div className="row mt-2">
         <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='td' text='Touchdown' checked={showTD} value='Touchdown'/>
-        <RadioButton color='warning' name='points' onChange={handlePointsSelection} id='otherPoints' text='Safety' checked={showSpecial} value='Safety'/>
+        <RadioButton color='secondary' name='points' onChange={handlePointsSelection} id='turnover' text='Turnover' checked={showTurnover} value='Turnover'/>
         <RadioButton color='secondary' name='points' onChange={handlePointsSelection} id='gameEvent' text='Mehr...' checked={showGameEvent} value='GameEvent'/>
       </div>
       { showTD &&
       <Touchdown resetRequested={reset} setResetRequested={setReset} update={setEvent} />
       }
-      { showSpecial &&
-      <Safety resetRequested={reset} setResetRequested={setReset} update={setEvent} />
+      { showTurnover &&
+      <Turnover update={setEvent}/>
       }
       {
         showGameEvent &&

@@ -25,7 +25,6 @@ const Touchdown = (props) => {
       {name: patRadio, player: patInput},
     ],
   });
-
   return (
     <><div className="input-group mt-2">
       <div className="input-group-text" id="btnGroupAddon">#TD&nbsp;</div>
@@ -52,7 +51,7 @@ const Touchdown = (props) => {
             onChange={(ev) => {
               setPatRadio(ev.target.value); setPat1Selected(!pat1Selected);
             }}
-            defaultValue='pat1' checked={pat1Selected} />
+            defaultValue='1-Extra-Punkt' checked={pat1Selected} />
           <label className="btn btn-outline-warning" htmlFor='pat1'>1</label>
           <input type="radio" id='pat2' name="pat"
             className="btn-check" defaultValue='2-Extra-Punkte' checked={!pat1Selected}
