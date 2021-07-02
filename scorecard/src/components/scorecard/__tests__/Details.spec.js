@@ -96,6 +96,7 @@ describe('Details component', () => {
     expect(homeButton).not.toBeChecked();
     expect(awayButton).toBeChecked();
     expect(screen.getByText('Einträge Gast')).toBeInTheDocument();
+    userEvent.click(screen.getByRole('radio', {name: 'Touchdown'}));
     userEvent.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');
     userEvent.type(screen.getByRole('spinbutton', {name: 'PAT number'}), '7');
     userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
@@ -111,7 +112,6 @@ describe('Details component', () => {
       name: new RegExp(`\\b${GAME_LOG_COMPLETE_GAME.away.name}\\b`, 'i')});
     expect(homeButton).not.toBeChecked();
     expect(awayButton).toBeChecked();
-    expect(screen.getByText('Einträge Gast')).toBeInTheDocument();
     userEvent.click(screen.getByRole('radio', {name: /turnover/i}));
     userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
     expect(homeButton).toBeChecked();
@@ -122,12 +122,11 @@ describe('Details component', () => {
       2 - "GET_GAME_LOG",
       3 - "GAME_CREATE_LOG_ENTRY_FAIL"] */
     expect(apiPost.mock.calls[0][1]['team']).toEqual('Away');
-
-    expect(screen.getByText('Einträge Heim')).toBeInTheDocument();
   });
 
   it('should send a post api call with correct half, when points input was submitted', () => {
     setup();
+    userEvent.click(screen.getByRole('radio', {name: 'Touchdown'}));
     userEvent.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');
     userEvent.type(screen.getByRole('spinbutton', {name: 'PAT number'}), '7');
     userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
