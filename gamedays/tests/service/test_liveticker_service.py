@@ -101,6 +101,7 @@ class TestLiveticker(TestCase):
         DBSetup().g62_status_empty()
         liveticker = Liveticker(Gameinfo.objects.filter(status='Geplant').last())
         assert liveticker.as_json() == {
+            "gameId": 6,
             "status": "Geplant",
             "time": "10:00",
             "home": {

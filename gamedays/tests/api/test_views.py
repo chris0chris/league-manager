@@ -126,6 +126,7 @@ class TestLivetickerAPIView(WebTest):
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 4
         expected_result = {
+            "gameId": 1,
             "status": "Geplant",
             "time": "10:00",
             "home": {
@@ -141,6 +142,7 @@ class TestLivetickerAPIView(WebTest):
             "ticks": []
         }
         assert response.json[0] == expected_result
+        expected_result.update({"gameId": 12})
         assert response.json[2] == expected_result
 
     def test_get_livetickers_for_one_gameday(self):
@@ -152,6 +154,7 @@ class TestLivetickerAPIView(WebTest):
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 2
         assert response.json[0] == {
+            "gameId": 1,
             "status": "Geplant",
             "time": "10:00",
             "home": {
