@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from gamedays.service.utils import AsJsonEncoder
 from teammanager.models import Gameresult, TeamLog
 
-EXCLUDED_EVENTS = ['Strafe', 'Spielzeit', 'Auszeit', 'FirstDown']
+EXCLUDED_EVENTS = ['Strafe', 'Spielzeit', 'Auszeit', 'First Down']
 
 
 class GameLogCreator(object):
