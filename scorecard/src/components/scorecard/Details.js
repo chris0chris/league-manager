@@ -47,7 +47,6 @@ const Details = (props) => {
   };
   const createLogEntry = (event, isAgainstOpponent=false) => {
     let nextTeamInPossession = null;
-    console.log('isAgainstOpponent', isAgainstOpponent);
     switch (event.event[0].name) {
       case 'Strafe':
       case 'Spielzeit':
@@ -62,7 +61,6 @@ const Details = (props) => {
     } else {
       props.createLogEntry({'team': teamInPossession, 'gameId': gameLog.gameId, 'half': half, ...event});
     }
-    console.log('nextTiP', nextTeamInPossession);
     props.updateTeamInPossession(gameLog.gameId, nextTeamInPossession);
     setTeamInPossession(nextTeamInPossession);
     setShowHomeLog(nextTeamInPossession == gameLog.home.name);

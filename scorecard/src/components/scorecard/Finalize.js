@@ -18,7 +18,6 @@ const Finalize = (props) => {
   const gameLog = props.gameLog;
   const handleEditLink = (ev) => {
     if (isHomeConfirmed || isAwayConfirmed) {
-      console.log('handlelink');
       ev.preventDefault();
     }
   };
