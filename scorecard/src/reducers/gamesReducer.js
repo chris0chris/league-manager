@@ -7,9 +7,37 @@ import {
 // import {GAME_LOG_COMPLETE_GAME} from '../__tests__/testdata/gameLogData.js';
 import {GAME_LOG_ONLY_FIRSTHALF} from '../__tests__/testdata/gameLogData.js';
 
+const isDebug = process.env.NODE_ENV === 'development';
+const EMPTY_GAMELOG = {
+  'isFirstHalf': true,
+  'home': {
+    'name': 'Heim',
+    'score': -1,
+    'firsthalf': {
+      'score:': -1,
+      'entries': [],
+    },
+    'secondhalf': {
+      'score:': -1,
+      'entries': [],
+    },
+  },
+  'away': {
+    'name': 'Gast',
+    'score': -1,
+    'firsthalf': {
+      'score:': -1,
+      'entries': [],
+    },
+    'secondhalf': {
+      'score:': -1,
+      'entries': [],
+    },
+  },
+};
 const initialState = {
   games: [],
-  gameLog: GAME_LOG_ONLY_FIRSTHALF,
+  gameLog: isDebug ? GAME_LOG_ONLY_FIRSTHALF : EMPTY_GAMELOG,
   deleteEntry: {__html: '<td colspan="4"></td>'},
   gameSetupOfficials: [],
   gameSetup: {
@@ -17,33 +45,6 @@ const initialState = {
     direction: '',
     fhPossession: '',
   },
-  // gameLog: {
-  //   'isFirstHalf': true,
-  //   'home': {
-  //     'name': 'Heim',
-  //     'score': -1,
-  //     'firsthalf': {
-  //       'score:': -1,
-  //       'entries': [],
-  //     },
-  //     'secondhalf': {
-  //       'score:': -1,
-  //       'entries': [],
-  //     },
-  //   },
-  //   'away': {
-  //     'name': 'Gast',
-  //     'score': -1,
-  //     'firsthalf': {
-  //       'score:': -1,
-  //       'entries': [],
-  //     },
-  //     'secondhalf': {
-  //       'score:': -1,
-  //       'entries': [],
-  //     },
-  //   },
-  // },
 };
 
 export default (state = initialState, action) => {
