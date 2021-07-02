@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event';
 
 const mockFunc = jest.fn();
 const setup = () => {
+  mockFunc.mockClear();
   render(<AddPoints onSubmit={mockFunc} />);
 };
 
@@ -15,14 +16,16 @@ describe('AddPoints component', () => {
     const touchdownButton = screen.getByRole('radio', {name: new RegExp('Touchdown')});
     expect(touchdownButton).toBeInTheDocument();
     expect(touchdownButton).toBeChecked();
-    expect(screen.getByRole('radio', {name: 'Safety'})).toBeInTheDocument();
+    expect(screen.getByRole('radio', {name: 'Turnover'})).toBeInTheDocument();
     expect(screen.getByRole('radio', {name: 'Mehr...'})).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Eintrag speichern'})).toBeInTheDocument();
   });
   it('should display different input field, when selecting another button', () => {
     setup();
-    userEvent.click(screen.getByRole('radio', {name: new RegExp('Safety')}));
-    expect(screen.getByPlaceholderText('Trikotnummer')).toBeInTheDocument();
+    userEvent.click(screen.getByRole('radio', {name: new RegExp('Turnover')}));
+    expect(screen.getByText('Angriffswechsel? Bitte speichern klicken.')).toBeInTheDocument();
+    userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
+    expect(screen.getByRole('radio', {name: new RegExp('Touchdown')})).toBeChecked();
   });
   it('should call callback, when input is submitted', () => {
     setup();
