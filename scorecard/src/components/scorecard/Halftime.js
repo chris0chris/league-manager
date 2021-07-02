@@ -66,7 +66,7 @@ const Halftime = (props) => {
             <h5 className="modal-title">Halbzeit {gameLog.home.name} {gameLog.home.score}:{gameLog.away.score} {gameLog.away.name}</h5>
           </div>
           <div className="modal-body">
-            <Timer isOn={timerIsOn} durationInSeconds={60} />
+            <Timer isOn={timerIsOn} durationInSeconds={120} />
             <div className="row mt-2">
               <div>Spielrichtung 2. HZ: <strong>{props.gameSetup.direction == 'directionLeft' ?
                     <FaArrowRight title="directionRight" /> : <FaArrowLeft title="directionLeft" />}</strong></div>

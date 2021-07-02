@@ -14,8 +14,11 @@ const Login = (props) => {
     props.loginUser(username, password);
   };
   if (props.isAuthenticated) {
-    return <Redirect to={ROOT_URL} />;
-    // return <Redirect to="/details" />;
+    if (process.env.NODE_ENV === 'production') {
+      return <Redirect to={ROOT_URL} />;
+    } else {
+      return <Redirect to="/details" />;
+    }
   }
 
   return (

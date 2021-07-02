@@ -36,7 +36,6 @@ const ScorecardTable = (props) => {
     $(`#modalDeleteEntry`).modal('show');
   };
   const handleClick = (ev) => {
-    console.log('click', ev.target.parentNode);
   };
   const handleEntryDisplay = (entry) => {
     let htmlSnippet = null;
