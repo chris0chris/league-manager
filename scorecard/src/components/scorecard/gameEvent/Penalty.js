@@ -48,14 +48,14 @@ const Penalty = (props) => {
     const regex = new RegExp(pattern, 'gi');
     return item.name.match(regex);
   };
-  update({
-    event: [{name: 'Strafe', player: playerNumber, input: selectedPenalty}],
-  }, isPenaltyAgainstOpponent);
   const filteredItems = props.penalties.filter((item) => {
     return checkName(item, searchInput);
   });
   let itemsToDisplay = searchInput ? filteredItems : props.penalties;
   itemsToDisplay = itemsToDisplay.slice(0, LIMIT_DISPLAYED_PENALTIES);
+  update({
+    event: [{name: 'Strafe', player: playerNumber, input: selectedPenalty}],
+  }, isPenaltyAgainstOpponent);
   return (
     <div>
       <div className='mt-2' style={{position: 'relative'}}>
