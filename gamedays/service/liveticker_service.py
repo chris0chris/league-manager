@@ -44,6 +44,7 @@ class Liveticker(object):
 
     def as_json(self):
         return dict(
+            gameId=self.game.id,
             status=self.get_status(),
             time=self.get_time(),
             home={
