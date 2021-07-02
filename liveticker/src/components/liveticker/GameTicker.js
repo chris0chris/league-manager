@@ -5,19 +5,6 @@ import Ticks from './Ticks';
 
 const GameTicker = (props) => {
   const {home, away, status, ticks} = props;
-  const [isHomeInPossession, setIsHomeInPossession] = useState(true);
-  useEffect(() => {
-    for (let index = 0; index < ticks.length; index++) {
-      const entry = ticks[index];
-      if (entry.team) {
-        console.log('found');
-        setIsHomeInPossession(entry.team == 'home' ? true : false);
-        console.log(entry.team, entry.team == 'home');
-        return;
-      }
-    }
-  }, [JSON.stringify(ticks)]);
-  console.log('homeInPos?', isHomeInPossession);
   return (
     <div className='card mb-4'>
       <div className='card-header'>
