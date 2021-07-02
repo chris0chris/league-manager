@@ -5,6 +5,8 @@ from django.db.models import QuerySet
 from gamedays.service.utils import AsJsonEncoder
 from teammanager.models import Gameresult, TeamLog
 
+EXCLUDED_EVENTS = ['Strafe', 'Spielzeit', 'Auszeit', 'FirstDown']
+
 
 class GameLogCreator(object):
     def __init__(self, gameinfo, team, event, user, half=1):
@@ -21,8 +23,8 @@ class GameLogCreator(object):
             teamlog = TeamLog()
             teamlog.gameinfo = self.gameinfo
             teamlog.team = self.team
-            teamlog.sequence = sequence if entry.get('name') not in ['Strafe', 'Spielzeit', 'Auszeit'] else 0
-            teamlog.cop = entry.get('name') == 'Turnover'
+            teamlog.sequence = sequence if entry.get('name') not in EXCLUDED_EVENTS else 0
+            teamlog.cop = entry.get('name') in ['Turnover', 'Interception']
             teamlog.event = entry.get('name')
             teamlog.input = entry.get('input')
             teamlog.player = entry.get('player') if entry.get('player') != '' else None
@@ -43,7 +45,7 @@ class GameLogCreator(object):
         # ToDo deleteMe ... info should come via API request
         if name == 'Touchdown':
             return 6
-        if name in ('1-Extra-Punkt', 'Safety (+1)'):
+        if name in ('Overtime', '1-Extra-Punkt', 'Safety (+1)'):
             return 1
         if name in ('2-Extra-Punkte', 'Safety (+2)'):
             return 2
@@ -113,8 +115,8 @@ class GameLog(object):
         return self.away_secondhalf_entries
 
     def _get_entries_for_team_and_half(self, team, half):
-        return TeamLog.objects.filter(gameinfo=self.gameinfo, team__name=team, half=half)\
-            .exclude(event__in=['Auszeit','Spielzeit','Strafe']).order_by('-sequence')
+        return TeamLog.objects.filter(gameinfo=self.gameinfo, team__name=team, half=half) \
+            .exclude(event__in=EXCLUDED_EVENTS).order_by('-sequence')
 
     def get_home_score(self):
         return self.get_home_firsthalf_score() + self.get_home_secondhalf_score()
@@ -147,6 +149,8 @@ class GameLog(object):
                     key = 'pat1'
                 elif entry.event == '2-Extra-Punkte':
                     key = 'pat2'
+                elif entry.event == 'Overtime':
+                    key = 'OT'
                 else:
                     key = entry.event
                 result[entry.sequence].update({key: entry.player})
