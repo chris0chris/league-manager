@@ -88,10 +88,6 @@ class TestScheduleUpdate(TestCase):
             update_gameresults(game)
         p5_first.update(status='beendet')
 
-        gmw = GamedayModelWrapper(gameday.pk)
-        qt = gmw.get_schedule()
-        f = gmw.get_final_table()
-        s = ''
 
     def test_update_9_teams_3_fields(self):
         gameday = DBSetup().create_empty_gameday()
