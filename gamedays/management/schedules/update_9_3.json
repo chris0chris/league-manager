@@ -1,0 +1,207 @@
+[
+  {
+    "name": "P7",
+    "pre-finished": "Vorrunde",
+    "games": [
+      {
+        "home": {
+          "standing": "Gruppe 1",
+          "place": 3
+        },
+        "away": {
+          "standing": "Gruppe 2",
+          "place": 3
+        },
+        "officials": {
+          "pre-finished": "Vorrunde",
+          "stage": "Vorrunde",
+          "place": 1,
+          "index": 1
+        }
+      },
+      {
+        "home": {
+          "standing": "Gruppe 2",
+          "place": 3
+        },
+        "away": {
+          "standing": "Gruppe 3",
+          "place": 3
+        },
+        "officials": {
+          "pre-finished": "PO",
+          "standing": "PO",
+          "place": 2,
+          "points": 0
+        }
+      },
+      {
+        "home": {
+          "standing": "Gruppe 3",
+          "place": 3
+        },
+        "away": {
+          "standing": "Gruppe 1",
+          "place": 3
+        },
+        "officials": {
+          "pre-finished": "HF",
+          "standing": "HF",
+          "place": 1,
+          "points": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "P5",
+    "pre-finished": "PO",
+    "games": [
+      {
+        "home": {
+          "standing": "PO",
+          "place": 2,
+          "points": 0
+        },
+        "away": {
+          "standing": "PO",
+          "place": 1,
+          "points": 0
+        },
+        "officials": {
+          "pre-finished": "Vorrunde",
+          "standing": "Gruppe 2",
+          "place": 3
+        }
+      }
+    ]
+  },
+  {
+    "name": "PO",
+    "pre-finished": "Vorrunde",
+    "games": [
+      {
+        "home": {
+          "stage": "Vorrunde",
+          "place": 2,
+          "index": 1
+        },
+        "away": {
+          "stage": "Vorrunde",
+          "place": 2,
+          "index": 0
+        },
+        "officials": {
+          "pre-finished": "Vorrunde",
+          "stage": "Vorrunde",
+          "place": 1,
+          "index": 0
+        }
+      },
+      {
+        "home": {
+          "stage": "Vorrunde",
+          "place": 2,
+          "index": 2
+        },
+        "away": {
+          "stage": "Vorrunde",
+          "place": 1,
+          "index": 2
+        },
+        "officials": {
+          "pre-finished": "Vorrunde",
+          "standing": "Gruppe 3",
+          "place": 3
+        }
+      }
+    ]
+  },
+  {
+    "name": "HF",
+    "pre-finished": "PO",
+    "games": [
+      {
+        "home": {
+          "standing": "PO",
+          "place": 1,
+          "points": 3
+        },
+        "away": {
+          "stage": "Vorrunde",
+          "place": 1,
+          "index": 0
+        },
+        "officials": {
+          "pre-finished": "PO",
+          "standing": "PO",
+          "place": 1,
+          "points": 0
+        }
+      },
+      {
+        "home": {
+          "standing": "PO",
+          "place": 2,
+          "points": 3
+        },
+        "away": {
+          "stage": "Vorrunde",
+          "place": 1,
+          "index": 1
+        },
+        "officials": {
+          "pre-finished": "Vorrunde",
+          "standing": "Gruppe 1",
+          "place": 3
+        }
+      }
+    ]
+  },
+  {
+    "name": "P3",
+    "pre-finished": "HF",
+    "games": [
+      {
+        "home": {
+          "standing": "HF",
+          "place": 2,
+          "points": 0
+        },
+        "away": {
+          "standing": "HF",
+          "place": 1,
+          "points": 0
+        },
+        "officials": {
+          "pre-finished": "Vorrunde",
+          "standing": "Gruppe 3",
+          "place": 3
+        }
+      }
+    ]
+  },
+  {
+    "name": "P1",
+    "pre-finished": "HF",
+    "games": [
+      {
+        "home": {
+          "standing": "HF",
+          "place": 2,
+          "points": 3
+        },
+        "away": {
+          "standing": "HF",
+          "place": 1,
+          "points": 3
+        },
+        "officials": {
+          "pre-finished": "Vorrunde",
+          "standing": "Gruppe 1",
+          "place": 3
+        }
+      }
+    ]
+  }
+]
