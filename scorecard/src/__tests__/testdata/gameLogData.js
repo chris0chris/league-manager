@@ -56,6 +56,7 @@ export const GAME_LOG_COMPLETE_GAME = {
         {
           'sequence': 11,
           'cop': true,
+          'name': 'Turnover',
         },
         {
           'sequence': 10,
@@ -65,6 +66,7 @@ export const GAME_LOG_COMPLETE_GAME = {
         {
           'sequence': 7,
           'cop': true,
+          'name': 'Turnover',
         },
         {
           'sequence': 6,
@@ -122,6 +124,7 @@ export const GAME_LOG_ONLY_FIRSTHALF = {
         {
           'sequence': 8,
           'cop': true,
+          'name': 'Turnover',
         },
         {
           'sequence': 7,
@@ -131,6 +134,7 @@ export const GAME_LOG_ONLY_FIRSTHALF = {
         {
           'sequence': 6,
           'cop': true,
+          'name': 'Turnover',
         },
         {
           'sequence': 5,

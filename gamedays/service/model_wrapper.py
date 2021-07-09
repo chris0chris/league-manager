@@ -103,12 +103,23 @@ class GamedayModelWrapper:
         final_table[DFFL] = DfflPoints.for_number_teams(final_table.shape[0])
         return final_table
 
-    def _get_standing_list(self, standing):
-        final_standing = self._games_with_result[self._games_with_result[STANDING].isin(standing)]
-        final_standing = final_standing.sort_values(by=POINTS, ascending=False)
-        final_standing = final_standing.sort_values(by=[STANDING])
-        final_standing = final_standing[TEAM_NAME].to_list()
-        return final_standing
+    def _get_standing_list(self, standings):
+        final_standing = self._games_with_result.groupby([STANDING, TEAM_NAME], as_index=False)
+        final_standing = final_standing.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'})
+        final_standing = final_standing.sort_values(by=[STANDING, POINTS, DIFF, PF, PA], ascending=False)
+        # final_standing = final_standing.sort_values(by=STANDING)
+        final_team_list = []
+        for current_standing in standings:
+            current_standing_table = final_standing[final_standing[STANDING] == current_standing]
+            if current_standing_table.shape[0] == 2:
+                final_team_list = final_team_list + current_standing_table[TEAM_NAME].to_list()
+            else:
+                current_standing_table = current_standing_table.groupby([TEAM_NAME], as_index=False)
+                current_standing_table = current_standing_table.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'})
+                current_standing_table = current_standing_table.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
+                final_team_list = final_team_list + current_standing_table[TEAM_NAME].to_list()
+
+        return final_team_list
 
     def _get_schedule(self):
         home_teams = self._games_with_result.groupby(GAMEINFO_ID).nth(0).reset_index()
@@ -150,8 +161,8 @@ class GamedayModelWrapper:
             return len(self._gameinfo[(self._gameinfo[STANDING] == check) & (self._gameinfo[STATUS] == FINISHED)]) \
                    == len(self._gameinfo[(self._gameinfo[STANDING] == check)])
 
-        return len(self._gameinfo[(self._gameinfo[STAGE] == check) & (self._gameinfo[STATUS] == FINISHED)]) \
-               == len(self._gameinfo[(self._gameinfo[STAGE] == check)])
+        return len(self._gameinfo[(self._gameinfo[STAGE] == check) & (self._gameinfo[STATUS] == FINISHED)]) == len(
+            self._gameinfo[(self._gameinfo[STAGE] == check)])
 
     def get_games_to_whistle(self, team):
         games_to_whistle = self._get_schedule()
@@ -161,3 +172,8 @@ class GamedayModelWrapper:
 
     def _has_standing(self, check):
         return self._gameinfo[self._gameinfo[STAGE].isin([check])].empty
+
+    def get_team_by_qualify_for(self, place, index):
+        qualify_standing_by_place = self._get_table().groupby(STANDING).nth(place - 1).sort_values(
+            by=[POINTS, DIFF, PF, PA], ascending=False)
+        return qualify_standing_by_place.iloc[index][TEAM_NAME]
