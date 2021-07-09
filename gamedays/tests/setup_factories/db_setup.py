@@ -109,11 +109,13 @@ class DBSetup:
 
     def create_teams(self, name, number_teams):
         teams = []
+        # for i in range(number_teams)[::-1]:
         for i in range(number_teams):
             teams.append(TeamFactory(name=(name + str(i + 1))))
         return teams
 
     def create_playoff_placeholder_teams(self):
+        TeamFactory(name='P3 Gruppe 3')
         TeamFactory(name='P3 Gruppe 2')
         TeamFactory(name='P3 Gruppe 1')
         TeamFactory(name='P4 Gruppe 1')
@@ -127,9 +129,21 @@ class DBSetup:
         TeamFactory(name='Gewinner P3')
         TeamFactory(name='Verlierer HF1')
         TeamFactory(name='Verlierer HF2')
+        TeamFactory(name='Verlierer HF')
         TeamFactory(name='Verlierer P3')
         TeamFactory(name='Verlierer P5')
         TeamFactory(name='Gewinner P5')
+        TeamFactory(name='Bester P1')
+        TeamFactory(name='Zweitbester P1')
+        TeamFactory(name='Bester P2')
+        TeamFactory(name='Zweitbester P2')
+        TeamFactory(name='Schlechtester P2')
+        TeamFactory(name='Schlechtester P1')
+        TeamFactory(name='Verlierer PO1')
+        TeamFactory(name='Verlierer PO2')
+        TeamFactory(name='Gewinner PO1')
+        TeamFactory(name='Gewinner PO2')
+        # TeamFactory(name='')
 
     def create_finalround_game(self, gameday, standing, status, home, away):
         if status == 'beendet':
