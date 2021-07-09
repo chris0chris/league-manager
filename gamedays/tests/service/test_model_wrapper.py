@@ -7,7 +7,7 @@ from pandas.testing import assert_frame_equal
 
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo
+from teammanager.models import Gameinfo, Gameresult
 
 
 def get_df_from_json(filename):
@@ -126,3 +126,27 @@ class TestGamedayModelWrapper(TestCase):
         Gameinfo.objects.filter(id=2).update(officials=2)
         gmw = GamedayModelWrapper(gameday.pk)
         assert len(gmw.get_games_to_whistle('').index) == 10
+
+    def test_get_all_second_places_for_prelim(self):
+        gameday = DBSetup().g62_qualify_finished();
+        all_prelim_games = Gameinfo.objects.filter(gameday=gameday)
+        for game in all_prelim_games:
+            update_gameresults(game)
+        gmw = GamedayModelWrapper(gameday.pk)
+        assert gmw.get_team_by_qualify_for(place=2, index=0) == 'B2'
+        assert gmw.get_team_by_qualify_for(place=2, index=1) == 'A2'
+
+
+def update_gameresults(game):
+    results = Gameresult.objects.filter(gameinfo=game)
+    assert results.count() == 2
+    result_1: Gameresult = results[0]
+    result_2: Gameresult = results[1]
+    result_1.fh = result_1.team.pk
+    result_1.sh = result_1.team.pk
+    result_1.pa = 2 * result_2.team.pk
+    result_1.save()
+    result_2.fh = result_2.team.pk
+    result_2.sh = result_2.team.pk
+    result_2.pa = 2 * result_1.team.pk
+    result_2.save()

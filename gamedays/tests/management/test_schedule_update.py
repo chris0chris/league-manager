@@ -6,6 +6,7 @@ from django.test import TestCase
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule
 from gamedays.management.schedule_update import ScheduleUpdate, UpdateGameEntry, UpdateEntry
 from gamedays.service.model_wrapper import GamedayModelWrapper
+from gamedays.tests.setup_factories.dataframe_setup import DataFrameAssertion
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from teammanager.models import Gameinfo, Gameresult, Gameday
 
@@ -23,6 +24,35 @@ def update_gameresults(game):
     result_2.sh = result_2.team.pk
     result_2.pa = 2 * result_1.team.pk
     result_2.save()
+
+
+class StandingWrapper:
+    def __init__(self, gameinfo: Gameinfo):
+        self.gameinfo = gameinfo
+
+    def is_updated_as_expected_with(self, expected_home_team, expected_away_team):
+        home: Gameresult = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=True)
+        away: Gameresult = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=False)
+        assert home.team.name == expected_home_team
+        assert away.team.name == expected_away_team
+
+
+def check_if_standing(standing):
+    return StandingWrapper(Gameinfo.objects.filter(standing=standing).first())
+
+
+def update_gameresults_and_finish_game_for(standing: str):
+    games_for_standing = Gameinfo.objects.filter(standing=standing).exclude(status='beendet')
+    for game in games_for_standing:
+        update_gameresults(game)
+    games_for_standing.update(status='beendet')
+
+
+def update_gameresults_and_finish_first_game_for_P7():
+    game: Gameinfo = Gameinfo.objects.filter(standing='P7').exclude(status='beendet').first()
+    update_gameresults(game)
+    game.status = 'beendet'
+    game.save()
 
 
 class TestScheduleUpdate(TestCase):
@@ -43,10 +73,7 @@ class TestScheduleUpdate(TestCase):
             update_gameresults(game)
         su = ScheduleUpdate(gameday.pk, gameday.format)
         su.update()
-        semifinals = Gameinfo.objects.filter(standing='HF')
-        for hf in semifinals:
-            update_gameresults(hf)
-        semifinals.update(status='beendet')
+        update_gameresults_and_finish_game_for('HF')
         su.update()
 
         p5_first = Gameinfo.objects.filter(standing__in=['P5-1', 'P3'])
@@ -65,6 +92,51 @@ class TestScheduleUpdate(TestCase):
         qt = gmw.get_schedule()
         f = gmw.get_final_table()
         s = ''
+
+    def test_update_9_teams_3_fields(self):
+        gameday = DBSetup().create_empty_gameday()
+        gameday.format = "9_3"
+        gameday.save()
+        group_A = DBSetup().create_teams('A', 3)
+        group_B = DBSetup().create_teams('B', 3)
+        group_C = DBSetup().create_teams('C', 3)
+        groups = [group_A, group_B, group_C]
+        DBSetup().create_playoff_placeholder_teams()
+        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
+        sc.create()
+
+        finished_games = Gameinfo.objects.filter(stage='Vorrunde')
+        for game in finished_games:
+            update_gameresults(game)
+        Gameinfo.objects.filter(stage='Vorrunde').update(status='beendet')
+
+        su = ScheduleUpdate(gameday.pk, gameday.format)
+        su.update()
+
+        check_if_standing('PO').is_updated_as_expected_with('B2', 'C2')
+
+        update_gameresults_and_finish_game_for('PO')
+        update_gameresults_and_finish_first_game_for_P7()
+
+        su.update()
+        check_if_standing('HF').is_updated_as_expected_with('C2', 'C3')
+
+        update_gameresults_and_finish_game_for('HF')
+        update_gameresults_and_finish_first_game_for_P7()
+        su.update()
+
+        update_gameresults_and_finish_game_for('P5')
+        update_gameresults_and_finish_first_game_for_P7()
+
+        check_if_standing('P1').is_updated_as_expected_with('B3', 'C3')
+        check_if_standing('P3').is_updated_as_expected_with('A3', 'C2')
+
+        update_gameresults_and_finish_game_for('P3')
+        update_gameresults_and_finish_game_for('P1')
+
+        gmw = GamedayModelWrapper(gameday.pk)
+        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('final_table_9_teams.json')
+        DataFrameAssertion.expect(gmw.get_schedule()).to_equal_json('schedule_9_teams_3_fields.json')
 
     def test_update_semifinal_and_p5(self):
         gameday = DBSetup().g62_qualify_finished()
@@ -130,9 +202,9 @@ class TestUpdateGameEntry:
                 "place": 3
             },
             "away": {
-                "standing": "Gruppe 2",
-                "points": 0,
-                "place": 1
+                "stage": "Vorrunde",
+                "place": 0,
+                "index": 1
             },
             "officials": {
                 "pre-finished": "HF",
@@ -145,13 +217,23 @@ class TestUpdateGameEntry:
         assert uge.get_standing('home') == 'Gruppe 1'
         assert uge.get_points('home') is None
         assert uge.get_pre_finished('home') is None
-        assert uge.get_place('away') == 1
-        assert uge.get_standing('away') == 'Gruppe 2'
-        assert uge.get_points('away') == 0
+        assert uge.get_place('away') == 0
+        assert uge.get_stage('away') == 'Vorrunde'
+        assert uge.get_index('away') == 1
         assert uge.get_place('officials') == 1
         assert uge.get_standing('officials') == 'HF'
         assert uge.get_points('officials') == 3
         assert uge.get_pre_finished('officials') == 'HF'
+
+    def test_get_none_when_entry_not_found(self):
+        uge = UpdateGameEntry({
+            "home": {
+                "stage": "Gruppe 1",
+            }
+        })
+        assert uge.get_standing('home') is None
+        assert uge.get_points('home') is None
+        assert uge.get_place('home') is None
 
 
 class TestUpdateEntry:
