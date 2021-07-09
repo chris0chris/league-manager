@@ -141,7 +141,10 @@ class GameLog(object):
                     'sequence': entry.sequence
                 }
             if entry.cop:
-                result[entry.sequence].update({'cop': entry.cop})
+                result[entry.sequence].update({
+                    'cop': entry.cop,
+                    'name': entry.event,
+                })
             else:
                 if entry.event == 'Touchdown':
                     key = 'td'

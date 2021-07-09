@@ -169,7 +169,7 @@ class TestGameLog(WebTest):
                                      'score': 0,
                                      'firsthalf': {
                                          'score': 0,
-                                         'entries': [{'sequence': 1, 'cop': True}]},
+                                         'entries': [{'sequence': 1, 'cop': True, 'name': 'Turnover'}]},
                                      'secondhalf': {'score': 0, 'entries': []}},
                                  'away': {
                                      'name': 'A2',

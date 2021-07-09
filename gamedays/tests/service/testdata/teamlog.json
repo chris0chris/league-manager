@@ -55,7 +55,8 @@
       "entries": [
         {
           "sequence": 10,
-          "cop": true
+          "cop": true,
+          "name": "Interception"
         },
         {
           "sequence": 7,
@@ -63,7 +64,8 @@
         },
         {
           "sequence": 6,
-          "cop": true
+          "cop": true,
+          "name": "Turnover"
         },
         {
           "sequence": 4,
