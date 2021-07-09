@@ -30,18 +30,19 @@ class StandingWrapper:
     def __init__(self, gameinfo: Gameinfo):
         self.gameinfo = gameinfo
 
-    def is_updated_as_expected_with(self, expected_home_team, expected_away_team):
+    def is_updated_as_expected_with(self, expected_home_team, expected_away_team, expected_official_team):
         home: Gameresult = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=True)
         away: Gameresult = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=False)
         assert home.team.name == expected_home_team
         assert away.team.name == expected_away_team
+        assert self.gameinfo.officials.name == expected_official_team
 
 
-def check_if_standing(standing):
-    return StandingWrapper(Gameinfo.objects.filter(standing=standing).first())
+def check_if_first_standing(standing):
+    return StandingWrapper(Gameinfo.objects.filter(standing=standing).exclude(status='beendet').first())
 
 
-def update_gameresults_and_finish_game_for(standing: str):
+def update_gameresults_by_standing_and_finish_game_for(standing: str):
     games_for_standing = Gameinfo.objects.filter(standing=standing).exclude(status='beendet')
     for game in games_for_standing:
         update_gameresults(game)
@@ -73,7 +74,7 @@ class TestScheduleUpdate(TestCase):
             update_gameresults(game)
         su = ScheduleUpdate(gameday.pk, gameday.format)
         su.update()
-        update_gameresults_and_finish_game_for('HF')
+        update_gameresults_by_standing_and_finish_game_for('HF')
         su.update()
 
         p5_first = Gameinfo.objects.filter(standing__in=['P5-1', 'P3'])
@@ -88,7 +89,6 @@ class TestScheduleUpdate(TestCase):
             update_gameresults(game)
         p5_first.update(status='beendet')
 
-
     def test_update_9_teams_3_fields(self):
         gameday = DBSetup().create_empty_gameday()
         gameday.format = "9_3"
@@ -101,34 +101,34 @@ class TestScheduleUpdate(TestCase):
         sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
         sc.create()
 
-        finished_games = Gameinfo.objects.filter(stage='Vorrunde')
-        for game in finished_games:
+        qualify_games = Gameinfo.objects.filter(stage='Vorrunde')
+        for game in qualify_games:
             update_gameresults(game)
         Gameinfo.objects.filter(stage='Vorrunde').update(status='beendet')
 
         su = ScheduleUpdate(gameday.pk, gameday.format)
         su.update()
+        check_if_first_standing('PO').is_updated_as_expected_with('B2', 'C2', 'C3')
+        check_if_first_standing('P7').is_updated_as_expected_with('A1', 'B1', 'B3')
 
-        check_if_standing('PO').is_updated_as_expected_with('B2', 'C2')
-
-        update_gameresults_and_finish_game_for('PO')
-        update_gameresults_and_finish_first_game_for_P7()
-
-        su.update()
-        check_if_standing('HF').is_updated_as_expected_with('C2', 'C3')
-
-        update_gameresults_and_finish_game_for('HF')
+        update_gameresults_by_standing_and_finish_game_for('PO')
         update_gameresults_and_finish_first_game_for_P7()
         su.update()
+        check_if_first_standing('HF').is_updated_as_expected_with('C2', 'C3', 'B2')
+        check_if_first_standing('P7').is_updated_as_expected_with('B1', 'C1', 'A2')
+        check_if_first_standing('P5').is_updated_as_expected_with('A2', 'B2', 'B1')
 
-        update_gameresults_and_finish_game_for('P5')
+        update_gameresults_by_standing_and_finish_game_for('HF')
         update_gameresults_and_finish_first_game_for_P7()
+        su.update()
+        check_if_first_standing('P7').is_updated_as_expected_with('C1', 'A1', 'C2')
+        check_if_first_standing('P1').is_updated_as_expected_with('B3', 'C3', 'A1')
+        check_if_first_standing('P3').is_updated_as_expected_with('A3', 'C2', 'C1')
 
-        check_if_standing('P1').is_updated_as_expected_with('B3', 'C3')
-        check_if_standing('P3').is_updated_as_expected_with('A3', 'C2')
-
-        update_gameresults_and_finish_game_for('P3')
-        update_gameresults_and_finish_game_for('P1')
+        update_gameresults_by_standing_and_finish_game_for('P5')
+        update_gameresults_and_finish_first_game_for_P7()
+        update_gameresults_by_standing_and_finish_game_for('P3')
+        update_gameresults_by_standing_and_finish_game_for('P1')
 
         gmw = GamedayModelWrapper(gameday.pk)
         DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('final_table_9_teams.json')
