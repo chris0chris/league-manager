@@ -33,9 +33,9 @@ class StandingWrapper:
     def is_updated_as_expected_with(self, expected_home_team, expected_away_team, expected_official_team):
         home: Gameresult = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=True)
         away: Gameresult = Gameresult.objects.get(gameinfo=self.gameinfo, isHome=False)
-        assert home.team.name == expected_home_team
-        assert away.team.name == expected_away_team
-        assert self.gameinfo.officials.name == expected_official_team
+        assert home.team.name == expected_home_team, 'home team doesnt match expected'
+        assert away.team.name == expected_away_team, 'away team doesnt match expected'
+        assert self.gameinfo.officials.name == expected_official_team, 'official team doesnt match expected'
 
 
 def check_if_first_standing(standing):
