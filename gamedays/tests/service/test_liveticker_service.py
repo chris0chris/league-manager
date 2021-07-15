@@ -97,6 +97,16 @@ class TestLiveticker(TestCase):
         assert len(ticks) == 5
         assert ticks[0] == Tick(teamlog_entry, is_home).as_json()
 
+    def test_liveticker_get_all_ticks(self):
+        DBSetup().g62_status_empty()
+        last_game = Gameinfo.objects.last()
+        home = Gameresult.objects.get(gameinfo=last_game, isHome=True)
+        away = Gameresult.objects.get(gameinfo=last_game, isHome=False)
+        DBSetup().create_teamlog_home_and_away(home=home.team, away=away.team, gameinfo=last_game)
+        liveticker = Liveticker(last_game)
+        ticks = liveticker.get_ticks(None)
+        assert len(ticks) == TeamLog.objects.all().count()
+
     def test_game_with_no_team_logs(self):
         DBSetup().g62_status_empty()
         liveticker = Liveticker(Gameinfo.objects.filter(status='Geplant').last())
