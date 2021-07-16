@@ -1,10 +1,20 @@
-import React from 'react';
+/* eslint-disable max-len */
+import React, {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import TeamBox from './TeamBox';
+import DisplayAllTicks from './DisplayAllTicks';
 import Ticks from './Ticks';
 
 const GameTicker = (props) => {
-  const {home, away, status, ticks} = props;
+  const {home, away, status, ticks, updateGamesToDisplay, gameIndex} = props;
+  const [loadAllTicks, setLoadAllTicks] = useState(false);
+  useEffect(() => {
+    if (loadAllTicks) {
+      updateGamesToDisplay(gameIndex, true);
+    } else {
+      updateGamesToDisplay(gameIndex, false);
+    }
+  }, [loadAllTicks]);
   return (
     <div className='card mb-4'>
       <div className='card-header'>
@@ -24,6 +34,11 @@ const GameTicker = (props) => {
         </div>
       </div>
       <Ticks entries={ticks} />
+      { ticks.length !== 0 &&
+        <div className="card-footer text-center">
+          <DisplayAllTicks loadAllTicks={loadAllTicks} setLoadAllTicks={setLoadAllTicks} />
+        </div>
+      }
     </div>
   );
 };
