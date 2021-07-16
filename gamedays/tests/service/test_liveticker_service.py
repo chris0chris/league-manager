@@ -29,6 +29,19 @@ class TestLivetickerService(TestCase):
         assert ls.get_liveticker()[0].get_status() == 'Geplant'
         assert ls.get_liveticker()[2].get_status() == 'beendet'
 
+    def test_get_liveticker_with_all_ticks_for_one_game(self):
+        gameday = DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(pk__lt=3).update(gameStarted='10:00', gameFinished='10:59', status='beendet')
+        Gameinfo.objects.filter(pk__gt=2).update(scheduled='11:00:00')
+        Gameinfo.objects.filter(pk__gt=4).update(scheduled='12:00:00')
+        home = Gameresult.objects.get(gameinfo_id=3, isHome=True)
+        away = Gameresult.objects.get(gameinfo_id=3, isHome=False)
+        DBSetup().create_teamlog_home_and_away(home=home.team, away=away.team, gameinfo=Gameinfo.objects.get(id=3))
+        ls = LivetickerService(gameday_id=gameday.pk, game_ids_with_all_ticks=[3])
+        all_liveticker = ls.get_liveticker()
+        assert len(all_liveticker) == 4
+        assert len(all_liveticker[0].get_ticks()) == 19
+
     def test_multiple_gamedays_are_live(self):
         gameday_one = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(gameday=gameday_one, pk__gt=2).update(scheduled='11:00')
@@ -104,7 +117,8 @@ class TestLiveticker(TestCase):
         away = Gameresult.objects.get(gameinfo=last_game, isHome=False)
         DBSetup().create_teamlog_home_and_away(home=home.team, away=away.team, gameinfo=last_game)
         liveticker = Liveticker(last_game)
-        ticks = liveticker.get_ticks(None)
+        liveticker.collect_all_ticks()
+        ticks = liveticker.get_ticks()
         assert len(ticks) == TeamLog.objects.all().count()
 
     def test_game_with_no_team_logs(self):

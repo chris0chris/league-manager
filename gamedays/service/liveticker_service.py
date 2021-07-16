@@ -37,6 +37,7 @@ class Tick(object):
 class Liveticker(object):
 
     def __init__(self, game):
+        self.number_of_ticks = 5
         self.game: Gameinfo = game
         self.gameresult_wrapper = GameresultWrapper(game)
         self.home_name = self.gameresult_wrapper.get_home_name()
@@ -69,10 +70,10 @@ class Liveticker(object):
             time = self.game.gameStarted
         return time.strftime("%H:%M")
 
-    def get_ticks(self, number_of_ticks=5):
+    def get_ticks(self):
         ticks = []
         relevant_ticks = TeamLog.objects.filter(gameinfo=self.game).order_by('-created_time')[
-            slice(None, number_of_ticks)]
+            slice(None, self.number_of_ticks)]
         tick: TeamLog
         for tick in relevant_ticks:
             if tick.team is None or tick.event == 'Spielzeit':
@@ -91,9 +92,13 @@ class Liveticker(object):
     def is_away_in_possession(self):
         return self.game.in_possession == self.away_name
 
+    def collect_all_ticks(self):
+        self.number_of_ticks = None
+
 
 class LivetickerService(object):
-    def __init__(self, gameday_id=None):
+    def __init__(self, gameday_id=None, game_ids_with_all_ticks=[]):
+        self.game_ids_with_all_ticks = game_ids_with_all_ticks
         if gameday_id is None:
             today_gamedays = Gameday.objects.filter(date=datetime.today())
             # ToDo  dummy Scorecard
@@ -114,11 +119,15 @@ class LivetickerService(object):
         return liveticker
 
     def _filter_games(self, games):
-        liveticker = []
+        all_liveticker = []
         next_scheduled = None
+        game: Gameinfo
         for game in games:
             if next_scheduled is None:
                 next_scheduled = game.scheduled
             if next_scheduled == game.scheduled:
-                liveticker.append(Liveticker(game))
-        return liveticker
+                liveticker = Liveticker(game)
+                if game.pk in self.game_ids_with_all_ticks:
+                    liveticker.collect_all_ticks()
+                all_liveticker.append(liveticker)
+        return all_liveticker

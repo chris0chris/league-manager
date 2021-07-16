@@ -171,6 +171,32 @@ class TestLivetickerAPIView(WebTest):
         }
         settings.DEBUG = tmp_settings_debug
 
+    def test_get_livetickers_for_with_one_game_all_ticks(self):
+        tmp_settings_debug = settings.DEBUG
+        settings.DEBUG = True
+        DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(pk__gt=2).update(scheduled='11:00')
+        response = self.app.get(reverse(API_LIVETICKER_ALL) + '?getAllTicksFor=[1,2]')
+        assert response.status_code == HTTPStatus.OK
+        assert len(response.json) == 2
+        assert response.json[0] == {
+            "gameId": 1,
+            "status": "Geplant",
+            "time": "10:00",
+            "home": {
+                "name": "A1",
+                "score": 3,
+                "isInPossession": True,
+            },
+            "away": {
+                "name": "A2",
+                "score": 2,
+                "isInPossession": False,
+            },
+            "ticks": []
+        }
+        settings.DEBUG = tmp_settings_debug
+
 
 class TestGamesToWhistleAPIView(WebTest):
     def test_get_games_to_whistle_for_specific_team(self):
