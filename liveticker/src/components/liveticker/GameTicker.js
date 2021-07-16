@@ -4,10 +4,12 @@ import PropTypes from 'prop-types';
 import TeamBox from './TeamBox';
 import DisplayAllTicks from './DisplayAllTicks';
 import Ticks from './Ticks';
+import {GrRefresh} from 'react-icons/gr';
 
 const GameTicker = (props) => {
   const {home, away, status, ticks, updateGamesToDisplay, gameIndex} = props;
   const [loadAllTicks, setLoadAllTicks] = useState(false);
+  const time = new Date().toLocaleTimeString();
   useEffect(() => {
     if (loadAllTicks) {
       updateGamesToDisplay(gameIndex, true);
@@ -28,6 +30,7 @@ const GameTicker = (props) => {
             <br />
             <span className='fs-6'>{status}</span>
             <br />
+            <span className='text-muted smaller'><GrRefresh title='Letzte Aktualisierung' style={{marginBottom: '2px'}} />{time} Uhr</span>
           </div>
           <TeamBox img={away.img} name={away.name}
             showPossession={away.isInPossession} />
