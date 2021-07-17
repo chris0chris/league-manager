@@ -16,6 +16,11 @@ const Ticks = (props) => {
   };
   return (
     <ul className='list-group list-group-flush'>
+      { entries.length === 0 &&
+        <li className={`list-group-item`}>
+          <div className="text-center">Keine Einträge bisher vorhanden.</div>
+        </li>
+      }
       {entries.map((entry, index) => (
         <li key={index} className={`list-group-item`}>
           <div className='text-center text-muted smaller'>{entry.time} Uhr</div>

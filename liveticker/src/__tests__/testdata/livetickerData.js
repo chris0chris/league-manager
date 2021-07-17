@@ -1,5 +1,6 @@
 export const LIVETICKER_DATA = [
   {
+    gameId: 1,
     status: '1. Halbzeit',
     time: '11:30',
     home: {
@@ -21,6 +22,7 @@ export const LIVETICKER_DATA = [
     ],
   },
   {
+    gameId: 2,
     status: '2. Halbzeit',
     time: '12:30',
     home: {

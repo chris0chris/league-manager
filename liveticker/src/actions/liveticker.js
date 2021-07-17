@@ -2,6 +2,8 @@ import {GET_LIVETICKER} from './types';
 
 import {apiGet} from './utils/api';
 
-export const getLiveticker = () => {
-  return apiGet('/api/liveticker', GET_LIVETICKER);
+export const getLiveticker = (gameIds) => {
+  return apiGet(
+      `/api/liveticker?getAllTicksFor=${JSON.stringify(gameIds)}`,
+      GET_LIVETICKER);
 };

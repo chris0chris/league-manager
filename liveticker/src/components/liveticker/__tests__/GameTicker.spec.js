@@ -3,10 +3,13 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import {LIVETICKER_DATA} from '../../../__tests__/testdata/livetickerData';
 import GameTicker from '../GameTicker';
+import userEvent from '@testing-library/user-event';
+
 
 const GAME_TICKER_DATA = LIVETICKER_DATA[0];
+const mockFunc = jest.fn();
 const setup = () => {
-  render(<GameTicker {...GAME_TICKER_DATA} />);
+  render(<GameTicker {...GAME_TICKER_DATA} updateGamesToDisplay={mockFunc} />);
 };
 
 describe('GameTicker component', () => {
@@ -17,5 +20,12 @@ describe('GameTicker component', () => {
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.home.name))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.away.name))).toBeInTheDocument();
     expect(screen.getByTitle('Team hat Ballbesitz')).toBeInTheDocument();
+    expect(screen.getByTitle('Klicken, um alle Einträge anzuzeigen'));
+  });
+  it('should call updateGamesToDisplay, when clicked on icon', () => {
+    setup();
+    mockFunc.mockClear();
+    userEvent.click(screen.getByTitle('Klicken, um alle Einträge anzuzeigen'));
+    expect(mockFunc.mock.calls).toHaveLength(1);
   });
 });
