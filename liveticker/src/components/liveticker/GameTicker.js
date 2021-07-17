@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import TeamBox from './TeamBox';
 import DisplayAllTicks from './DisplayAllTicks';
 import Ticks from './Ticks';
-import {GrRefresh} from 'react-icons/gr';
+import {MdRefresh} from 'react-icons/md';
 
 const GameTicker = (props) => {
   const {home, away, status, ticks, updateGamesToDisplay, gameIndex} = props;
@@ -30,7 +30,7 @@ const GameTicker = (props) => {
             <br />
             <span className='fs-6'>{status}</span>
             <br />
-            <span className='text-muted smaller'><GrRefresh title='Letzte Aktualisierung' style={{marginBottom: '2px'}} />{time} Uhr</span>
+            <span className='text-muted smaller'><MdRefresh title='Letzte Aktualisierung' style={{marginBottom: '2px'}} />{time} Uhr</span>
           </div>
           <TeamBox img={away.img} name={away.name}
             showPossession={away.isInPossession} />
