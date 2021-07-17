@@ -4,8 +4,9 @@ echo "checkout git"
 git pull
 echo "installing requirements"
 pip install -r requirements.txt
-echo "doing django stuff"
+echo "migrating django"
 python manage.py migrate
+echo "collecting django static files"
 rm -rf league_manager/league_manager/static
 python manage.py collectstatic
 echo "reloading webapp"
