@@ -52,6 +52,8 @@ GameTicker.propTypes = {
   status: PropTypes.string.isRequired,
   time: PropTypes.string.isRequired,
   ticks: PropTypes.array.isRequired,
+  updateGamesToDisplay: PropTypes.func.isRequired,
+  gameIndex: PropTypes.number.isRequired,
 };
 
 export default GameTicker;
