@@ -19,6 +19,14 @@ class TestLivetickerService(TestCase):
         ls = LivetickerService(gameday.pk)
         assert len(ls.get_liveticker()) == 2
 
+    def test_get_all_livetickers_with_games_for_the_next_round_playing(self):
+        gameday = DBSetup().g62_status_empty()
+        Gameinfo.objects.filter(pk__gt=2).update(scheduled='11:00:00')
+        Gameinfo.objects.filter(pk=3).update(status='1. Halbzeit')
+        Gameinfo.objects.filter(pk=4).update(status='2. Halbzeit')
+        ls = LivetickerService(gameday.pk)
+        assert len(ls.get_liveticker()) == 4
+
     def test_get_livetickers_for_last_done_and_coming_up_games(self):
         gameday = DBSetup().g62_status_empty()
         Gameinfo.objects.filter(pk__lt=3).update(gameStarted='10:00', gameFinished='10:59', status='beendet')

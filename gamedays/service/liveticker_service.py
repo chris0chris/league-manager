@@ -97,7 +97,7 @@ class Liveticker(object):
 
 
 class LivetickerService(object):
-    def __init__(self, gameday_id=None, game_ids_with_all_ticks=[]):
+    def __init__(self, gameday_id=None, game_ids_with_all_ticks=()):
         self.game_ids_with_all_ticks = game_ids_with_all_ticks
         if gameday_id is None:
             today_gamedays = Gameday.objects.filter(date=datetime.today())
@@ -120,12 +120,12 @@ class LivetickerService(object):
 
     def _filter_games(self, games):
         all_liveticker = []
-        next_scheduled = None
+        group_by_schedule_time = None
         game: Gameinfo
         for game in games:
-            if next_scheduled is None:
-                next_scheduled = game.scheduled
-            if next_scheduled == game.scheduled:
+            if group_by_schedule_time is None:
+                group_by_schedule_time = game.scheduled
+            if group_by_schedule_time == game.scheduled or game.status in ['1. Halbzeit', '2. Halbzeit']:
                 liveticker = Liveticker(game)
                 if game.pk in self.game_ids_with_all_ticks:
                     liveticker.collect_all_ticks()
