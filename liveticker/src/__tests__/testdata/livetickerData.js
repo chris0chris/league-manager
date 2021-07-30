@@ -2,6 +2,7 @@ export const LIVETICKER_DATA = [
   {
     gameId: 1,
     status: '1. Halbzeit',
+    standing: 'Gruppe 1',
     time: '11:30',
     home: {
       name: 'Baltic Blue Stars Rostock',
@@ -24,6 +25,7 @@ export const LIVETICKER_DATA = [
   {
     gameId: 2,
     status: '2. Halbzeit',
+    standing: 'P1',
     time: '12:30',
     home: {
       name: 'Munich Mules',
