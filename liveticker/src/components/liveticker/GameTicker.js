@@ -7,7 +7,7 @@ import Ticks from './Ticks';
 import {MdRefresh} from 'react-icons/md';
 
 const GameTicker = (props) => {
-  const {home, away, status, ticks, updateGamesToDisplay, gameIndex} = props;
+  const {home, away, status, standing, ticks, updateGamesToDisplay, gameIndex} = props;
   const [loadAllTicks, setLoadAllTicks] = useState(false);
   const time = new Date().toLocaleTimeString();
   useEffect(() => {
@@ -24,6 +24,8 @@ const GameTicker = (props) => {
           <TeamBox img={home.img} name={home.name}
             showPossession={home.isInPossession} />
           <div className='col-4 align-self-center text-center'>
+            <span className='text-muted smaller'>{standing}</span>
+            <br/>
             <span className='fs-2 fw-bold'>
               {home.score} - {away.score}
             </span>
