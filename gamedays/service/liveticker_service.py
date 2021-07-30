@@ -47,14 +47,15 @@ class Liveticker(object):
         return dict(
             gameId=self.game.id,
             status=self.get_status(),
+            standing=self.game.standing,
             time=self.get_time(),
             home={
-                "name": self.home_name,
+                "name": self.gameresult_wrapper.get_home_fullname(),
                 "score": self.gameresult_wrapper.get_home_score(),
                 "isInPossession": self.is_home_in_possession(),
             },
             away={
-                "name": self.away_name,
+                "name": self.gameresult_wrapper.get_away_fullname(),
                 "score": self.gameresult_wrapper.get_away_score(),
                 "isInPossession": self.is_away_in_possession(),
             },
