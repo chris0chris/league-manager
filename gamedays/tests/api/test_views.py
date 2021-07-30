@@ -110,6 +110,27 @@ class TestGamedaySchedule(WebTest):
 
 
 class TestLivetickerAPIView(WebTest):
+    @pytest.fixture(autouse=True)
+    def before_each(self):
+        self.expected_liveticker_result = {
+            "gameId": 1,
+            "status": "Geplant",
+            "standing": "Gruppe 1",
+            "time": "10:00",
+            "home": {
+                "name": "AAAAAAA1",
+                "score": 3,
+                "isInPossession": True,
+            },
+            "away": {
+                "name": "AAAAAAA2",
+                "score": 2,
+                "isInPossession": False,
+            },
+            "ticks": []
+        }
+        yield
+
     def test_empty_liveticker(self):
         response = self.app.get(reverse(API_LIVETICKER_ALL))
         assert response.json == []
@@ -125,22 +146,7 @@ class TestLivetickerAPIView(WebTest):
         response = self.app.get(reverse(API_LIVETICKER_ALL))
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 4
-        expected_result = {
-            "gameId": 1,
-            "status": "Geplant",
-            "time": "10:00",
-            "home": {
-                "name": "A1",
-                "score": 3,
-                "isInPossession": True,
-            },
-            "away": {
-                "name": "A2",
-                "score": 2,
-                "isInPossession": False,
-            },
-            "ticks": []
-        }
+        expected_result = self.expected_liveticker_result
         assert response.json[0] == expected_result
         expected_result.update({"gameId": 12})
         assert response.json[2] == expected_result
@@ -153,22 +159,7 @@ class TestLivetickerAPIView(WebTest):
         response = self.app.get(reverse(API_LIVETICKER_ALL))
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 2
-        assert response.json[0] == {
-            "gameId": 1,
-            "status": "Geplant",
-            "time": "10:00",
-            "home": {
-                "name": "A1",
-                "score": 3,
-                "isInPossession": True,
-            },
-            "away": {
-                "name": "A2",
-                "score": 2,
-                "isInPossession": False,
-            },
-            "ticks": []
-        }
+        assert response.json[0] == self.expected_liveticker_result
         settings.DEBUG = tmp_settings_debug
 
     def test_get_livetickers_for_with_one_game_all_ticks(self):
@@ -179,22 +170,7 @@ class TestLivetickerAPIView(WebTest):
         response = self.app.get(reverse(API_LIVETICKER_ALL) + '?getAllTicksFor=[1,2]')
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 2
-        assert response.json[0] == {
-            "gameId": 1,
-            "status": "Geplant",
-            "time": "10:00",
-            "home": {
-                "name": "A1",
-                "score": 3,
-                "isInPossession": True,
-            },
-            "away": {
-                "name": "A2",
-                "score": 2,
-                "isInPossession": False,
-            },
-            "ticks": []
-        }
+        assert response.json[0] == self.expected_liveticker_result
         settings.DEBUG = tmp_settings_debug
 
 

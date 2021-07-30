@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 const GAME_TICKER_DATA = LIVETICKER_DATA[0];
 const mockFunc = jest.fn();
 const setup = () => {
-  render(<GameTicker {...GAME_TICKER_DATA} updateGamesToDisplay={mockFunc} />);
+  render(<GameTicker {...GAME_TICKER_DATA} gameIndex={0} updateGamesToDisplay={mockFunc} />);
 };
 
 describe('GameTicker component', () => {
@@ -17,6 +17,7 @@ describe('GameTicker component', () => {
     setup();
     expect(screen.getAllByRole('listitem')).toHaveLength(5);
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.status))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(GAME_TICKER_DATA.standing))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.home.name))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.away.name))).toBeInTheDocument();
     expect(screen.getByTitle('Team hat Ballbesitz')).toBeInTheDocument();

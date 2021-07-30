@@ -111,7 +111,9 @@ class DBSetup:
         teams = []
         # for i in range(number_teams)[::-1]:
         for i in range(number_teams):
-            teams.append(TeamFactory(name=(name + str(i + 1))))
+            team_number = str(i + 1)
+            # description=AAAAAAA1
+            teams.append(TeamFactory(name=(name + team_number), description=(name * 7 + team_number)))
         return teams
 
     def create_playoff_placeholder_teams(self):
