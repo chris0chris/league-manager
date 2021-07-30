@@ -52,6 +52,7 @@ GameTicker.propTypes = {
   home: PropTypes.object.isRequired,
   away: PropTypes.object.isRequired,
   status: PropTypes.string.isRequired,
+  standing: PropTypes.string.isRequired,
   time: PropTypes.string.isRequired,
   ticks: PropTypes.array.isRequired,
   updateGamesToDisplay: PropTypes.func.isRequired,
