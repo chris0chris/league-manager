@@ -135,14 +135,15 @@ class TestLiveticker(TestCase):
         assert liveticker.as_json() == {
             "gameId": 6,
             "status": "Geplant",
+            "standing": "Gruppe 2",
             "time": "10:00",
             "home": {
-                "name": "B3",
+                "name": "BBBBBBB3",
                 "score": 1,
                 "isInPossession": False,
             },
             "away": {
-                "name": "B1",
+                "name": "BBBBBBB1",
                 "score": 3,
                 "isInPossession": False,
             },

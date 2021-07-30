@@ -30,6 +30,13 @@ class TestGameresultWrapper(TestCase):
         assert gameresult_wrapper.get_home_name() == 'A1'
         assert gameresult_wrapper.get_away_name() == 'B1'
 
+    def test_get_team_fullnames(self):
+        DBSetup().g62_status_empty()
+        lastGame = Gameinfo.objects.last()
+        gameresult_wrapper = GameresultWrapper(lastGame)
+        assert gameresult_wrapper.get_home_fullname() == 'AAAAAAA1'
+        assert gameresult_wrapper.get_away_fullname() == 'BBBBBBB1'
+
     def test_get_team_scores(self):
         DBSetup().g62_status_empty()
         lastGame = Gameinfo.objects.last()
