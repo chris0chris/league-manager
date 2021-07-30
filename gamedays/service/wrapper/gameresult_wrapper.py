@@ -31,7 +31,10 @@ class GameresultWrapper(object):
     def _get_team_name(self, is_home):
         return self._get_gameresult(is_home).team.name
 
-    def _get_gameresult(self, is_home):
+    def _get_team_fullname(self, is_home):
+        return self._get_gameresult(is_home).team.description
+
+    def _get_gameresult(self, is_home) -> Gameresult:
         return Gameresult.objects.get(gameinfo=self.gameinfo, isHome=is_home)
 
     def get_home_name(self):
@@ -56,3 +59,8 @@ class GameresultWrapper(object):
             score = score + gameresult.sh
         return score
 
+    def get_home_fullname(self):
+        return self._get_team_fullname(is_home=True)
+
+    def get_away_fullname(self):
+        return self._get_team_fullname(is_home=False)
