@@ -203,38 +203,28 @@ class TestUpdateGameEntry:
                 "index": 1
             },
             "officials": {
-                "pre-finished": "HF",
+                "pre_finished": "HF",
                 "standing": "HF",
                 "points": 3,
                 "place": 1
             }
         })
-        assert uge.get_place('home') == 3
-        assert uge.get_standing('home') == 'Gruppe 1'
-        assert uge.get_points('home') is None
-        assert uge.get_pre_finished('home') is None
-        assert uge.get_place('away') == 0
-        assert uge.get_stage('away') == 'Vorrunde'
-        assert uge.get_index('away') == 1
-        assert uge.get_place('officials') == 1
-        assert uge.get_standing('officials') == 'HF'
-        assert uge.get_points('officials') == 3
-        assert uge.get_pre_finished('officials') == 'HF'
-
-    def test_get_none_when_entry_not_found(self):
-        uge = UpdateGameEntry({
-            "home": {
-                "stage": "Gruppe 1",
-            }
-        })
-        assert uge.get_standing('home') is None
-        assert uge.get_points('home') is None
-        assert uge.get_place('home') is None
+        assert uge.home.place == 3
+        assert uge.home.standing == 'Gruppe 1'
+        assert uge.home.points is None
+        assert uge.home.pre_finished is None
+        assert uge.away.place == 0
+        assert uge.away.stage == 'Vorrunde'
+        assert uge.away.index == 1
+        assert uge.officials.place == 1
+        assert uge.officials.standing == 'HF'
+        assert uge.officials.points == 3
+        assert uge.officials.pre_finished == 'HF'
 
 
 class TestUpdateEntry:
 
-    def test_ue_get_methods(self):
+    def test_update_entry_get_methods(self):
         ue = UpdateEntry({
             "name": "P5",
             "games": []
