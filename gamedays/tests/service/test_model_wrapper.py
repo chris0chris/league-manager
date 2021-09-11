@@ -136,6 +136,25 @@ class TestGamedayModelWrapper(TestCase):
         assert gmw.get_team_by_qualify_for(place=2, index=0) == 'B2'
         assert gmw.get_team_by_qualify_for(place=2, index=1) == 'A2'
 
+    def test_team_aggregation(self):
+        gameday = DBSetup().g72_qualify_finished();
+        all_games = Gameinfo.objects.filter(gameday=gameday)
+        for game in all_games:
+            update_gameresults(game)
+        gmw = GamedayModelWrapper(gameday.pk)
+        assert gmw.get_team_aggregate_by(aggregate_standings=['Gruppe 1', 'Gruppe 2'], aggregate_place=2,
+                                         place=1) == 'A3'
+        assert gmw.get_team_aggregate_by(aggregate_standings=['Gruppe 1', 'Gruppe 2'], aggregate_place=2,
+                                         place=2) == 'B2'
+
+    def test_get_mulitple_teams_by_standing_and_points(self):
+        gameday = DBSetup().g72_qualify_finished();
+        all_games = Gameinfo.objects.filter(gameday=gameday)
+        for game in all_games:
+            update_gameresults(game)
+        gmw = GamedayModelWrapper(gameday.pk)
+        assert gmw.get_teams_by(standing='HF', points=3) == ['B2', 'B1']
+
 
 def update_gameresults(game):
     results = Gameresult.objects.filter(gameinfo=game)

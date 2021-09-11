@@ -145,6 +145,16 @@ class DBSetup:
         TeamFactory(name='Verlierer PO2')
         TeamFactory(name='Gewinner PO1')
         TeamFactory(name='Gewinner PO2')
+        TeamFactory(name='Schlechterer Zweitplatzierter Gruppe 1+2')
+        TeamFactory(name='Bester Zweitplatzierter Gruppe 1+2')
+        TeamFactory(name='schlechtere Rangfolge')
+        TeamFactory(name='beste Rangfolge')
+        TeamFactory(name='Gewinner P10')
+        TeamFactory(name='Verlierer P10')
+        TeamFactory(name='Gewinner HF')
+        TeamFactory(name='Verlierer PO')
+        TeamFactory(name='P2 Gruppe 3')
+        TeamFactory(name='P1 Gruppe 3')
         # TeamFactory(name='')
 
     def create_finalround_game(self, gameday, standing, status, home, away):

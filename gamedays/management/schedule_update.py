@@ -70,14 +70,52 @@ class ScheduleUpdate:
             if gmw.is_finished(update_entry['pre_finished']) and not gmw.is_finished(update_entry['name']):
                 entry = UpdateEntry(update_entry)
                 qs = Gameinfo.objects.filter(gameday_id=self.gameday_id, standing=entry.get_name())
+                game: UpdateGameEntry
+                gi: Gameinfo
                 for gi, game in zip(qs, entry):
                     if game.home.stage:
                         home = gmw.get_team_by_qualify_for(game.home.place, game.home.index)
+                    elif game.home.aggregate_standings:
+                        home = gmw.get_team_aggregate_by(game.home.aggregate_standings,
+                                                         game.home.aggregate_place,
+                                                         game.home.place)
+                    elif game.home.first_match:
+                        teams = gmw.get_teams_by(game.home.standing, game.home.points)
+                        for entry_to_match in game.home.first_match:
+                            if entry_to_match.aggregate_standings:
+                                potential_team = gmw.get_team_aggregate_by(entry_to_match.aggregate_standings,
+                                                                           entry_to_match.aggregate_place,
+                                                                           entry_to_match.place)
+                            else:
+                                potential_team = gmw.get_team_by(entry_to_match.place,
+                                                                 entry_to_match.standing,
+                                                                 entry_to_match.points)
+                            if potential_team in teams:
+                                home = potential_team
+                                break
                     else:
                         home = gmw.get_team_by(game.home.place, game.home.standing,
                                                game.home.points)
                     if game.away.stage:
                         away = gmw.get_team_by_qualify_for(game.away.place, game.away.index)
+                    elif game.away.aggregate_standings:
+                        away = gmw.get_team_aggregate_by(game.away.aggregate_standings,
+                                                         game.away.aggregate_place,
+                                                         game.away.place)
+                    elif game.away.first_match:
+                        teams = gmw.get_teams_by(game.away.standing, game.away.points)
+                        for entry_to_match in game.away.first_match:
+                            if entry_to_match.aggregate_standings:
+                                potential_team = gmw.get_team_aggregate_by(entry_to_match.aggregate_standings,
+                                                                           entry_to_match.aggregate_place,
+                                                                           entry_to_match.place)
+                            else:
+                                potential_team = gmw.get_team_by(entry_to_match.place,
+                                                                 entry_to_match.standing,
+                                                                 entry_to_match.points)
+                            if potential_team in teams:
+                                away = potential_team
+                                break
                     else:
                         away = gmw.get_team_by(game.away.place, game.away.standing,
                                                game.away.points)

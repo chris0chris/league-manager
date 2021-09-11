@@ -134,6 +134,55 @@ class TestScheduleUpdate(TestCase):
         DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('final_table_9_teams.json')
         DataFrameAssertion.expect(gmw.get_schedule()).to_equal_json('schedule_9_teams_3_fields.json')
 
+    def test_update_11_teams_3_fields(self):
+        gameday = DBSetup().create_empty_gameday()
+        gameday.format = "11_3"
+        gameday.save()
+        group_A = DBSetup().create_teams('A', 4)
+        group_B = DBSetup().create_teams('B', 4)
+        group_C = DBSetup().create_teams('C', 3)
+        groups = [group_A, group_B, group_C]
+        DBSetup().create_playoff_placeholder_teams()
+        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
+        sc.create()
+
+        qualify_games = Gameinfo.objects.filter(stage='Vorrunde')
+        for game in qualify_games:
+            update_gameresults(game)
+        Gameinfo.objects.filter(stage='Vorrunde').update(status='beendet')
+
+        su = ScheduleUpdate(gameday.pk, gameday.format)
+        su.update()
+        check_if_first_standing('PO').is_updated_as_expected_with('A3', 'C3', 'A1')
+        check_if_first_standing('P7').is_updated_as_expected_with('A2', 'B2', 'B1')
+
+        update_gameresults_by_standing_and_finish_game_for('PO')
+        update_gameresults_and_finish_first_game_for_P7()
+        su.update()
+        check_if_first_standing('HF').is_updated_as_expected_with('C2', 'B4', 'A2')
+        check_if_first_standing('P7').is_updated_as_expected_with('B2', 'C1', 'B3')
+        check_if_first_standing('P5').is_updated_as_expected_with('B3', 'A3', 'Gewinner P10')
+        check_if_first_standing('P10').is_updated_as_expected_with('A1', 'B1', 'A3')
+
+        update_gameresults_by_standing_and_finish_game_for('HF')
+        update_gameresults_by_standing_and_finish_game_for('P10')
+        update_gameresults_and_finish_first_game_for_P7()
+        su.update()
+        check_if_first_standing('P7').is_updated_as_expected_with('C1', 'A2', 'A1')
+        check_if_first_standing('P5').is_updated_as_expected_with('B3', 'A3', 'B1')
+        check_if_first_standing('P3').is_updated_as_expected_with('A4', 'B4', 'B2')
+        check_if_first_standing('P1').is_updated_as_expected_with('C3', 'C2', 'A2')
+
+        update_gameresults_and_finish_first_game_for_P7()
+        update_gameresults_by_standing_and_finish_game_for('P5')
+        update_gameresults_by_standing_and_finish_game_for('P3')
+        update_gameresults_by_standing_and_finish_game_for('P1')
+
+        gmw = GamedayModelWrapper(gameday.pk)
+        print(gmw.get_final_table().to_json(orient='table'))
+        DataFrameAssertion.expect(gmw.get_schedule()).to_equal_json('schedule_11_teams_3_fields.json')
+        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('final_table_11_teams.json')
+
     def test_update_semifinal_and_p5(self):
         gameday = DBSetup().g62_qualify_finished()
 
