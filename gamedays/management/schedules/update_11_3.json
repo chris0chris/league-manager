@@ -74,7 +74,7 @@
         "officials": {
           "pre_finished": "PO",
           "standing": "PO",
-          "place": 2,
+          "place": 1,
           "points": 0
         }
       },
@@ -199,12 +199,12 @@
       {
         "home": {
           "standing": "PO",
-          "place": 2,
+          "place": 1,
           "points": 0
         },
         "away": {
           "standing": "PO",
-          "place": 1,
+          "place": 2,
           "points": 0
         },
         "officials": {
@@ -232,7 +232,7 @@
         "officials": {
           "pre_finished": "PO",
           "standing": "PO",
-          "place": 1,
+          "place": 2,
           "points": 0
         }
       }
@@ -245,12 +245,12 @@
       {
         "home": {
           "standing": "HF",
-          "place": 2,
+          "place": 1,
           "points": 0
         },
         "away": {
           "standing": "HF",
-          "place": 1,
+          "place": 2,
           "points": 0
         },
         "officials": {
@@ -277,9 +277,10 @@
           "points": 3
         },
         "officials": {
-          "pre_finished": "Vorrunde",
-          "standing": "Gruppe 1",
-          "place": 3
+          "pre_finished": "P3",
+          "standing": "P3",
+          "place": 1,
+          "points": 3
         }
       }
     ]

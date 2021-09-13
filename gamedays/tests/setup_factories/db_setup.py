@@ -151,8 +151,6 @@ class DBSetup:
         TeamFactory(name='beste Rangfolge')
         TeamFactory(name='Gewinner P10')
         TeamFactory(name='Verlierer P10')
-        TeamFactory(name='Gewinner HF')
-        TeamFactory(name='Verlierer PO')
         TeamFactory(name='P2 Gruppe 3')
         TeamFactory(name='P1 Gruppe 3')
         # TeamFactory(name='')
