@@ -92,9 +92,14 @@ class GamedayModelWrapper:
                     self._games_with_result[GAMEINFO_ID].isin(games_for_fith_place[GAMEINFO_ID].values)]
                 table_fith_place = table_fith_place.groupby([TEAM_NAME], as_index=False)
                 table_fith_place = table_fith_place.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
-                # ToDo handle DIFF ascending
                 table_fith_place = table_fith_place.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
                 final_standing = self._get_standing_list(standing) + table_fith_place[TEAM_NAME].to_list()
+            elif self._games_with_result.nunique()[TEAM_NAME] == 11:
+                standing = ['P1', 'P3', 'P5']
+                p7 = self.get_team_aggregate_by(aggregate_standings=['P7'], aggregate_place=1, place=1)
+                p8 = self.get_team_aggregate_by(aggregate_standings=['P7'], aggregate_place=2, place=1)
+                p9 = self.get_team_aggregate_by(aggregate_standings=['P7'], aggregate_place=3, place=1)
+                final_standing = self._get_standing_list(standing) + [p7, p8, p9] + self._get_standing_list(['P10'])
             else:
                 standing = ['P1', 'P3', 'P5', 'P7']
                 final_standing = self._get_standing_list(standing)
@@ -147,9 +152,8 @@ class GamedayModelWrapper:
         return qualify_round.groupby(STANDING).nth(place - 1).loc[standing][TEAM_NAME]
 
     def get_team_by_points(self, place, standing, points):
-        results_with_standing = self._games_with_result[self._games_with_result[STANDING] == standing]
-        results_with_standing_and_according_points = results_with_standing[self._games_with_result[POINTS] == points]
-        return results_with_standing_and_according_points.iloc[place - 1][TEAM_NAME]
+        teams = self._get_teams_by(standing, points)
+        return teams.iloc[place - 1][TEAM_NAME]
 
     def get_team_by(self, place, standing, points=None):
         if points is None:
@@ -177,3 +181,18 @@ class GamedayModelWrapper:
         qualify_standing_by_place = self._get_table().groupby(STANDING).nth(place - 1).sort_values(
             by=[POINTS, DIFF, PF, PA], ascending=False)
         return qualify_standing_by_place.iloc[index][TEAM_NAME]
+
+    def get_team_aggregate_by(self, aggregate_standings, aggregate_place, place):
+        return self._games_with_result[self._games_with_result[STANDING].isin(aggregate_standings)].groupby(
+            [STANDING, TEAM_NAME], as_index=False).agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'}).sort_values(
+            by=[POINTS, DIFF, PF, PA], ascending=False).sort_values(by=STANDING).groupby(STANDING).nth(
+            aggregate_place - 1).sort_values(by=[POINTS, DIFF, PF, PA], ascending=False).iloc[place - 1][TEAM_NAME]
+
+    def get_teams_by(self, standing, points):
+        teams = self._get_teams_by(standing, points)
+        return list(teams[TEAM_NAME])
+
+    def _get_teams_by(self, standing, points):
+        results_with_standing = self._games_with_result[self._games_with_result[STANDING] == standing]
+        results_with_standing_and_according_points = results_with_standing[self._games_with_result[POINTS] == points]
+        return results_with_standing_and_according_points

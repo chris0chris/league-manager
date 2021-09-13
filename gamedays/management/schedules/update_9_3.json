@@ -1,7 +1,7 @@
 [
   {
     "name": "P7",
-    "pre-finished": "Vorrunde",
+    "pre_finished": "Vorrunde",
     "games": [
       {
         "home": {
@@ -13,7 +13,7 @@
           "place": 3
         },
         "officials": {
-          "pre-finished": "Vorrunde",
+          "pre_finished": "Vorrunde",
           "stage": "Vorrunde",
           "place": 1,
           "index": 1
@@ -29,7 +29,7 @@
           "place": 3
         },
         "officials": {
-          "pre-finished": "PO",
+          "pre_finished": "PO",
           "standing": "PO",
           "place": 2,
           "points": 0
@@ -45,7 +45,7 @@
           "place": 3
         },
         "officials": {
-          "pre-finished": "HF",
+          "pre_finished": "HF",
           "standing": "HF",
           "place": 1,
           "points": 0
@@ -55,7 +55,7 @@
   },
   {
     "name": "P5",
-    "pre-finished": "PO",
+    "pre_finished": "PO",
     "games": [
       {
         "home": {
@@ -69,7 +69,7 @@
           "points": 0
         },
         "officials": {
-          "pre-finished": "Vorrunde",
+          "pre_finished": "Vorrunde",
           "standing": "Gruppe 2",
           "place": 3
         }
@@ -78,7 +78,7 @@
   },
   {
     "name": "PO",
-    "pre-finished": "Vorrunde",
+    "pre_finished": "Vorrunde",
     "games": [
       {
         "home": {
@@ -92,7 +92,7 @@
           "index": 0
         },
         "officials": {
-          "pre-finished": "Vorrunde",
+          "pre_finished": "Vorrunde",
           "stage": "Vorrunde",
           "place": 1,
           "index": 0
@@ -110,7 +110,7 @@
           "index": 2
         },
         "officials": {
-          "pre-finished": "Vorrunde",
+          "pre_finished": "Vorrunde",
           "standing": "Gruppe 3",
           "place": 3
         }
@@ -119,7 +119,7 @@
   },
   {
     "name": "HF",
-    "pre-finished": "PO",
+    "pre_finished": "PO",
     "games": [
       {
         "home": {
@@ -133,7 +133,7 @@
           "index": 0
         },
         "officials": {
-          "pre-finished": "PO",
+          "pre_finished": "PO",
           "standing": "PO",
           "place": 1,
           "points": 0
@@ -151,7 +151,7 @@
           "index": 1
         },
         "officials": {
-          "pre-finished": "Vorrunde",
+          "pre_finished": "Vorrunde",
           "standing": "Gruppe 1",
           "place": 3
         }
@@ -160,7 +160,7 @@
   },
   {
     "name": "P3",
-    "pre-finished": "HF",
+    "pre_finished": "HF",
     "games": [
       {
         "home": {
@@ -174,7 +174,7 @@
           "points": 0
         },
         "officials": {
-          "pre-finished": "Vorrunde",
+          "pre_finished": "Vorrunde",
           "standing": "Gruppe 3",
           "place": 3
         }
@@ -183,7 +183,7 @@
   },
   {
     "name": "P1",
-    "pre-finished": "HF",
+    "pre_finished": "HF",
     "games": [
       {
         "home": {
@@ -197,7 +197,7 @@
           "points": 3
         },
         "officials": {
-          "pre-finished": "Vorrunde",
+          "pre_finished": "Vorrunde",
           "standing": "Gruppe 1",
           "place": 3
         }

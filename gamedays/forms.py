@@ -12,6 +12,7 @@ SCHEDULE_CHOICES = (
     ("8_2", "8 Teams 2 Felder"),
     ("8_3", "8 Teams 3 Felder"),
     ("9_3", "9 Teams 3 Felder"),
+    ("11_3", "11 Teams 3 Felder"),
 )
 
 

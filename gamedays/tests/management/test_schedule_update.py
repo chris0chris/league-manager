@@ -134,6 +134,56 @@ class TestScheduleUpdate(TestCase):
         DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('final_table_9_teams.json')
         DataFrameAssertion.expect(gmw.get_schedule()).to_equal_json('schedule_9_teams_3_fields.json')
 
+    def test_update_11_teams_3_fields(self):
+        gameday = DBSetup().create_empty_gameday()
+        gameday.format = "11_3"
+        gameday.save()
+        group_A = DBSetup().create_teams('A', 4)
+        group_B = DBSetup().create_teams('B', 4)
+        group_C = DBSetup().create_teams('C', 3)
+        groups = [group_A, group_B, group_C]
+        DBSetup().create_playoff_placeholder_teams()
+        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
+        sc.create()
+
+        qualify_games = Gameinfo.objects.filter(stage='Vorrunde')
+        for game in qualify_games:
+            update_gameresults(game)
+        Gameinfo.objects.filter(stage='Vorrunde').update(status='beendet')
+
+        su = ScheduleUpdate(gameday.pk, gameday.format)
+        su.update()
+        check_if_first_standing('PO').is_updated_as_expected_with('A3', 'C3', 'A1')
+        check_if_first_standing('P7').is_updated_as_expected_with('A2', 'B2', 'B1')
+
+        update_gameresults_by_standing_and_finish_game_for('PO')
+        update_gameresults_and_finish_first_game_for_P7()
+        su.update()
+        check_if_first_standing('HF').is_updated_as_expected_with('C2', 'B4', 'A2')
+        check_if_first_standing('P7').is_updated_as_expected_with('B2', 'C1', 'A3')
+        check_if_first_standing('P5').is_updated_as_expected_with('A3', 'B3', 'Gewinner P10')
+        check_if_first_standing('P10').is_updated_as_expected_with('A1', 'B1', 'B3')
+
+        update_gameresults_by_standing_and_finish_game_for('HF')
+        update_gameresults_by_standing_and_finish_game_for('P10')
+        update_gameresults_and_finish_first_game_for_P7()
+        su.update()
+        check_if_first_standing('P7').is_updated_as_expected_with('C1', 'A2', 'A1')
+        check_if_first_standing('P5').is_updated_as_expected_with('A3', 'B3', 'B1')
+        check_if_first_standing('P3').is_updated_as_expected_with('B4', 'A4', 'B2')
+        check_if_first_standing('P1').is_updated_as_expected_with('C3', 'C2', 'Gewinner P3')
+
+        update_gameresults_and_finish_first_game_for_P7()
+        update_gameresults_by_standing_and_finish_game_for('P5')
+        update_gameresults_by_standing_and_finish_game_for('P3')
+        su.update()
+        check_if_first_standing('P1').is_updated_as_expected_with('C3', 'C2', 'B4')
+        update_gameresults_by_standing_and_finish_game_for('P1')
+
+        gmw = GamedayModelWrapper(gameday.pk)
+        DataFrameAssertion.expect(gmw.get_schedule()).to_equal_json('schedule_11_teams_3_fields.json')
+        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('final_table_11_teams.json')
+
     def test_update_semifinal_and_p5(self):
         gameday = DBSetup().g62_qualify_finished()
 
@@ -203,38 +253,28 @@ class TestUpdateGameEntry:
                 "index": 1
             },
             "officials": {
-                "pre-finished": "HF",
+                "pre_finished": "HF",
                 "standing": "HF",
                 "points": 3,
                 "place": 1
             }
         })
-        assert uge.get_place('home') == 3
-        assert uge.get_standing('home') == 'Gruppe 1'
-        assert uge.get_points('home') is None
-        assert uge.get_pre_finished('home') is None
-        assert uge.get_place('away') == 0
-        assert uge.get_stage('away') == 'Vorrunde'
-        assert uge.get_index('away') == 1
-        assert uge.get_place('officials') == 1
-        assert uge.get_standing('officials') == 'HF'
-        assert uge.get_points('officials') == 3
-        assert uge.get_pre_finished('officials') == 'HF'
-
-    def test_get_none_when_entry_not_found(self):
-        uge = UpdateGameEntry({
-            "home": {
-                "stage": "Gruppe 1",
-            }
-        })
-        assert uge.get_standing('home') is None
-        assert uge.get_points('home') is None
-        assert uge.get_place('home') is None
+        assert uge.home.place == 3
+        assert uge.home.standing == 'Gruppe 1'
+        assert uge.home.points is None
+        assert uge.home.pre_finished is None
+        assert uge.away.place == 0
+        assert uge.away.stage == 'Vorrunde'
+        assert uge.away.index == 1
+        assert uge.officials.place == 1
+        assert uge.officials.standing == 'HF'
+        assert uge.officials.points == 3
+        assert uge.officials.pre_finished == 'HF'
 
 
 class TestUpdateEntry:
 
-    def test_ue_get_methods(self):
+    def test_update_entry_get_methods(self):
         ue = UpdateEntry({
             "name": "P5",
             "games": []

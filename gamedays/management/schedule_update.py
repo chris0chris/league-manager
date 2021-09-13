@@ -13,37 +13,19 @@ class Abstract(ABC):
 
 
 class UpdateGameEntry:
-    STANDING = 'standing'
-    PLACE = 'place'
-    POINTS = 'points'
-    PRE_FINISHED = 'pre-finished'
-    STAGE = 'stage'
-    INDEX = 'index'
+    def __init__(self, in_dict: dict):
+        assert isinstance(in_dict, dict)
+        for key, val in in_dict.items():
+            if isinstance(val, (list, tuple)):
+                setattr(self, key, [UpdateGameEntry(x) if isinstance(x, dict) else x for x in val])
+            else:
+                setattr(self, key, UpdateGameEntry(val) if isinstance(val, dict) else val)
 
-    def __init__(self, entry):
-        self.entry = entry
-
-    def get_standing(self, home_away):
-        return self.entry[home_away].get(self.STANDING)
-
-    def get_place(self, home_away):
-        return self.entry[home_away].get(self.PLACE)
-
-    def get_points(self, home_away):
-        if self.POINTS in self.entry[home_away]:
-            return self.entry[home_away].get(self.POINTS)
-        return None
-
-    def get_pre_finished(self, name):
-        if self.PRE_FINISHED in self.entry[name]:
-            return self.entry[name][self.PRE_FINISHED]
-        return None
-
-    def get_stage(self, home_away):
-        return self.entry[home_away].get(self.STAGE)
-
-    def get_index(self, home_away):
-        return self.entry[home_away].get(self.INDEX)
+    def __getattr__(self, item):
+        try:
+            return self.__dict__[item]
+        except KeyError:
+            return None
 
 
 class UpdateEntry:
@@ -85,30 +67,68 @@ class ScheduleUpdate:
     def update(self):
         gmw = GamedayModelWrapper(self.gameday_id)
         for update_entry in self.data:
-            if gmw.is_finished(update_entry['pre-finished']) and not gmw.is_finished(update_entry['name']):
+            if gmw.is_finished(update_entry['pre_finished']) and not gmw.is_finished(update_entry['name']):
                 entry = UpdateEntry(update_entry)
                 qs = Gameinfo.objects.filter(gameday_id=self.gameday_id, standing=entry.get_name())
+                game: UpdateGameEntry
+                gi: Gameinfo
                 for gi, game in zip(qs, entry):
-                    if game.get_stage('home'):
-                        home = gmw.get_team_by_qualify_for(game.get_place('home'), game.get_index('home'))
+                    if game.home.stage:
+                        home = gmw.get_team_by_qualify_for(game.home.place, game.home.index)
+                    elif game.home.aggregate_standings:
+                        home = gmw.get_team_aggregate_by(game.home.aggregate_standings,
+                                                         game.home.aggregate_place,
+                                                         game.home.place)
+                    elif game.home.first_match:
+                        teams = gmw.get_teams_by(game.home.standing, game.home.points)
+                        for entry_to_match in game.home.first_match:
+                            if entry_to_match.aggregate_standings:
+                                potential_team = gmw.get_team_aggregate_by(entry_to_match.aggregate_standings,
+                                                                           entry_to_match.aggregate_place,
+                                                                           entry_to_match.place)
+                            else:
+                                potential_team = gmw.get_team_by(entry_to_match.place,
+                                                                 entry_to_match.standing,
+                                                                 entry_to_match.points)
+                            if potential_team in teams:
+                                home = potential_team
+                                break
                     else:
-                        home = gmw.get_team_by(game.get_place('home'), game.get_standing('home'),
-                                               game.get_points('home'))
-                    if game.get_stage('away'):
-                        away = gmw.get_team_by_qualify_for(game.get_place('away'), game.get_index('away'))
+                        home = gmw.get_team_by(game.home.place, game.home.standing,
+                                               game.home.points)
+                    if game.away.stage:
+                        away = gmw.get_team_by_qualify_for(game.away.place, game.away.index)
+                    elif game.away.aggregate_standings:
+                        away = gmw.get_team_aggregate_by(game.away.aggregate_standings,
+                                                         game.away.aggregate_place,
+                                                         game.away.place)
+                    elif game.away.first_match:
+                        teams = gmw.get_teams_by(game.away.standing, game.away.points)
+                        for entry_to_match in game.away.first_match:
+                            if entry_to_match.aggregate_standings:
+                                potential_team = gmw.get_team_aggregate_by(entry_to_match.aggregate_standings,
+                                                                           entry_to_match.aggregate_place,
+                                                                           entry_to_match.place)
+                            else:
+                                potential_team = gmw.get_team_by(entry_to_match.place,
+                                                                 entry_to_match.standing,
+                                                                 entry_to_match.points)
+                            if potential_team in teams:
+                                away = potential_team
+                                break
                     else:
-                        away = gmw.get_team_by(game.get_place('away'), game.get_standing('away'),
-                                               game.get_points('away'))
+                        away = gmw.get_team_by(game.away.place, game.away.standing,
+                                               game.away.points)
                     self._update_gameresult(gi, home, True)
                     self._update_gameresult(gi, away, False)
-                    if gmw.is_finished(game.get_pre_finished('officials')):
-                        if game.get_stage('officials'):
+                    if gmw.is_finished(game.officials.pre_finished):
+                        if game.officials.stage:
                             officialsTeamName = gmw.get_team_by_qualify_for(
-                                game.get_place('officials'), game.get_index('officials'))
+                                game.officials.place, game.officials.index)
                         else:
-                            officialsTeamName = gmw.get_team_by(game.get_place('officials'),
-                                                                game.get_standing('officials'),
-                                                                game.get_points('officials'))
+                            officialsTeamName = gmw.get_team_by(game.officials.place,
+                                                                game.officials.standing,
+                                                                game.officials.points)
                         officials = Team.objects.get(name=officialsTeamName)
                         if gi.officials != officials:
                             gi.officials = officials
