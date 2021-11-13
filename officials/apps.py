@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class TeammanagerConfig(AppConfig):
+class OfficialsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'teammanager'
+    name = 'officials'

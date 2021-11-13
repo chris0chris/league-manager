@@ -73,7 +73,8 @@ class DBSetup:
         # for fixture in fixtures:
         #     print(fixture)
 
-        gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official, in_possession=teams[0].name)
+        gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official,
+                             in_possession=teams[0].name)
         GameresultFactory(gameinfo=gi, team=teams[0], fh=2, sh=1, pa=2, isHome=True)
         GameresultFactory(gameinfo=gi, team=teams[1], fh=1, sh=1, pa=3)
         gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official)
@@ -157,12 +158,14 @@ class DBSetup:
 
     def create_finalround_game(self, gameday, standing, status, home, away):
         if status == 'beendet':
-            gi = GameinfoFactory(gameday=gameday, stage='Finalrunde', standing=standing, status=status, in_possession=home.name)
+            gi = GameinfoFactory(gameday=gameday, stage='Finalrunde', standing=standing, status=status,
+                                 in_possession=home.name)
             GameresultFactory(gameinfo=gi, team=home, fh=1, sh=1, pa=3, isHome=True)
             GameresultFactory(gameinfo=gi, team=away, fh=2, sh=1, pa=2)
             return gi
         else:
-            gi = GameinfoFactory(gameday=gameday, stage='Finalrunde', standing=standing, status=status, in_possession=home.name)
+            gi = GameinfoFactory(gameday=gameday, stage='Finalrunde', standing=standing, status=status,
+                                 in_possession=home.name)
             GameresultFactory(gameinfo=gi, team=home, isHome=True)
             GameresultFactory(gameinfo=gi, team=away)
             return gi
@@ -180,10 +183,10 @@ class DBSetup:
                           status=status, number_teams=number_teams)
         return gameday
 
-    def create_officials(self, gameinfo):
-        officials_positions = ['referee', 'scorecard jude', 'down judge', 'field judge', 'side judge']
+    def create_game_officials(self, gameinfo, official=None):
+        officials_positions = ['Referee', 'Scorecard Judge', 'Down Judge', 'Field Judge', 'Side Judge']
         for position in officials_positions:
-            GameOfficialFactory(gameinfo=gameinfo, position=position)
+            GameOfficialFactory(gameinfo=gameinfo, position=position, official=official)
 
     def create_teamlog_home_and_away(self, home=None, away=None, gameinfo=None) -> Gameinfo:
         if home is None:
@@ -237,5 +240,5 @@ class DBSetup:
             'Authorization': 'Token ' + token[1],
         }
 
-    def create_new_user(self):
-        return UserFactory(username='another_user')
+    def create_new_user(self, username='another_user', is_staff=False):
+        return UserFactory(username=username, is_staff=is_staff)
