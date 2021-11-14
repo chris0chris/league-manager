@@ -11,17 +11,25 @@ from officials.urls import OFFICIALS_LIST_FOR_TEAM
 
 
 class TestOfficialListView(WebTest):
-    def test_officials_access_only_for_authenticated_user(self):
-        response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': 1}))
-        assert response.status_code == HTTPStatus.FOUND
-        assert response.url.index('login/?next=')
+    def test_officials_names_are_obfuscated_for_anonymous_user(self):
+        team = DbSetupOfficials().create_officials_full_setup()
+        response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
+        assert response.status_code == HTTPStatus.OK
+        context_items = response.context['object_list']
+        first_official: dict = context_items.get('officials_list')[0]
+        assert first_official.get('first_name') == 'F****'
+        assert first_official.get('last_name') == 'F****'
 
     def test_officials_access_forbidden_for_authenticated_user_but_not_team_member(self):
         user = DBSetup().create_new_user('some user')
-        teams = DBSetup().create_teams('team', 1)
+        team = DbSetupOfficials().create_officials_full_setup()
         self.app.set_user(user)
-        response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': teams[0].pk}), expect_errors=True)
-        assert response.status_code == HTTPStatus.FORBIDDEN
+        response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
+        assert response.status_code == HTTPStatus.OK
+        context_items = response.context['object_list']
+        first_official: dict = context_items.get('officials_list')[1]
+        assert first_official.get('first_name') == 'J****'
+        assert first_official.get('last_name') == 'J****'
 
     def test_access_to_team_officials_only_for_team_member(self):
         team = DbSetupOfficials().create_officials_full_setup()

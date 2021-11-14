@@ -1,5 +1,4 @@
 # Create your views here.
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.shortcuts import render
 from django.views import View
 
@@ -8,7 +7,7 @@ from officials.service.official_service import OfficialService
 from teammanager.models import Team
 
 
-class OfficialsTeamListView(LoginRequiredMixin, UserPassesTestMixin, View):
+class OfficialsTeamListView(View):
     model = Official
     template_name = 'officials/officials_list.html'
 
@@ -16,11 +15,14 @@ class OfficialsTeamListView(LoginRequiredMixin, UserPassesTestMixin, View):
         team_id = kwargs.get('pk')
         year = kwargs.get('year')
         official_service = OfficialService()
-        context = {'object_list': official_service.get_officials_for(team_id, year)}
+        if self.is_user_allowed_to_see_official_names(team_id):
+            context = {'object_list': official_service.get_officials_for(team_id, year, are_names_obfuscated=False)}
+        else:
+            context = {'object_list': official_service.get_officials_for(team_id, year)}
+
         return render(request, self.template_name, context)
 
-    def test_func(self):
-        team_id = self.kwargs.get('pk')
+    def is_user_allowed_to_see_official_names(self, team_id):
         team: Team = Team.objects.get(pk=team_id)
         if self.request.user.is_staff:
             return True

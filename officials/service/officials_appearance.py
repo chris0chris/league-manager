@@ -32,14 +32,14 @@ class OfficialAppearanceTeamList(object):
         self.team_id = team_id
         self.year = year
 
-    def as_json(self):
+    def as_json(self, are_names_obfuscated=True):
         return {
             'year': self.year,
             'officials_list': self.get_officials_list()
         }
 
     def get_officials_list(self):
-        officials = Official.objects.filter(team_id=self.team_id)
+        officials = Official.objects.filter(team_id=self.team_id).order_by('last_name', 'first_name')
         officials_result_list = []
         for current_official in officials:
             try:
