@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="media content-section">
+    <div class="media-body">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Datum</th>
+                <th scope="col">Spieltag</th>
+                <th scope="col">Team</th>
+                <th scope="col">Name</th>
+                <th scope="col">Position</th>
+                <th scope="col">Spiel</th>
+                <th scope="col">Platzierung</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for official in object_list %}
+            <tr>
+                <th scope="row">{{official.info.date}}</th>
+                <td>{{official.info.gameday}}</td>
+                <td>{{official.info.team}}</td>
+                <td>{{official.name}}</td>
+                <td>{{official.position}}</td>
+                <td>{{official.info.vs}}</td>
+                <td>{{official.info.standing}}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</article>
+{% endblock content %}

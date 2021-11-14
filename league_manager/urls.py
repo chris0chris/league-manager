@@ -25,6 +25,8 @@ from league_manager.views import homeview
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('api/', include('gamedays.api.urls')),
+                  path('api/officials/', include('officials.api.urls')),
+                  path('officials/', include('officials.urls')),
                   path('teammanager/', include('teammanager.urls')),
                   path('scorecard/', include('scorecard.urls')),
                   path('liveticker/', include('liveticker.urls')),

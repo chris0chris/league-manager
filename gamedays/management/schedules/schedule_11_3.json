@@ -7,14 +7,14 @@
         "standing": "Gruppe 1",
         "home": "0_0",
         "away": "0_1",
-        "official": "2_2"
+        "official": "2_0"
       },
       {
         "stage": "Vorrunde",
         "standing": "Gruppe 1",
         "home": "0_2",
         "away": "0_0",
-        "official": "1_2"
+        "official": "1_0"
       },
       {
         "stage": "Vorrunde",
@@ -136,14 +136,14 @@
         "standing": "Gruppe 2",
         "home": "1_3",
         "away": "1_2",
-        "official": "2_0"
+        "official": "2_2"
       },
       {
         "stage": "Vorrunde",
         "standing": "Gruppe 3",
         "home": "2_0",
         "away": "2_1",
-        "official": "1_0"
+        "official": "1_2"
       },
       {
         "stage": "Vorrunde",

@@ -28,7 +28,7 @@ describe('getGames action', () => {
       done();
     });
 
-    return store.dispatch(getGamedays()).then(() => {
+    store.dispatch(getGamedays()).then(() => {
       const newState = store.getState();
       expect(newState.gamedays).toBe(expectedState.data);
     });

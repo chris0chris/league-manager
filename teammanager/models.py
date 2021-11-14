@@ -158,13 +158,15 @@ class Gameresult(models.Model):
 
 class GameOfficial(models.Model):
     gameinfo: Gameinfo = models.ForeignKey(Gameinfo, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
+    official = models.ForeignKey('officials.Official', on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
     position = models.CharField(max_length=100)
 
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.gameinfo.pk}__{self.name} - {self.position}'
+        name_or_official_name = self.name if self.name else self.offical.name
+        return f'{self.gameinfo.pk}__{name_or_official_name} - {self.position}'
 
 
 class GameSetup(models.Model):

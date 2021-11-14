@@ -27,18 +27,18 @@ class TestRetrieveUpdateOfficials(WebTest):
     def test_officials_will_be_updated(self):
         DBSetup().g62_status_empty()
         last_game = Gameinfo.objects.last()
-        DBSetup().create_officials(last_game)
+        DBSetup().create_game_officials(last_game)
         assert len(GameOfficial.objects.all()) == 5
         response = self.app.put_json(reverse(API_GAME_OFFICIALS, kwargs={'pk': last_game.pk}), [
-            {"name": "Saskia", "position": "referee"},
-            {"name": "Franz", "position": "side judge"}], headers=DBSetup().get_token_header())
+            {"name": "Saskia", "position": "Referee"},
+            {"name": "Franz", "position": "Side Judge"}], headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.OK
         assert len(GameOfficial.objects.all()) == 5
 
     def test_officials_get(self):
         DBSetup().g62_status_empty()
         last_game = Gameinfo.objects.last()
-        DBSetup().create_officials(last_game)
+        DBSetup().create_game_officials(last_game)
         response = self.app.get(reverse(API_GAME_OFFICIALS, kwargs={'pk': last_game.pk}))
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 5

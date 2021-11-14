@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import factory
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -61,7 +63,7 @@ class GamedayFactory(DjangoModelFactory):
     class Meta:
         model = Gameday
 
-    date = '2020-10-10'
+    date = datetime.today().strftime('%Y-%m-%d')
     start = '10:00'
     name = 'Test Spieltag'
     season = factory.SubFactory(SeasonFactory)
@@ -101,4 +103,3 @@ class GameSetupFactory(DjangoModelFactory):
         model = GameSetup
 
     gameinfo = factory.SubFactory(GameinfoFactory)
-

@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'league_table',
     'corsheaders',
     'teammanager',
+    'officials',
     'accounts',
     'knox',
     'wagtail.core',
