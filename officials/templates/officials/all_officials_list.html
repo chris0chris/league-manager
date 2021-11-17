@@ -3,11 +3,11 @@
 <article class="media content-section">
     <div class="media-body">
         <h1>{{ object_list.year }}</h1>
-        {{ object_list.officials_list|length }} - Offizielle
         <table class="table table-hover">
             <thead>
             <tr>
                 <th scope="col">#</th>
+                <th scope="col">Team</th>
                 <th scope="col">Nachname</th>
                 <th scope="col">Vorname</th>
                 <th scope="col">Lizenzstufe</th>
@@ -22,6 +22,7 @@
             {% for official in object_list.officials_list %}
             <tr>
                 <th scope="row">{{official.id}}</th>
+                <td><a href="/officials/team/{{official.team_id}}/list">{{official.team}}</a></td>
                 <td>{{official.last_name}}</td>
                 <td>{{official.first_name}}</td>
                 <td>{{official.license}}</td>

@@ -13,10 +13,13 @@ class OfficialAppearanceTeamListEntry:
         game_officials: QuerySet = self.official.gameofficial_set.filter(gameinfo__gameday__date__year=self.year)
         official_license: OfficialLicenseHistory = self.official.officiallicensehistory_set.get(
             created_at__year=self.year)
+        team = self.official.team
         entry = OfficialSerializer(self.official).data
         entry.update(
             {
                 'license': official_license.license.name,
+                'team': team.name,
+                'team_id': team.pk,
                 'referee': game_officials.filter(position='Referee').count(),
                 'down_judge': game_officials.filter(position='Down Judge').count(),
                 'field_judge': game_officials.filter(position='Field Judge').count(),

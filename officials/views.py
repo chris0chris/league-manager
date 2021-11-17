@@ -1,4 +1,6 @@
 # Create your views here.
+from datetime import datetime
+
 from django.shortcuts import render
 from django.views import View
 
@@ -43,11 +45,19 @@ class AllOfficialsListView(View):
         return render(request, self.template_name, context)
 
 
-# ToDo delete class when new season started
 class GameOfficialListView(View):
     template_name = 'officials/game_officials_list.html'
 
     def get(self, request, *args, **kwargs):
-        game_officials = GameOfficial.objects.exclude(position='Scorecard Judge')
-        context = {'object_list': GameOfficialAllInfosSerializer(game_officials, many=True).data}
+        year = kwargs.get('year', datetime.today().year)
+        team_id = kwargs.get('pk')
+        game_officials = GameOfficial.objects.filter(gameinfo__gameday__date__year=year).exclude(
+            position='Scorecard Judge')
+        if team_id:
+            game_officials = game_officials.filter(gameinfo__officials__pk=team_id)
+        is_staff = request.user.is_staff
+        team_name = request.user.username
+        context = {
+            'object_list': GameOfficialAllInfosSerializer(instance=game_officials, display_names_for_team=team_name,
+                                                          is_staff=is_staff, many=True).data}
         return render(request, self.template_name, context)
