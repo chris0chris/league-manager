@@ -34,6 +34,9 @@
                 <div class="navbar-nav mr-auto">
                     <a class="nav-item nav-link" href="{% url 'league-home' %}">Home</a>
                     <a class="nav-item nav-link" href="{% url 'teammanager' %}">Teammanager</a>
+                    <a class="nav-item nav-link" href="{% url 'view-officials-list-for-all-teams' %}">#Einsätze</a>
+                    <a class="nav-item nav-link" href="{% url 'view-officials-game-officials-appearance' %}">Alle
+                        Einsätze</a>
                     {% if object %}
                     <a class="nav-item nav-link" href="{% url 'league-gameday-update' object.id%}">Edit</a>
                     {% endif %}
