@@ -34,7 +34,9 @@ class GamedayModelWrapper:
 
     def __init__(self, pk):
         self._gameinfo: DataFrame = pd.DataFrame(Gameinfo.objects.filter(gameday_id=pk).values(
-            *([f.name for f in Gameinfo._meta.local_fields] + ['officials__name'])))
+            # select the fields which should be in the dataframe
+            *([f.name for f in Gameinfo._meta.local_fields] + ['officials__name'] + ['gameday__name'] + [
+                'gameday__date'])))
         if self._gameinfo.empty:
             raise Gameinfo.DoesNotExist
 
