@@ -23,8 +23,6 @@ class Tick(object):
             text = f'{text}: -'
         if self.game_log.event in ['Auszeit', 'Spielzeit', 'Strafe']:
             text = f'{text} - {self.game_log.input}'
-        if 'Turnover' == self.game_log.event:
-            text = 'Ballabgabe'
         return text
 
     def __repr__(self):

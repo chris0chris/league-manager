@@ -32,7 +32,7 @@ const GameTicker = (props) => {
             <br />
             <span className='fs-6'>{status}</span>
             <br />
-            <span className='text-muted smaller'><MdRefresh title='Letzte Aktualisierung' style={{marginBottom: '2px'}} />{time} Uhr</span>
+            <span className='text-muted smaller'><MdRefresh title='Last update' style={{marginBottom: '2px'}} />{time} (CET)</span>
           </div>
           <TeamBox img={away.img} name={away.name}
             showPossession={away.isInPossession} />

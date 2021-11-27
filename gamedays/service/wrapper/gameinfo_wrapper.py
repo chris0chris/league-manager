@@ -8,17 +8,17 @@ class GameinfoWrapper(object):
         self.gameinfo = Gameinfo.objects.get(id=game_id)
 
     def set_halftime_to_now(self):
-        self.gameinfo.status = '2. Halbzeit'
+        self.gameinfo.status = '2nd Half'
         self.gameinfo.gameHalftime = datetime.now()
         self.gameinfo.save()
 
     def set_gamestarted_to_now(self):
-        self.gameinfo.status = '1. Halbzeit'
+        self.gameinfo.status = '1st Half'
         self.gameinfo.gameStarted = datetime.now()
         self.gameinfo.save()
 
     def set_game_finished_to_now(self):
-        self.gameinfo.status = 'beendet'
+        self.gameinfo.status = 'finished'
         self.gameinfo.gameFinished = datetime.now()
         self.gameinfo.save()
 

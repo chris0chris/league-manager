@@ -15,7 +15,7 @@ const TeamBox = (props) => {
       )}
       <span className=''>{name}</span><br/>
       { showPossession &&
-        <FaFootballBall title='Team hat Ballbesitz' size='17' />
+        <FaFootballBall title='Team is in ball possession' size='17' />
       }
     </div>
   );

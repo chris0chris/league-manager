@@ -18,12 +18,12 @@ const Ticks = (props) => {
     <ul className='list-group list-group-flush'>
       { entries.length === 0 &&
         <li className={`list-group-item`}>
-          <div className="text-center">Keine Einträge bisher vorhanden.</div>
+          <div className="text-center">No entries available.</div>
         </li>
       }
       {entries.map((entry, index) => (
         <li key={index} className={`list-group-item`}>
-          <div className='text-center text-muted smaller'>{entry.time} Uhr</div>
+          <div className='text-center text-muted smaller'>{entry.time} (CET)</div>
           <div className={getAlignmentFor(entry.team)}>{entry.text}</div>
         </li>
       ))}

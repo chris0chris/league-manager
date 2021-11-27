@@ -8,11 +8,11 @@ const DisplayAllTicks = (props) => {
   return (
     <div onClick={() => setLoadAllTicks(!loadAllTicks)}>
       { loadAllTicks &&
-        <GiCancel title="Klicken, um die letzten 5 Einträge anzuzeigen" />
+        <GiCancel title="Click to display only last 5 entries" />
       }
       {!loadAllTicks &&
       <>
-        <FaInfinity title="Klicken, um alle Einträge anzuzeigen" /><br/>
+        <FaInfinity title="Click to display all entries" /><br/>
       </>
       }
 
