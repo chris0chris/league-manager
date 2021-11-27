@@ -53,8 +53,6 @@ class Schedule:
     def __init__(self, gameday_format: str, groups: []):
         self.format = gameday_format
         self.groups = groups
-        if not self._format_match_number_of_teams():
-            raise ScheduleTeamMismatchError
         self.entries = self._get_entries()
 
     def _get_entries(self):

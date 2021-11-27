@@ -4,6 +4,7 @@ from django.utils import timezone
 from teammanager.models import Gameday, Season, League
 
 SCHEDULE_CHOICES = (
+    ("2_1", "2 Teams 1 Feld"),
     ("3_1", "3 Teams 1 Feld"),
     ("4_1", "4 Teams 1 Feld"),
     ("5_2", "5 Teams 2 Felder"),
