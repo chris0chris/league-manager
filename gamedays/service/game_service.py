@@ -12,15 +12,15 @@ class GameService(object):
 
     def update_halftime(self):
         self.gameinfo.set_halftime_to_now()
-        self._create_log_entry('2. Halbzeit gestartet')
+        self._create_log_entry('2nd half started')
 
     def update_gamestart(self):
         self.gameinfo.set_gamestarted_to_now()
-        self._create_log_entry('Spiel gestartet')
+        self._create_log_entry('Game started')
 
     def update_game_finished(self):
         self.gameinfo.set_game_finished_to_now()
-        self._create_log_entry('Spiel beendet')
+        self._create_log_entry('Game finished')
 
     def get_gamelog(self):
         return GameLog(self.gameinfo.gameinfo)

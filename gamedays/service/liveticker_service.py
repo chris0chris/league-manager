@@ -124,7 +124,7 @@ class LivetickerService(object):
         for game in games:
             if group_by_schedule_time is None:
                 group_by_schedule_time = game.scheduled
-            if group_by_schedule_time == game.scheduled or game.status in ['1. Halbzeit', '2. Halbzeit']:
+            if group_by_schedule_time == game.scheduled or game.status in ['1st Half', '2nd Half']:
                 liveticker = Liveticker(game)
                 if game.pk in self.game_ids_with_all_ticks:
                     liveticker.collect_all_ticks()

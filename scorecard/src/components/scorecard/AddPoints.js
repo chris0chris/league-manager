@@ -38,7 +38,7 @@ const AddPoints = (props) => {
   };
   const handleSubmit = (formEvent) => {
     formEvent.preventDefault();
-    setShowStates(false, true, false);
+    setShowStates(true, false, false);
     setReset(true);
     updateParent(event, isAgainstOpponent);
   };
