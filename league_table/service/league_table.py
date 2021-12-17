@@ -52,7 +52,7 @@ class LeagueTable:
         all_schedules = pd.DataFrame()
         for gameday in all_gamedays:
             try:
-                gmw = GamedayModelWrapper(gameday.pk)
+                gmw = GamedayModelWrapper(gameday.pk, ['gameday__name', 'gameday__date'])
                 all_schedules = all_schedules.append(gmw.get_schedule(), ignore_index=True)
             except Gameinfo.DoesNotExist:
                 pass
