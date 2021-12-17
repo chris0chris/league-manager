@@ -44,11 +44,15 @@ class GameOfficialAllInfosSerializer(ModelSerializer):
         }
 
     def obfuscate_name(self, object: GameOfficial):
+        official_name = self._get_official_name(object)
         if self.display_names_for_team == object.gameinfo.officials.name or self.is_staff:
-            if object.official is not None:
-                return f'{object.official.first_name} {object.official.last_name}'
-            return object.name
-        return re.sub('\B[a-zäöüÄÖÜßé]', '*', object.name)
+            return official_name
+        return re.sub('\B[a-zäöüÄÖÜßé]', '*', official_name)
+
+    def _get_official_name(self, game_official):
+        if game_official.official is not None:
+            return f'{game_official.official.first_name} {game_official.official.last_name}'
+        return game_official.name
 
     class Meta:
         model = GameOfficial
