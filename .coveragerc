@@ -17,7 +17,6 @@ omit =
    */wsgi.py
    */asgi.py
    */urls.py
-   */*Spreadsheet*.py
 
    *__init__*
    */__pycache__/*
