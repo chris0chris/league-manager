@@ -5,9 +5,11 @@ import pandas as pd
 from django.test import TestCase
 from pandas.testing import assert_frame_equal
 
+from gamedays.service.gameday_settings import SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, \
+    STANDING, STAGE, STATUS
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo, Gameresult
+from teammanager.models import Gameinfo, Gameresult, Team
 
 
 def get_df_from_json(filename):
@@ -35,9 +37,12 @@ class TestGamedayModelWrapper(TestCase):
         gameday = DBSetup().g62_qualify_finished()
         expected_schedule = get_df_from_json('schedule_g62_qualify_finished')
         schedule = GamedayModelWrapper(gameday.pk).get_schedule()
-        del expected_schedule['scheduled']
-        del schedule['scheduled']
-        del schedule['in_possession']
+        columns = [SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, STANDING, STAGE, STATUS]
+        schedule = schedule[columns]
+        expected_schedule = expected_schedule[columns]
+        # del expected_schedule['scheduled']
+        # del schedule['scheduled']
+        # del schedule['in_possession']
         assert schedule.to_json() == expected_schedule.to_json()
 
     def test_empty_get_qualify_table(self):
@@ -116,14 +121,17 @@ class TestGamedayModelWrapper(TestCase):
 
     def test_get_games_to_whistle(self):
         gameday = DBSetup().g62_status_empty()
-        Gameinfo.objects.filter(id=1).update(gameFinished='12:00')
+        first_game = Gameinfo.objects.first()
+        Gameinfo.objects.filter(id=first_game.pk).update(gameFinished='12:00')
         gmw = GamedayModelWrapper(gameday.pk)
         assert len(gmw.get_games_to_whistle('officials').index) == 5
 
     def test_get_games_to_whistle_for_all_teams(self):
         gameday = DBSetup().g62_status_empty()
-        Gameinfo.objects.filter(id=1).update(gameFinished='12:00')
-        Gameinfo.objects.filter(id=2).update(officials=2)
+        first_game = Gameinfo.objects.first()
+        first_team = Team.objects.first()
+        Gameinfo.objects.filter(id=first_game.pk).update(gameFinished='12:00')
+        Gameinfo.objects.filter(id=first_game.pk + 1).update(officials=first_team.pk + 1)
         gmw = GamedayModelWrapper(gameday.pk)
         assert len(gmw.get_games_to_whistle('').index) == 10
 

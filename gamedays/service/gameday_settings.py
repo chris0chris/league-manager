@@ -27,6 +27,7 @@ DIFF = '+/-'
 GROUP1 = 'Gruppe 1'
 FINISHED = 'beendet'
 GAME_FINISHED = 'gameFinished'
+IS_HOME = 'isHome'
 
 GAMEINFO_ID = 'gameinfo'
 ID = 'id'

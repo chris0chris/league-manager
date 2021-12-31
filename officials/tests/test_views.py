@@ -8,6 +8,7 @@ from gamedays.tests.setup_factories.db_setup import DBSetup
 from officials.models import Official
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 from officials.urls import OFFICIALS_LIST_FOR_TEAM, OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE
+from teammanager.models import Gameinfo
 
 
 class TestOfficialListView(WebTest):
@@ -53,7 +54,7 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
         user = DBSetup().create_new_user('some user', is_staff=True)
         self.app.set_user(user)
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
-        response.form['entries'] = '1, 2, Referee'
+        response.form['entries'] = '0, 0, Referee'
         response = response.form.submit()
         self.assertFormError(response, 'form', 'entries', ['gameinfo_id nicht gefunden!'])
 
@@ -61,8 +62,9 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
         user = DBSetup().create_new_user('some user', is_staff=True)
         self.app.set_user(user)
         DBSetup().g62_status_empty()
+        first_game = Gameinfo.objects.first()
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
-        response.form['entries'] = '1, 2, Field Judge'
+        response.form['entries'] = f'{first_game.pk}, 9999, Field Judge'
         response = response.form.submit()
         self.assertFormError(response, 'form', 'entries', ['official_id nicht gefunden!'])
 
@@ -82,8 +84,10 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
         self.app.set_user(user)
         DBSetup().g62_status_empty()
         DbSetupOfficials().create_officials_and_team()
+        first_game = Gameinfo.objects.first()
+        first_official = Official.objects.first()
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
-        response.form['entries'] = '1, 2, Side Judge'
+        response.form['entries'] = f'{first_game.pk}, {first_official.pk + 1}, Side Judge'
         response = response.form.submit()
-        assert 'ID: 1 -> Spiel 1 - Julia Jegura als Side Judge' in \
+        assert ' - Julia Jegura als Side Judge' in \
                response.html.find_all("div", {"class": "alert-success"})[0].text

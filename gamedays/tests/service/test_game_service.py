@@ -14,20 +14,20 @@ class TestGameService(TestCase):
             GameService(1)
 
     def test_update_game_by_halftime(self):
-        DBSetup().g62_status_empty()
+        gameday = DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         game_service = GameService(firstGame.pk)
-        game_service.update_halftime()
+        game_service.update_halftime(gameday.author)
         firstGame = Gameinfo.objects.first()
         assert firstGame.status == '2. Halbzeit'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameHalftime))
         assert len(TeamLog.objects.all()) == 1
 
     def test_gamestart_is_updated(self):
-        DBSetup().g62_status_empty()
+        gameday = DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         game_service = GameService(firstGame.pk)
-        game_service.update_gamestart()
+        game_service.update_gamestart(gameday.author)
         firstGame: Gameinfo = Gameinfo.objects.first()
         assert firstGame.status == '1. Halbzeit'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameStarted))
@@ -35,25 +35,25 @@ class TestGameService(TestCase):
 
 
     def test_gamefinished_is_updated(self):
-        DBSetup().g62_status_empty()
+        gameday = DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         game_service = GameService(firstGame.pk)
-        game_service.update_game_finished()
+        game_service.update_game_finished(gameday.author)
         firstGame: Gameinfo = Gameinfo.objects.first()
         assert firstGame.status == 'beendet'
         assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameFinished))
         assert len(TeamLog.objects.all()) == 1
 
     def test_entry_for_game_created_halftime_and_finished_only_written_once(self):
-        DBSetup().g62_status_empty()
+        gameday = DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
         game_service = GameService(firstGame.pk)
-        game_service.update_gamestart()
-        game_service.update_gamestart()
-        game_service.update_halftime()
-        game_service.update_halftime()
-        game_service.update_game_finished()
-        game_service.update_game_finished()
+        game_service.update_gamestart(gameday.author)
+        game_service.update_gamestart(gameday.author)
+        game_service.update_halftime(gameday.author)
+        game_service.update_halftime(gameday.author)
+        game_service.update_game_finished(gameday.author)
+        game_service.update_game_finished(gameday.author)
         assert len(TeamLog.objects.all()) == 3
 
 

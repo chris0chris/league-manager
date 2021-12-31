@@ -21,14 +21,16 @@ class TestGamedayService(TestCase):
 
     def test_get_games_to_whistle(self):
         gameday = DBSetup().g62_status_empty()
-        Gameinfo.objects.filter(id=1).update(gameFinished='12:00')
+        first_game = Gameinfo.objects.first()
+        Gameinfo.objects.filter(id=first_game.pk).update(gameFinished='12:00')
         gs = GamedayService.create(gameday.pk)
         games_to_whistle = gs.get_games_to_whistle('officials')
         assert len(games_to_whistle) == 5
 
     def test_get_all_games_to_whistle_for_all_teams(self):
         gameday = DBSetup().g62_status_empty()
-        Gameinfo.objects.filter(id=1).update(gameFinished='12:00')
+        first_game = Gameinfo.objects.first()
+        Gameinfo.objects.filter(id=first_game.pk).update(gameFinished='12:00')
         gs = GamedayService.create(gameday.pk)
         games_to_whistle = gs.get_games_to_whistle('*')
         assert len(games_to_whistle) == 10

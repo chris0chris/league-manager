@@ -4,7 +4,7 @@ from pandas import DataFrame
 
 from gamedays.service.gameday_settings import STANDING, TEAM_NAME, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, GROUP1, \
     GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
-    STATUS, SH, FH, FINISHED, GAME_FINISHED, DFFL, IN_POSSESSION
+    STATUS, SH, FH, FINISHED, GAME_FINISHED, DFFL, IN_POSSESSION, IS_HOME
 from teammanager.models import Gameinfo, Gameresult
 
 
@@ -39,8 +39,9 @@ class GamedayModelWrapper:
         if self._gameinfo.empty:
             raise Gameinfo.DoesNotExist
 
-        gameresult = pd.DataFrame(Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id']).values(
-            *([f.name for f in Gameresult._meta.local_fields] + [TEAM_NAME])))
+        gameresult = pd.DataFrame(
+            Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id']).order_by('-' + IS_HOME).values(
+                *([f.name for f in Gameresult._meta.local_fields] + [TEAM_NAME])))
         games_with_result = pd.merge(self._gameinfo, gameresult, left_on='id', right_on=GAMEINFO_ID)
         games_with_result[IN_POSSESSION] = games_with_result[IN_POSSESSION].astype(str)
         games_with_result = games_with_result.convert_dtypes()
