@@ -112,6 +112,7 @@ class LivetickerService(object):
     def get_liveticker(self):
         next_games = Gameinfo.objects.filter(
             gameday__in=self.gameday_ids, gameFinished__isnull=True).order_by(SCHEDULED)
+        print(list(next_games))
         previously_finished_games = Gameinfo.objects.filter(
             gameday__in=self.gameday_ids, gameFinished__isnull=False).order_by(f'-{SCHEDULED}')
         liveticker = []
