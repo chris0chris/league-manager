@@ -10,4 +10,4 @@ Pillow==8.4.0
 django-rest-knox==4.1.0
 django-debug-toolbar==3.2.4
 python-dotenv~=0.19.2
-mysqlclient~=2.1.0
+mysqlclient==2.1.0
