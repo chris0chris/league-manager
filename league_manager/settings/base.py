@@ -127,7 +127,7 @@ DATABASES = {
         'NAME': os.environ.get('MYSQL_DB_NAME', 'test_db'),
         'USER': os.environ.get('MYSQL_USER', 'user'),
         'PASSWORD': os.environ.get('MYSQL_PWD', 'user'),
-        'HOST': os.environ.get('MYSQL_HOST', 'localhost'),
+        'HOST': os.environ.get('MYSQL_HOST', '127.0.0.1'),
         # 'PORT': '3306',
         'OPTIONS': {
             'init_command': 'set default_storage_engine=InnoDB',
