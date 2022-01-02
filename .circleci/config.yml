@@ -10,8 +10,8 @@ jobs:
       - image: cimg/mysql:8.0
         environment:
           MYSQL_DATABASE: test_db
-          MYSQL_USER: root
-          MYSQL_PASSWORD: root
+          MYSQL_USER: user
+          MYSQL_PASSWORD: user
     working_directory: ~/repo
 
     steps:
