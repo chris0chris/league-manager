@@ -8,6 +8,11 @@ jobs:
     docker:
       - image: cimg/python:3.9.3
       - image: cimg/mysql:8.0
+        environment:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_db
+          MYSQL_USER: root
+          MYSQL_PASSWORD: root
     working_directory: ~/repo
 
     steps:
@@ -23,8 +28,6 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            #            python3 -m pip install --user virtualenv
-            #            python3 -m virtualenv venv
             python -m venv ~/.venv
             . ~/.venv/bin/activate
             pip install -r requirements.txt
@@ -37,7 +40,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            . venv/bin/activate
+            . ~/.venv/bin/activate
             pytest --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
       - store_test_results:
           path: test-reports

@@ -124,10 +124,10 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('MYSQL_DB_NAME'),
-        'USER': os.environ.get('MYSQL_USER'),
-        'PASSWORD': os.environ.get('MYSQL_PWD'),
-        'HOST': os.environ.get('MYSQL_HOST'),
+        'NAME': os.environ.get('MYSQL_DB_NAME', 'test_db'),
+        'USER': os.environ.get('MYSQL_USER', 'root'),
+        'PASSWORD': os.environ.get('MYSQL_PWD', 'root'),
+        'HOST': os.environ.get('MYSQL_HOST', 'localhost'),
         # 'PORT': '3306',
         'OPTIONS': {
             'init_command': 'set default_storage_engine=InnoDB',
