@@ -16,7 +16,7 @@ class TestGamedayCreateView(WebTest):
 
     def test_create_gameday(self):
         DBSetup().create_empty_gameday()
-        non_existent_gameday = len(Gameday.objects.all()) + 1
+        non_existent_gameday = Gameday.objects.last().pk + 1
         self.app.set_user(User.objects.all().first())
         response: DjangoWebtestResponse = self.app.get(reverse('league-gameday-create'))
         assert response.status_code == HTTPStatus.OK

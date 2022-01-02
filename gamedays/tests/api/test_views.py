@@ -148,6 +148,8 @@ class TestLivetickerAPIView(WebTest):
         assert len(response.json) == 4
         expected_result = self.expected_liveticker_result
         expected_result['gameId'] = first_game_gameday_one.pk
+        print('expected_result', expected_result)
+        print('actual_result', response.json[0])
         assert response.json[0] == expected_result
         expected_result['gameId'] = first_game_gameday_two.pk
         assert response.json[2] == expected_result
