@@ -1,6 +1,10 @@
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'dummy'
@@ -28,21 +32,6 @@ INSTALLED_APPS = [
     'officials',
     'accounts',
     'knox',
-    'wagtail.core',
-    'wagtail.admin',
-    'wagtail.documents',
-    'wagtail.snippets',
-    'wagtail.users',
-    'wagtail.images',
-    'wagtail.embeds',
-    'wagtail.search',
-    'wagtail.sites',
-    'wagtail.contrib.redirects',
-    'wagtail.contrib.forms',
-    'wagtail.contrib.sitemaps',
-    'wagtail.contrib.routable_page',
-    'taggit',
-    'modelcluster',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +43,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'league_manager.urls'
@@ -135,12 +123,18 @@ REST_FRAMEWORK = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, '../db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('MYSQL_DB_NAME', 'test_db'),
+        'USER': os.environ.get('MYSQL_USER', 'user'),
+        'PASSWORD': os.environ.get('MYSQL_PWD', 'user'),
+        'HOST': os.environ.get('MYSQL_HOST', '127.0.0.1'),
+        # 'PORT': '3306',
+        'OPTIONS': {
+            'init_command': 'set default_storage_engine=InnoDB',
+        },
+    },
 }
 
-WAGTAIL_SITE_NAME = '5er DFFL'
 
 # ToDo deleteMe
 X_FRAME_OPTIONS = 'ALLOWALL'

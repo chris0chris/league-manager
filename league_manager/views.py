@@ -1,4 +1,40 @@
+from django.conf import settings
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import render
+from django.urls import URLPattern, URLResolver
+from django.views import View
+
 
 def homeview(request):
     return render(request, 'homeview.html')
+
+
+URLCONF = __import__(settings.ROOT_URLCONF, {}, {}, [''])
+
+
+class AllUrlsView(View, UserPassesTestMixin):
+    template_name = 'league_manager/urls_list.html'
+
+    def get(self, request):
+        urls_list = []
+        for p in self.list_urls(URLCONF.urlpatterns):
+            urls_list += [p]
+        context = {
+            'object_list': urls_list
+        }
+        return render(request, self.template_name, context)
+
+    def list_urls(self, patterns, path=None):
+        """ recursive """
+        if not path:
+            path = []
+        result = []
+        for pattern in patterns:
+            if isinstance(pattern, URLPattern):
+                result.append(''.join(path) + str(pattern.pattern))
+            elif isinstance(pattern, URLResolver):
+                result += self.list_urls(pattern.url_patterns, path + [str(pattern.pattern)])
+        return result
+
+    def test_func(self):
+        return self.request.user.is_staff

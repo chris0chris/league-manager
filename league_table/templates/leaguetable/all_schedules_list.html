@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<!--<script src="{% static 'gamedays/js/jquery.bracket.min.js' %}" type="text/javascript"></script>-->
+<!--<link href="{% static 'gamedays/css/jquery.bracket.min.css' %}" rel="stylesheet" type="text/css"/>-->
+<div class="row mb-1">
+    <div class="col">Datum: {{ object.date | date:"l, j. F Y " }}</div>
+    <!--    <div class="col-8">Ort: {{ object.location }}</div>-->
+</div>
+
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapseSchedule" aria-expanded="true" class="card-header" data-target="#collapseSchedule"
+         data-toggle="collapse" id="headingSchedule" role="button">
+        <h2>Spielplan</h2>
+    </div>
+    <div aria-labelledby="headingSchedule" class="collapse show" id="collapseSchedule">
+        <div class="card-body">
+            {% if info.schedule == None %}
+            Spielplan wurde noch nicht erstellt.
+            {% else %}
+            <input class="mb-1" id="search" placeholder="Suche nach Teamname" type="text"><br/>
+            {{ info.schedule | safe }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function() {
+        $('table tbody tr').addClass('text-nowrap')
+    })
+$(document).ready(function(){
+  $("#search").on("keyup", function() {
+  console.log('keyup', $(this).val().toLowerCase())
+  console.log($("#schedule tbody tr"))
+    var value = $(this).val().toLowerCase();
+    $("#schedule tbody tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+
+
+
+</script>
+
+{% endblock content %}

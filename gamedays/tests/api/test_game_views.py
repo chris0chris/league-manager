@@ -122,7 +122,7 @@ class TestGameLog(WebTest):
                                           'name': 'A2',
                                           'score': 0,
                                           'secondhalf': {'entries': [], 'score': 0}},
-                                 'gameId': 1,
+                                 'gameId': firstGame.pk,
                                  'home': {'firsthalf': {'entries': [{'pat1': 7, 'sequence': 1, 'td': 19}], 'score': 7},
                                           'name': 'A1',
                                           'score': 7,
@@ -139,7 +139,7 @@ class TestGameLog(WebTest):
                                            {'name': '1-Extra-Punkt', 'player': ''}]},
                                       headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.CREATED
-        assert response.json == {'gameId': 1,
+        assert response.json == {'gameId': firstGame.pk,
                                  'away': {
                                      'name': 'A2',
                                      'score': 0,
@@ -162,7 +162,7 @@ class TestGameLog(WebTest):
                                       {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
                                        'event': [{'name': 'Turnover'}]}, headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.CREATED
-        assert response.json == {'gameId': 1,
+        assert response.json == {'gameId': firstGame.pk,
                                  'isFirstHalf': True,
                                  'home': {
                                      'name': 'A1',

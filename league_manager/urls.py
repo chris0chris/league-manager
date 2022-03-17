@@ -20,9 +20,12 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_view
 from django.urls import path, include
 
-from league_manager.views import homeview
+from league_manager.views import homeview, AllUrlsView
+
+ADMIN_ALL_URLS = 'admin-all-urls'
 
 urlpatterns = [
+                  path('urls', AllUrlsView.as_view(), name=ADMIN_ALL_URLS),
                   path('admin/', admin.site.urls),
                   path('api/', include('gamedays.api.urls')),
                   path('api/officials/', include('officials.api.urls')),

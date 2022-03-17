@@ -4,7 +4,7 @@ from pandas import DataFrame
 
 from gamedays.service.gameday_settings import STANDING, TEAM_NAME, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, GROUP1, \
     GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
-    STATUS, SH, FH, FINISHED, GAME_FINISHED, DFFL, IN_POSSESSION
+    STATUS, SH, FH, FINISHED, GAME_FINISHED, DFFL, IN_POSSESSION, IS_HOME
 from teammanager.models import Gameinfo, Gameresult
 
 
@@ -32,14 +32,16 @@ class DfflPoints(object):
 
 class GamedayModelWrapper:
 
-    def __init__(self, pk):
+    def __init__(self, pk, additional_columns=[]):
         self._gameinfo: DataFrame = pd.DataFrame(Gameinfo.objects.filter(gameday_id=pk).values(
-            *([f.name for f in Gameinfo._meta.local_fields] + ['officials__name'])))
+            # select the fields which should be in the dataframe
+            *([f.name for f in Gameinfo._meta.local_fields] + ['officials__name'] + additional_columns)))
         if self._gameinfo.empty:
             raise Gameinfo.DoesNotExist
 
-        gameresult = pd.DataFrame(Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id']).values(
-            *([f.name for f in Gameresult._meta.local_fields] + [TEAM_NAME])))
+        gameresult = pd.DataFrame(
+            Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id']).order_by('-' + IS_HOME).values(
+                *([f.name for f in Gameresult._meta.local_fields] + [TEAM_NAME])))
         games_with_result = pd.merge(self._gameinfo, gameresult, left_on='id', right_on=GAMEINFO_ID)
         games_with_result[IN_POSSESSION] = games_with_result[IN_POSSESSION].astype(str)
         games_with_result = games_with_result.convert_dtypes()

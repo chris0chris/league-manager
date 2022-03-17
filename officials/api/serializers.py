@@ -27,9 +27,16 @@ class GameOfficialAllInfosSerializer(ModelSerializer):
     def get_infos(self, object: GameOfficial):
         home = object.gameinfo.gameresult_set.get(isHome=True).team.name
         away = object.gameinfo.gameresult_set.get(isHome=False).team.name
+        if object.official is not None:
+            team = object.official.team
+            team_name = team.name
+            team_id = team.pk
+        else:
+            team_name = object.gameinfo.officials.name
+            team_id = object.gameinfo.officials.pk
         return {
-            'team': object.gameinfo.officials.name,
-            'team_id': object.gameinfo.officials.pk,
+            'team': team_name,
+            'team_id': team_id,
             'gameday': object.gameinfo.gameday.name,
             'date': object.gameinfo.gameday.date.strftime('%d.%m.%Y'),
             'vs': home + ' vs ' + away,
@@ -37,9 +44,15 @@ class GameOfficialAllInfosSerializer(ModelSerializer):
         }
 
     def obfuscate_name(self, object: GameOfficial):
+        official_name = self._get_official_name(object)
         if self.display_names_for_team == object.gameinfo.officials.name or self.is_staff:
-            return object.name
-        return re.sub('\B[a-zäöüÄÖÜßé]', '*', object.name)
+            return official_name
+        return re.sub('\B[a-zäöüÄÖÜßé]', '*', official_name)
+
+    def _get_official_name(self, game_official):
+        if game_official.official is not None:
+            return f'{game_official.official.first_name} {game_official.official.last_name}'
+        return game_official.name
 
     class Meta:
         model = GameOfficial

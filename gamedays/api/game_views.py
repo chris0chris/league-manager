@@ -50,7 +50,7 @@ class GameLogAPIView(APIView):
 class GameHalftimeAPIView(APIView):
     def put(self, request, *args, **kwargs):
         game_service = GameService(kwargs.get('pk'))
-        game_service.update_halftime()
+        game_service.update_halftime(request.user)
         return Response()
 
 
@@ -61,7 +61,7 @@ class GameFinalizeUpdateView(UpdateAPIView):
     def update(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         game_service = GameService(pk)
-        game_service.update_game_finished()
+        game_service.update_game_finished(request.user)
         game_setup, _ = GameSetup.objects.get_or_create(gameinfo_id=pk)
         serializer = GameFinalizer(instance=game_setup, data=request.data)
         if serializer.is_valid():
@@ -90,7 +90,7 @@ class GameSetupCreateOrUpdateView(RetrieveUpdateAPIView):
         serializer = GameSetupSerializer(instance=game_setup, data=request.data)
         if is_game_setup_created:
             game_service = GameService(pk)
-            game_service.update_gamestart()
+            game_service.update_gamestart(request.user)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=HTTPStatus.OK)

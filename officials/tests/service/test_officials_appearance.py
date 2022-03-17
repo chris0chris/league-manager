@@ -5,6 +5,7 @@ from django.test import TestCase
 from officials.models import Official
 from officials.service.officials_appearance import OfficialAppearanceTeamList, OfficialAppearanceTeamListEntry
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
+from teammanager.models import Team
 
 
 class TestOfficialApearanceTeamList(TestCase):
@@ -29,13 +30,15 @@ class TestOfficialAppearanceTeamListEntry(TestCase):
     def test_list_entry_results_as_expected(self):
         DbSetupOfficials().create_officials_full_setup()
         current_year = datetime.today().year
-        team_list_entry = OfficialAppearanceTeamListEntry(Official.objects.first(), current_year).as_json()
+        first_official = Official.objects.first()
+        first_team = Team.objects.first()
+        team_list_entry = OfficialAppearanceTeamListEntry(first_official, current_year).as_json()
         assert team_list_entry == {
-            'id': 1,
+            'id': first_official.pk,
             'first_name': 'Franzi',
             'last_name': 'Fedora',
             'team': 'Test Team',
-            'team_id': 1,
+            'team_id': first_team.pk,
             'license': 'F1',
             'referee': 1,
             'down_judge': 1,

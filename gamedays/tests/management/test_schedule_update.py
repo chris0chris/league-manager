@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from unittest.mock import patch, MagicMock
 
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule
 from gamedays.management.schedule_update import ScheduleUpdate, UpdateGameEntry, UpdateEntry
@@ -56,7 +56,9 @@ def update_gameresults_and_finish_first_game_for_P7():
     game.save()
 
 
-class TestScheduleUpdate(TestCase):
+class TestScheduleUpdate(TransactionTestCase):
+    reset_sequences = True
+
     def test_update_7_teams_2_fields(self):
         gameday = DBSetup().create_empty_gameday()
         gameday.format = "7_2"

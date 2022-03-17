@@ -1,35 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.forms import Form
-from django.shortcuts import render
 from django.urls import reverse
-from django.views import View
 from django.views.generic import ListView, DetailView, UpdateView, CreateView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
 from teammanager.models import Gameday
 from .forms import GamedayCreateForm, GamedayUpdateForm
-from .service.GamedaySpreadsheetService import GamedaySpreadsheetService
 from .service.gameday_service import GamedayService
-
-
-class GamespreadsDetailView(View):
-    template_name = 'gamedays/gameday_detail.html'
-
-    def get(self, request, *args, **kwargs):
-        gss = GamedaySpreadsheetService(kwargs['index'])
-        context = {'info': gss.get_spreadsheet(),
-                   'object': gss.get_gameday(kwargs['index'])
-                   }
-        return render(request, self.template_name, context)
-
-
-class GamespreadListView(View):
-    template_name = 'gamedays/gameday_list.html'
-
-    def get(self, request, *args, **kwargs):
-        gss = GamedaySpreadsheetService()
-        context = {'object_list': gss.get_gamedays_spreads()}
-        return render(request, self.template_name, context)
 
 
 class GamedayListView(ListView):
@@ -44,7 +21,6 @@ class GamedayDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(GamedayDetailView, self).get_context_data()
         gs = GamedayService.create(context['gameday'].pk)
-        # ToDo refactor, wenn Spreadsheet abgeschaltet sind
         render_configs = {
             'index': False,
             'classes': ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center'],

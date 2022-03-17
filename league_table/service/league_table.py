@@ -2,7 +2,9 @@ import json
 
 import pandas as pd
 
-from gamedays.service.gameday_settings import TEAM_NAME, PF, POINTS, PA, DIFF, DFFL
+from gamedays.service.gameday_settings import SCHEDULED, OFFICIALS_NAME, STAGE, STANDING, HOME, \
+    AWAY, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL, GAMEDAY_NAME, GAMEDAY_ID, \
+    GAMEINFO_ID
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from teammanager.models import Gameday, Gameinfo, SeasonLeagueTeam, Season
 
@@ -43,3 +45,16 @@ class LeagueTable:
                                            })
         all_standings = all_standings.sort_values(by=[DFFL, POINTS, DIFF, PF, PA], ascending=False)
         return all_standings
+
+    def get_all_schedules(self):
+        season = Season.objects.last()
+        all_gamedays = Gameday.objects.filter(season__name=season)
+        all_schedules = pd.DataFrame()
+        for gameday in all_gamedays:
+            try:
+                gmw = GamedayModelWrapper(gameday.pk, ['gameday__name', 'gameday__date'])
+                all_schedules = all_schedules.append(gmw.get_schedule(), ignore_index=True)
+            except Gameinfo.DoesNotExist:
+                pass
+        columns = [GAMEDAY_NAME, GAMEDAY_ID, SCHEDULED, OFFICIALS_NAME, GAMEINFO_ID, HOME, AWAY, STANDING, STAGE]
+        return all_schedules[columns]
