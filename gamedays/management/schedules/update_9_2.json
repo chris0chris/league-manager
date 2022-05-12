@@ -1,0 +1,183 @@
+[
+  {
+    "name": "P7",
+    "pre_finished": "Vorrunde",
+    "games": [
+      {
+        "home": {
+          "standing": "Gruppe 1",
+          "place": 3
+        },
+        "away": {
+          "standing": "Gruppe 2",
+          "place": 3
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "standing": "Gruppe 2",
+          "place": 1
+        }
+      },
+      {
+        "home": {
+          "standing": "Gruppe 2",
+          "place": 3
+        },
+        "away": {
+          "standing": "Gruppe 3",
+          "place": 3
+        },
+        "officials": {
+          "pre_finished": "PO",
+          "standing": "PO",
+          "place": 2,
+          "points": 0
+        }
+      },
+      {
+        "home": {
+          "standing": "Gruppe 3",
+          "place": 3
+        },
+        "away": {
+          "standing": "Gruppe 1",
+          "place": 3
+        },
+        "officials": {
+          "pre_finished": "PO",
+          "standing": "PO",
+          "place": 2,
+          "points": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "PO",
+    "pre_finished": "Vorrunde",
+    "games": [
+      {
+        "home": {
+          "stage": "Vorrunde",
+          "place": 2,
+          "index": 1
+        },
+        "away": {
+          "stage": "Vorrunde",
+          "place": 2,
+          "index": 0
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "standing": "Gruppe 1",
+          "place": 3
+        }
+      },
+      {
+        "home": {
+          "stage": "Vorrunde",
+          "place": 2,
+          "index": 2
+        },
+        "away": {
+          "stage": "Vorrunde",
+          "place": 1,
+          "index": 2
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "standing": "Gruppe 2",
+          "place": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "HF",
+    "pre_finished": "PO",
+    "games": [
+      {
+        "home": {
+          "standing": "PO",
+          "place": 1,
+          "points": 3
+        },
+        "away": {
+          "stage": "Vorrunde",
+          "place": 1,
+          "index": 0
+        },
+        "officials": {
+          "pre_finished": "PO",
+          "standing": "PO",
+          "place": 1,
+          "points": 0
+        }
+      },
+      {
+        "home": {
+          "standing": "PO",
+          "place": 2,
+          "points": 3
+        },
+        "away": {
+          "stage": "Vorrunde",
+          "place": 1,
+          "index": 1
+        },
+        "officials": {
+          "pre_finished": "PO",
+          "standing": "PO",
+          "place": 2,
+          "points": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "P3",
+    "pre_finished": "HF",
+    "games": [
+      {
+        "home": {
+          "standing": "HF",
+          "place": 2,
+          "points": 0
+        },
+        "away": {
+          "standing": "HF",
+          "place": 1,
+          "points": 0
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "standing": "Gruppe 3",
+          "place": 3
+        }
+      }
+    ]
+  },
+  {
+    "name": "P1",
+    "pre_finished": "HF",
+    "games": [
+      {
+        "home": {
+          "standing": "HF",
+          "place": 2,
+          "points": 3
+        },
+        "away": {
+          "standing": "HF",
+          "place": 1,
+          "points": 3
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "standing": "Gruppe 1",
+          "place": 3
+        }
+      }
+    ]
+  }
+]

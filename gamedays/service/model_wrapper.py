@@ -162,6 +162,9 @@ class GamedayModelWrapper:
             return self.get_qualify_team_by(place, standing)
         return self.get_team_by_points(place, standing, points)
 
+    def _has_standing(self, check):
+        return self._gameinfo[self._gameinfo[STAGE].isin([check])].empty
+
     def is_finished(self, check):
         if self._has_standing(check):
             return len(self._gameinfo[(self._gameinfo[STANDING] == check) & (self._gameinfo[STATUS] == FINISHED)]) \
@@ -175,9 +178,6 @@ class GamedayModelWrapper:
         games_to_whistle = games_to_whistle.sort_values(by=[SCHEDULED, FIELD])
         return games_to_whistle[
             (games_to_whistle[OFFICIALS_NAME].str.contains(team)) & (games_to_whistle[GAME_FINISHED] == '')]
-
-    def _has_standing(self, check):
-        return self._gameinfo[self._gameinfo[STAGE].isin([check])].empty
 
     def get_team_by_qualify_for(self, place, index):
         qualify_standing_by_place = self._get_table().groupby(STANDING).nth(place - 1).sort_values(

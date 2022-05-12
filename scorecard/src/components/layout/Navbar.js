@@ -16,9 +16,6 @@ const Navbar = (props) => {
           <strong>{user ? `Hallo ${user.username}` : ''}</strong>
         </span>
       </li>
-      <li className="nav-item text-muted" style={{fontSize: 'x-small'}}>
-        {VERSION}
-      </li>
       <li className="nav-item">
         <button
           onClick={props.logoutUser}
