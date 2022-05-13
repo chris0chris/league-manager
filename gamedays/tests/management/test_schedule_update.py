@@ -59,6 +59,23 @@ def update_gameresults_and_finish_first_game_for_P7():
 class TestScheduleUpdate(TransactionTestCase):
     reset_sequences = True
 
+    def test_update_less_than_5_teams_dont_throws_error(self):
+        gameday = DBSetup().create_empty_gameday()
+        gameday.format = "5_2"
+        gameday.save()
+        group_A = DBSetup().create_teams('A', 5)
+        groups = [group_A]
+        DBSetup().create_playoff_placeholder_teams()
+        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
+        sc.create()
+
+        Gameinfo.objects.filter(stage='Hauptrunde').update(status='beendet')
+        finished_games = Gameinfo.objects.filter(status='beendet')
+        for game in finished_games:
+            update_gameresults(game)
+        su = ScheduleUpdate(gameday.pk, gameday.format)
+        su.update()
+
     def test_update_7_teams_2_fields(self):
         gameday = DBSetup().create_empty_gameday()
         gameday.format = "7_2"

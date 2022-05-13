@@ -53,8 +53,12 @@ class UpdateEntry:
 class ScheduleUpdate:
     def __init__(self, gameday_id, format):
         self.gameday_id = gameday_id
-        with open(pathlib.Path(__file__).parent / 'schedules/update_{0}.json'.format(format), 'r') as f:
-            self.data = json.loads(f.read())
+        number_of_teams = int(format.split('_')[0])
+        if number_of_teams > 5:
+            with open(pathlib.Path(__file__).parent / 'schedules/update_{0}.json'.format(format), 'r') as f:
+                self.data = json.loads(f.read())
+        else:
+            self.data = {}
 
     def _update_gameresult(self, gi, teamName, is_home):
         team = Team.objects.get(name=teamName)
