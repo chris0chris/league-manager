@@ -10,11 +10,6 @@ const LivetickerApp = (props) => {
   return (
     <div className='container mt-2'>
       <Liveticker />
-      <div className='row text-end'>
-        <div style={{fontSize: 'x-small', color: 'white'}}>
-          {VERSION}
-        </div>
-      </div>
     </div>
   );
 };
