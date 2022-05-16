@@ -12,7 +12,7 @@ const Liveticker = (props) => {
   const [gamesToDisplayAllTicks, setGamesToDisplayAllTicks] = useState([]);
   const timer = () => setEndlessCounter(endlessCounter + 1);
   const minute = 60 * 1000;
-  const refreshTime = 0.1 * minute;
+  const refreshTime = 1 * minute;
   useEffect(() => {
     updateLiveticker();
     const id = setInterval(timer, refreshTime);
