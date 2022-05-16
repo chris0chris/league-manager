@@ -1,7 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const GitRevisionPlugin = require('git-revision-webpack-plugin');
-const gitRevisionPlugin = new GitRevisionPlugin();
 
 module.exports = {
   entry: path.resolve(__dirname, 'src/index.js'),
@@ -9,12 +7,7 @@ module.exports = {
     path: path.resolve(__dirname, 'static/liveticker/js'),
     filename: 'liveticker.js',
   },
-  plugins: [
-    gitRevisionPlugin,
-    new webpack.DefinePlugin({
-      'VERSION': JSON.stringify(gitRevisionPlugin.version()),
-    }),
-  ],
+  plugins: [],
   module: {
     rules: [
       {
