@@ -114,7 +114,7 @@ class DBSetup:
         for i in range(number_teams):
             team_number = str(i + 1)
             # description=AAAAAAA1
-            teams.append(TeamFactory(name=(name + team_number), description=(name * 7 + team_number)))
+            teams.append(TeamFactory(name=(name + team_number), description=f'{name * 7}{team_number}'))
         return teams
 
     def create_playoff_placeholder_teams(self):
@@ -251,6 +251,7 @@ class DBSetup:
         if user is None:
             user = User.objects.first()
         from knox.models import AuthToken
+        user.salt = None
         token = AuthToken.objects.create(user)
         return {
             'Content-Type': 'application/json',
