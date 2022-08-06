@@ -3,6 +3,7 @@ from .base import *
 DEBUG = True
 DEBUG_TOOLBAR = False
 ALLOWED_HOSTS = ['127.0.0.1']
+PYTHONWARNINGS = 'always'
 
 if DEBUG_TOOLBAR:
     INSTALLED_APPS = INSTALLED_APPS + [
