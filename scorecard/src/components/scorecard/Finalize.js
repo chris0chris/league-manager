@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {FaCheck, FaPaperPlane} from 'react-icons/fa';
-import {Link, Redirect} from 'react-router-dom';
+import {Link, Navigate} from 'react-router-dom';
 import {DETAILS_URL, ROOT_URL} from '../common/urls';
 import {gameFinalize} from '../../actions/games';
 import GameLog from './GameLog';
@@ -30,7 +30,7 @@ const Finalize = (props) => {
     setIsSuccessfulSubmitted(true);
   };
   if (isSuccessfulSubmitted) {
-    return <Redirect to={ROOT_URL} />;
+    return <Navigate to={ROOT_URL} />;
   }
   return (<div className="container">
     <div className="row">

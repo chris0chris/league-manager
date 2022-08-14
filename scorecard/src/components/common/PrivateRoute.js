@@ -1,23 +1,19 @@
 import React from 'react';
-import {Route, Redirect} from 'react-router-dom';
+import {Navigate} from 'react-router-dom';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import {LOGIN_URL} from './urls';
 
 const PrivateRoute = ({component: Component, auth, ...rest}) => {
   return (
-    <Route
-      {...rest}
-      render={(props) => {
-        if (auth.isLoading) {
-          return <h2>Loading ... </h2>;
-        } else if (!auth.isAuthenticated) {
-          return <Redirect to={LOGIN_URL} />;
-        } else {
-          return <Component {...props} />;
-        }
-      }}
-    />
+    <div>
+      {auth.isLoading &&
+          <h2>Loading ... </h2>}
+      {!auth.isAuthenticated &&
+      <Navigate to={LOGIN_URL} />}
+      {!auth.isLoading && auth.isAuthenticated &&
+         <Component />}
+    </div>
   );
 };
 

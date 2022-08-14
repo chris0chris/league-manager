@@ -5,13 +5,14 @@ import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import {getGamedays} from '../../actions/gamedays';
 import {getGames, setSelectedGame} from '../../actions/games';
-import {Redirect} from 'react-router-dom';
+import {Navigate} from 'react-router-dom';
 import {OFFICIALS_URL} from '../common/urls';
 
 const SelectGame = (props) => {
   const [isSelectedGameLoaded, setSelectedGameLoaded] = useState(false);
   const [gamesForGamedayLoaded, setGamesForGamedayLoaded] = useState(false);
   const [selectedGamedayId, setSelectedGamedayId] = useState(null);
+  console.log('Select Game');
   useEffect(() => {
     props.getGamedays();
   }, [props.gamedays.length]);
@@ -34,7 +35,7 @@ const SelectGame = (props) => {
     setSelectedGameLoaded(true);
   };
   if (isSelectedGameLoaded) {
-    return <Redirect to={OFFICIALS_URL} />;
+    return <Navigate to={OFFICIALS_URL} />;
   }
   return (
     <div>

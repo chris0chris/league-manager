@@ -1,11 +1,11 @@
 import React, {useEffect} from 'react';
-import ReactDOM from 'react-dom';
+import {Provider} from 'react-redux';
 import {
   HashRouter as Router,
   Route,
-  Switch,
+  Routes,
+  useLocation,
 } from 'react-router-dom';
-import {Provider} from 'react-redux';
 
 import 'regenerator-runtime/runtime';
 
@@ -34,36 +34,45 @@ const App = (props) => {
   useEffect(() => {
     store.dispatch(getPenalties());
   }, []);
+  console.log('App', window.location.href);
   return (
-    <Router>
-      <div className="container mt-2">
-        <div className="row">
-          <Switch>
-            <PrivateRoute exact path={ROOT_URL} component={SelectGame} />
-            <PrivateRoute exact path={OFFICIALS_URL} component={Officials} />
-            <PrivateRoute exact path={DETAILS_URL} component={Details} />
-            <PrivateRoute exact path={FINALIZE_URL} component={Finalize} />
-            <Route exact path={LOGIN_URL} component={Login} />
-          </Switch>
+    <Provider store={store}>
+      <Router>
+        <div className="container mt-2">
+          <div className="row">
+            <Routes>
+              <Route exact path={LOGIN_URL} element={<Login />} />
+              <Route exact path={OFFICIALS_URL}
+                element={<PrivateRoute component={Officials} />} />
+              <Route exact path={DETAILS_URL}
+                element={<PrivateRoute component={Details} />} />
+              <Route exact path={FINALIZE_URL}
+                element={<PrivateRoute component={Finalize} />} />
+              <Route exact path="/*"
+                element={<PrivateRoute component={SelectGame} />} />
+              <Route
+                path="*"
+                element={
+                  <main style={{padding: '1rem'}}>
+                    <p>There's nothing here!</p>
+                  </main>
+                }
+              />
+            </Routes>
+          </div>
+          <div className="row">
+            <MessageToaster />
+          </div>
         </div>
-        <div className="row">
-          <MessageToaster />
+        <div className="container my-1 py-4">
+          <Navbar />
         </div>
-      </div>
-      <div className="container my-1 py-4">
-        <Navbar />
-      </div>
-    </Router>
+      </Router>
+    </Provider>
+
   );
 };
 
 export default App;
 
-ReactDOM.render(
-    <React.StrictMode>
-      <Provider store={store}>
-        <App />
-      </Provider>
-    </React.StrictMode>,
-    document.getElementById('app'),
-);
+

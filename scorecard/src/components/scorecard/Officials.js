@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import FloatingInput from '../layout/FloatingInput';
 import {FaArrowLeft, FaArrowRight} from 'react-icons/fa';
-import {Redirect} from 'react-router-dom';
+import {Navigate} from 'react-router-dom';
 import {DETAILS_URL} from '../common/urls';
 import {GameSetup, Official} from '../../actions/objects';
 import {
@@ -88,7 +88,7 @@ export const Officials = (props) => {
     setIsSuccessfulSubmitted(true);
   };
   if (isSuccessfulSubmitted) {
-    return <Redirect to={`${DETAILS_URL}?start=${fhPossession}`} />;
+    return <Navigate to={`${DETAILS_URL}?start=${fhPossession}`} />;
   }
   return (
     <div className="container">

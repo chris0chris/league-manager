@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Redirect} from 'react-router-dom';
+import {Navigate} from 'react-router-dom';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import {loginUser} from '../../actions/auth';
@@ -8,7 +8,7 @@ import {ROOT_URL} from '../common/urls';
 const Login = (props) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
+  console.log('Login page');
   const onSubmit = (e) => {
     e.preventDefault();
     props.loginUser(username, password);
@@ -16,9 +16,9 @@ const Login = (props) => {
   const ENTRY_FROM_START = true;
   if (props.isAuthenticated) {
     if (process.env.NODE_ENV === 'production' || ENTRY_FROM_START) {
-      return <Redirect to={ROOT_URL} />;
+      return <Navigate to={ROOT_URL} />;
     } else {
-      return <Redirect to="/details" />;
+      return <Navigate to="/details" />;
     }
   }
 

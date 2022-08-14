@@ -31,7 +31,7 @@ describe('AddPoints component', () => {
     userEvent.click(screen.getByRole('radio', {name: 'Serie'}));
     expect(screen.getByPlaceholderText('First Down - Nummer optional')).toBeInTheDocument();
     userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
-    expect(screen.getByRole('radio', {name: 'Serie'})).toBeChecked();
+    expect(screen.getByRole('radio', {name: 'Touchdown'})).toBeChecked();
     expect(mockFunc.mock.calls).toHaveLength(1);
   });
 });

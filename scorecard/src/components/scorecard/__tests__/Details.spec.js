@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import {testStore} from '../../../__tests__/Utils';
 import React from 'react';
-import {HashRouter as Router, Route} from 'react-router-dom';
+import {MemoryRouter as Router, Route, Routes} from 'react-router-dom';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -46,10 +46,10 @@ const setup = (gameLog = GAME_LOG_COMPLETE_GAME) => {
   const store = testStore(initialState);
   render(
       <Router>
-        <Route path='' location={{search: `?start=${GAME_LOG_COMPLETE_GAME.away.name}`}} >
-          <Details store={store} />
-        </Route>
-        <Route path={FINALIZE_URL}>Finalize Page</Route>
+        <Routes>
+          <Route path='' location={{search: `?start=${GAME_LOG_COMPLETE_GAME.away.name}`}} element={<Details store={store} />} />
+          <Route path={FINALIZE_URL}>Finalize Page</Route>
+        </Routes>
       </Router>,
   );
 };
