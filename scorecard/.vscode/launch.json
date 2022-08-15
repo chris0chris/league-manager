@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Chrome",
+      "request": "launch",
+      "type": "chrome",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug CRA Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/react-scripts",
+      "args": [
+        "test",
+        "--runInBand",
+        "--no-cache",
+        "--watchAll=false"
+      ],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "CI": "true"
+      },
+      "disableOptimisticBPs": true
+    }
+  ]
+}
