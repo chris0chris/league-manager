@@ -1,12 +1,12 @@
 /* eslint-disable max-len */
 import React from 'react';
-import {HashRouter as Router, Route} from 'react-router-dom';
+import {MemoryRouter as Router, Route, Routes} from 'react-router-dom';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {testStore} from '../../../__tests__/Utils';
 import {GAME_PAIR_1} from '../../../__tests__/testdata/gamesData';
 import Officials from '../Officials';
-import {DETAILS_URL} from '../../common/urls';
+import {DETAILS_URL, OFFICIALS_URL} from '../../common/urls';
 import {apiGet, apiPut, apiPost} from '../../../actions/utils/api';
 import {GET_GAME_OFFICIALS, GET_GAME_SETUP} from '../../../actions/types';
 import {GAME_OFFICIALS} from '../../../__tests__/testdata/gameSetupData';
@@ -75,15 +75,17 @@ const setup = (isInitialEmpty=false) => {
   };
   const store = testStore(initialState);
   render(
-      <Router>
-        <Officials store={store} />
-        <Route path={DETAILS_URL}>Some Text</Route>
+      <Router initialEntries={[{pathname: '/officials'}]}>
+        <Routes>
+          <Route path={OFFICIALS_URL} element={<Officials store={store} />} />
+          <Route path={DETAILS_URL} element={<div>Some Text</div>} />
+        </Routes>
       </Router>,
   );
 };
 
 describe('Officials component', () => {
-  it('should render component', async () => {
+  it('should render component', () => {
     setup();
     expect(screen.getByRole('heading')).toHaveTextContent(
         // eslint-disable-next-line max-len
@@ -93,20 +95,21 @@ describe('Officials component', () => {
     expect(screen.getAllByRole('radio').length).toBe(6);
     expect(screen.getByTestId('ctTeam').textContent).toEqual(selectedGame.away);
   });
-  it('submit form and redirects', () => {
+  it('submit form and redirects', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.type(
+    await user.type(
         screen.getByPlaceholderText('Scorecard Judge-Name'),
         'SC Name',
     );
-    userEvent.type(screen.getByPlaceholderText('Referee-Name'), 'R Name');
-    userEvent.type(screen.getByPlaceholderText('Down Judge-Name'), 'DJ Name');
-    userEvent.type(screen.getByPlaceholderText('Field Judge-Name'), 'FJ Name');
-    userEvent.type(screen.getByPlaceholderText('Side Judge-Name'), 'SJ Name');
-    userEvent.click(screen.getByText('Gewonnen'));
-    userEvent.click(screen.getByText(selectedGame.home));
-    userEvent.click(screen.getByTitle('directionLeft'));
-    userEvent.click(screen.getByText('Spiel starten'));
+    await user.type(screen.getByPlaceholderText('Referee-Name'), 'R Name');
+    await user.type(screen.getByPlaceholderText('Down Judge-Name'), 'DJ Name');
+    await user.type(screen.getByPlaceholderText('Field Judge-Name'), 'FJ Name');
+    await user.type(screen.getByPlaceholderText('Side Judge-Name'), 'SJ Name');
+    await user.click(screen.getByText('Gewonnen'));
+    await user.click(screen.getByText(selectedGame.home));
+    await user.click(screen.getByTitle('directionLeft'));
+    await user.click(screen.getByText('Spiel starten'));
     expect(apiPut.mock.calls[0][0]).toBe(`/api/game/${selectedGame.id}/setup`);
     expect(apiPut.mock.calls[1][0]).toBe(`/api/game/${selectedGame.id}/officials`);
     expect(apiGet.mock.calls[0][0]).toBe(`/api/game/${selectedGame.id}/officials`);
@@ -114,13 +117,14 @@ describe('Officials component', () => {
     expect(apiGet.mock.calls[2][0]).toBe(`/api/gamelog/${selectedGame.id}`);
     expect(screen.getByText('Some Text')).toBeInTheDocument();
   });
-  it('checks if buttons are checked when clicked', () => {
+  it('checks if buttons are checked when clicked', async () => {
+    const user = userEvent.setup();
     setup(true);
     const wonButton = screen.getByRole('radio', {name: 'Gewonnen'});
     const lostButton = screen.getByText('Verloren');
     expect(wonButton).not.toBeChecked();
     expect(lostButton).not.toBeChecked();
-    userEvent.click(wonButton);
+    await user.click(wonButton);
     expect(wonButton).toBeChecked();
     expect(lostButton).not.toBeChecked();
   });

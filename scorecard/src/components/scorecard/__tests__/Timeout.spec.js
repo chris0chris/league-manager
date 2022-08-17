@@ -28,19 +28,20 @@ describe('Timeout component', () => {
     expect(screen.queryByText('Abbrechen')).toBeInTheDocument();
     expect(screen.getAllByRole('button')).toHaveLength(3);
   });
-  it('should disable timeout button and set correct time, when clicked on done', () => {
+  it('should disable timeout button and set correct time, when clicked on done', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.click(screen.getByTestId('timeoutButton'));
-    userEvent.type(screen.getByPlaceholderText('Minuten'), '00');
-    userEvent.type(screen.getByPlaceholderText('Sekunden'), '01');
-    userEvent.click(screen.getByRole('button', {name: 'Fertig'}));
+    await user.click(screen.getByTestId('timeoutButton'));
+    await user.type(screen.getByPlaceholderText('Minuten'), '00');
+    await user.type(screen.getByPlaceholderText('Sekunden'), '01');
+    await user.click(screen.getByRole('button', {name: 'Fertig'}));
     expect(modalMock.mock.calls[0][0]).toBe('hide');
     expect(screen.getByTestId('timeoutButton')).toBeDisabled();
-    expect(screen.getByText('00:01')).toBeInTheDocument();
+    expect(screen.getByText('0:1')).toBeInTheDocument();
     expect(onSubmitMock.mock.calls[0][0]).toEqual({
       team: 'TeamName',
       event: [
-        {name: 'Auszeit', input: '00:01'},
+        {name: 'Auszeit', input: '0:1'},
       ],
     });
   });

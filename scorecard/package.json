@@ -47,7 +47,7 @@
   "scripts": {
     "start": "react-scripts start",
     "test": "react-scripts test",
-    "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache",
+    "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache test -- --config jest.config.js",
     "dev": "webpack --mode development --config webpack.config.js",
     "dev:watch": "webpack --mode development --watch --config webpack.config.js",
     "build": "webpack --mode production --config webpack.config.js",

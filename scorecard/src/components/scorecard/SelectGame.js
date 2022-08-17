@@ -12,7 +12,6 @@ const SelectGame = (props) => {
   const [isSelectedGameLoaded, setSelectedGameLoaded] = useState(false);
   const [gamesForGamedayLoaded, setGamesForGamedayLoaded] = useState(false);
   const [selectedGamedayId, setSelectedGamedayId] = useState(null);
-  console.log('Select Game');
   useEffect(() => {
     props.getGamedays();
   }, [props.gamedays.length]);

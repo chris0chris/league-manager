@@ -40,11 +40,13 @@ describe('Penalty component', () => {
     expect(screen.getByPlaceholderText('Strafe eingeben und auswählen...')).toBeInTheDocument();
     expect(screen.getAllByRole('listitem')).toHaveLength(5);
   });
-  it('should update event, when time is inserted', () => {
+
+  it('should update event, when time is inserted', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.type(screen.getByPlaceholderText('Trikotnummer'), '42');
-    userEvent.type(screen.getByPlaceholderText('Strafe eingeben und auswählen...'), 'ik');
-    userEvent.click(screen.getByText('illegaler Kontakt Defense'));
+    await user.type(screen.getByPlaceholderText('Trikotnummer'), '42');
+    await user.type(screen.getByPlaceholderText('Strafe eingeben und auswählen...'), 'ik');
+    await user.click(screen.getByText('illegaler Kontakt Defense'));
     const illegalContactText = screen.getByRole('textbox');
     expect(illegalContactText).toBeInTheDocument();
     const lastMockCall = updateMock.mock.calls.length - 1;
