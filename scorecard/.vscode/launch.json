@@ -16,17 +16,14 @@
       "args": [
         "test",
         "--runInBand",
-        "--no-cache",
-        "--watchAll=false"
+        "--no-cache"
       ],
       "cwd": "${workspaceRoot}",
-      "protocol": "inspector",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "env": {
         "CI": "true"
-      },
-      "disableOptimisticBPs": true
+      }
     }
   ]
 }
