@@ -135,10 +135,10 @@ class TestLivetickerAPIView(WebTest):
 
     def test_get_all_livetickers_only_scheduled(self):
         gameday_one = DBSetup().g62_status_empty()
+        gameday_two = DBSetup().g62_status_empty()
         first_game_gameday_one = Gameinfo.objects.filter(gameday=gameday_one).first()
         # only first two games shall be the next scheduled games
         Gameinfo.objects.filter(gameday=gameday_one, pk__gt=first_game_gameday_one.pk + 1).update(scheduled='11:00')
-        gameday_two = DBSetup().g62_status_empty()
         first_game_gameday_two = Gameinfo.objects.filter(gameday=gameday_two).first()
         # only first two games for second gameday shall be the next scheduled games
         Gameinfo.objects.filter(gameday=gameday_two, pk__gt=first_game_gameday_two.pk + 1).update(scheduled='11:00')
@@ -150,6 +150,7 @@ class TestLivetickerAPIView(WebTest):
         expected_result['gameId'] = first_game_gameday_one.pk
         print('expected_result', expected_result)
         print('actual_result', response.json[0])
+        print('response JSON', response.json)
         assert response.json[0] == expected_result
         expected_result['gameId'] = first_game_gameday_two.pk
         assert response.json[2] == expected_result

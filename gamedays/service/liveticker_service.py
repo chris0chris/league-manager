@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.conf import settings
 
-from gamedays.service.gameday_settings import SCHEDULED
+from gamedays.service.gameday_settings import SCHEDULED, GAMEDAY_ID
 from gamedays.service.wrapper.gameresult_wrapper import GameresultWrapper
 from teammanager.models import Gameinfo, TeamLog, Gameday
 
@@ -111,7 +111,7 @@ class LivetickerService(object):
 
     def get_liveticker(self):
         next_games = Gameinfo.objects.filter(
-            gameday__in=self.gameday_ids, gameFinished__isnull=True).order_by(SCHEDULED)
+            gameday__in=self.gameday_ids, gameFinished__isnull=True).order_by(SCHEDULED, GAMEDAY_ID, 'id')
         print(list(next_games))
         previously_finished_games = Gameinfo.objects.filter(
             gameday__in=self.gameday_ids, gameFinished__isnull=False).order_by(f'-{SCHEDULED}')
