@@ -23,10 +23,11 @@ describe('GameTicker component', () => {
     expect(screen.getByTitle('Team hat Ballbesitz')).toBeInTheDocument();
     expect(screen.getByTitle('Klicken, um alle Einträge anzuzeigen'));
   });
-  it('should call updateGamesToDisplay, when clicked on icon', () => {
+  it('should call updateGamesToDisplay, when clicked on icon', async () => {
+    const user = userEvent.setup();
     setup();
     mockFunc.mockClear();
-    userEvent.click(screen.getByTitle('Klicken, um alle Einträge anzuzeigen'));
+    await user.click(screen.getByTitle('Klicken, um alle Einträge anzuzeigen'));
     expect(mockFunc.mock.calls).toHaveLength(1);
   });
 });
