@@ -4,7 +4,6 @@ import {
   HashRouter as Router,
   Route,
   Routes,
-  useLocation,
 } from 'react-router-dom';
 
 import 'regenerator-runtime/runtime';
@@ -16,8 +15,7 @@ import PrivateRoute from './common/PrivateRoute';
 import {DETAILS_URL,
   FINALIZE_URL,
   LOGIN_URL,
-  OFFICIALS_URL,
-  ROOT_URL} from './common/urls';
+  OFFICIALS_URL} from './common/urls';
 import {loadUser} from '../actions/auth';
 import {getPenalties} from '../actions/config';
 
@@ -54,7 +52,7 @@ const App = (props) => {
                 path="*"
                 element={
                   <main style={{padding: '1rem'}}>
-                    <p>There's nothing here!</p>
+                    <p>There is nothing here!</p>
                   </main>
                 }
               />

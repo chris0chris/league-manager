@@ -21,7 +21,8 @@ const DisplayAllTicks = (props) => {
 };
 
 DisplayAllTicks.propTypes = {
-
+  loadAllTicks: PropTypes.bool.isRequired,
+  setLoadAllTicks: PropTypes.func.isRequired,
 };
 
 export default DisplayAllTicks;

@@ -5,7 +5,7 @@ import {connect} from 'react-redux';
 import RadioButton from '../layout/RadioButton';
 import GameLog from './GameLog';
 import AddPoints from './AddPoints';
-import {Navigate, useLocation, useSearchParams} from 'react-router-dom';
+import {Navigate, useSearchParams} from 'react-router-dom';
 import {createLogEntry, halftime, updateTeamInPossession} from '../../actions/games';
 import Halftime from './Halftime';
 import {FINALIZE_URL} from '../common/urls';
