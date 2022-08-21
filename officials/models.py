@@ -10,6 +10,7 @@ class Official(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     team: Team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
+    external_id = models.CharField(max_length=100, null=True, default=None)
 
     objects: QuerySet = models.Manager()
 
