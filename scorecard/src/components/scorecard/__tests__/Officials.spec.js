@@ -88,8 +88,7 @@ describe('Officials component', () => {
   it('should render component', () => {
     setup();
     expect(screen.getByRole('heading')).toHaveTextContent(
-        // eslint-disable-next-line max-len
-        `Feld ${selectedGame.field}: ${selectedGame.home} vs ${selectedGame.away}`,
+        `${selectedGame.home} vs ${selectedGame.away}`,
     );
     expect(screen.getAllByRole('textbox').length).toBe(5);
     expect(screen.getAllByRole('radio').length).toBe(6);
@@ -132,6 +131,7 @@ describe('Officials component', () => {
     setup();
     expect(screen.getByPlaceholderText('Scorecard Judge-Name')).toHaveDisplayValue('Sofia Scorecard');
     expect(screen.getByPlaceholderText('Referee-Name')).toHaveDisplayValue('Rebecca Referee');
+    expect(screen.getByPlaceholderText('Referee-Name')).toHaveAttribute('readonly');
     expect(screen.getByPlaceholderText('Down Judge-Name')).toHaveDisplayValue('Daniela Down');
     expect(screen.getByPlaceholderText('Field Judge-Name')).toHaveDisplayValue('Franziska Field');
     expect(screen.getByPlaceholderText('Side Judge-Name')).toHaveDisplayValue('Saskia Side');

@@ -32,7 +32,6 @@ const App = (props) => {
   useEffect(() => {
     store.dispatch(getPenalties());
   }, []);
-  console.log('App', window.location.href);
   return (
     <Provider store={store}>
       <Router>

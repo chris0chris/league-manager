@@ -12,7 +12,7 @@ class OfficialSerializer(ModelSerializer):
 
     class Meta:
         model = Official
-        fields = '__all__'
+        exclude = ('external_id',)
 
 
 class GameOfficialAllInfosSerializer(ModelSerializer):

@@ -2,7 +2,6 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import FloatingInput from '../layout/FloatingInput';
 import {FaArrowLeft, FaArrowRight} from 'react-icons/fa';
 import {Navigate} from 'react-router-dom';
 import {DETAILS_URL} from '../common/urls';
@@ -14,47 +13,62 @@ import {
   saveOfficials} from '../../actions/gamesetup';
 import {getGameLog, updateTeamInPossession} from '../../actions/games';
 import RadioButton from '../layout/RadioButton';
+import InputDropdown from '../layout/InputDropdown';
 
 export const Officials = (props) => {
   const selectedGame = props.selectedGame;
   const [isSuccessfulSubmitted, setIsSuccessfulSubmitted] = useState(false);
-  const [scJudge, setScJudge] = useState('');
-  const [referee, setReferee] = useState('');
-  const [downJudge, setDownJudge] = useState('');
-  const [fieldJudge, setFieldJudge] = useState('');
-  const [sideJudge, setSideJudge] = useState('');
+  const [scJudgeInit, setScJudgeInit] = useState({text: '', id: null});
+  const [refereeInit, setRefereeInit] = useState({text: '', id: null});
+  const [downJudgeInit, setDownJudgeInit] = useState({text: '', id: null});
+  const [fieldJudgeInit, setFieldJudgeInit] = useState({text: '', id: null});
+  const [sideJudgeInit, setSideJudgeInit] = useState({text: '', id: null});
   const [ct, setCt] = useState();
   const [fhPossession, setFhPossession] = useState('');
   const [direction, setDirection] = useState('');
+  const [teamOfficials, setTeamOfficials] = useState([]);
+  const [referee, setReferee] = useState({text: '', id: null});
+  const [scJudge, setScJudge] = useState({text: '', id: null});
+  const [downJudge, setDownJudge] = useState({text: '', id: null});
+  const [fieldJudge, setFieldJudge] = useState({text: '', id: null});
+  const [sideJudge, setSideJudge] = useState({text: '', id: null});
 
   useEffect(() => {
     props.getOfficials(selectedGame.id);
     props.getGameSetup(selectedGame.id);
+    setTeamOfficials((props.teamOfficials).map((entry) => {
+      return {
+        text: `${entry.first_name} ${entry.last_name}`,
+        subtext: entry.team,
+        id: entry.id,
+      };
+    }));
   }, []);
+
   useEffect(() => {
     if (props.gameSetupOfficials.length == 0) {
-      setReferee('');
-      setScJudge('');
-      setDownJudge('');
-      setFieldJudge('');
-      setSideJudge('');
+      setRefereeInit('');
+      setScJudgeInit('');
+      setDownJudgeInit('');
+      setFieldJudgeInit('');
+      setSideJudgeInit('');
     } else {
       props.gameSetupOfficials.forEach((item) => {
         switch (item.position) {
           case Official.REFEREE:
-            setReferee(item.name);
+            setRefereeInit({text: item.name, id: item.official});
             break;
           case Official.SCORECARD_JUDGE:
-            setScJudge(item.name);
+            setScJudgeInit({text: item.name, id: item.official});
             break;
           case Official.DOWN_JUDGE:
-            setDownJudge(item.name);
+            setDownJudgeInit({text: item.name, id: item.official});
             break;
           case Official.FIELD_JUDGE:
-            setFieldJudge(item.name);
+            setFieldJudgeInit({text: item.name, id: item.official});
             break;
           case Official.SIDE_JUDGE:
-            setSideJudge(item.name);
+            setSideJudgeInit({text: item.name, id: item.official});
             break;
           default:
             break;
@@ -76,11 +90,11 @@ export const Officials = (props) => {
         direction,
     );
     const officials = [];
-    officials.push({name: referee, position: Official.REFEREE});
-    officials.push({name: scJudge, position: Official.SCORECARD_JUDGE});
-    officials.push({name: downJudge, position: Official.DOWN_JUDGE});
-    officials.push({name: fieldJudge, position: Official.FIELD_JUDGE});
-    officials.push({name: sideJudge, position: Official.SIDE_JUDGE});
+    officials.push({name: referee.text, position: Official.REFEREE, official: referee.id});
+    officials.push({name: scJudge.text, position: Official.SCORECARD_JUDGE, official: scJudge.id});
+    officials.push({name: downJudge.text, position: Official.DOWN_JUDGE, official: downJudge.id});
+    officials.push({name: fieldJudge.text, position: Official.FIELD_JUDGE, official: fieldJudge.id});
+    officials.push({name: sideJudge.text, position: Official.SIDE_JUDGE, official: sideJudge.id});
     props.saveGameSetup(selectedGame.id, gameSetup);
     props.saveOfficials(selectedGame.id, officials);
     props.updateTeamInPossession(selectedGame.id, fhPossession);
@@ -92,40 +106,44 @@ export const Officials = (props) => {
   }
   return (
     <div className="container">
+      <div className='text-muted fs6'>
+      Feld {selectedGame.field} - {selectedGame.scheduled.slice(0, -3)} Uhr - {selectedGame.standing}
+      </div>
       <h4 className="mt-2">
-        Feld {selectedGame.field}: {selectedGame.home} vs {selectedGame.away}
+        {selectedGame.home} vs {selectedGame.away}
       </h4>
       <form onSubmit={handleSubmit}>
-        <FloatingInput
-          id="scJudgeName"
-          text="Scorecard Judge-Name"
-          value={scJudge}
-          onChange={setScJudge}
-        />
-        <FloatingInput
-          id="referee"
-          text="Referee-Name"
-          value={referee}
-          onChange={setReferee}
-        />
-        <FloatingInput
-          id="downJudge"
-          text="Down Judge-Name"
-          value={downJudge}
-          onChange={setDownJudge}
-        />
-        <FloatingInput
-          id="fieldJudge"
-          text="Field Judge-Name"
-          value={fieldJudge}
-          onChange={setFieldJudge}
-        />
-        <FloatingInput
-          id="sideJudge"
-          text="Side Judge-Name"
-          value={sideJudge}
-          onChange={setSideJudge}
-        />
+        <InputDropdown
+          id='scJudgeName'
+          setSelectedIndex={setScJudge}
+          placeholderText="Scorecard Judge-Name"
+          focus={false}
+          initValues={scJudgeInit}
+          items={teamOfficials}/>
+        <InputDropdown
+          id='referee'
+          setSelectedIndex={setReferee}
+          placeholderText="Referee-Name"
+          initValues={refereeInit}
+          items={teamOfficials}/>
+        <InputDropdown
+          id='downJudge'
+          setSelectedIndex={setDownJudge}
+          placeholderText="Down Judge-Name"
+          initValues={downJudgeInit}
+          items={teamOfficials}/>
+        <InputDropdown
+          id='fieldJudge'
+          setSelectedIndex={setFieldJudge}
+          placeholderText="Field Judge-Name"
+          initValues={fieldJudgeInit}
+          items={teamOfficials}/>
+        <InputDropdown
+          id='sideJudge'
+          setSelectedIndex={setSideJudge}
+          placeholderText="Side Judge-Name"
+          initValues={sideJudgeInit}
+          items={teamOfficials}/>
         <div className="row mt-3">
           <div>
             Münzwahl hat:{' '}
@@ -216,6 +234,7 @@ Officials.propTypes = {
   saveGameSetup: PropTypes.func.isRequired,
   getOfficials: PropTypes.func.isRequired,
   saveOfficials: PropTypes.func.isRequired,
+  teamOfficials: PropTypes.array,
   getGameLog: PropTypes.func.isRequired,
   updateTeamInPossession: PropTypes.func.isRequired,
 };
@@ -225,6 +244,7 @@ const mapStateToProps = (state) => ({
   selectedGame: state.gamesReducer.selectedGame,
   gameSetupOfficials: state.gamesReducer.gameSetupOfficials,
   gameSetup: state.gamesReducer.gameSetup,
+  teamOfficials: state.officialsReducer.teamOfficials,
 });
 
 export default connect(mapStateToProps,

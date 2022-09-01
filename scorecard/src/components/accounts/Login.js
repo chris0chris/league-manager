@@ -3,22 +3,38 @@ import {Navigate} from 'react-router-dom';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import {loginUser} from '../../actions/auth';
+// import {setSelectedGame} from '../../actions/games';
 import {ROOT_URL} from '../common/urls';
 
 const Login = (props) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  console.log('Login page');
   const onSubmit = (e) => {
     e.preventDefault();
     props.loginUser(username, password);
   };
-  const ENTRY_FROM_START = true;
+  const ENTRY_FROM_START = false;
+  // const ENTRY_FROM_START = true;
   if (props.isAuthenticated) {
     if (process.env.NODE_ENV === 'production' || ENTRY_FROM_START) {
       return <Navigate to={ROOT_URL} />;
     } else {
-      return <Navigate to="/details" />;
+      // props.setSelectedGame({
+      //   'scheduled': '18:10:00',
+      //   'field': 1,
+      //   'officials': 'Rooks',
+      //   'stage': 'Finalrunde',
+      //   'standing': 'P1',
+      //   'home': 'Sparr',
+      //   'points_home': 27,
+      //   'points_away': 26,
+      //   'away': 'Spatz',
+      //   'status': 'geplant',
+      //   'id_home': 117,
+      //   'id_away': 118,
+      //   'id': 59,
+      // });
+      return <Navigate to="/officials" />;
     }
   }
 
@@ -73,4 +89,4 @@ Login.propTypes = {
   isAuthenticated: PropTypes.bool,
 };
 
-export default connect(mapStateToProps, {loginUser})(Login);
+export default connect(mapStateToProps, {loginUser/*, setSelectedGame*/})(Login);

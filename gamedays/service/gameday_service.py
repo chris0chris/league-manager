@@ -122,8 +122,8 @@ class GamedayService:
         if team == '*':
             team = ''
         games_to_whistle = self.gmw.get_games_to_whistle(team)
-        columns = [SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY,
+        columns = [SCHEDULED, FIELD, OFFICIALS, OFFICIALS_NAME, STAGE, STANDING, HOME, POINTS_HOME, POINTS_AWAY, AWAY,
                    STATUS, ID_HOME, ID_AWAY, 'id']
         games_to_whistle = games_to_whistle[columns]
-        games_to_whistle = games_to_whistle.rename(columns={OFFICIALS_NAME: OFFICIALS})
+        games_to_whistle = games_to_whistle.rename(columns={OFFICIALS: 'officialsId', OFFICIALS_NAME: OFFICIALS})
         return games_to_whistle
