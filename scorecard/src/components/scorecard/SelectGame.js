@@ -8,6 +8,9 @@ import {getGames, setSelectedGame} from '../../actions/games';
 import {getTeamOfficials} from '../../actions/officials';
 import {Navigate} from 'react-router-dom';
 import {OFFICIALS_URL} from '../common/urls';
+import {
+  getGameSetup,
+  getOfficials} from '../../actions/gamesetup';
 
 const SelectGame = (props) => {
   const [isSelectedGameLoaded, setSelectedGameLoaded] = useState(false);
@@ -31,7 +34,10 @@ const SelectGame = (props) => {
   };
 
   const loadGame = (index) => {
+    console.log('loadgame', props.games[index]);
     props.setSelectedGame(props.games[index]);
+    props.getOfficials(props.games[index].id);
+    props.getGameSetup(props.games[index].id);
     props.getTeamOfficials(props.games[index].officialsId);
     setSelectedGameLoaded(true);
   };
@@ -69,4 +75,6 @@ export default connect(mapStateToProps, {
   getGames,
   setSelectedGame,
   getTeamOfficials,
+  getOfficials,
+  getGameSetup,
 })(SelectGame);

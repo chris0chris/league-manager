@@ -62,9 +62,8 @@ describe('SelectGame component', () => {
   it('should redirect to officials page', async () => {
     const user = userEvent.setup();
     setup();
-    const firstMockCall = apiGet.mock.calls[0][0];
-    expect(firstMockCall).toBe('/api/gameday/list');
-    expect(screen.queryByText(pageText)).toBeFalsy();
+    expect(apiGet.mock.calls[0][0]).toBe('/api/gameday/list');
+    expect(screen.queryByText(pageText)).not.toBeInTheDocument();
 
     const secondSelectGamedayButton = screen.getAllByRole('button')[1];
     await user.click(secondSelectGamedayButton);
@@ -75,13 +74,18 @@ describe('SelectGame component', () => {
       name: /start/i,
     })[0];
     await user.click(firstStartGameButton);
-    const secondMockCall = apiGet.mock.calls[1][0];
-    expect(secondMockCall).toBe(
+    expect(apiGet.mock.calls[1][0]).toBe(
         // eslint-disable-next-line max-len
         `/api/gameday/${TWO_GAMEDAYS.gamedays[1].id}/officials/OfficialsTeam`,
     );
+    expect(apiGet.mock.calls[2][0])
+        .toBe(`/api/game/${TWO_GAMES.games[0].id}/officials`);
+    expect(apiGet.mock.calls[3][0])
+        .toBe(`/api/game/${TWO_GAMES.games[0].id}/setup`);
+    expect(apiGet.mock.calls[4][0])
+        .toBe(`/api/officials/team/${TWO_GAMES.games[0].officialsId}/list`);
     const selectedGameStateInStore = store.getState().gamesReducer.selectedGame;
     expect(selectedGameStateInStore).toEqual(TWO_GAMES.games[0]);
-    expect(screen.getByText(pageText)).toBeTruthy();
+    expect(screen.getByText(pageText)).toBeInTheDocument();
   });
 });

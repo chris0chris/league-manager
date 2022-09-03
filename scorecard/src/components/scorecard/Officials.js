@@ -34,8 +34,6 @@ export const Officials = (props) => {
   const [sideJudge, setSideJudge] = useState({text: '', id: null});
 
   useEffect(() => {
-    props.getOfficials(selectedGame.id);
-    props.getGameSetup(selectedGame.id);
     setTeamOfficials((props.teamOfficials).map((entry) => {
       return {
         text: `${entry.first_name} ${entry.last_name}`,
@@ -43,16 +41,10 @@ export const Officials = (props) => {
         id: entry.id,
       };
     }));
-  }, []);
+  }, [props.teamOfficials, props.gameSetup, props.gameSetupOfficials]);
 
   useEffect(() => {
-    if (props.gameSetupOfficials.length == 0) {
-      setRefereeInit('');
-      setScJudgeInit('');
-      setDownJudgeInit('');
-      setFieldJudgeInit('');
-      setSideJudgeInit('');
-    } else {
+    if (props.gameSetupOfficials.length > 0) {
       props.gameSetupOfficials.forEach((item) => {
         switch (item.position) {
           case Official.REFEREE:
@@ -116,32 +108,32 @@ export const Officials = (props) => {
         <InputDropdown
           id='scJudgeName'
           setSelectedIndex={setScJudge}
-          placeholderText="Scorecard Judge-Name"
+          placeholderText="Scorecard Judge (Vorname Nachname)"
           focus={false}
           initValues={scJudgeInit}
           items={teamOfficials}/>
         <InputDropdown
           id='referee'
           setSelectedIndex={setReferee}
-          placeholderText="Referee-Name"
+          placeholderText="Referee (Vorname Nachname)"
           initValues={refereeInit}
           items={teamOfficials}/>
         <InputDropdown
           id='downJudge'
           setSelectedIndex={setDownJudge}
-          placeholderText="Down Judge-Name"
+          placeholderText="Down Judge (Vorname Nachname)"
           initValues={downJudgeInit}
           items={teamOfficials}/>
         <InputDropdown
           id='fieldJudge'
           setSelectedIndex={setFieldJudge}
-          placeholderText="Field Judge-Name"
+          placeholderText="Field Judge (Vorname Nachname)"
           initValues={fieldJudgeInit}
           items={teamOfficials}/>
         <InputDropdown
           id='sideJudge'
           setSelectedIndex={setSideJudge}
-          placeholderText="Side Judge-Name"
+          placeholderText="Side Judge (Vorname Nachname)"
           initValues={sideJudgeInit}
           items={teamOfficials}/>
         <div className="row mt-3">

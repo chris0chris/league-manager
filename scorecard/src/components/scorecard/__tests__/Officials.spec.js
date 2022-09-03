@@ -10,6 +10,7 @@ import {DETAILS_URL, OFFICIALS_URL} from '../../common/urls';
 import {apiGet, apiPut, apiPost} from '../../../actions/utils/api';
 import {GET_GAME_OFFICIALS, GET_GAME_SETUP} from '../../../actions/types';
 import {GAME_OFFICIALS} from '../../../__tests__/testdata/gameSetupData';
+import {OFFICIALS_TEAM_OFFICIALS} from '../../../__tests__/testdata/officialsData';
 
 const selectedGame = GAME_PAIR_1;
 let isInitEmpty = false;
@@ -52,7 +53,7 @@ apiGet.mockImplementation((url, actionType) => (dispatch) => {
 });
 
 
-const setup = (isInitialEmpty=false) => {
+const setup = (isInitialEmpty=false, emptyTeamOfficials=false) => {
   isInitEmpty = isInitialEmpty;
   let initialOfficials = GAME_OFFICIALS;
   let initialGameSetup = {
@@ -60,9 +61,13 @@ const setup = (isInitialEmpty=false) => {
     direction: 'directionRight',
     fhPossession: GAME_PAIR_1.away,
   };
-  if (!isInitialEmpty) {
+  let initialTeamOfficials = OFFICIALS_TEAM_OFFICIALS;
+  if (isInitialEmpty) {
     initialOfficials = [];
     initialGameSetup = {};
+  }
+  if (emptyTeamOfficials) {
+    initialTeamOfficials = [];
   }
   apiPut.mockClear();
   apiGet.mockClear();
@@ -71,6 +76,9 @@ const setup = (isInitialEmpty=false) => {
       selectedGame: GAME_PAIR_1,
       gameSetupOfficials: initialOfficials,
       gameSetup: initialGameSetup,
+    },
+    officialsReducer: {
+      teamOfficials: initialTeamOfficials,
     },
   };
   const store = testStore(initialState);
@@ -94,26 +102,30 @@ describe('Officials component', () => {
     expect(screen.getAllByRole('radio').length).toBe(6);
     expect(screen.getByTestId('ctTeam').textContent).toEqual(selectedGame.away);
   });
+  it('should render team officials', async () => {
+    const user = userEvent.setup();
+    setup(true, false);
+    await user.click(screen.getByPlaceholderText('Scorecard Judge (Vorname Nachname)'));
+    expect(screen.getAllByRole('listitem')).toHaveLength(3);
+  });
   it('submit form and redirects', async () => {
     const user = userEvent.setup();
     setup();
     await user.type(
-        screen.getByPlaceholderText('Scorecard Judge-Name'),
+        screen.getByPlaceholderText('Scorecard Judge (Vorname Nachname)'),
         'SC Name',
     );
-    await user.type(screen.getByPlaceholderText('Referee-Name'), 'R Name');
-    await user.type(screen.getByPlaceholderText('Down Judge-Name'), 'DJ Name');
-    await user.type(screen.getByPlaceholderText('Field Judge-Name'), 'FJ Name');
-    await user.type(screen.getByPlaceholderText('Side Judge-Name'), 'SJ Name');
+    await user.type(screen.getByPlaceholderText('Referee (Vorname Nachname)'), 'R Name');
+    await user.type(screen.getByPlaceholderText('Down Judge (Vorname Nachname)'), 'DJ Name');
+    await user.type(screen.getByPlaceholderText('Field Judge (Vorname Nachname)'), 'FJ Name');
+    await user.type(screen.getByPlaceholderText('Side Judge (Vorname Nachname)'), 'SJ Name');
     await user.click(screen.getByText('Gewonnen'));
     await user.click(screen.getByText(selectedGame.home));
     await user.click(screen.getByTitle('directionLeft'));
     await user.click(screen.getByText('Spiel starten'));
     expect(apiPut.mock.calls[0][0]).toBe(`/api/game/${selectedGame.id}/setup`);
     expect(apiPut.mock.calls[1][0]).toBe(`/api/game/${selectedGame.id}/officials`);
-    expect(apiGet.mock.calls[0][0]).toBe(`/api/game/${selectedGame.id}/officials`);
-    expect(apiGet.mock.calls[1][0]).toBe(`/api/game/${selectedGame.id}/setup`);
-    expect(apiGet.mock.calls[2][0]).toBe(`/api/gamelog/${selectedGame.id}`);
+    expect(apiGet.mock.calls[0][0]).toBe(`/api/gamelog/${selectedGame.id}`);
     expect(screen.getByText('Some Text')).toBeInTheDocument();
   });
   it('checks if buttons are checked when clicked', async () => {
@@ -129,23 +141,23 @@ describe('Officials component', () => {
   });
   it('should call getApi to init the page, display the officials name and game setup infos', () => {
     setup();
-    expect(screen.getByPlaceholderText('Scorecard Judge-Name')).toHaveDisplayValue('Sofia Scorecard');
-    expect(screen.getByPlaceholderText('Referee-Name')).toHaveDisplayValue('Rebecca Referee');
-    expect(screen.getByPlaceholderText('Referee-Name')).toHaveAttribute('readonly');
-    expect(screen.getByPlaceholderText('Down Judge-Name')).toHaveDisplayValue('Daniela Down');
-    expect(screen.getByPlaceholderText('Field Judge-Name')).toHaveDisplayValue('Franziska Field');
-    expect(screen.getByPlaceholderText('Side Judge-Name')).toHaveDisplayValue('Saskia Side');
+    expect(screen.getByPlaceholderText('Scorecard Judge (Vorname Nachname)')).toHaveDisplayValue('Sofia Scorecard');
+    expect(screen.getByPlaceholderText('Referee (Vorname Nachname)')).toHaveDisplayValue('Rebecca Referee');
+    expect(screen.getByPlaceholderText('Referee (Vorname Nachname)')).toHaveAttribute('readonly');
+    expect(screen.getByPlaceholderText('Down Judge (Vorname Nachname)')).toHaveDisplayValue('Daniela Down');
+    expect(screen.getByPlaceholderText('Field Judge (Vorname Nachname)')).toHaveDisplayValue('Franziska Field');
+    expect(screen.getByPlaceholderText('Side Judge (Vorname Nachname)')).toHaveDisplayValue('Saskia Side');
     expect(screen.getByRole('radio', {name: 'Gewonnen'})).toBeChecked();
     expect(screen.getByRole('radio', {name: selectedGame.away})).toBeChecked();
     expect(screen.getByTestId('directionRight')).toBeChecked();
   });
   it('should call getApi to init the page and display empty officials', () => {
     setup(true);
-    expect(screen.getByPlaceholderText('Scorecard Judge-Name')).toHaveDisplayValue('');
-    expect(screen.getByPlaceholderText('Referee-Name')).toHaveDisplayValue('');
-    expect(screen.getByPlaceholderText('Down Judge-Name')).toHaveDisplayValue('');
-    expect(screen.getByPlaceholderText('Field Judge-Name')).toHaveDisplayValue('');
-    expect(screen.getByPlaceholderText('Side Judge-Name')).toHaveDisplayValue('');
+    expect(screen.getByPlaceholderText('Scorecard Judge (Vorname Nachname)')).toHaveDisplayValue('');
+    expect(screen.getByPlaceholderText('Referee (Vorname Nachname)')).toHaveDisplayValue('');
+    expect(screen.getByPlaceholderText('Down Judge (Vorname Nachname)')).toHaveDisplayValue('');
+    expect(screen.getByPlaceholderText('Field Judge (Vorname Nachname)')).toHaveDisplayValue('');
+    expect(screen.getByPlaceholderText('Side Judge (Vorname Nachname)')).toHaveDisplayValue('');
     expect(screen.getByRole('radio', {name: 'Gewonnen'})).not.toBeChecked();
     expect(screen.getByRole('radio', {name: 'Verloren'})).not.toBeChecked();
     expect(screen.getByRole('radio', {name: selectedGame.away})).not.toBeChecked();
