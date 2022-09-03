@@ -165,4 +165,12 @@ describe('Officials component', () => {
     expect(screen.getByTestId('directionRight')).not.toBeChecked();
     expect(screen.getByTestId('directionLeft')).not.toBeChecked();
   });
+  it('should reduce officials when one is selected', async () => {
+    const user = userEvent.setup();
+    setup(true);
+    await user.click(screen.getByPlaceholderText('Referee (Vorname Nachname)'));
+    await user.click(screen.getAllByText(/first_name first_last_name/i)[0]);
+    await user.click(screen.getByPlaceholderText('Down Judge (Vorname Nachname)'));
+    expect(screen.getAllByRole('listitem')).toHaveLength(2);
+  });
 });

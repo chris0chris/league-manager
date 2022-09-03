@@ -61,6 +61,8 @@ SelectGame.propTypes = {
   getGamedays: PropTypes.func.isRequired,
   getGames: PropTypes.func.isRequired,
   getTeamOfficials: PropTypes.func.isRequired,
+  getOfficials: PropTypes.func.isRequired,
+  getGameSetup: PropTypes.func.isRequired,
   setSelectedGame: PropTypes.func.isRequired,
 };
 

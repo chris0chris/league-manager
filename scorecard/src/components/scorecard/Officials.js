@@ -41,7 +41,7 @@ export const Officials = (props) => {
         id: entry.id,
       };
     }));
-  }, [props.teamOfficials, props.gameSetup, props.gameSetupOfficials]);
+  }, [JSON.stringify(props.teamOfficials)]);
 
   useEffect(() => {
     if (props.gameSetupOfficials.length > 0) {
@@ -73,6 +73,29 @@ export const Officials = (props) => {
     setDirection(props.gameSetup.direction);
     setFhPossession(props.gameSetup.fhPossession);
   }, [JSON.stringify(props.gameSetup)]);
+  useEffect(() => {
+    const allOfficials = (props.teamOfficials).map((entry) => {
+      return {
+        text: `${entry.first_name} ${entry.last_name}`,
+        subtext: entry.team,
+        id: entry.id,
+      };
+    });
+    const filteredOfficials = allOfficials.filter((item) => {
+      switch (item.id) {
+        case scJudge.id:
+        case referee.id:
+        case downJudge.id:
+        case fieldJudge.id:
+        case sideJudge.id:
+          return false;
+        default:
+          return true;
+      }
+    });
+    setTeamOfficials(filteredOfficials);
+  }, [scJudge, referee, downJudge, fieldJudge, sideJudge]);
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const gameSetup = new GameSetup(
