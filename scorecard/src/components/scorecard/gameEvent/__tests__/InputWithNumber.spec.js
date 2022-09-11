@@ -22,9 +22,10 @@ describe('InputWithNumber component', () => {
     expect(screen.getByPlaceholderText('TestLabel - Trikotnummer')).toBeRequired();
     expect(updateFunc.mock.calls[0][1]).toBeTruthy();
   });
-  it('should send correct update', () => {
+  it('should send correct update', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.type(screen.getByPlaceholderText('TestLabel - Nummer optional'), '22');
+    await user.type(screen.getByPlaceholderText('TestLabel - Nummer optional'), '22');
     expect(updateFunc.mock.calls[2][0]).toEqual({
       event: [{name: 'TestLabel', player: '22'}],
     });

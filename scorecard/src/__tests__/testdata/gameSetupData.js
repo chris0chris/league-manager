@@ -8,6 +8,7 @@ export const GAME_OFFICIALS = [
   {
     'name': 'Rebecca Referee',
     'position': Official.REFEREE,
+    'official': 1,
   },
   {
     'name': 'Daniela Down',

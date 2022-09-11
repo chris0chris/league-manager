@@ -5,8 +5,12 @@ import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import {getGamedays} from '../../actions/gamedays';
 import {getGames, setSelectedGame} from '../../actions/games';
-import {Redirect} from 'react-router-dom';
+import {getTeamOfficials} from '../../actions/officials';
+import {Navigate} from 'react-router-dom';
 import {OFFICIALS_URL} from '../common/urls';
+import {
+  getGameSetup,
+  getOfficials} from '../../actions/gamesetup';
 
 const SelectGame = (props) => {
   const [isSelectedGameLoaded, setSelectedGameLoaded] = useState(false);
@@ -31,10 +35,13 @@ const SelectGame = (props) => {
 
   const loadGame = (index) => {
     props.setSelectedGame(props.games[index]);
+    props.getOfficials(props.games[index].id);
+    props.getGameSetup(props.games[index].id);
+    props.getTeamOfficials(props.games[index].officialsId);
     setSelectedGameLoaded(true);
   };
   if (isSelectedGameLoaded) {
-    return <Redirect to={OFFICIALS_URL} />;
+    return <Navigate to={OFFICIALS_URL} />;
   }
   return (
     <div>
@@ -52,6 +59,9 @@ SelectGame.propTypes = {
   user: PropTypes.object.isRequired,
   getGamedays: PropTypes.func.isRequired,
   getGames: PropTypes.func.isRequired,
+  getTeamOfficials: PropTypes.func.isRequired,
+  getOfficials: PropTypes.func.isRequired,
+  getGameSetup: PropTypes.func.isRequired,
   setSelectedGame: PropTypes.func.isRequired,
 };
 
@@ -65,4 +75,7 @@ export default connect(mapStateToProps, {
   getGamedays,
   getGames,
   setSelectedGame,
+  getTeamOfficials,
+  getOfficials,
+  getGameSetup,
 })(SelectGame);

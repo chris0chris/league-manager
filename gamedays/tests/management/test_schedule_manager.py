@@ -41,11 +41,11 @@ class TestSchedule:
         first_game = 0
         last_game = 5
         assert schedule.entries[0].games[first_game].home == 'A1'
-        assert schedule.entries[0].games[first_game].away == 'A2'
-        assert schedule.entries[0].games[first_game].officials == 'A4'
+        assert schedule.entries[0].games[first_game].away == 'A4'
+        assert schedule.entries[0].games[first_game].officials == 'A2'
         assert schedule.entries[0].games[last_game].home == 'A1'
-        assert schedule.entries[0].games[last_game].away == 'A4'
-        assert schedule.entries[0].games[last_game].officials == 'A2'
+        assert schedule.entries[0].games[last_game].away == 'A2'
+        assert schedule.entries[0].games[last_game].officials == 'A4'
 
     def test_schedule_throws_exception_format_and_groups_dont_fit(self):
         groups = [['A1', 'A2', 'A3', 'A4'], ['B1', 'B2', 'B3']]
@@ -65,7 +65,7 @@ class TestScheduleCreator2(TestCase):
         gameinfo_set = Gameinfo.objects.filter(gameday_id=gameday.pk)
         assert gameinfo_set.count() == 6
         gameinfo: Gameinfo = gameinfo_set.first()
-        assert gameinfo.officials.name == 'A4'
+        assert gameinfo.officials.name == 'A2'
         assert str(gameinfo.scheduled) == '10:00:00'
         assert str(gameinfo_set.last().scheduled) == '15:50:00'
         assert Gameresult.objects.filter(gameinfo=gameinfo).count() == 2

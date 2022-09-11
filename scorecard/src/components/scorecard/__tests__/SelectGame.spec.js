@@ -1,8 +1,7 @@
 import SelectGame from '../SelectGame';
-// import { shallow } from "enzyme";
 import {testStore} from '../../../__tests__/Utils';
 import React from 'react';
-import {HashRouter as Router, Route} from 'react-router-dom';
+import {MemoryRouter as Router, Route, Routes} from 'react-router-dom';
 import {TWO_GAMEDAYS} from '../../../__tests__/testdata/gamedaysData';
 import {TWO_GAMES} from '../../../__tests__/testdata/gamesData';
 
@@ -45,9 +44,11 @@ const setup = () => {
   };
   store = testStore(initialState);
   render(
-      <Router>
-        <SelectGame store={store} />
-        <Route path={OFFICIALS_URL}>{pageText}</Route>
+      <Router initialEntries={[{pathname: '/'}]}>
+        <Routes>
+          <Route path='/' element={<SelectGame store={store} />} />
+          <Route path={OFFICIALS_URL} element={<div>{pageText}</div>} />
+        </Routes>
       </Router>,
   );
 };
@@ -58,28 +59,33 @@ describe('SelectGame component', () => {
     expect(screen.getAllByRole('button').length).toBe(2);
     expect(screen.getAllByRole('table')).toHaveLength(1);
   });
-  it('should redirect to officials page', () => {
+  it('should redirect to officials page', async () => {
+    const user = userEvent.setup();
     setup();
-    const firstMockCall = apiGet.mock.calls[0][0];
-    expect(firstMockCall).toBe('/api/gameday/list');
-    expect(screen.queryByText(pageText)).toBeFalsy();
+    expect(apiGet.mock.calls[0][0]).toBe('/api/gameday/list');
+    expect(screen.queryByText(pageText)).not.toBeInTheDocument();
 
     const secondSelectGamedayButton = screen.getAllByRole('button')[1];
-    userEvent.click(secondSelectGamedayButton);
+    await user.click(secondSelectGamedayButton);
     expect(screen.getAllByRole('button').length).toBe(4);
     expect(screen.getAllByRole('table')).toHaveLength(2);
 
     const firstStartGameButton = screen.getAllByRole('button', {
       name: /start/i,
     })[0];
-    userEvent.click(firstStartGameButton);
-    const secondMockCall = apiGet.mock.calls[1][0];
-    expect(secondMockCall).toBe(
+    await user.click(firstStartGameButton);
+    expect(apiGet.mock.calls[1][0]).toBe(
         // eslint-disable-next-line max-len
         `/api/gameday/${TWO_GAMEDAYS.gamedays[1].id}/officials/OfficialsTeam`,
     );
+    expect(apiGet.mock.calls[2][0])
+        .toBe(`/api/game/${TWO_GAMES.games[0].id}/officials`);
+    expect(apiGet.mock.calls[3][0])
+        .toBe(`/api/game/${TWO_GAMES.games[0].id}/setup`);
+    expect(apiGet.mock.calls[4][0])
+        .toBe(`/api/officials/team/${TWO_GAMES.games[0].officialsId}/list`);
     const selectedGameStateInStore = store.getState().gamesReducer.selectedGame;
     expect(selectedGameStateInStore).toEqual(TWO_GAMES.games[0]);
-    expect(screen.getByText(pageText)).toBeTruthy();
+    expect(screen.getByText(pageText)).toBeInTheDocument();
   });
 });

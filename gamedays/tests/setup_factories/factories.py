@@ -43,6 +43,7 @@ class SeasonLeagueTeamFactory(DjangoModelFactory):
     league = factory.SubFactory(LeagueFactory)
     team = factory.SubFactory(TeamFactory)
 
+
 class GameOfficialFactory(DjangoModelFactory):
     class Meta:
         model = GameOfficial
@@ -58,6 +59,7 @@ class UserFactory(DjangoModelFactory):
 
     username = 'test_admin'
     is_staff = True
+
 
 class GamedayFactory(DjangoModelFactory):
     class Meta:
@@ -80,7 +82,6 @@ class GameinfoFactory(DjangoModelFactory):
     scheduled = '10:00'
     officials = factory.SubFactory(TeamFactory)
     field = 1
-
 
 
 class GameresultFactory(DjangoModelFactory):

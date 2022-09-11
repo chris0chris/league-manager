@@ -20,18 +20,20 @@ describe('AddPoints component', () => {
     expect(screen.getByRole('radio', {name: 'Mehr...'})).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Eintrag speichern'})).toBeInTheDocument();
   });
-  it('should display different input field, when selecting another button', () => {
+  it('should display different input field, when selecting another button', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.click(screen.getByRole('radio', {name: 'Serie'}));
-    userEvent.type(screen.getByRole('spinbutton', {name: 'number'}), '19');
-    userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
+    await user.click(screen.getByRole('radio', {name: 'Serie'}));
+    await user.type(screen.getByRole('spinbutton', {name: 'number'}), '19');
+    await user.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
   });
-  it('should call callback, when input is submitted', () => {
+  it('should call callback, when input is submitted', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.click(screen.getByRole('radio', {name: 'Serie'}));
+    await user.click(screen.getByRole('radio', {name: 'Serie'}));
     expect(screen.getByPlaceholderText('First Down - Nummer optional')).toBeInTheDocument();
-    userEvent.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
-    expect(screen.getByRole('radio', {name: 'Serie'})).toBeChecked();
+    await user.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
+    expect(screen.getByRole('radio', {name: 'Touchdown'})).toBeChecked();
     expect(mockFunc.mock.calls).toHaveLength(1);
   });
 });

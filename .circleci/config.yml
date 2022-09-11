@@ -87,5 +87,5 @@ workflows:
   build_and_test:
     jobs:
       - python
-#      - scorecard_js
-#      - liveticker_js
+      - scorecard_js
+      - liveticker_js

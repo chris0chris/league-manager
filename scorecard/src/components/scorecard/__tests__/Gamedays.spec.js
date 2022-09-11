@@ -11,8 +11,7 @@ const setup = () => {
     ...ONE_GAMEDAY,
     onClick: mockFunc,
   };
-  const component = render(<Gamedays {...initialState} />);
-  return component;
+  render(<Gamedays {...initialState} />);
 };
 
 describe('Gamedays component', () => {
@@ -21,9 +20,10 @@ describe('Gamedays component', () => {
     expect(screen.getAllByRole('row').length).toBe(2);
   });
 
-  it('should emit callback on click event', () => {
+  it('should emit callback on click event', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button'));
     expect(mockFunc.mock.calls.length).toBe(1);
     expect(mockFunc.mock.calls[0][0]).toBe(1);
   });

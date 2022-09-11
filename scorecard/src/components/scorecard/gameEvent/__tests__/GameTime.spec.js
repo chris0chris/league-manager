@@ -18,12 +18,14 @@ describe('GameTime component', () => {
     expect(screen.getByPlaceholderText('Minuten')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Sekunden')).toBeInTheDocument();
   });
-  it('should update event, when time is inserted', () => {
+
+  it('should update event, when time is typed', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.type(screen.getByPlaceholderText('Minuten'), '00');
-    userEvent.type(screen.getByPlaceholderText('Sekunden'), '01');
-    expect(updateMock.mock.calls[4][0]).toEqual({
-      event: [{name: 'Spielzeit', input: '00:01'}],
+    await user.type(screen.getByPlaceholderText('Minuten'), '0');
+    await user.type(screen.getByPlaceholderText('Sekunden'), '1');
+    expect(updateMock.mock.calls[2][0]).toEqual({
+      event: [{name: 'Spielzeit', input: '0:1'}],
     });
   });
 });

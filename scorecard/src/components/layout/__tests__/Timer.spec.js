@@ -11,7 +11,9 @@ describe('FloatingInput component', () => {
     jest.useFakeTimers();
     setup();
     expect(screen.getByText('10')).toBeInTheDocument();
-    act(() => jest.advanceTimersByTime(4000));
+    act(() => jest.advanceTimersByTime(1000));
+    act(() => jest.advanceTimersByTime(1000));
+    act(() => jest.advanceTimersByTime(1000));
     expect(screen.getByText('7')).toBeInTheDocument();
   });
 });

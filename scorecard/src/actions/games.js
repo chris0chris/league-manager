@@ -29,7 +29,7 @@ export const getGameLog = (gameId) => {
 };
 
 export const createLogEntry = (event) => {
-  console.log(event);
+  // console.log(event);
   return apiPost(`/api/gamelog/${event.gameId}`,
       event, GET_GAME_LOG, GAME_CREATE_LOG_ENTRY_FAIL);
 };

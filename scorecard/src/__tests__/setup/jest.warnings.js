@@ -6,8 +6,10 @@ global.console.error = (...args) => {
    * https://github.com/jsdom/jsdom/issues/1937
    */
   const errorMessage = 'Not implemented: HTMLFormElement.prototype.submit';
-  if (args && args[0].includes(errorMessage)) {
-    return false;
+  if (args) {
+    if (JSON.stringify(args[0]).includes(errorMessage)) {
+      return false;
+    }
   }
 
   global.originalLogError(...args);

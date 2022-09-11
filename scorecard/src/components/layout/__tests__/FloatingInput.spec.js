@@ -19,11 +19,12 @@ describe('FloatingInput component', () => {
     expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 
-  it('should validate correct', () => {
+  it('should validate correct', async () => {
+    const user = userEvent.setup();
     setup();
     const inputElement = screen.getByPlaceholderText('someText');
     expect(inputElement).toBeInvalid();
-    userEvent.type(inputElement, 'some text');
+    await user.type(inputElement, 'some text');
     expect(inputElement).toBeValid();
   });
 });

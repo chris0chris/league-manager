@@ -1,15 +1,17 @@
 /* eslint-disable max-len */
 import React from 'react';
-import {HashRouter as Router, Route} from 'react-router-dom';
+import {Provider} from 'react-redux';
+import {MemoryRouter as Router, Route, Routes} from 'react-router-dom';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {testStore} from '../../../__tests__/Utils';
 import {GAME_PAIR_1} from '../../../__tests__/testdata/gamesData';
 import Officials from '../Officials';
-import {DETAILS_URL} from '../../common/urls';
+import {DETAILS_URL, OFFICIALS_URL} from '../../common/urls';
 import {apiGet, apiPut, apiPost} from '../../../actions/utils/api';
 import {GET_GAME_OFFICIALS, GET_GAME_SETUP} from '../../../actions/types';
 import {GAME_OFFICIALS} from '../../../__tests__/testdata/gameSetupData';
+import {OFFICIALS_TEAM_OFFICIALS} from '../../../__tests__/testdata/officialsData';
 
 const selectedGame = GAME_PAIR_1;
 let isInitEmpty = false;
@@ -51,8 +53,7 @@ apiGet.mockImplementation((url, actionType) => (dispatch) => {
   return () => {};
 });
 
-
-const setup = (isInitialEmpty=false) => {
+const setup = (isInitialEmpty=false, emptyTeamOfficials=false) => {
   isInitEmpty = isInitialEmpty;
   let initialOfficials = GAME_OFFICIALS;
   let initialGameSetup = {
@@ -60,9 +61,13 @@ const setup = (isInitialEmpty=false) => {
     direction: 'directionRight',
     fhPossession: GAME_PAIR_1.away,
   };
-  if (!isInitialEmpty) {
+  let initialTeamOfficials = OFFICIALS_TEAM_OFFICIALS;
+  if (isInitialEmpty) {
     initialOfficials = [];
     initialGameSetup = {};
+  }
+  if (emptyTeamOfficials) {
+    initialTeamOfficials = [];
   }
   apiPut.mockClear();
   apiGet.mockClear();
@@ -72,81 +77,102 @@ const setup = (isInitialEmpty=false) => {
       gameSetupOfficials: initialOfficials,
       gameSetup: initialGameSetup,
     },
+    officialsReducer: {
+      teamOfficials: initialTeamOfficials,
+      searchOfficialsResult: [],
+    },
   };
   const store = testStore(initialState);
-  render(
-      <Router>
-        <Officials store={store} />
-        <Route path={DETAILS_URL}>Some Text</Route>
-      </Router>,
+  render(<Provider store={store}>
+    <Router initialEntries={[{pathname: '/officials'}]}>
+      <Routes>
+        <Route path={OFFICIALS_URL} element={<Officials store={store} />} />
+        <Route path={DETAILS_URL} element={<div>Some Text</div>} />
+      </Routes>
+    </Router>
+  </Provider>,
   );
 };
 
 describe('Officials component', () => {
-  it('should render component', async () => {
+  it('should render component', () => {
     setup();
     expect(screen.getByRole('heading')).toHaveTextContent(
-        // eslint-disable-next-line max-len
-        `Feld ${selectedGame.field}: ${selectedGame.home} vs ${selectedGame.away}`,
+        `${selectedGame.home} vs ${selectedGame.away}`,
     );
     expect(screen.getAllByRole('textbox').length).toBe(5);
     expect(screen.getAllByRole('radio').length).toBe(6);
     expect(screen.getByTestId('ctTeam').textContent).toEqual(selectedGame.away);
   });
-  it('submit form and redirects', () => {
+  it('should render team officials', async () => {
+    const user = userEvent.setup();
+    setup(true, false);
+    await user.click(screen.getByPlaceholderText('Scorecard Judge (Vorname Nachname)'));
+    expect(screen.getAllByRole('listitem')).toHaveLength(4);
+  });
+  it('submit form and redirects', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.type(
-        screen.getByPlaceholderText('Scorecard Judge-Name'),
+    await user.type(
+        screen.getByPlaceholderText('Scorecard Judge (Vorname Nachname)'),
         'SC Name',
     );
-    userEvent.type(screen.getByPlaceholderText('Referee-Name'), 'R Name');
-    userEvent.type(screen.getByPlaceholderText('Down Judge-Name'), 'DJ Name');
-    userEvent.type(screen.getByPlaceholderText('Field Judge-Name'), 'FJ Name');
-    userEvent.type(screen.getByPlaceholderText('Side Judge-Name'), 'SJ Name');
-    userEvent.click(screen.getByText('Gewonnen'));
-    userEvent.click(screen.getByText(selectedGame.home));
-    userEvent.click(screen.getByTitle('directionLeft'));
-    userEvent.click(screen.getByText('Spiel starten'));
+    await user.type(screen.getByPlaceholderText('Referee (Vorname Nachname)'), 'R Name');
+    await user.type(screen.getByPlaceholderText('Down Judge (Vorname Nachname)'), 'DJ Name');
+    await user.type(screen.getByPlaceholderText('Field Judge (Vorname Nachname)'), 'FJ Name');
+    await user.type(screen.getByPlaceholderText('Side Judge (Vorname Nachname)'), 'SJ Name');
+    await user.click(screen.getByText('Gewonnen'));
+    await user.click(screen.getByText(selectedGame.home));
+    await user.click(screen.getByTitle('directionLeft'));
+    await user.click(screen.getByText('Spiel starten'));
     expect(apiPut.mock.calls[0][0]).toBe(`/api/game/${selectedGame.id}/setup`);
     expect(apiPut.mock.calls[1][0]).toBe(`/api/game/${selectedGame.id}/officials`);
-    expect(apiGet.mock.calls[0][0]).toBe(`/api/game/${selectedGame.id}/officials`);
-    expect(apiGet.mock.calls[1][0]).toBe(`/api/game/${selectedGame.id}/setup`);
-    expect(apiGet.mock.calls[2][0]).toBe(`/api/gamelog/${selectedGame.id}`);
+    expect(apiGet.mock.calls[0][0]).toBe(`/api/gamelog/${selectedGame.id}`);
     expect(screen.getByText('Some Text')).toBeInTheDocument();
   });
-  it('checks if buttons are checked when clicked', () => {
+  it('checks if buttons are checked when clicked', async () => {
+    const user = userEvent.setup();
     setup(true);
     const wonButton = screen.getByRole('radio', {name: 'Gewonnen'});
     const lostButton = screen.getByText('Verloren');
     expect(wonButton).not.toBeChecked();
     expect(lostButton).not.toBeChecked();
-    userEvent.click(wonButton);
+    await user.click(wonButton);
     expect(wonButton).toBeChecked();
     expect(lostButton).not.toBeChecked();
   });
   it('should call getApi to init the page, display the officials name and game setup infos', () => {
     setup();
-    expect(screen.getByPlaceholderText('Scorecard Judge-Name')).toHaveDisplayValue('Sofia Scorecard');
-    expect(screen.getByPlaceholderText('Referee-Name')).toHaveDisplayValue('Rebecca Referee');
-    expect(screen.getByPlaceholderText('Down Judge-Name')).toHaveDisplayValue('Daniela Down');
-    expect(screen.getByPlaceholderText('Field Judge-Name')).toHaveDisplayValue('Franziska Field');
-    expect(screen.getByPlaceholderText('Side Judge-Name')).toHaveDisplayValue('Saskia Side');
+    expect(screen.getByPlaceholderText('Scorecard Judge (Vorname Nachname)')).toHaveDisplayValue('Sofia Scorecard');
+    expect(screen.getByPlaceholderText('Referee (Vorname Nachname)')).toHaveDisplayValue('Rebecca Referee');
+    expect(screen.getByPlaceholderText('Referee (Vorname Nachname)')).toHaveAttribute('readonly');
+    expect(screen.getByPlaceholderText('Down Judge (Vorname Nachname)')).toHaveDisplayValue('Daniela Down');
+    expect(screen.getByPlaceholderText('Field Judge (Vorname Nachname)')).toHaveDisplayValue('Franziska Field');
+    expect(screen.getByPlaceholderText('Side Judge (Vorname Nachname)')).toHaveDisplayValue('Saskia Side');
     expect(screen.getByRole('radio', {name: 'Gewonnen'})).toBeChecked();
     expect(screen.getByRole('radio', {name: selectedGame.away})).toBeChecked();
     expect(screen.getByTestId('directionRight')).toBeChecked();
   });
   it('should call getApi to init the page and display empty officials', () => {
     setup(true);
-    expect(screen.getByPlaceholderText('Scorecard Judge-Name')).toHaveDisplayValue('');
-    expect(screen.getByPlaceholderText('Referee-Name')).toHaveDisplayValue('');
-    expect(screen.getByPlaceholderText('Down Judge-Name')).toHaveDisplayValue('');
-    expect(screen.getByPlaceholderText('Field Judge-Name')).toHaveDisplayValue('');
-    expect(screen.getByPlaceholderText('Side Judge-Name')).toHaveDisplayValue('');
+    expect(screen.getByPlaceholderText('Scorecard Judge (Vorname Nachname)')).toHaveDisplayValue('');
+    expect(screen.getByPlaceholderText('Referee (Vorname Nachname)')).toHaveDisplayValue('');
+    expect(screen.getByPlaceholderText('Down Judge (Vorname Nachname)')).toHaveDisplayValue('');
+    expect(screen.getByPlaceholderText('Field Judge (Vorname Nachname)')).toHaveDisplayValue('');
+    expect(screen.getByPlaceholderText('Side Judge (Vorname Nachname)')).toHaveDisplayValue('');
     expect(screen.getByRole('radio', {name: 'Gewonnen'})).not.toBeChecked();
     expect(screen.getByRole('radio', {name: 'Verloren'})).not.toBeChecked();
     expect(screen.getByRole('radio', {name: selectedGame.away})).not.toBeChecked();
     expect(screen.getByRole('radio', {name: selectedGame.home})).not.toBeChecked();
     expect(screen.getByTestId('directionRight')).not.toBeChecked();
     expect(screen.getByTestId('directionLeft')).not.toBeChecked();
+  });
+  it('should reduce officials when one is selected', async () => {
+    const user = userEvent.setup();
+    setup(true);
+    await user.click(screen.getByPlaceholderText('Referee (Vorname Nachname)'));
+    await user.click(screen.getAllByText(/first_name first_last_name/i)[0]);
+    await user.click(screen.getByPlaceholderText('Down Judge (Vorname Nachname)'));
+    expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
 });

@@ -5,7 +5,7 @@ import {connect} from 'react-redux';
 import RadioButton from '../layout/RadioButton';
 import GameLog from './GameLog';
 import AddPoints from './AddPoints';
-import {Redirect, useLocation} from 'react-router-dom';
+import {Navigate, useSearchParams} from 'react-router-dom';
 import {createLogEntry, halftime, updateTeamInPossession} from '../../actions/games';
 import Halftime from './Halftime';
 import {FINALIZE_URL} from '../common/urls';
@@ -19,10 +19,10 @@ const Details = (props) => {
   const [teamInPossession, setTeamInPossession] = useState(gameLog.home.name);
   const [half, setHalf] = useState(1);
   const [isFinal, setIsFinal] = useState(false);
-  const queryParams = useLocation().search;
+  const [searchParams] = useSearchParams();
   useEffect(() => {
-    if (queryParams) {
-      const startingTeam = queryParams.split('=')[1];
+    const startingTeam = searchParams.get('start');
+    if (startingTeam) {
       setTeamInPossession(startingTeam);
       setShowHomeLog(startingTeam == gameLog.home.name);
       setHalf(gameLog.isFirstHalf ? 1 : 2);
@@ -67,7 +67,7 @@ const Details = (props) => {
     setShowHomeLog(nextTeamInPossession == gameLog.home.name);
   };
   if (isFinal) {
-    return <Redirect to={FINALIZE_URL} />;
+    return <Navigate to={FINALIZE_URL} />;
   }
   const getOppositeTeam = () => {
     return teamInPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;

@@ -15,15 +15,15 @@
       },
       {
         "name": "pf",
-        "type": "integer"
+        "type": "string"
       },
       {
         "name": "pa",
-        "type": "integer"
+        "type": "string"
       },
       {
         "name": "+/-",
-        "type": "integer"
+        "type": "string"
       },
       {
         "name": "dffl",
@@ -33,7 +33,7 @@
     "primaryKey": [
       "index"
     ],
-    "pandas_version": "0.20.0"
+    "pandas_version": "1.4.0"
   },
   "data": [
     {

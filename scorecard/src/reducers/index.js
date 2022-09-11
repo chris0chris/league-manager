@@ -4,6 +4,7 @@ import message from './messageReducer';
 import auth from './authReducer';
 import games from './gamesReducer';
 import config from './configReducer';
+import teamOfficials from './officialsReducer';
 
 export default combineReducers({
   gamedaysReducer: gamedays,
@@ -11,4 +12,5 @@ export default combineReducers({
   messageReducer: message,
   authReducer: auth,
   configReducer: config,
+  officialsReducer: teamOfficials,
 });

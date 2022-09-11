@@ -57,24 +57,27 @@ describe('Halftime component', () => {
     expect(screen.getAllByTestId('timeoutButton')).toHaveLength(4);
     expect(screen.getByRole('button', {name: 'Ende'})).toBeInTheDocument();
   });
-  it('should set half, when halftime button and done is clicked', () => {
+  it('should set half, when halftime button and done is clicked', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.click(screen.getByRole('button', {name: 'Halbzeit'}));
+    await user.click(screen.getByRole('button', {name: 'Halbzeit'}));
     expect(apiGet.mock.calls[0][0]).toBe(`/api/game/${GAME_LOG_ONLY_FIRSTHALF.gameId}/setup`);
     expect(screen.getByText(GAME_LOG_ONLY_FIRSTHALF.home.name)).toBeInTheDocument();
     expect(screen.getByTitle('directionLeft')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('halftime-done'));
+    await user.click(screen.getByTestId('halftime-done'));
     expect(submitMock.mock.calls[0][0]).toBe(true);
   });
-  it('should send false, when final button is clicked', () => {
+  it('should send false, when final button is clicked', async () => {
+    const user = userEvent.setup();
     setup(false);
-    userEvent.click(screen.getByRole('button', {name: 'Ende'}));
+    await user.click(screen.getByRole('button', {name: 'Ende'}));
     expect(submitMock.mock.calls[0][0]).toBe(false);
   });
-  it('should do nothing, when halftime button and cancel is clicked', () => {
+  it('should do nothing, when halftime button and cancel is clicked', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.click(screen.getByRole('button', {name: 'Halbzeit'}));
-    userEvent.click(screen.getByTestId('halftime-cancel'));
+    await user.click(screen.getByRole('button', {name: 'Halbzeit'}));
+    await user.click(screen.getByTestId('halftime-cancel'));
     expect(submitMock.mock.calls).toHaveLength(0);
   });
 });

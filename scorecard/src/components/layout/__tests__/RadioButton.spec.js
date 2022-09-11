@@ -47,14 +47,16 @@ describe('RadioButtons component', () => {
     expect(screen.getByLabelText('textSecondButton')).toBeInTheDocument();
   });
 
-  it('should propagate the correct implicit value', () => {
+  it('should propagate the correct implicit value', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.click(screen.getByText('textFirstButton'));
+    await user.click(screen.getByText('textFirstButton'));
     expect(mockFunk.mock.calls[0][0]).toBe('textFirstButton');
   });
-  it('should propagate the correct explicit value', () => {
+  it('should propagate the correct explicit value', async () => {
+    const user = userEvent.setup();
     setup('someValue');
-    userEvent.click(screen.getByText('textFirstButton'));
+    await user.click(screen.getByText('textFirstButton'));
     expect(mockFunk.mock.calls[0][0]).toBe('someValue');
   });
 });

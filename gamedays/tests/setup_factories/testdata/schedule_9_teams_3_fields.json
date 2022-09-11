@@ -58,6 +58,7 @@
         "type": "string"
       },
       {
+        "extDtype": "Int64",
         "name": "gameinfo",
         "type": "integer"
       },
@@ -66,8 +67,9 @@
         "type": "integer"
       },
       {
+        "extDtype": "string",
         "name": "home",
-        "type": "string"
+        "type": "any"
       },
       {
         "name": "points_home",
@@ -78,8 +80,9 @@
         "type": "integer"
       },
       {
+        "extDtype": "string",
         "name": "away",
-        "type": "string"
+        "type": "any"
       },
       {
         "name": "id_away",
@@ -89,7 +92,7 @@
     "primaryKey": [
       "index"
     ],
-    "pandas_version": "0.20.0"
+    "pandas_version": "1.4.0"
   },
   "data": [
     {

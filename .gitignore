@@ -141,6 +141,7 @@ server*
 #Versioning
 /**/static/**/COMMITHASH
 /**/static/**/VERSION
+/**/*LICENSE.txt
 
 #react
 #/**/**/main.js

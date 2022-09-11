@@ -35,10 +35,11 @@ describe('ModalDeleteEntry component', () => {
     expect(screen.getByRole('button', {name: 'Abbrechen'})).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Löschen'})).toBeInTheDocument();
   });
-  it('should delete entry via api, when row is double clicked and delete button is clicked', () => {
+  it('should delete entry via api, when row is double clicked and delete button is clicked', async () => {
+    const user = userEvent.setup();
     setup();
-    userEvent.dblClick(screen.getAllByText('Turnover')[0]);
-    userEvent.click(screen.getByRole('button', {name: 'Löschen'}));
+    await user.dblClick(screen.getAllByText('Turnover')[0]);
+    await user.click(screen.getByRole('button', {name: 'Löschen'}));
     expect(apiDelete.mock.calls[0][0]).toBe(`/api/gamelog/${GAME_LOG_COMPLETE_GAME.gameId}`);
   });
 });
