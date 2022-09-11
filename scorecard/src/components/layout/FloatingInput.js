@@ -24,18 +24,22 @@ const FloatingInput = (props) => {
   return (
     <div className="form-floating mt-3">
       <input
+        autoFocus={autofocus}
         type={type}
         className="form-control"
         id={id}
         value={inputValue}
         onChange={(e) => handleChange(e.target.value)}
-        onBlur={() => setHasFocus(false)}
-        onFocus={() => setHasFocus(true)}
+        onBlur={() => {
+          setHasFocus(false);
+        }}
+        onFocus={() => {
+          setHasFocus(true);
+        }}
         placeholder={text}
         required={required}
         readOnly={readOnly}
         style={{display: show ? 'block' : 'none'}}
-        autoFocus={autofocus}
       />
       <label htmlFor={id} className="form-label">
         {text}

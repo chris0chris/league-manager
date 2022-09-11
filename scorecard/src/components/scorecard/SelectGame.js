@@ -34,7 +34,6 @@ const SelectGame = (props) => {
   };
 
   const loadGame = (index) => {
-    console.log('loadgame', props.games[index]);
     props.setSelectedGame(props.games[index]);
     props.getOfficials(props.games[index].id);
     props.getGameSetup(props.games[index].id);

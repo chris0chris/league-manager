@@ -6,11 +6,13 @@ import FloatingInput from './FloatingInput';
 const InputDropdown = (props) => {
   const {
     setSelectedIndex,
+    searchForText = () => {},
     placeholderText,
     id,
     itemLimit = 5,
     focus = false,
     items,
+    onSelected = () => {},
     initValues = {}} = props;
 
   const [searchInput, setSearchInput] = useState('');
@@ -36,6 +38,14 @@ const InputDropdown = (props) => {
     setSelectedIndex({text: itemText, id: id});
     setDisplaySuggestionBox(false);
     setDisplaySearchInput(false);
+    onSelected();
+  };
+  const submitSearch = (event) => {
+    event.preventDefault();
+    setDisplaySearchInput(true);
+    setDisplaySuggestionBox(true);
+    setAutofocus(true);
+    searchForText(searchInput);
   };
   const clearSearchInput = () => {
     setDisplaySearchInput(true);
@@ -108,7 +118,7 @@ const InputDropdown = (props) => {
             {itemsToDisplay.map((item, index) => (
               <li
                 key={index}
-                className='list-group-item'
+                className='list-group-item bg-light'
                 onMouseDown={() => {
                   handleSearchSelection(item.text, item.id);
                 }}
@@ -124,6 +134,13 @@ const InputDropdown = (props) => {
                 </div>
               </li>
             ))}
+            <li className="list-group-item d-grid">
+              <button type="button"
+                onMouseDown={submitSearch}
+                className="btn btn-secondary">
+                teamübergreifende Suche
+              </button>
+            </li>
           </ul>
         </div>}
       </div>
@@ -136,10 +153,11 @@ InputDropdown.propTypes = {
   setSelectedIndex: PropTypes.func.isRequired,
   placeholderText: PropTypes.string.isRequired,
   items: PropTypes.array.isRequired,
+  searchForText: PropTypes.func,
+  onSelected: PropTypes.func,
   itemLimit: PropTypes.number,
   initValues: PropTypes.object,
   focus: PropTypes.bool,
 };
 
 export default InputDropdown;
-

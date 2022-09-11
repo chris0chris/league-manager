@@ -45,7 +45,7 @@ class Liveticker(object):
 
     def as_json(self):
         return dict(
-            gameId=self.game.id,
+            gameId=self.game.pk,
             status=self.get_status(),
             standing=self.game.standing,
             time=self.get_time(),
@@ -112,7 +112,6 @@ class LivetickerService(object):
     def get_liveticker(self):
         next_games = Gameinfo.objects.filter(
             gameday__in=self.gameday_ids, gameFinished__isnull=True).order_by(SCHEDULED, GAMEDAY_ID, 'id')
-        print(list(next_games))
         previously_finished_games = Gameinfo.objects.filter(
             gameday__in=self.gameday_ids, gameFinished__isnull=False).order_by(f'-{SCHEDULED}')
         liveticker = []

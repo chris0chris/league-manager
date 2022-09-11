@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
+import {Provider} from 'react-redux';
 import {MemoryRouter as Router, Route, Routes} from 'react-router-dom';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -52,7 +53,6 @@ apiGet.mockImplementation((url, actionType) => (dispatch) => {
   return () => {};
 });
 
-
 const setup = (isInitialEmpty=false, emptyTeamOfficials=false) => {
   isInitEmpty = isInitialEmpty;
   let initialOfficials = GAME_OFFICIALS;
@@ -79,16 +79,18 @@ const setup = (isInitialEmpty=false, emptyTeamOfficials=false) => {
     },
     officialsReducer: {
       teamOfficials: initialTeamOfficials,
+      searchOfficialsResult: [],
     },
   };
   const store = testStore(initialState);
-  render(
-      <Router initialEntries={[{pathname: '/officials'}]}>
-        <Routes>
-          <Route path={OFFICIALS_URL} element={<Officials store={store} />} />
-          <Route path={DETAILS_URL} element={<div>Some Text</div>} />
-        </Routes>
-      </Router>,
+  render(<Provider store={store}>
+    <Router initialEntries={[{pathname: '/officials'}]}>
+      <Routes>
+        <Route path={OFFICIALS_URL} element={<Officials store={store} />} />
+        <Route path={DETAILS_URL} element={<div>Some Text</div>} />
+      </Routes>
+    </Router>
+  </Provider>,
   );
 };
 
@@ -106,7 +108,7 @@ describe('Officials component', () => {
     const user = userEvent.setup();
     setup(true, false);
     await user.click(screen.getByPlaceholderText('Scorecard Judge (Vorname Nachname)'));
-    expect(screen.getAllByRole('listitem')).toHaveLength(3);
+    expect(screen.getAllByRole('listitem')).toHaveLength(4);
   });
   it('submit form and redirects', async () => {
     const user = userEvent.setup();
@@ -171,6 +173,6 @@ describe('Officials component', () => {
     await user.click(screen.getByPlaceholderText('Referee (Vorname Nachname)'));
     await user.click(screen.getAllByText(/first_name first_last_name/i)[0]);
     await user.click(screen.getByPlaceholderText('Down Judge (Vorname Nachname)'));
-    expect(screen.getAllByRole('listitem')).toHaveLength(2);
+    expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
 });

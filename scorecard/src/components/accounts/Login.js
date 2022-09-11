@@ -13,8 +13,8 @@ const Login = (props) => {
     e.preventDefault();
     props.loginUser(username, password);
   };
-  const ENTRY_FROM_START = false;
-  // const ENTRY_FROM_START = true;
+  const ENTRY_FROM_START = true;
+  // ENTRY_FROM_START = false;
   if (props.isAuthenticated) {
     if (process.env.NODE_ENV === 'production' || ENTRY_FROM_START) {
       return <Navigate to={ROOT_URL} />;
@@ -23,6 +23,7 @@ const Login = (props) => {
       //   'scheduled': '18:10:00',
       //   'field': 1,
       //   'officials': 'Rooks',
+      //   'officialsId': 23,
       //   'stage': 'Finalrunde',
       //   'standing': 'P1',
       //   'home': 'Sparr',

@@ -1,19 +1,19 @@
 /* eslint-disable max-len */
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
+import {connect, useDispatch} from 'react-redux';
 import {FaArrowLeft, FaArrowRight} from 'react-icons/fa';
 import {Navigate} from 'react-router-dom';
 import {DETAILS_URL} from '../common/urls';
 import {GameSetup, Official} from '../../actions/objects';
 import {
-  getGameSetup,
   saveGameSetup,
-  getOfficials,
   saveOfficials} from '../../actions/gamesetup';
 import {getGameLog, updateTeamInPossession} from '../../actions/games';
+import {searchForOfficials} from '../../actions/officials';
 import RadioButton from '../layout/RadioButton';
 import InputDropdown from '../layout/InputDropdown';
+import {OFFICIALS_SEARCH_FOR_OFFICIALS} from '../../actions/types';
 
 export const Officials = (props) => {
   const selectedGame = props.selectedGame;
@@ -32,6 +32,7 @@ export const Officials = (props) => {
   const [downJudge, setDownJudge] = useState({text: '', id: null});
   const [fieldJudge, setFieldJudge] = useState({text: '', id: null});
   const [sideJudge, setSideJudge] = useState({text: '', id: null});
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setTeamOfficials((props.teamOfficials).map((entry) => {
@@ -43,6 +44,7 @@ export const Officials = (props) => {
     }));
   }, [JSON.stringify(props.teamOfficials)]);
 
+  // load setup officials
   useEffect(() => {
     if (props.gameSetupOfficials.length > 0) {
       props.gameSetupOfficials.forEach((item) => {
@@ -68,19 +70,64 @@ export const Officials = (props) => {
       });
     }
   }, [JSON.stringify(props.gameSetupOfficials)]);
+
+  // game setup
   useEffect(() => {
     setCt(props.gameSetup.ctResult);
     setDirection(props.gameSetup.direction);
     setFhPossession(props.gameSetup.fhPossession);
   }, [JSON.stringify(props.gameSetup)]);
+
+  // load search officials
   useEffect(() => {
-    const allOfficials = (props.teamOfficials).map((entry) => {
+    const teamOffi = (props.teamOfficials).map((entry) => {
       return {
         text: `${entry.first_name} ${entry.last_name}`,
         subtext: entry.team,
         id: entry.id,
       };
     });
+    const searchOffi = (props.searchOfficialsResult).map((entry) => {
+      return {
+        text: `${entry.first_name} ${entry.last_name}`,
+        subtext: entry.team,
+        id: entry.id,
+      };
+    });
+    const allOfficials = [...searchOffi, ...teamOffi];
+    const filteredOfficials = allOfficials.filter((item) => {
+      switch (item.id) {
+        case scJudge.id:
+        case referee.id:
+        case downJudge.id:
+        case fieldJudge.id:
+        case sideJudge.id:
+          return false;
+        default:
+          return true;
+      }
+    });
+    setTeamOfficials(filteredOfficials);
+  }, [JSON.stringify(props.searchOfficialsResult)]);
+
+
+  // filter team officials
+  useEffect(() => {
+    const teamOffi = (props.teamOfficials).map((entry) => {
+      return {
+        text: `${entry.first_name} ${entry.last_name}`,
+        subtext: entry.team,
+        id: entry.id,
+      };
+    });
+    const searchOffi = (props.searchOfficialsResult).map((entry) => {
+      return {
+        text: `${entry.first_name} ${entry.last_name}`,
+        subtext: entry.team,
+        id: entry.id,
+      };
+    });
+    const allOfficials = [...searchOffi, ...teamOffi];
     const filteredOfficials = allOfficials.filter((item) => {
       switch (item.id) {
         case scJudge.id:
@@ -96,6 +143,9 @@ export const Officials = (props) => {
     setTeamOfficials(filteredOfficials);
   }, [scJudge, referee, downJudge, fieldJudge, sideJudge]);
 
+  const searchForOfficials = (name) => {
+    props.searchForOfficials(selectedGame.officialsId, name);
+  };
   const handleSubmit = (event) => {
     event.preventDefault();
     const gameSetup = new GameSetup(
@@ -119,6 +169,12 @@ export const Officials = (props) => {
   if (isSuccessfulSubmitted) {
     return <Navigate to={`${DETAILS_URL}?start=${fhPossession}`} />;
   }
+  const resetOfficialsSearch = () => {
+    dispatch({
+      type: OFFICIALS_SEARCH_FOR_OFFICIALS,
+      payload: [],
+    });
+  };
   return (
     <div className="container">
       <div className='text-muted fs6'>
@@ -132,31 +188,41 @@ export const Officials = (props) => {
           id='scJudgeName'
           setSelectedIndex={setScJudge}
           placeholderText="Scorecard Judge (Vorname Nachname)"
-          focus={false}
+          focus={true}
+          onSelected={resetOfficialsSearch}
           initValues={scJudgeInit}
+          searchForText={searchForOfficials}
           items={teamOfficials}/>
         <InputDropdown
           id='referee'
           setSelectedIndex={setReferee}
           placeholderText="Referee (Vorname Nachname)"
+          onSelected={resetOfficialsSearch}
+          searchForText={searchForOfficials}
           initValues={refereeInit}
           items={teamOfficials}/>
         <InputDropdown
           id='downJudge'
           setSelectedIndex={setDownJudge}
           placeholderText="Down Judge (Vorname Nachname)"
+          onSelected={resetOfficialsSearch}
+          searchForText={searchForOfficials}
           initValues={downJudgeInit}
           items={teamOfficials}/>
         <InputDropdown
           id='fieldJudge'
           setSelectedIndex={setFieldJudge}
           placeholderText="Field Judge (Vorname Nachname)"
+          onSelected={resetOfficialsSearch}
+          searchForText={searchForOfficials}
           initValues={fieldJudgeInit}
           items={teamOfficials}/>
         <InputDropdown
           id='sideJudge'
           setSelectedIndex={setSideJudge}
           placeholderText="Side Judge (Vorname Nachname)"
+          onSelected={resetOfficialsSearch}
+          searchForText={searchForOfficials}
           initValues={sideJudgeInit}
           items={teamOfficials}/>
         <div className="row mt-3">
@@ -245,27 +311,30 @@ Officials.propTypes = {
   selectedGame: PropTypes.object.isRequired,
   gameSetupOfficials: PropTypes.array.isRequired,
   gameSetup: PropTypes.object.isRequired,
-  getGameSetup: PropTypes.func.isRequired,
   saveGameSetup: PropTypes.func.isRequired,
-  getOfficials: PropTypes.func.isRequired,
   saveOfficials: PropTypes.func.isRequired,
+  searchForOfficials: PropTypes.func.isRequired,
+  searchOfficialsResult: PropTypes.array.isRequired,
   teamOfficials: PropTypes.array,
   getGameLog: PropTypes.func.isRequired,
   updateTeamInPossession: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-  games: state.gamesReducer.games,
   selectedGame: state.gamesReducer.selectedGame,
   gameSetupOfficials: state.gamesReducer.gameSetupOfficials,
   gameSetup: state.gamesReducer.gameSetup,
+  searchOfficialsResult: state.officialsReducer.searchOfficialsResult,
   teamOfficials: state.officialsReducer.teamOfficials,
+  // teamOfficials: [{id: 1, team: 'Augsburg Rooks', first_name: 'Chris', last_name: 'Kämpfe', external_id: '3'},
+  //   {id: 4, team: 'Augsburg Rooks', first_name: 'Andreas', last_name: 'Heidrich', external_id: null},
+  //   {id: 41, team: 'Augsburg Rooks', first_name: 'Niklas', last_name: 'Just', external_id: '117'},
+  // ],
 });
 
 export default connect(mapStateToProps,
-    {getGameSetup,
+    {getGameLog,
       saveGameSetup,
-      getOfficials,
       saveOfficials,
-      getGameLog,
+      searchForOfficials,
       updateTeamInPossession})(Officials);
