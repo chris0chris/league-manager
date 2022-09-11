@@ -90,4 +90,6 @@ Login.propTypes = {
   isAuthenticated: PropTypes.bool,
 };
 
-export default connect(mapStateToProps, {loginUser/*, setSelectedGame*/})(Login);
+export default connect(
+    mapStateToProps,
+    {loginUser/* , setSelectedGame*/})(Login);
