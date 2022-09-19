@@ -60,10 +60,4 @@ class TestOfficialsSearchName(WebTest):
     def test_search_first_name_is_too_short(self):
         response = self.app.get(reverse(API_OFFICIALS_SEARCH_BY_NAME), 'name=to%20oShortFirstName', expect_errors=True)
         assert response.status_code == HTTPStatus.BAD_REQUEST
-        assert response.json[0] == 'Vor- UND Nachname muss mindestens 3 Zeichen haben'
-
-    def test_search_last_name_is_too_short(self):
-        DbSetupOfficials().create_officials_and_team()
-        response = self.app.get(reverse(API_OFFICIALS_SEARCH_BY_NAME), 'name=tooShortLastNa%20me', expect_errors=True)
-        assert response.status_code == HTTPStatus.BAD_REQUEST
-        assert response.json[0] == 'Vor- UND Nachname muss mindestens 3 Zeichen haben'
+        assert response.json[0] == 'Vorname muss mindestens 3 Zeichen haben'
