@@ -19,6 +19,7 @@ const InputDropdown = (props) => {
   const [displaySuggestionBox, setDisplaySuggestionBox] = useState(false);
   const [displaySearchInput, setDisplaySearchInput] = useState(true);
   const [autofocus, setAutofocus] = useState(focus);
+  const [displaySearchButton, setDisplaySearchButton] = useState(true);
   useEffect(() => {
     if (initValues && Object.keys(initValues).length !== 0) {
       if (initValues.text && !initValues.id) {
@@ -33,6 +34,10 @@ const InputDropdown = (props) => {
       }
     }
   }, [initValues]);
+  useEffect(() => {
+    setDisplaySearchButton(true);
+  }, [items]);
+
   const handleSearchSelection = (itemText, id) => {
     setSearchInput(itemText);
     setSelectedIndex({text: itemText, id: id});
@@ -46,6 +51,14 @@ const InputDropdown = (props) => {
     setDisplaySuggestionBox(true);
     setAutofocus(true);
     searchForText(searchInput);
+    setDisplaySearchButton(false);
+  };
+  const blockSearch = (event) => {
+    event.preventDefault();
+    setDisplaySearchInput(true);
+    setDisplaySuggestionBox(true);
+    setAutofocus(true);
+    setDisplaySearchButton(false);
   };
   const clearSearchInput = () => {
     setDisplaySearchInput(true);
@@ -134,13 +147,23 @@ const InputDropdown = (props) => {
                 </div>
               </li>
             ))}
+            { displaySearchButton &&
             <li className="list-group-item d-grid">
               <button type="button"
                 onMouseDown={submitSearch}
                 className="btn btn-secondary">
                 teamübergreifende Suche
               </button>
-            </li>
+            </li>}
+            { !displaySearchButton &&
+            <li className="list-group-item d-grid">
+              <button type="button"
+                onMouseDown={blockSearch}
+                className="btn btn-secondary disabled"
+                style={{pointerEvents: 'all'}}>
+              suche nach Official ...
+              </button>
+            </li>}
           </ul>
         </div>}
       </div>
