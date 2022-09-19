@@ -13,6 +13,8 @@ class GamedayListView(ListView):
     model = Gameday
     template_name = 'gamedays/gameday_list.html'
 
+    ordering = ['-date']
+
 
 class GamedayDetailView(DetailView):
     model = Gameday
