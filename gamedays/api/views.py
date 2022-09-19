@@ -22,7 +22,7 @@ class GamedayListAPIView(ListAPIView):
     def get_queryset(self):
         # ToDo Dummyscorecard
         if settings.DEBUG:
-            return Gameday.objects.all()
+            return [Gameday.objects.first()]
         return Gameday.objects.filter(date=datetime.today())
 
 class GameinfoUpdateAPIView(RetrieveUpdateAPIView):

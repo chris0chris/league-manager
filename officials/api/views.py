@@ -27,9 +27,9 @@ class OfficialsSearchName(APIView):
         if len(name) < 2:
             raise NotFound(
                 detail=f'Bitte Vor- und Nachname getrennt durch Leerzeichen eingeben und Suche erneut starten')
-        if len(name[0]) < 3 or len(name[1]) < 3:
-            raise ValidationError('Vor- UND Nachname muss mindestens 3 Zeichen haben', HTTPStatus.BAD_REQUEST)
-        officials = Official.objects.filter(first_name__icontains=name[0], last_name__icontains=name[-1]).exclude(
+        if len(name[0]) < 3:
+            raise ValidationError('Vorname muss mindestens 3 Zeichen haben', HTTPStatus.BAD_REQUEST)
+        officials = Official.objects.filter(first_name__istartswith=name[0], last_name__istartswith=name[-1]).exclude(
             team=team_id).order_by('first_name', 'last_name')
         serializer = OfficialSerializer(officials, many=True)
         return Response(serializer.data, status=HTTPStatus.OK)
