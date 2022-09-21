@@ -242,6 +242,9 @@ class DBSetup:
                        author=author)
         TeamLogFactory(gameinfo=gameinfo, team=away, sequence=10, event='Auszeit', input='00:01', value=0, half=2,
                        author=author)
+        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=11, player=7, event='Safety', value=1, half=2,
+                       isDeleted=True,
+                       author=author)
         TeamLogFactory(gameinfo=gameinfo, team=None, sequence=0, event='Spiel beendet', half=2, author=author)
 
     def create_gamesetup(self, gameinfo):

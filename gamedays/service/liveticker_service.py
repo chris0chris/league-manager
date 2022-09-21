@@ -73,7 +73,7 @@ class Liveticker(object):
 
     def get_ticks(self):
         ticks = []
-        relevant_ticks = TeamLog.objects.filter(gameinfo=self.game).order_by('-created_time')[
+        relevant_ticks = TeamLog.objects.filter(gameinfo=self.game).exclude(isDeleted=True).order_by('-created_time')[
             slice(None, self.number_of_ticks)]
         tick: TeamLog
         for tick in relevant_ticks:
