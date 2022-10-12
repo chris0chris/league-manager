@@ -1,4 +1,4 @@
-from django.db.models import QuerySet, Count
+from django.db.models import QuerySet, Sum
 
 from officials.api.serializers import OfficialSerializer
 from officials.models import Official, OfficialLicenseHistory
@@ -12,41 +12,37 @@ class OfficialAppearanceTeamListEntry:
     def as_json(self):
         game_officials: QuerySet = self.official.gameofficial_set.filter(gameinfo__gameday__date__year=self.year)
         external_games_by_official: QuerySet = self.official.officialexternalgames_set.filter(date__year=self.year)
-        e = \
-        self.official.officialexternalgames_set.filter(date__year=self.year).aggregate(num_games=Count('number_games'))[
-            'num_games']
         official_license: OfficialLicenseHistory = self.official.officiallicensehistory_set.get(
             created_at__year=self.year)
         team = self.official.team
         entry = OfficialSerializer(self.official).data
-        referee_ext = external_games_by_official.filter(position='Referee').aggregate(num_games=Count('number_games'))[
+        referee_ext = external_games_by_official.filter(position='Referee').aggregate(num_games=Sum('number_games'))[
             'num_games']
         down_judge_ext = \
-        external_games_by_official.filter(position='Down Judge').aggregate(num_games=Count('number_games'))['num_games']
+            external_games_by_official.filter(position='Down Judge').aggregate(num_games=Sum('number_games'))[
+                'num_games']
         field_judge_ext = \
-        external_games_by_official.filter(position='Field Judge').aggregate(num_games=Count('number_games'))[
-            'num_games']
+            external_games_by_official.filter(position='Field Judge').aggregate(num_games=Sum('number_games'))[
+                'num_games']
         side_judge_ext = \
-        external_games_by_official.filter(position='Side Judge').aggregate(num_games=Count('number_games'))['num_games']
-        mix_ext = external_games_by_official.filter(position='Mix').aggregate(num_games=Count('number_games'))[
-            'num_games']
-        overall_ext = external_games_by_official.aggregate(num_games=Count('number_games'))['num_games']
+            external_games_by_official.filter(position='Side Judge').aggregate(num_games=Sum('number_games'))[
+                'num_games']
+        overall_ext = external_games_by_official.aggregate(num_games=Sum('number_games'))['num_games']
         entry.update(
             {
                 'license': official_license.license.name,
                 'team': team.name,
                 'team_id': team.pk,
                 'referee': game_officials.filter(position='Referee').count(),
-                'referee_ext': referee_ext,
+                'referee_ext': 0 if referee_ext is None else referee_ext,
                 'down_judge': game_officials.filter(position='Down Judge').count(),
-                'down_judge_ext': down_judge_ext,
+                'down_judge_ext': 0 if down_judge_ext is None else down_judge_ext,
                 'field_judge': game_officials.filter(position='Field Judge').count(),
-                'field_judge_ext': field_judge_ext,
+                'field_judge_ext': 0 if field_judge_ext is None else field_judge_ext,
                 'side_judge': game_officials.filter(position='Side Judge').count(),
-                'side_judge_ext': side_judge_ext,
-                'mix_ext': mix_ext,
+                'side_judge_ext': 0 if side_judge_ext is None else side_judge_ext,
                 'overall': game_officials.exclude(position='Scorecard Judge').count(),
-                'overall_ext': overall_ext,
+                'overall_ext': 0 if overall_ext is None else overall_ext,
             }
         )
         return entry
