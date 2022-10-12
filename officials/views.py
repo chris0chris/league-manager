@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from django.views import View
 
 from officials.api.serializers import GameOfficialAllInfosSerializer
-from officials.forms import AddInternalGameOfficialEntryForm
+from officials.forms import AddInternalGameOfficialEntryForm, AddExternalGameOfficialEntryForm
 from officials.models import Official
 from officials.service.official_service import OfficialService
 from teammanager.models import Team, GameOfficial, Gameinfo
@@ -98,6 +98,46 @@ class AddInternalGameOfficialUpdateView(LoginRequiredMixin, UserPassesTestMixin,
         except Gameinfo.DoesNotExist:
             all_lines = [current_line] + all_lines
             form.add_error('entries', 'gameinfo_id nicht gefunden!')
+        except Official.DoesNotExist:
+            all_lines = [current_line] + all_lines
+            form.add_error('entries', 'official_id nicht gefunden!')
+
+        if form.is_valid():
+            messages.success(self.request, mark_safe(created_entries))
+        data['entries'] = '\n'.join(all_lines)
+        form.data = data
+        return render(request, self.template_name, {'form': form})
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class AddExternalGameOfficialUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    form_class = AddInternalGameOfficialEntryForm
+    template_name = 'officials/external_gameofficial_form.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {'form': AddExternalGameOfficialEntryForm()})
+
+    def post(self, request):
+        created_entries = 'Folgende Einträge erzeugt: <br>'
+        current_line = []
+        form = AddExternalGameOfficialEntryForm(request.POST)
+        data = form.data.copy()
+        all_lines = data.get('entries').splitlines()
+        try:
+            official_service = OfficialService()
+            while all_lines:
+                current_line = all_lines.pop(0)
+                result = [x.strip() for x in current_line.split(',')]
+                created_entries += official_service.create_external_official_entry(result) + '<br>'
+        except (TypeError, ValueError) as error:
+            error_message = error.args[0]
+            all_lines = [current_line] + all_lines
+            if 'positional arguments' in error_message:
+                form.add_error('entries', 'Zu viele Einträge in der ersten Zeile! Maximal 7 erlaubt.')
+            else:
+                form.add_error('entries', error_message)
         except Official.DoesNotExist:
             all_lines = [current_line] + all_lines
             form.add_error('entries', 'official_id nicht gefunden!')
