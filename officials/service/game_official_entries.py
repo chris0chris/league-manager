@@ -1,4 +1,4 @@
-from officials.models import Official
+from officials.models import Official, OfficialExternalGames
 from teammanager.models import Gameinfo, GameOfficial
 
 
@@ -28,3 +28,25 @@ class InternalGameOfficialEntry:
         game_official_entry.save()
         return f'ID: {game_official_entry.pk} ' \
                f'-> Spiel {self.gameinfo_id} - {official.first_name} {official.last_name} als {self.position}'
+
+
+class ExternalGameOfficialEntry:
+    class Meta:
+        model = OfficialExternalGames
+        fields = '__all__'
+
+    def __init__(self, official_id, number_games, date, position, association, is_international=False, comment=None):
+        self.official_id = convert_to_int('official_id', official_id)
+        self.constructor_values = [
+            convert_to_int('official_id', official_id),
+            convert_to_int('number_games', number_games),
+            date, position, association, is_international, comment
+        ]
+
+    def save(self) -> str:
+        official = Official.objects.get(pk=self.official_id)
+        external_official_game_entry = OfficialExternalGames(None, *self.constructor_values)
+        external_official_game_entry.save()
+        return f'ID: {external_official_game_entry.pk} ' \
+               f'-> #Spiele {external_official_game_entry.number_games}:' \
+               f' {official.first_name} {official.last_name} als {external_official_game_entry.position}'

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from officials.models import Official
-from officials.service.game_official_entries import InternalGameOfficialEntry
+from officials.service.game_official_entries import InternalGameOfficialEntry, ExternalGameOfficialEntry
 from officials.service.officials_appearance import OfficialAppearanceTeamList
 from teammanager.models import Team
 
@@ -45,4 +45,8 @@ class OfficialService:
 
     def create_game_official_entry(self, result) -> str:
         entry = InternalGameOfficialEntry(*result)
+        return entry.save()
+
+    def create_external_official_entry(self, result) -> str:
+        entry = ExternalGameOfficialEntry(*result)
         return entry.save()
