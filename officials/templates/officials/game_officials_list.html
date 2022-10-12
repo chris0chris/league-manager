@@ -5,6 +5,7 @@
         <table class="table table-hover">
             <thead>
             <tr>
+                <th scope="col">#</th>
                 <th scope="col">Datum</th>
                 <th scope="col">Spieltag</th>
                 <th scope="col">Team</th>
@@ -17,12 +18,13 @@
             <tbody>
             {% for official in object_list %}
             <tr>
-                <th scope="row">{{official.info.date}}</th>
+                <th scope="row">{{official.info.game_official_id}}</th>
+                <td>{{official.info.date}}</td>
                 <td>{{official.info.gameday}}</td>
                 <td><a href="/officials/team/{{official.info.team_id}}/gamelist">{{official.info.team}}</a></td>
                 <td>{{official.name}}</td>
                 <td>{{official.position}}</td>
-                <td>{{official.info.vs}}</td>
+                <td>{{official.info.vs}} (#{{official.info.gameinfo_id}})</td>
                 <td>{{official.info.standing}}</td>
             </tr>
             {% endfor %}

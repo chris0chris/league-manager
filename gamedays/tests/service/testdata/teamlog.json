@@ -54,6 +54,11 @@
       "score": 3,
       "entries": [
         {
+          "sequence": 11,
+          "Safety": 7,
+          "isDeleted": true
+        },
+        {
           "sequence": 10,
           "cop": true,
           "name": "Interception"

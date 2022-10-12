@@ -37,6 +37,8 @@ class GameOfficialAllInfosSerializer(ModelSerializer):
         return {
             'team': team_name,
             'team_id': team_id,
+            'game_official_id': object.pk,
+            'gameinfo_id': object.gameinfo.pk,
             'gameday': object.gameinfo.gameday.name,
             'date': object.gameinfo.gameday.date.strftime('%d.%m.%Y'),
             'vs': home + ' vs ' + away,

@@ -117,7 +117,8 @@ class TestLiveticker(TestCase):
         home = Gameresult.objects.get(gameinfo=last_game, isHome=True)
         away = Gameresult.objects.get(gameinfo=last_game, isHome=False)
         DBSetup().create_teamlog_home_and_away(home=home.team, away=away.team, gameinfo=last_game)
-        teamlog_entry: TeamLog = TeamLog.objects.filter(gameinfo=last_game).order_by('-created_time').first()
+        teamlog_entry: TeamLog = TeamLog.objects.filter(gameinfo=last_game).exclude(isDeleted=True).order_by(
+            '-created_time').first()
         # workaround to get test stable due to fast creation of teamlog entries
         if teamlog_entry.team is None or teamlog_entry.event == 'Spielzeit':
             is_home = None
@@ -137,7 +138,7 @@ class TestLiveticker(TestCase):
         liveticker = Liveticker(last_game)
         liveticker.collect_all_ticks()
         ticks = liveticker.get_ticks()
-        assert len(ticks) == TeamLog.objects.all().count()
+        assert len(ticks) == TeamLog.objects.all().count() - 1
 
     def test_game_with_no_team_logs(self):
         DBSetup().g62_status_empty()

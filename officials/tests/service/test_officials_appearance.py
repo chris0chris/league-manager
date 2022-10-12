@@ -33,16 +33,21 @@ class TestOfficialAppearanceTeamListEntry(TestCase):
         first_official = Official.objects.first()
         first_team = Team.objects.first()
         team_list_entry = OfficialAppearanceTeamListEntry(first_official, current_year).as_json()
-        assert team_list_entry == {
-            'id': first_official.pk,
-            'first_name': 'Franzi',
-            'last_name': 'Fedora',
-            'team': 'Test Team',
-            'team_id': first_team.pk,
-            'license': 'F1',
-            'referee': 1,
-            'down_judge': 1,
-            'field_judge': 1,
-            'side_judge': 1,
-            'overall': 4,
-        }
+        assert team_list_entry == {'down_judge': 1,
+                                   'down_judge_ext': 0,
+                                   'field_judge': 1,
+                                   'field_judge_ext': 0,
+                                   'first_name': 'Franzi',
+                                   'id': first_official.pk,
+                                   'last_name': 'Fedora',
+                                   'license': 'F1',
+                                   'mix_ext': 0,
+                                   'overall': 4,
+                                   'overall_ext': 0,
+                                   'referee': 1,
+                                   'referee_ext': 0,
+                                   'side_judge': 1,
+                                   'side_judge_ext': 0,
+                                   'team': 'Test Team',
+                                   'team_id': first_team.pk,
+                                   }

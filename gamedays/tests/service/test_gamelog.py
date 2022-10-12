@@ -25,7 +25,7 @@ class TestGamelog(TestCase):
         assert len(gamelog.get_entries_home_firsthalf()) == 5
         assert len(gamelog.get_entries_home_secondhalf()) == 5
         assert len(gamelog.get_entries_away_firsthalf()) == 0
-        assert len(gamelog.get_entries_away_secondhalf()) == 4
+        assert len(gamelog.get_entries_away_secondhalf()) == 5
 
     def test_get_gamelog_as_json(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
