@@ -3,11 +3,13 @@
 <article class="media content-section">
     <div class="media-body">
         <h1>{{ object_list.year }}</h1>
+        <p>Angezeigt werden alle Spiele (inklusive externe Spiele, z.B. für Landesverband) die gepfiffen wurden für
+            lizenzierte Offizielle. In Klammern sind alle Spiele die für die 5er DFFL gepfiffen wurden.</p>
+        {{ object_list.officials_list|length }} - Offizielle
         <table class="table table-hover">
             <thead>
             <tr>
                 <th scope="col">#</th>
-                <th scope="col">Team</th>
                 <th scope="col">Nachname</th>
                 <th scope="col">Vorname</th>
                 <th scope="col">Lizenzstufe</th>
@@ -22,15 +24,14 @@
             {% for official in object_list.officials_list %}
             <tr>
                 <th scope="row">{{official.id}}</th>
-                <td><a href="/officials/team/{{official.team_id}}/list">{{official.team}}</a></td>
                 <td>{{official.last_name}}</td>
                 <td>{{official.first_name}}</td>
                 <td>{{official.license}}</td>
-                <td>{{official.overall}}</td>
-                <td>{{official.referee}}</td>
-                <td>{{official.down_judge}}</td>
-                <td>{{official.field_judge}}</td>
-                <td>{{official.side_judge}}</td>
+                <td>{{official.overall_ext|add:official.overall}} ({{official.overall}})</td>
+                <td>{{official.referee_ext|add:official.referee}} ({{official.referee}})</td>
+                <td>{{official.down_judge_ext|add:official.down_judge}} ({{official.down_judge}})</td>
+                <td>{{official.field_judge_ext|add:official.field_judge}} ({{official.field_judge}})</td>
+                <td>{{official.side_judge_ext|add:official.side_judge}} ({{official.side_judge}})</td>
             </tr>
             {% endfor %}
             </tbody>
