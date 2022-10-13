@@ -41,7 +41,6 @@ class TestOfficialAppearanceTeamListEntry(TestCase):
                                    'id': first_official.pk,
                                    'last_name': 'Fedora',
                                    'license': 'F1',
-                                   'mix_ext': 0,
                                    'overall': 4,
                                    'overall_ext': 0,
                                    'referee': 1,
