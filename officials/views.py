@@ -42,10 +42,8 @@ class AllOfficialsListView(View):
     def get(self, request, **kwargs):
         year = kwargs.get('year')
         official_service = OfficialService()
-        if self.request.user.is_staff:
-            context = {'object_list': official_service.get_all_officials(year, are_names_obfuscated=False)}
-        else:
-            context = {'object_list': official_service.get_all_officials(year)}
+        all_teams = Team.objects.all().exclude(location='dummy').order_by('description')
+        context = {'object_list': all_teams}
         return render(request, self.template_name, context)
 
 
