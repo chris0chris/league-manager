@@ -2,7 +2,7 @@
 {% block content %}
 <article class="media content-section">
     <div class="media-body">
-        <h1>{{ object_list.year }}</h1>
+        <h1>{{ object_list.year }} - {{ object_list.team }}</h1>
         <p>Angezeigt werden alle Spiele (inklusive externe Spiele, z.B. für Landesverband) die gepfiffen wurden für
             lizenzierte Offizielle. In Klammern sind alle Spiele die für die 5er DFFL gepfiffen wurden.</p>
         {{ object_list.officials_list|length }} - Offizielle

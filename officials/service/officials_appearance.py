@@ -2,6 +2,7 @@ from django.db.models import QuerySet, Sum
 
 from officials.api.serializers import OfficialSerializer
 from officials.models import Official, OfficialLicenseHistory
+from teammanager.wrapper.team_wrapper import TeamWrapper
 
 
 class OfficialAppearanceTeamListEntry:
@@ -50,17 +51,18 @@ class OfficialAppearanceTeamListEntry:
 
 class OfficialAppearanceTeamList(object):
     def __init__(self, team_id, year):
-        self.team_id = team_id
+        self.team = TeamWrapper(team_id)
         self.year = year
 
     def as_json(self, are_names_obfuscated=True):
         return {
             'year': self.year,
+            'team': self.team.get_team_description(),
             'officials_list': self.get_officials_list()
         }
 
     def get_officials_list(self):
-        officials = Official.objects.filter(team_id=self.team_id).order_by('last_name', 'first_name')
+        officials = Official.objects.filter(team_id=self.team.get_id()).order_by('last_name', 'first_name')
         officials_result_list = []
         for current_official in officials:
             try:

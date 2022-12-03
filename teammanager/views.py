@@ -169,7 +169,7 @@ def deleteuser(request, user_id):
     if request.user.is_superuser | (
             (user_deleting.team == user_is_being_deleted.team) & user_deleting.check_teammanager()):
         user_is_being_deleted.delete()
-    return redirect(teamdetail,team_id=user_is_being_deleted.team_id)
+    return redirect(teamdetail, team_id=user_is_being_deleted.team_id)
 
 
 def playerdetail(request, player_id):
@@ -243,4 +243,3 @@ def showachievements(request):
     achievements=pd.DataFrame(models.Achievement.objects.all().values()).to_json(orient="split")
     achievements=json.loads(achievements)
     return render(request, 'showAchievements.html',{'achievements':achievements})
-

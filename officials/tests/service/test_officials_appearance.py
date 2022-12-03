@@ -14,6 +14,7 @@ class TestOfficialApearanceTeamList(TestCase):
         officials_list = OfficialAppearanceTeamList(0, current_year)
         assert officials_list.as_json() == {
             'year': current_year,
+            'team': 'Team nicht gefunden',
             'officials_list': []
         }
 
