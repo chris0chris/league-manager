@@ -1,0 +1,241 @@
+@startuml
+
+' Styles
+hide circle
+skinparam linetype ortho
+hide empty members
+
+legend top left
+    General notes:
+    - every entity has an 'id' number field acting as primary key (auto-incremented)
+
+    What is the use of:
+    - "Season League Team"
+    - "Achievement"
+    - "Player Achievement"
+    - "Game Setup"
+end legend
+
+
+package "Auth" <<Rectangle>> #E0E0E0 {
+    entity "User" as user {
+        <i>User data used for authentication</i>
+        --
+        * password: text
+          last_login: datetime
+        * is_superuser: bool
+        * username: text
+        * first_name: text
+        * last_name: text
+        * email: text
+        * is_staff: bool
+        * is_active: bool
+        * date_joined: datetime
+    }
+}
+
+
+package "Team Manager" as teammanager <<Rectangle>> #E0E0E0 {
+    entity "Season" as season {
+        <i>Seasons for grouping gamedays</i>
+        --
+        * name: text
+    }
+
+    entity "League" as league {
+        <i>Divisions for grouping gamedays</i>
+        --
+        * name: text
+    }
+
+    entity "Team" as team {
+        <i>Team participating in games</i>
+        --
+        * name: text
+        * description: text
+        * location: text
+        * logo: text (image)
+    }
+
+'    Table used? Is currently empty.
+'    entity "Season League Team" as seasonleagueteam {
+'    }
+
+    entity "User Profile" as userprofile {
+        <i>Infos about players in a team</i>
+        --
+        avatar: text (image)
+        firstname: text
+        lastname: text
+        playernumber: nuber
+        position: text
+        location: text
+        birth_date: date
+    }
+
+'    Table used? Is currently empty.
+'    entity "Permissions" as permissions {
+'        <i>???</i>
+'        --
+'        * name: text
+'    }
+
+'    Relation table between userprofile and permissions
+'    entity "User Permissions" as userpermissions {
+'    }
+
+'    Table used? Is currently empty.
+'    entity "Achievement" as achievement {
+'        * name: text
+'    }
+
+    entity "Gameday" as gameday  {
+        <i>Infos about a gameday</i>
+        --
+        * name: text
+        * date: date
+        * start: time
+        * format: text
+    }
+
+    entity "Game Info" as gameinfo {
+        <i>Infos about a game on a gameday</i>
+        --
+        * scheduled: time
+        * field: number
+        * status: text
+          gameStarted: time
+          gameHalftime: time
+          gameFinished: time
+        * stage: text
+        * standing: text
+          in_possession: text
+    }
+
+    entity "Game Result" as gameresult {
+        <i>Result of each team in a game</i>
+        --
+        fh: number
+        sh: number
+        pa: number
+        isHome: bool
+    }
+
+    entity "Game Official" as gameofficial {
+        <i>A referee in a game</i>
+        --
+          name: text
+        * position: text
+    }
+
+    entity "Game Setup" as gamesetup {
+        <i>Extension to "Game Info"???</i>
+        --
+        * ctResult: text
+        * direction: text
+        * fhPossession: text
+        * homeCaptain: text
+        * awayCaptain: text
+        * hasFinalScoreChanged: bool
+    }
+
+    entity "Team Log" as teamlog {
+        <i>Event in a game</i>
+        --
+        * sequence: number
+          player: number
+        * event: text
+          input: text
+        * value: number
+        * cop: bool
+        * half: number
+        * isDeleted: bool
+        * created_time: time
+    }
+
+'    Table used? Is currently empty.
+'    entity "Player Achievement" as playerachievement {
+'        * value: number
+'    }
+}
+
+
+package "Officials" as officials <<Rectangle>> #E0E0E0 {
+    entity "Official" as official {
+        <i>Infos about a potential referee</i>
+        --
+        * first_name: text
+        * last_name: text
+          external_id: text
+    }
+
+    entity "Official License" as officiallicense {
+        <i>Referee license types</i>
+        --
+        * name: text
+    }
+
+    entity "Official License History" as officiallicensehistory {
+        <i>Infos about when a referee got a license</i>
+        --
+        * created_at: date
+    }
+
+    entity "Official External Games" as officialexternalgames {
+        <i>Infos about referee jobs not part of the 5er DFFL</i>
+        --
+        * date: date
+        * position: text
+        * association: text
+        * number_games: number
+        * is_international: bool
+        comment: text
+    }
+}
+
+
+gameday --|| season
+gameday --|| league
+gameday --|| user: author
+gameday --o{ gameinfo: games
+
+gameinfo --|| gamesetup: setup
+gameinfo --o| team: officials team
+gameinfo --o{ gameresult: results
+gameinfo --o{ gameofficial: officials
+
+team --o{ userprofile: players
+team --o{ official: officials
+
+teamlog --|| user: author
+teamlog --|| team
+teamlog --|| gameinfo
+
+userprofile --o| user
+gameresult --|| team
+
+gameofficial --|| official
+
+' Table used? Is currently empty.
+'seasonleagueteam --|| season: season_id
+'seasonleagueteam --|| league: league_id
+'seasonleagueteam --|| team: team_id
+
+
+' Table used? Is currently empty.
+'userprofile }o--o{ permissions: via User Permissions
+'userpermissions --|| permissions: permission_id
+'userpermissions --|| userprofile: user_id
+
+' Table used? Is currently empty.
+'playerachievement --|| achievement: achievement_id
+'playerachievement --|| userprofile: player_id
+'playerachievement --|| gameinfo: game_id
+
+
+official --o{ officiallicensehistory
+official --o{ officialexternalgames
+
+officiallicensehistory ||--|| officiallicense
+
+@enduml
