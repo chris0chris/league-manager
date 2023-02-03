@@ -10,10 +10,11 @@ legend top left
     - every entity has an 'id' number field acting as primary key (auto-incremented)
 
     What is the use of:
-    - "Season League Team"
-    - "Achievement"
-    - "Player Achievement"
-    - "Game Setup"
+    - "Season League Team", "Achievement", "Player Achievement" -> all 3 models were implementend as a university
+    to track some statistics. The project is now finished and we can think about to integrate these models or
+    to create some new models.
+    - "Game Setup" -> is something like an extension to gameinfo. It is used to store information for the scorecard,
+    so when the scorecard is reloaded all previous selection made can be retrieved
 end legend
 
 
