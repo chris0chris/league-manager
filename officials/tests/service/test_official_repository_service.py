@@ -59,8 +59,8 @@ class TestOfficialGameCount(TestCase):
             'team': official.team.description,
             'last_name': official.last_name,
             'first_name': official.first_name,
-            'last_license': 'F2',
-            'license_year': 2020,
+            'last_license': 'F1',
+            'license_year': year,
             'current_season': 14,
             'overall': 24,
         }

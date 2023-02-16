@@ -54,7 +54,7 @@ class OfficialAppearanceTeamList(object):
         self.team = TeamWrapper(team_id)
         self.year = year
 
-    def as_json(self, are_names_obfuscated=True):
+    def as_json(self):
         return {
             'year': self.year,
             'team': self.team.get_team_description(),
@@ -64,7 +64,10 @@ class OfficialAppearanceTeamList(object):
     def get_officials_list(self):
         officials = Official.objects.filter(team_id=self.team.get_id()).order_by('last_name', 'first_name')
         officials_result_list = []
+        years_set = set()
         for current_official in officials:
+            years_set.update(
+                list(current_official.officiallicensehistory_set.all().values_list('created_at__year', flat=True)))
             try:
                 officials_result_list += [
                     OfficialAppearanceTeamListEntry(current_official, self.year).as_json()
@@ -72,4 +75,7 @@ class OfficialAppearanceTeamList(object):
             except OfficialLicenseHistory.DoesNotExist:
                 # no official found with a license for the year ... skip it
                 continue
-        return officials_result_list
+        return {
+            'years': sorted(years_set),
+            'list': officials_result_list
+        }

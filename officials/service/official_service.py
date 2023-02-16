@@ -21,7 +21,7 @@ class OfficialService:
         return result_list
 
     def _obfuscate_result_list(self, result_list):
-        for current_official in result_list.get('officials_list'):
+        for current_official in result_list.get('officials_list').get('list'):
             obfuscated_first_name = self._obfuscate_name(current_official.get('first_name'))
             obfuscated_last_name = self._obfuscate_name(current_official.get('last_name'))
             current_official.update(first_name=obfuscated_first_name, last_name=obfuscated_last_name)

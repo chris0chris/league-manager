@@ -1,4 +1,3 @@
-# Create your views here.
 from datetime import datetime
 
 from django.contrib import messages
@@ -22,11 +21,13 @@ class OfficialsTeamListView(View):
         team_id = kwargs.get('pk')
         year = kwargs.get('year', datetime.today().year)
         official_service = OfficialService()
-        if self.is_user_allowed_to_see_official_names(team_id):
-            context = {'object_list': official_service.get_officials_for(team_id, year, are_names_obfuscated=False)}
-        else:
-            context = {'object_list': official_service.get_officials_for(team_id, year)}
-
+        need_names_to_be_obfuscated = not self.is_user_allowed_to_see_official_names(team_id)
+        context = {
+            'team_id': team_id,
+            'object_list': official_service.get_officials_for(
+                team_id, year,
+                are_names_obfuscated=need_names_to_be_obfuscated)
+        }
         return render(request, self.template_name, context)
 
     def is_user_allowed_to_see_official_names(self, team_id):
@@ -149,7 +150,7 @@ class AddExternalGameOfficialUpdateView(LoginRequiredMixin, UserPassesTestMixin,
         return self.request.user.is_staff
 
 
-class GameCountOfficials(View):
+class GameCountOfficials(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'officials/game_count.html'
 
     def get(self, request, *args, **kwargs):

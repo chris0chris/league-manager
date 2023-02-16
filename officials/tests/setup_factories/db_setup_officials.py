@@ -15,10 +15,12 @@ class DbSetupOfficials:
         team = TeamFactory(name=team_name)
         official1 = OfficialFactory(first_name='Franzi', last_name='Fedora', team=team, external_id=1)
         official2 = OfficialFactory(first_name='Julia', last_name='Jegura', team=team, external_id=7)
-        OfficialLicenseHistoryFactory(license=OfficialLicenseFactory(name='F1'), official=official1)
         OfficialLicenseHistoryFactory(license=OfficialLicenseFactory(name='F2'), official=official1,
                                       created_at='2020-07-07')
+        OfficialLicenseHistoryFactory(license=OfficialLicenseFactory(name='F1'), official=official1)
         OfficialLicenseHistoryFactory(license=OfficialLicenseFactory(name='F2'), official=official2)
+        OfficialLicenseHistoryFactory(license=OfficialLicenseFactory(name='F2'), official=official2,
+                                      created_at=str(datetime.today().year - 1) + '-01-01')
         return team
 
     def create_officials_full_setup(self):
