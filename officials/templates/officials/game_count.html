@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="media content-section">
+    <div class="media-body">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">External-ID</th>
+                <th scope="col">Team</th>
+                <th scope="col">Nachname</th>
+                <th scope="col">Vorname</th>
+                <th scope="col">Lizenz</th>
+                <th scope="col">Lizenz-Jahr</th>
+                <th scope="col">#Saison {{ season }}</th>
+                <th scope="col">#Insgesamt</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for official in officials_list %}
+            <tr class="{% if official.license_year != season %}bg-danger text-white{% endif %}">
+                <th scope="row">{{official.external_id}}</th>
+                <td>{{official.team}}</td>
+                <td>{{official.last_name}}</td>
+                <td>{{official.first_name}}</td>
+                <td>{{official.last_license}}</td>
+                <td>{{official.license_year}}</td>
+                <td class="{% if official.current_season < 4 %}bg-warning{% endif %}">{{official.current_season}}</td>
+                <td>{{official.overall}}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</article>
+{% endblock content %}

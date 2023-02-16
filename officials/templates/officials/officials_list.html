@@ -2,10 +2,16 @@
 {% block content %}
 <article class="media content-section">
     <div class="media-body">
-        <h1>{{ object_list.year }}</h1>
+        <h1>{{ object_list.year }} - {{ object_list.team }}</h1>
         <p>Angezeigt werden alle Spiele (inklusive externe Spiele, z.B. für Landesverband) die gepfiffen wurden für
             lizenzierte Offizielle. In Klammern sind alle Spiele die für die 5er DFFL gepfiffen wurden.</p>
-        {{ object_list.officials_list|length }} - Offizielle
+
+        {% for year in object_list.officials_list.years %}
+        <a href="/officials/team/{{team_id}}/list/{{year}}">{{ year }}</a>
+        {% endfor %}
+        <p>
+
+            {{ object_list.officials_list.list|length }} - Offizielle
         <table class="table table-hover">
             <thead>
             <tr>
@@ -21,7 +27,7 @@
             </tr>
             </thead>
             <tbody>
-            {% for official in object_list.officials_list %}
+            {% for official in object_list.officials_list.list %}
             <tr>
                 <th scope="row">{{official.id}}</th>
                 <td>{{official.last_name}}</td>

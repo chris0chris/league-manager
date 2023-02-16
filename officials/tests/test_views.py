@@ -1,3 +1,4 @@
+from datetime import datetime
 from http import HTTPStatus
 
 from django.contrib.auth.models import User
@@ -8,7 +9,7 @@ from gamedays.tests.setup_factories.db_setup import DBSetup
 from officials.models import Official, OfficialExternalGames
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 from officials.urls import OFFICIALS_LIST_FOR_TEAM, OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE, \
-    OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE
+    OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE, OFFICIALS_GAME_COUNT
 from teammanager.models import Gameinfo
 
 
@@ -18,7 +19,7 @@ class TestOfficialListView(WebTest):
         response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
         assert response.status_code == HTTPStatus.OK
         context_items = response.context['object_list']
-        first_official: dict = context_items.get('officials_list')[0]
+        first_official: dict = context_items.get('officials_list').get('list')[0]
         assert first_official.get('first_name') == 'F****'
         assert first_official.get('last_name') == 'F****'
 
@@ -29,7 +30,7 @@ class TestOfficialListView(WebTest):
         response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
         assert response.status_code == HTTPStatus.OK
         context_items = response.context['object_list']
-        first_official: dict = context_items.get('officials_list')[1]
+        first_official: dict = context_items.get('officials_list').get('list')[1]
         assert first_official.get('first_name') == 'J****'
         assert first_official.get('last_name') == 'J****'
 
@@ -39,7 +40,7 @@ class TestOfficialListView(WebTest):
         response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
         context_items = response.context['object_list']
         all_officials = Official.objects.all()
-        assert len(context_items['officials_list']) == len(all_officials)
+        assert len(context_items['officials_list']['list']) == len(all_officials)
 
 
 class TestAddInternalGameOfficialUpdateView(WebTest):
@@ -116,3 +117,27 @@ class TestAddExternalGameOfficialUpdateView(WebTest):
         assert '#Spiele 3: Franzi Fedora' in \
                response.html.find_all("div", {"class": "alert-success"})[0].text
         assert OfficialExternalGames.objects.all().count() == 2
+
+
+class TestGameCountOfficials(WebTest):
+    def test_all_entries_will_be_checked(self):
+        user = DBSetup().create_new_user('some staff user', is_staff=True)
+        self.app.set_user(user)
+        DbSetupOfficials().create_officials_full_setup()
+        year = datetime.today().year
+        response: DjangoWebtestResponse = self.app.get(
+            reverse(OFFICIALS_GAME_COUNT, kwargs={'year': year})
+        )
+        assert len(response.context['officials_list']) == Official.objects.all().count()
+        assert response.context['season'] == year
+
+    def test_entries_only_for_id_is_checked(self):
+        user = DBSetup().create_new_user('some staff user', is_staff=True)
+        self.app.set_user(user)
+        DbSetupOfficials().create_officials_full_setup()
+        year = datetime.today().year
+        response: DjangoWebtestResponse = self.app.get(
+            reverse(OFFICIALS_GAME_COUNT, kwargs={'year': year}) + '?externalIds=,,  , 7 '
+        )
+        assert len(response.context['officials_list']) == 1
+        assert response.context['officials_list'][0]['first_name'] == 'Julia'

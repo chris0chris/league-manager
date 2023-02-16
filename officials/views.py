@@ -1,4 +1,3 @@
-# Create your views here.
 from datetime import datetime
 
 from django.contrib import messages
@@ -20,13 +19,15 @@ class OfficialsTeamListView(View):
 
     def get(self, request, **kwargs):
         team_id = kwargs.get('pk')
-        year = kwargs.get('year')
+        year = kwargs.get('year', datetime.today().year)
         official_service = OfficialService()
-        if self.is_user_allowed_to_see_official_names(team_id):
-            context = {'object_list': official_service.get_officials_for(team_id, year, are_names_obfuscated=False)}
-        else:
-            context = {'object_list': official_service.get_officials_for(team_id, year)}
-
+        need_names_to_be_obfuscated = not self.is_user_allowed_to_see_official_names(team_id)
+        context = {
+            'team_id': team_id,
+            'object_list': official_service.get_officials_for(
+                team_id, year,
+                are_names_obfuscated=need_names_to_be_obfuscated)
+        }
         return render(request, self.template_name, context)
 
     def is_user_allowed_to_see_official_names(self, team_id):
@@ -40,8 +41,6 @@ class AllOfficialsListView(View):
     template_name = 'officials/all_officials_list.html'
 
     def get(self, request, **kwargs):
-        year = kwargs.get('year')
-        official_service = OfficialService()
         all_teams = Team.objects.all().exclude(location='dummy').order_by('description')
         context = {'object_list': all_teams}
         return render(request, self.template_name, context)
@@ -59,6 +58,7 @@ class GameOfficialListView(View):
             game_officials_with_no_official = game_officials.filter(gameinfo__officials__pk=team_id, official=None)
             game_officials_with_official_link = game_officials.filter(official__team__pk=team_id)
             game_officials = game_officials_with_no_official.union(game_officials_with_official_link)
+        game_officials.order_by('gameinfo__gameday__date__year')
         is_staff = request.user.is_staff
         team_name = request.user.username
         context = {
@@ -148,3 +148,31 @@ class AddExternalGameOfficialUpdateView(LoginRequiredMixin, UserPassesTestMixin,
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+class GameCountOfficials(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = 'officials/game_count.html'
+
+    def get(self, request, *args, **kwargs):
+        year = kwargs.get('year', datetime.today().year)
+        external_ids = request.GET.get('externalIds', '')
+        external_ids = self.get_external_ids_as_int(external_ids)
+        official_service = OfficialService()
+        context = {
+            'season': year,
+            'officials_list': official_service.get_game_count(year, external_ids)
+        }
+        return render(request, self.template_name, context)
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_external_ids_as_int(self, external_ids):
+        ids_as_array = external_ids.split(',')
+        all_ids_as_int = []
+        for current_id in ids_as_array:
+            try:
+                all_ids_as_int += [int(current_id)]
+            except ValueError:
+                continue
+        return all_ids_as_int

@@ -14,7 +14,11 @@ class TestOfficialApearanceTeamList(TestCase):
         officials_list = OfficialAppearanceTeamList(0, current_year)
         assert officials_list.as_json() == {
             'year': current_year,
-            'officials_list': []
+            'team': 'Team nicht gefunden',
+            'officials_list': {
+                'list': [],
+                'years': []
+            }
         }
 
     def test_appearance_list_is_correct(self):
@@ -23,8 +27,15 @@ class TestOfficialApearanceTeamList(TestCase):
         officials_list = OfficialAppearanceTeamList(team.pk, current_year)
         result = officials_list.as_json()
         assert result['year'] == current_year
-        assert len(result['officials_list']) == 2
+        assert len(result['officials_list']['list']) == 2
 
+    def test_appearance_list_has_correct_year_count(self):
+        team = DbSetupOfficials().create_officials_full_setup()
+        current_year = datetime.today().year
+        officials_list = OfficialAppearanceTeamList(team.pk, current_year)
+        result = officials_list.as_json()
+        assert result['year'] == current_year
+        assert len(result['officials_list']['years']) == 3
 
 class TestOfficialAppearanceTeamListEntry(TestCase):
     def test_list_entry_results_as_expected(self):
