@@ -1,6 +1,6 @@
 from factory.django import DjangoModelFactory
 
-from officials.models import Official, OfficialLicense, OfficialLicenseHistory
+from officials.models import Official, OfficialLicense, OfficialLicenseHistory, OfficialExternalGames
 
 
 class OfficialFactory(DjangoModelFactory):
@@ -19,3 +19,8 @@ class OfficialLicenseFactory(DjangoModelFactory):
 class OfficialLicenseHistoryFactory(DjangoModelFactory):
     class Meta:
         model = OfficialLicenseHistory
+
+
+class OfficialExternalGamesFactory(DjangoModelFactory):
+    class Meta:
+        model = OfficialExternalGames

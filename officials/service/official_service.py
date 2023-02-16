@@ -1,16 +1,19 @@
 from datetime import datetime
 
+from django.db.models import Sum
+
 from officials.models import Official
 from officials.service.game_official_entries import InternalGameOfficialEntry, ExternalGameOfficialEntry
 from officials.service.officials_appearance import OfficialAppearanceTeamList
+from officials.service.officials_repository_service import OfficialsRepositoryService
 from teammanager.models import Team
 
 
 class OfficialService:
-    def get_officials_for(self, team_id, year=None, are_names_obfuscated=True):
-        if year is None:
-            today = datetime.today()
-            year = today.year
+    def __init__(self):
+        self.repository_service = OfficialsRepositoryService()
+
+    def get_officials_for(self, team_id, year, are_names_obfuscated=True):
         officials_list = OfficialAppearanceTeamList(team_id, year)
         result_list = officials_list.as_json()
         if are_names_obfuscated:
@@ -50,3 +53,11 @@ class OfficialService:
     def create_external_official_entry(self, result) -> str:
         entry = ExternalGameOfficialEntry(*result)
         return entry.save()
+
+    def get_game_count(self, year: int, external_ids: [int]) -> []:
+        return self.repository_service.get_officials_game_count(year, external_ids)
+
+    def _aggregate_games(self, external_official_qs):
+        all_external_games_count = external_official_qs.aggregate(num_games=Sum('number_games')).get('num_games',
+                                                                                                     0) or 0
+        return all_external_games_count

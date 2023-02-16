@@ -1,7 +1,7 @@
 from django.urls import path
 
 from officials.views import OfficialsTeamListView, AllOfficialsListView, GameOfficialListView, \
-    AddInternalGameOfficialUpdateView, AddExternalGameOfficialUpdateView
+    AddInternalGameOfficialUpdateView, AddExternalGameOfficialUpdateView, GameCountOfficials
 
 OFFICIALS_LIST_FOR_TEAM = 'view-officials-list-for-team'
 OFFICIALS_LIST_FOR_TEAM_AND_YEAR = 'view-officials-list-for-team-and-year'
@@ -12,6 +12,7 @@ OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_TEAM = 'view-officials-game-officials-ap
 OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_TEAM_AND_YEAR = 'view-officials-game-officials-appearance-for-team-and-year'
 OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE = 'officials-gameofficial-internal-create'
 OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE = 'officials-gameofficial-external-create'
+OFFICIALS_GAME_COUNT = 'officials-game-count'
 
 urlpatterns = [
     path('team/<int:pk>/list', OfficialsTeamListView.as_view(), name=OFFICIALS_LIST_FOR_TEAM),
@@ -28,4 +29,6 @@ urlpatterns = [
          name=OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE),
     path('gameofficial/external/create', AddExternalGameOfficialUpdateView.as_view(),
          name=OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE),
+    path('game-count/<int:year>', GameCountOfficials.as_view(), name=OFFICIALS_GAME_COUNT),
+
 ]
