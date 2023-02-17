@@ -113,6 +113,9 @@ class Gameday(models.Model):
 
     objects: QuerySet = models.Manager()
 
+    class Meta:
+        ordering = ['date']
+
     def __str__(self):
         return f'{self.pk}__{self.date} {self.name}'
 
@@ -131,6 +134,9 @@ class Gameinfo(models.Model):
     in_possession = models.CharField(max_length=100, blank=True, null=True, default=None)
 
     objects: QuerySet = models.Manager()
+
+    class Meta:
+        ordering = ['scheduled']
 
     def __str__(self):
         return f'{self.gameday.pk}__{self.pk}__{self.field} - {self.scheduled}: {self.stage} / {self.standing} ' \

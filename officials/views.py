@@ -54,14 +54,15 @@ class GameOfficialListView(View):
         team_id = kwargs.get('pk')
         game_officials = GameOfficial.objects.filter(gameinfo__gameday__date__year=year).exclude(
             position='Scorecard Judge')
+        game_officials = game_officials.order_by('gameinfo__gameday__date')
         if team_id:
             game_officials_with_no_official = game_officials.filter(gameinfo__officials__pk=team_id, official=None)
             game_officials_with_official_link = game_officials.filter(official__team__pk=team_id)
             game_officials = game_officials_with_no_official.union(game_officials_with_official_link)
-        game_officials.order_by('gameinfo__gameday__date__year')
         is_staff = request.user.is_staff
         team_name = request.user.username
         context = {
+            'year': year,
             'object_list': GameOfficialAllInfosSerializer(instance=game_officials, display_names_for_team=team_name,
                                                           is_staff=is_staff, many=True).data}
         return render(request, self.template_name, context)
