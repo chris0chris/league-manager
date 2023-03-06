@@ -135,6 +135,9 @@ class TestGameCountOfficials(WebTest):
         user = DBSetup().create_new_user('some staff user', is_staff=True)
         self.app.set_user(user)
         DbSetupOfficials().create_officials_full_setup()
+        official: Official = Official.objects.last()
+        official.external_id = 7
+        official.save()
         year = datetime.today().year
         response: DjangoWebtestResponse = self.app.get(
             reverse(OFFICIALS_GAME_COUNT, kwargs={'year': year}) + '?externalIds=,,  , 7 '
