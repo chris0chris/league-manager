@@ -6,7 +6,8 @@ from teammanager.models import Gameday, Season, League
 SCHEDULE_CHOICES = (
     ("3_1", "3 Teams 1 Feld"),
     ("4_1", "4 Teams 1 Feld"),
-    ("5_2", "5 Teams 2 Felder"),
+    ("5_dffl1_2", "5 Teams 2 Felder (DFFL1)"),
+    ("5_2", "5 Teams 2 Felder (DFFL2"),
     ("6_2", "6 Teams 2 Felder"),
     ("7_2", "7 Teams 2 Felder"),
     ("8_2", "8 Teams 2 Felder"),
