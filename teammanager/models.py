@@ -204,15 +204,14 @@ class TeamLog(models.Model):
     created_time = models.TimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
 
-
     objects: QuerySet = models.Manager()
 
     def __str__(self):
         if self.cop:
             return f'{self.gameinfo.pk}__{self.team}#{self.sequence} {self.event} - Half: {self.half}' \
                    f'{" [DELETED]" if self.isDeleted else ""}'
-        return f'{self.gameinfo.pk}__{self.team}#{self.sequence} {self.event} Player: {self.player} Value: {self.value} ' \
-               f'- Half: {self.half}{" [DELETED]" if self.isDeleted else ""}'
+        return f'{self.gameinfo.pk}__{self.team}#{self.sequence} {self.event} Player: {self.player} ' \
+               f'Value: {self.value} - Half: {self.half}{" [DELETED]" if self.isDeleted else ""}'
 
 
 class PlayerAchievement(models.Model):
