@@ -1,6 +1,7 @@
 import json
 import math
 from datetime import datetime
+from typing import List
 
 import requests
 from django.conf import settings
@@ -122,7 +123,7 @@ class ApiParticipants:
         for current_participant in all_participants:
             self.participants += [ApiParticipant(current_participant)]
 
-    def get_all(self) -> list[ApiParticipant]:
+    def get_all(self) -> List[ApiParticipant]:
         return self.participants
 
 
