@@ -25,6 +25,7 @@ class GamedayListAPIView(ListAPIView):
             return [Gameday.objects.first()]
         return Gameday.objects.filter(date=datetime.today())
 
+
 class GameinfoUpdateAPIView(RetrieveUpdateAPIView):
     serializer_class = GameinfoSerializer
     queryset = Gameinfo.objects.all()
@@ -64,6 +65,7 @@ class GameOfficialCreateOrUpdateView(RetrieveUpdateAPIView):
 
 class GamedayScheduleView(APIView):
 
+    # noinspection PyMethodMayBeStatic
     def get(self, request: Request, *args, **kwargs):
         gs = GamedayService.create(kwargs['pk'])
         get = request.query_params.get('get')
@@ -85,6 +87,7 @@ class GamedayCreateView(CreateAPIView):
 
 
 class LivetickerAPIView(APIView):
+    # noinspection PyMethodMayBeStatic
     def get(self, request, *args, **kwargs):
         from ast import literal_eval
         get_all_ticks_for = request.query_params.get('getAllTicksFor')

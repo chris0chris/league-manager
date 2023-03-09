@@ -47,13 +47,29 @@ class TestSchedule:
         assert schedule.entries[0].games[last_game].away == 'A2'
         assert schedule.entries[0].games[last_game].officials == 'A4'
 
+    def test_schedule_loaded_for_5_teams_2_fields_dffl1(self):
+        groups = [['A1', 'A2', 'A3', 'A4', 'A5']]
+        schedule = Schedule('5_dffl1_2', groups)
+        assert len(schedule.entries) == 2
+        assert schedule.entries[0].field == '1'
+        assert schedule.entries[1].field == '2'
+        assert len(schedule.entries[0].games) == 5
+        first_game = 0
+        last_game = 4
+        assert schedule.entries[0].games[first_game].home == 'A1'
+        assert schedule.entries[0].games[first_game].away == 'A2'
+        assert schedule.entries[0].games[first_game].officials == 'A5'
+        assert schedule.entries[0].games[last_game].home == 'A4'
+        assert schedule.entries[0].games[last_game].away == 'A5'
+        assert schedule.entries[0].games[last_game].officials == 'A1'
+
     def test_schedule_throws_exception_format_and_groups_dont_fit(self):
         groups = [['A1', 'A2', 'A3', 'A4'], ['B1', 'B2', 'B3']]
         with pytest.raises(ScheduleTeamMismatchError):
             Schedule('6_2', groups)
 
 
-class TestScheduleCreator2(TestCase):
+class TestScheduleCreator(TestCase):
     def test_schedule_created_for_4_teams(self):
         gameday = DBSetup().create_empty_gameday()
         DBSetup().create_playoff_placeholder_teams()
@@ -70,6 +86,23 @@ class TestScheduleCreator2(TestCase):
         assert str(gameinfo_set.last().scheduled) == '15:50:00'
         assert Gameresult.objects.filter(gameinfo=gameinfo).count() == 2
         assert Gameresult.objects.all().count() == 12
+
+    def test_schedule_created_for_5_teams_dffl1(self):
+        gameday = DBSetup().create_empty_gameday()
+        DBSetup().create_playoff_placeholder_teams()
+        group_A = DBSetup().create_teams('A', 5)
+        assert Gameinfo.objects.filter(gameday_id=gameday.pk).exists() is False
+        groups = [group_A]
+        sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule("5_dffl1_2", groups))
+        sc.create()
+        gameinfo_set = Gameinfo.objects.filter(gameday_id=gameday.pk)
+        assert gameinfo_set.count() == 10
+        gameinfo: Gameinfo = gameinfo_set.first()
+        assert gameinfo.officials.name == 'A5'
+        assert str(gameinfo.scheduled) == '10:00:00'
+        assert str(gameinfo_set.last().scheduled) == '16:40:00'
+        assert Gameresult.objects.filter(gameinfo=gameinfo).count() == 2
+        assert Gameresult.objects.all().count() == 20
 
     def test_schedule_created_for_6_teams_and_2_fields(self):
         gameday = DBSetup().create_empty_gameday()

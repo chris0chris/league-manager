@@ -1,15 +1,8 @@
 import json
 import pathlib
-from abc import ABC, abstractmethod
 
 from gamedays.service.model_wrapper import GamedayModelWrapper
-from teammanager.models import Gameinfo, Gameresult, Team
-
-
-class Abstract(ABC):
-    @abstractmethod
-    def update_schedule(self):
-        pass
+from teammanager.models import Gameinfo, Gameresult, Team, Gameday
 
 
 class UpdateGameEntry:
@@ -54,7 +47,7 @@ class ScheduleUpdate:
     def __init__(self, gameday_id, format):
         self.gameday_id = gameday_id
         number_of_teams = int(format.split('_')[0])
-        if number_of_teams > 5:
+        if number_of_teams > 5 and not Gameday.objects.get(pk=gameday_id).league.name == 'SFL':
             with open(pathlib.Path(__file__).parent / 'schedules/update_{0}.json'.format(format), 'r') as f:
                 self.data = json.loads(f.read())
         else:

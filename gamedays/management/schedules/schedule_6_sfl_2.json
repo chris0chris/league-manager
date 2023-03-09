@@ -1,0 +1,85 @@
+[
+  {
+    "field": "1",
+    "games": [
+      {
+        "break_after": 20,
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_0",
+        "away": "1_0",
+        "official": "0_2"
+      },
+      {
+        "break_after": 20,
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_0",
+        "away": "1_1",
+        "official": "1_0"
+      },
+      {
+        "break_after": 20,
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_0",
+        "away": "1_2",
+        "official": "1_1"
+      },
+      {
+        "break_after": 20,
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_2",
+        "away": "1_0",
+        "official": "0_0"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_2",
+        "away": "1_1",
+        "official": "0_0"
+      }
+    ]
+  },
+  {
+    "field": "2",
+    "games": [
+      {
+        "break_after": 20,
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_1",
+        "away": "1_1",
+        "official": "1_2"
+      },
+      {
+        "break_after": 20,
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_2",
+        "away": "1_2",
+        "official": "0_1"
+      },
+      {
+        "break_after": 20,
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_1",
+        "away": "1_0",
+        "official": "0_2"
+      },
+      {
+        "break_after": 20,
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_1",
+        "away": "1_2",
+        "official": "1_1"
+      },
+      {
+      }
+    ]
+  }
+]

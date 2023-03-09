@@ -9,18 +9,21 @@ from teammanager.models import Team, Gameinfo
 
 
 class DbSetupOfficials:
+    # noinspection PyMethodMayBeStatic
     def create_officials_and_team(self) -> Team:
         team_name = 'Test Team'
         DBSetup().create_new_user(team_name)
         team = TeamFactory(name=team_name)
-        official1 = OfficialFactory(first_name='Franzi', last_name='Fedora', team=team, external_id=1)
-        official2 = OfficialFactory(first_name='Julia', last_name='Jegura', team=team, external_id=7)
-        OfficialLicenseHistoryFactory(license=OfficialLicenseFactory(name='F2'), official=official1,
+        license_f2 = OfficialLicenseFactory(name='F2')
+        license_f1 = OfficialLicenseFactory(name='F1')
+        official1 = OfficialFactory(first_name='Franzi', last_name='Fedora', team=team)
+        official2 = OfficialFactory(first_name='Julia', last_name='Jegura', team=team)
+        OfficialLicenseHistoryFactory(license=license_f2, official=official1,
                                       created_at='2020-07-07')
-        OfficialLicenseHistoryFactory(license=OfficialLicenseFactory(name='F1'), official=official1)
-        OfficialLicenseHistoryFactory(license=OfficialLicenseFactory(name='F2'), official=official2)
-        OfficialLicenseHistoryFactory(license=OfficialLicenseFactory(name='F2'), official=official2,
+        OfficialLicenseHistoryFactory(license=license_f1, official=official1)
+        OfficialLicenseHistoryFactory(license=license_f2, official=official2,
                                       created_at=str(datetime.today().year - 1) + '-01-01')
+        OfficialLicenseHistoryFactory(license=license_f2, official=official2)
         return team
 
     def create_officials_full_setup(self):
@@ -38,6 +41,7 @@ class DbSetupOfficials:
         gameday.save()
         return team
 
+    # noinspection PyMethodMayBeStatic
     def create_external_officials_entries(self):
         current_year = datetime.today()
         last_year = current_year - timedelta(days=3 * 365)

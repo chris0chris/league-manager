@@ -1,0 +1,96 @@
+[
+  {
+    "field": "1",
+    "games": [
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_0",
+        "away": "1_0",
+        "official": "0_2"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_0",
+        "away": "1_1",
+        "official": "1_2"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_2",
+        "away": "1_2",
+        "official": "1_3"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_0",
+        "away": "1_3",
+        "official": "1_2"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_2",
+        "away": "1_0",
+        "official": "0_1"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_2",
+        "away": "1_1",
+        "official": "0_0"
+      }
+    ]
+  },
+  {
+    "field": "2",
+    "games": [
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_1",
+        "away": "1_2",
+        "official": "1_1"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_2",
+        "away": "1_3",
+        "official": "0_1"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_1",
+        "away": "1_0",
+        "official": "1_1"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_1",
+        "away": "1_1",
+        "official": "1_0"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_0",
+        "away": "1_2",
+        "official": "1_3"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe SFL",
+        "home": "0_1",
+        "away": "1_3",
+        "official": "1_0"
+      }
+    ]
+  }
+]

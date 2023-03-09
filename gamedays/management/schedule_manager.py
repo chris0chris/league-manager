@@ -1,6 +1,7 @@
 import datetime
 import json
 import pathlib
+from typing import Union, List
 
 from teammanager.models import Gameday, Gameinfo, Gameresult, Team
 
@@ -14,16 +15,17 @@ class ScheduleTeamMismatchError(BaseException):
 
 
 class ScheduleEntry:
-    def __init__(self, schedule_entry: object):
+    def __init__(self, schedule_entry: dict):
         self.stage = schedule_entry['stage']
         self.standing = schedule_entry['standing']
         self.home = schedule_entry['home']
         self.away = schedule_entry['away']
         self.officials = schedule_entry['official']
+        self.break_after = schedule_entry.get('break_after', 0)
 
     def __repr__(self):
-        return f'ScheduleEntry({{stage: "{self.stage}", standing: "{self.standing}", ' \
-               f'home: "{self.home}", away: "{self.away}", official: "{self.officials}"}}'
+        return f'ScheduleEntry({{break_before: {self.break_after}, stage: "{self.stage}", ' \
+               f'standing: "{self.standing}", home: "{self.home}", away: "{self.away}", official: "{self.officials}"}}'
 
 
 class EmptyScheduleEntry:
@@ -36,8 +38,9 @@ class FieldSchedule:
         self.field = field
         self.games = self._create_schedule_entries(games)
 
+    # noinspection PyMethodMayBeStatic
     def _create_schedule_entries(self, games):
-        entries = []
+        entries: List[Union[ScheduleEntry, EmptyScheduleEntry]] = []
         for game in games:
             if len(game) == 0:
                 entries = entries + [EmptyScheduleEntry()]
@@ -89,10 +92,15 @@ class Schedule:
 
     def _format_match_number_of_teams(self):
         number_of_teams = int(self.format.split('_')[0])
-        return number_of_teams == sum(len(group) for group in self.groups)
+        sum_of_teams = 0
+        for group in self.groups:
+            sum_of_teams += len(group)
+        return number_of_teams == sum_of_teams
 
 
 class ScheduleCreator:
+    DEFAULT_GAME_LENGTH = 70
+
     def __init__(self, gameday: Gameday, schedule: Schedule):
         self.gameday = gameday
         self.schedule = schedule
@@ -108,7 +116,7 @@ class ScheduleCreator:
                     scheduled = self._calc_next_time_slot(scheduled)
                     continue
                 self._create_gameinfo_and_gameresult(game, field, scheduled)
-                scheduled = self._calc_next_time_slot(scheduled)
+                scheduled = self._calc_next_time_slot(scheduled, game.break_after)
 
     def _create_gameinfo_and_gameresult(self, game, field, scheduled):
         gameinfo = Gameinfo()
@@ -139,7 +147,9 @@ class ScheduleCreator:
         away.team = self._get_team(game.away)
         away.save()
 
-    def _calc_next_time_slot(self, scheduled):
+    # noinspection PyMethodMayBeStatic
+    def _calc_next_time_slot(self, scheduled, break_before=0):
         scheduled_to_datetime_object = datetime.datetime.combine(datetime.date(1, 1, 1), scheduled)
-        new_scheduled_time = (scheduled_to_datetime_object + datetime.timedelta(minutes=70)).time()
+        slot_length = self.DEFAULT_GAME_LENGTH + break_before
+        new_scheduled_time = (scheduled_to_datetime_object + datetime.timedelta(minutes=slot_length)).time()
         return new_scheduled_time

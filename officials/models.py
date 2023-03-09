@@ -10,15 +10,12 @@ class Official(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     team: Team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
-    external_id = models.CharField(max_length=100, null=True, default=None)
+    external_id = models.CharField(max_length=100, null=True, default=None, unique=True)
 
     objects: QuerySet = models.Manager()
 
-    def get_license(self):
-        return self.officiallicensehistory_set.first().license
-
     def __str__(self):
-        return f'{self.team.name}__{self.last_name}, {self.first_name}'
+        return f'{self.team.description}__{self.last_name}, {self.first_name}'
 
 
 class OfficialLicense(models.Model):
@@ -34,11 +31,12 @@ class OfficialLicenseHistory(models.Model):
     official: Official = models.ForeignKey(Official, on_delete=models.CASCADE)
     license = models.ForeignKey(OfficialLicense, on_delete=models.CASCADE)
     created_at = models.DateField(default=date.today)
+    result = models.PositiveSmallIntegerField(null=False, default=0)
 
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.created_at}__{self.license} - {self.official.last_name}'
+        return f'{self.created_at}__{self.license} - {self.official.last_name} # {self.result}'
 
 
 class OfficialExternalGames(models.Model):
