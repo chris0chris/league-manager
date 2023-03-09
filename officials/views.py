@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from django.contrib import messages
@@ -9,6 +10,7 @@ from django.views import View
 from officials.api.serializers import GameOfficialAllInfosSerializer
 from officials.forms import AddInternalGameOfficialEntryForm, AddExternalGameOfficialEntryForm
 from officials.models import Official
+from officials.service.moodle.moodle_service import MoodleService
 from officials.service.official_service import OfficialService
 from teammanager.models import Team, GameOfficial, Gameinfo
 
@@ -177,3 +179,18 @@ class GameCountOfficials(LoginRequiredMixin, UserPassesTestMixin, View):
             except ValueError:
                 continue
         return all_ids_as_int
+
+
+class MoodleReportView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = 'officials/moodle_report.html'
+
+    def get(self, request, *args, **kwargs):
+        moodle_service = MoodleService()
+        result = moodle_service.update_licenses()
+        context = {
+            'result': json.dumps(result, indent=4)
+        }
+        return render(request, self.template_name, context)
+
+    def test_func(self):
+        return self.request.user.is_staff

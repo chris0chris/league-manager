@@ -1,0 +1,149 @@
+import json
+import math
+from datetime import datetime
+
+import requests
+from django.conf import settings
+
+
+class FieldNotFoundException(Exception):
+    def __init__(self, field, current_field):
+        super().__init__(f'Field \'{field}\' not found. Instead got {json.dumps(current_field)}')
+
+
+class ApiUserInfo:
+    def __init__(self, user_info_json):
+        self.first_name = user_info_json[0]['firstname']
+        self.last_name = user_info_json[0]['lastname']
+        self.custom_fields = user_info_json[0]['customfields'][0]
+        self.id = user_info_json[0]['id']
+
+    def get_first_name(self) -> str:
+        return self.first_name
+
+    def get_last_name(self) -> str:
+        return self.last_name
+
+    def get_id(self) -> int:
+        return self.id
+
+    def get_team(self) -> str:
+        if self.custom_fields['name'] != 'Teamname':
+            raise FieldNotFoundException('Teamname', self.custom_fields)
+        return self.custom_fields['value']
+
+    def __str__(self):
+        return f'{self.id}: {self.last_name}, {self.first_name} -> {self.get_team()}'
+
+
+class ApiCourse:
+    def __init__(self, course_json):
+        self.end_date = datetime.fromtimestamp(course_json['enddate'])
+        self.license_id = self._map_category_to_license_id(course_json['categoryid'])
+        self.course_id = course_json['id']
+
+    def __str__(self):
+        return f'{self.course_id}: license_id {self.license_id} # {self.end_date}'
+
+    def __repr__(self):
+        return f'ApiCourse(course_json={{"id": {self.course_id}, "enddate":{self.end_date}}})'
+
+    # noinspection PyMethodMayBeStatic
+    def _map_category_to_license_id(self, category_id):
+        license_map = {
+            4: 1,
+            3: 3,
+            2: 2,
+        }
+        return license_map.get(category_id)
+
+    def is_relevant(self):
+        year = datetime.today().year
+        if self.course_id == 15:
+            return True
+        return self.end_date.year == year and self.license_id in [1, 2, 3]
+
+    def get_id(self):
+        return self.course_id
+
+    def get_year(self):
+        return self.end_date.year
+
+    def get_date(self):
+        return self.end_date
+
+    def get_license_id(self):
+        if self.course_id == 15:
+            return 1
+        return self.license_id
+
+
+class ApiCourses:
+    def __init__(self, courses_json):
+        all_courses = courses_json.get('courses', [])
+        self.courses = []
+        for current_course in all_courses:
+            self.courses += [ApiCourse(current_course)]
+
+    def __str__(self):
+        return f'Number courses: {len(self.courses)}'
+
+    def get_all(self):
+        return self.courses
+
+
+class ApiParticipant:
+    def __init__(self, participant_json):
+        gradeitem = participant_json['gradeitems'][0]
+        self.grademax = gradeitem['grademax']
+        self.graderaw = gradeitem['graderaw']
+        self.user_id = participant_json['userid']
+
+    def has_result(self):
+        if self.graderaw is not None and self.grademax is not None:
+            return True
+        return False
+
+    def get_result(self):
+        result = self.graderaw / self.grademax * 100
+        return int(math.ceil(result))
+
+    def __str__(self):
+        return f'{self.user_id}: graderaw {self.graderaw} / {self.grademax} grademax'
+
+    def get_user_id(self):
+        return self.user_id
+
+
+class ApiParticipants:
+    def __init__(self, participants_json):
+        all_participants = participants_json.get('usergrades', [])
+        self.participants = []
+        for current_participant in all_participants:
+            self.participants += [ApiParticipant(current_participant)]
+
+    def get_all(self) -> list[ApiParticipant]:
+        return self.participants
+
+
+class MoodleApi:
+    def __init__(self):
+        self.moodle_url = f'{settings.MOODLE_URL}/offd/moodle/webservice/rest/server.php' \
+                          f'?wstoken={settings.MOODLE_WSTOKEN}&moodlewsrestformat=json'
+
+    def __str__(self):
+        return f'{settings.MOODLE_URL}'
+
+    def get_courses(self) -> ApiCourses:
+        return ApiCourses(self._send_request('&wsfunction=core_course_get_courses_by_field'))
+
+    def get_participants_for_course(self, course_id) -> ApiParticipants:
+        return ApiParticipants(self._send_request(
+            f'&wsfunction=gradereport_user_get_grade_items&courseid={course_id}'))
+
+    def get_user_info(self, user_id) -> ApiUserInfo:
+        return ApiUserInfo(self._send_request(
+            f'&wsfunction=core_user_get_users_by_field&field=id&values[0]={user_id}'))
+
+    def _send_request(self, additional_params) -> dict:
+        return requests.get(f'{self.moodle_url}{additional_params}').json()
