@@ -59,11 +59,11 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Gameday
 
     def form_valid(self, form: Form):
-        groups = [list for list in [
+        groups = [group_list for group_list in [
             self._format_array(form.cleaned_data['group1']),
             self._format_array(form.cleaned_data['group2']),
             self._format_array(form.cleaned_data['group3']),
-            self._format_array(form.cleaned_data['group4'])] if list != ['']]
+            self._format_array(form.cleaned_data['group4'])] if group_list != ['']]
 
         try:
             sc = ScheduleCreator(
@@ -75,7 +75,7 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                            'Spielplan konnte nicht erstellt werden, '
                            'da es das Format als Spielplan nicht gibt: "{0}"'.format(self.object.format))
             return super(GamedayUpdateView, self).form_invalid(form)
-        except (IndexError, ScheduleTeamMismatchError):
+        except ScheduleTeamMismatchError:
             form.add_error(None,
                            'Spielplan konnte nicht erstellt werden, '
                            'da die Kombination #Teams und #Format nicht zum Spielplan passen')
@@ -93,5 +93,6 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         return self.request.user.is_staff
 
+    # noinspection PyMethodMayBeStatic
     def _format_array(self, data):
         return [value.strip() for value in data.split(',')]

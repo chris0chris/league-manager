@@ -15,6 +15,8 @@ SCHEDULE_CHOICES = (
     ("9_2", "9 Teams 2 Felder"),
     ("9_3", "9 Teams 3 Felder"),
     ("11_3", "11 Teams 3 Felder"),
+    ("6_sfl_2", "SFL - 3x3 Conference"),
+    ("7_sfl_2", "SFL - 3x4 Conference"),
 )
 
 
@@ -28,10 +30,10 @@ class GamedayCreateForm(forms.ModelForm):
         model = Gameday
         exclude = ['author']
         widgets = {
-            'date': forms.DateInput(format=('%d.%m.%Y'),
+            'date': forms.DateInput(format='%d.%m.%Y',
                                     attrs={'type': 'date'}
                                     ),
-            'start': forms.TimeInput(format=('%H:%M'), attrs={'type': 'time', 'value': '10:00'})
+            'start': forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'value': '10:00'})
         }
 
     def save(self, user=None):

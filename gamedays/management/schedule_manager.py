@@ -92,7 +92,10 @@ class Schedule:
 
     def _format_match_number_of_teams(self):
         number_of_teams = int(self.format.split('_')[0])
-        return number_of_teams == sum(len(group) for group in self.groups)
+        sum_of_teams = 0
+        for group in self.groups:
+            sum_of_teams += len(group)
+        return number_of_teams == sum_of_teams
 
 
 class ScheduleCreator:
