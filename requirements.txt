@@ -1,4 +1,4 @@
-Django==4.1
+Django==4.1.7
 django-crispy-forms==1.14.0
 numpy==1.23.1
 pandas==1.4.3
