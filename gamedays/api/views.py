@@ -89,10 +89,13 @@ class GamedayCreateView(CreateAPIView):
 class LivetickerAPIView(APIView):
     # noinspection PyMethodMayBeStatic
     def get(self, request, *args, **kwargs):
-        from ast import literal_eval
-        get_all_ticks_for = request.query_params.get('getAllTicksFor')
-        games_with_all_ticks = literal_eval(get_all_ticks_for) if get_all_ticks_for is not None else []
-        ls = LivetickerService(game_ids_with_all_ticks=games_with_all_ticks)
+        games_with_all_ticks = self._parse_input(request.query_params.get('getAllTicksFor'))
+        league = self._parse_input(request.query_params.get('league'))
+        ls = LivetickerService(game_ids_with_all_ticks=games_with_all_ticks, league=league)
         liveticker = ls.get_liveticker()
         liveticker_as_json = [entry.as_json() for entry in liveticker]
         return Response(liveticker_as_json)
+
+    # noinspection PyMethodMayBeStatic
+    def _parse_input(self, input_value):
+        return input_value.split(',') if input_value else []
