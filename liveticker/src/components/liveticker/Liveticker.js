@@ -8,6 +8,8 @@ import GameTicker from './GameTicker';
 
 const Liveticker = (props) => {
   const [endlessCounter, setEndlessCounter] = useState(0);
+  const searchParams = new URLSearchParams(document.location.search);
+  const league = searchParams.get('league') || '';
   // eslint-disable-next-line no-unused-vars
   const [gamesToDisplayAllTicks, setGamesToDisplayAllTicks] = useState([]);
   const timer = () => setEndlessCounter(endlessCounter + 1);
@@ -34,7 +36,7 @@ const Liveticker = (props) => {
     gamesToDisplayAllTicks.forEach((index) => {
       gameIds.push(props.liveticker[index].gameId);
     });
-    props.getLiveticker(gameIds);
+    props.getLiveticker(gameIds.toString(), league);
   };
   return (
     <>
