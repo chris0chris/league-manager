@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from gamedays.service.liveticker_service import LivetickerService, Liveticker, Tick
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo, Gameresult, TeamLog, Gameday
+from teammanager.models import Gameinfo, Gameresult, TeamLog, Gameday, League
 
 
 class TestLivetickerService(TestCase):
@@ -18,6 +18,20 @@ class TestLivetickerService(TestCase):
         first_game = Gameinfo.objects.first()
         Gameinfo.objects.filter(pk__gt=first_game.pk + 1).update(scheduled='11:00:00')
         ls = LivetickerService(gameday.pk)
+        assert len(ls.get_liveticker()) == 2
+
+    def test_get_livetickers_for_league(self):
+        gameday = DBSetup().g62_status_empty()
+        league = League(name='test-league')
+        league.save()
+        gameday.league = league
+        gameday.save()
+        first_game = Gameinfo.objects.first()
+        Gameinfo.objects.filter(pk__gt=first_game.pk + 1).update(scheduled='11:00:00')
+        ls = LivetickerService(league=['specific-league'])
+        assert len(ls.get_liveticker()) == 0
+
+        ls = LivetickerService(league=['test-league'])
         assert len(ls.get_liveticker()) == 2
 
     def test_get_all_livetickers_with_games_for_the_next_round_playing(self):

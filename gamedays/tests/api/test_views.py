@@ -174,7 +174,7 @@ class TestLivetickerAPIView(WebTest):
         DBSetup().g62_status_empty()
         first_game = Gameinfo.objects.first()
         Gameinfo.objects.filter(pk__gt=first_game.pk + 1).update(scheduled='11:00')
-        response = self.app.get(reverse(API_LIVETICKER_ALL) + '?getAllTicksFor=[1,2]')
+        response = self.app.get(reverse(API_LIVETICKER_ALL) + '?getAllTicksFor=1,2')
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 2
         self.expected_liveticker_result["gameId"] = first_game.pk

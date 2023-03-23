@@ -1,10 +1,8 @@
 from datetime import datetime
 
-from django.conf import settings
-
 from gamedays.service.gameday_settings import SCHEDULED, GAMEDAY_ID
 from gamedays.service.wrapper.gameresult_wrapper import GameresultWrapper
-from teammanager.models import Gameinfo, TeamLog, Gameday
+from teammanager.models import Gameinfo, TeamLog, Gameday, League
 
 
 class Tick(object):
@@ -98,13 +96,17 @@ class Liveticker(object):
 
 
 class LivetickerService(object):
-    def __init__(self, gameday_id=None, game_ids_with_all_ticks=()):
+    def __init__(self, gameday_id=None, game_ids_with_all_ticks=(), league=[]):
         self.game_ids_with_all_ticks = game_ids_with_all_ticks
+        if not league:
+            league = League.objects.all()
+        else:
+            league = League.objects.filter(name__in=league)
         if gameday_id is None:
-            today_gamedays = Gameday.objects.filter(date=datetime.today())
+            today_gamedays = Gameday.objects.filter(date=datetime.today(), league__in=league)
             # ToDo  dummy Scorecard
-            if settings.DEBUG:
-                today_gamedays = Gameday.objects.all()
+            # if settings.DEBUG:
+            #     today_gamedays = Gameday.objects.all()
             self.gameday_ids = [gameday.pk for gameday in today_gamedays]
         else:
             self.gameday_ids = [gameday_id]
