@@ -36,7 +36,7 @@ describe('InputDropdown component', () => {
     expect(inputElement).toBeInTheDocument();
     expect(inputElement).toBeEnabled();
     expect(screen.getAllByText(/name/i)).toHaveLength(3);
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('searchButton')).toBeInTheDocument();
     expect(updateMock.mock.calls).toHaveLength(0);
   });
 
@@ -58,7 +58,7 @@ describe('InputDropdown component', () => {
       screen.getByPlaceholderText('inputDropdownPlaceholderText');
     expect(inputElement).not.toHaveAttribute('readonly');
     expect(inputElement).toHaveValue('different text');
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('searchButton')).toBeInTheDocument();
     expect(updateMock.mock.calls[0][0]).
         toEqual({text: 'different text', id: null});
     expect(updateMock.mock.calls).toHaveLength(1);

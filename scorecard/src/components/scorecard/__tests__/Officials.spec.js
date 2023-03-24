@@ -108,7 +108,7 @@ describe('Officials component', () => {
     const user = userEvent.setup();
     setup(true, false);
     await user.click(screen.getByPlaceholderText('Scorecard Judge (Vorname Nachname)'));
-    expect(screen.getAllByRole('listitem')).toHaveLength(4);
+    expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
   it('submit form and redirects', async () => {
     const user = userEvent.setup();
@@ -173,6 +173,6 @@ describe('Officials component', () => {
     await user.click(screen.getByPlaceholderText('Referee (Vorname Nachname)'));
     await user.click(screen.getAllByText(/first_name first_last_name/i)[0]);
     await user.click(screen.getByPlaceholderText('Down Judge (Vorname Nachname)'));
-    expect(screen.getAllByRole('listitem')).toHaveLength(3);
+    expect(screen.getAllByRole('listitem')).toHaveLength(2);
   });
 });
