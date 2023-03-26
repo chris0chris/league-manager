@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {FaCheck, FaInfo, FaUserInjured} from 'react-icons/fa';
+import {FaCheck} from 'react-icons/fa';
 import {connect} from 'react-redux';
+import MessageToasterContent from './MessageToasterContent';
 
 const MessageToaster = (props) => {
   const [duration, setDuration] = useState(3);
@@ -27,6 +28,10 @@ const MessageToaster = (props) => {
     }
     setShowToast(true);
   }, [props.msg]);
+  const closeToast = () => {
+    setShowToast(false);
+    setTimerIsOn(false);
+  };
   const [showToast, setShowToast] = useState(true);
   return (
     <div className="container">
@@ -35,34 +40,25 @@ const MessageToaster = (props) => {
         style={{zIndex: 10000}}>
         <div className={`toast ${showToast ? 'show' : 'hide'}`}
           role="alert" aria-live="assertive" aria-atomic="true">
-          {props.status == 200 &&
-          <>
-            <div className="toast-header bg-success text-white">
-              <FaInfo />
-              <strong className="me-auto">nformation</strong>
-              <button type="button" className="btn-close" onClick={() => {
-                setShowToast(!showToast); setTimerIsOn(false)
-                ;
-              }} aria-label="Close"></button>
-            </div>
-            <div className="toast-body">
-              Eintrag gespeichert <FaCheck />
-            </div>
-          </>}
-          {props.status != 200 &&
-          <>
-            <div className="toast-header bg-danger text-white">
-              <FaUserInjured className="me-2"/>
-              <strong className="me-auto">Fehler</strong>
-              <button type="button" className="btn-close" onClick={() => {
-                setShowToast(!showToast); setTimerIsOn(false)
-                ;
-              }} aria-label="Close"></button>
-            </div>
-            <div className="toast-body">
-              {JSON.stringify(props.msg)}
-            </div>
-          </>}
+          {(() => {
+            switch (props.status) {
+              case 200:
+                return <MessageToasterContent
+                  content={<>Eintrag gespeichert <FaCheck /></>}
+                  type="success"
+                  onClick={closeToast}/>;
+              case 404:
+                return <MessageToasterContent
+                  content={JSON.stringify(props.msg)}
+                  type="warning"
+                  onClick={closeToast} />;
+              default:
+                return <MessageToasterContent
+                  content={JSON.stringify(props.msg)}
+                  type="danger" isError={true}
+                  onClick={closeToast}/>;
+            }
+          })()}
         </div>
       </div>}
     </div>
