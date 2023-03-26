@@ -30,11 +30,11 @@ class TestOfficialsTeamListAPIView(WebTest):
 class TestOfficialsSearchName(WebTest):
     def test_search_for_empty_name(self):
         response = self.app.get(reverse(API_OFFICIALS_SEARCH_BY_NAME), expect_errors=True)
-        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.status_code == HTTPStatus.BAD_REQUEST
 
     def test_search_for_only_one_name_part(self):
         response = self.app.get(reverse(API_OFFICIALS_SEARCH_BY_NAME), 'name=onlyOnePartOfName', expect_errors=True)
-        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.status_code == HTTPStatus.BAD_REQUEST
 
     def test_search_for_name(self):
         DbSetupOfficials().create_officials_and_team()
@@ -53,9 +53,8 @@ class TestOfficialsSearchName(WebTest):
 
     def test_search_no_official_found(self):
         DbSetupOfficials().create_officials_and_team()
-        response = self.app.get(reverse(API_OFFICIALS_SEARCH_BY_NAME), 'name=nonExistent%20Official')
-        assert response.status_code == HTTPStatus.OK
-        assert len(response.json) == 0
+        response = self.app.get(reverse(API_OFFICIALS_SEARCH_BY_NAME), 'name=nonExist%20Official', expect_errors=True)
+        assert response.status_code == HTTPStatus.NOT_FOUND
 
     def test_search_first_name_is_too_short(self):
         response = self.app.get(reverse(API_OFFICIALS_SEARCH_BY_NAME), 'name=to%20oShortFirstName', expect_errors=True)

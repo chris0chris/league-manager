@@ -15,10 +15,10 @@
     "react-icons": "^4.3.1",
     "react-redux": "^8.0.2",
     "react-router-dom": "^6.3.0",
+    "react-scripts": "5.0.1",
     "redux": "^4.1.2",
     "redux-devtools-extension": "^2.13.9",
     "redux-thunk": "^2.4.0",
-    "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
@@ -46,7 +46,6 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "test": "react-scripts test",
     "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache test -- --config jest.config.js",
     "dev": "webpack --mode development --config webpack.config.js",
     "dev:watch": "webpack --mode development --watch --config webpack.config.js",

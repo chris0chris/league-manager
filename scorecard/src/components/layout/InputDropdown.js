@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
-import {FaTrashAlt} from 'react-icons/fa';
+import {FaSearch, FaTrashAlt} from 'react-icons/fa';
 import FloatingInput from './FloatingInput';
 
 const InputDropdown = (props) => {
@@ -110,62 +110,67 @@ const InputDropdown = (props) => {
           </div>
         )}
         {displaySearchInput &&
-        <div>
-          <FloatingInput
-            autofocus={autofocus}
-            setHasFocus={setDisplaySuggestionBox}
-            id={id}
-            show={displaySearchInput}
-            onChange={onChange}
-            text={placeholderText}
-            value={searchInput} />
-          <ul
-            className='list-group'
-            style={{
-              position: 'absolute',
-              zIndex: 99,
-              width: '100%',
-              display: displaySuggestionBox ? 'block' : 'none',
-            }}
-          >
-            {itemsToDisplay.map((item, index) => (
-              <li
-                key={index}
-                className='list-group-item bg-light'
-                onMouseDown={() => {
-                  handleSearchSelection(item.text, item.id);
-                }}
-              >
-                <div className='row'>
-                  <div className='col-9'>{item.text}</div>
-                  <div
-                    className='col-3 text-end text-muted ps-0 pe-0'
-                    style={{fontSize: 'x-small'}}
-                  >
-                    {item.subtext}
+        <div className='row'>
+          <div className='col'>
+            <FloatingInput
+              autofocus={autofocus}
+              setHasFocus={setDisplaySuggestionBox}
+              id={id}
+              show={displaySearchInput}
+              onChange={onChange}
+              text={placeholderText}
+              value={searchInput} />
+            <ul
+              className='list-group'
+              style={{
+                position: 'absolute',
+                zIndex: 99,
+                width: '100%',
+                display: displaySuggestionBox ? 'block' : 'none',
+              }}
+            >
+              {itemsToDisplay.map((item, index) => (
+                <li
+                  key={index}
+                  className='list-group-item bg-light'
+                  onMouseDown={() => {
+                    handleSearchSelection(item.text, item.id);
+                  }}
+                >
+                  <div className='row'>
+                    <div className='col-9'>{item.text}</div>
+                    <div
+                      className='col-3 text-end text-muted ps-0 pe-0'
+                      style={{fontSize: 'x-small'}}
+                    >
+                      {item.subtext}
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
-            { displaySearchButton &&
-            <li className="list-group-item d-grid">
-              <button type="button"
-                onMouseDown={submitSearch}
-                className="btn btn-secondary">
-                teamübergreifende Suche
-              </button>
-            </li>}
-            { !displaySearchButton &&
-            <li className="list-group-item d-grid">
-              <button type="button"
-                onMouseDown={blockSearch}
-                className="btn btn-secondary disabled"
-                style={{pointerEvents: 'all'}}>
-              suche nach Official ...
-              </button>
-            </li>}
-          </ul>
-        </div>}
+                </li>
+              ))}
+            </ul>
+          </div>
+          { displaySearchButton &&
+          <div className='col-3 d-grid mt-3'>
+            <button type="button"
+              onMouseDown={submitSearch}
+              className="btn btn-secondary"
+              data-testid="searchButton">
+              <FaSearch />
+            </button>
+          </div>}
+          { !displaySearchButton &&
+          <div className='col-3 d-grid mt-3'>
+            <button type="button"
+              onMouseDown={blockSearch}
+              className="btn btn-secondary disabled"
+              data-testid="searchButtonDisabled"
+              style={{pointerEvents: 'all'}}>
+              <FaSearch />
+            </button>
+          </div>}
+        </div>
+        }
       </div>
     </div>
   );

@@ -71,6 +71,14 @@ export const apiGet = (url, successType) => async (dispatch, getState) => {
   await axios
       .get(url, tokenConfig(getState))
       .then((res) => {
+        console.log('res ...', res, successType);
+        if (res.data) {
+          console.log('EMPTY ...', res, successType + '_EMPTY');
+          dispatch({
+            type: successType + '_EMPTY',
+            payload: res.data,
+          });
+        }
         dispatch({
           type: successType,
           payload: res.data,
