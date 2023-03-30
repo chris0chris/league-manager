@@ -17,7 +17,12 @@ class TestOfficialsTeamListAPIView(WebTest):
         response = self.app.get(reverse(API_OFFICIALS_FOR_TEAM, kwargs={'pk': team.pk}))
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 2
-        assert response.json[0] == OfficialSerializer(official).data
+        expected_result = OfficialSerializer(official).data
+        actual_result = response.json[0]
+        assert actual_result['valid_until'] == str(expected_result['valid_until'])
+        del actual_result['valid_until']
+        del expected_result['valid_until']
+        assert actual_result == expected_result
 
     def test_get_empty_officials_for_non_existent_team(self):
         DbSetupOfficials().create_officials_and_team()
@@ -42,7 +47,12 @@ class TestOfficialsSearchName(WebTest):
         response = self.app.get(reverse(API_OFFICIALS_SEARCH_BY_NAME), 'name=fra%20fed')
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 1
-        assert response.json[0] == OfficialSerializer(official).data
+        expected_result = OfficialSerializer(official).data
+        actual_result = response.json[0]
+        assert actual_result['valid_until'] == str(expected_result['valid_until'])
+        del actual_result['valid_until']
+        del expected_result['valid_until']
+        assert actual_result == expected_result
 
     def test_search_finds_multiple_matches(self):
         DbSetupOfficials().create_officials_and_team()

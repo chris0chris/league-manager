@@ -1,9 +1,10 @@
+import datetime
 from datetime import date
 
 from django.db import models
 from django.db.models import QuerySet
 
-from teammanager.models import Team
+from teammanager.models import Team, Association
 
 
 class Official(models.Model):
@@ -11,11 +12,12 @@ class Official(models.Model):
     last_name = models.CharField(max_length=100)
     team: Team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
     external_id = models.CharField(max_length=100, null=True, default=None, unique=True)
+    association = models.ForeignKey(Association, on_delete=models.SET_NULL, null=True)
 
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.team.description}__{self.last_name}, {self.first_name}'
+        return f'{self.team.description}__{self.last_name}, {self.first_name} - ({self.association.name if not self.association is None else "NONE"})'
 
 
 class OfficialLicense(models.Model):
@@ -34,6 +36,9 @@ class OfficialLicenseHistory(models.Model):
     result = models.PositiveSmallIntegerField(null=False, default=0)
 
     objects: QuerySet = models.Manager()
+
+    def valid_until(self):
+        return datetime.date(self.created_at.year + 1, 3, 31)
 
     def __str__(self):
         return f'{self.created_at}__{self.license} - {self.official.last_name} # {self.result}'

@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.views import View
 
-from officials.api.serializers import GameOfficialAllInfosSerializer
+from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer
 from officials.forms import AddInternalGameOfficialEntryForm, AddExternalGameOfficialEntryForm
 from officials.models import Official
 from officials.service.moodle.moodle_service import MoodleService
@@ -65,8 +65,8 @@ class GameOfficialListView(View):
         team_name = request.user.username
         context = {
             'year': year,
-            'object_list': GameOfficialAllInfosSerializer(instance=game_officials, display_names_for_team=team_name,
-                                                          is_staff=is_staff, many=True).data}
+            'object_list': GameOfficialAllInfoSerializer(instance=game_officials, display_names_for_team=team_name,
+                                                         is_staff=is_staff, many=True).data}
         return render(request, self.template_name, context)
 
 
@@ -194,3 +194,16 @@ class MoodleReportView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+class OfficialProfileView(View):
+    template_name = 'officials/profile.html'
+
+    def get(self, request, *args, **kwargs):
+        license_id = kwargs.get('license_id')
+        official = Official.objects.get(id=license_id)
+        return render(
+            request,
+            self.template_name,
+            OfficialSerializer(instance=official, is_staff=self.request.user.is_staff).data
+        )

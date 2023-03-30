@@ -22,6 +22,16 @@ class League(models.Model):
         return self.name
 
 
+class Association(models.Model):
+    abbr = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=100)
+
+    objects: QuerySet = models.Manager()
+
+    def __str__(self):
+        return f'{self.pk}: {self.abbr} - {self.name}'
+
+
 class Team(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=1000, unique=True)
