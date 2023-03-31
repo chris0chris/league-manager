@@ -17,7 +17,6 @@ class GameLogCreator(object):
         self.user = user
 
     def create(self):
-        print(type(self.event), self.event)
         sequence = self._getSequence()
         for entry in self.event:
             teamlog = TeamLog()

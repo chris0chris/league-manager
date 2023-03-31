@@ -125,7 +125,7 @@
         "home": {
           "standing": "PO",
           "place": 1,
-          "points": 3
+          "points": 2
         },
         "away": {
           "stage": "Vorrunde",
@@ -143,7 +143,7 @@
         "home": {
           "standing": "PO",
           "place": 2,
-          "points": 3
+          "points": 2
         },
         "away": {
           "stage": "Vorrunde",
@@ -189,12 +189,12 @@
         "home": {
           "standing": "HF",
           "place": 2,
-          "points": 3
+          "points": 2
         },
         "away": {
           "standing": "HF",
           "place": 1,
-          "points": 3
+          "points": 2
         },
         "officials": {
           "pre_finished": "Vorrunde",

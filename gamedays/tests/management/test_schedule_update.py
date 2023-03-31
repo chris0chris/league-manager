@@ -150,8 +150,8 @@ class TestScheduleUpdate(TransactionTestCase):
         update_gameresults_by_standing_and_finish_game_for('P1')
 
         gmw = GamedayModelWrapper(gameday.pk)
-        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('final_table_9_teams.json')
-        DataFrameAssertion.expect(gmw.get_schedule()).to_equal_json('schedule_9_teams_3_fields.json')
+        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('final_table_9_teams')
+        DataFrameAssertion.expect(gmw.get_schedule()).to_equal_json('schedule_9_teams_3_fields')
 
     def test_update_11_teams_3_fields(self):
         gameday = DBSetup().create_empty_gameday()
@@ -200,8 +200,9 @@ class TestScheduleUpdate(TransactionTestCase):
         update_gameresults_by_standing_and_finish_game_for('P1')
 
         gmw = GamedayModelWrapper(gameday.pk)
-        DataFrameAssertion.expect(gmw.get_schedule()).to_equal_json('schedule_11_teams_3_fields.json')
-        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('final_table_11_teams.json')
+
+        DataFrameAssertion.expect(gmw.get_schedule()).to_equal_json('schedule_11_teams_3_fields')
+        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('final_table_11_teams')
 
     def test_update_semifinal_and_p5(self):
         gameday = DBSetup().g62_qualify_finished()
@@ -274,7 +275,7 @@ class TestUpdateGameEntry:
             "officials": {
                 "pre_finished": "HF",
                 "standing": "HF",
-                "points": 3,
+                "points": 2,
                 "place": 1
             }
         })
@@ -287,7 +288,7 @@ class TestUpdateGameEntry:
         assert uge.away.index == 1
         assert uge.officials.place == 1
         assert uge.officials.standing == 'HF'
-        assert uge.officials.points == 3
+        assert uge.officials.points == 2
         assert uge.officials.pre_finished == 'HF'
 
 

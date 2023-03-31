@@ -15,15 +15,15 @@
       },
       {
         "name": "pf",
-        "type": "integer"
+        "type": "string"
       },
       {
         "name": "pa",
-        "type": "integer"
+        "type": "string"
       },
       {
         "name": "+/-",
-        "type": "integer"
+        "type": "string"
       },
       {
         "name": "dffl",
@@ -33,43 +33,70 @@
     "primaryKey": [
       "index"
     ],
-    "pandas_version": "0.20.0"
+    "pandas_version": "1.4.0"
   },
   "data": [
     {
       "index": 0,
-      "team__name": "A1",
-      "points": 9,
-      "pf": 9,
-      "pa": 3,
-      "+/-": 6,
-      "dffl": 8
+      "team__name": "B1",
+      "points": 8,
+      "pf": 12,
+      "pa": 7,
+      "+/-": 5,
+      "dffl": 12
     },
     {
       "index": 1,
-      "team__name": "A2",
-      "points": 6,
-      "pf": 6,
-      "pa": 4,
-      "+/-": 2,
-      "dffl": 6
+      "team__name": "A1",
+      "points": 8,
+      "pf": 14,
+      "pa": 8,
+      "+/-": 6,
+      "dffl": 10
     },
     {
       "index": 2,
+      "team__name": "A2",
+      "points": 6,
+      "pf": 11,
+      "pa": 9,
+      "+/-": 2,
+      "dffl": 8
+    },
+    {
+      "index": 3,
+      "team__name": "B2",
+      "points": 2,
+      "pf": 8,
+      "pa": 10,
+      "+/-": -2,
+      "dffl": 6
+    },
+    {
+      "index": 4,
       "team__name": "A3",
-      "points": 3,
-      "pf": 3,
-      "pa": 5,
+      "points": 4,
+      "pf": 8,
+      "pa": 10,
       "+/-": -2,
       "dffl": 4
     },
     {
-      "index": 3,
+      "index": 5,
+      "team__name": "B3",
+      "points": 4,
+      "pf": 10,
+      "pa": 12,
+      "+/-": -2,
+      "dffl": 3
+    },
+    {
+      "index": 6,
       "team__name": "A4",
       "points": 0,
-      "pf": 0,
-      "pa": 6,
-      "+/-": -6,
+      "pf": 2,
+      "pa": 9,
+      "+/-": -7,
       "dffl": 2
     }
   ]

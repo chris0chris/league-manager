@@ -7,11 +7,13 @@
       },
       {
         "name": "standing",
-        "type": "string"
+        "type": "any",
+        "extDtype": "string"
       },
       {
         "name": "team__name",
-        "type": "string"
+        "type": "any",
+        "extDtype": "string"
       },
       {
         "name": "points",
@@ -19,28 +21,28 @@
       },
       {
         "name": "pf",
-        "type": "integer"
+        "type": "string"
       },
       {
         "name": "pa",
-        "type": "integer"
+        "type": "string"
       },
       {
         "name": "+/-",
-        "type": "integer"
+        "type": "string"
       }
     ],
     "primaryKey": [
       "index"
     ],
-    "pandas_version": "0.20.0"
+    "pandas_version": "1.4.0"
   },
   "data": [
     {
       "index": 0,
       "standing": "Gruppe 1",
       "team__name": "A1",
-      "points": 6,
+      "points": 4,
       "pf": 6,
       "pa": 3,
       "+/-": 3
@@ -49,7 +51,7 @@
       "index": 1,
       "standing": "Gruppe 1",
       "team__name": "A2",
-      "points": 3,
+      "points": 2,
       "pf": 4,
       "pa": 4,
       "+/-": 0
@@ -67,7 +69,7 @@
       "index": 3,
       "standing": "Gruppe 2",
       "team__name": "B1",
-      "points": 6,
+      "points": 4,
       "pf": 6,
       "pa": 3,
       "+/-": 3
@@ -76,7 +78,7 @@
       "index": 4,
       "standing": "Gruppe 2",
       "team__name": "B2",
-      "points": 3,
+      "points": 2,
       "pf": 4,
       "pa": 4,
       "+/-": 0
