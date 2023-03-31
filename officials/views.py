@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.views import View
 
-from officials.api.serializers import GameOfficialAllInfosSerializer
+from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer
 from officials.forms import AddInternalGameOfficialEntryForm, AddExternalGameOfficialEntryForm
 from officials.models import Official
 from officials.service.moodle.moodle_service import MoodleService
@@ -65,8 +65,8 @@ class GameOfficialListView(View):
         team_name = request.user.username
         context = {
             'year': year,
-            'object_list': GameOfficialAllInfosSerializer(instance=game_officials, display_names_for_team=team_name,
-                                                          is_staff=is_staff, many=True).data}
+            'object_list': GameOfficialAllInfoSerializer(instance=game_officials, display_names_for_team=team_name,
+                                                         is_staff=is_staff, many=True).data}
         return render(request, self.template_name, context)
 
 
@@ -194,3 +194,46 @@ class MoodleReportView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+class OfficialProfileView(View):
+    template_name = 'officials/profile.html'
+
+    def get(self, request, *args, **kwargs):
+        license_id = kwargs.get('license_id')
+        official = Official.objects.get(id=license_id)
+        return render(
+            request,
+            self.template_name,
+            OfficialSerializer(instance=official, is_staff=self.request.user.is_staff).data
+        )
+
+
+class OfficialAssociationListView(View):
+    template_name = 'officials/association_list.html'
+
+    def get(self, request, *args, **kwargs):
+        association_abbreviation = kwargs.get('abbr')
+        year = datetime.today().year
+        official_list = Official.objects \
+            .filter(association__abbr=association_abbreviation,
+                    officiallicensehistory__created_at__year=year) \
+            .exclude(officiallicensehistory__license_id=4) \
+            .order_by('team__description', 'last_name')
+        return render(
+            request,
+            self.template_name,
+            {
+                'association': association_abbreviation,
+                'result': OfficialSerializer(
+                    instance=official_list,
+                    is_staff=self.is_user_allowed_to_see_official_names(association_abbreviation),
+                    fetch_email=True,
+                    many=True).data
+            }
+        )
+
+    def is_user_allowed_to_see_official_names(self, association):
+        if self.request.user.is_staff:
+            return True
+        return self.request.user.username == association

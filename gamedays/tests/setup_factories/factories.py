@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from factory.django import DjangoModelFactory
 
 from teammanager.models import Team, Gameday, Gameinfo, Gameresult, GameOfficial, GameSetup, TeamLog, League, Season, \
-    SeasonLeagueTeam
+    SeasonLeagueTeam, Association
 
 
 class LeagueFactory(DjangoModelFactory):
@@ -31,7 +31,7 @@ class TeamFactory(DjangoModelFactory):
         django_get_or_create = ('name',)
 
     name = 'teamName'
-    description = 'team description'
+    description = factory.Sequence(lambda n: f'team description {n}')
     location = 'team location'
 
 
@@ -59,6 +59,15 @@ class UserFactory(DjangoModelFactory):
 
     username = 'test_admin'
     is_staff = True
+
+
+class AssociationFactory(DjangoModelFactory):
+    class Meta:
+        model = Association
+        django_get_or_create = ('abbr',)
+
+    abbr = 'ABBR Factory'
+    name = 'Assoc name Factory'
 
 
 class GamedayFactory(DjangoModelFactory):

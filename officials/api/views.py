@@ -14,7 +14,7 @@ class OfficialsTeamListAPIView(APIView):
     def get(self, request, *args, **kwargs):
         team_id = kwargs.get('pk')
         officials = Official.objects.filter(team_id=team_id).order_by('first_name', 'last_name')
-        serializer = OfficialSerializer(officials, many=True)
+        serializer = OfficialSerializer(instance=officials, many=True)
         return Response(serializer.data, status=HTTPStatus.OK)
 
 
@@ -35,5 +35,5 @@ class OfficialsSearchName(APIView):
             team=team_id).order_by('first_name', 'last_name')
         if not officials:
             raise NotFound(f'Es wurden keine Offiziellen gefunden für: {" ".join(name)}')
-        serializer = OfficialSerializer(officials, many=True)
+        serializer = OfficialSerializer(instance=officials, many=True)
         return Response(serializer.data, status=HTTPStatus.OK)

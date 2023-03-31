@@ -16,16 +16,26 @@ Metrics:
 To run server local under pycharm
 
 1. create new python configuration (Alt + E)
-   1. set script path to `manage.py`
-   2. set **parameters** to: `runserver`
-   3. set **environment variables** to: `league_manager=dev`
+    1. set script path to `manage.py`
+    2. set **parameters** to: `runserver`
+    3. set **environment variables** to: `league_manager=dev`
 
 #### Migration steps
 
 Run new migration step in terminal
 
+```
     python manage.py makemigrations
     python manage.py migrate
+```
+
+#### Access images and CSS
+
+Run in Terminal
+
+```
+python manage.py collectstatic
+```
 
 ### MySQL
 

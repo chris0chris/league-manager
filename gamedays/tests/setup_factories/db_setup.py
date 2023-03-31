@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 
 from gamedays.tests.setup_factories.factories import GameinfoFactory, GameresultFactory, GamedayFactory, \
-    GameOfficialFactory, TeamLogFactory, GameSetupFactory, TeamFactory, UserFactory
+    GameOfficialFactory, TeamLogFactory, GameSetupFactory, TeamFactory, UserFactory, AssociationFactory
 from teammanager.models import Gameday, Gameinfo, Team
 
 
@@ -260,6 +260,9 @@ class DBSetup:
             'Content-Type': 'application/json',
             'Authorization': 'Token ' + token[1],
         }
+
+    def create_new_association(self, abbr='ABBR', name='Association name'):
+        return AssociationFactory(abbr=abbr, name=name)
 
     def create_new_user(self, username='another_user', is_staff=False):
         return UserFactory(username=username, is_staff=is_staff)

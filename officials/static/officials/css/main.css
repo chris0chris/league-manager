@@ -1,0 +1,32 @@
+.official-profile {
+    max-width: 150px;
+    max-height: 150px;
+}
+
+.official-license--expired {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    width: auto;
+    height: auto;
+    z-index: 1;
+    transform: rotate(-45deg);
+    color: red;
+    font-size: x-large;
+}
+
+.official-license {
+  position: relative;
+}
+
+.overlay {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    width: auto;
+    height: auto;
+    z-index: 1;
+    transform: rotate(-45deg);
+    color: red;
+    font-size: x-large;
+}

@@ -16,7 +16,7 @@ class OfficialAppearanceTeamListEntry:
         official_license: OfficialLicenseHistory = self.official.officiallicensehistory_set.get(
             created_at__year=self.year)
         team = self.official.team
-        entry = OfficialSerializer(self.official).data
+        entry = OfficialSerializer(instance=self.official).data
         referee_ext = external_games_by_official.filter(position='Referee').aggregate(num_games=Sum('number_games'))[
             'num_games']
         down_judge_ext = \
