@@ -1,20 +1,14 @@
-import json
 import pathlib
 
 import pandas as pd
 from django.test import TestCase
-from pandas.testing import assert_frame_equal
 
 from gamedays.service.gameday_settings import SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, \
     STANDING, STAGE, STATUS
 from gamedays.service.model_wrapper import GamedayModelWrapper
+from gamedays.tests.setup_factories.dataframe_setup import DataFrameAssertion
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from teammanager.models import Gameinfo, Gameresult, Team
-
-
-def get_df_from_json(filename):
-    return pd.read_json(pathlib.Path(__file__).parent / 'testdata/{0}.json'.format(filename),
-                        orient='table')
 
 
 class TestGamedayModelWrapper(TestCase):
@@ -35,14 +29,12 @@ class TestGamedayModelWrapper(TestCase):
 
     def test_get_schedule(self):
         gameday = DBSetup().g62_qualify_finished()
-        expected_schedule = get_df_from_json('schedule_g62_qualify_finished')
+        expected_schedule = pd.read_json(pathlib.Path(__file__).parent / 'testdata/schedule_g62_qualify_finished.json',
+                                         orient='table')
         schedule = GamedayModelWrapper(gameday.pk).get_schedule()
         columns = [SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, STANDING, STAGE, STATUS]
         schedule = schedule[columns]
         expected_schedule = expected_schedule[columns]
-        # del expected_schedule['scheduled']
-        # del schedule['scheduled']
-        # del schedule['in_possession']
         assert schedule.to_json() == expected_schedule.to_json()
 
     def test_empty_get_qualify_table(self):
@@ -53,8 +45,7 @@ class TestGamedayModelWrapper(TestCase):
     def test_get_qualify_table(self):
         gameday = DBSetup().g62_qualify_finished()
         gmw = GamedayModelWrapper(gameday.pk)
-        expected_qualify_table = get_df_from_json('ts_qualify_table')
-        assert_frame_equal(gmw.get_qualify_table(), expected_qualify_table, check_dtype=False)
+        DataFrameAssertion.expect(gmw.get_qualify_table()).to_equal_json('ts_qualify_table')
 
     def test_empty_get_final_table(self):
         gameday = DBSetup().g62_qualify_finished()
@@ -63,22 +54,18 @@ class TestGamedayModelWrapper(TestCase):
 
     def test_get_final_table(self):
         gameday = DBSetup().g62_finalround(sf='beendet', p5='beendet', p3='beendet', p1='beendet')
-        expected_final_table = get_df_from_json('ts_final_table_6_teams')
         gmw = GamedayModelWrapper(gameday.pk)
-        assert gmw.get_final_table().to_json() == expected_final_table.to_json()
+        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('ts_final_table_6_teams')
 
     def test_get_final_table_for_7_teams(self):
         gameday = DBSetup().g72_finished()
-        expected_table = get_df_from_json('ts_final_table_7_teams')
         gmw = GamedayModelWrapper(gameday.pk)
-        print(json.dumps(json.loads(gmw.get_final_table().to_json(orient='table')), indent=2))
-        assert_frame_equal(gmw.get_final_table(), expected_table, check_dtype=False)
+        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('ts_final_table_7_teams')
 
     def test_get_final_table_for_main_round(self):
         gameday = DBSetup().create_main_round_gameday(status='beendet', number_teams=4)
-        expected_table = get_df_from_json('ts_final_table_4_teams')
         gmw = GamedayModelWrapper(gameday.pk)
-        assert_frame_equal(gmw.get_final_table(), expected_table, check_dtype=False)
+        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('ts_final_table_4_teams')
 
     def test_get_qualify_team_by(self):
         gameday = DBSetup().g62_qualify_finished()
@@ -90,14 +77,14 @@ class TestGamedayModelWrapper(TestCase):
         gameday = DBSetup().g62_finalround(sf='beendet')
         gmw = GamedayModelWrapper(gameday.pk)
         assert gmw.get_team_by_points(place=1, standing='HF', points=0) == 'B2'
-        assert gmw.get_team_by_points(place=1, standing='HF', points=3) == 'A1'
+        assert gmw.get_team_by_points(place=1, standing='HF', points=2) == 'A1'
         assert gmw.get_team_by_points(place=2, standing='HF', points=0) == 'A2'
-        assert gmw.get_team_by_points(place=2, standing='HF', points=3) == 'B1'
+        assert gmw.get_team_by_points(place=2, standing='HF', points=2) == 'B1'
 
     def test_get_team_by(self):
         gameday = DBSetup().g62_finalround(sf='beendet')
         gmw = GamedayModelWrapper(gameday.pk)
-        assert gmw.get_team_by(place=1, standing='HF', points=3) == 'A1'
+        assert gmw.get_team_by(place=1, standing='HF', points=2) == 'A1'
         assert gmw.get_team_by(place=1, standing='Gruppe 1') == 'A1'
 
     def test_is_finished(self):
@@ -161,7 +148,7 @@ class TestGamedayModelWrapper(TestCase):
         for game in all_games:
             update_gameresults(game)
         gmw = GamedayModelWrapper(gameday.pk)
-        assert gmw.get_teams_by(standing='HF', points=3) == ['B2', 'B1']
+        assert gmw.get_teams_by(standing='HF', points=2) == ['B2', 'B1']
 
 
 def update_gameresults(game):

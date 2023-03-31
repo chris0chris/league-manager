@@ -50,7 +50,7 @@ class GamedayModelWrapper:
         games_with_result[DIFF] = games_with_result[PF] - games_with_result[PA]
         tmp = games_with_result.fillna(0)
         tmp[POINTS] = np.where(tmp[PF] == tmp[PA], 1,
-                               np.where(tmp[PF] > tmp[PA], 3, 0))
+                               np.where(tmp[PF] > tmp[PA], 2, 0))
         games_with_result[POINTS] = tmp[POINTS]
         self._games_with_result: DataFrame = games_with_result
 

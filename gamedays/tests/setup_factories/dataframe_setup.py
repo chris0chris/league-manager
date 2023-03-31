@@ -9,7 +9,8 @@ class DataFrameWrapper:
         self.dataframe = dataframe
 
     def to_equal_json(self, filename):
-        assert JsonHelper.read_file(filename) == JsonHelper.loads(self.dataframe.to_json(orient='table'))
+        print(json.dumps(json.loads(self.dataframe.to_json(orient='table')), indent=2))
+        assert JsonHelper.loads(self.dataframe.to_json(orient='table')) == JsonHelper.read_file(filename)
 
 
 class DataFrameAssertion(object):
@@ -22,7 +23,7 @@ class DataFrameAssertion(object):
 class JsonHelper(object):
     @staticmethod
     def read_file(filename) -> dict:
-        with open(pathlib.Path(__file__).parent / 'testdata' / filename) as f:
+        with open(pathlib.Path(__file__).parent / 'testdata' / f'{filename}.json') as f:
             expected_gamelog = json.load(f)
         return expected_gamelog
 

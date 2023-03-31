@@ -58,18 +58,18 @@
         "type": "string"
       },
       {
-        "extDtype": "Int64",
         "name": "gameinfo",
-        "type": "integer"
+        "type": "integer",
+        "extDtype": "Int64"
       },
       {
         "name": "id_home",
         "type": "integer"
       },
       {
-        "extDtype": "string",
         "name": "home",
-        "type": "any"
+        "type": "any",
+        "extDtype": "string"
       },
       {
         "name": "points_home",
@@ -80,9 +80,9 @@
         "type": "integer"
       },
       {
-        "extDtype": "string",
         "name": "away",
-        "type": "any"
+        "type": "any",
+        "extDtype": "string"
       },
       {
         "name": "id_away",

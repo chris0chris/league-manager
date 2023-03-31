@@ -22,7 +22,7 @@
         "type": "string"
       },
       {
-        "name": "+\/-",
+        "name": "+/-",
         "type": "string"
       },
       {
@@ -39,91 +39,91 @@
     {
       "index": 0,
       "team__name": "C3",
-      "points": 15,
+      "points": 10,
       "pf": 110,
       "pa": 72,
-      "+\/-": 38,
+      "+/-": 38,
       "dffl": 0
     },
     {
       "index": 1,
       "team__name": "C2",
-      "points": 9,
+      "points": 6,
       "pf": 100,
       "pa": 92,
-      "+\/-": 8,
+      "+/-": 8,
       "dffl": 0
     },
     {
       "index": 2,
       "team__name": "B4",
-      "points": 12,
+      "points": 8,
       "pf": 80,
       "pa": 64,
-      "+\/-": 16,
+      "+/-": 16,
       "dffl": 0
     },
     {
       "index": 3,
       "team__name": "A4",
-      "points": 9,
+      "points": 6,
       "pf": 40,
       "pa": 50,
-      "+\/-": -10,
+      "+/-": -10,
       "dffl": 0
     },
     {
       "index": 4,
       "team__name": "B3",
-      "points": 9,
+      "points": 6,
       "pf": 70,
       "pa": 64,
-      "+\/-": 6,
+      "+/-": 6,
       "dffl": 0
     },
     {
       "index": 5,
       "team__name": "A3",
-      "points": 6,
+      "points": 4,
       "pf": 30,
       "pa": 50,
-      "+\/-": -20,
+      "+/-": -20,
       "dffl": 0
     },
     {
       "index": 6,
       "team__name": "C1",
-      "points": 6,
+      "points": 4,
       "pf": 72,
       "pa": 58,
-      "+\/-": 14,
+      "+/-": 14,
       "dffl": 0
     },
     {
       "index": 7,
       "team__name": "B2",
-      "points": 6,
+      "points": 4,
       "pf": 60,
       "pa": 62,
-      "+\/-": -2,
+      "+/-": -2,
       "dffl": 0
     },
     {
       "index": 8,
       "team__name": "A2",
-      "points": 3,
+      "points": 2,
       "pf": 20,
       "pa": 46,
-      "+\/-": -26,
+      "+/-": -26,
       "dffl": 0
     },
     {
       "index": 9,
       "team__name": "B1",
-      "points": 3,
+      "points": 2,
       "pf": 40,
       "pa": 44,
-      "+\/-": -4,
+      "+/-": -4,
       "dffl": 0
     },
     {
@@ -132,7 +132,7 @@
       "points": 0,
       "pf": 8,
       "pa": 28,
-      "+\/-": -20,
+      "+/-": -20,
       "dffl": 0
     }
   ]

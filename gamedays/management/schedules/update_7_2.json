@@ -52,7 +52,7 @@
           "pre_finished": "HF",
           "standing": "HF",
           "place": 2,
-          "points": 3
+          "points": 2
         }
       }
     ]
@@ -98,7 +98,7 @@
           "pre_finished": "HF",
           "standing": "HF",
           "place": 1,
-          "points": 3
+          "points": 2
         }
       }
     ]
@@ -111,18 +111,18 @@
         "home": {
           "standing": "HF",
           "place": 1,
-          "points": 3
+          "points": 2
         },
         "away": {
           "standing": "HF",
           "place": 2,
-          "points": 3
+          "points": 2
         },
         "officials": {
           "pre_finished": "P3",
           "standing": "P3",
           "place": 1,
-          "points": 3
+          "points": 2
         }
       }
     ]
