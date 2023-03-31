@@ -46,7 +46,8 @@ class TestOfficialAppearanceTeamListEntry(TestCase):
         first_team = Team.objects.first()
         team_list_entry = OfficialAppearanceTeamListEntry(first_official, current_year).as_json()
         assert team_list_entry == {
-            'association': 'Association name',
+            'association': 'ABBR',
+            'email': '',
             'down_judge': 1,
             'down_judge_ext': 0,
             'field_judge': 1,

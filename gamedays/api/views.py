@@ -44,7 +44,7 @@ class GameOfficialCreateOrUpdateView(RetrieveUpdateAPIView):
         game_id = kwargs.get('pk')
         try:
             officials = GameOfficial.objects.filter(gameinfo_id=game_id)
-            serializer = GameOfficialSerializer(officials, many=True)
+            serializer = GameOfficialSerializer(instance=officials, many=True)
             return Response(serializer.data, status=HTTPStatus.OK)
         except GameOfficial.DoesNotExist:
             raise NotFound(detail=f'No officials found for gameId {game_id}')

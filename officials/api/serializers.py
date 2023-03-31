@@ -5,6 +5,7 @@ from rest_framework.fields import CharField, SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 
 from officials.models import Official, OfficialLicenseHistory
+from officials.service.moodle.moodle_service import MoodleService
 from teammanager.models import GameOfficial
 
 
@@ -25,18 +26,28 @@ class OfficialSerializer(ModelSerializer):
     is_valid = SerializerMethodField('check_license_validation')
     valid_until = SerializerMethodField()
     license = SerializerMethodField()
+    email = SerializerMethodField()
+    moodle_service = None
 
     class Meta:
         model = Official
         exclude = ('external_id',)
 
-    def __init__(self, is_staff=False, *args, **kwargs):
+    def __init__(self, is_staff=False, fetch_email=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.is_staff = is_staff
+        if fetch_email:
+            self.moodle_service = MoodleService()
 
     def get_license(self, obj):
         license_history = self._get_license_history(obj)
         return license_history.license.name
+
+    def get_email(self, obj: Official):
+        if not self.moodle_service or not self.is_staff:
+            return ''
+        user_info = self.moodle_service.get_user_info_by(external_id=obj.external_id)
+        return user_info.get_email()
 
     def get_association(self, obj):
         try:

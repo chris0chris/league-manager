@@ -207,3 +207,33 @@ class OfficialProfileView(View):
             self.template_name,
             OfficialSerializer(instance=official, is_staff=self.request.user.is_staff).data
         )
+
+
+class OfficialAssociationListView(View):
+    template_name = 'officials/association_list.html'
+
+    def get(self, request, *args, **kwargs):
+        association_abbreviation = kwargs.get('abbr')
+        year = datetime.today().year
+        official_list = Official.objects \
+            .filter(association__abbr=association_abbreviation,
+                    officiallicensehistory__created_at__year=year) \
+            .exclude(officiallicensehistory__license_id=4) \
+            .order_by('team__description', 'last_name')
+        return render(
+            request,
+            self.template_name,
+            {
+                'association': association_abbreviation,
+                'result': OfficialSerializer(
+                    instance=official_list,
+                    is_staff=self.is_user_allowed_to_see_official_names(association_abbreviation),
+                    fetch_email=True,
+                    many=True).data
+            }
+        )
+
+    def is_user_allowed_to_see_official_names(self, association):
+        if self.request.user.is_staff:
+            return True
+        return self.request.user.username == association

@@ -2,7 +2,7 @@ from django.urls import path
 
 from officials.views import OfficialsTeamListView, AllOfficialsListView, GameOfficialListView, \
     AddInternalGameOfficialUpdateView, AddExternalGameOfficialUpdateView, GameCountOfficials, MoodleReportView, \
-    OfficialProfileView
+    OfficialProfileView, OfficialAssociationListView
 
 OFFICIALS_LIST_FOR_TEAM = 'view-officials-list-for-team'
 OFFICIALS_LIST_FOR_TEAM_AND_YEAR = 'view-officials-list-for-team-and-year'
@@ -16,6 +16,7 @@ OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE = 'officials-gameofficial-external-create
 OFFICIALS_GAME_COUNT = 'officials-game-count'
 OFFICIALS_MOODLE_REPORT = 'officials-moodle-report'
 OFFICIALS_PROFILE = 'officials-profile'
+OFFICIALS_ASSOCIATION_LIST = 'officials-association-list'
 
 urlpatterns = [
     path('team/<int:pk>/list', OfficialsTeamListView.as_view(), name=OFFICIALS_LIST_FOR_TEAM),
@@ -35,5 +36,6 @@ urlpatterns = [
     path('game-count/<int:year>', GameCountOfficials.as_view(), name=OFFICIALS_GAME_COUNT),
     path('moodle-report', MoodleReportView.as_view(), name=OFFICIALS_MOODLE_REPORT),
     path('profile/<int:license_id>', OfficialProfileView.as_view(), name=OFFICIALS_PROFILE),
+    path('<str:abbr>/list', OfficialAssociationListView.as_view(), name=OFFICIALS_ASSOCIATION_LIST),
 
 ]

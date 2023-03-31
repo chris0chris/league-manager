@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="media content-section">
+    <div class="media-body">
+        <h1>{{ association | upper }}</h1>
+        <p>Bedeutung der Lizenzstufen:</p>
+        <ul>
+            <li>F3: Person besitzt Mechanics-Kenntnisse (keine Strafabtragung, grobe Foulübersicht)</li>
+            <li>F2: Person kann Strafabtragung und kennt alle Fouls</li>
+            <li>F1: Person kann Crew-Verantwortung übernehmen</li>
+        </ul>
+        <br/>
+        <h4>{{ result|length }} - Offizielle</h4>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Team</th>
+                <th scope="col">Name</th>
+                <th scope="col">Lizenzstufe</th>
+                <th scope="col">Gültig bis</th>
+                <th scope="col">E-Mail</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for official in result %}
+            <tr>
+                <th scope="row">{{official.id}}</th>
+                <td>{{official.team}}</td>
+                <td>{{official.name}}</td>
+                <td>{{official.license}}</td>
+                <td>{{official.valid_until}}</td>
+                <td>{{official.email}}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</article>
+{% endblock content %}

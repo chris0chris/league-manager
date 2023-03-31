@@ -17,7 +17,7 @@ class TestOfficialsTeamListAPIView(WebTest):
         response = self.app.get(reverse(API_OFFICIALS_FOR_TEAM, kwargs={'pk': team.pk}))
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 2
-        expected_result = OfficialSerializer(official).data
+        expected_result = OfficialSerializer(instance=official).data
         actual_result = response.json[0]
         assert actual_result['valid_until'] == str(expected_result['valid_until'])
         del actual_result['valid_until']
@@ -47,7 +47,7 @@ class TestOfficialsSearchName(WebTest):
         response = self.app.get(reverse(API_OFFICIALS_SEARCH_BY_NAME), 'name=fra%20fed')
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 1
-        expected_result = OfficialSerializer(official).data
+        expected_result = OfficialSerializer(instance=official).data
         actual_result = response.json[0]
         assert actual_result['valid_until'] == str(expected_result['valid_until'])
         del actual_result['valid_until']

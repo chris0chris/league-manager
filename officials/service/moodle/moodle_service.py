@@ -3,7 +3,7 @@ from django.db.models import QuerySet
 
 from officials.models import OfficialLicenseHistory, Official
 from officials.service.moodle.moodle_api import MoodleApi, ApiUserInfo, ApiCourses, ApiParticipants
-from teammanager.models import Team
+from teammanager.models import Team, Association
 
 
 class LicenseCalculator:
@@ -126,6 +126,8 @@ class MoodleService:
         official.first_name = user_info.get_first_name()
         official.last_name = user_info.get_last_name()
         official.team = self._get_first(Team.objects.filter(description=user_info.get_team()))
+        if user_info.whistle_for_association():
+            official.association = Association.objects.get(name=user_info.get_association())
         official.save()
         return official
 
@@ -144,3 +146,6 @@ class MoodleService:
             raise MultipleObjectsReturned(f'For the following QuerySet multiple items found {query_set} '
                                           f'with WHERE-clause {query_set.query.where}')
         return query_set.first()
+
+    def get_user_info_by(self, external_id) -> ApiUserInfo:
+        return self.moodle_api.get_user_info(external_id)

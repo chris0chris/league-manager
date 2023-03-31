@@ -43,8 +43,9 @@ class TestOfficialSerializer(TestCase):
         DbSetupOfficials().create_officials_full_setup()
         official = Official.objects.first()
         year = datetime.date.today().year + 1
-        assert OfficialSerializer(official).data == {
-            'association': 'Association name',
+        assert OfficialSerializer(instance=official).data == {
+            'association': 'ABBR',
+            'email': '',
             'first_name': 'Franzi',
             'id': official.pk,
             'is_valid': True,
@@ -59,8 +60,9 @@ class TestOfficialSerializer(TestCase):
         DbSetupOfficials().create_officials_full_setup()
         official = Official.objects.last()
         year = datetime.date.today().year + 1
-        assert OfficialSerializer(official).data == {
+        assert OfficialSerializer(instance=official).data == {
             'association': 'Kein Verband hinterlegt',
+            'email': '',
             'first_name': 'Julia',
             'id': official.pk,
             'is_valid': True,

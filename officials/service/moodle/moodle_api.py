@@ -14,10 +14,13 @@ class FieldNotFoundException(Exception):
 
 class ApiUserInfo:
     def __init__(self, user_info_json):
-        self.first_name = user_info_json[0]['firstname']
-        self.last_name = user_info_json[0]['lastname']
-        self.custom_fields = user_info_json[0]['customfields'][0]
-        self.id = user_info_json[0]['id']
+        if not user_info_json:
+            user_info_json = [{}]
+        self.first_name = user_info_json[0].get('firstname', '')
+        self.last_name = user_info_json[0].get('lastname', '')
+        self.custom_fields = user_info_json[0].get('customfields', [{}, {}, {}])
+        self.id = user_info_json[0].get('id', '')
+        self.email = user_info_json[0].get('email', '')
 
     def get_first_name(self) -> str:
         return self.first_name
@@ -28,10 +31,27 @@ class ApiUserInfo:
     def get_id(self) -> int:
         return self.id
 
+    def get_email(self) -> str:
+        return self.email
+
     def get_team(self) -> str:
-        if self.custom_fields['name'] != 'Teamname':
-            raise FieldNotFoundException('Teamname', self.custom_fields)
-        return self.custom_fields['value']
+        return self._get_custom_field_value(0, 'Team')
+
+    def get_association(self) -> str:
+        return self._get_custom_field_value(2, 'LandesverbandAuswahl')
+
+    def whistle_for_association(self) -> bool:
+        value = self._get_custom_field_value(1, 'Landesverband')
+        return value == 'Ja.'
+
+    def _get_custom_field_value(self, custom_field_index: int, expected_field_name):
+        try:
+            custom_field = self.custom_fields[custom_field_index]
+        except IndexError:
+            return ''
+        if custom_field.get('shortname', expected_field_name) != expected_field_name:
+            raise FieldNotFoundException(expected_field_name, self.custom_fields)
+        return custom_field.get('value', '')
 
     def __str__(self):
         return f'{self.id}: {self.last_name}, {self.first_name} -> {self.get_team()}'
