@@ -4,7 +4,7 @@ import re
 from rest_framework.fields import CharField, SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 
-from officials.models import Official, OfficialLicenseHistory
+from officials.models import Official, OfficialLicenseHistory, EmptyOfficialLicenseHistory
 from officials.service.moodle.moodle_service import MoodleService
 from teammanager.models import GameOfficial
 
@@ -72,6 +72,8 @@ class OfficialSerializer(ModelSerializer):
 
     def _get_license_history(self, obj):
         newest_license: OfficialLicenseHistory = obj.officiallicensehistory_set.last()
+        if newest_license is None:
+            return EmptyOfficialLicenseHistory()
         return newest_license
 
 
