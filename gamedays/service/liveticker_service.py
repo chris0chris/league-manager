@@ -96,8 +96,8 @@ class Liveticker(object):
 
 
 class LivetickerService(object):
-    def __init__(self, gameday_id=None, game_ids_with_all_ticks=(), league=[]):
-        self.game_ids_with_all_ticks = game_ids_with_all_ticks
+    def __init__(self, gameday_id=None, game_ids_with_all_ticks=(), league=()):
+        self.game_ids_with_all_ticks = list(map(int, game_ids_with_all_ticks))
         if not league:
             league = League.objects.all()
         else:

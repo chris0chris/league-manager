@@ -3,7 +3,6 @@ from collections import OrderedDict
 from datetime import datetime
 from http import HTTPStatus
 
-from django.conf import settings
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.request import Request
@@ -21,8 +20,8 @@ class GamedayListAPIView(ListAPIView):
 
     def get_queryset(self):
         # ToDo Dummyscorecard
-        if settings.DEBUG:
-            return [Gameday.objects.first()]
+        # if settings.DEBUG:
+        #     return [Gameday.objects.first()]
         return Gameday.objects.filter(date=datetime.today())
 
 

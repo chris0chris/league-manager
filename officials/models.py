@@ -29,6 +29,18 @@ class OfficialLicense(models.Model):
         return f'{self.name}'
 
 
+class EmptyLicense:
+    pk = 4
+    name = 'Keine Lizenz vorhanden'
+
+
+class EmptyOfficialLicenseHistory:
+    license = EmptyLicense()
+
+    def valid_until(self):
+        return datetime.date(1, 1, 1)
+
+
 class OfficialLicenseHistory(models.Model):
     official: Official = models.ForeignKey(Official, on_delete=models.CASCADE)
     license = models.ForeignKey(OfficialLicense, on_delete=models.CASCADE)
