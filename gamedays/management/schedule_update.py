@@ -1,8 +1,8 @@
 import json
 import pathlib
 
+from gamedays.models import Team, Gameday, Gameinfo, Gameresult
 from gamedays.service.model_wrapper import GamedayModelWrapper
-from teammanager.models import Gameinfo, Gameresult, Team, Gameday
 
 
 class UpdateGameEntry:

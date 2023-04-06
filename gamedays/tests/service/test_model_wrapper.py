@@ -3,12 +3,12 @@ import pathlib
 import pandas as pd
 from django.test import TestCase
 
+from gamedays.models import Team, Gameinfo, Gameresult
 from gamedays.service.gameday_settings import SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, \
     STANDING, STAGE, STATUS
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.tests.setup_factories.dataframe_setup import DataFrameAssertion
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo, Gameresult, Team
 
 
 class TestGamedayModelWrapper(TestCase):

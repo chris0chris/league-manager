@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 
+from gamedays.models import Team, Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import TeamFactory
 from officials.models import Official
 from officials.tests.setup_factories.factories_officials import OfficialFactory, OfficialLicenseHistoryFactory, \
     OfficialLicenseFactory, OfficialExternalGamesFactory
-from teammanager.models import Team, Gameinfo
 
 
 class DbSetupOfficials:

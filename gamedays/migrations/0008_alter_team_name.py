@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('teammanager', '0007_gameinfo_in_possession'),
+        ('gamedays', '0007_gameinfo_in_possession'),
     ]
 
     operations = [

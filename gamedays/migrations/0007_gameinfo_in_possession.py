@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('teammanager', '0006_auto_20210322_1911'),
+        ('gamedays', '0006_auto_20210322_1911'),
     ]
 
     operations = [

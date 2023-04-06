@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 
-from teammanager.models import Gameday, Season, League
+from gamedays.models import Season, League, Gameday
 
 SCHEDULE_CHOICES = (
     ("3_1", "3 Teams 1 Feld"),

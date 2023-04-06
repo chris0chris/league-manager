@@ -5,10 +5,10 @@ from django.test import TransactionTestCase
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule
 from gamedays.management.schedule_update import ScheduleUpdate, UpdateGameEntry, UpdateEntry
+from gamedays.models import Gameday, Gameinfo, Gameresult
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.tests.setup_factories.dataframe_setup import DataFrameAssertion
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo, Gameresult, Gameday
 
 
 def update_gameresults(game):

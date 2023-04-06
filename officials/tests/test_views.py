@@ -5,12 +5,12 @@ from django.contrib.auth.models import User
 from django_webtest import WebTest, DjangoWebtestResponse
 from rest_framework.reverse import reverse
 
+from gamedays.models import Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from officials.models import Official, OfficialExternalGames
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 from officials.urls import OFFICIALS_LIST_FOR_TEAM, OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE, \
     OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE, OFFICIALS_GAME_COUNT
-from teammanager.models import Gameinfo
 
 
 class TestOfficialListView(WebTest):

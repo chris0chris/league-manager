@@ -3,6 +3,7 @@ from collections import OrderedDict
 from datetime import datetime
 from http import HTTPStatus
 
+from django.conf import settings
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.request import Request
@@ -10,9 +11,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, GameOfficialSerializer
+from gamedays.models import Gameday, Gameinfo, GameOfficial
 from gamedays.service.gameday_service import GamedayService
 from gamedays.service.liveticker_service import LivetickerService
-from teammanager.models import Gameday, Gameinfo, GameOfficial
 
 
 class GamedayListAPIView(ListAPIView):
@@ -20,8 +21,8 @@ class GamedayListAPIView(ListAPIView):
 
     def get_queryset(self):
         # ToDo Dummyscorecard
-        # if settings.DEBUG:
-        #     return [Gameday.objects.first()]
+        if settings.DEBUG:
+            return [Gameday.objects.first()]
         return Gameday.objects.filter(date=datetime.today())
 
 

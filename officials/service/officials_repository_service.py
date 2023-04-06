@@ -1,7 +1,7 @@
 from django.db.models import Sum, QuerySet
 
+from gamedays.models import GameOfficial
 from officials.models import Official, OfficialExternalGames, OfficialLicenseHistory
-from teammanager.models import GameOfficial
 
 
 class OfficialsRepositoryService:

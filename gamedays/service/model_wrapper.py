@@ -2,10 +2,10 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame
 
+from gamedays.models import Gameinfo, Gameresult
 from gamedays.service.gameday_settings import STANDING, TEAM_NAME, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, GROUP1, \
     GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
     STATUS, SH, FH, FINISHED, GAME_FINISHED, DFFL, IN_POSSESSION, IS_HOME
-from teammanager.models import Gameinfo, Gameresult
 
 
 class DfflPoints(object):

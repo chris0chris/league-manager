@@ -2,8 +2,8 @@ import json
 
 from django.db.models import QuerySet
 
+from gamedays.models import Gameresult, TeamLog
 from gamedays.service.utils import AsJsonEncoder
-from teammanager.models import Gameresult, TeamLog
 
 EXCLUDED_EVENTS = ['Strafe', 'Spielzeit', 'Auszeit', 'First Down']
 

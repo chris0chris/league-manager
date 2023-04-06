@@ -8,20 +8,20 @@ from django import forms
 from django.contrib import messages
 from django.shortcuts import render, redirect
 
-from teammanager import models
+import gamedays.models
 
 
 # Create your views here.
 
 class Teamform(forms.ModelForm):
     class Meta:
-        model = models.Team
+        model = gamedays.models.Team
         exclude = []
 
 
 class Userform(forms.ModelForm):
     class Meta:
-        model = models.UserProfile
+        model = gamedays.models.UserProfile
         exclude = ['team', 'user']
 
 
@@ -44,20 +44,20 @@ def createteam(request):
 
 
 def showteams(request):
-    all_teams = models.Team.objects.all()
+    all_teams = gamedays.models.Team.objects.all()
     return render(request, 'showTeams.html', {'teams': all_teams})
 
 
 def teamdetail(request, team_id):
     members = []
 
-    team = models.Team.objects.get(pk=team_id)
-    members = list(models.UserProfile.objects.filter(team=team))
+    team = gamedays.models.Team.objects.get(pk=team_id)
+    members = list(gamedays.models.UserProfile.objects.filter(team=team))
     if request.user.is_authenticated:
         if request.user.is_superuser:
             allow_button_view = True
         else:
-            user = models.UserProfile.objects.get(user=request.user)
+            user = gamedays.models.UserProfile.objects.get(user=request.user)
             if team == user.team and user.check_teammanager:
                 allow_button_view = True
             else:
@@ -72,7 +72,7 @@ def teamdetail(request, team_id):
 
 def deleteteam(request, team_id):
     if request.user.is_superuser:
-        team = models.Team.objects.get(pk=team_id)
+        team = gamedays.models.Team.objects.get(pk=team_id)
         team.delete()
         return redirect(showteams)
     else:
@@ -87,7 +87,7 @@ def createuser(request, team_id):
     if request.user.is_superuser:
         authored = True
     else:
-        user = models.UserProfile.objects.get(user=request.user)
+        user = gamedays.models.UserProfile.objects.get(user=request.user)
         if ((user.team.id == team_id) & user.check_teammanager()):
             authored = True
     if authored:
@@ -95,7 +95,7 @@ def createuser(request, team_id):
             form = Userform(request.POST, request.FILES)
             if form.is_valid():
                 obj = form.save(commit=False)
-                team = models.Team.objects.get(pk=team_id)
+                team = gamedays.models.Team.objects.get(pk=team_id)
                 obj.team = team
                 obj.save()
                 return redirect(teamdetail,team_id=team_id)
@@ -113,12 +113,12 @@ def editteam(request, team_id):
     if request.user.is_authenticated is False:
         return redirect('login')
 
-    team = models.Team.objects.get(pk=team_id)
+    team = gamedays.models.Team.objects.get(pk=team_id)
 
     if request.user.is_superuser:
         authored = True
     else:
-        user = models.UserProfile.objects.get(user=request.user)
+        user = gamedays.models.UserProfile.objects.get(user=request.user)
         if ((user.team == team) & user.check_teammanager()):
             authored = True
     if authored:
@@ -140,8 +140,8 @@ def edituser(request, user_id):
     if request.user.is_authenticated is False:
         return redirect('login')
 
-    user_editing = models.UserProfile.objects.get(user=request.user)
-    user_is_being_edited = models.UserProfile.objects.get(pk=user_id)
+    user_editing = gamedays.models.UserProfile.objects.get(user=request.user)
+    user_is_being_edited = gamedays.models.UserProfile.objects.get(pk=user_id)
 
     if request.user.is_superuser | (
             (user_editing.team == user_is_being_edited.team) & user_editing.check_teammanager()):
@@ -163,8 +163,8 @@ def deleteuser(request, user_id):
     if request.user.is_authenticated is False:
         return redirect('login')
 
-    user_deleting = models.UserProfile.objects.get(user=request.user)
-    user_is_being_deleted = models.UserProfile.objects.get(pk=user_id)
+    user_deleting = gamedays.models.UserProfile.objects.get(user=request.user)
+    user_is_being_deleted = gamedays.models.UserProfile.objects.get(pk=user_id)
 
     if request.user.is_superuser | (
             (user_deleting.team == user_is_being_deleted.team) & user_deleting.check_teammanager()):
@@ -173,19 +173,19 @@ def deleteuser(request, user_id):
 
 
 def playerdetail(request, player_id):
-    achievements={}
-    gamedays={'items':{}}
-    player = models.UserProfile.objects.get(pk=player_id)
-    playerAchievements = pd.DataFrame(models.PlayerAchievement.objects.filter(player=player).values())
-    Achievements=pd.DataFrame(models.Achievement.objects.all().values())
+    achievements = {}
+    gamedays = {'items': {}}
+    player = gamedays.models.UserProfile.objects.get(pk=player_id)
+    playerAchievements = pd.DataFrame(gamedays.models.PlayerAchievement.objects.filter(player=player).values())
+    Achievements = pd.DataFrame(gamedays.models.Achievement.objects.all().values())
     if not playerAchievements.empty:
-        merge=pd.merge( Achievements,playerAchievements, left_on='id', right_on='achievement_id')
-        merge.drop(['id_x','id_y','player_id','achievement_id'],axis=1,inplace=True)
+        merge = pd.merge(Achievements, playerAchievements, left_on='id', right_on='achievement_id')
+        merge.drop(['id_x', 'id_y', 'player_id', 'achievement_id'], axis=1, inplace=True)
         game_dict = dict()
 
-        tmp=[]
+        tmp = []
 
-        for index,item in Achievements.iterrows():
+        for index, item in Achievements.iterrows():
             tmp.append(item['name'])
 
         for a in merge.iterrows():
@@ -208,7 +208,7 @@ def uploadplayerscsv(request,team_id):
     if request.method == "GET":
         return render(request,'uploadplayerscsv.html')
 
-    team = list(models.Team.objects.filter(pk=team_id))
+    team = list(gamedays.models.Team.objects.filter(pk=team_id))
     csv_file = request.FILES['file']
 
     if not csv_file.name.endswith('.csv') and not csv_file.name.endswith('.CSV'):
@@ -218,7 +218,7 @@ def uploadplayerscsv(request,team_id):
         messages.error(request, 'TEAM not Found')
         return render(request, 'uploadplayerscsv.html')
 
-    team = models.Team.objects.get(pk=team_id)
+    team = gamedays.models.Team.objects.get(pk=team_id)
 
 
     data_set = csv_file.read().decode('ANSI')
@@ -226,13 +226,13 @@ def uploadplayerscsv(request,team_id):
     io_string = io.StringIO(data_set)
     next(io_string)
     for column in csv.reader(io_string, delimiter=';', quotechar="|"):
-        created = models.UserProfile.objects.update_or_create(
-            team = team,
-            firstname= column[0],
-            lastname= column [1],
-            playernumber= column[2],
-            position= column[3],
-            birth_date= datetime.strptime(column[4],'%d.%m.%Y')
+        created = gamedays.models.UserProfile.objects.update_or_create(
+            team=team,
+            firstname=column[0],
+            lastname=column[1],
+            playernumber=column[2],
+            position=column[3],
+            birth_date=datetime.strptime(column[4], '%d.%m.%Y')
         )
     return redirect(teamdetail,team_id=team_id)
 
@@ -240,6 +240,6 @@ def uploadplayerscsv(request,team_id):
 def showachievements(request):
     if request.user.is_authenticated is False or request.user.is_superuser is False:
         return redirect('login')
-    achievements=pd.DataFrame(models.Achievement.objects.all().values()).to_json(orient="split")
-    achievements=json.loads(achievements)
+    achievements = pd.DataFrame(gamedays.models.Achievement.objects.all().values()).to_json(orient="split")
+    achievements = json.loads(achievements)
     return render(request, 'showAchievements.html',{'achievements':achievements})

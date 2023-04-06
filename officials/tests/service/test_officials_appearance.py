@@ -2,10 +2,10 @@ import datetime
 
 from django.test import TestCase
 
+from gamedays.models import Team
 from officials.models import Official
 from officials.service.officials_appearance import OfficialAppearanceTeamList, OfficialAppearanceTeamListEntry
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
-from teammanager.models import Team
 
 
 class TestOfficialApearanceTeamList(TestCase):

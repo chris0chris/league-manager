@@ -2,10 +2,10 @@ import datetime
 
 from django.test import TestCase
 
+from gamedays.models import GameOfficial
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer
 from officials.models import Official
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
-from teammanager.models import GameOfficial
 
 
 class TestGameOfficialAllInfoSerializer(TestCase):

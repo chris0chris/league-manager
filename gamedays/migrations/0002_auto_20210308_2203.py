@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('teammanager', '0001_initial'),
+        ('gamedays', '0001_initial'),
     ]
 
     operations = [
@@ -28,8 +28,8 @@ class Migration(migrations.Migration):
             name='SeasonLeagueTeam',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('league', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='teammanager.league')),
-                ('season', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='teammanager.season')),
+                ('league', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gamedays.league')),
+                ('season', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gamedays.season')),
             ],
         ),
         migrations.RenameField(
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='userprofile',
             name='team',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='teammanager.team'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='gamedays.team'),
         ),
         migrations.DeleteModel(
             name='Division',
@@ -56,6 +56,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='seasonleagueteam',
             name='team',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='teammanager.team'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gamedays.team'),
         ),
     ]

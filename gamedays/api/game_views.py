@@ -9,9 +9,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from gamedays.api.serializers import GameFinalizer, GameSetupSerializer
+from gamedays.models import Team, Gameinfo, GameSetup
 from gamedays.service.game_service import GameService
 from gamedays.service.gameday_service import GamedayService
-from teammanager.models import Gameinfo, Team, GameSetup
 
 
 class GameLogAPIView(APIView):

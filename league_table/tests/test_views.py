@@ -1,8 +1,8 @@
 from django.urls import reverse
 from django_webtest import WebTest
 
+from gamedays.models import Season, League, Team, SeasonLeagueTeam
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Season, League, Team, SeasonLeagueTeam
 
 
 class TestLeagueTableView(WebTest):
