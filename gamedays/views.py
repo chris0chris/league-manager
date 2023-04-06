@@ -4,8 +4,8 @@ from django.urls import reverse
 from django.views.generic import ListView, DetailView, UpdateView, CreateView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
-from teammanager.models import Gameday
 from .forms import GamedayCreateForm, GamedayUpdateForm
+from .models import Gameday
 from .service.gameday_service import GamedayService
 
 

@@ -7,12 +7,12 @@ from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.views import View
 
+from gamedays.models import Team, Gameinfo, GameOfficial
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer
 from officials.forms import AddInternalGameOfficialEntryForm, AddExternalGameOfficialEntryForm
 from officials.models import Official
 from officials.service.moodle.moodle_service import MoodleService
 from officials.service.official_service import OfficialService
-from teammanager.models import Team, GameOfficial, Gameinfo
 
 
 class OfficialsTeamListView(View):

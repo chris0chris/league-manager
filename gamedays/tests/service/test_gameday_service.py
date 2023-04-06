@@ -1,8 +1,8 @@
 from django.test import TestCase
 
+from gamedays.models import Gameinfo
 from gamedays.service.gameday_service import GamedayService, EmptySchedule, EmptyQualifyTable, EmptyFinalTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo
 
 
 class TestGamedayService(TestCase):

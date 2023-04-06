@@ -4,7 +4,7 @@ from datetime import date
 from django.db import models
 from django.db.models import QuerySet
 
-from teammanager.models import Team, Association
+from gamedays.models import Association, Team
 
 
 class Official(models.Model):

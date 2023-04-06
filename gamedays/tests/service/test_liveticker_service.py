@@ -2,9 +2,9 @@ from datetime import datetime
 
 from django.test import TestCase
 
+from gamedays.models import League, Gameday, Gameinfo, Gameresult, TeamLog
 from gamedays.service.liveticker_service import LivetickerService, Liveticker, Tick
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo, Gameresult, TeamLog, Gameday, League
 
 
 class TestLivetickerService(TestCase):

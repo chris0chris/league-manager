@@ -1,4 +1,4 @@
-from teammanager.models import Team
+from gamedays.models import Team
 
 
 class TeamWrapper(object):

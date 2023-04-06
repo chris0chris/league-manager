@@ -2,10 +2,10 @@ import re
 
 from django.test import TestCase
 
+from gamedays.models import Team, Gameinfo, Gameresult, TeamLog
 from gamedays.service.game_service import GameService
 from gamedays.service.gamelog import GameLog
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo, Gameresult, Team, TeamLog
 
 
 class TestGameService(TestCase):

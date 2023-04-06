@@ -1,5 +1,5 @@
+from gamedays.models import Gameinfo, GameOfficial
 from officials.models import Official, OfficialExternalGames
-from teammanager.models import Gameinfo, GameOfficial
 
 
 def convert_to_int(attr_name, value):

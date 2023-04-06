@@ -2,11 +2,11 @@ from datetime import datetime
 
 from django.db.models import Sum
 
+from gamedays.models import Team
 from officials.models import Official
 from officials.service.game_official_entries import InternalGameOfficialEntry, ExternalGameOfficialEntry
 from officials.service.officials_appearance import OfficialAppearanceTeamList
 from officials.service.officials_repository_service import OfficialsRepositoryService
-from teammanager.models import Team
 
 
 class OfficialService:

@@ -2,11 +2,11 @@ import json
 
 import pandas as pd
 
+from gamedays.models import Season, SeasonLeagueTeam, Gameday, Gameinfo
 from gamedays.service.gameday_settings import SCHEDULED, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     AWAY, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL, GAMEDAY_NAME, GAMEDAY_ID, \
     GAMEINFO_ID
 from gamedays.service.model_wrapper import GamedayModelWrapper
-from teammanager.models import Gameday, Gameinfo, SeasonLeagueTeam, Season
 
 
 class LeagueTable:

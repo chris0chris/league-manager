@@ -1,8 +1,8 @@
 from datetime import datetime
 
+from gamedays.models import League, Gameday, Gameinfo, TeamLog
 from gamedays.service.gameday_settings import SCHEDULED, GAMEDAY_ID
 from gamedays.service.wrapper.gameresult_wrapper import GameresultWrapper
-from teammanager.models import Gameinfo, TeamLog, Gameday, League
 
 
 class Tick(object):

@@ -39,10 +39,6 @@ python manage.py collectstatic
 
 ### MySQL
 
-#### Matching GameOfficial with Official who has license
-
-    UPDATE teammanager_gameofficial SET official_id =  WHERE id IN ();
-
 #### EXPORT MySQL from pythonanywhere
 
     mysqldump -u 5erdffl -h 5erdffl.mysql.eu.pythonanywhere-services.com --set-gtid-purged=OFF --no-tablespaces '5erdffl$league_manager'  > db-backup.sql

@@ -1,8 +1,8 @@
 from django.test import TestCase
 
+from gamedays.models import Gameinfo, Gameresult
 from gamedays.service.wrapper.gameresult_wrapper import GameresultWrapper
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo, Gameresult
 
 
 class TestGameresultWrapper(TestCase):

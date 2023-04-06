@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 
+from gamedays.models import Team, Gameday, Gameinfo
 from gamedays.tests.setup_factories.factories import GameinfoFactory, GameresultFactory, GamedayFactory, \
     GameOfficialFactory, TeamLogFactory, GameSetupFactory, TeamFactory, UserFactory, AssociationFactory
-from teammanager.models import Gameday, Gameinfo, Team
 
 
 class DBSetup:

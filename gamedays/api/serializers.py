@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from teammanager.models import Gameday, Gameinfo, GameOfficial, GameSetup
+from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
 
 
 class GamedaySerializer(ModelSerializer):

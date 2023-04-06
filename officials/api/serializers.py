@@ -4,9 +4,9 @@ import re
 from rest_framework.fields import CharField, SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 
+from gamedays.models import GameOfficial
 from officials.models import Official, OfficialLicenseHistory, EmptyOfficialLicenseHistory
 from officials.service.moodle.moodle_service import MoodleService
-from teammanager.models import GameOfficial
 
 
 class Obfuscator:
@@ -116,7 +116,7 @@ class GameOfficialAllInfoSerializer(ModelSerializer):
     def _get_official_name(self, game_official):
         if game_official.official is not None:
             return f'{game_official.official.first_name} {game_official.official.last_name}'
-        return game_official.name
+        return f'{game_official.name} *'
 
     class Meta:
         model = GameOfficial

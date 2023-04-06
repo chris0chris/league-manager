@@ -132,6 +132,12 @@ class ApiParticipant:
     def __str__(self):
         return f'{self.user_id}: graderaw {self.graderaw} / {self.grademax} grademax'
 
+    def __repr__(self):
+        return f'ApiParticipant(participant_json=' \
+               f'{{"gradeitems":[' \
+               f'{{"grademax": {self.grademax}, "graderaw": {self.graderaw}, "user_id": {self.user_id}}}' \
+               f']}})'
+
     def get_user_id(self):
         return self.user_id
 

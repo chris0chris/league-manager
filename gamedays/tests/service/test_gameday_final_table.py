@@ -3,7 +3,7 @@ from abc import abstractmethod, ABC
 from typing import List
 from unittest import TestCase
 
-from teammanager.models import Gameresult, Gameinfo, Gameday, Team
+from gamedays.models import Team, Gameday, Gameinfo, Gameresult
 
 
 class ComparableMixin(object):

@@ -3,11 +3,11 @@ from http import HTTPStatus
 from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
+from gamedays.models import Team
 from officials.api.serializers import OfficialSerializer
 from officials.api.urls import API_OFFICIALS_FOR_TEAM, API_OFFICIALS_SEARCH_BY_NAME
 from officials.models import Official
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
-from teammanager.models import Team
 
 
 class TestOfficialsTeamListAPIView(WebTest):

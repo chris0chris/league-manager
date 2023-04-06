@@ -3,7 +3,7 @@ import json
 import pathlib
 from typing import Union, List
 
-from teammanager.models import Gameday, Gameinfo, Gameresult, Team
+from gamedays.models import Team, Gameday, Gameinfo, Gameresult
 
 
 class TeamNotExistent(BaseException):

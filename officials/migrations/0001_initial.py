@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('teammanager', '0008_alter_team_name'),
+        ('gamedays', '0008_alter_team_name'),
     ]
 
     operations = [
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('first_name', models.CharField(max_length=100)),
                 ('last_name', models.CharField(max_length=100)),
                 ('team',
-                 models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='teammanager.team')),
+                 models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='gamedays.team')),
             ],
         ),
         migrations.CreateModel(

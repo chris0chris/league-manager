@@ -1,9 +1,9 @@
 from django.core.exceptions import MultipleObjectsReturned
 from django.db.models import QuerySet
 
+from gamedays.models import Association, Team
 from officials.models import OfficialLicenseHistory, Official
 from officials.service.moodle.moodle_api import MoodleApi, ApiUserInfo, ApiCourses, ApiParticipants
-from teammanager.models import Team, Association
 
 
 class LicenseCalculator:

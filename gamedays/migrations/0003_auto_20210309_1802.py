@@ -6,20 +6,20 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('teammanager', '0002_auto_20210308_2203'),
+        ('gamedays', '0002_auto_20210308_2203'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='gameday',
             name='league',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='teammanager.league'),
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='gamedays.league'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='gameday',
             name='season',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='teammanager.season'),
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='gamedays.season'),
             preserve_default=False,
         ),
     ]

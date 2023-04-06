@@ -3,9 +3,9 @@ import pathlib
 import pandas as pd
 from django.test import TestCase
 
+from gamedays.models import Season, League, Team, SeasonLeagueTeam
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from league_table.service.league_table import LeagueTable
-from teammanager.models import Team, League, SeasonLeagueTeam, Season
 
 
 # ToDo extract method for reuseability

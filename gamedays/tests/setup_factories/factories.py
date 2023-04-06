@@ -5,8 +5,8 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from factory.django import DjangoModelFactory
 
-from teammanager.models import Team, Gameday, Gameinfo, Gameresult, GameOfficial, GameSetup, TeamLog, League, Season, \
-    SeasonLeagueTeam, Association
+from gamedays.models import Season, League, Association, Team, SeasonLeagueTeam, Gameday, Gameinfo, Gameresult, \
+    GameOfficial, GameSetup, TeamLog
 
 
 class LeagueFactory(DjangoModelFactory):

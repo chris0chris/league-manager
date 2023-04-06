@@ -2,10 +2,10 @@ from datetime import datetime
 
 from django.test import TestCase
 
+from gamedays.models import GameOfficial
 from officials.models import OfficialExternalGames, Official
 from officials.service.officials_repository_service import OfficialGameCount
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
-from teammanager.models import GameOfficial
 
 
 class TestOfficialGameCount(TestCase):

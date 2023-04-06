@@ -11,9 +11,9 @@ from rest_framework.reverse import reverse
 
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
 from gamedays.api.urls import API_GAMEDAY_LIST, API_GAMEDAY_WHISTLEGAMES, API_LIVETICKER_ALL
+from gamedays.models import Team, Gameday, Gameinfo
 from gamedays.service.gameday_service import EmptySchedule, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameday, Gameinfo, Team
 
 
 class TestGamedayAPIViews(WebTest):

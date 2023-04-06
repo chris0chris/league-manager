@@ -1,7 +1,7 @@
+from gamedays.models import Team, TeamLog
 from gamedays.service.gamelog import GameLog, GameLogCreator
 from gamedays.service.wrapper.gameinfo_wrapper import GameinfoWrapper
 from gamedays.service.wrapper.gameresult_wrapper import GameresultWrapper
-from teammanager.models import Team, TeamLog
 
 
 class GameService(object):

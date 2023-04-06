@@ -4,10 +4,10 @@ import pathlib
 from django.contrib.auth.models import User
 from django.test import TestCase
 
+from gamedays.models import Team, Gameinfo, Gameresult, TeamLog
 from gamedays.service.gamelog import GameLog, GameLogObject, GameLogCreator
 from gamedays.service.utils import AsJsonEncoder
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from teammanager.models import Gameinfo, Gameresult, TeamLog, Team
 
 
 class TestGamelog(TestCase):
