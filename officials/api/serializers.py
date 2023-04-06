@@ -116,7 +116,7 @@ class GameOfficialAllInfoSerializer(ModelSerializer):
     def _get_official_name(self, game_official):
         if game_official.official is not None:
             return f'{game_official.official.first_name} {game_official.official.last_name}'
-        return f'{game_official.name} *'
+        return f'{game_official.name} ?'
 
     class Meta:
         model = GameOfficial
