@@ -29,7 +29,7 @@
             <tbody>
             {% for official in object_list.officials_list.list %}
             <tr>
-                <th scope="row">{{official.id}}</th>
+                <th scope="row"><a href="/officials/profile/{{official.id}}">{{official.id}}</a></th>
                 <td>{{official.last_name}}</td>
                 <td>{{official.first_name}}</td>
                 <td>{{official.license}}</td>
