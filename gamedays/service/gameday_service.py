@@ -114,7 +114,7 @@ class GamedayService:
         final_table = self.gmw.get_final_table()
         if final_table.empty:
             return final_table
-        final_table = final_table[[DFFL, TEAM_NAME, POINTS, PF, PA, DIFF]]
+        final_table = final_table[[TEAM_NAME, POINTS, PF, PA, DIFF]]
         final_table = final_table.rename(columns=TABLE_HEADERS)
         return final_table
 
