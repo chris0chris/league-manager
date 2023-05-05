@@ -72,9 +72,9 @@ class ApiCourse:
     # noinspection PyMethodMayBeStatic
     def _map_category_to_license_id(self, category_id):
         license_map = {
-            4: 1,
-            3: 3,
-            2: 2,
+            4: 1,  # F1
+            3: 3,  # F2
+            2: 2,  # F3
         }
         return license_map.get(category_id)
 

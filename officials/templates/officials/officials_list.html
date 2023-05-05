@@ -3,15 +3,26 @@
 <article class="media content-section">
     <div class="media-body">
         <h1>{{ object_list.year }} - {{ object_list.team }}</h1>
-        <p>Angezeigt werden alle Spiele (inklusive externe Spiele, z.B. für Landesverband) die gepfiffen wurden für
-            lizenzierte Offizielle. In Klammern sind alle Spiele die für die 5er DFFL gepfiffen wurden.</p>
-
-        {% for year in object_list.officials_list.years %}
-        <a href="/officials/team/{{team_id}}/list/{{year}}">{{ year }}</a>
-        {% endfor %}
         <p>
-
+            Angezeigt werden alle Spiele (inklusive externe Spiele, z.B. für Landesverband) die gepfiffen wurden für
+            lizenzierte Offizielle. In Klammern sind alle Spiele die für die 5er DFFL gepfiffen wurden.<br>
+            Ein Einsatz als Scorecard Judge wird NICHT gewertet.
+        </p>
+        <p>
+            Sollten Spiele fehlen, kannst du <a href="{% url 'view-officials-game-officials-appearance' %}">hier</a>
+            überprüfen, ob dein Einsatz in der 5er DFFL gezählt wurde.
+        </p>
+        <p>
+            Bei Fragen wende dich bitte an Chris: c.kaempfe@afvd.de
+        </p>
+        <p>
+            {% for year in object_list.officials_list.years %}
+            <a href="/officials/team/{{team_id}}/list/{{year}}">{{ year }}</a>
+            {% endfor %}
+        </p>
+        <h3>
             {{ object_list.officials_list.list|length }} - Offizielle
+        </h3>
         <table class="table table-hover">
             <thead>
             <tr>

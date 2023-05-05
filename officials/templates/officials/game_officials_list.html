@@ -2,9 +2,16 @@
 {% block content %}
 <article class="media content-section">
     <div class="media-body">
+        {% if gameday_is_running %}
         <p>
-            Personen die einem <b>Fragezeichen</b> (<b>?</b>) hinter dem Namen haben, deren Spiele werden nicht gezählt,
-            da für diese kein Eintrag gefunden wurde.<br/>
+            Aktuell läuft ein Spieltag, deswegen können die Daten aus Gründen der Performance nicht dargestellt werden.
+            Bitte probiere es an einem anderen Tag.
+        </p>
+        {% else %}
+        <p>
+            Personen die ein <b>Fragezeichen</b> (<b>?</b>) hinter dem Namen haben, deren Spiele werden nicht gezählt,
+            da für diese kein Eintrag gefunden wurde. Entweder haben diese keine Lizenz oder
+            der Name wurde nicht über die Scorecard ausgewählt / gesucht.<br/>
             Bei Fragen bitte an Chris wenden: c.kaempfe@afvd.de
         </p>
         <table class="table table-hover">
@@ -35,6 +42,7 @@
             {% endfor %}
             </tbody>
         </table>
+        {% endif %}
     </div>
 </article>
 {% endblock content %}
