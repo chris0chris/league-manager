@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.views import View
 
-from gamedays.models import Team, Gameinfo, GameOfficial
+from gamedays.models import Team, Gameinfo, GameOfficial, Gameday
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer
 from officials.forms import AddInternalGameOfficialEntryForm, AddExternalGameOfficialEntryForm
 from officials.models import Official
@@ -52,6 +52,10 @@ class GameOfficialListView(View):
     template_name = 'officials/game_officials_list.html'
 
     def get(self, request, **kwargs):
+        if Gameday.objects.filter(date=datetime.today()).exists():
+            return render(request, self.template_name, {
+                'gameday_is_running': True
+            })
         year = kwargs.get('year', datetime.today().year)
         team_id = kwargs.get('pk')
         game_officials = GameOfficial.objects.filter(gameinfo__gameday__date__year=year).exclude(
