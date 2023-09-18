@@ -11,6 +11,7 @@ const allTeams = [
   { teamName: "Würzburg Wombats", league: "DFFL 1" },
   { teamName: "Eberswalde Rangers", league: "DFFL 1" },
   { teamName: "Regensburg Phoenix", league: "DFFL 2" },
+  { teamName: "Rosenheim Rebels", league: "DFFL 2" },
 ];
 
 const teams = allTeams.sort((a, b) => {

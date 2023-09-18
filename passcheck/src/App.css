@@ -1,28 +1,28 @@
 * {
-    margin: 10px 0 0 5px;
+  margin: 10px 0 0 5px;
 }
 
 .search-div {
-    width: 100%;
-    max-width: 600px;
-    display: flex;
-    flex-flow: row;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-flow: row;
 }
 
 #searchbutton {
-    width: 25%;
+  width: 25%;
 }
 
 #radiobuttons-div {
-    width: 100%;
-    display: flex;
-    flex-flow: row;
+  width: 100%;
+  display: flex;
+  flex-flow: row;
 }
 
 label {
-    margin: 0 20px;
+  margin: 0 20px;
 }
 
 button {
-    margin: 0 1px;
+  margin: 0 1px;
 }
