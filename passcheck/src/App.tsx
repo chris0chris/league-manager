@@ -1,11 +1,15 @@
-import SearchableDropdown from "./components/SearchableDropdown";
+import PlayersOverview from "./components/PlayersOverview";
 
 function App() {
   return (
-    <div>
-      <h1>Passtool</h1>
-      <SearchableDropdown />
-    </div>
+    <>
+      <h1>Passcheck von "Teamname"</h1>
+      <div>Feld: "Feld"</div>
+      <div>Kickoff: "Uhrzeit"</div>
+      <div>
+        <PlayersOverview />
+      </div>
+    </>
   );
 }
 
