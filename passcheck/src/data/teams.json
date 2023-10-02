@@ -1,0 +1,85 @@
+[
+	{
+		"teamName": "Cakewalk",
+		"league": "DFFL",
+        "gecheckt": false
+    },
+	{
+		"teamName": "Lavasoft",
+		"league": "DFFL2"
+	,"gecheckt": false},
+	{
+		"teamName": "Adobe",
+		"league": "DFFL"
+	,"gecheckt": false},
+	{
+		"teamName": "Microsoft",
+		"league": "DFFL"
+	,"gecheckt": false},
+	{
+		"teamName": "Lavasoft",
+		"league": "DFFL"
+	,"gecheckt": false},
+	{
+		"teamName": "Sibelius",
+		"league": "DFFL2"
+	,"gecheckt": false},
+	{
+		"teamName": "Sibelius",
+		"league": "DFFL"
+	,"gecheckt": false},
+	{
+		"teamName": "Borland",
+		"league": "DFFL2"
+	,"gecheckt": false},
+	{
+		"teamName": "Adobe",
+		"league": "DFFL"
+	,"gecheckt": false},
+	{
+		"teamName": "Chami",
+		"league": "DFFL2"
+	,"gecheckt": false},
+	{
+		"teamName": "Google",
+		"league": "DFFL"
+	,"gecheckt": false},
+	{
+		"teamName": "Chami",
+		"league": "DFFL"
+	,"gecheckt": false},
+	{
+		"teamName": "Google",
+		"league": "DFFL2"
+	,"gecheckt": false},
+	{
+		"teamName": "Lavasoft",
+		"league": "DFFL"
+	,"gecheckt": false},
+	{
+		"teamName": "Sibelius",
+		"league": "DFFL2"
+	,"gecheckt": false},
+	{
+		"teamName": "Chami",
+		"league": "DFFL2"
+	,"gecheckt": false},
+	{
+		"teamName": "Sibelius",
+		"league": "DFFL"
+	,"gecheckt": false},
+	{
+		"teamName": "Amazon",
+		"league": "DFFL2"
+	,"gecheckt": false},
+	{
+		"teamName": "Borland",
+		"league": "DFFL"
+	,"gecheckt": false},
+	{
+		"teamName": "Lavasoft",
+		"league": "DFFL2",
+		"gecheckt": false
+}
+]
+

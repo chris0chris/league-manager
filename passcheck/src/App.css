@@ -1,28 +1,60 @@
-* {
-  margin: 10px 0 0 5px;
+#root {
+  margin: 10px 5px 10px 5px;
 }
 
-.search-div {
+.modal-footer {
+  justify-content: space-between;
+}
+
+.anwesend {
+  background-color: #00FF00;
+}
+
+tr {
+  height: 40px;
+}
+
+.officialNameInput {
   width: 100%;
-  max-width: 600px;
-  display: flex;
-  flex-flow: row;
+  height: 40px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
-#searchbutton {
-  width: 25%;
-}
-
-#radiobuttons-div {
+.full-widht-button {
   width: 100%;
-  display: flex;
-  flex-flow: row;
+  height: 40px;
 }
 
-label {
-  margin: 0 20px;
+#searchbar {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  height: 40px;
 }
 
-button {
-  margin: 0 1px;
+.modal-button-right, .modal-button-left {
+  width: 50px;
+  height: 50px;
+}
+
+.modal-button-middle {
+  width: 100px;
+  height: 50px;
+}
+
+.span-div{
+  position: relative;
+  padding-bottom: 30px;
+}
+
+.left-span {
+  position: absolute;
+  left: 0;
+}
+
+
+.right-span {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
