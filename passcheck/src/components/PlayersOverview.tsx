@@ -58,7 +58,7 @@ function PlayersOverview() {
       <Button
         variant="secondary"
         onClick={toggleSecondTeam}
-        className="full-widht-button"
+        className="full-width-button"
       >
         Passliste "Teamname" II
       </Button>
@@ -77,7 +77,7 @@ function PlayersOverview() {
         <input
           type="text"
           placeholder="Name Official"
-          className="officialNameInput"
+          className="officialNameInput form-control me-2"
         />
       </div>
       <div>
@@ -85,7 +85,7 @@ function PlayersOverview() {
           variant="success"
           type="submit"
           onClick={showModal}
-          className="full-widht-button"
+          className="full-width-button"
         >
           {" "}
           Passliste abschicken{" "}

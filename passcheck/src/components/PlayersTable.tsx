@@ -71,13 +71,13 @@ function PlayersTable({
         onChange={onChange}
         value={searchInput}
       />
-      <Table bordered hover size="sm">
+      <Table bordered hover size="sm" className="rounded-table">
         <thead>
           <tr>
-            <th>Lfd</th>
-            <th>Name</th>
-            <th>Trikot</th>
-            <th>Pass</th>
+            <th className="table-border">Lfd</th>
+            <th className="table-border">Name</th>
+            <th className="table-border">Trikot</th>
+            <th className="table-border">Pass</th>
           </tr>
         </thead>
         <tbody>
