@@ -27,12 +27,12 @@ interface Props {
 function PlayerLine({ playersData, index }: Props) {
   return (
     <>
-      <td>{playersData[index].key + 1}</td>
-      <td>
+      <td className="table-border">{playersData[index].key + 1}</td>
+      <td className="table-border">
         <span>{playersData[index].name}</span>
       </td>
-      <td>{playersData[index].shirtnumber}</td>
-      <td>{playersData[index].passnumber}</td>
+      <td className="table-border">{playersData[index].shirtnumber}</td>
+      <td className="table-border">{playersData[index].passnumber}</td>
     </>
   );
 }
