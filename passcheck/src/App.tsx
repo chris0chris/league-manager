@@ -1,11 +1,10 @@
+import Headerdata from "./components/Headerdata";
 import PlayersOverview from "./components/PlayersOverview";
 
 function App() {
   return (
     <>
-      <h1>Passcheck von "Teamname"</h1>
-      <div>Feld: "Feld"</div>
-      <div>Kickoff: "Uhrzeit"</div>
+      <Headerdata />
       <div>
         <PlayersOverview />
       </div>
