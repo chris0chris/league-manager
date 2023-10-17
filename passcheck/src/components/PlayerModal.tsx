@@ -1,6 +1,16 @@
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
+type jsonTypePlayer = {
+  gecheckt: boolean;
+  key: number;
+  playerid: string;
+  name: string;
+  lastname: string;
+  passnumber: string;
+  shirtnumber: number;
+}[];
+
 type jsonType = {
   gecheckt: boolean;
   key: number;

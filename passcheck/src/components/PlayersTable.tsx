@@ -3,6 +3,16 @@ import PlayerModal from "./PlayerModal";
 import Table from "react-bootstrap/Table";
 import { useEffect, useState } from "react";
 
+type jsonTypePlayer = {
+  gecheckt: boolean;
+  key: number;
+  playerid: string;
+  name: string;
+  lastname: string;
+  passnumber: string;
+  shirtnumber: number;
+}[];
+
 type jsonType = {
   gecheckt: boolean;
   key: number;
