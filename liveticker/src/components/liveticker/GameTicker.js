@@ -38,12 +38,15 @@ const GameTicker = (props) => {
             showPossession={away.isInPossession} />
         </div>
       </div>
-      <Ticks entries={ticks} />
-      { ticks.length !== 0 &&
-        <div className="card-footer text-center">
-          <DisplayAllTicks loadAllTicks={loadAllTicks} setLoadAllTicks={setLoadAllTicks} />
+      <Ticks entries={ticks} gameStatus={status} />
+      {ticks.length !== 0 && (
+        <div className='card-footer text-center'>
+          <DisplayAllTicks
+            loadAllTicks={loadAllTicks}
+            setLoadAllTicks={setLoadAllTicks}
+          />
         </div>
-      }
+      )}
     </div>
   );
 };
