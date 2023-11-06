@@ -11,9 +11,9 @@
             "lastname": "Just",
             "shirtnumber": 73,
             "passnumber": "4894",
-            "gender": "male",
+            "sex": "male",
             "gamesCount": 0,
-            "helpCount": 0,
+            "assistanceCount": 0,
             "checked": false
         },
         {
@@ -22,9 +22,9 @@
             "lastname": "Just",
             "shirtnumber": 2,
             "passnumber": "4895",
-            "gender": "male",
+            "sex": "male",
             "gamesCount": 0,
-            "helpCount": 0,
+            "assistanceCount": 0,
             "checked": false
         }
     ]

@@ -7,7 +7,7 @@ function App() {
     <>
       <Headerdata />
       <div>
-        <PlayersOverview />
+        <TeamOverview />
       </div>
     </>
   );

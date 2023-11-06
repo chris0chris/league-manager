@@ -16,6 +16,7 @@ function TeamCard({ index, teams }: Props) {
     console.log("Pythonfunktion ausführen mit " + teams[index].name);
     setChecked(!checkedTeam);
     teams[index].checked = checkedTeam;
+    console.log(teams[index].checked);
   };
 
   return (
@@ -25,8 +26,8 @@ function TeamCard({ index, teams }: Props) {
         <Card.Header>{teams[index].name}</Card.Header>
         <Card.Body>
           <ListGroup variant="flush">
-            <ListGroup.Item>Kickoff: Platzhalter</ListGroup.Item>
-            <ListGroup.Item>Feld: Platzhalter</ListGroup.Item>
+            <ListGroup.Item>Kickoff: {teams[index].kickoff}</ListGroup.Item>
+            <ListGroup.Item>Feld: {teams[index].field}</ListGroup.Item>
             <ListGroup.Item>
               {checkedTeam && (
                 <span style={{ color: "green" }}>
@@ -42,7 +43,11 @@ function TeamCard({ index, teams }: Props) {
             variant="primary"
             onClick={clickHandler}
           >
-            Passcheck durchführen
+            {!checkedTeam ? (
+              <span>Passcheck durchführen</span>
+            ) : (
+              <span>Passcheck aktualisieren</span>
+            )}
           </Button>
         </Card.Footer>
       </Card>
