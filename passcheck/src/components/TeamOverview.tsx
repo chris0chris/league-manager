@@ -1,22 +1,20 @@
 //import teams from "../data/teams.json";
-import TeamButton from "./TeamButton";
+import TeamCard from "./TeamCard";
 import { useState } from "react";
 
-var teams = require("../data/teams.json");
-
-console.log(teams);
+let teamDataJSON = require("../data/teams.json");
+const teamsWithKeys = teamDataJSON.teamlist.map((obj: any, index: any) => ({
+  ...obj,
+  key: index,
+}));
+console.log(teamDataJSON.teamlist);
 
 function TeamOverview(this: any) {
   return (
     <>
-      {teams.map((team: any) => (
+      {teamsWithKeys.map((team: any) => (
         <div>
-          <TeamButton
-            key={team.teamName}
-            teamName={team.teamName}
-            league={team.league}
-            checked={teams.checked}
-          />
+          <TeamCard index={team.key} teams={teamsWithKeys} />
         </div>
       ))}
     </>

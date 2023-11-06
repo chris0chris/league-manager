@@ -1,25 +1,8 @@
 //import { useState } from "react";
-
-type jsonTypePlayer = {
-  gecheckt: boolean;
-  key: number;
-  playerid: string;
-  name: string;
-  lastname: string;
-  passnumber: string;
-  shirtnumber: number;
-}[];
-
-type jsonType = {
-  gecheckt: boolean;
-  key: number;
-  name: string;
-  passnumber: string;
-  shirtnumber: number;
-}[];
+import { jsonTypePlayer } from "../data/types";
 
 interface Props {
-  playersData: jsonType;
+  playersData: jsonTypePlayer;
   index: number;
 }
 
@@ -29,7 +12,9 @@ function PlayerLine({ playersData, index }: Props) {
     <>
       <td className="table-border">{playersData[index].key + 1}</td>
       <td className="table-border">
-        <span>{playersData[index].name}</span>
+        <span>
+          {playersData[index].name} {playersData[index].lastname}
+        </span>
       </td>
       <td className="table-border">{playersData[index].shirtnumber}</td>
       <td className="table-border">{playersData[index].passnumber}</td>

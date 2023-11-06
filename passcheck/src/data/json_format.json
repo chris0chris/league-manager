@@ -2,23 +2,30 @@
     "gamedayid":1,
     "kickoff": "10:00 Uhr",
     "field": 2,
+    "teamid": "rooks",
     "teamname":"Augsburg Rooks",
     "playerlist":[ 
-    {
-        "playerid": "nik73",
-        "name": "Niklas",
-        "lastname": "Just",
-        "shirtnumber": 73,
-        "passnumber": "4894",
-        "gecheckt": false
-    },
-    {
-        "playerid": "nils2",
-        "name": "Nils",
-        "lastname": "Just",
-        "shirtnumber": 2,
-        "passnumber": "4895",
-        "gecheckt": false
-    }
+        {
+            "playerid": "nik73",
+            "name": "Niklas",
+            "lastname": "Just",
+            "shirtnumber": 73,
+            "passnumber": "4894",
+            "gender": "male",
+            "gamesCount": 0,
+            "helpCount": 0,
+            "checked": false
+        },
+        {
+            "playerid": "nils2",
+            "name": "Nils",
+            "lastname": "Just",
+            "shirtnumber": 2,
+            "passnumber": "4895",
+            "gender": "male",
+            "gamesCount": 0,
+            "helpCount": 0,
+            "checked": false
+        }
     ]
 }

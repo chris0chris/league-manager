@@ -69,3 +69,7 @@ tr {
 .table-border {
   border: 1px solid lightgray;
 }
+
+.card-div {
+  margin-top: 5px;
+}

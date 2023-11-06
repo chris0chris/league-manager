@@ -1,85 +1,35 @@
-[
-	{
-		"teamName": "Cakewalk",
-		"league": "DFFL",
-        "gecheckt": false
-    },
-	{
-		"teamName": "Lavasoft",
-		"league": "DFFL2"
-	,"gecheckt": false},
-	{
-		"teamName": "Adobe",
-		"league": "DFFL"
-	,"gecheckt": false},
-	{
-		"teamName": "Microsoft",
-		"league": "DFFL"
-	,"gecheckt": false},
-	{
-		"teamName": "Lavasoft",
-		"league": "DFFL"
-	,"gecheckt": false},
-	{
-		"teamName": "Sibelius",
-		"league": "DFFL2"
-	,"gecheckt": false},
-	{
-		"teamName": "Sibelius",
-		"league": "DFFL"
-	,"gecheckt": false},
-	{
-		"teamName": "Borland",
-		"league": "DFFL2"
-	,"gecheckt": false},
-	{
-		"teamName": "Adobe",
-		"league": "DFFL"
-	,"gecheckt": false},
-	{
-		"teamName": "Chami",
-		"league": "DFFL2"
-	,"gecheckt": false},
-	{
-		"teamName": "Google",
-		"league": "DFFL"
-	,"gecheckt": false},
-	{
-		"teamName": "Chami",
-		"league": "DFFL"
-	,"gecheckt": false},
-	{
-		"teamName": "Google",
-		"league": "DFFL2"
-	,"gecheckt": false},
-	{
-		"teamName": "Lavasoft",
-		"league": "DFFL"
-	,"gecheckt": false},
-	{
-		"teamName": "Sibelius",
-		"league": "DFFL2"
-	,"gecheckt": false},
-	{
-		"teamName": "Chami",
-		"league": "DFFL2"
-	,"gecheckt": false},
-	{
-		"teamName": "Sibelius",
-		"league": "DFFL"
-	,"gecheckt": false},
-	{
-		"teamName": "Amazon",
-		"league": "DFFL2"
-	,"gecheckt": false},
-	{
-		"teamName": "Borland",
-		"league": "DFFL"
-	,"gecheckt": false},
-	{
-		"teamName": "Lavasoft",
-		"league": "DFFL2",
-		"gecheckt": false
+{
+	"gamedayid":1,
+	"teamlist":[
+		{	
+			"id": "team1",
+			"name": "Cakewalk",
+			"kickoff": "10:00 Uhr",
+			"field": 2,
+			"checked": false
+		},
+		{
+			"id": "team2",
+			"name": "Lavasoft",
+			"kickoff": "10:00 Uhr",
+			"field": 2,
+			"checked": false
+		},
+		{
+			"id": "team3",
+			"name": "Adobe",
+			"kickoff": "10:00 Uhr",
+			"field": 1,
+			"checked": false
+		},
+		{
+			"id": "team4",
+			"name": "Microsoft",
+			"kickoff": "10:00 Uhr",
+			"field": 1,
+			"checked": false
+		}
+	]
+	
 }
-]
 
