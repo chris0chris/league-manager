@@ -2,29 +2,29 @@
 	"gamedayid":1,
 	"teamlist":[
 		{	
-			"id": "team1",
-			"name": "Cakewalk",
+			"id": "rooks",
+			"name": "Augsburg Rooks",
 			"kickoff": "10:00 Uhr",
 			"field": 2,
 			"checked": false
 		},
 		{
-			"id": "team2",
-			"name": "Lavasoft",
+			"id": "lions",
+			"name": "Augsburg Lions",
 			"kickoff": "10:00 Uhr",
 			"field": 2,
 			"checked": false
 		},
 		{
-			"id": "team3",
-			"name": "Adobe",
+			"id": "lions2",
+			"name": "Augsburg Lions II",
 			"kickoff": "10:00 Uhr",
 			"field": 1,
 			"checked": false
 		},
 		{
-			"id": "team4",
-			"name": "Microsoft",
+			"id": "sparr",
+			"name": "Munich Sparrows",
 			"kickoff": "10:00 Uhr",
 			"field": 1,
 			"checked": false
