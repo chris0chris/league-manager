@@ -2,27 +2,10 @@ import PlayerLine from "./PlayerLine";
 import PlayerModal from "./PlayerModal";
 import Table from "react-bootstrap/Table";
 import { useEffect, useState } from "react";
-
-type jsonTypePlayer = {
-  gecheckt: boolean;
-  key: number;
-  playerid: string;
-  name: string;
-  lastname: string;
-  passnumber: string;
-  shirtnumber: number;
-}[];
-
-type jsonType = {
-  gecheckt: boolean;
-  key: number;
-  name: string;
-  passnumber: string;
-  shirtnumber: number;
-}[];
+import { jsonTypePlayer } from "../data/types";
 
 interface Props {
-  players: jsonType;
+  players: jsonTypePlayer;
   increasePlayersCount(): void;
   decreasePlayersCount(): void;
   initModal: boolean;
@@ -92,7 +75,7 @@ function PlayersTable({
                 player: any //map each player in the array into one row of a table
               ) => (
                 <tr
-                  className={player.gecheckt ? "table-success" : ""}
+                  className={player.checked ? "table-success" : ""}
                   key={player.key}
                   onClick={() => {
                     //click the row to show the modal with the players infos

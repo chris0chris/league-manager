@@ -1,28 +1,11 @@
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-
-type jsonTypePlayer = {
-  gecheckt: boolean;
-  key: number;
-  playerid: string;
-  name: string;
-  lastname: string;
-  passnumber: string;
-  shirtnumber: number;
-}[];
-
-type jsonType = {
-  gecheckt: boolean;
-  key: number;
-  name: string;
-  passnumber: string;
-  shirtnumber: number;
-}[];
+import { jsonTypePlayer } from "../data/types";
 
 interface Props {
   modalVisible: boolean;
   handleClose(): any;
-  playersData: jsonType;
+  playersData: jsonTypePlayer;
   index: number;
   increaseIndex(): void;
   decreaseIndex(): void;
@@ -46,9 +29,9 @@ function PlayerModal({
 }: Props) {
   const update = () => {
     //Invert the checked status of the player
-    playersData[index].gecheckt = !playersData[index].gecheckt;
+    playersData[index].checked = !playersData[index].checked;
     //Increase or decrease active player count for final output
-    playersData[index].gecheckt
+    playersData[index].checked
       ? increasePlayersCount()
       : decreasePlayersCount();
   };
@@ -72,7 +55,9 @@ function PlayerModal({
         <Modal.Body>
           <div className="span-div">
             <span className="left-span">Name:</span>
-            <span className="right-span">{playersData[index].name}</span>
+            <span className="right-span">
+              {playersData[index].name} {playersData[index].lastname}
+            </span>
           </div>
           <div className="span-div">
             <span className="left-span">Trikotnummer:</span>
@@ -107,14 +92,14 @@ function PlayerModal({
             </svg>
           </Button>
           <Button
-            variant={playersData[index].gecheckt ? "danger" : "success"}
+            variant={playersData[index].checked ? "danger" : "success"}
             className="modal-button-middle"
             onClick={() => {
-              update(); //Switch boolean of property "gecheckt"
-              playersData[index].gecheckt && nextPlayer(); //Automatically load Modal with next Player in list when you check a player
+              update(); //Switch boolean of property "checked"
+              playersData[index].checked && nextPlayer(); //Automatically load Modal with next Player in list when you check a player
             }}
           >
-            {!playersData[index].gecheckt && (
+            {!playersData[index].checked && (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="30"
@@ -126,7 +111,7 @@ function PlayerModal({
                 <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
               </svg>
             )}
-            {playersData[index].gecheckt && (
+            {playersData[index].checked && (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="30"

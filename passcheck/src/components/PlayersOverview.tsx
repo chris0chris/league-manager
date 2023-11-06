@@ -4,8 +4,8 @@ import Modal from "react-bootstrap/Modal";
 import { useState, useEffect } from "react";
 
 //var playersUnsorted = require("../data/players.json"); //store entire json object in variable
-var teamDataJson = require("../data/json_format.json");
-var playersUnsorted = teamDataJson.playerlist;
+let teamDataJson = require("../data/json_format.json");
+let playersUnsorted = teamDataJson.playerlist;
 const players = playersUnsorted.sort((a: any, b: any) => {
   //sort players by shirtnumber ascending
   return a.shirtnumber < b.shirtnumber ? -1 : 1;
