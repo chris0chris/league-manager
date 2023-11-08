@@ -9,22 +9,22 @@
             "playerid": "nik73",
             "name": "Niklas",
             "lastname": "Just",
-            "shirtnumber": 73,
+            "trikotnumber": 73,
             "passnumber": "4894",
             "sex": "male",
-            "gamesCount": 0,
-            "assistanceCount": 0,
+            "ownLeagueGamedaysPlayed": 0,
+            "otherTeamGamedaysPlayed": 0,
             "checked": false
         },
         {
             "playerid": "nils2",
             "name": "Nils",
             "lastname": "Just",
-            "shirtnumber": 2,
+            "trikotnumber": 2,
             "passnumber": "4895",
             "sex": "male",
-            "gamesCount": 0,
-            "assistanceCount": 0,
+            "ownLeagueGamedaysPlayed": 0,
+            "otherTeamGamedaysPlayed": 0,
             "checked": false
         }
     ]

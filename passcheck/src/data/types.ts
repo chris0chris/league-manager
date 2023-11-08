@@ -3,9 +3,11 @@ export type jsonTypePlayer = {
     playerid: string;
     name: string;
     lastname: string;
-    shirtnumber: number;
+    trikotnumber: number;
     passnumber: string;
     sex: string;
+    ownLeagueGamedaysPlayed: number;
+    otherTeamGamedaysPlayed: number;
     checked: boolean;
   }[];
 

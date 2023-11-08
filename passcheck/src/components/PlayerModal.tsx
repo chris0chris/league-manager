@@ -61,7 +61,9 @@ function PlayerModal({
           </div>
           <div className="span-div">
             <span className="left-span">Trikotnummer:</span>
-            <span className="right-span">{playersData[index].shirtnumber}</span>
+            <span className="right-span">
+              {playersData[index].trikotnumber}
+            </span>
           </div>
           <div className="span-div">
             <span className="left-span">Passnummer:</span>
@@ -92,13 +94,14 @@ function PlayerModal({
             </svg>
           </Button>
           <Button
-            variant={playersData[index].checked ? "danger" : "success"}
+            variant={playersData[index].checked ? "danger" : "success"} //coloring the button depending on the state of the player
             className="modal-button-middle"
             onClick={() => {
               update(); //Switch boolean of property "checked"
               playersData[index].checked && nextPlayer(); //Automatically load Modal with next Player in list when you check a player
             }}
           >
+            {/* following section alters icon depending on the state of the player */}
             {!playersData[index].checked && (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
