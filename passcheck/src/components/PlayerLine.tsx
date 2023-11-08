@@ -16,7 +16,7 @@ function PlayerLine({ playersData, index }: Props) {
           {playersData[index].name} {playersData[index].lastname}
         </span>
       </td>
-      <td className="table-border">{playersData[index].shirtnumber}</td>
+      <td className="table-border">{playersData[index].trikotnumber}</td>
       <td className="table-border">{playersData[index].passnumber}</td>
     </>
   );

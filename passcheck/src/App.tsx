@@ -7,7 +7,8 @@ function App() {
     <>
       <Headerdata />
       <div>
-        <TeamOverview />
+        {/* <TeamOverview /> */}
+        <PlayersOverview />
       </div>
     </>
   );
