@@ -10,16 +10,16 @@ const Navbar = (props) => {
   const {isAuthenticated, user} = props.auth;
   const [expanded, setExpanded] = useState(false);
   const authLinks = (
-    <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
-      <li className="nav-item">
-        <span className="navbar-text mr-3">
+    <ul className='navbar-nav ml-auto mt-2 mt-lg-0'>
+      <li className='nav-item'>
+        <span className='navbar-text mr-3'>
           <strong>{user ? `Hallo ${user.username}` : ''}</strong>
         </span>
       </li>
-      <li className="nav-item">
+      <li className='nav-item'>
         <button
           onClick={props.logoutUser}
-          className="nav-link btn btn-info btn-sm text-light"
+          className='nav-link btn btn-info btn-sm text-light'
         >
           Logout
         </button>
@@ -28,9 +28,9 @@ const Navbar = (props) => {
   );
 
   const guestLinks = (
-    <ul className="navbar-nav ml-auto mt-2 mt-lg-0">
-      <li className="nav-item">
-        <Link to={LOGIN_URL} className="nav-link">
+    <ul className='navbar-nav ml-auto mt-2 mt-lg-0'>
+      <li className='nav-item'>
+        <Link to={LOGIN_URL} className='nav-link'>
           Login
         </Link>
       </li>
@@ -38,26 +38,26 @@ const Navbar = (props) => {
   );
 
   return (
-    <nav className="navbar fixed-bottom navbar-expand-sm navbar-light bg-light">
-      <div className="container">
-        <a className="navbar-brand" href="#">
-          Menü
+    <nav className='navbar fixed-bottom navbar-expand-sm'>
+      <div className='container'>
+        <a className='navbar-brand' href='#'>
+          DEMO # Menü
         </a>
         <button
           className={`navbar-toggler ${expanded ? '' : 'collapsed'}`}
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarNav"
-          aria-controls="navbarNav"
+          type='button'
+          data-toggle='collapse'
+          data-target='#navbarNav'
+          aria-controls='navbarNav'
           aria-expanded={expanded}
-          aria-label="Toggle navigation"
+          aria-label='Toggle navigation'
           onClick={() => setExpanded(!expanded)}
         >
-          <span className="navbar-toggler-icon"></span>
+          <span className='navbar-toggler-icon'></span>
         </button>
         <div
           className={`collapse navbar-collapse ${expanded ? 'show' : ''}`}
-          id="navbarNav"
+          id='navbarNav'
         >
           {isAuthenticated ? authLinks : guestLinks}
         </div>

@@ -1,7 +1,12 @@
 body {
-  background: #fafafa;
+  background: #FDEFEE;
   color: #333333;
   margin-top: 5rem;
+  background-image: url('/static/league_manager/images/demo_background.png');
+  background-repeat: no-repeat;
+  background-size: 395px;
+  background-position: center;
+  background-position-y: 50px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -16,12 +21,16 @@ ul {
   background-color: #5f788a;
 }
 
+.navbar {
+    background-color: #FCDAD9;
+}
+
 .site-header .navbar-nav .nav-link {
-  color: #cbd5db;
+  color: #ffffff;
 }
 
 .site-header .navbar-nav .nav-link:hover {
-  color: #ffffff;
+  color: #000000;
 }
 
 .site-header .navbar-nav .nav-link.active {

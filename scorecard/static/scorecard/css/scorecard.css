@@ -1,8 +1,13 @@
 body {
-    background-image: url('/static/scorecard/images/demo_background.png');
+    background-image: url('/static/league_manager/images/demo_background.png');
     background-repeat: no-repeat;
     background-size: 395px;
     background-position: center center;
+    background-color: #FDEFEE;
+}
+
+.navbar {
+    background-color: #FCDAD9;
 }
 
 #formCheck.uncheck {
