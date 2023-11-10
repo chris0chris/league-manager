@@ -13,9 +13,9 @@
     <link href='{% static "gamedays/css/main.css" %}' rel="stylesheet" type="text/css">
     {% endif %}
     {% if title %}
-    <title>5er DFFL - {{ title }}</title>
+    <title>DEMO # 5er DFFL # DEMO - {{ title }}</title>
     {% else %}
-    <title>5er DFFL</title>
+    <title>DEMO # 5er DFFL # DEMO</title>
     {% endif %}
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
@@ -33,7 +33,7 @@
 <header class="site-header">
     <nav class="navbar navbar-expand-md fixed-top">
         <div class="container">
-            <a class="navbar-brand mr-4" href="{% url 'league-home' %}">5er DFFL</a>
+            <a class="navbar-brand mr-4" href="{% url 'league-home' %}">5er DFFL # DEMO</a>
             <button aria-controls="navbarToggle" aria-expanded="false" class="navbar-toggler"
                     data-bs-target="#navbarToggle" data-bs-toggle="collapse"
                     role="button">
@@ -42,7 +42,9 @@
             <div class="collapse navbar-collapse" id="navbarToggle">
                 <div class="navbar-nav mr-auto">
                     <a class="nav-item nav-link" href="{% url 'league-home' %}">Home</a>
-<!--                    <a class="nav-item nav-link" href="{% url 'teammanager' %}">Teammanager</a>-->
+                    <a class="nav-item nav-link" href="/scorecard">Scorecard</a>
+                    <a class="nav-item nav-link" href="/liveticker">Liveticker</a>
+                    <!--                    <a class="nav-item nav-link" href="{% url 'teammanager' %}">Teammanager</a>-->
                     <a class="nav-item nav-link" href="{% url 'view-officials-list-for-all-teams' %}">#Einsätze</a>
                     <a class="nav-item nav-link" href="{% url 'view-officials-game-officials-appearance' %}">Alle
                         Einsätze</a>
