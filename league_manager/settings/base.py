@@ -128,8 +128,7 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'demodffl$league_manager',
-        # 'NAME': os.environ.get('MYSQL_DB_NAME', 'test_db'),
+        'NAME': os.environ.get('MYSQL_DB_NAME', 'test_db'),
         'USER': os.environ.get('MYSQL_USER', 'user'),
         'PASSWORD': os.environ.get('MYSQL_PWD', 'user'),
         'HOST': os.environ.get('MYSQL_HOST', '127.0.0.1'),
