@@ -1,0 +1,2342 @@
+[
+  {
+    "model": "gamedays.season",
+    "pk": 1,
+    "fields": {
+      "name": "Jederzeit"
+    }
+  },
+  {
+    "model": "gamedays.league",
+    "pk": 1,
+    "fields": {
+      "name": "Standard"
+    }
+  },
+  {
+    "model": "gamedays.association",
+    "pk": 1,
+    "fields": {
+      "abbr": "assoca",
+      "name": "Landesverband A"
+    }
+  },
+  {
+    "model": "gamedays.team",
+    "pk": 1,
+    "fields": {
+      "name": "TeamA",
+      "description": "Team A",
+      "location": "Team A",
+      "logo": "",
+      "association": 1
+    }
+  },
+  {
+    "model": "gamedays.team",
+    "pk": 2,
+    "fields": {
+      "name": "TeamB",
+      "description": "Team B",
+      "location": "Team B",
+      "logo": "",
+      "association": 1
+    }
+  },
+  {
+    "model": "gamedays.team",
+    "pk": 3,
+    "fields": {
+      "name": "TeamC",
+      "description": "Team C",
+      "location": "Team C",
+      "logo": "",
+      "association": 1
+    }
+  },
+  {
+    "model": "gamedays.team",
+    "pk": 4,
+    "fields": {
+      "name": "TeamD",
+      "description": "Team D",
+      "location": "Team D",
+      "logo": "",
+      "association": 1
+    }
+  },
+  {
+    "model": "gamedays.team",
+    "pk": 5,
+    "fields": {
+      "name": "TeamE",
+      "description": "Team E",
+      "location": "Team E",
+      "logo": "",
+      "association": 1
+    }
+  },
+  {
+    "model": "gamedays.team",
+    "pk": 6,
+    "fields": {
+      "name": "officials",
+      "description": "Team Officials",
+      "location": "officials",
+      "logo": "",
+      "association": 1
+    }
+  },
+  {
+    "model": "gamedays.gameday",
+    "pk": 1,
+    "fields": {
+      "name": "Testspieltag 1",
+      "season": 1,
+      "league": 1,
+      "date": "2023-10-31",
+      "start": "10:00:00",
+      "format": "3_1",
+      "author": 1
+    }
+  },
+  {
+    "model": "gamedays.gameday",
+    "pk": 2,
+    "fields": {
+      "name": "Testspieltag 2",
+      "season": 1,
+      "league": 1,
+      "date": "2023-10-31",
+      "start": "10:00:00",
+      "format": "5_dffl1_2",
+      "author": 1
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 1,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "10:00:00",
+      "field": 1,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 2,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "11:10:00",
+      "field": 1,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 3,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "12:20:00",
+      "field": 1,
+      "officials": 1,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 4,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "13:30:00",
+      "field": 1,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 5,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "14:40:00",
+      "field": 1,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 6,
+    "fields": {
+      "gameday": 1,
+      "scheduled": "15:50:00",
+      "field": 1,
+      "officials": 1,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 7,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "10:00:00",
+      "field": 1,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 8,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "11:40:00",
+      "field": 1,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 9,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "13:20:00",
+      "field": 1,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 10,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "15:00:00",
+      "field": 1,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 11,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "16:40:00",
+      "field": 1,
+      "officials": 1,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 12,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "10:00:00",
+      "field": 2,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 13,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "11:40:00",
+      "field": 2,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 14,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "13:20:00",
+      "field": 2,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 15,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "15:00:00",
+      "field": 2,
+      "officials": 6,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameinfo",
+    "pk": 16,
+    "fields": {
+      "gameday": 2,
+      "scheduled": "16:40:00",
+      "field": 2,
+      "officials": 1,
+      "status": "Geplant",
+      "gameStarted": null,
+      "gameHalftime": null,
+      "gameFinished": null,
+      "stage": "Hauptrunde",
+      "standing": "Gruppe 1",
+      "in_possession": null
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 1,
+    "fields": {
+      "gameinfo": 1,
+      "team": 1,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 2,
+    "fields": {
+      "gameinfo": 1,
+      "team": 2,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 3,
+    "fields": {
+      "gameinfo": 2,
+      "team": 1,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 4,
+    "fields": {
+      "gameinfo": 2,
+      "team": 3,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 5,
+    "fields": {
+      "gameinfo": 3,
+      "team": 3,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 6,
+    "fields": {
+      "gameinfo": 3,
+      "team": 2,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 7,
+    "fields": {
+      "gameinfo": 4,
+      "team": 2,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 8,
+    "fields": {
+      "gameinfo": 4,
+      "team": 1,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 9,
+    "fields": {
+      "gameinfo": 5,
+      "team": 3,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 10,
+    "fields": {
+      "gameinfo": 5,
+      "team": 1,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 11,
+    "fields": {
+      "gameinfo": 6,
+      "team": 2,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 12,
+    "fields": {
+      "gameinfo": 6,
+      "team": 3,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 13,
+    "fields": {
+      "gameinfo": 7,
+      "team": 1,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 14,
+    "fields": {
+      "gameinfo": 7,
+      "team": 2,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 15,
+    "fields": {
+      "gameinfo": 8,
+      "team": 3,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 16,
+    "fields": {
+      "gameinfo": 8,
+      "team": 1,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 17,
+    "fields": {
+      "gameinfo": 9,
+      "team": 5,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 18,
+    "fields": {
+      "gameinfo": 9,
+      "team": 3,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 19,
+    "fields": {
+      "gameinfo": 10,
+      "team": 4,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 20,
+    "fields": {
+      "gameinfo": 10,
+      "team": 2,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 21,
+    "fields": {
+      "gameinfo": 11,
+      "team": 4,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 22,
+    "fields": {
+      "gameinfo": 11,
+      "team": 5,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 23,
+    "fields": {
+      "gameinfo": 12,
+      "team": 3,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 24,
+    "fields": {
+      "gameinfo": 12,
+      "team": 4,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 25,
+    "fields": {
+      "gameinfo": 13,
+      "team": 2,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 26,
+    "fields": {
+      "gameinfo": 13,
+      "team": 5,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 27,
+    "fields": {
+      "gameinfo": 14,
+      "team": 1,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 28,
+    "fields": {
+      "gameinfo": 14,
+      "team": 4,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 29,
+    "fields": {
+      "gameinfo": 15,
+      "team": 5,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 30,
+    "fields": {
+      "gameinfo": 15,
+      "team": 1,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 31,
+    "fields": {
+      "gameinfo": 16,
+      "team": 2,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": true
+    }
+  },
+  {
+    "model": "gamedays.gameresult",
+    "pk": 32,
+    "fields": {
+      "gameinfo": 16,
+      "team": 3,
+      "fh": null,
+      "sh": null,
+      "pa": null,
+      "isHome": false
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 1,
+    "fields": {
+      "action_time": "2023-10-31T20:16:15.975",
+      "user": 1,
+      "content_type": 13,
+      "object_id": "1",
+      "object_repr": "Standard",
+      "action_flag": 1,
+      "change_message": "[{\"added\": {}}]"
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 2,
+    "fields": {
+      "action_time": "2023-10-31T20:16:22.440",
+      "user": 1,
+      "content_type": 14,
+      "object_id": "1",
+      "object_repr": "Jederzeit",
+      "action_flag": 1,
+      "change_message": "[{\"added\": {}}]"
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 3,
+    "fields": {
+      "action_time": "2023-10-31T20:24:09.516",
+      "user": 1,
+      "content_type": 5,
+      "object_id": "1",
+      "object_repr": "Team A",
+      "action_flag": 1,
+      "change_message": "[{\"added\": {}}]"
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 4,
+    "fields": {
+      "action_time": "2023-10-31T20:24:18.036",
+      "user": 1,
+      "content_type": 5,
+      "object_id": "2",
+      "object_repr": "Team B",
+      "action_flag": 1,
+      "change_message": "[{\"added\": {}}]"
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 5,
+    "fields": {
+      "action_time": "2023-10-31T20:24:28.210",
+      "user": 1,
+      "content_type": 5,
+      "object_id": "3",
+      "object_repr": "Team C",
+      "action_flag": 1,
+      "change_message": "[{\"added\": {}}]"
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 6,
+    "fields": {
+      "action_time": "2023-10-31T20:25:11.549",
+      "user": 1,
+      "content_type": 5,
+      "object_id": "4",
+      "object_repr": "Team D",
+      "action_flag": 1,
+      "change_message": "[{\"added\": {}}]"
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 7,
+    "fields": {
+      "action_time": "2023-10-31T20:25:20.998",
+      "user": 1,
+      "content_type": 5,
+      "object_id": "5",
+      "object_repr": "Team E",
+      "action_flag": 1,
+      "change_message": "[{\"added\": {}}]"
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 8,
+    "fields": {
+      "action_time": "2023-10-31T20:25:56.724",
+      "user": 1,
+      "content_type": 5,
+      "object_id": "6",
+      "object_repr": "officials",
+      "action_flag": 1,
+      "change_message": "[{\"added\": {}}]"
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 9,
+    "fields": {
+      "action_time": "2023-10-31T20:26:59.863",
+      "user": 1,
+      "content_type": 20,
+      "object_id": "2",
+      "object_repr": "officials",
+      "action_flag": 1,
+      "change_message": "[{\"added\": {}}]"
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 10,
+    "fields": {
+      "action_time": "2023-10-31T20:30:15.653",
+      "user": 1,
+      "content_type": 20,
+      "object_id": "3",
+      "object_repr": "TeamA",
+      "action_flag": 1,
+      "change_message": "[{\"added\": {}}]"
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 11,
+    "fields": {
+      "action_time": "2023-11-09T10:15:39.976",
+      "user": 1,
+      "content_type": 8,
+      "object_id": "3",
+      "object_repr": "1__TeamB#0 First Down Player: None Value: 0 - Half: 2",
+      "action_flag": 3,
+      "change_message": ""
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 12,
+    "fields": {
+      "action_time": "2023-11-09T10:15:39.993",
+      "user": 1,
+      "content_type": 8,
+      "object_id": "2",
+      "object_repr": "1__None#0 2. Halbzeit gestartet Player: None Value: 0 - Half: 0",
+      "action_flag": 3,
+      "change_message": ""
+    }
+  },
+  {
+    "model": "admin.logentry",
+    "pk": 13,
+    "fields": {
+      "action_time": "2023-11-09T10:15:40.001",
+      "user": 1,
+      "content_type": 8,
+      "object_id": "1",
+      "object_repr": "1__None#0 Spiel gestartet Player: None Value: 0 - Half: 0",
+      "action_flag": 3,
+      "change_message": ""
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 1,
+    "fields": {
+      "name": "Can add achievement",
+      "content_type": 1,
+      "codename": "add_achievement"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 2,
+    "fields": {
+      "name": "Can change achievement",
+      "content_type": 1,
+      "codename": "change_achievement"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 3,
+    "fields": {
+      "name": "Can delete achievement",
+      "content_type": 1,
+      "codename": "delete_achievement"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 4,
+    "fields": {
+      "name": "Can view achievement",
+      "content_type": 1,
+      "codename": "view_achievement"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 5,
+    "fields": {
+      "name": "Can add gameday",
+      "content_type": 2,
+      "codename": "add_gameday"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 6,
+    "fields": {
+      "name": "Can change gameday",
+      "content_type": 2,
+      "codename": "change_gameday"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 7,
+    "fields": {
+      "name": "Can delete gameday",
+      "content_type": 2,
+      "codename": "delete_gameday"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 8,
+    "fields": {
+      "name": "Can view gameday",
+      "content_type": 2,
+      "codename": "view_gameday"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 9,
+    "fields": {
+      "name": "Can add gameinfo",
+      "content_type": 3,
+      "codename": "add_gameinfo"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 10,
+    "fields": {
+      "name": "Can change gameinfo",
+      "content_type": 3,
+      "codename": "change_gameinfo"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 11,
+    "fields": {
+      "name": "Can delete gameinfo",
+      "content_type": 3,
+      "codename": "delete_gameinfo"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 12,
+    "fields": {
+      "name": "Can view gameinfo",
+      "content_type": 3,
+      "codename": "view_gameinfo"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 13,
+    "fields": {
+      "name": "Can add permissions",
+      "content_type": 4,
+      "codename": "add_permissions"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 14,
+    "fields": {
+      "name": "Can change permissions",
+      "content_type": 4,
+      "codename": "change_permissions"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 15,
+    "fields": {
+      "name": "Can delete permissions",
+      "content_type": 4,
+      "codename": "delete_permissions"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 16,
+    "fields": {
+      "name": "Can view permissions",
+      "content_type": 4,
+      "codename": "view_permissions"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 17,
+    "fields": {
+      "name": "Can add team",
+      "content_type": 5,
+      "codename": "add_team"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 18,
+    "fields": {
+      "name": "Can change team",
+      "content_type": 5,
+      "codename": "change_team"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 19,
+    "fields": {
+      "name": "Can delete team",
+      "content_type": 5,
+      "codename": "delete_team"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 20,
+    "fields": {
+      "name": "Can view team",
+      "content_type": 5,
+      "codename": "view_team"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 21,
+    "fields": {
+      "name": "Can add user profile",
+      "content_type": 6,
+      "codename": "add_userprofile"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 22,
+    "fields": {
+      "name": "Can change user profile",
+      "content_type": 6,
+      "codename": "change_userprofile"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 23,
+    "fields": {
+      "name": "Can delete user profile",
+      "content_type": 6,
+      "codename": "delete_userprofile"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 24,
+    "fields": {
+      "name": "Can view user profile",
+      "content_type": 6,
+      "codename": "view_userprofile"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 25,
+    "fields": {
+      "name": "Can add user permissions",
+      "content_type": 7,
+      "codename": "add_userpermissions"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 26,
+    "fields": {
+      "name": "Can change user permissions",
+      "content_type": 7,
+      "codename": "change_userpermissions"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 27,
+    "fields": {
+      "name": "Can delete user permissions",
+      "content_type": 7,
+      "codename": "delete_userpermissions"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 28,
+    "fields": {
+      "name": "Can view user permissions",
+      "content_type": 7,
+      "codename": "view_userpermissions"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 29,
+    "fields": {
+      "name": "Can add team log",
+      "content_type": 8,
+      "codename": "add_teamlog"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 30,
+    "fields": {
+      "name": "Can change team log",
+      "content_type": 8,
+      "codename": "change_teamlog"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 31,
+    "fields": {
+      "name": "Can delete team log",
+      "content_type": 8,
+      "codename": "delete_teamlog"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 32,
+    "fields": {
+      "name": "Can view team log",
+      "content_type": 8,
+      "codename": "view_teamlog"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 33,
+    "fields": {
+      "name": "Can add player achievement",
+      "content_type": 9,
+      "codename": "add_playerachievement"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 34,
+    "fields": {
+      "name": "Can change player achievement",
+      "content_type": 9,
+      "codename": "change_playerachievement"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 35,
+    "fields": {
+      "name": "Can delete player achievement",
+      "content_type": 9,
+      "codename": "delete_playerachievement"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 36,
+    "fields": {
+      "name": "Can view player achievement",
+      "content_type": 9,
+      "codename": "view_playerachievement"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 37,
+    "fields": {
+      "name": "Can add game setup",
+      "content_type": 10,
+      "codename": "add_gamesetup"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 38,
+    "fields": {
+      "name": "Can change game setup",
+      "content_type": 10,
+      "codename": "change_gamesetup"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 39,
+    "fields": {
+      "name": "Can delete game setup",
+      "content_type": 10,
+      "codename": "delete_gamesetup"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 40,
+    "fields": {
+      "name": "Can view game setup",
+      "content_type": 10,
+      "codename": "view_gamesetup"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 41,
+    "fields": {
+      "name": "Can add gameresult",
+      "content_type": 11,
+      "codename": "add_gameresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 42,
+    "fields": {
+      "name": "Can change gameresult",
+      "content_type": 11,
+      "codename": "change_gameresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 43,
+    "fields": {
+      "name": "Can delete gameresult",
+      "content_type": 11,
+      "codename": "delete_gameresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 44,
+    "fields": {
+      "name": "Can view gameresult",
+      "content_type": 11,
+      "codename": "view_gameresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 45,
+    "fields": {
+      "name": "Can add game official",
+      "content_type": 12,
+      "codename": "add_gameofficial"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 46,
+    "fields": {
+      "name": "Can change game official",
+      "content_type": 12,
+      "codename": "change_gameofficial"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 47,
+    "fields": {
+      "name": "Can delete game official",
+      "content_type": 12,
+      "codename": "delete_gameofficial"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 48,
+    "fields": {
+      "name": "Can view game official",
+      "content_type": 12,
+      "codename": "view_gameofficial"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 49,
+    "fields": {
+      "name": "Can add league",
+      "content_type": 13,
+      "codename": "add_league"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 50,
+    "fields": {
+      "name": "Can change league",
+      "content_type": 13,
+      "codename": "change_league"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 51,
+    "fields": {
+      "name": "Can delete league",
+      "content_type": 13,
+      "codename": "delete_league"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 52,
+    "fields": {
+      "name": "Can view league",
+      "content_type": 13,
+      "codename": "view_league"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 53,
+    "fields": {
+      "name": "Can add season",
+      "content_type": 14,
+      "codename": "add_season"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 54,
+    "fields": {
+      "name": "Can change season",
+      "content_type": 14,
+      "codename": "change_season"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 55,
+    "fields": {
+      "name": "Can delete season",
+      "content_type": 14,
+      "codename": "delete_season"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 56,
+    "fields": {
+      "name": "Can view season",
+      "content_type": 14,
+      "codename": "view_season"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 57,
+    "fields": {
+      "name": "Can add season league team",
+      "content_type": 15,
+      "codename": "add_seasonleagueteam"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 58,
+    "fields": {
+      "name": "Can change season league team",
+      "content_type": 15,
+      "codename": "change_seasonleagueteam"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 59,
+    "fields": {
+      "name": "Can delete season league team",
+      "content_type": 15,
+      "codename": "delete_seasonleagueteam"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 60,
+    "fields": {
+      "name": "Can view season league team",
+      "content_type": 15,
+      "codename": "view_seasonleagueteam"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 61,
+    "fields": {
+      "name": "Can add association",
+      "content_type": 16,
+      "codename": "add_association"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 62,
+    "fields": {
+      "name": "Can change association",
+      "content_type": 16,
+      "codename": "change_association"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 63,
+    "fields": {
+      "name": "Can delete association",
+      "content_type": 16,
+      "codename": "delete_association"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 64,
+    "fields": {
+      "name": "Can view association",
+      "content_type": 16,
+      "codename": "view_association"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 65,
+    "fields": {
+      "name": "Can add log entry",
+      "content_type": 17,
+      "codename": "add_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 66,
+    "fields": {
+      "name": "Can change log entry",
+      "content_type": 17,
+      "codename": "change_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 67,
+    "fields": {
+      "name": "Can delete log entry",
+      "content_type": 17,
+      "codename": "delete_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 68,
+    "fields": {
+      "name": "Can view log entry",
+      "content_type": 17,
+      "codename": "view_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 69,
+    "fields": {
+      "name": "Can add permission",
+      "content_type": 18,
+      "codename": "add_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 70,
+    "fields": {
+      "name": "Can change permission",
+      "content_type": 18,
+      "codename": "change_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 71,
+    "fields": {
+      "name": "Can delete permission",
+      "content_type": 18,
+      "codename": "delete_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 72,
+    "fields": {
+      "name": "Can view permission",
+      "content_type": 18,
+      "codename": "view_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 73,
+    "fields": {
+      "name": "Can add group",
+      "content_type": 19,
+      "codename": "add_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 74,
+    "fields": {
+      "name": "Can change group",
+      "content_type": 19,
+      "codename": "change_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 75,
+    "fields": {
+      "name": "Can delete group",
+      "content_type": 19,
+      "codename": "delete_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 76,
+    "fields": {
+      "name": "Can view group",
+      "content_type": 19,
+      "codename": "view_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 77,
+    "fields": {
+      "name": "Can add user",
+      "content_type": 20,
+      "codename": "add_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 78,
+    "fields": {
+      "name": "Can change user",
+      "content_type": 20,
+      "codename": "change_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 79,
+    "fields": {
+      "name": "Can delete user",
+      "content_type": 20,
+      "codename": "delete_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 80,
+    "fields": {
+      "name": "Can view user",
+      "content_type": 20,
+      "codename": "view_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 81,
+    "fields": {
+      "name": "Can add content type",
+      "content_type": 21,
+      "codename": "add_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 82,
+    "fields": {
+      "name": "Can change content type",
+      "content_type": 21,
+      "codename": "change_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 83,
+    "fields": {
+      "name": "Can delete content type",
+      "content_type": 21,
+      "codename": "delete_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 84,
+    "fields": {
+      "name": "Can view content type",
+      "content_type": 21,
+      "codename": "view_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 85,
+    "fields": {
+      "name": "Can add session",
+      "content_type": 22,
+      "codename": "add_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 86,
+    "fields": {
+      "name": "Can change session",
+      "content_type": 22,
+      "codename": "change_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 87,
+    "fields": {
+      "name": "Can delete session",
+      "content_type": 22,
+      "codename": "delete_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 88,
+    "fields": {
+      "name": "Can view session",
+      "content_type": 22,
+      "codename": "view_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 89,
+    "fields": {
+      "name": "Can add official",
+      "content_type": 23,
+      "codename": "add_official"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 90,
+    "fields": {
+      "name": "Can change official",
+      "content_type": 23,
+      "codename": "change_official"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 91,
+    "fields": {
+      "name": "Can delete official",
+      "content_type": 23,
+      "codename": "delete_official"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 92,
+    "fields": {
+      "name": "Can view official",
+      "content_type": 23,
+      "codename": "view_official"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 93,
+    "fields": {
+      "name": "Can add official license",
+      "content_type": 24,
+      "codename": "add_officiallicense"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 94,
+    "fields": {
+      "name": "Can change official license",
+      "content_type": 24,
+      "codename": "change_officiallicense"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 95,
+    "fields": {
+      "name": "Can delete official license",
+      "content_type": 24,
+      "codename": "delete_officiallicense"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 96,
+    "fields": {
+      "name": "Can view official license",
+      "content_type": 24,
+      "codename": "view_officiallicense"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 97,
+    "fields": {
+      "name": "Can add official license history",
+      "content_type": 25,
+      "codename": "add_officiallicensehistory"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 98,
+    "fields": {
+      "name": "Can change official license history",
+      "content_type": 25,
+      "codename": "change_officiallicensehistory"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 99,
+    "fields": {
+      "name": "Can delete official license history",
+      "content_type": 25,
+      "codename": "delete_officiallicensehistory"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 100,
+    "fields": {
+      "name": "Can view official license history",
+      "content_type": 25,
+      "codename": "view_officiallicensehistory"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 101,
+    "fields": {
+      "name": "Can add official external games",
+      "content_type": 26,
+      "codename": "add_officialexternalgames"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 102,
+    "fields": {
+      "name": "Can change official external games",
+      "content_type": 26,
+      "codename": "change_officialexternalgames"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 103,
+    "fields": {
+      "name": "Can delete official external games",
+      "content_type": 26,
+      "codename": "delete_officialexternalgames"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 104,
+    "fields": {
+      "name": "Can view official external games",
+      "content_type": 26,
+      "codename": "view_officialexternalgames"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 105,
+    "fields": {
+      "name": "Can add auth token",
+      "content_type": 27,
+      "codename": "add_authtoken"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 106,
+    "fields": {
+      "name": "Can change auth token",
+      "content_type": 27,
+      "codename": "change_authtoken"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 107,
+    "fields": {
+      "name": "Can delete auth token",
+      "content_type": 27,
+      "codename": "delete_authtoken"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 108,
+    "fields": {
+      "name": "Can view auth token",
+      "content_type": 27,
+      "codename": "view_authtoken"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$390000$Rw2vADyGvPoBvtCSVklMHp$11xmy0tPLM/K0AcoVuFPB1WiYqoPS/vpTjLmFB42SMA=",
+      "last_login": "2023-10-31T20:15:16.992",
+      "is_superuser": true,
+      "username": "demoAdmin",
+      "first_name": "",
+      "last_name": "",
+      "email": "c.kaempfe@afvd.de",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2023-10-31T20:13:14.566",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$390000$6IIzh3IY7uNlSObmZer5Ur$SJovaAWSS6k/IfhryiKaJyP2m/ej6X7jBOzAHHC+Q0s=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "officials",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2023-10-31T20:26:59.592",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$390000$8kNh8kXzFYNO8FmvHVZqJD$40rsPRH3qW3QRfWZSNsAS1tudWqEYIWvk3PxlFpuz3w=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "TeamA",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2023-10-31T20:30:15.347",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 1,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "achievement"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 2,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "gameday"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 3,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "gameinfo"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 4,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "permissions"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 5,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "team"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 6,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "userprofile"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 7,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "userpermissions"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 8,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "teamlog"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 9,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "playerachievement"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 10,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "gamesetup"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 11,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "gameresult"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 12,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "gameofficial"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 13,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "league"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 14,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "season"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 15,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "seasonleagueteam"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 16,
+    "fields": {
+      "app_label": "gamedays",
+      "model": "association"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 17,
+    "fields": {
+      "app_label": "admin",
+      "model": "logentry"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 18,
+    "fields": {
+      "app_label": "auth",
+      "model": "permission"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 19,
+    "fields": {
+      "app_label": "auth",
+      "model": "group"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 20,
+    "fields": {
+      "app_label": "auth",
+      "model": "user"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 21,
+    "fields": {
+      "app_label": "contenttypes",
+      "model": "contenttype"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 22,
+    "fields": {
+      "app_label": "sessions",
+      "model": "session"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 23,
+    "fields": {
+      "app_label": "officials",
+      "model": "official"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 24,
+    "fields": {
+      "app_label": "officials",
+      "model": "officiallicense"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 25,
+    "fields": {
+      "app_label": "officials",
+      "model": "officiallicensehistory"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 26,
+    "fields": {
+      "app_label": "officials",
+      "model": "officialexternalgames"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 27,
+    "fields": {
+      "app_label": "knox",
+      "model": "authtoken"
+    }
+  },
+  {
+    "model": "sessions.session",
+    "pk": "v4j31xnzp5re4rktepp2crzqa9kgewn8",
+    "fields": {
+      "session_data": ".eJxVjDsOwjAQBe_iGln-yjElPWewvN5dHECOFCdVxN1JpBTQzsx7m0h5XWpaO81pRHEVWlx-GeTyonYIfOb2mGSZ2jKPII9EnrbL-4T0vp3t30HNve5rH2EIKhDZCBxcMc6zAWWVykwKcafaoLWgdfHgKfCA0TjOxDqStuLzBesXOF4:1qxuCq:SA3-brVIN0ypB6IMPYIR_rPMtq0D5fEb7OqZyAZITkw",
+      "expire_date": "2023-11-14T20:15:16.999"
+    }
+  },
+  {
+    "model": "officials.official",
+    "pk": 1,
+    "fields": {
+      "first_name": "Aidan",
+      "last_name": "Leyzell",
+      "team": 6,
+      "external_id": "1",
+      "association": 1
+    }
+  },
+  {
+    "model": "officials.official",
+    "pk": 2,
+    "fields": {
+      "first_name": "Daniel",
+      "last_name": "Lusher",
+      "team": 6,
+      "external_id": "2",
+      "association": 1
+    }
+  },
+  {
+    "model": "officials.official",
+    "pk": 3,
+    "fields": {
+      "first_name": "Irena",
+      "last_name": "Ceney",
+      "team": 6,
+      "external_id": "3",
+      "association": 1
+    }
+  },
+  {
+    "model": "officials.official",
+    "pk": 4,
+    "fields": {
+      "first_name": "Kyle",
+      "last_name": "Fourman",
+      "team": 6,
+      "external_id": "4",
+      "association": 1
+    }
+  },
+  {
+    "model": "officials.official",
+    "pk": 5,
+    "fields": {
+      "first_name": "Linc",
+      "last_name": "Suerz",
+      "team": 6,
+      "external_id": "5",
+      "association": 1
+    }
+  },
+  {
+    "model": "officials.official",
+    "pk": 6,
+    "fields": {
+      "first_name": "Minor",
+      "last_name": "Hansel",
+      "team": 6,
+      "external_id": "6",
+      "association": 1
+    }
+  },
+  {
+    "model": "officials.official",
+    "pk": 7,
+    "fields": {
+      "first_name": "Ram",
+      "last_name": "Hartland",
+      "team": 6,
+      "external_id": "7",
+      "association": 1
+    }
+  },
+  {
+    "model": "officials.official",
+    "pk": 8,
+    "fields": {
+      "first_name": "Anne",
+      "last_name": "Alt",
+      "team": 1,
+      "external_id": "8",
+      "association": 1
+    }
+  },
+  {
+    "model": "officials.official",
+    "pk": 9,
+    "fields": {
+      "first_name": "Marle",
+      "last_name": "Mix",
+      "team": 1,
+      "external_id": "9",
+      "association": 1
+    }
+  },
+  {
+    "model": "officials.official",
+    "pk": 10,
+    "fields": {
+      "first_name": "Walter",
+      "last_name": "Willich",
+      "team": 1,
+      "external_id": "10",
+      "association": 1
+    }
+  },
+  {
+    "model": "officials.officiallicense",
+    "pk": 1,
+    "fields": {
+      "name": "F1"
+    }
+  },
+  {
+    "model": "officials.officiallicense",
+    "pk": 2,
+    "fields": {
+      "name": "F2"
+    }
+  },
+  {
+    "model": "officials.officiallicense",
+    "pk": 3,
+    "fields": {
+      "name": "F3"
+    }
+  },
+  {
+    "model": "knox.authtoken",
+    "pk": "0245f83a96feb8e781620fe52b884153594669ccd794780d5a25bacf00cb56ae8a7947cfb2969bd09e54f56e29d3367dd2f9315242124abaa7470a658bcf6dab",
+    "fields": {
+      "token_key": "91902e24",
+      "user": 3,
+      "created": "2023-11-08T19:58:12.514",
+      "expiry": "2023-11-09T05:58:12.504"
+    }
+  },
+  {
+    "model": "knox.authtoken",
+    "pk": "02dea5eadec13a731c87e0597448a08671fe1748b03549e76593e2e628f0e7735eb622367941ca796fa8c84b710dc3edeeb83bc2c7e23c72fa656a66581c4886",
+    "fields": {
+      "token_key": "1a81f427",
+      "user": 2,
+      "created": "2023-11-09T09:42:43.779",
+      "expiry": "2023-11-09T19:42:43.779"
+    }
+  }
+]

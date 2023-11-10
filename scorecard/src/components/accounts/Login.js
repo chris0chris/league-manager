@@ -35,45 +35,51 @@ const Login = (props) => {
       //   'id_away': 118,
       //   'id': 59,
       // });
-      return <Navigate to="/officials" />;
+      return <Navigate to='/officials' />;
     }
   }
 
   return (
-    <div className="col-md-6 m-auto">
-      <div className="card card-body mt-5">
-        <h2 className="text-center">Login</h2>
+    <div className='col-md-6 m-auto'>
+      <div className='card card-body mt-5'>
+        <h2 className='text-center'>Login</h2>
         <form onSubmit={onSubmit}>
-          <div className="form-group">
+          <div className='form-group'>
             <label>Username</label>
             <input
-              type="text"
-              className="form-control"
-              name="username"
+              type='text'
+              className='form-control'
+              name='username'
               onChange={(e) => setUsername(e.target.value)}
               value={username}
             />
           </div>
 
-          <div className="form-group">
+          <div className='form-group'>
             <label>Password</label>
             <input
-              type="password"
-              className="form-control"
-              name="password"
+              type='password'
+              className='form-control'
+              name='password'
               onChange={(e) => setPassword(e.target.value)}
               value={password}
             />
           </div>
 
-          <div className="form-group d-grid mt-3">
-            <button type="submit" className="btn btn-primary">
+          <div className='form-group d-grid mt-3'>
+            <button type='submit' className='btn btn-primary'>
               Login
             </button>
           </div>
-          <div className="mt-3">
-            Du hast keine Login-Daten? Oh, oh ... bitte an dein Teammanagement
-            oder die Ligaorganisation wenden.
+          <div className='alert alert-warning mt-3'>
+            Diese App ist rein für DEMO Zwecke!
+            <br />
+            Um sich anzumelden gibt es zwei Möglichkeiten (Username / Passwort):
+            <ul>
+              <li>officials / ASDF9876</li>
+              <li>TeamA / ASDF9876</li>
+            </ul>
+            Bitte Groß- und Kleinschreibung beachten.
           </div>
         </form>
       </div>
@@ -90,6 +96,6 @@ Login.propTypes = {
   isAuthenticated: PropTypes.bool,
 };
 
-export default connect(
-    mapStateToProps,
-    {loginUser/* , setSelectedGame*/})(Login);
+export default connect(mapStateToProps, {loginUser /* , setSelectedGame*/})(
+  Login
+);

@@ -6,7 +6,14 @@ const Gamedays = ({gamedays, onClick: emitEvent}) => {
   return (
     <>
       <h3>Bitte einen Spieltag auswählen</h3>
-      <table className="table table-striped">
+      <p className='alert alert-warning mt-3'>
+        Alle Spiele werden um 24 Uhr zurückgesetzt.
+        <br />
+        Sollte es beim Spielstand zu unerklärlichen sprüngen kommen, dann liegt
+        es daran, dass jemand parallel die Scorecard testet. Dann bitte die
+        Scorecard zu einem anderen Zeitpunkt ausprobieren.
+      </p>
+      <table className='table table-striped'>
         <thead>
           <tr>
             <th>Datum</th>
@@ -15,11 +22,11 @@ const Gamedays = ({gamedays, onClick: emitEvent}) => {
           </tr>
         </thead>
         <tbody>
-          {gamedays.length == 0 &&
-            <tr className="text-center fw-bold">
-              <td colSpan="3">Keine Spieltage verfügbar</td>
+          {gamedays.length == 0 && (
+            <tr className='text-center fw-bold'>
+              <td colSpan='3'>Keine Spieltage verfügbar</td>
             </tr>
-          }
+          )}
           {gamedays.map((gameday) => (
             <tr
               key={gameday.id}
@@ -33,7 +40,7 @@ const Gamedays = ({gamedays, onClick: emitEvent}) => {
                     setActiveRow(gameday.id);
                     emitEvent(gameday.id);
                   }}
-                  className="btn btn-success btn-sm"
+                  className='btn btn-success btn-sm'
                 >
                   Auswählen
                 </button>
