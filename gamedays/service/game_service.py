@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from gamedays.models import Team, TeamLog
 from gamedays.service.gamelog import GameLog, GameLogCreator
 from gamedays.service.wrapper.gameinfo_wrapper import GameinfoWrapper
@@ -19,6 +21,8 @@ class GameService(object):
         self._create_log_entry('Spiel gestartet', user)
 
     def update_game_finished(self, user):
+        if settings.DEMO:
+            return
         self.gameinfo.set_game_finished_to_now()
         self._create_log_entry('Spiel beendet', user)
 

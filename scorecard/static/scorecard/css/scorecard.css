@@ -1,3 +1,10 @@
+body {
+    background-image: url('/static/scorecard/images/demo_background.png');
+    background-repeat: no-repeat;
+    background-size: 395px;
+    background-position: center center;
+}
+
 #formCheck.uncheck {
   background-position: left;
   background-color: #fff;

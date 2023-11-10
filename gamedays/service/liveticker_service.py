@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from gamedays.models import League, Gameday, Gameinfo, TeamLog
 from gamedays.service.gameday_settings import SCHEDULED, GAMEDAY_ID
 from gamedays.service.wrapper.gameresult_wrapper import GameresultWrapper
@@ -103,10 +101,7 @@ class LivetickerService(object):
         else:
             league = League.objects.filter(name__in=league)
         if gameday_id is None:
-            today_gamedays = Gameday.objects.filter(date=datetime.today(), league__in=league)
-            # ToDo  dummy Scorecard
-            # if settings.DEBUG:
-            #     today_gamedays = Gameday.objects.all()
+            today_gamedays = Gameday.objects.all()
             self.gameday_ids = [gameday.pk for gameday in today_gamedays]
         else:
             self.gameday_ids = [gameday_id]

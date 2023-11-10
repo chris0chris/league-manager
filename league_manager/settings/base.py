@@ -128,8 +128,8 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': 'test_5erdffl$league_manager',
-        'NAME': os.environ.get('MYSQL_DB_NAME', 'test_db'),
+        'NAME': 'demodffl$league_manager',
+        # 'NAME': os.environ.get('MYSQL_DB_NAME', 'test_db'),
         'USER': os.environ.get('MYSQL_USER', 'user'),
         'PASSWORD': os.environ.get('MYSQL_PWD', 'user'),
         'HOST': os.environ.get('MYSQL_HOST', '127.0.0.1'),
@@ -145,3 +145,5 @@ MOODLE_WSTOKEN = os.environ.get('MOODLE_WSTOKEN')
 
 # ToDo deleteMe
 X_FRAME_OPTIONS = 'ALLOWALL'
+
+DEMO = True

@@ -2,13 +2,11 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {connect, useDispatch} from 'react-redux';
-import {FaArrowLeft, FaArrowRight} from 'react-icons/fa';
+import {FaArrowLeft, FaArrowRight, FaSearch} from 'react-icons/fa';
 import {Navigate} from 'react-router-dom';
 import {DETAILS_URL} from '../common/urls';
 import {GameSetup, Official} from '../../actions/objects';
-import {
-  saveGameSetup,
-  saveOfficials} from '../../actions/gamesetup';
+import {saveGameSetup, saveOfficials} from '../../actions/gamesetup';
 import {getGameLog, updateTeamInPossession} from '../../actions/games';
 import {searchForOfficials} from '../../actions/officials';
 import RadioButton from '../layout/RadioButton';
@@ -35,13 +33,15 @@ export const Officials = (props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    setTeamOfficials((props.teamOfficials).map((entry) => {
-      return {
-        text: `${entry.first_name} ${entry.last_name}`,
-        subtext: entry.team,
-        id: entry.id,
-      };
-    }));
+    setTeamOfficials(
+      props.teamOfficials.map((entry) => {
+        return {
+          text: `${entry.first_name} ${entry.last_name}`,
+          subtext: entry.team,
+          id: entry.id,
+        };
+      })
+    );
   }, [JSON.stringify(props.teamOfficials)]);
 
   // load setup officials
@@ -80,14 +80,14 @@ export const Officials = (props) => {
 
   // load search officials
   useEffect(() => {
-    const teamOffi = (props.teamOfficials).map((entry) => {
+    const teamOffi = props.teamOfficials.map((entry) => {
       return {
         text: `${entry.first_name} ${entry.last_name}`,
         subtext: entry.team,
         id: entry.id,
       };
     });
-    const searchOffi = (props.searchOfficialsResult).map((entry) => {
+    const searchOffi = props.searchOfficialsResult.map((entry) => {
       return {
         text: `${entry.first_name} ${entry.last_name}`,
         subtext: entry.team,
@@ -110,17 +110,16 @@ export const Officials = (props) => {
     setTeamOfficials(filteredOfficials);
   }, [JSON.stringify(props.searchOfficialsResult)]);
 
-
   // filter team officials
   useEffect(() => {
-    const teamOffi = (props.teamOfficials).map((entry) => {
+    const teamOffi = props.teamOfficials.map((entry) => {
       return {
         text: `${entry.first_name} ${entry.last_name}`,
         subtext: entry.team,
         id: entry.id,
       };
     });
-    const searchOffi = (props.searchOfficialsResult).map((entry) => {
+    const searchOffi = props.searchOfficialsResult.map((entry) => {
       return {
         text: `${entry.first_name} ${entry.last_name}`,
         subtext: entry.team,
@@ -149,17 +148,37 @@ export const Officials = (props) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     const gameSetup = new GameSetup(
-        selectedGame.id,
-        ct,
-        fhPossession,
-        direction,
+      selectedGame.id,
+      ct,
+      fhPossession,
+      direction
     );
     const officials = [];
-    officials.push({name: referee.text, position: Official.REFEREE, official: referee.id});
-    officials.push({name: scJudge.text, position: Official.SCORECARD_JUDGE, official: scJudge.id});
-    officials.push({name: downJudge.text, position: Official.DOWN_JUDGE, official: downJudge.id});
-    officials.push({name: fieldJudge.text, position: Official.FIELD_JUDGE, official: fieldJudge.id});
-    officials.push({name: sideJudge.text, position: Official.SIDE_JUDGE, official: sideJudge.id});
+    officials.push({
+      name: referee.text,
+      position: Official.REFEREE,
+      official: referee.id,
+    });
+    officials.push({
+      name: scJudge.text,
+      position: Official.SCORECARD_JUDGE,
+      official: scJudge.id,
+    });
+    officials.push({
+      name: downJudge.text,
+      position: Official.DOWN_JUDGE,
+      official: downJudge.id,
+    });
+    officials.push({
+      name: fieldJudge.text,
+      position: Official.FIELD_JUDGE,
+      official: fieldJudge.id,
+    });
+    officials.push({
+      name: sideJudge.text,
+      position: Official.SIDE_JUDGE,
+      official: sideJudge.id,
+    });
     props.saveGameSetup(selectedGame.id, gameSetup);
     props.saveOfficials(selectedGame.id, officials);
     props.updateTeamInPossession(selectedGame.id, fhPossession);
@@ -176,129 +195,198 @@ export const Officials = (props) => {
     });
   };
   return (
-    <div className="container">
+    <div className='container'>
       <div className='text-muted fs6'>
-      Feld {selectedGame.field} - {selectedGame.scheduled.slice(0, -3)} Uhr - {selectedGame.standing}
+        Feld {selectedGame.field} - {selectedGame.scheduled.slice(0, -3)} Uhr -{' '}
+        {selectedGame.standing}
       </div>
-      <h4 className="mt-2">
+      <h4 className='mt-2'>
         {selectedGame.home} vs {selectedGame.away}
       </h4>
+      <p className='alert alert-warning mt-3'>
+        Mögliche Offizielle die direkt oder über die Suche ausgewählt werden
+        können, folgen nach dieser Infobox und sind nur in der Demoversion
+        sichtbar.
+        <br />
+        Um die Suche zu benutzen (<FaSearch />
+        ), müssen mind. 3 Buchstaben des Vornamen und 1 Buchstabe des Nachnamen
+        eingegeben werden.
+      </p>
+      <table>
+        <tbody>
+          <tr>
+            <td>Aidan</td>
+            <td>Leyzell</td>
+            <td>Team Officials</td>
+          </tr>
+          <tr>
+            <td>Daniel</td>
+            <td>Lusher</td>
+            <td>Team Officials</td>
+          </tr>
+          <tr>
+            <td>Irena</td>
+            <td>Ceney</td>
+            <td>Team Officials</td>
+          </tr>
+          <tr>
+            <td>Kyle</td>
+            <td>Fourman</td>
+            <td>Team Officials</td>
+          </tr>
+          <tr>
+            <td>Linc</td>
+            <td>Suerz</td>
+            <td>Team Officials</td>
+          </tr>
+          <tr>
+            <td>Minor</td>
+            <td>Hansel</td>
+            <td>Team Officials</td>
+          </tr>
+          <tr>
+            <td>Ram</td>
+            <td>Hartland</td>
+            <td>Team Officials</td>
+          </tr>
+          <tr>
+            <td>Anne</td>
+            <td>Alt</td>
+            <td>Team A</td>
+          </tr>
+          <tr>
+            <td>Marle</td>
+            <td>Mix</td>
+            <td>Team A</td>
+          </tr>
+          <tr>
+            <td>Walter</td>
+            <td>Willich</td>
+            <td>Team A</td>
+          </tr>
+        </tbody>
+      </table>
       <form onSubmit={handleSubmit}>
         <InputDropdown
           id='scJudgeName'
           setSelectedIndex={setScJudge}
-          placeholderText="Scorecard Judge (Vorname Nachname)"
+          placeholderText='Scorecard Judge (Vorname Nachname)'
           focus={true}
           onSelected={resetOfficialsSearch}
           initValues={scJudgeInit}
           searchForText={searchForOfficials}
-          items={teamOfficials}/>
+          items={teamOfficials}
+        />
         <InputDropdown
           id='referee'
           setSelectedIndex={setReferee}
-          placeholderText="Referee (Vorname Nachname)"
+          placeholderText='Referee (Vorname Nachname)'
           onSelected={resetOfficialsSearch}
           searchForText={searchForOfficials}
           initValues={refereeInit}
-          items={teamOfficials}/>
+          items={teamOfficials}
+        />
         <InputDropdown
           id='downJudge'
           setSelectedIndex={setDownJudge}
-          placeholderText="Down Judge (Vorname Nachname)"
+          placeholderText='Down Judge (Vorname Nachname)'
           onSelected={resetOfficialsSearch}
           searchForText={searchForOfficials}
           initValues={downJudgeInit}
-          items={teamOfficials}/>
+          items={teamOfficials}
+        />
         <InputDropdown
           id='fieldJudge'
           setSelectedIndex={setFieldJudge}
-          placeholderText="Field Judge (Vorname Nachname)"
+          placeholderText='Field Judge (Vorname Nachname)'
           onSelected={resetOfficialsSearch}
           searchForText={searchForOfficials}
           initValues={fieldJudgeInit}
-          items={teamOfficials}/>
+          items={teamOfficials}
+        />
         <InputDropdown
           id='sideJudge'
           setSelectedIndex={setSideJudge}
-          placeholderText="Side Judge (Vorname Nachname)"
+          placeholderText='Side Judge (Vorname Nachname)'
           onSelected={resetOfficialsSearch}
           searchForText={searchForOfficials}
           initValues={sideJudgeInit}
-          items={teamOfficials}/>
-        <div className="row mt-3">
+          items={teamOfficials}
+        />
+        <div className='row mt-3'>
           <div>
             Münzwahl hat:{' '}
-            <span className="fw-bold" data-testid="ctTeam">
+            <span className='fw-bold' data-testid='ctTeam'>
               {selectedGame.away}
             </span>
           </div>
         </div>
-        <div className="row mt-3">
+        <div className='row mt-3'>
           <RadioButton
-            id="ctWon"
-            name="coinToss"
-            color="secondary"
+            id='ctWon'
+            name='coinToss'
+            color='secondary'
             onChange={setCt}
-            text="Gewonnen"
+            text='Gewonnen'
             checked={ct == 'Gewonnen'}
           />
           <RadioButton
-            id="ctLost"
-            name="coinToss"
-            color="secondary"
+            id='ctLost'
+            name='coinToss'
+            color='secondary'
             onChange={setCt}
-            text="Verloren"
+            text='Verloren'
             checked={ct == 'Verloren'}
           />
         </div>
-        <div className="row mt-3">
+        <div className='row mt-3'>
           <div>Team mit Ballbesitz in der 1. Halbzeit</div>
         </div>
-        <div className="row mt-3">
+        <div className='row mt-3'>
           <RadioButton
-            id="possessionHome"
-            name="fhPossesion"
-            color="secondary"
+            id='possessionHome'
+            name='fhPossesion'
+            color='secondary'
             onChange={setFhPossession}
             text={selectedGame.home}
             checked={fhPossession == selectedGame.home}
           />
           <RadioButton
-            id="possessionAway"
-            name="fhPossesion"
-            color="secondary"
+            id='possessionAway'
+            name='fhPossesion'
+            color='secondary'
             onChange={setFhPossession}
             text={selectedGame.away}
             checked={fhPossession == selectedGame.away}
           />
         </div>
 
-        <div className="row mt-3">
+        <div className='row mt-3'>
           <div>Spielrichtung 1. Halbzeit (aus Blick Scorecard Judge)</div>
         </div>
-        <div className="row mt-3">
+        <div className='row mt-3'>
           <RadioButton
-            id="directionLeft"
-            name="direction"
-            color="secondary"
+            id='directionLeft'
+            name='direction'
+            color='secondary'
             onChange={setDirection}
-            text={<FaArrowLeft title="directionLeft" />}
-            value="directionLeft"
+            text={<FaArrowLeft title='directionLeft' />}
+            value='directionLeft'
             checked={direction == 'directionLeft'}
           />
           <RadioButton
-            id="directionRight"
-            name="direction"
-            color="secondary"
+            id='directionRight'
+            name='direction'
+            color='secondary'
             onChange={setDirection}
-            text={<FaArrowRight title="directionRight" />}
-            value="directionRight"
+            text={<FaArrowRight title='directionRight' />}
+            value='directionRight'
             checked={direction == 'directionRight'}
           />
         </div>
 
-        <div className="d-grid mt-3">
-          <button className="btn btn-primary" type="submit">
+        <div className='d-grid mt-3'>
+          <button className='btn btn-primary' type='submit'>
             Spiel starten
           </button>
         </div>
@@ -332,9 +420,10 @@ const mapStateToProps = (state) => ({
   // ],
 });
 
-export default connect(mapStateToProps,
-    {getGameLog,
-      saveGameSetup,
-      saveOfficials,
-      searchForOfficials,
-      updateTeamInPossession})(Officials);
+export default connect(mapStateToProps, {
+  getGameLog,
+  saveGameSetup,
+  saveOfficials,
+  searchForOfficials,
+  updateTeamInPossession,
+})(Officials);
