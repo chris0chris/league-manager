@@ -7,7 +7,7 @@ load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'dummy'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 CORS_ORIGIN_ALLOW_ALL = True
 

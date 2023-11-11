@@ -17,8 +17,9 @@ class DbSetupOfficials:
         association = DBSetup().create_new_association()
         license_f2 = OfficialLicenseFactory(name='F2')
         license_f1 = OfficialLicenseFactory(name='F1')
-        official1 = OfficialFactory(first_name='Franzi', last_name='Fedora', team=team, association=association)
-        official2 = OfficialFactory(first_name='Julia', last_name='Jegura', team=team)
+        official1 = OfficialFactory(first_name='Franzi', last_name='Fedora', team=team, association=association,
+                                    external_id=5)
+        official2 = OfficialFactory(first_name='Julia', last_name='Jegura', team=team, external_id=7)
         OfficialLicenseHistoryFactory(license=license_f2, official=official1,
                                       created_at='2020-07-07')
         OfficialLicenseHistoryFactory(license=license_f1, official=official1)
