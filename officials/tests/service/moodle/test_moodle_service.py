@@ -281,3 +281,40 @@ class TestGameService(TestCase):
         assert len(result['missing_team_names']) == 0
         assert len(result['missed_officials']) == 0
         assert len(result['result_list']) == 0
+
+    @patch.object(MoodleApi, 'get_participants_for_course')
+    def test_calculate_user_games_by_course(self, participants_mock: MagicMock):
+        course_id = 57
+        participants_mock.return_value = ApiParticipants({
+            'usergrades': [
+                {
+                    'courseid': course_id,
+                    'userid': 1,
+                    'gradeitems': [{
+                        'graderaw': None,
+                        'grademax': 10,
+                    }],
+                },
+                {
+                    'courseid': course_id,
+                    'userid': 5,
+                    'gradeitems': [{
+                        'graderaw': None,
+                        'grademax': 10,
+                    }],
+                },
+                {
+                    'courseid': course_id,
+                    'userid': 7,
+                    'gradeitems': [{
+                        'graderaw': None,
+                        'grademax': 10,
+                    }],
+                },
+            ]
+        })
+        moodle_service = MoodleService()
+        result = moodle_service.calculate_user_games_by_course(course_id)
+        assert result == [1, 5, 7]
+
+        participants_mock.assert_called_once_with(57)

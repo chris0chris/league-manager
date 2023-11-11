@@ -1,5 +1,6 @@
 from datetime import datetime
 from http import HTTPStatus
+from unittest.mock import patch, MagicMock
 
 from django.contrib.auth.models import User
 from django_webtest import WebTest, DjangoWebtestResponse
@@ -8,9 +9,10 @@ from rest_framework.reverse import reverse
 from gamedays.models import Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from officials.models import Official, OfficialExternalGames
+from officials.service.moodle.moodle_service import MoodleService
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 from officials.urls import OFFICIALS_LIST_FOR_TEAM, OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE, \
-    OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE, OFFICIALS_GAME_COUNT
+    OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE, OFFICIALS_LICENSE_CHECK
 
 
 class TestOfficialListView(WebTest):
@@ -25,8 +27,8 @@ class TestOfficialListView(WebTest):
 
     def test_officials_access_forbidden_for_authenticated_user_but_not_team_member(self):
         user = DBSetup().create_new_user('some user')
-        team = DbSetupOfficials().create_officials_full_setup()
         self.app.set_user(user)
+        team = DbSetupOfficials().create_officials_full_setup()
         response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
         assert response.status_code == HTTPStatus.OK
         context_items = response.context['object_list']
@@ -101,7 +103,7 @@ class TestAddExternalGameOfficialUpdateView(WebTest):
         user = DBSetup().create_new_user('some user', is_staff=True)
         self.app.set_user(user)
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE))
-        response.form['entries'] = f'999, 1, 2022-12-07, Side Judge, AFVBy'
+        response.form['entries'] = '999, 1, 2022-12-07, Side Judge, AFVBy'
         response = response.form.submit()
         self.assertFormError(response, 'form', 'entries', ['official_id nicht gefunden!'])
 
@@ -120,27 +122,19 @@ class TestAddExternalGameOfficialUpdateView(WebTest):
 
 
 class TestGameCountOfficials(WebTest):
-    def test_all_entries_will_be_checked(self):
+    @patch.object(MoodleService, 'calculate_user_games_by_course')
+    def test_all_entries_will_be_checked(self, moodle_service_mock: MagicMock):
         user = DBSetup().create_new_user('some staff user', is_staff=True)
         self.app.set_user(user)
         DbSetupOfficials().create_officials_full_setup()
+        all_official_ids = []
+        current_official: Official
+        for current_official in Official.objects.all():
+            all_official_ids += [current_official.external_id]
+        moodle_service_mock.return_value = all_official_ids
         year = datetime.today().year
         response: DjangoWebtestResponse = self.app.get(
-            reverse(OFFICIALS_GAME_COUNT, kwargs={'year': year})
+            reverse(OFFICIALS_LICENSE_CHECK, kwargs={'year': year, 'course_id': 7})
         )
         assert len(response.context['officials_list']) == Official.objects.all().count()
         assert response.context['season'] == year
-
-    def test_entries_only_for_id_is_checked(self):
-        user = DBSetup().create_new_user('some staff user', is_staff=True)
-        self.app.set_user(user)
-        DbSetupOfficials().create_officials_full_setup()
-        official: Official = Official.objects.last()
-        official.external_id = 7
-        official.save()
-        year = datetime.today().year
-        response: DjangoWebtestResponse = self.app.get(
-            reverse(OFFICIALS_GAME_COUNT, kwargs={'year': year}) + '?externalIds=,,  , 7 '
-        )
-        assert len(response.context['officials_list']) == 1
-        assert response.context['officials_list'][0]['first_name'] == 'Julia'
