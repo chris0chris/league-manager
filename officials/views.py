@@ -157,17 +157,16 @@ class AddExternalGameOfficialUpdateView(LoginRequiredMixin, UserPassesTestMixin,
         return self.request.user.is_staff
 
 
-class GameCountOfficials(LoginRequiredMixin, UserPassesTestMixin, View):
-    template_name = 'officials/game_count.html'
+class LicenseCheckForOfficials(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = 'officials/license_check.html'
 
     def get(self, request, *args, **kwargs):
         year = kwargs.get('year', datetime.today().year)
-        external_ids = request.GET.get('externalIds', '')
-        external_ids = self.get_external_ids_as_int(external_ids)
+        course_id = kwargs.get('course_id')
         official_service = OfficialService()
         context = {
             'season': year,
-            'officials_list': official_service.get_game_count(year, external_ids)
+            'officials_list': official_service.get_game_count_for_license(year, course_id)
         }
         return render(request, self.template_name, context)
 

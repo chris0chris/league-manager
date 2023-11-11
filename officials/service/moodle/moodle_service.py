@@ -45,6 +45,13 @@ class MoodleService:
         self.license_history: QuerySet[OfficialLicenseHistory] = OfficialLicenseHistory.objects.none()
         self.license_calculator = LicenseCalculator()
 
+    def calculate_user_games_by_course(self, course_id) -> []:
+        participants: ApiParticipants = self.moodle_api.get_participants_for_course(course_id)
+        participants_ids = []
+        for current_participant in participants.get_all():
+            participants_ids += [current_participant.user_id]
+        return participants_ids
+
     def update_licenses(self):
         courses: ApiCourses = self.moodle_api.get_courses()
         missing_team_names = set()

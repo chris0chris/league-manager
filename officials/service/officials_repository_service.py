@@ -6,7 +6,7 @@ from officials.models import Official, OfficialExternalGames, OfficialLicenseHis
 
 class OfficialsRepositoryService:
 
-    def get_officials_game_count(self, year, external_ids):
+    def get_officials_game_count_for_license(self, year, external_ids):
         if not external_ids:
             officials = Official.objects.all()
         else:
