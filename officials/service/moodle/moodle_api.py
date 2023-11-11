@@ -109,7 +109,7 @@ class ApiCourses:
     def __str__(self):
         return f'Number courses: {len(self.courses)}'
 
-    def get_all(self):
+    def get_all(self) -> List[ApiCourse]:
         return self.courses
 
 
@@ -119,6 +119,9 @@ class ApiParticipant:
         self.grademax = gradeitem['grademax']
         self.graderaw = gradeitem['graderaw']
         self.user_id = participant_json['userid']
+
+    def get_user_id(self):
+        return self.user_id
 
     def has_result(self):
         if self.graderaw is not None and self.grademax is not None:
@@ -137,9 +140,6 @@ class ApiParticipant:
                f'{{"gradeitems":[' \
                f'{{"grademax": {self.grademax}, "graderaw": {self.graderaw}, "user_id": {self.user_id}}}' \
                f']}})'
-
-    def get_user_id(self):
-        return self.user_id
 
 
 class ApiParticipants:

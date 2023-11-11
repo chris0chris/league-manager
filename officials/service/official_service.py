@@ -5,6 +5,7 @@ from django.db.models import Sum
 from gamedays.models import Team
 from officials.models import Official
 from officials.service.game_official_entries import InternalGameOfficialEntry, ExternalGameOfficialEntry
+from officials.service.moodle.moodle_service import MoodleService
 from officials.service.officials_appearance import OfficialAppearanceTeamList
 from officials.service.officials_repository_service import OfficialsRepositoryService
 
@@ -54,8 +55,10 @@ class OfficialService:
         entry = ExternalGameOfficialEntry(*result)
         return entry.save()
 
-    def get_game_count(self, year: int, external_ids: [int]) -> []:
-        return self.repository_service.get_officials_game_count(year, external_ids)
+    def get_game_count_for_license(self, year: int, course_id: int) -> []:
+        moodle_service = MoodleService()
+        external_ids = moodle_service.calculate_user_games_by_course(course_id)
+        return self.repository_service.get_officials_game_count_for_license(year, external_ids)
 
     def _aggregate_games(self, external_official_qs):
         all_external_games_count = external_official_qs.aggregate(num_games=Sum('number_games')).get('num_games',
