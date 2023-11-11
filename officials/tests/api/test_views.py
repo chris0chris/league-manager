@@ -56,6 +56,12 @@ class TestOfficialsSearchName(WebTest):
 
     def test_search_finds_multiple_matches(self):
         DbSetupOfficials().create_officials_and_team()
+        official_1: Official = Official.objects.first()
+        official_1.external_id = 55
+        official_1.save()
+        official_2: Official = Official.objects.last()
+        official_2.external_id = 77
+        official_2.save()
         DbSetupOfficials().create_officials_and_team()
         response = self.app.get(reverse(API_OFFICIALS_SEARCH_BY_NAME), 'name=FRA%20FED')
         assert response.status_code == HTTPStatus.OK
