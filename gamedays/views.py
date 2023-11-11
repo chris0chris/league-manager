@@ -82,7 +82,7 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return super(GamedayUpdateView, self).form_invalid(form)
         except TeamNotExistent as err:
             form.add_error(None,
-                           f'Spielplan konnte nicht erstellt werden, da dass Team "{err}" nicht gefunden wurde.')
+                           f'Spielplan konnte nicht erstellt werden, da das Team "{err}" nicht gefunden wurde.')
             return super(GamedayUpdateView, self).form_invalid(form)
 
         return super(GamedayUpdateView, self).form_valid(form)

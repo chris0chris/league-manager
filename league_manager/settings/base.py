@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'officials',
     'accounts',
     'knox',
+    'passcheck',
 ]
 
 MIDDLEWARE = [
