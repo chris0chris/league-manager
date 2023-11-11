@@ -1,6 +1,6 @@
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { jsonTypePlayer } from "../data/types";
+import { jsonTypePlayer } from "../constants/types";
 
 interface Props {
   modalVisible: boolean;

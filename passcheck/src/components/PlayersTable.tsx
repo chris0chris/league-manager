@@ -2,7 +2,7 @@ import PlayerLine from "./PlayerLine";
 import PlayerModal from "./PlayerModal";
 import Table from "react-bootstrap/Table";
 import { useEffect, useState } from "react";
-import { jsonTypePlayer } from "../data/types";
+import { jsonTypePlayer } from "../constants/types";
 
 interface Props {
   players: jsonTypePlayer;

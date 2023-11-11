@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import ListGroup from "react-bootstrap/ListGroup";
-import { jsonTypeTeam } from "../data/types";
+import { jsonTypeTeam } from "../constants/types";
 
 interface Props {
   index: number;
