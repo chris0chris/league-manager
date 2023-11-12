@@ -3,7 +3,7 @@ from django.db.models import QuerySet
 
 from gamedays.models import Association, Team
 from officials.models import OfficialLicenseHistory, Official
-from officials.service.moodle.moodle_api import MoodleApi, ApiUserInfo, ApiCourses, ApiParticipants
+from officials.service.moodle.moodle_api import MoodleApi, ApiUserInfo, ApiCourses, ApiParticipants, ApiUpdateUser
 
 
 class LicenseCalculator:
@@ -37,6 +37,15 @@ class LicenseCalculator:
         if license_check['min_next_license_rank'] <= participant_result:
             return license_check['next_license_rank']
         return self.NO_LICENSE
+
+    @staticmethod
+    def get_license_name(license_id):
+        license_name_mapping = {
+            LicenseCalculator.F1_LICENSE: 'F1',
+            LicenseCalculator.F2_LICENSE: 'F2',
+            LicenseCalculator.F3_LICENSE: 'F3'
+        }.get
+        return license_name_mapping(license_id, '')
 
 
 class MoodleService:
@@ -120,10 +129,11 @@ class MoodleService:
                 participant.get_result()
             )
             license_history_to_update.result = participant.get_result()
-            license_history_to_update.save()
         else:
-            new_license_history = self.create_new_license_history(course, official, participant)
-            new_license_history.save()
+            license_history_to_update = self.create_new_license_history(course, official, participant)
+        license_history_to_update.save()
+        api_user = ApiUpdateUser(official.pk, license_history_to_update.license_id)
+        self.moodle_api.update_user(api_user)
 
     def create_new_or_update_existing_official(self, user_info) -> Official:
         official = self._get_first(Official.objects.filter(external_id=user_info.get_id()))
@@ -138,7 +148,7 @@ class MoodleService:
         official.save()
         return official
 
-    def create_new_license_history(self, course, official, participant):
+    def create_new_license_history(self, course, official, participant) -> OfficialLicenseHistory:
         license_id = self.license_calculator.calculate(course.get_license_id(), participant.get_result())
         return OfficialLicenseHistory(
             created_at=course.get_date(),
