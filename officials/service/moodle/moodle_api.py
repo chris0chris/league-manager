@@ -153,6 +153,14 @@ class ApiParticipants:
         return self.participants
 
 
+class ApiUpdateUser:
+    def __init__(self, user_id, license_number, license_id):
+        self.user_id = user_id
+        self.license_number = license_number
+        from officials.service.moodle.moodle_service import LicenseCalculator
+        self.license_name = LicenseCalculator.get_license_name(license_id)
+
+
 class MoodleApi:
     def __init__(self):
         self.moodle_url = f'{settings.MOODLE_URL}/offd/moodle/webservice/rest/server.php' \
@@ -171,6 +179,13 @@ class MoodleApi:
     def get_user_info(self, user_id) -> ApiUserInfo:
         return ApiUserInfo(self._send_request(
             f'&wsfunction=core_user_get_users_by_field&field=id&values[0]={user_id}'))
+
+    def update_user(self, api_user: ApiUpdateUser):
+        self._send_request(f'&wsfunction=core_user_update_users&users[0][id]={api_user.user_id}'
+                           f'&users[0][customfields][0][type]=Lizenznummer'
+                           f'&users[0][customfields][0][value]={api_user.license_number}'
+                           f'&users[0][customfields][1][type]=Lizenzstufe'
+                           f'&users[0][customfields][1][value]={api_user.license_name}')
 
     def _send_request(self, additional_params) -> dict:
         return requests.get(f'{self.moodle_url}{additional_params}').json()

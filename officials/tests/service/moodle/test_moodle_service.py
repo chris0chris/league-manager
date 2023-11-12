@@ -51,6 +51,12 @@ class TestLicenseCalculator:
         result = license_calculator.calculate(2, 69)
         assert result == 4
 
+    def test_get_license_name(self):
+        assert LicenseCalculator.get_license_name(1) == 'F1'
+        assert LicenseCalculator.get_license_name(3) == 'F2'
+        assert LicenseCalculator.get_license_name(2) == 'F3'
+        assert LicenseCalculator.get_license_name(4) == ''
+
 
 class TestGameService(TestCase):
 
