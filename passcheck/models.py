@@ -1,9 +1,12 @@
 from django.db import models
 from django.db.models import QuerySet
+
+# import other models
 from gamedays.models import Gameday, Team
 
 
 class Playerlist(models.Model):
+    # content of model / columns of table
     team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
     firstname = models.CharField(max_length=50)
     lastname = models.CharField(max_length=50)
