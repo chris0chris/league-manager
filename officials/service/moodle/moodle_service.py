@@ -54,7 +54,7 @@ class MoodleService:
         self.license_history: QuerySet[OfficialLicenseHistory] = OfficialLicenseHistory.objects.none()
         self.license_calculator = LicenseCalculator()
 
-    def calculate_user_games_by_course(self, course_id) -> []:
+    def get_all_users_for_course(self, course_id) -> []:
         participants: ApiParticipants = self.moodle_api.get_participants_for_course(course_id)
         participants_ids = []
         for current_participant in participants.get_all():
@@ -132,7 +132,7 @@ class MoodleService:
         else:
             license_history_to_update = self.create_new_license_history(course, official, participant)
         license_history_to_update.save()
-        api_user = ApiUpdateUser(official.pk, license_history_to_update.license_id)
+        api_user = ApiUpdateUser(official.external_id, official.pk, license_history_to_update.license_id)
         self.moodle_api.update_user(api_user)
 
     def create_new_or_update_existing_official(self, user_info) -> Official:

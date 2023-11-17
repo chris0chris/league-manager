@@ -57,7 +57,7 @@ class OfficialService:
 
     def get_game_count_for_license(self, year: int, course_id: int) -> []:
         moodle_service = MoodleService()
-        external_ids = moodle_service.calculate_user_games_by_course(course_id)
+        external_ids = moodle_service.get_all_users_for_course(course_id)
         return self.repository_service.get_officials_game_count_for_license(year, external_ids)
 
     def _aggregate_games(self, external_official_qs):
