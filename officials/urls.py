@@ -15,7 +15,8 @@ OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE = 'officials-gameofficial-internal-create
 OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE = 'officials-gameofficial-external-create'
 OFFICIALS_LICENSE_CHECK = 'officials-license-check'
 OFFICIALS_MOODLE_REPORT = 'officials-moodle-report'
-OFFICIALS_PROFILE = 'officials-profile'
+OFFICIALS_PROFILE_LICENSE = 'officials-profile-license'
+OFFICIALS_PROFILE_GAMELIST = 'officials-profile-gamelist'
 OFFICIALS_ASSOCIATION_LIST = 'officials-association-list'
 
 urlpatterns = [
@@ -35,7 +36,9 @@ urlpatterns = [
          name=OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE),
     path('licensecheck/<int:year>/<int:course_id>', LicenseCheckForOfficials.as_view(), name=OFFICIALS_LICENSE_CHECK),
     path('moodle-report', MoodleReportView.as_view(), name=OFFICIALS_MOODLE_REPORT),
-    path('profile/<int:license_id>', OfficialProfileView.as_view(), name=OFFICIALS_PROFILE),
+    path('profile/license/<int:license_id>', OfficialProfileView.as_view(), name=OFFICIALS_PROFILE_LICENSE),
+    path('profile/gamelist/<int:license_id>/<int:year>', OfficialProfileView.as_view(),
+         name=OFFICIALS_PROFILE_GAMELIST),
     path('<str:abbr>/list', OfficialAssociationListView.as_view(), name=OFFICIALS_ASSOCIATION_LIST),
 
 ]
