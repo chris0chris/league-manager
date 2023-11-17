@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 from django.test import TestCase
 
 from officials.models import Official, OfficialLicenseHistory, OfficialLicense
-from officials.service.moodle.moodle_api import MoodleApi, ApiCourses, ApiParticipants, ApiUserInfo
+from officials.service.moodle.moodle_api import MoodleApi, ApiCourses, ApiParticipants, ApiUserInfo, ApiUpdateUser
 from officials.service.moodle.moodle_service import MoodleService, LicenseCalculator
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 
@@ -59,12 +59,12 @@ class TestLicenseCalculator:
 
 
 class TestGameService(TestCase):
-
+    @patch.object(MoodleApi, 'update_user')
     @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
     @patch.object(MoodleApi, 'get_user_info')
     def test_update_licenses_with_no_matching_category_id(self, user_mock: MagicMock, participants_mock: MagicMock,
-                                                          courses_mock: MagicMock):
+                                                          courses_mock: MagicMock, update_user_mock: MagicMock):
         courses_mock.return_value = ApiCourses({
             "courses": [
                 {
@@ -76,17 +76,19 @@ class TestGameService(TestCase):
         })
         moodle_service = MoodleService()
         result = moodle_service.update_licenses()
-        assert participants_mock.call_count == 0
-        assert user_mock.call_count == 0
+        participants_mock.assert_not_called()
+        user_mock.assert_not_called()
+        update_user_mock.assert_not_called()
         assert len(result['missing_team_names']) == 0
         assert len(result['missed_officials']) == 0
         assert len(result['result_list']) == 0
 
+    @patch.object(MoodleApi, 'update_user')
     @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
     @patch.object(MoodleApi, 'get_user_info')
     def test_update_licenses_no_matching_teams(self, user_mock: MagicMock, participants_mock: MagicMock,
-                                               courses_mock: MagicMock):
+                                               courses_mock: MagicMock, update_user_mock: MagicMock):
         user_id = 1
         user_id_2 = 2
         courses_mock.return_value = ApiCourses({
@@ -147,12 +149,14 @@ class TestGameService(TestCase):
         assert result['missing_team_names'] == ['moodle teamname', 'teamname moodle']
         assert len(result['missed_officials']) == 2
         assert len(result['result_list']) == 0
+        update_user_mock.assert_not_called()
 
+    @patch.object(MoodleApi, 'update_user')
     @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
     @patch.object(MoodleApi, 'get_user_info')
     def test_update_licenses_create_official(self, user_mock: MagicMock, participants_mock: MagicMock,
-                                             courses_mock: MagicMock):
+                                             courses_mock: MagicMock, update_user_mock: MagicMock):
         user_id = 82
         team = DbSetupOfficials().create_officials_and_team()
         license_f1 = OfficialLicense.objects.get(name='F1')
@@ -199,12 +203,17 @@ class TestGameService(TestCase):
         assert len(result['missing_team_names']) == 0
         assert len(result['missed_officials']) == 0
         assert len(result['result_list']) == 1
+        actual_api_user_update: ApiUpdateUser = update_user_mock.call_args[0][0]
+        assert actual_api_user_update.user_id == user_id
+        assert actual_api_user_update.license_number == created_official.pk
+        assert actual_api_user_update.license_name == 'F1'
 
+    @patch.object(MoodleApi, 'update_user')
     @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
     @patch.object(MoodleApi, 'get_user_info')
     def test_update_licenses_update_official(self, user_mock: MagicMock, participants_mock: MagicMock,
-                                             courses_mock: MagicMock):
+                                             courses_mock: MagicMock, update_user_mock: MagicMock):
         team = DbSetupOfficials().create_officials_and_team()
         # id workaround need to be done due testdatabase ids are not reset
         official: Official = Official.objects.last()
@@ -255,11 +264,17 @@ class TestGameService(TestCase):
         assert len(result['missing_team_names']) == 0
         assert len(result['missed_officials']) == 0
         assert len(result['result_list']) == 1
+        actual_api_user_update: ApiUpdateUser = update_user_mock.call_args[0][0]
+        assert actual_api_user_update.user_id == updated_official.external_id
+        assert actual_api_user_update.license_number == updated_official.pk
+        assert actual_api_user_update.license_name == 'F2'
 
+    @patch.object(MoodleApi, 'update_user')
     @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
-    def test_update_licenses_user_has_no_result(self, participants_mock: MagicMock,
-                                                courses_mock: MagicMock):
+    @patch.object(MoodleApi, 'get_user_info')
+    def test_update_licenses_user_has_no_result(self, user_mock: MagicMock, participants_mock: MagicMock,
+                                                courses_mock: MagicMock, update_user_mock: MagicMock):
         user_id = 7
         courses_mock.return_value = ApiCourses({
             "courses": [
@@ -284,12 +299,14 @@ class TestGameService(TestCase):
         })
         moodle_service = MoodleService()
         result = moodle_service.update_licenses()
+        user_mock.assert_not_called()
+        update_user_mock.assert_not_called()
         assert len(result['missing_team_names']) == 0
         assert len(result['missed_officials']) == 0
         assert len(result['result_list']) == 0
 
     @patch.object(MoodleApi, 'get_participants_for_course')
-    def test_calculate_user_games_by_course(self, participants_mock: MagicMock):
+    def test_get_all_users_for_course(self, participants_mock: MagicMock):
         course_id = 57
         participants_mock.return_value = ApiParticipants({
             'usergrades': [
@@ -320,7 +337,7 @@ class TestGameService(TestCase):
             ]
         })
         moodle_service = MoodleService()
-        result = moodle_service.calculate_user_games_by_course(course_id)
+        result = moodle_service.get_all_users_for_course(course_id)
         assert result == [1, 5, 7]
 
         participants_mock.assert_called_once_with(57)
