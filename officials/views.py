@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from django.views import View
 
 from gamedays.models import Team, Gameinfo, GameOfficial, Gameday
-from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer
+from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
 from officials.forms import AddInternalGameOfficialEntryForm, AddExternalGameOfficialEntryForm
 from officials.models import Official
 from officials.service.moodle.moodle_service import MoodleService
@@ -199,8 +199,8 @@ class MoodleReportView(LoginRequiredMixin, UserPassesTestMixin, View):
         return self.request.user.is_staff
 
 
-class OfficialProfileView(View):
-    template_name = 'officials/profile.html'
+class OfficialProfileLicenseView(View):
+    template_name = 'officials/profile_license.html'
 
     def get(self, request, *args, **kwargs):
         license_id = kwargs.get('license_id')
@@ -208,7 +208,31 @@ class OfficialProfileView(View):
         return render(
             request,
             self.template_name,
-            OfficialSerializer(instance=official, is_staff=self.request.user.is_staff).data
+            {'official_info': OfficialSerializer(instance=official, is_staff=self.request.user.is_staff).data}
+        )
+
+
+class OfficialProfileGamelistView(View):
+    template_name = 'officials/profile_gamelist.html'
+
+    def get(self, request, *args, **kwargs):
+        year = datetime.today().year
+        season = kwargs.get('year', year)
+        license_id = kwargs.get('license_id')
+        official = Official.objects.get(id=license_id)
+        official_info = OfficialGamelistSerializer(instance=official, season=season,
+                                                   is_staff=self.request.user.is_staff).data
+        return render(
+            request,
+            self.template_name,
+            context={
+                "year": year,
+                "season": season,
+                "official_info": official_info,
+                "needed_games_for_license": 4 - (
+                        official_info['external_games']['number_games'] + official_info['dffl_games'][
+                    'number_games'])
+            }
         )
 
 

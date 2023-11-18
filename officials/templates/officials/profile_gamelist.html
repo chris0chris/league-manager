@@ -1,0 +1,109 @@
+{% extends "officials/profile_license.html" %}
+{% block license_status %}
+{% if year != season %}
+<div class="row bg-danger text-white mb-2">
+    <div class="text-center">Status Lizenzverlängerung unklar, da Season ({{ season }}) nicht mit aktuellem Jahr
+        ({{ year }}) übereinstimmt.
+    </div>
+</div>
+{% else %}
+{% if needed_games_for_license < 1 %}
+<div class="row bg-success text-white mb-2">
+    <div class="text-center">Lizenzverlängerung kann erfolgen</div>
+</div>
+{% else %}
+<div class="row bg-warning text-white mb-2">
+    <div class="text-center">Noch {{ needed_games_for_license }} Spiele für Lizenzverlängerung benötigt</div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock license_status %}
+{% block profile_gamecount %}
+<div class="row mt-2">
+    DFFL Spiele: {{ official_info.dffl_games.number_games }}
+</div>
+<div class="row">
+    Spiele außerhalb der DFFL: {{ official_info.external_games.number_games }}
+</div>
+{% endblock profile_gamecount %}
+{% block gamelist %}
+{% if gameday_is_running %}
+<p>
+    Aktuell läuft ein Spieltag, deswegen können die Daten aus Gründen der Performance nicht dargestellt werden.
+    Bitte probiere es an einem anderen Tag.
+</p>
+{% else %}
+<p class="mt-2">
+    Sollten Spiele fehlen, kannst du <a href="{% url 'view-officials-game-officials-appearance' %}">hier</a>
+    überprüfen, ob dein Einsatz in der DFFL gezählt wurde.
+</p>
+<p>
+    Bei fehlenden Einsätzen, unabhänig ob DFFL, außerhalb der Liga oder Flag & Fun Turnieren, kannst du diese <a
+        href="https://forms.gle/F9dSrMoodipfbys79" target="_blank">hier</a> nachmelden.<br/>
+    Bei Fragen wende dich bitte an Chris: c.kaempfe@afvd.de
+</p>
+<h2>{{ season }} DFFL Spiele (und Ligen mit Scorecard)</h2>
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Datum</th>
+        <th scope="col">Spieltag</th>
+        <th scope="col">Position</th>
+        <th scope="col">Spiel</th>
+        <th scope="col">Platzierung</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if official_info.dffl_games.number_games == 0 %}
+    <tr>
+        <td colspan="6">Keine Einträge vorhanden.</td>
+    </tr>
+    {% endif %}
+    {% for official in official_info.dffl_games.all_games %}
+    <tr>
+        <th scope="row">{{official.game_official_id}}</th>
+        <td>{{official.date}}</td>
+        <td>{{official.gameday}}</td>
+        <td>{{official.position}}</td>
+        <td>{{official.vs}} (#{{official.gameinfo_id}})</td>
+        <td>{{official.standing}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<h2>{{ season }} Spiele außerhalb der DFFL</h2>
+<p>
+    Hier werden alle Spiele aufgelistet, die ohne Verwendung der Scorecard gepfiffen wurden.
+</p>
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th scope="col">Datum</th>
+        <th scope="col">#Spiele</th>
+        <th scope="col">Position</th>
+        <th scope="col">Verband</th>
+        <th scope="col">International</th>
+        <th scope="col">Kommentar</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if official_info.external_games.number_games == 0 %}
+    <tr>
+        <td colspan="6">Keine Einträge vorhanden.</td>
+    </tr>
+    {% endif %}
+    {% for entry in official_info.external_games.all_games %}
+    <tr>
+        <td>{{entry.date}}</td>
+        <td>{{entry.number_games}}</td>
+        <td>{{entry.position}}</td>
+        <td>{{entry.association}}</td>
+        <td>{{entry.is_internatioinal|yesno:"Ja,Nein"}}</td>
+        <td>{{entry.comment}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock gamelist %}
