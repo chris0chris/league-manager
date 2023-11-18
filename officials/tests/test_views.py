@@ -122,7 +122,7 @@ class TestAddExternalGameOfficialUpdateView(WebTest):
 
 
 class TestGameCountOfficials(WebTest):
-    @patch.object(MoodleService, 'calculate_user_games_by_course')
+    @patch.object(MoodleService, 'get_all_users_for_course')
     def test_all_entries_will_be_checked(self, moodle_service_mock: MagicMock):
         user = DBSetup().create_new_user('some staff user', is_staff=True)
         self.app.set_user(user)
