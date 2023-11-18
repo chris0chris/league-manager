@@ -3,7 +3,7 @@ import datetime
 from django.test import TestCase
 
 from gamedays.models import GameOfficial
-from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer
+from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
 from officials.models import Official
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 
@@ -72,3 +72,16 @@ class TestOfficialSerializer(TestCase):
             'team': official.team.description,
             'valid_until': datetime.date(year, 3, 31)
         }
+
+
+class TestOfficialGamelistSerializer(TestCase):
+    def test_game_official_is_serialized(self):
+        DbSetupOfficials().create_officials_full_setup()
+        DbSetupOfficials().create_external_officials_entries()
+        official = Official.objects.last()
+        from datetime import datetime
+        season = datetime.today().year
+        serializer = OfficialGamelistSerializer(instance=official, season=season, is_staff=False).data
+        assert serializer['external_games']['number_games'] == 7
+        assert len(serializer['external_games']['all_games']) == 1
+        assert serializer['dffl_games']['number_games'] == 8

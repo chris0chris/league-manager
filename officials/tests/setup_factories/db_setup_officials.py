@@ -37,9 +37,9 @@ class DbSetupOfficials:
         db_setup.create_game_officials(Gameinfo.objects.last(), Official.objects.last())
         db_setup.create_game_officials(Gameinfo.objects.get(pk=first_game.pk + 1), Official.objects.last())
         gameday = db_setup.g62_status_empty()
+        gameday.date = '2020-07-07'
         db_setup.create_game_officials(gameday.gameinfo_set.first(), Official.objects.first())
         db_setup.create_game_officials(gameday.gameinfo_set.last(), Official.objects.last())
-        gameday.date = '2020-07-07'
         gameday.save()
         return team
 

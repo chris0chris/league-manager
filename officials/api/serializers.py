@@ -1,11 +1,12 @@
 import datetime
 import re
 
-from rest_framework.fields import CharField, SerializerMethodField
+from django.db.models import Sum, QuerySet
+from rest_framework.fields import CharField, SerializerMethodField, BooleanField, DateField
 from rest_framework.serializers import ModelSerializer
 
 from gamedays.models import GameOfficial
-from officials.models import Official, OfficialLicenseHistory, EmptyOfficialLicenseHistory
+from officials.models import Official, OfficialLicenseHistory, EmptyOfficialLicenseHistory, OfficialExternalGames
 from officials.service.moodle.moodle_service import MoodleService
 
 
@@ -17,6 +18,14 @@ class Obfuscator:
         for current_arg in args:
             obfuscated_text += current_arg[0] + 4 * '*'
         return obfuscated_text
+
+
+class OfficialExternalGamesSerializer(ModelSerializer):
+    date = DateField(format='%d.%m.%Y')
+
+    class Meta:
+        model = OfficialExternalGames
+        exclude = ('official',)
 
 
 class OfficialSerializer(ModelSerializer):
@@ -75,6 +84,50 @@ class OfficialSerializer(ModelSerializer):
         if newest_license is None:
             return EmptyOfficialLicenseHistory()
         return newest_license
+
+
+class OfficialGamelistSerializer(OfficialSerializer):
+    is_valid = BooleanField(default=True)
+    dffl_games = SerializerMethodField('get_dffl_games')
+    external_games = SerializerMethodField('get_external_games')
+
+    def __init__(self, season, is_staff=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.is_staff = is_staff
+        self.season = season
+
+    def get_external_games(self, obj: Official):
+        all_official_entries: QuerySet = obj.officialexternalgames_set.filter(date__year=self.season)
+        number_games = all_official_entries.aggregate(Sum('number_games'))[
+            'number_games__sum'] if all_official_entries.exists() else 0
+        return {
+            'all_games': OfficialExternalGamesSerializer(instance=all_official_entries, many=True).data,
+            'number_games': number_games
+        }
+
+    def get_dffl_games(self, obj: Official):
+        all_official_entries = obj.gameofficial_set.filter(gameinfo__gameday__date__year=self.season).exclude(
+            position='Scorecard Judge')
+        all_games = []
+        for current_official_entry in all_official_entries:
+            all_games += [self._get_dffl_game_infos(current_official_entry)]
+        return {
+            'all_games': all_games,
+            'number_games': len(all_games)
+        }
+
+    def _get_dffl_game_infos(self, object: GameOfficial):
+        home = object.gameinfo.gameresult_set.get(isHome=True).team.description
+        away = object.gameinfo.gameresult_set.get(isHome=False).team.description
+        return {
+            'position': object.position,
+            'game_official_id': object.pk,
+            'gameinfo_id': object.gameinfo.pk,
+            'gameday': object.gameinfo.gameday.name,
+            'date': object.gameinfo.gameday.date.strftime('%d.%m.%Y'),
+            'vs': home + ' vs ' + away,
+            'standing': object.gameinfo.standing,
+        }
 
 
 class GameOfficialAllInfoSerializer(ModelSerializer):
