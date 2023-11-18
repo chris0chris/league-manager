@@ -61,7 +61,7 @@ class OfficialSerializer(ModelSerializer):
     def get_association(self, obj):
         try:
             return obj.association.abbr
-        except AttributeError as e:
+        except AttributeError:
             return 'Kein Verband hinterlegt'
 
     def check_license_validation(self, obj):
