@@ -17,11 +17,16 @@
                 href="https://forms.gle/F9dSrMoodipfbys79" target="_blank">hier</a> nachmelden.<br/>
             Bei Fragen wende dich bitte an Chris: c.kaempfe@afvd.de
         </p>
-        <p>
+        <ul class="nav nav-pills">
             {% for year in object_list.officials_list.years %}
-            <a href="/officials/team/{{team_id}}/list/{{year}}">{{ year }}</a>
+            <li class="nav-item">
+                <a class="nav-link {% if object_list.year == year %}active{% endif %}"
+                   href="/officials/team/{{team_id}}/list/{{year}}">{{ year }}</a>
+            </li>
             {% endfor %}
-        </p>
+        </ul>
+
+
         <h3>
             {{ object_list.officials_list.list|length }} - Offizielle
         </h3>
@@ -42,7 +47,9 @@
             <tbody>
             {% for official in object_list.officials_list.list %}
             <tr>
-                <th scope="row"><a href="/officials/profile/{{official.id}}">{{official.id}}</a></th>
+                <th scope="row"><a
+                        href="{% url 'view-officials-profile-gamelist' license_id=official.id season=object_list.year %}">{{official.id}}</a>
+                </th>
                 <td>{{official.last_name}}</td>
                 <td>{{official.first_name}}</td>
                 <td>{{official.license}}</td>
