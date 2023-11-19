@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 from django.views import View
 
 from gamedays.models import Team, Gameinfo, GameOfficial, Gameday
+from league_manager.utils.view_utils import PermissionHelper
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
 from officials.forms import AddInternalGameOfficialEntryForm, AddExternalGameOfficialEntryForm
 from officials.models import Official
@@ -217,11 +218,13 @@ class OfficialProfileGamelistView(View):
 
     def get(self, request, *args, **kwargs):
         year = datetime.today().year
-        season = kwargs.get('year', year)
+        season = kwargs.get('season', year)
         license_id = kwargs.get('license_id')
         official = Official.objects.get(id=license_id)
-        official_info = OfficialGamelistSerializer(instance=official, season=season,
-                                                   is_staff=self.request.user.is_staff).data
+        official_info = OfficialGamelistSerializer(
+            instance=official,
+            season=season,
+            is_staff=PermissionHelper.has_staff_or_user_permission(request, official.team)).data
         return render(
             request,
             self.template_name,

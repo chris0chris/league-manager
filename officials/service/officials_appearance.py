@@ -76,6 +76,6 @@ class OfficialAppearanceTeamList(object):
                 # no official found with a license for the year ... skip it
                 continue
         return {
-            'years': sorted(years_set),
+            'years': sorted(years_set, reverse=True),
             'list': officials_result_list
         }
