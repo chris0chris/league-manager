@@ -16,7 +16,8 @@ class Obfuscator:
     def obfuscate(*args: str):
         obfuscated_text = ''
         for current_arg in args:
-            obfuscated_text += current_arg[0] + 4 * '*'
+            if current_arg is not None and current_arg != '':
+                obfuscated_text += current_arg[0] + 4 * '*'
         return obfuscated_text
 
 
@@ -37,9 +38,7 @@ class OfficialExternalGamesSerializer(ModelSerializer):
     def get_reporter_name(self, obj: OfficialExternalGames):
         if self.is_staff:
             return obj.reporter_name
-        split_name = obj.reporter_name.split(' ')
-        return Obfuscator.obfuscate(split_name[0], split_name[1])
-
+        return Obfuscator.obfuscate(obj.reporter_name.split(' ')[:2])
 
 
 class OfficialSerializer(ModelSerializer):
@@ -174,11 +173,11 @@ class GameOfficialAllInfoSerializer(ModelSerializer):
             'standing': object.gameinfo.standing,
         }
 
-    def obfuscate_name(self, object: GameOfficial):
-        official_name = self._get_official_name(object)
-        if self.display_names_for_team == object.gameinfo.officials.name or self.is_staff:
+    def obfuscate_name(self, obj: GameOfficial):
+        official_name = self._get_official_name(obj)
+        if self.display_names_for_team == obj.gameinfo.officials.name or self.is_staff:
             return official_name
-        return re.sub('\B[a-zäöüÄÖÜßé]', '*', official_name)
+        return Obfuscator.obfuscate(*official_name.split(' ')[:2])
 
     def _get_official_name(self, game_official):
         if game_official.official is not None:

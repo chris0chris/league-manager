@@ -3,9 +3,24 @@ import datetime
 from django.test import TestCase
 
 from gamedays.models import GameOfficial
-from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
+from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer, \
+    Obfuscator
 from officials.models import Official
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
+
+
+class TestObfuscator:
+    def test_obfuscator_obfuscate(self):
+        assert Obfuscator.obfuscate('Some', 'Name') == 'S****N****'
+
+    def test_obfuscator_only_one_argument(self):
+        assert Obfuscator.obfuscate('Some') == 'S****'
+
+    def test_obfuscator_works_with_empty_values(self):
+        assert Obfuscator.obfuscate(None) == ''
+        assert Obfuscator.obfuscate('') == ''
+        assert Obfuscator.obfuscate(None, '') == ''
+        assert Obfuscator.obfuscate(None, '', 'Nmae') == 'N****'
 
 
 class TestGameOfficialAllInfoSerializer(TestCase):
