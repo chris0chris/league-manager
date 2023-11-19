@@ -23,7 +23,7 @@
     DFFL Spiele: {{ official_info.dffl_games.number_games }}
 </div>
 <div class="row">
-    Spiele außerhalb der DFFL: {{ official_info.external_games.number_games }}
+    Spiele außerhalb der DFFL: {{ official_info.external_games.number_games|floatformat }}
 </div>
 {% endblock profile_gamecount %}
 {% block gamelist %}
@@ -33,15 +33,7 @@
     Bitte probiere es an einem anderen Tag.
 </p>
 {% else %}
-<p class="mt-2">
-    Sollten Spiele fehlen, kannst du <a href="{% url 'view-officials-game-officials-appearance' %}">hier</a>
-    überprüfen, ob dein Einsatz in der DFFL gezählt wurde.
-</p>
-<p>
-    Bei fehlenden Einsätzen, unabhänig ob DFFL, außerhalb der Liga oder Flag & Fun Turnieren, kannst du diese <a
-        href="https://forms.gle/F9dSrMoodipfbys79" target="_blank">hier</a> nachmelden.<br/>
-    Bei Fragen wende dich bitte an Chris: c.kaempfe@afvd.de
-</p>
+<br/>
 <h2>{{ season }} DFFL Spiele (und Ligen mit Scorecard)</h2>
 <table class="table table-hover">
     <thead>
@@ -76,14 +68,38 @@
 <p>
     Hier werden alle Spiele aufgelistet, die ohne Verwendung der Scorecard gepfiffen wurden.
 </p>
+<p>
+    Eine Beschreibung der Spalten findest du, wenn du mit der Maus über den Spaltennamen fährst.<br/>
+    Ab wann ein Spiel als Lizenzspiel zählt, wird <a href="https://offd.de/offd/moodle/mod/page/view.php?id=315"
+                                                     target="_blank">hier</a> beschrieben.
+</p>
 <table class="table table-hover">
     <thead>
     <tr>
         <th scope="col">Datum</th>
-        <th scope="col">#Spiele</th>
+        <th scope="col"><span data-bs-title="#Spiele gibt an, wie viele Spiele gepfiffen wurden."
+                              data-bs-toggle="tooltip">#Spiele</span><br/><span
+                data-bs-title="#Lizenzspiele ist die Anzahl der Spiele, die für die
+    Lizenzverlängerung gewertet werden" data-bs-toggle="tooltip">(#Lizenzspiele)</span></th>
+        <th scope="col">
+            <div data-bs-title="Dauer einer Halbzeit" data-bs-toggle="tooltip">Halbzeitdauer</div>
+        </th>
+        <th scope="col">
+            <div data-bs-title="Wurde mit Clock Control gespielt?" data-bs-toggle="tooltip">Clock Control</div>
+        </th>
         <th scope="col">Position</th>
-        <th scope="col">Verband</th>
-        <th scope="col">International</th>
+        <th scope="col">
+            <div data-bs-title="Unter welchem Verband lief das Spiel?" data-bs-toggle="tooltip">Verband</div>
+        </th>
+        <th scope="col">
+            <div data-bs-title="Ist es ein internationales Spiel?" data-bs-toggle="tooltip">International</div>
+        </th>
+        <th scope="col">
+            <div data-bs-title="Wann wurde der Eintrag gemeldet?" data-bs-toggle="tooltip">Meldedatum</div>
+        </th>
+        <th scope="col">
+            <div data-bs-title="Durch wen wurde der Eintrag gemeldet?" data-bs-toggle="tooltip">Meldename</div>
+        </th>
         <th scope="col">Kommentar</th>
     </tr>
     </thead>
@@ -96,14 +112,32 @@
     {% for entry in official_info.external_games.all_games %}
     <tr>
         <td>{{entry.date}}</td>
-        <td>{{entry.number_games}}</td>
+        <td>{{entry.number_games}} ({{ entry.calculated_number_games|floatformat }})</td>
+        <td>{{entry.halftime_duration}}</td>
+        <td>{{entry.has_clockcontrol|yesno:'Ja,Nein'}}</td>
         <td>{{entry.position}}</td>
         <td>{{entry.association}}</td>
-        <td>{{entry.is_internatioinal|yesno:"Ja,Nein"}}</td>
+        <td>{{entry.is_international|yesno:"Ja,Nein"}}</td>
+        <td>{{entry.notification_date}}</td>
+        <td>{{entry.reporter_name}}</td>
         <td>{{entry.comment}}</td>
     </tr>
     {% endfor %}
     </tbody>
 </table>
+<h2>Anmerkungen</h2>
+<p>
+    Sollten Spiele fehlen, kannst du <a href="{% url 'view-officials-game-officials-appearance' %}">hier</a>
+    überprüfen, ob dein Einsatz in der DFFL gezählt wurde.
+</p>
+<p>
+    Bei fehlenden Einsätzen, unabhänig ob DFFL, außerhalb der Liga oder Flag & Fun Turnieren, kannst du diese <a
+        href="https://forms.gle/F9dSrMoodipfbys79" target="_blank">hier</a> nachmelden.<br/>
+    Bei Fragen wende dich bitte an Chris: c.kaempfe@afvd.de
+</p>
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
 {% endif %}
 {% endblock gamelist %}

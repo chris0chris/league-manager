@@ -1,8 +1,8 @@
 import datetime
 import re
 
-from django.db.models import Sum, QuerySet
-from rest_framework.fields import CharField, SerializerMethodField, BooleanField, DateField
+from django.db.models import QuerySet
+from rest_framework.fields import CharField, SerializerMethodField, BooleanField, DateField, FloatField
 from rest_framework.serializers import ModelSerializer
 
 from gamedays.models import GameOfficial
@@ -22,10 +22,24 @@ class Obfuscator:
 
 class OfficialExternalGamesSerializer(ModelSerializer):
     date = DateField(format='%d.%m.%Y')
+    notification_date = DateField(format='%d.%m.%Y')
+    calculated_number_games = FloatField(read_only=True)
+    reporter_name = SerializerMethodField('get_reporter_name')
 
     class Meta:
         model = OfficialExternalGames
         exclude = ('official',)
+
+    def __init__(self, is_staff=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.is_staff = is_staff
+
+    def get_reporter_name(self, obj: OfficialExternalGames):
+        if self.is_staff:
+            return obj.reporter_name
+        split_name = obj.reporter_name.split(' ')
+        return Obfuscator.obfuscate(split_name[0], split_name[1])
+
 
 
 class OfficialSerializer(ModelSerializer):
@@ -97,12 +111,12 @@ class OfficialGamelistSerializer(OfficialSerializer):
         self.season = season
 
     def get_external_games(self, obj: Official):
-        all_official_entries: QuerySet = obj.officialexternalgames_set.filter(date__year=self.season)
-        number_games = all_official_entries.aggregate(Sum('number_games'))[
-            'number_games__sum'] if all_official_entries.exists() else 0
+        all_official_entries: QuerySet[OfficialExternalGames] = obj.officialexternalgames_set.filter(
+            date__year=self.season)
         return {
-            'all_games': OfficialExternalGamesSerializer(instance=all_official_entries, many=True).data,
-            'number_games': number_games
+            'all_games': OfficialExternalGamesSerializer(instance=all_official_entries, many=True,
+                                                         is_staff=self.is_staff).data,
+            'number_games': sum(entry.calculated_number_games for entry in all_official_entries)
         }
 
     def get_dffl_games(self, obj: Official):
