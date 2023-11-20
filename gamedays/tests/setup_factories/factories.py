@@ -91,6 +91,7 @@ class GameinfoFactory(DjangoModelFactory):
     scheduled = '10:00'
     officials = factory.SubFactory(TeamFactory)
     field = 1
+    in_possession = ''
 
 
 class GameresultFactory(DjangoModelFactory):
@@ -106,6 +107,7 @@ class TeamLogFactory(DjangoModelFactory):
         model = TeamLog
 
     gameinfo = factory.SubFactory(GameinfoFactory)
+    input = ''
 
 
 class GameSetupFactory(DjangoModelFactory):
