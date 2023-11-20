@@ -17,7 +17,8 @@ class Official(models.Model):
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.team.description}__{self.last_name}, {self.first_name} - ({self.association.name if not self.association is None else "NONE"})'
+        return (f'{self.team.description}__{self.last_name}, {self.first_name} - ('
+                f'{"NONE" if self.association is None else self.association.name})')
 
 
 class OfficialLicense(models.Model):
@@ -37,6 +38,7 @@ class EmptyLicense:
 class EmptyOfficialLicenseHistory:
     license = EmptyLicense()
 
+    # noinspection PyMethodMayBeStatic
     def valid_until(self):
         return datetime.date(1, 1, 1)
 
@@ -50,6 +52,7 @@ class OfficialLicenseHistory(models.Model):
     objects: QuerySet = models.Manager()
 
     def valid_until(self):
+        # noinspection PyUnresolvedReferences
         return datetime.date(self.created_at.year + 1, 3, 31)
 
     def __str__(self):
