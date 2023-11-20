@@ -1,7 +1,7 @@
 from django.urls import path
 
 from officials.views import OfficialsTeamListView, AllOfficialsListView, GameOfficialListView, \
-    AddInternalGameOfficialUpdateView, AddExternalGameOfficialUpdateView, LicenseCheckForOfficials, MoodleReportView, \
+    AddInternalGameOfficialUpdateView, LicenseCheckForOfficials, MoodleReportView, \
     OfficialProfileLicenseView, OfficialAssociationListView, OfficialProfileGamelistView
 
 OFFICIALS_LIST_FOR_TEAM = 'view-officials-list-for-team'
@@ -12,7 +12,6 @@ OFFICIALS_GAME_OFFICIALS_APPEARANCE = 'view-officials-game-officials-appearance'
 OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_TEAM = 'view-officials-game-officials-appearance-for-team'
 OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_TEAM_AND_YEAR = 'view-officials-game-officials-appearance-for-team-and-year'
 OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE = 'view-officials-gameofficial-internal-create'
-OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE = 'view-officials-gameofficial-external-create'
 OFFICIALS_LICENSE_CHECK = 'view-officials-license-check'
 OFFICIALS_MOODLE_REPORT = 'view-officials-moodle-report'
 OFFICIALS_PROFILE_LICENSE = 'view-officials-profile-license'
@@ -32,8 +31,6 @@ urlpatterns = [
          name=OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_TEAM_AND_YEAR),
     path('gameofficial/internal/create', AddInternalGameOfficialUpdateView.as_view(),
          name=OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE),
-    path('gameofficial/external/create', AddExternalGameOfficialUpdateView.as_view(),
-         name=OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE),
     path('licensecheck/<int:year>/<int:course_id>', LicenseCheckForOfficials.as_view(), name=OFFICIALS_LICENSE_CHECK),
     path('moodle-report', MoodleReportView.as_view(), name=OFFICIALS_MOODLE_REPORT),
     path('profile/<int:license_id>/license', OfficialProfileLicenseView.as_view(), name=OFFICIALS_PROFILE_LICENSE),
