@@ -2,10 +2,9 @@
 {% block content %}
 <article class="media content-section">
     <div class="media-body">
-        <h1>{{ object_list.year }} - {{ object_list.team }}</h1>
+        <h1>{{ object_list.season }} - {{ object_list.team }}</h1>
         <p>
-            Angezeigt werden alle Spiele (inklusive externe Spiele, z.B. für Landesverband) die gepfiffen wurden für
-            lizenzierte Offizielle. In Klammern sind alle Spiele die für die 5er DFFL gepfiffen wurden.<br>
+            Eine Beschreibung der Zahlen findest du, wenn du mit der Maus über die Zahl fährst.<br>
             Ein Einsatz als Scorecard Judge wird NICHT gewertet.
         </p>
         <p>
@@ -14,21 +13,20 @@
         </p>
         <p>
             Bei fehlenden Einsätzen, unabhänig ob DFFL, außerhalb der Liga oder Flag & Fun Turnieren, kannst du diese <a
-                href="https://forms.gle/F9dSrMoodipfbys79" target="_blank">hier</a> nachmelden.<br/>
-            Bei Fragen wende dich bitte an Chris: c.kaempfe@afvd.de
+                href="https://offd.de/offd/moodle/mod/page/view.php?id=315" target="_blank">hier</a> nachmelden.<br/>
         </p>
         <ul class="nav nav-pills">
-            {% for year in object_list.officials_list.years %}
+            {% for year in object_list.years %}
             <li class="nav-item">
-                <a class="nav-link {% if object_list.year == year %}active{% endif %}"
-                   href="/officials/team/{{team_id}}/list/{{year}}">{{ year }}</a>
+                <a class="nav-link {% if year == object_list.season %}active{% endif %}"
+                   href="/officials/team/{{object_list.team_id}}/list/{{year}}">{{ year }}</a>
             </li>
             {% endfor %}
         </ul>
 
 
         <h3>
-            {{ object_list.officials_list.list|length }} - Offizielle
+            {{ object_list.officials_list|length }} - Offizielle
         </h3>
         <table class="table table-hover">
             <thead>
@@ -36,32 +34,74 @@
                 <th scope="col">#</th>
                 <th scope="col">Nachname</th>
                 <th scope="col">Vorname</th>
-                <th scope="col">Lizenzstufe</th>
-                <th scope="col">#Spiele</th>
-                <th scope="col">#R</th>
-                <th scope="col">#DJ</th>
-                <th scope="col">#FJ</th>
-                <th scope="col">#SJ</th>
+                <th scope="col">
+                    <div data-bs-title="Lizenzstufe in der ausgewählten Saison" data-bs-toggle="tooltip">Lizenzstufe
+                    </div>
+                </th>
+                <th scope="col">
+                    <div data-bs-title="Summe aller Spiele (DFFL Spiele / Spiele außerhalb der DFFL)"
+                         data-bs-toggle="tooltip">#Spiele
+                    </div>
+                </th>
+                <th scope="col">
+                    <div data-bs-title="Summe aller Spiele als Referee (DFFL Spiele / Spiele außerhalb der DFFL)"
+                         data-bs-toggle="tooltip">#Referee
+                    </div>
+                </th>
+                <th scope="col">
+                    <div data-bs-title="Summe aller Spiele als Down Judge (DFFL Spiele / Spiele außerhalb der DFFL)"
+                         data-bs-toggle="tooltip">#Down Judge
+                    </div>
+                </th>
+                <th scope="col">
+                    <div data-bs-title="Summe aller Spiele als Field Judge (DFFL Spiele / Spiele außerhalb der DFFL)"
+                         data-bs-toggle="tooltip">#Field Judge
+                    </div>
+                </th>
+                <th scope="col">
+                    <div data-bs-title="Summe aller Spiele als Side Judge (DFFL Spiele / Spiele außerhalb der DFFL)"
+                         data-bs-toggle="tooltip">#Side Judge
+                    </div>
+                </th>
             </tr>
             </thead>
             <tbody>
-            {% for official in object_list.officials_list.list %}
+            {% for official in object_list.officials_list %}
             <tr>
                 <th scope="row"><a
-                        href="{% url 'view-officials-profile-gamelist' license_id=official.id season=object_list.year %}">{{official.id}}</a>
+                        href="{% url 'view-officials-profile-gamelist' license_id=official.id season=object_list.season %}">{{official.id}}</a>
                 </th>
                 <td>{{official.last_name}}</td>
                 <td>{{official.first_name}}</td>
                 <td>{{official.license}}</td>
-                <td>{{official.overall_ext|add:official.overall}} ({{official.overall}})</td>
-                <td>{{official.referee_ext|add:official.referee}} ({{official.referee}})</td>
-                <td>{{official.down_judge_ext|add:official.down_judge}} ({{official.down_judge}})</td>
-                <td>{{official.field_judge_ext|add:official.field_judge}} ({{official.field_judge}})</td>
-                <td>{{official.side_judge_ext|add:official.side_judge}} ({{official.side_judge}})</td>
+                <td><span data-bs-title="Summe aller Spiele" data-bs-toggle="tooltip">{{official.position_count.sum.overall|floatformat}}</span>
+                    (<span data-bs-title="Summe aller DFFL Spiele" data-bs-toggle="tooltip">{{official.position_count.scorecard.overall}}</span>
+                    / <span data-bs-title="Summe aller externen Spiele" data-bs-toggle="tooltip">{{official.position_count.external.overall|floatformat}})</span>
+                </td>
+                <td><span data-bs-title="Summe aller Spiele als Referee" data-bs-toggle="tooltip">{{official.position_count.sum.referee|floatformat}}</span>
+                    <span data-bs-title="DFFL Spiele als Referee" data-bs-toggle="tooltip">({{official.position_count.scorecard.referee}}</span>
+                    / <span data-bs-title="Externe Spiele als Referee" data-bs-toggle="tooltip">{{official.position_count.external.referee|floatformat}})</span>
+                </td>
+                <td><span data-bs-title="Summe aller Spiele als Down Judge" data-bs-toggle="tooltip">{{official.position_count.sum.down_judge|floatformat}}</span>
+                    <span data-bs-title="DFFL Spiele als Down Judge" data-bs-toggle="tooltip">({{official.position_count.scorecard.down_judge}}</span>
+                    / <span data-bs-title="Externe Spiele als Down Judge" data-bs-toggle="tooltip">{{official.position_count.external.down_judge|floatformat}})</span>
+                </td>
+                <td><span data-bs-title="Summe aller Spiele als Field Judge" data-bs-toggle="tooltip">{{official.position_count.sum.field_judge|floatformat}}</span>
+                    <span data-bs-title="DFFL Spiele als Field Judge" data-bs-toggle="tooltip">({{official.position_count.scorecard.field_judge}}</span>
+                    / <span data-bs-title="Externe Spiele als Field Judge" data-bs-toggle="tooltip">{{official.position_count.external.field_judge|floatformat}})</span>
+                </td>
+                <td><span data-bs-title="Summe aller Spiele als Side Judge" data-bs-toggle="tooltip">{{official.position_count.sum.side_judge|floatformat}}</span>
+                    <span data-bs-title="DFFL Spiele als Side Judge" data-bs-toggle="tooltip">({{official.position_count.scorecard.side_judge}}</span>
+                    / <span data-bs-title="Externe Spiele als Side Judge" data-bs-toggle="tooltip">{{official.position_count.external.side_judge|floatformat}})</span>
+                </td>
             </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
 </article>
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
 {% endblock content %}
