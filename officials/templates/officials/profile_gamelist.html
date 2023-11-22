@@ -1,0 +1,143 @@
+{% extends "officials/profile_license.html" %}
+{% block license_status %}
+{% if year != season %}
+<div class="row bg-danger text-white mb-2">
+    <div class="text-center">Status Lizenzverlängerung unklar, da Season ({{ season }}) nicht mit aktuellem Jahr
+        ({{ year }}) übereinstimmt.
+    </div>
+</div>
+{% else %}
+{% if needed_games_for_license < 1 %}
+<div class="row bg-success text-white mb-2">
+    <div class="text-center">Lizenzverlängerung kann erfolgen</div>
+</div>
+{% else %}
+<div class="row bg-warning text-white mb-2">
+    <div class="text-center">Noch {{ needed_games_for_license }} Spiele für Lizenzverlängerung benötigt</div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock license_status %}
+{% block profile_gamecount %}
+<div class="row mt-2">
+    DFFL Spiele: {{ official_info.dffl_games.number_games }}
+</div>
+<div class="row">
+    Spiele außerhalb der DFFL: {{ official_info.external_games.number_games|floatformat }}
+</div>
+{% endblock profile_gamecount %}
+{% block gamelist %}
+{% if gameday_is_running %}
+<p>
+    Aktuell läuft ein Spieltag, deswegen können die Daten aus Gründen der Performance nicht dargestellt werden.
+    Bitte probiere es an einem anderen Tag.
+</p>
+{% else %}
+<br/>
+<h2>{{ season }} DFFL Spiele (und Ligen mit Scorecard)</h2>
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Datum</th>
+        <th scope="col">Spieltag</th>
+        <th scope="col">Position</th>
+        <th scope="col">Spiel</th>
+        <th scope="col">Platzierung</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if official_info.dffl_games.number_games == 0 %}
+    <tr>
+        <td colspan="6">Keine Einträge vorhanden.</td>
+    </tr>
+    {% endif %}
+    {% for official in official_info.dffl_games.all_games %}
+    <tr>
+        <th scope="row">{{official.game_official_id}}</th>
+        <td>{{official.date}}</td>
+        <td>{{official.gameday}}</td>
+        <td>{{official.position}}</td>
+        <td>{{official.vs}} (#{{official.gameinfo_id}})</td>
+        <td>{{official.standing}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<h2>{{ season }} Spiele außerhalb der DFFL</h2>
+<p>
+    Hier werden alle Spiele aufgelistet, die ohne Verwendung der Scorecard gepfiffen wurden.
+</p>
+<p>
+    Eine Beschreibung der Spalten findest du, wenn du mit der Maus über den Spaltennamen fährst.<br/>
+    Ab wann ein Spiel als Lizenzspiel zählt, wird <a href="https://offd.de/offd/moodle/mod/page/view.php?id=315"
+                                                     target="_blank">hier</a> beschrieben.
+</p>
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th scope="col">Datum</th>
+        <th scope="col"><span data-bs-title="#Spiele gibt an, wie viele Spiele gepfiffen wurden."
+                              data-bs-toggle="tooltip">#Spiele</span><br/><span
+                data-bs-title="#Lizenzspiele ist die Anzahl der Spiele, die für die
+    Lizenzverlängerung gewertet werden" data-bs-toggle="tooltip">(#Lizenzspiele)</span></th>
+        <th scope="col">
+            <div data-bs-title="Dauer einer Halbzeit" data-bs-toggle="tooltip">Halbzeitdauer</div>
+        </th>
+        <th scope="col">
+            <div data-bs-title="Wurde mit Clock Control gespielt?" data-bs-toggle="tooltip">Clock Control</div>
+        </th>
+        <th scope="col">Position</th>
+        <th scope="col">
+            <div data-bs-title="Unter welchem Verband lief das Spiel?" data-bs-toggle="tooltip">Verband</div>
+        </th>
+        <th scope="col">
+            <div data-bs-title="Ist es ein internationales Spiel?" data-bs-toggle="tooltip">International</div>
+        </th>
+        <th scope="col">
+            <div data-bs-title="Wann wurde der Eintrag gemeldet?" data-bs-toggle="tooltip">Meldedatum</div>
+        </th>
+        <th scope="col">
+            <div data-bs-title="Durch wen wurde der Eintrag gemeldet?" data-bs-toggle="tooltip">Meldename</div>
+        </th>
+        <th scope="col">Kommentar</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if official_info.external_games.number_games == 0 %}
+    <tr>
+        <td colspan="10">Keine Einträge vorhanden.</td>
+    </tr>
+    {% endif %}
+    {% for entry in official_info.external_games.all_games %}
+    <tr>
+        <td>{{entry.date}}</td>
+        <td>{{entry.number_games}} ({{ entry.calculated_number_games|floatformat }})</td>
+        <td>{{entry.halftime_duration}}</td>
+        <td>{{entry.has_clockcontrol|yesno:'Ja,Nein'}}</td>
+        <td>{{entry.position}}</td>
+        <td>{{entry.association}}</td>
+        <td>{{entry.is_international|yesno:"Ja,Nein"}}</td>
+        <td>{{entry.notification_date}}</td>
+        <td>{{entry.reporter_name}}</td>
+        <td>{{entry.comment}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<h2>Anmerkungen</h2>
+<p>
+    Sollten Spiele fehlen, kannst du <a href="{% url 'view-officials-game-officials-appearance' %}">hier</a>
+    überprüfen, ob dein Einsatz in der DFFL gezählt wurde.
+</p>
+<p>
+    Bei fehlenden Einsätzen, unabhänig ob DFFL, außerhalb der Liga oder Flag & Fun Turnieren, kannst du diese <a
+        href="https://forms.gle/F9dSrMoodipfbys79" target="_blank">hier</a> nachmelden.<br/>
+    Bei Fragen wende dich bitte an Chris: c.kaempfe@afvd.de
+</p>
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
+{% endif %}
+{% endblock gamelist %}

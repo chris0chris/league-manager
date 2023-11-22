@@ -3,9 +3,24 @@ import datetime
 from django.test import TestCase
 
 from gamedays.models import GameOfficial
-from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer
+from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer, \
+    Obfuscator, OfficialGameCountSerializer
 from officials.models import Official
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
+
+
+class TestObfuscator:
+    def test_obfuscator_obfuscate(self):
+        assert Obfuscator.obfuscate('Some', 'Name') == 'S****N****'
+
+    def test_obfuscator_only_one_argument(self):
+        assert Obfuscator.obfuscate('Some') == 'S****'
+
+    def test_obfuscator_works_with_empty_values(self):
+        assert Obfuscator.obfuscate(None) == ''
+        assert Obfuscator.obfuscate('') == ''
+        assert Obfuscator.obfuscate(None, '') == ''
+        assert Obfuscator.obfuscate(None, '', 'Nmae') == 'N****'
 
 
 class TestGameOfficialAllInfoSerializer(TestCase):
@@ -13,7 +28,7 @@ class TestGameOfficialAllInfoSerializer(TestCase):
         DbSetupOfficials().create_officials_full_setup()
         all_game_officials = GameOfficial.objects.all()
         serializer = GameOfficialAllInfoSerializer(all_game_officials, many=True)
-        assert serializer.data[0].get('name') == 'F***** F*****'
+        assert serializer.data[0].get('name') == 'F****F****'
 
     def test_names_are_clear_for_staff(self):
         DbSetupOfficials().create_officials_full_setup()
@@ -24,18 +39,22 @@ class TestGameOfficialAllInfoSerializer(TestCase):
     def test_names_are_clear_for_same_team_name(self):
         DbSetupOfficials().create_officials_full_setup()
         all_game_officials = GameOfficial.objects.all()
-        serializer = GameOfficialAllInfoSerializer(instance=all_game_officials, display_names_for_team='officials',
-                                                   many=True)
+        serializer = GameOfficialAllInfoSerializer(
+            instance=all_game_officials,
+            display_names_for_team='officials',
+            is_staff=True,
+            many=True
+        )
         assert serializer.data[0].get('name') == 'Franzi Fedora'
 
     def test_game_official_is_serialized(self):
         DbSetupOfficials().create_officials_full_setup()
         first_entry = GameOfficial.objects.first()
-        first_entry.name = None
+        first_entry.name = ''
         first_entry.save()
         all_game_officials = GameOfficial.objects.all()
         serializer = GameOfficialAllInfoSerializer(instance=all_game_officials, many=True)
-        assert serializer.data[0].get('name') == 'F***** F*****'
+        assert serializer.data[0].get('name') == 'F****F****'
 
 
 class TestOfficialSerializer(TestCase):
@@ -46,10 +65,10 @@ class TestOfficialSerializer(TestCase):
         assert OfficialSerializer(instance=official).data == {
             'association': 'ABBR',
             'email': '',
-            'first_name': 'Franzi',
+            'first_name': 'F****',
             'id': official.pk,
             'is_valid': True,
-            'last_name': 'Fedora',
+            'last_name': 'F****',
             'license': 'F1',
             'name': 'F****F****',
             'team': official.team.description,
@@ -60,7 +79,7 @@ class TestOfficialSerializer(TestCase):
         DbSetupOfficials().create_officials_full_setup()
         official = Official.objects.last()
         year = datetime.date.today().year + 1
-        assert OfficialSerializer(instance=official).data == {
+        assert OfficialSerializer(instance=official, is_staff=True).data == {
             'association': 'Kein Verband hinterlegt',
             'email': '',
             'first_name': 'Julia',
@@ -68,7 +87,53 @@ class TestOfficialSerializer(TestCase):
             'is_valid': True,
             'last_name': 'Jegura',
             'license': 'F2',
-            'name': 'J****J****',
+            'name': 'Julia Jegura',
             'team': official.team.description,
             'valid_until': datetime.date(year, 3, 31)
+        }
+
+
+class TestOfficialGamelistSerializer(TestCase):
+    def test_game_official_is_serialized(self):
+        DbSetupOfficials().create_officials_full_setup()
+        DbSetupOfficials().create_external_officials_entries()
+        official = Official.objects.last()
+        from datetime import datetime
+        season = datetime.today().year
+        serializer = OfficialGamelistSerializer(instance=official, season=season, is_staff=False).data
+        assert serializer['external_games']['number_games'] == 7
+        assert len(serializer['external_games']['all_games']) == 1
+        assert serializer['dffl_games']['number_games'] == 8
+
+
+class TestOfficialGameCountSerializer(TestCase):
+    def test_games_are_count(self):
+        DbSetupOfficials().create_officials_full_setup()
+        DbSetupOfficials().create_external_officials_entries()
+        official = Official.objects.last()
+        from datetime import datetime
+        season = datetime.today().year
+        serializer = OfficialGameCountSerializer(instance=official, season=season, is_staff=False).data
+        assert serializer['position_count'] == {
+            'scorecard': {
+                'referee': 2,
+                'down_judge': 2,
+                'field_judge': 2,
+                'side_judge': 2,
+                'overall': 8,
+            },
+            'external': {
+                'referee': 7.0,
+                'down_judge': 0,
+                'field_judge': 0,
+                'side_judge': 0,
+                'overall': 7.0,
+            },
+            'sum': {
+                'overall': 15.0,
+                'referee': 9.0,
+                'down_judge': 2,
+                'field_judge': 2,
+                'side_judge': 2
+            }
         }

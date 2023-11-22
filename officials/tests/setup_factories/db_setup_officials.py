@@ -37,9 +37,9 @@ class DbSetupOfficials:
         db_setup.create_game_officials(Gameinfo.objects.last(), Official.objects.last())
         db_setup.create_game_officials(Gameinfo.objects.get(pk=first_game.pk + 1), Official.objects.last())
         gameday = db_setup.g62_status_empty()
+        gameday.date = '2020-07-07'
         db_setup.create_game_officials(gameday.gameinfo_set.first(), Official.objects.first())
         db_setup.create_game_officials(gameday.gameinfo_set.last(), Official.objects.last())
-        gameday.date = '2020-07-07'
         gameday.save()
         return team
 
@@ -49,16 +49,25 @@ class DbSetupOfficials:
         last_year = current_year - timedelta(days=3 * 365)
         OfficialExternalGamesFactory(official=Official.objects.first(), number_games=4, date=current_year,
                                      position='Mix', association='association A', is_international=False,
-                                     comment='no comment').save()
+                                     has_clockcontrol=1, halftime_duration=15, notification_date=current_year,
+                                     reporter_name='some reporter name', comment='no comment').save()
         OfficialExternalGamesFactory(official=Official.objects.first(), number_games=6, date=current_year,
                                      position='Mix', association='association A', is_international=False,
+                                     has_clockcontrol=1, halftime_duration=15, notification_date=current_year,
+                                     reporter_name='some reporter name',
                                      comment='no comment').save()
         OfficialExternalGamesFactory(official=Official.objects.first(), number_games=6, date=last_year,
                                      position='Mix', association='association A', is_international=False,
+                                     has_clockcontrol=1, halftime_duration=15, notification_date=current_year,
+                                     reporter_name='some reporter name',
                                      comment='no comment').save()
         OfficialExternalGamesFactory(official=Official.objects.last(), number_games=7, date=current_year,
                                      position='Referee', association='association B', is_international=True,
+                                     has_clockcontrol=1, halftime_duration=15, notification_date=current_year,
+                                     reporter_name='some reporter name',
                                      comment='no comment').save()
         OfficialExternalGamesFactory(official=Official.objects.last(), number_games=5, date=last_year,
                                      position='Referee', association='association B', is_international=True,
+                                     has_clockcontrol=1, halftime_duration=15, notification_date=current_year,
+                                     reporter_name='some reporter name',
                                      comment='no comment').save()

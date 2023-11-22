@@ -154,11 +154,17 @@ class ApiParticipants:
 
 
 class ApiUpdateUser:
-    def __init__(self, user_id, license_number, license_id):
-        self.user_id = user_id
-        self.license_number = license_number
+    def __init__(self, external_id, official_id, license_id):
+        self.user_id = external_id
+        self.license_number = official_id
         from officials.service.moodle.moodle_service import LicenseCalculator
         self.license_name = LicenseCalculator.get_license_name(license_id)
+
+    def __repr__(self):
+        return f'ApiUpdateUser(' \
+               f'external_id={self.user_id},' \
+               f'official_id={self.license_number}, ' \
+               f'license_id={self.license_name})'
 
 
 class MoodleApi:

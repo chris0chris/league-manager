@@ -8,11 +8,11 @@ from rest_framework.reverse import reverse
 
 from gamedays.models import Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from officials.models import Official, OfficialExternalGames
+from officials.models import Official
 from officials.service.moodle.moodle_service import MoodleService
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 from officials.urls import OFFICIALS_LIST_FOR_TEAM, OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE, \
-    OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE, OFFICIALS_LICENSE_CHECK
+    OFFICIALS_LICENSE_CHECK
 
 
 class TestOfficialListView(WebTest):
@@ -21,7 +21,7 @@ class TestOfficialListView(WebTest):
         response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
         assert response.status_code == HTTPStatus.OK
         context_items = response.context['object_list']
-        first_official: dict = context_items.get('officials_list').get('list')[0]
+        first_official: dict = context_items.get('officials_list')[0]
         assert first_official.get('first_name') == 'F****'
         assert first_official.get('last_name') == 'F****'
 
@@ -32,7 +32,7 @@ class TestOfficialListView(WebTest):
         response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
         assert response.status_code == HTTPStatus.OK
         context_items = response.context['object_list']
-        first_official: dict = context_items.get('officials_list').get('list')[1]
+        first_official: dict = context_items.get('officials_list')[1]
         assert first_official.get('first_name') == 'J****'
         assert first_official.get('last_name') == 'J****'
 
@@ -42,7 +42,7 @@ class TestOfficialListView(WebTest):
         response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
         context_items = response.context['object_list']
         all_officials = Official.objects.all()
-        assert len(context_items['officials_list']['list']) == len(all_officials)
+        assert len(context_items['officials_list']) == len(all_officials)
 
 
 class TestAddInternalGameOfficialUpdateView(WebTest):
@@ -97,32 +97,8 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
                response.html.find_all("div", {"class": "alert-success"})[0].text
 
 
-class TestAddExternalGameOfficialUpdateView(WebTest):
-
-    def test_official_id_not_found(self):
-        user = DBSetup().create_new_user('some user', is_staff=True)
-        self.app.set_user(user)
-        response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE))
-        response.form['entries'] = '999, 1, 2022-12-07, Side Judge, AFVBy'
-        response = response.form.submit()
-        self.assertFormError(response, 'form', 'entries', ['official_id nicht gefunden!'])
-
-    def test_game_official_entry_successfull(self):
-        user = DBSetup().create_new_user('some staff user', is_staff=True)
-        self.app.set_user(user)
-        DbSetupOfficials().create_officials_and_team()
-        first_official = Official.objects.first()
-        response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE))
-        response.form['entries'] = f'{first_official.pk}, 3, 2022-12-07, Side Judge, AFVBy\n' \
-                                   f'{first_official.pk}, 1, 2022-12-07, Side Judge, AFVBy'
-        response = response.form.submit()
-        assert '#Spiele 3: Franzi Fedora' in \
-               response.html.find_all("div", {"class": "alert-success"})[0].text
-        assert OfficialExternalGames.objects.all().count() == 2
-
-
 class TestGameCountOfficials(WebTest):
-    @patch.object(MoodleService, 'calculate_user_games_by_course')
+    @patch.object(MoodleService, 'get_all_users_for_course')
     def test_all_entries_will_be_checked(self, moodle_service_mock: MagicMock):
         user = DBSetup().create_new_user('some staff user', is_staff=True)
         self.app.set_user(user)

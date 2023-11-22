@@ -8,12 +8,14 @@
             Bitte probiere es an einem anderen Tag.
         </p>
         {% else %}
+
         <p>
             Personen die ein <b>Fragezeichen</b> (<b>?</b>) hinter dem Namen haben, deren Spiele werden nicht gezählt,
             da für diese kein Eintrag gefunden wurde. Entweder haben diese keine Lizenz oder
             der Name wurde nicht über die Scorecard ausgewählt / gesucht.<br/>
             Bei Fragen bitte an Chris wenden: c.kaempfe@afvd.de
         </p>
+        {% include 'officials/_pagination_game_officials_list.html' %}
         <table class="table table-hover">
             <thead>
             <tr>
@@ -42,6 +44,7 @@
             {% endfor %}
             </tbody>
         </table>
+        {% include 'officials/_pagination_game_officials_list.html' %}
         {% endif %}
     </div>
 </article>

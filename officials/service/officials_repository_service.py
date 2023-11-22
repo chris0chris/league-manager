@@ -5,7 +5,7 @@ from officials.models import Official, OfficialExternalGames, OfficialLicenseHis
 
 
 class OfficialsRepositoryService:
-
+    # noinspection PyMethodMayBeStatic
     def get_officials_game_count_for_license(self, year, external_ids):
         if not external_ids:
             officials = Official.objects.all()
@@ -23,6 +23,11 @@ class OfficialsRepositoryService:
                 external_official_qs,
             ).as_json()]
         return all_officials
+
+    # noinspection PyMethodMayBeStatic
+    def get_all_years_with_team_official_licenses(self, team):
+        return OfficialLicenseHistory.objects.filter(official__team=team).values_list(
+            'created_at__year', flat=True).distinct()
 
 
 class OfficialGameCount:

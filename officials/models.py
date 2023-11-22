@@ -2,7 +2,7 @@ import datetime
 from datetime import date
 
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import QuerySet, ExpressionWrapper, Case, When, F, FloatField, Value, Sum
 
 from gamedays.models import Association, Team
 
@@ -17,7 +17,8 @@ class Official(models.Model):
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.team.description}__{self.last_name}, {self.first_name} - ({self.association.name if not self.association is None else "NONE"})'
+        return (f'{self.team.description}__{self.last_name}, {self.first_name} - ('
+                f'{"NONE" if self.association is None else self.association.name})')
 
 
 class OfficialLicense(models.Model):
@@ -37,6 +38,7 @@ class EmptyLicense:
 class EmptyOfficialLicenseHistory:
     license = EmptyLicense()
 
+    # noinspection PyMethodMayBeStatic
     def valid_until(self):
         return datetime.date(1, 1, 1)
 
@@ -50,6 +52,7 @@ class OfficialLicenseHistory(models.Model):
     objects: QuerySet = models.Manager()
 
     def valid_until(self):
+        # noinspection PyUnresolvedReferences
         return datetime.date(self.created_at.year + 1, 3, 31)
 
     def __str__(self):
@@ -60,12 +63,50 @@ class OfficialExternalGames(models.Model):
     official: Official = models.ForeignKey(Official, on_delete=models.CASCADE)
     number_games = models.PositiveSmallIntegerField()
     date = models.DateField()
+    notification_date = models.DateField()
+    reporter_name = models.CharField(max_length=100, default=None, blank=True)
     position = models.CharField(max_length=100)
     association = models.CharField(max_length=100)
+    halftime_duration = models.PositiveSmallIntegerField()
+    has_clockcontrol = models.BooleanField(default=False)
     is_international = models.BooleanField(default=False)
-    comment = models.CharField(max_length=100, default=None, null=True)
+    comment = models.CharField(max_length=100, default=None, blank=True)
 
     objects: QuerySet = models.Manager()
+
+    @property
+    def calculated_number_games(self):
+        return OfficialExternalGames.objects.filter(pk=self.pk).annotate(
+            adjusted_number_games=ExpressionWrapper(
+                Case(
+                    When(
+                        has_clockcontrol=True,
+                        halftime_duration__gte=15,
+                        then=F('number_games')
+                    ),
+                    When(
+                        has_clockcontrol=True,
+                        halftime_duration__lt=15,
+                        then=F('number_games') * 0.5
+                    ),
+                    When(
+                        has_clockcontrol=False,
+                        halftime_duration__gte=23,
+                        then=F('number_games')
+                    ),
+                    When(
+                        has_clockcontrol=False,
+                        halftime_duration__lt=23,
+                        then=F('number_games') * 0.5
+                    ),
+                    default=Value(0),  # Default case if none of the conditions match
+                    output_field=FloatField()
+                ),
+                output_field=FloatField()
+            )
+        ).aggregate(
+            total_calculated_number_games=Sum('adjusted_number_games')
+        )['total_calculated_number_games']
 
     def __str__(self):
         return f'{self.official.last_name}__{self.date}: {self.number_games}'
