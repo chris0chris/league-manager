@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from gamedays.models import GameOfficial
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer, \
-    Obfuscator
+    Obfuscator, OfficialGameCountSerializer
 from officials.models import Official
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 
@@ -65,10 +65,10 @@ class TestOfficialSerializer(TestCase):
         assert OfficialSerializer(instance=official).data == {
             'association': 'ABBR',
             'email': '',
-            'first_name': 'Franzi',
+            'first_name': 'F****',
             'id': official.pk,
             'is_valid': True,
-            'last_name': 'Fedora',
+            'last_name': 'F****',
             'license': 'F1',
             'name': 'F****F****',
             'team': official.team.description,
@@ -79,7 +79,7 @@ class TestOfficialSerializer(TestCase):
         DbSetupOfficials().create_officials_full_setup()
         official = Official.objects.last()
         year = datetime.date.today().year + 1
-        assert OfficialSerializer(instance=official).data == {
+        assert OfficialSerializer(instance=official, is_staff=True).data == {
             'association': 'Kein Verband hinterlegt',
             'email': '',
             'first_name': 'Julia',
@@ -87,7 +87,7 @@ class TestOfficialSerializer(TestCase):
             'is_valid': True,
             'last_name': 'Jegura',
             'license': 'F2',
-            'name': 'J****J****',
+            'name': 'Julia Jegura',
             'team': official.team.description,
             'valid_until': datetime.date(year, 3, 31)
         }
@@ -104,3 +104,36 @@ class TestOfficialGamelistSerializer(TestCase):
         assert serializer['external_games']['number_games'] == 7
         assert len(serializer['external_games']['all_games']) == 1
         assert serializer['dffl_games']['number_games'] == 8
+
+
+class TestOfficialGameCountSerializer(TestCase):
+    def test_games_are_count(self):
+        DbSetupOfficials().create_officials_full_setup()
+        DbSetupOfficials().create_external_officials_entries()
+        official = Official.objects.last()
+        from datetime import datetime
+        season = datetime.today().year
+        serializer = OfficialGameCountSerializer(instance=official, season=season, is_staff=False).data
+        assert serializer['position_count'] == {
+            'scorecard': {
+                'referee': 2,
+                'down_judge': 2,
+                'field_judge': 2,
+                'side_judge': 2,
+                'overall': 8,
+            },
+            'external': {
+                'referee': 7.0,
+                'down_judge': 0,
+                'field_judge': 0,
+                'side_judge': 0,
+                'overall': 7.0,
+            },
+            'sum': {
+                'overall': 15.0,
+                'referee': 9.0,
+                'down_judge': 2,
+                'field_judge': 2,
+                'side_judge': 2
+            }
+        }
