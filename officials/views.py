@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.views import View
@@ -71,10 +72,21 @@ class GameOfficialListView(View):
             game_officials = game_officials_with_no_official.union(game_officials_with_official_link)
         is_staff = request.user.is_staff
         team_name = request.user.username
+
+        paginator = Paginator(game_officials, 100)
+        page = request.GET.get('page')
+        try:
+            game_officials = paginator.page(page)
+        except PageNotAnInteger:
+            game_officials = paginator.page(1)
+        except EmptyPage:
+            game_officials = paginator.page(paginator.num_pages)
         context = {
             'year': year,
             'object_list': GameOfficialAllInfoSerializer(instance=game_officials, display_names_for_team=team_name,
-                                                         is_staff=is_staff, many=True).data}
+                                                         is_staff=is_staff, many=True).data,
+            'page_obj': game_officials,
+        }
         return render(request, self.template_name, context)
 
 

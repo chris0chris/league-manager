@@ -1,0 +1,35 @@
+<nav aria-label="Game official entries">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.number > 6 %}
+        <li class="page-item"><a class="page-link" href="?page=1">Anfang</a></li>
+        {% endif %}
+        {% if page_obj.has_previous %}
+        {% if page_obj.number > 10 %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.number|add:'-10' }}">-10</a></li>
+        {% endif %}
+        <li class="page-item"><a class="page-link"
+                                 href="?page={{ page_obj.previous_page_number }}">Vorherige</a></li>
+        {% endif %}
+
+        {% for i in page_obj.paginator.page_range %}
+        {% if i >= page_obj.number|add:'-5' and i <= page_obj.number|add:'5' %}
+        {% if i == page_obj.number %}
+        <li class="page-item active"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+        {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Nächste</a></li>
+        {% if page_obj.number|add:10 <= page_obj.paginator.num_pages %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.number|add:'10' }}">+10</a></li>
+        {% endif %}
+        {% if page_obj.number|add:5 < page_obj.paginator.num_pages %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+            {{ page_obj.paginator.num_pages }} (Ende)
+        </a></li>
+        {% endif %}
+        {% endif %}
+    </ul>
+</nav>
