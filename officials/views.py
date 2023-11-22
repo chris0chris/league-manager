@@ -24,14 +24,17 @@ class OfficialsTeamListView(View):
         team_id = kwargs.get('pk')
         year = kwargs.get('year', datetime.today().year)
         official_service = OfficialService()
-        need_names_to_be_obfuscated = not self.is_user_allowed_to_see_official_names(team_id)
-        context = {
-            'team_id': team_id,
-            'object_list': official_service.get_officials_for(
-                team_id, year,
-                are_names_obfuscated=need_names_to_be_obfuscated)
-        }
-        return render(request, self.template_name, context)
+        return render(
+            request,
+            self.template_name,
+            context={
+                'object_list': official_service.get_all_officials_with_team_infos(
+                    team_id,
+                    year,
+                    PermissionHelper.has_staff_or_user_permission(request, team_id)
+                )
+            }
+        )
 
     def is_user_allowed_to_see_official_names(self, team_id):
         team: Team = Team.objects.get(pk=team_id)
@@ -89,11 +92,10 @@ class AddInternalGameOfficialUpdateView(LoginRequiredMixin, UserPassesTestMixin,
         data = form.data.copy()
         all_lines = data.get('entries').splitlines()
         try:
-            official_service = OfficialService()
             while all_lines:
                 current_line = all_lines.pop(0)
                 result = [x.strip() for x in current_line.split(',')]
-                created_entries += official_service.create_game_official_entry(result) + '<br>'
+                created_entries += OfficialService.create_game_official_entry(result) + '<br>'
         except (TypeError, ValueError) as error:
             error_message = error.args[0]
             all_lines = [current_line] + all_lines
@@ -185,7 +187,7 @@ class OfficialProfileGamelistView(View):
         official_info = OfficialGamelistSerializer(
             instance=official,
             season=season,
-            is_staff=PermissionHelper.has_staff_or_user_permission(request, official.team)).data
+            is_staff=PermissionHelper.has_staff_or_user_permission(request, official.team.pk)).data
         return render(
             request,
             self.template_name,

@@ -44,6 +44,8 @@ class OfficialSerializer(ModelSerializer):
     team = CharField(source='team.description')
     association = SerializerMethodField()
     name = SerializerMethodField()
+    last_name = SerializerMethodField()
+    first_name = SerializerMethodField()
     is_valid = SerializerMethodField('check_license_validation')
     valid_until = SerializerMethodField()
     license = SerializerMethodField()
@@ -59,6 +61,17 @@ class OfficialSerializer(ModelSerializer):
         self.is_staff = is_staff
         if fetch_email:
             self.moodle_service = MoodleService()
+
+    def get_last_name(self, obj: Official):
+        return self._obfuscate_text_if_needed(obj.last_name)
+
+    def get_first_name(self, obj: Official):
+        return self._obfuscate_text_if_needed(obj.first_name)
+
+    def _obfuscate_text_if_needed(self, text: str) -> str:
+        if self.is_staff:
+            return text
+        return Obfuscator.obfuscate(text)
 
     def get_license(self, obj):
         license_history = self._get_license_history(obj)
@@ -98,6 +111,58 @@ class OfficialSerializer(ModelSerializer):
         if newest_license is None:
             return EmptyOfficialLicenseHistory()
         return newest_license
+
+
+class OfficialGameCountSerializer(OfficialSerializer):
+    position_count = SerializerMethodField()
+
+    def __init__(self, season, is_staff=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.is_staff = is_staff
+        self.season = season
+
+    def get_position_count(self, obj: Official):
+        external_games_by_official: QuerySet[OfficialExternalGames] = obj.officialexternalgames_set.filter(
+            date__year=self.season)
+        referee_ext = sum(
+            entry.calculated_number_games for entry in external_games_by_official.filter(position='Referee'))
+        down_judge_ext = sum(
+            entry.calculated_number_games for entry in external_games_by_official.filter(position='Down Judge'))
+        field_judge_ext = sum(
+            entry.calculated_number_games for entry in external_games_by_official.filter(position='Field Judge'))
+        side_judge_ext = sum(
+            entry.calculated_number_games for entry in external_games_by_official.filter(position='Side Judge'))
+        mix = sum(entry.calculated_number_games for entry in external_games_by_official.filter(position='Mix'))
+        game_officials: QuerySet = obj.gameofficial_set.filter(gameinfo__gameday__date__year=self.season)
+        overall_ext = referee_ext + down_judge_ext + field_judge_ext + side_judge_ext + mix
+        overall = game_officials.exclude(position='Scorecard Judge').count()
+        referee = game_officials.filter(position='Referee').count()
+        down_judge = game_officials.filter(position='Down Judge').count()
+        field_judge = game_officials.filter(position='Field Judge').count()
+        side_judge = game_officials.filter(position='Side Judge').count()
+        return {
+            'scorecard': {
+                'referee': referee,
+                'down_judge': down_judge,
+                'field_judge': field_judge,
+                'side_judge': side_judge,
+                'overall': overall,
+            },
+            'external': {
+                'referee': 0 if referee_ext is None else referee_ext,
+                'down_judge': 0 if down_judge_ext is None else down_judge_ext,
+                'field_judge': 0 if field_judge_ext is None else field_judge_ext,
+                'side_judge': 0 if side_judge_ext is None else side_judge_ext,
+                'overall': overall_ext,
+            },
+            'sum': {
+                'overall': overall_ext + overall,
+                'referee': referee + referee_ext,
+                'down_judge': down_judge + down_judge_ext,
+                'field_judge': field_judge + field_judge_ext,
+                'side_judge': side_judge + side_judge_ext
+            }
+        }
 
 
 class OfficialGamelistSerializer(OfficialSerializer):
