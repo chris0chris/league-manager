@@ -37,7 +37,7 @@ class OfficialExternalGamesSerializer(ModelSerializer):
     def get_reporter_name(self, obj: OfficialExternalGames):
         if self.is_staff:
             return obj.reporter_name
-        return Obfuscator.obfuscate(obj.reporter_name.split(' ')[:2])
+        return Obfuscator.obfuscate(*obj.reporter_name.split(' ')[:2])
 
 
 class OfficialSerializer(ModelSerializer):
