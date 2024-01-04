@@ -1,5 +1,5 @@
 //import { useState } from "react";
-import { jsonTypePlayer } from "../constants/types";
+import { jsonTypePlayer } from "../common/types";
 
 interface Props {
   playersData: jsonTypePlayer;

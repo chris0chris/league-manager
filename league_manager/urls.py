@@ -27,6 +27,7 @@ ADMIN_ALL_URLS = 'admin-all-urls'
 urlpatterns = [
                   path('urls', AllUrlsView.as_view(), name=ADMIN_ALL_URLS),
                   path('admin/', admin.site.urls),
+                    # ToDo: fix gameday urls
                   path('api/', include('gamedays.api.urls')),
                   path('api/officials/', include('officials.api.urls')),
                   path('api/passcheck/', include('passcheck.api.urls')),

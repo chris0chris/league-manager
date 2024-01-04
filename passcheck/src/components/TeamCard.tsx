@@ -2,7 +2,10 @@ import { useState } from "react";
 import { Button } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import ListGroup from "react-bootstrap/ListGroup";
-import { jsonTypeTeam } from "../constants/types";
+import { jsonTypeTeam } from "../common/types";
+import {PLAYERS_URL} from "../common/urls";
+
+import {useNavigate} from 'react-router-dom';
 
 interface Props {
   index: number;
@@ -11,12 +14,14 @@ interface Props {
 
 function TeamCard({ index, teams }: Props) {
   const [checkedTeam, setChecked] = useState<boolean>(teams[index].checked);
+  const navigate = useNavigate();
 
   const clickHandler = () => {
     console.log("Pythonfunktion ausführen mit " + teams[index].name);
-    setChecked(!checkedTeam);
+    /* setChecked(!checkedTeam);
     teams[index].checked = checkedTeam;
-    console.log(teams[index].checked);
+    console.log(teams[index].checked); */
+    navigate('/players');
   };
 
   return (
