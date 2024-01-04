@@ -29,10 +29,11 @@ urlpatterns = [
                   path('urls', AllUrlsView.as_view(), name=ADMIN_ALL_URLS),
                   path('clear-cache', ClearCacheView.as_view(), name=CLEAR_CACHE),
                   path('admin/', admin.site.urls),
+                  # ToDo: fix gameday urls
+                  path('api/', include('gamedays.api.urls')),
                   path('api/liveticker/', include('liveticker.api.urls')),
                   path('api/officials/', include('officials.api.urls')),
                   path('api/passcheck/', include('passcheck.api.urls')),
-                  path('api/', include('gamedays.api.urls')),
                   path('officials/', include('officials.urls')),
                   path('teammanager/', include('teammanager.urls')),
                   path('scorecard/', include('scorecard.urls')),

@@ -24,6 +24,7 @@
       Only files inside the `public` folder can be referenced from the HTML.
     -->
 
+
     {% load static %}
     <link href='{% static "passcheck/css/passcheck.css" %}' rel="stylesheet"/>
     <title>5er DFFL - Passcheck</title>
@@ -41,9 +42,8 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-
-    <script src='{% static "passcheck/js/787.b55a9b03.chunk.js" %}'></script>
-    <script src='{% static "passcheck/js/main.19fa58ff.js" %}'></script>
+    <script src='{% static "passcheck/js/passcheck.chunk.js" %}'></script>
+    <script src='{% static "passcheck/js/passcheck.js" %}'></script>
     <!-- <script>
       const DEBUG = false;
       if (!DEBUG) {
