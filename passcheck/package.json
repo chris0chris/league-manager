@@ -13,6 +13,7 @@
     "axios": "^1.6.3",
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.1",
+    "knox": "^0.9.2",
     "react": "^18.2.0",
     "react-bootstrap": "^2.8.0",
     "react-dom": "^18.2.0",
@@ -80,5 +81,6 @@
     "style-loader": "^3.3.3",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
-  }
+  },
+  "proxy": "http://127.0.0.1:8000"
 }

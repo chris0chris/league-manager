@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import ListGroup from "react-bootstrap/ListGroup";
-import { jsonTypeTeam } from "../common/types";
+import { jsonTypeTeam, apiGames } from "../common/types";
 import {PLAYERS_URL} from "../common/urls";
 
 import {useNavigate} from 'react-router-dom';
@@ -10,9 +10,10 @@ import {useNavigate} from 'react-router-dom';
 interface Props {
   index: number;
   teams: jsonTypeTeam;
+  games: apiGames;
 }
 
-function TeamCard({ index, teams }: Props) {
+function TeamCard({ index, teams, games }: Props) {
   const [checkedTeam, setChecked] = useState<boolean>(teams[index].checked);
   const navigate = useNavigate();
 
@@ -23,6 +24,8 @@ function TeamCard({ index, teams }: Props) {
     console.log(teams[index].checked); */
     navigate('/players');
   };
+
+  console.log('gamesTC:', games);
 
   return (
     <div className="card-div">
