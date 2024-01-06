@@ -27,23 +27,15 @@ function TeamOverview(this: any) {
   const [tokenKey, setTokenKey] = useState<string>("");
 
   useEffect(() => {
-    const fetchData = async () => {
-        const gamesFetched = await getGames(tokenKey);
-        setGames(gamesFetched);
-//         const officials = await getOfficials();
-//         setOfficials(officials);
-//         const teams = await getTeams();
-//         setTeams(teams);
-//         const gamedays = await getGamedays();
-//         setGamedays(gamedays);
-
-
-    };
-
     const token = localStorage.getItem('token');
     if(token !== null){
         setTokenKey(token.slice(0,8));
-        fetchData();
+        if(tokenKey !== ""){
+            getGames(tokenKey).then((result) => {
+                setGames(result);
+                console.log('getGamesResult', result);
+            });
+        }
     }else{
         //window.location.href = "/scorecard/";
     };

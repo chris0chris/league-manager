@@ -1,7 +1,10 @@
 # importing framework views
+from http import HTTPStatus
+
 from rest_framework.generics import ListAPIView
 from django.contrib.auth.models import User
-
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 # importing serializers
 from passcheck.api.serializers import (PasscheckSerializer,
@@ -9,11 +12,15 @@ PasscheckGamesListSerializer,
 PasscheckOfficialsAuthSerializer,
 PasscheckGamedayTeamsSerializer,
 PasscheckGamedaysListSerializer,
-PasscheckUsernamesSerializer)
+PasscheckUsernamesSerializer,
+PasscheckServiceSerializer)
 
 # importing models
 from passcheck.models import Playerlist
 from gamedays.models import Gameinfo, Team, Gameday
+
+# importing services
+from passcheck.service.passcheck_service import PasscheckService
 
 # importing knox for authentication
 from knox.models import AuthToken
@@ -50,6 +57,16 @@ class PasscheckGamedayTeamsAPIView(ListAPIView):
 
     def get_queryset(self, *args, **kwargs):
         return Team.objects.all()
+
+
+class PasscheckServiceAPIView(APIView):
+    # serializer_class = PasscheckServiceSerializer
+
+    def get(self, *args, **kwargs):
+        token = kwargs.get('token')
+        if token:
+            passcheck = PasscheckService()
+            return Response(passcheck.get_passcheck_data(token=token), status=HTTPStatus.OK)
 
 
 class PasscheckGamedaysListAPIView(ListAPIView):
