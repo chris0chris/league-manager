@@ -1,11 +1,11 @@
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { jsonTypePlayer } from "../common/types";
+import { jsonTypePlayerlist } from "../common/types";
 
 interface Props {
   modalVisible: boolean;
   handleClose(): any;
-  playersData: jsonTypePlayer;
+  playersData: jsonTypePlayerlist;
   index: number;
   increaseIndex(): void;
   decreaseIndex(): void;

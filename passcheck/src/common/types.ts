@@ -1,4 +1,4 @@
-export type jsonTypePlayer = {
+export type jsonTypePlayerlist = {
     key: number;
     playerid: string;
     name: string;
@@ -19,6 +19,16 @@ export type jsonTypePlayer = {
     checked: boolean;
   }[];
 
+  export type jsonTypeGames = {
+    id: number;
+    field: number;
+    scheduled: string;
+    officials: number;
+    gameday: number;
+    away: string;
+    home: string;
+  }[];
+
   export type apiTeam = {
     id: number;
     name: string;
@@ -30,12 +40,16 @@ export type jsonTypePlayer = {
   }
 
   export type apiGames = {
-    teamName: string;
-    games: [{id: number;
-    field: number;
-    scheduled: string;
-    officials: number;}]
-
+    officialsTeamName: string;
+    games: [{
+        id: number;
+        field: number;
+        scheduled: string;
+        officials: number;
+        gameday: number;
+        away: string;
+        home: string;
+    }]
   }
 
   export type apiGamedays = {

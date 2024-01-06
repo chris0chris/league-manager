@@ -1,53 +1,29 @@
 import { Button } from "react-bootstrap";
 import TeamCard from "./TeamCard";
+import Headerdata from "./Headerdata"
 import { useState, useEffect } from "react";
+import { jsonTypeGames } from "../common/types"
 //import { getGames, getOfficials, getTeams, getGamedays } from "../common/games";
-import {getGames} from "../common/games";
-let teamDataJSON = require("../data/teams.json"); //let api handle
-const teamsWithKeys = teamDataJSON.teamlist.map((obj: any, index: any) => ({
-  ...obj,
-  key: index,
-}));
+import {getPasscheckData} from "../common/games";
 
-
-
-const clickHandler = () =>
-{
-    return;
+interface Props {
+    index: number;
+    games: jsonTypeGames;
+    officials: string;
+    loadTeam: (team: string) => void;
 }
 
-function TeamOverview(this: any) {
-
-  //window.location.href = "/scorecard/";
-
-  const [games, setGames] = useState<any>([]);
-  const [officials, setOfficials] = useState<string>("");
-  const [teams, setTeams] = useState<any>([]);
-  const [gamedays, setGamedays] = useState<any>([]);
-  const [tokenKey, setTokenKey] = useState<string>("");
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if(token !== null){
-        setTokenKey(token.slice(0,8));
-        if(tokenKey !== ""){
-            getGames(tokenKey).then((result) => {
-                setGames(result);
-                console.log('getGamesResult', result);
-            });
-        }
-    }else{
-        //window.location.href = "/scorecard/";
-    };
-  },[tokenKey]);
+function TeamOverview({ index, games, officials, loadTeam }: Props) {
 
   return (
     <>
-      {teamsWithKeys.map((team: any) => (
-        <div>
-          <TeamCard index={team.key} teams={teamsWithKeys} games={games}/>
-        </div>
-      ))}
+        <h1>{games[index].home} - {games[index].away}</h1>
+            <div>
+              <TeamCard team={games[index].home} index={index} games={games} loadTeam={loadTeam} />
+            </div>
+            <div>
+              <TeamCard team={games[index].away} index={index} games={games} loadTeam={loadTeam} />
+            </div>
     </>
   );
 }

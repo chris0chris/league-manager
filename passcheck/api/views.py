@@ -12,15 +12,14 @@ PasscheckGamesListSerializer,
 PasscheckOfficialsAuthSerializer,
 PasscheckGamedayTeamsSerializer,
 PasscheckGamedaysListSerializer,
-PasscheckUsernamesSerializer,
-PasscheckServiceSerializer)
+PasscheckUsernamesSerializer)
 
 # importing models
 from passcheck.models import Playerlist
 from gamedays.models import Gameinfo, Team, Gameday
 
 # importing services
-from passcheck.service.passcheck_service import PasscheckService
+from passcheck.service.passcheck_service import PasscheckService, PasscheckServicePlayers
 
 # importing knox for authentication
 from knox.models import AuthToken
@@ -60,13 +59,20 @@ class PasscheckGamedayTeamsAPIView(ListAPIView):
 
 
 class PasscheckServiceAPIView(APIView):
-    # serializer_class = PasscheckServiceSerializer
 
     def get(self, *args, **kwargs):
         token = kwargs.get('token')
         if token:
             passcheck = PasscheckService()
             return Response(passcheck.get_passcheck_data(token=token), status=HTTPStatus.OK)
+
+
+class PasscheckServicePlayersAPIView(APIView):
+    def get(self, *args, **kwargs):
+        team = kwargs.get('team')
+        if team:
+            playerlist = PasscheckServicePlayers()
+            return Response(playerlist.get_playerlist_data(team=team), status=HTTPStatus.OK)
 
 
 class PasscheckGamedaysListAPIView(ListAPIView):
