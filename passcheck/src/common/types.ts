@@ -30,10 +30,12 @@ export type jsonTypePlayer = {
   }
 
   export type apiGames = {
-    id: number;
+    teamName: string;
+    games: [{id: number;
     field: number;
     scheduled: string;
-    officials: number;
+    officials: number;}]
+
   }
 
   export type apiGamedays = {

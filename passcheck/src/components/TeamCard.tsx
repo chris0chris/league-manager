@@ -25,13 +25,13 @@ function TeamCard({ index, teams, games }: Props) {
     navigate('/players');
   };
 
-  console.log('gamesTC:', games);
+  //console.log('gamesTC:', games);
 
   return (
     <div className="card-div">
       <Card style={{ width: "20rem" }}>
         <Card.Img variant="top"></Card.Img>
-        <Card.Header>{teams[index].name}</Card.Header>
+        <Card.Header>{games.teamName}</Card.Header>
         <Card.Body>
           <ListGroup variant="flush">
             <ListGroup.Item>Kickoff: {teams[index].kickoff}</ListGroup.Item>

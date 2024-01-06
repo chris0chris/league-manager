@@ -21,7 +21,8 @@ class PasscheckGamesListSerializer(ModelSerializer):
         fields = ('id',
                   'field',
                   'scheduled',
-                  'officials')
+                  'officials',
+                  'gameday_id')
 
 
 class PasscheckOfficialsAuthSerializer(ModelSerializer):
@@ -46,3 +47,8 @@ class PasscheckUsernamesSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username')
+
+
+class PasscheckServiceSerializer:
+    class Meta:
+        fields = '__all__'

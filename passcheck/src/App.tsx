@@ -8,7 +8,7 @@ import {
   Routes,
 } from 'react-router-dom';
 
-import {TEAMS_URL, PLAYERS_URL} from "./common/urls";
+//import {TEAMS_URL, PLAYERS_URL} from "./common/urls";
 
 function App() {
   return (
