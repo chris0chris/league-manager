@@ -8,22 +8,22 @@ import {PLAYERS_URL} from "../common/urls";
 import {useNavigate} from 'react-router-dom';
 
 interface Props {
-  team: string;
   index: number;
+  loadIndex: (index: number) =>  void;
+  officialsTeam: string;
   games: jsonTypeGames;
-  loadTeam: (team: string) => void;
 }
 
-function TeamCard({ team, games, index, loadTeam }: Props) {
+function GameCard({ index, officialsTeam, games, loadIndex }: Props) {
   const [checkedTeam, setChecked] = useState<boolean>(false);
   const navigate = useNavigate();
   const clickHandler = () => {
-    //console.log("Pythonfunktion ausführen mit " + teams[index].name);
+    console.log("index:", index);
     /* setChecked(!checkedTeam);
     teams[index].checked = checkedTeam;
     console.log(teams[index].checked); */
-    loadTeam(team);
-    navigate('/players');
+    loadIndex(index);
+    navigate('/teams');
   };
 
   //console.log('gamesTC:', games);
@@ -32,7 +32,7 @@ function TeamCard({ team, games, index, loadTeam }: Props) {
     <div className="card-div">
       <Card style={{ width: "20rem" }}>
         <Card.Img variant="top"></Card.Img>
-        <Card.Header>{team}</Card.Header>
+        <Card.Header>{games[index].home} - {games[index].away}</Card.Header>
         <Card.Body>
           <ListGroup variant="flush">
             <ListGroup.Item>Kickoff: {games[index].scheduled.slice(0,5)} Uhr</ListGroup.Item>
@@ -53,7 +53,7 @@ function TeamCard({ team, games, index, loadTeam }: Props) {
             onClick={clickHandler}
           >
             {!checkedTeam ? (
-              <span>Passcheck durchführen</span>
+              <span>Zum Passcheck</span>
             ) : (
               <span>Passcheck aktualisieren</span>
             )}
@@ -64,4 +64,4 @@ function TeamCard({ team, games, index, loadTeam }: Props) {
   );
 }
 
-export default TeamCard;
+export default GameCard;

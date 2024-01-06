@@ -2,10 +2,10 @@ import PlayerLine from "./PlayerLine";
 import PlayerModal from "./PlayerModal";
 import Table from "react-bootstrap/Table";
 import { useEffect, useState } from "react";
-import { jsonTypePlayer } from "../common/types";
+import { jsonTypePlayerlist } from "../common/types";
 
 interface Props {
-  players: jsonTypePlayer;
+  players: jsonTypePlayerlist;
   increasePlayersCount(): void;
   decreasePlayersCount(): void;
   initModal: boolean;
@@ -20,6 +20,7 @@ function PlayersTable({
   initModal,
   resetPageLoad,
 }: Props) {
+
   const [searchInput, setSearchInput] = useState(""); //Filter players by last name
   const onChange = (event: any) => {
     //Searchbar is being used
@@ -67,7 +68,7 @@ function PlayersTable({
           {playersData
             .filter((player: any) => {
               const searchTerm = searchInput.toLowerCase();
-              const playerName = player.name.toLowerCase();
+              const playerName = player.name.toLowerCase() + ' ' + player.lastname.toLowerCase();
               return playerName.startsWith(searchTerm);
             })
             .map(

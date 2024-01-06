@@ -1,5 +1,10 @@
 var teamDataJson = require("../data/json_format.json");
 
+interface Props {
+
+}
+
+
 function Headerdata() {
   return (
     <>

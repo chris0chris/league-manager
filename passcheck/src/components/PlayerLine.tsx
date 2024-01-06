@@ -1,8 +1,8 @@
 //import { useState } from "react";
-import { jsonTypePlayer } from "../common/types";
+import { jsonTypePlayerlist } from "../common/types";
 
 interface Props {
-  playersData: jsonTypePlayer;
+  playersData: jsonTypePlayerlist;
   index: number;
 }
 

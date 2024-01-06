@@ -1,3 +1,4 @@
+from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 from django.contrib.auth.models import User
 
@@ -16,13 +17,30 @@ class PasscheckSerializer(ModelSerializer):
 
 
 class PasscheckGamesListSerializer(ModelSerializer):
+    home = SerializerMethodField()
+    away = SerializerMethodField()
+
+    def get_home(self, obj: Gameinfo):
+        return obj.gameresult_set.get(isHome=True).team.description
+    def get_away(self, obj:Gameinfo):
+        return obj.gameresult_set.get(isHome=False).team.description
+
     class Meta:
         model = Gameinfo
         fields = ('id',
                   'field',
                   'scheduled',
                   'officials',
-                  'gameday_id')
+                  'gameday_id',
+                  'home',
+                  'away')
+
+
+class PasscheckTeamInfoSerializer(ModelSerializer):
+    class Meta:
+        model = Gameinfo
+
+
 
 
 class PasscheckOfficialsAuthSerializer(ModelSerializer):

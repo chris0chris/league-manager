@@ -2,22 +2,18 @@ import PlayersTable from "./PlayersTable";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { useState, useEffect } from "react";
+import { jsonTypePlayerlist } from "../common/types";
 
-//var playersUnsorted = require("../data/players.json"); //store entire json object in variable
-let teamDataJson = require("../data/json_format.json");
-let playersUnsorted = teamDataJson.playerlist;
-const players = playersUnsorted.sort((a: any, b: any) => {
-  //sort players by shirtnumber ascending
-  return a.shirtnumber < b.shirtnumber ? -1 : 1;
-});
-const playersWithKeys = players.map((obj: any, index: any) => ({
-  //map index to every object inside the array
-  ...obj,
-  key: index,
-}));
+
+interface Props {
+    team: string;
+    players: jsonTypePlayerlist;
+    otherPlayers: jsonTypePlayerlist;
+}
 
 //component that shows all available players on the team in a table
-function PlayersOverview() {
+function PlayersOverview({team, players, otherPlayers}: Props) {
+  console.log("players in overview:", players)
   const [showSecondTeam, setShowSecondTeam] = useState<boolean>(false);
   const toggleSecondTeam = () => {
     setShowSecondTeam(!showSecondTeam);
@@ -47,7 +43,7 @@ function PlayersOverview() {
   return (
     <>
       <PlayersTable
-        players={playersWithKeys}
+        players={players}
         increasePlayersCount={increasePlayersCount}
         decreasePlayersCount={decreasePlayersCount}
         initModal={pageLoad}
@@ -60,13 +56,13 @@ function PlayersOverview() {
         onClick={toggleSecondTeam}
         className="full-width-button"
       >
-        Passliste "Teamname" II
+        Passliste {team} II
       </Button>
       <br />
       <br />
       {showSecondTeam && (
         <PlayersTable
-          players={playersWithKeys}
+          players={otherPlayers}
           increasePlayersCount={increasePlayersCount}
           decreasePlayersCount={decreasePlayersCount}
           initModal={false}
