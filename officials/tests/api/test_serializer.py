@@ -23,7 +23,7 @@ class TestObfuscator:
         assert Obfuscator.obfuscate(None, '', 'Nmae') == 'N****'
 
 
-class TestGameOfficialAllInfoSerializer:
+class TestGameOfficialAllInfoSerializer(TestCase):
     def create_some_official(self, **kwargs):
         defaults = {
             'id': 77,
