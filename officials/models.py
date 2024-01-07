@@ -16,6 +16,12 @@ class Official(models.Model):
 
     objects: QuerySet = models.Manager()
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['id', 'team']),
+            models.Index(fields=['id', 'association']),
+        ]
+
     def __str__(self):
         return (f'{self.team.description}__{self.last_name}, {self.first_name} - ('
                 f'{"NONE" if self.association is None else self.association.name})')
