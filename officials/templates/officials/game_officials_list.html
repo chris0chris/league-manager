@@ -32,14 +32,14 @@
             <tbody>
             {% for official in object_list %}
             <tr>
-                <th scope="row">{{official.info.game_official_id}}</th>
-                <td>{{official.info.date}}</td>
-                <td>{{official.info.gameday}}</td>
-                <td><a href="/officials/team/{{official.info.team_id}}/gamelist">{{official.info.team}}</a></td>
+                <th scope="row">{{official.id}}</th>
+                <td>{{official.gameday_date}}</td>
+                <td>{{official.gameday_name}}</td>
+                <td><a href="/officials/team/{{official.team_official_id}}/gamelist">{{official.team_name}}</a></td>
                 <td>{{official.name}}</td>
                 <td>{{official.position}}</td>
-                <td>{{official.info.vs}} (#{{official.info.gameinfo_id}})</td>
-                <td>{{official.info.standing}}</td>
+                <td>{{official.home}} vs {{official.away}} (#{{official.gameinfo_id}})</td>
+                <td>{{official.standing}}</td>
             </tr>
             {% endfor %}
             </tbody>
