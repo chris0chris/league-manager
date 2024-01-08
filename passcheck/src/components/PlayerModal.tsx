@@ -13,6 +13,7 @@ interface Props {
   minIndex(): void;
   increasePlayersCount(): void;
   decreasePlayersCount(): void;
+  gameday: number;
 }
 
 function PlayerModal({
@@ -26,14 +27,20 @@ function PlayerModal({
   maxIndex,
   increasePlayersCount,
   decreasePlayersCount,
+  gameday
 }: Props) {
   const update = () => {
     //Invert the checked status of the player
-    playersData[index].checked = !playersData[index].checked;
+    if(playersData[index].gamedays.includes(gameday)){
+        playersData[index].gamedays.splice(playersData[index].gamedays.indexOf(gameday), 1);
+        decreasePlayersCount();
+    } else {
+        playersData[index].gamedays.push(gameday);
+        increasePlayersCount();
+    }
+    //playersData[index].checked = !playersData[index].checked;
     //Increase or decrease active player count for final output
-    playersData[index].checked
-      ? increasePlayersCount()
-      : decreasePlayersCount();
+    //playersData[index].checked
   };
 
   const nextPlayer = () => {
@@ -50,13 +57,13 @@ function PlayerModal({
         keyboard={false}
       >
         <Modal.Header closeButton>
-          <Modal.Title>{playersData[index].name}</Modal.Title>
+          <Modal.Title>{playersData[index].firstname} {playersData[index].lastname}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="span-div">
             <span className="left-span">Name:</span>
             <span className="right-span">
-              {playersData[index].name} {playersData[index].lastname}
+              {playersData[index].firstname} {playersData[index].lastname}
             </span>
           </div>
           <div className="span-div">
@@ -94,15 +101,15 @@ function PlayerModal({
             </svg>
           </Button>
           <Button
-            variant={playersData[index].checked ? "danger" : "success"} //coloring the button depending on the state of the player
+            variant={playersData[index].gamedays.includes(gameday) ? "danger" : "success"} //coloring the button depending on the state of the player
             className="modal-button-middle"
             onClick={() => {
               update(); //Switch boolean of property "checked"
-              playersData[index].checked && nextPlayer(); //Automatically load Modal with next Player in list when you check a player
+              playersData[index].gamedays.includes(gameday) && nextPlayer(); //Automatically load Modal with next Player in list when you check a player
             }}
           >
             {/* following section alters icon depending on the state of the player */}
-            {!playersData[index].checked && (
+            {!playersData[index].gamedays.includes(gameday) && (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="30"
@@ -114,7 +121,7 @@ function PlayerModal({
                 <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
               </svg>
             )}
-            {playersData[index].checked && (
+            {playersData[index].gamedays.includes(gameday) && (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="30"

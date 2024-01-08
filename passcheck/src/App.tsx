@@ -1,4 +1,3 @@
-import Headerdata from "./components/Headerdata";
 import PlayersOverview from "./components/PlayersOverview";
 import TeamOverview from "./components/TeamOverview";
 import GameOverview from "./components/GameOverview";
@@ -19,23 +18,20 @@ import {
 
 function App() {
 
+    //componentDidMount() {
     const [games, setGames] = useState<any>([]);
     const [gamesWithKeys, setGamesWithKeys] = useState<any>([]);
     const [officials, setOfficials] = useState<string>("");
     const [tokenKey, setTokenKey] = useState<string>("");
-    const [index, setIndex] = useState<number>(0);
+    const [gameIndex, setGameIndex] = useState<number>(0);
     const [team, setTeam] = useState<string>("");
     const [playerlist, setPlayerlist] = useState<any>([]);
     const [playersWithKeys, setPlayersWithKeys] = useState<any>([]);
     const [otherPlayers, setOtherPlayers] = useState<any>([]);
-
-    const loadIndex = (index: number) => {
-        setIndex(index);
-    }
-
-    const loadTeam = (team: string) => {
-        setTeam(team);
-    }
+    const [otherPlayersWithKeys, setOtherPlayersWithKeys] = useState<any>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [playersLoaded, setPlayersLoaded] = useState<boolean>(false);
+    let otherPlayersFound = false;
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -45,12 +41,55 @@ function App() {
                 getPasscheckData(tokenKey).then((result) => {
                     setGames(result.games);
                     setOfficials(result.officialsTeamName);
+                    setLoading(false);
                 });
             }
         }else{
             //window.location.href = "/scorecard/";
         };
     },[tokenKey]);
+
+
+    const loadIndex = (index: number) => {
+        setGameIndex(index);
+    }
+
+    const loadTeam = (team: string) => {
+        setTeam(team);
+        if (team !== "" && playerlist.length === 0) {
+            getPlayerList(team).then((result) => {
+                setLoading(false);
+                if (result.players.length !== 0 && result.otherPlayers.length !== 0) {
+                    setOtherPlayers(result.otherPlayers);
+                    setPlayerlist(result.players);
+                    otherPlayersFound = true;
+                    if (otherPlayersFound && otherPlayersWithKeys.length === 0) {
+                        const keys = result.otherPlayers.map((obj: any, index: any) => ({
+                            ...obj,
+                            key: index,
+                        }));
+                        setOtherPlayersWithKeys(keys);
+                    }
+                    if (playersWithKeys.length === 0) {
+                        const keys = result.players.map((obj: any, index: any) => ({
+                            ...obj,
+                            key: index,
+                        }));
+                        setPlayersWithKeys(keys);
+                    }
+                }
+            });
+        }
+    };
+
+    useEffect(() => {
+    if(playersWithKeys.length !== 0 && otherPlayersWithKeys.length !== 0){
+       setPlayersLoaded(true);
+    }
+    },[playersWithKeys, otherPlayersWithKeys]);
+
+
+
 
     useEffect(() => {
         const keys = games.map((obj: any, index: any) => ({
@@ -61,45 +100,61 @@ function App() {
 
     },[games]);
 
-    if(team !== ""){
-        getPlayerList(team).then((result) => {
-            if(result.players.length !== 0){
-                    console.log('useStatePlayerlist', result.players);
-                    setPlayerlist(result.players);
-                    console.log('playerlist:', playerlist);
-            }
-            //setOtherPlayers(result.otherPlayers);
-        });
+//     if(team !== "" && playerlist.length === 0){
+//         getPlayerList(team).then((result) => {
+//             if(result.players.length !== 0 && result.otherPlayers.length !== 0){
+//                 setOtherPlayers(result.otherPlayers);
+//                 setLoading(true);
+//                 otherPlayersFound = true;
+//                 if(otherPlayersFound && otherPlayersWithKeys.length === 0){
+//                     const keys = otherPlayers.map((obj: any, index: any) => ({
+//                         ...obj,
+//                         key: index,
+//                     }));
+//                     setOtherPlayersWithKeys(keys);
+//                 }
+//             }
+//             if(result.players.length !== 0){
+//                 setPlayerlist(result.players);
+//                 setLoading(true);
+//                 if(playerlist.length !== 0 && playersWithKeys.length === 0){
+//                     const keys = playerlist.map((obj: any, index: any) => ({
+//                         ...obj,
+//                         key: index,
+//                     }));
+//                     setPlayersWithKeys(keys);
+//                 }
+//             }
+//
+//         });
+//     }
+//
+//     setLoading(false);
+//
+//     setPlayersLoaded(true);
+
+
+
+    if(loading){
+        return <p>loading...</p>;
     }
-
-    //funktioniert nicht
-    useEffect(() => {
-        const keys = playerlist.map((obj: any, index: any) => ({
-            ...obj,
-            key: index,
-        }));
-        setPlayersWithKeys(keys);
-        console.log('playerskeys:', playerlist);
-
-    },[playerlist]);
-
-  return (
-    <>
-      <Router>
-          <div>
-              <Routes>
-                <Route path="/" element={<GameOverview gamesWithKeys={gamesWithKeys} officials={officials} loadIndex={loadIndex} />}/>
-                <Route path="/teams" element={<TeamOverview index={index} games={gamesWithKeys} officials={officials} loadTeam={loadTeam} />}/>
-                <Route path="/players" element={<PlayersOverview team={team} players={playersWithKeys} otherPlayers={otherPlayers} />}/>
-                <Route path="*" element={
-                    <main style={{padding: '1rem'}}>
-                        <p>There is nothing here!</p>
-                    </main>}/>
-              </Routes>
-          </div>
-      </Router>
-    </>
-  );
+      return (
+        <>
+          <Router>
+              <div>
+                  <Routes>
+                    <Route path="/" element={<GameOverview gamesWithKeys={gamesWithKeys} officials={officials} loadIndex={loadIndex} />}/>
+                    <Route path="/teams" element={<TeamOverview index={gameIndex} games={gamesWithKeys} officials={officials} loadTeam={loadTeam} playersLoaded={playersLoaded} />}/>
+                    <Route path="/players" element={<PlayersOverview team={team} gameday={games[gameIndex].gameday_id} players={playersWithKeys} otherPlayers={otherPlayersWithKeys} />} />
+                    <Route path="*" element={
+                        <main style={{padding: '1rem'}}>
+                            <p>There is nothing here!</p>
+                        </main>}/>
+                  </Routes>
+              </div>
+          </Router>
+        </>
+      );
 }
 
 export default App;

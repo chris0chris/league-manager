@@ -3,21 +3,24 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { useState, useEffect } from "react";
 import { jsonTypePlayerlist } from "../common/types";
+import {useNavigate} from 'react-router-dom';
+
 
 
 interface Props {
     team: string;
+    gameday: number;
     players: jsonTypePlayerlist;
     otherPlayers: jsonTypePlayerlist;
 }
 
 //component that shows all available players on the team in a table
-function PlayersOverview({team, players, otherPlayers}: Props) {
-  console.log("players in overview:", players)
+function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
   const [showSecondTeam, setShowSecondTeam] = useState<boolean>(false);
   const toggleSecondTeam = () => {
     setShowSecondTeam(!showSecondTeam);
   };
+
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
   const showModal = () => {
     //set modal visible
@@ -27,6 +30,7 @@ function PlayersOverview({team, players, otherPlayers}: Props) {
     //set modal invisible
     setModalVisible(false);
   };
+
   const [playersCount, setPlayersCount] = useState<number>(0);
   const increasePlayersCount = () => {
     setPlayersCount(playersCount + 1);
@@ -34,14 +38,22 @@ function PlayersOverview({team, players, otherPlayers}: Props) {
   const decreasePlayersCount = () => {
     setPlayersCount(playersCount - 1);
   };
+
   const [pageLoad, setPageLoad] = useState<boolean>(false);
   useEffect(() => {
     //load first modal
     setPageLoad(true);
   }, []);
 
+  const navigate = useNavigate();
+  const handleClickEvent = () => {
+    navigate('/');
+  };
+
   return (
     <>
+     <h1>Spielerliste {team}</h1>
+     <Button onClick={handleClickEvent}>Auswahl abbrechen</Button>
       <PlayersTable
         players={players}
         increasePlayersCount={increasePlayersCount}
@@ -50,15 +62,17 @@ function PlayersOverview({team, players, otherPlayers}: Props) {
         resetPageLoad={() => {
           setPageLoad(false);
         }}
+        gameday={gameday}
       />
+      {otherPlayers.length !== 0 && (<>
       <Button
         variant="secondary"
         onClick={toggleSecondTeam}
         className="full-width-button"
-      >
-        Passliste {team} II
+      >{showSecondTeam ? ("weitere Pässe ausblenden") : ("weitere Pässe anzeigen")}
+
       </Button>
-      <br />
+      <br /></>)}
       <br />
       {showSecondTeam && (
         <PlayersTable
@@ -67,6 +81,7 @@ function PlayersOverview({team, players, otherPlayers}: Props) {
           decreasePlayersCount={decreasePlayersCount}
           initModal={false}
           resetPageLoad={() => {}}
+          gameday={gameday}
         />
       )}
       <div>
@@ -84,7 +99,7 @@ function PlayersOverview({team, players, otherPlayers}: Props) {
           className="full-width-button"
         >
           {" "}
-          Passliste abschicken{" "}
+          Passliste abschicken {" "}
         </Button>
       </div>
       <Modal
