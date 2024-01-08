@@ -2,6 +2,8 @@ import PlayersOverview from "./components/PlayersOverview";
 import TeamOverview from "./components/TeamOverview";
 import GameOverview from "./components/GameOverview";
 import { useState, useEffect } from "react";
+import Button from "react-bootstrap/Button";
+
 
 import { getPasscheckData, getPlayerList } from "./common/games"
 
@@ -100,41 +102,6 @@ function App() {
 
     },[games]);
 
-//     if(team !== "" && playerlist.length === 0){
-//         getPlayerList(team).then((result) => {
-//             if(result.players.length !== 0 && result.otherPlayers.length !== 0){
-//                 setOtherPlayers(result.otherPlayers);
-//                 setLoading(true);
-//                 otherPlayersFound = true;
-//                 if(otherPlayersFound && otherPlayersWithKeys.length === 0){
-//                     const keys = otherPlayers.map((obj: any, index: any) => ({
-//                         ...obj,
-//                         key: index,
-//                     }));
-//                     setOtherPlayersWithKeys(keys);
-//                 }
-//             }
-//             if(result.players.length !== 0){
-//                 setPlayerlist(result.players);
-//                 setLoading(true);
-//                 if(playerlist.length !== 0 && playersWithKeys.length === 0){
-//                     const keys = playerlist.map((obj: any, index: any) => ({
-//                         ...obj,
-//                         key: index,
-//                     }));
-//                     setPlayersWithKeys(keys);
-//                 }
-//             }
-//
-//         });
-//     }
-//
-//     setLoading(false);
-//
-//     setPlayersLoaded(true);
-
-
-
     if(loading){
         return <p>loading...</p>;
     }
@@ -146,6 +113,11 @@ function App() {
                     <Route path="/" element={<GameOverview gamesWithKeys={gamesWithKeys} officials={officials} loadIndex={loadIndex} />}/>
                     <Route path="/teams" element={<TeamOverview index={gameIndex} games={gamesWithKeys} officials={officials} loadTeam={loadTeam} playersLoaded={playersLoaded} />}/>
                     <Route path="/players" element={<PlayersOverview team={team} gameday={games[gameIndex].gameday_id} players={playersWithKeys} otherPlayers={otherPlayersWithKeys} />} />
+                    <Route path="/success" element={<div><main style={{padding: '1rem'}}>
+                            <p>Passcheck erfolgreich!</p>
+                        </main><Button onClick={() => {
+                            window.location.href = "/passcheck/";
+                        }}>Zurück</Button></div>}/>
                     <Route path="*" element={
                         <main style={{padding: '1rem'}}>
                             <p>There is nothing here!</p>
