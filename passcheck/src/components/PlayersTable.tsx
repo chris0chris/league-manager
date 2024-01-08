@@ -1,7 +1,7 @@
 import PlayerLine from "./PlayerLine";
 import PlayerModal from "./PlayerModal";
 import Table from "react-bootstrap/Table";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { jsonTypePlayerlist } from "../common/types";
 
 interface Props {
@@ -10,6 +10,7 @@ interface Props {
   decreasePlayersCount(): void;
   initModal: boolean;
   resetPageLoad(): void;
+  gameday: number;
 }
 
 //component that shows all available players on the team in a table
@@ -19,6 +20,7 @@ function PlayersTable({
   decreasePlayersCount,
   initModal,
   resetPageLoad,
+  gameday
 }: Props) {
 
   const [searchInput, setSearchInput] = useState(""); //Filter players by last name
@@ -26,7 +28,7 @@ function PlayersTable({
     //Searchbar is being used
     setSearchInput(event.target.value);
   };
-  const [playersData, setPlayersData] = useState(players); //store array with indexes in useState
+  const [playersData, setPlayersData] = useState<jsonTypePlayerlist>(players); //store array with indexes in useState
   const [modalKey, setModalKey] = useState<number>(0); //store current key to keep track of the active player
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
   const showModal = (key: number) => {
@@ -68,7 +70,7 @@ function PlayersTable({
           {playersData
             .filter((player: any) => {
               const searchTerm = searchInput.toLowerCase();
-              const playerName = player.name.toLowerCase() + ' ' + player.lastname.toLowerCase();
+              const playerName = player.firstname.toLowerCase() + ' ' + player.lastname.toLowerCase();
               return playerName.startsWith(searchTerm);
             })
             .map(
@@ -76,7 +78,7 @@ function PlayersTable({
                 player: any //map each player in the array into one row of a table
               ) => (
                 <tr
-                  className={player.checked ? "table-success" : ""}
+                  className={player.gamedays.includes(gameday) ? "table-success" : ""}
                   key={player.key}
                   onClick={() => {
                     //click the row to show the modal with the players infos
@@ -115,6 +117,7 @@ function PlayersTable({
         }}
         increasePlayersCount={increasePlayersCount}
         decreasePlayersCount={decreasePlayersCount}
+        gameday={gameday}
       />
     </>
   );

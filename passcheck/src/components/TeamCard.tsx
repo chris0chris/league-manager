@@ -12,9 +12,10 @@ interface Props {
   index: number;
   games: jsonTypeGames;
   loadTeam: (team: string) => void;
+  playersLoaded: boolean;
 }
 
-function TeamCard({ team, games, index, loadTeam }: Props) {
+function TeamCard({ team, games, index, loadTeam, playersLoaded }: Props) {
   const [checkedTeam, setChecked] = useState<boolean>(false);
   const navigate = useNavigate();
   const clickHandler = () => {
@@ -23,8 +24,12 @@ function TeamCard({ team, games, index, loadTeam }: Props) {
     teams[index].checked = checkedTeam;
     console.log(teams[index].checked); */
     loadTeam(team);
-    navigate('/players');
+
   };
+
+  if(playersLoaded){
+        navigate('/players');
+  }
 
   //console.log('gamesTC:', games);
 

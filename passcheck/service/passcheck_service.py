@@ -48,5 +48,6 @@ class PasscheckServicePlayers:
         description = unquote(team)
         return {
             'players': self.get_players(team=description),
+            'otherPlayers': self.get_players(team=description),
             # 'otherPlayers': self.get_other_players(team=team),
         }

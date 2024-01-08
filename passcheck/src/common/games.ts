@@ -7,7 +7,6 @@ export const getPasscheckData = async (token:string) => {
         const data = await apiGet(
             `/api/passcheck/${token}/`
         );
-        console.log('data:', data);
         return data;
 };
 

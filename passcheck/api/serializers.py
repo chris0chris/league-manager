@@ -11,6 +11,15 @@ from knox.models import AuthToken
 
 # Serialize table data into json object
 class PasscheckSerializer(ModelSerializer):
+    ownLeagueGamedaysPlayed = SerializerMethodField('get_own')
+    otherTeamGamedaysPlayed = SerializerMethodField('get_other')
+
+    def get_own(self, obj: Playerlist):
+        return 0
+
+    def get_other(self, obj: Playerlist):
+        return 0
+
     class Meta:
         model = Playerlist
         fields = '__all__'

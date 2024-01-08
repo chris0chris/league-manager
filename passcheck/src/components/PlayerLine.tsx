@@ -13,7 +13,7 @@ function PlayerLine({ playersData, index }: Props) {
       <td className="table-border">{playersData[index].key + 1}</td>
       <td className="table-border">
         <span>
-          {playersData[index].name} {playersData[index].lastname}
+          {playersData[index].firstname} {playersData[index].lastname}
         </span>
       </td>
       <td className="table-border">{playersData[index].trikotnumber}</td>
