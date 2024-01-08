@@ -4,6 +4,7 @@ import Modal from "react-bootstrap/Modal";
 import { useState, useEffect } from "react";
 import { jsonTypePlayerlist } from "../common/types";
 import {useNavigate} from 'react-router-dom';
+import { submitRoster } from '../common/games';
 
 
 
@@ -31,7 +32,26 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
     setModalVisible(false);
   };
 
-  const [playersCount, setPlayersCount] = useState<number>(0);
+  const [playersCount, setPlayersCount] = useState<number>(
+    players.reduce((count, player) => {
+      if (player.gamedays.includes(gameday)) {
+        count++;
+      }
+      return count;
+    }, 0)
+  );
+
+  // You can use useEffect to update the count when players or gameday changes
+  useEffect(() => {
+    const newPlayersCount = players.reduce((count, player) => {
+      if (player.gamedays.includes(gameday)) {
+        count++;
+      }
+      return count;
+    }, 0);
+
+    setPlayersCount(newPlayersCount);
+  }, [players, gameday]);
   const increasePlayersCount = () => {
     setPlayersCount(playersCount + 1);
   };
@@ -48,6 +68,23 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
   const navigate = useNavigate();
   const handleClickEvent = () => {
     navigate('/');
+  };
+
+  const onSubmitRoster = () => {
+    submitRoster(team, {
+        gameday: gameday,
+        roster: getCheckedPlayers(),
+    })
+    handleClose();
+    navigate('/success');
+  };
+
+  const getCheckedPlayers = () => {
+    return players.map((player: any) => {
+        if(player.gamedays.includes(gameday)){
+            return player.id;
+        }
+     }).filter((id) => id != null);
   };
 
   return (
@@ -112,14 +149,14 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
           <Modal.Title>Passliste bestätigen</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div>Team: "Teamname"</div>
+          <div>Team: {team}</div>
           <div>Es sind {playersCount} Spieler anwesend.</div>
         </Modal.Body>
         <Modal.Footer className="modal-footer">
           <Button variant="secondary" className="me-auto" onClick={handleClose}>
             Zurück
           </Button>
-          <Button variant="primary" className="ms-auto">
+          <Button variant="primary"  onClick={onSubmitRoster} className="ms-auto">
             Passliste bestätigen
           </Button>
         </Modal.Footer>

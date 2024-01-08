@@ -1,4 +1,4 @@
-import { apiGet } from '../actions/utils/api';
+import { apiGet, apiPut } from '../actions/utils/api';
 import {apiTeam, apiTokens, apiGames, apiGamedays, apiUsernames } from './types';
 
 
@@ -13,7 +13,15 @@ export const getPasscheckData = async (token:string) => {
 export const getPlayerList = async (team:string) => {
 
         const players = await apiGet(
-            `/api/passcheck/players/${team}/`
+            `/api/passcheck/roster/${team}/`
         );
         return players;
+}
+
+export const submitRoster = async (team:string, roster:any) => {
+
+        await apiPut(
+            `/api/passcheck/roster/${team}/`,
+            roster
+        );
 }

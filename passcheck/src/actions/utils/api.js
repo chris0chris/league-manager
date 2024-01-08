@@ -43,29 +43,19 @@ import axios from 'axios';
 //        });
 //      });
 //};
-//
-//export const apiPut = (url, body, successType, errorType) => async (
-//    dispatch,
-//    getState,
-//) => {
-//  const header = tokenConfig(getState);
-//
-//  await axios
-//      .put(url, body, header)
-//      .then((res) => {
-//        dispatch({
-//          type: successType,
-//          payload: res.data,
-//        });
-//      })
-//      .catch((err) => {
-//        dispatch(returnErrors(err.response.data, err.response.status));
-//        dispatch({
-//          type: errorType,
-//        });
-//      });
-//};
-//
+
+export const apiPut = async (url, body) => {
+  const header = tokenConfig();
+
+  await axios
+      .put(url, body, header)
+      .then((res) => {
+      })
+      .catch((err) => {
+        console.error(err)
+      });
+};
+
 export const apiGet = async (url) => {
   return await axios
       .get(url, tokenConfig())

@@ -51,3 +51,11 @@ class PasscheckServicePlayers:
             'otherPlayers': self.get_players(team=description),
             # 'otherPlayers': self.get_other_players(team=team),
         }
+
+    def create_roster(self, team, data):
+        gameday = data.get('gameday')
+        roster = data.get('roster')
+        for player in Playerlist.objects.filter(team__description=team, gamedays__id=gameday):
+            player.gamedays.clear()
+        for player in Playerlist.objects.filter(id__in=roster):
+            player.gamedays.add(gameday)

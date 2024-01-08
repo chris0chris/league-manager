@@ -58,7 +58,7 @@ class PasscheckGamedayTeamsAPIView(ListAPIView):
         return Team.objects.all()
 
 
-class PasscheckServiceAPIView(APIView):
+class PasscheckGamesAPIView(APIView):
 
     def get(self, *args, **kwargs):
         token = kwargs.get('token')
@@ -67,13 +67,19 @@ class PasscheckServiceAPIView(APIView):
             return Response(passcheck.get_passcheck_data(token=token), status=HTTPStatus.OK)
 
 
-class PasscheckServicePlayersAPIView(APIView):
+class PasscheckRosterAPIView(APIView):
     def get(self, *args, **kwargs):
         team = kwargs.get('team')
         if team:
             playerlist = PasscheckServicePlayers()
             return Response(playerlist.get_playerlist_data(team=team), status=HTTPStatus.OK)
 
+    def put(self, request, *args, **kwargs):
+        data = request.data
+        team = kwargs.get('team')
+        passcheckservice = PasscheckServicePlayers()
+        passcheckservice.create_roster(team, data)
+        return Response(status=HTTPStatus.OK)
 
 class PasscheckGamedaysListAPIView(ListAPIView):
     serializer_class = PasscheckGamedaysListSerializer
