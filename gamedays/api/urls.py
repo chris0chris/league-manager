@@ -3,7 +3,7 @@ from django.urls import path
 from gamedays.api.game_views import GameLogAPIView, GameHalftimeAPIView, GameFinalizeUpdateView, \
     GameSetupCreateOrUpdateView, GamesToWhistleAPIView, ConfigPenalties, GamePossessionAPIView
 from gamedays.api.views import GamedayListAPIView, GameinfoUpdateAPIView, GamedayRetrieveUpdate, \
-    GamedayScheduleView, GameOfficialCreateOrUpdateView, LivetickerAPIView
+    GamedayScheduleView, GameOfficialCreateOrUpdateView
 
 API_GAMEDAY_WHISTLEGAMES = 'api-gameday-whistlegames'
 
@@ -12,7 +12,6 @@ API_GAMEDAY_LIST = 'api-gameday-list'
 API_GAMELOG = 'api-gamelog'
 
 API_CONFIG_SCORECARD_PENALTIES = 'api-config-scorecard-penalties'
-API_LIVETICKER_ALL = 'api-liveticker-all'
 API_GAME_POSSESSION = 'api-game-possession'
 API_GAME_FINALIZE = 'api-game-finalize'
 API_GAME_HALFTIME = 'api-game-halftime'
@@ -31,6 +30,5 @@ urlpatterns = [
     path('game/<int:pk>/halftime', GameHalftimeAPIView.as_view(), name=API_GAME_HALFTIME),
     path('game/<int:pk>/finalize', GameFinalizeUpdateView.as_view(), name=API_GAME_FINALIZE),
     path('game/<int:pk>/possession', GamePossessionAPIView.as_view(), name=API_GAME_POSSESSION),
-    path('liveticker', LivetickerAPIView.as_view(), name=API_LIVETICKER_ALL),
     path('config/scorecard/penalties', ConfigPenalties.as_view(), name=API_CONFIG_SCORECARD_PENALTIES)
 ]
