@@ -1,5 +1,7 @@
+from datetime import datetime
 from typing import List
 
+from django.conf import settings
 from django.db.models import Subquery, OuterRef, F, Q
 
 from gamedays.models import League, Gameday, Gameinfo, Gameresult, TeamLog
