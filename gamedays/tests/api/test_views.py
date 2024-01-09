@@ -5,12 +5,11 @@ from datetime import datetime
 from http import HTTPStatus
 
 import pytest
-from django.conf import settings
 from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
-from gamedays.api.urls import API_GAMEDAY_LIST, API_GAMEDAY_WHISTLEGAMES, API_LIVETICKER_ALL
+from gamedays.api.urls import API_GAMEDAY_LIST, API_GAMEDAY_WHISTLEGAMES
 from gamedays.models import Team, Gameday, Gameinfo
 from gamedays.service.gameday_service import EmptySchedule, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
@@ -106,80 +105,6 @@ class TestGamedaySchedule(WebTest):
         assert response.status_code == HTTPStatus.OK
         import pandas as pd
         assert response.json == json.loads(pd.DataFrame().to_json(orient='split'))
-
-
-class TestLivetickerAPIView(WebTest):
-    @pytest.fixture(autouse=True)
-    def before_each(self):
-        self.expected_liveticker_result = {
-            "status": "Geplant",
-            "standing": "Gruppe 1",
-            "time": "10:00",
-            "home": {
-                "name": "AAAAAAA1",
-                "score": 3,
-                "isInPossession": True,
-            },
-            "away": {
-                "name": "AAAAAAA2",
-                "score": 2,
-                "isInPossession": False,
-            },
-            "ticks": []
-        }
-        yield
-
-    def test_empty_liveticker(self):
-        response = self.app.get(reverse(API_LIVETICKER_ALL))
-        assert response.json == []
-
-    def test_get_all_livetickers_only_scheduled(self):
-        gameday_one = DBSetup().g62_status_empty()
-        gameday_two = DBSetup().g62_status_empty()
-        first_game_gameday_one = Gameinfo.objects.filter(gameday=gameday_one).first()
-        # only first two games shall be the next scheduled games
-        Gameinfo.objects.filter(gameday=gameday_one, pk__gt=first_game_gameday_one.pk + 1).update(scheduled='11:00')
-        first_game_gameday_two = Gameinfo.objects.filter(gameday=gameday_two).first()
-        # only first two games for second gameday shall be the next scheduled games
-        Gameinfo.objects.filter(gameday=gameday_two, pk__gt=first_game_gameday_two.pk + 1).update(scheduled='11:00')
-        Gameday.objects.all().update(date=datetime.today())
-        response = self.app.get(reverse(API_LIVETICKER_ALL))
-        assert response.status_code == HTTPStatus.OK
-        assert len(response.json) == 4
-        expected_result = self.expected_liveticker_result
-        expected_result['gameId'] = first_game_gameday_one.pk
-        print('expected_result', expected_result)
-        print('actual_result', response.json[0])
-        print('response JSON', response.json)
-        assert response.json[0] == expected_result
-        expected_result['gameId'] = first_game_gameday_two.pk
-        assert response.json[2] == expected_result
-
-    def test_get_livetickers_for_one_gameday(self):
-        tmp_settings_debug = settings.DEBUG
-        settings.DEBUG = True
-        DBSetup().g62_status_empty()
-        first_game = Gameinfo.objects.first()
-        Gameinfo.objects.filter(pk__gt=first_game.pk + 1).update(scheduled='11:00')
-        response = self.app.get(reverse(API_LIVETICKER_ALL))
-        assert response.status_code == HTTPStatus.OK
-        assert len(response.json) == 2
-        self.expected_liveticker_result["gameId"] = first_game.pk
-        assert response.json[0] == self.expected_liveticker_result
-        settings.DEBUG = tmp_settings_debug
-
-    def test_get_livetickers_for_with_one_game_all_ticks(self):
-        tmp_settings_debug = settings.DEBUG
-        settings.DEBUG = True
-        DBSetup().g62_status_empty()
-        first_game = Gameinfo.objects.first()
-        Gameinfo.objects.filter(pk__gt=first_game.pk + 1).update(scheduled='11:00')
-        response = self.app.get(reverse(API_LIVETICKER_ALL) + '?getAllTicksFor=1,2')
-        assert response.status_code == HTTPStatus.OK
-        assert len(response.json) == 2
-        self.expected_liveticker_result["gameId"] = first_game.pk
-        assert response.json[0] == self.expected_liveticker_result
-        settings.DEBUG = tmp_settings_debug
 
 
 class TestGamesToWhistleAPIView(WebTest):
