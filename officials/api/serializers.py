@@ -1,6 +1,6 @@
 import datetime
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Max
 from rest_framework.fields import CharField, SerializerMethodField, BooleanField, DateField, FloatField
 from rest_framework.serializers import ModelSerializer
 
@@ -181,7 +181,9 @@ class OfficialGamelistSerializer(OfficialSerializer):
         return {
             'all_games': OfficialExternalGamesSerializer(instance=all_official_entries, many=True,
                                                          is_staff=self.is_staff).data,
-            'number_games': sum(entry.calculated_number_games for entry in all_official_entries)
+            'number_games': sum(entry.calculated_number_games for entry in all_official_entries),
+            'last_update': OfficialExternalGames.objects.all().aggregate(Max('notification_date'))[
+                'notification_date__max']
         }
 
     def get_dffl_games(self, obj: Official):
