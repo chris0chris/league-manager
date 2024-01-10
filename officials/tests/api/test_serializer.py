@@ -11,6 +11,7 @@ from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 
 class TestObfuscator:
     def test_obfuscator_obfuscate(self):
+        assert Obfuscator.obfuscate(*'Some Name'.split(' ')[:2]) == 'S****N****'
         assert Obfuscator.obfuscate('Some', 'Name') == 'S****N****'
 
     def test_obfuscator_only_one_argument(self):

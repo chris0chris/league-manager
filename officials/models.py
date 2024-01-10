@@ -61,16 +61,16 @@ class OfficialLicenseHistory(models.Model):
 
 class OfficialExternalGames(models.Model):
     official: Official = models.ForeignKey(Official, on_delete=models.CASCADE)
-    number_games = models.PositiveSmallIntegerField()
+    number_games: int = models.PositiveSmallIntegerField()
     date = models.DateField()
     notification_date = models.DateField()
-    reporter_name = models.CharField(max_length=100, default=None, blank=True)
-    position = models.CharField(max_length=100)
-    association = models.CharField(max_length=100)
-    halftime_duration = models.PositiveSmallIntegerField()
-    has_clockcontrol = models.BooleanField(default=False)
-    is_international = models.BooleanField(default=False)
-    comment = models.CharField(max_length=100, default=None, blank=True)
+    reporter_name: str = models.CharField(max_length=100, default=None, blank=True)
+    position: str = models.CharField(max_length=100)
+    association: str = models.CharField(max_length=100)
+    halftime_duration: int = models.PositiveSmallIntegerField()
+    has_clockcontrol: bool = models.BooleanField(default=False)
+    is_international: bool = models.BooleanField(default=False)
+    comment: str = models.CharField(max_length=100, default=None, blank=True)
 
     objects: QuerySet = models.Manager()
 
