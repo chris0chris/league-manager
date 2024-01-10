@@ -6,7 +6,8 @@ from liveticker.service.liveticker_service import LivetickerService
 
 class LivetickerAPIView(APIView):
     def get(self, request):
-        league = self._parse_input(request.query_params.get('league'))
+        league = request.query_params.get('league')
+        league = [] if league is None or league == '' else league.split(',')
         games_with_all_ticks = self._parse_input(request.query_params.get('getAllTicksFor'))
         gameday_ids = self._parse_input(request.query_params.get('gameday'))
         liveticker_service = LivetickerService(league, games_with_all_ticks, gameday_ids)
