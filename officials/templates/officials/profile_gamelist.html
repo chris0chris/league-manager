@@ -6,6 +6,8 @@
         ({{ year }}) übereinstimmt. <br/>
         {% if needed_games_for_license < 1 %}
         Für die Season {{ season }} kann eine Lizenzverlängerung erfolgen.
+        {% else %}
+        Für die Season {{ season }} werden noch {{ needed_games_for_license }} Spiele für Lizenzverlängerung benötigt.
         {% endif %}
     </div>
 </div>
