@@ -1,7 +1,7 @@
 import datetime
 
 from django.db.models import QuerySet
-from rest_framework.fields import CharField, SerializerMethodField, BooleanField, DateField, FloatField
+from rest_framework.fields import CharField, SerializerMethodField, BooleanField, DateField, FloatField, IntegerField
 from rest_framework.serializers import ModelSerializer, Serializer
 
 from gamedays.models import GameOfficial
@@ -38,6 +38,14 @@ class OfficialExternalGamesSerializer(ModelSerializer):
         if self.is_staff:
             return obj.reporter_name
         return Obfuscator.obfuscate(*obj.reporter_name.split(' ')[:2])
+
+
+class OfficialTeamListScorecardSerializer(Serializer):
+    ALL_FIELD_VALUES = ['last_name', 'first_name', 'id', 'team__description']
+    team = CharField(source='team__description')
+    last_name = CharField()
+    first_name = CharField()
+    id = IntegerField()
 
 
 class OfficialSerializer(ModelSerializer):
