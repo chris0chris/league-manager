@@ -1,5 +1,3 @@
-from typing import List
-
 from rest_framework.fields import SerializerMethodField, IntegerField
 from rest_framework.serializers import ModelSerializer, Serializer
 
@@ -93,7 +91,7 @@ class GameLogSerializer(Serializer):
             },
         }
 
-    def _get_entries(self, is_home: bool, obj: dict) -> tuple[List, List]:
+    def _get_entries(self, is_home: bool, obj: dict):
         teamlog = self.TEAMLOG_HOME if is_home else self.TEAMLOG_AWAY
         teamlog = obj[teamlog]
         teamlog_firsthalf = []
