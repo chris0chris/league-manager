@@ -6,8 +6,8 @@ from http import HTTPStatus
 from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
-from gamedays.api.urls import API_GAME_POSSESSION, API_CONFIG_SCORECARD_PENALTIES, API_GAME_FINALIZE, API_GAME_HALFTIME, \
-    API_GAMELOG, API_GAME_SETUP, API_GAME_OFFICIALS
+from gamedays.api.urls import (API_GAME_POSSESSION, API_CONFIG_SCORECARD_PENALTIES, API_GAME_FINALIZE,
+                               API_GAME_HALFTIME, API_GAMELOG, API_GAME_SETUP, API_GAME_OFFICIALS)
 from gamedays.models import Gameinfo, Gameresult, GameOfficial, GameSetup, TeamLog
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
@@ -69,8 +69,8 @@ class TestGameSetup(WebTest):
 
         gamesetup = {"ctResult": "won", "direction": "arrow_forward", "fhPossession": "HOME"}
         assert len(GameSetup.objects.all()) == 1
-        response = self.app.put_json(reverse(API_GAME_SETUP, kwargs={'pk': first_game.pk}), gamesetup
-                                     , headers=DBSetup().get_token_header())
+        response = self.app.put_json(reverse(API_GAME_SETUP, kwargs={'pk': first_game.pk}), gamesetup,
+                                     headers=DBSetup().get_token_header())
         assert len(GameSetup.objects.all()) == 1
         assert response.status_code == HTTPStatus.OK
         assert response.json == gamesetup
@@ -109,9 +109,9 @@ class TestGameLog(WebTest):
     def test_post_team_log(self):
         DBSetup().g62_status_empty()
         another_user = DBSetup().create_new_user()
-        firstGame = Gameinfo.objects.first()
-        response = self.app.post_json(reverse(API_GAMELOG, kwargs={'id': firstGame.pk}),
-                                      {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+        first_game = Gameinfo.objects.first()
+        response = self.app.post_json(reverse(API_GAMELOG, kwargs={'id': first_game.pk}),
+                                      {'team': 'A1', 'gameId': first_game.pk, 'half': 1,
                                        'event': [
                                            {'name': 'Touchdown', 'player': '19'},
                                            {'name': '1-Extra-Punkt', 'player': '7'}]},
@@ -122,7 +122,7 @@ class TestGameLog(WebTest):
                                           'name': 'A2',
                                           'score': 0,
                                           'secondhalf': {'entries': [], 'score': 0}},
-                                 'gameId': firstGame.pk,
+                                 'gameId': first_game.pk,
                                  'home': {'firsthalf': {'entries': [{'pat1': 7, 'sequence': 1, 'td': 19}], 'score': 7},
                                           'name': 'A1',
                                           'score': 7,
@@ -131,15 +131,15 @@ class TestGameLog(WebTest):
 
     def test_post_team_log_with_empty_pat(self):
         DBSetup().g62_status_empty()
-        firstGame = Gameinfo.objects.first()
-        response = self.app.post_json(reverse(API_GAMELOG, kwargs={'id': firstGame.pk}),
-                                      {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+        first_game = Gameinfo.objects.first()
+        response = self.app.post_json(reverse(API_GAMELOG, kwargs={'id': first_game.pk}),
+                                      {'team': 'A1', 'gameId': first_game.pk, 'half': 1,
                                        'event': [
                                            {'name': 'Touchdown', 'player': '19'},
                                            {'name': '1-Extra-Punkt', 'player': ''}]},
                                       headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.CREATED
-        assert response.json == {'gameId': firstGame.pk,
+        assert response.json == {'gameId': first_game.pk,
                                  'away': {
                                      'name': 'A2',
                                      'score': 0,
@@ -157,12 +157,12 @@ class TestGameLog(WebTest):
 
     def test_post_team_log_change_of_possession(self):
         DBSetup().g62_status_empty()
-        firstGame = Gameinfo.objects.first()
-        response = self.app.post_json(reverse(API_GAMELOG, kwargs={'id': firstGame.pk}),
-                                      {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+        first_game = Gameinfo.objects.first()
+        response = self.app.post_json(reverse(API_GAMELOG, kwargs={'id': first_game.pk}),
+                                      {'team': 'A1', 'gameId': first_game.pk, 'half': 1,
                                        'event': [{'name': 'Turnover'}]}, headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.CREATED
-        assert response.json == {'gameId': firstGame.pk,
+        assert response.json == {'gameId': first_game.pk,
                                  'isFirstHalf': True,
                                  'home': {
                                      'name': 'A1',
@@ -180,42 +180,42 @@ class TestGameLog(WebTest):
 
     def test_post_team_log_updates_score(self):
         DBSetup().g62_status_empty()
-        firstGame = Gameinfo.objects.first()
-        response = self.app.post_json(reverse(API_GAMELOG, kwargs={'id': firstGame.pk}),
-                                      {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+        first_game = Gameinfo.objects.first()
+        response = self.app.post_json(reverse(API_GAMELOG, kwargs={'id': first_game.pk}),
+                                      {'team': 'A1', 'gameId': first_game.pk, 'half': 1,
                                        'event': [
                                            {'name': 'Touchdown', 'player': '19'},
                                            {'name': '2-Extra-Punkte', 'player': '7'}]},
                                       headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.CREATED
-        home: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=True)
-        away: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=False)
+        home: Gameresult = Gameresult.objects.get(gameinfo=first_game, isHome=True)
+        away: Gameresult = Gameresult.objects.get(gameinfo=first_game, isHome=False)
         assert home.fh == 8
         assert away.fh == 0
 
     def test_score_is_updated_with_multiple_entries(self):
         DBSetup().g62_status_empty()
-        firstGame = Gameinfo.objects.first()
-        self.app.post_json(reverse(API_GAMELOG, kwargs={'id': firstGame.pk}),
-                           {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+        first_game = Gameinfo.objects.first()
+        self.app.post_json(reverse(API_GAMELOG, kwargs={'id': first_game.pk}),
+                           {'team': 'A1', 'gameId': first_game.pk, 'half': 1,
                             'event': [
                                 {'name': 'Touchdown', 'player': '19'},
                                 {'name': '1-Extra-Punkt', 'player': '7'}]}, headers=DBSetup().get_token_header())
-        self.app.post_json(reverse(API_GAMELOG, kwargs={'id': firstGame.pk}),
-                           {'team': 'A1', 'gameId': firstGame.pk, 'half': 1,
+        self.app.post_json(reverse(API_GAMELOG, kwargs={'id': first_game.pk}),
+                           {'team': 'A1', 'gameId': first_game.pk, 'half': 1,
                             'event': [
                                 {'name': 'Touchdown', 'player': '19'},
                                 {'name': 'Safety (+2)', 'player': '7'}]}, headers=DBSetup().get_token_header())
-        self.app.post_json(reverse(API_GAMELOG, kwargs={'id': firstGame.pk}),
-                           {'team': 'A2', 'gameId': firstGame.pk, 'half': 2,
+        self.app.post_json(reverse(API_GAMELOG, kwargs={'id': first_game.pk}),
+                           {'team': 'A2', 'gameId': first_game.pk, 'half': 2,
                             'event': [
                                 {'name': 'Touchdown', 'player': '19'},
                                 {'name': '2-Extra-Punkte', 'player': ''}]}, headers=DBSetup().get_token_header())
-        self.app.post_json(reverse(API_GAMELOG, kwargs={'id': firstGame.pk}),
-                           {'team': 'A2', 'gameId': firstGame.pk, 'half': 2,
+        self.app.post_json(reverse(API_GAMELOG, kwargs={'id': first_game.pk}),
+                           {'team': 'A2', 'gameId': first_game.pk, 'half': 2,
                             'event': [{'name': 'Turnover'}]}, headers=DBSetup().get_token_header())
-        home: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=True)
-        away: Gameresult = Gameresult.objects.get(gameinfo=firstGame, isHome=False)
+        home: Gameresult = Gameresult.objects.get(gameinfo=first_game, isHome=True)
+        away: Gameresult = Gameresult.objects.get(gameinfo=first_game, isHome=False)
         assert home.fh == 15
         assert home.sh == 0
         assert away.fh == 0
@@ -235,33 +235,33 @@ class TestGameLog(WebTest):
 class TestGameHalftime(WebTest):
     def test_halftime_submitted(self):
         DBSetup().g62_status_empty()
-        firstGame: Gameinfo = Gameinfo.objects.first()
-        response = self.app.put_json(reverse(API_GAME_HALFTIME, kwargs={'pk': firstGame.pk}),
+        first_game: Gameinfo = Gameinfo.objects.first()
+        response = self.app.put_json(reverse(API_GAME_HALFTIME, kwargs={'pk': first_game.pk}),
                                      headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.OK
-        firstGame = Gameinfo.objects.first()
-        assert firstGame.status == '2. Halbzeit'
-        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameHalftime))
+        first_game = Gameinfo.objects.first()
+        assert first_game.status == '2. Halbzeit'
+        assert re.match(r'^(0\d|1\d|2[0-3]):[0-5]\d', str(first_game.gameHalftime))
 
 
 class TestGameFinalize(WebTest):
     def test_game_is_finalized(self):
         DBSetup().g62_status_empty()
-        firstGame: Gameinfo = Gameinfo.objects.last()
-        DBSetup().create_gamesetup(firstGame)
-        response = self.app.put_json(reverse(API_GAME_FINALIZE, kwargs={'pk': firstGame.pk}), {
+        first_game: Gameinfo = Gameinfo.objects.last()
+        DBSetup().create_gamesetup(first_game)
+        response = self.app.put_json(reverse(API_GAME_FINALIZE, kwargs={'pk': first_game.pk}), {
             'homeCaptain': 'Home Captain',
             'awayCaptain': 'Away Captain',
             'hasFinalScoreChanged': True
         }, headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.OK
-        gamesetup = GameSetup.objects.get(gameinfo=firstGame)
+        gamesetup = GameSetup.objects.get(gameinfo=first_game)
         assert gamesetup.homeCaptain == 'Home Captain'
         assert gamesetup.awayCaptain == 'Away Captain'
-        assert gamesetup.hasFinalScoreChanged == True
-        firstGame: Gameinfo = Gameinfo.objects.last()
-        assert firstGame.status == 'beendet'
-        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameFinished))
+        assert gamesetup.hasFinalScoreChanged is True
+        first_game: Gameinfo = Gameinfo.objects.last()
+        assert first_game.status == 'beendet'
+        assert re.match(r'^(0\d|1\d|2[0-3]):[0-5]\d', str(first_game.gameFinished))
 
 
 class TestConfigPenaltiesAPIView(WebTest):
@@ -269,6 +269,7 @@ class TestConfigPenaltiesAPIView(WebTest):
         response = self.app.get(reverse(API_CONFIG_SCORECARD_PENALTIES))
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) >= 1
+
 
 class TestGamePossessionAPIView(WebTest):
     def test_put_game_possession(self):
