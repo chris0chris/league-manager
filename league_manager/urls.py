@@ -20,11 +20,14 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_view
 from django.urls import path, include
 
-from league_manager.views import homeview, AllUrlsView
+from league_manager.views import homeview, AllUrlsView, ClearCacheView
 
 ADMIN_ALL_URLS = 'admin-all-urls'
+CLEAR_CACHE = 'clear-cache'
+
 urlpatterns = [
                   path('urls', AllUrlsView.as_view(), name=ADMIN_ALL_URLS),
+                  path('clear-cache', ClearCacheView.as_view(), name=CLEAR_CACHE),
                   path('admin/', admin.site.urls),
                   path('api/liveticker/', include('liveticker.api.urls')),
                   path('api/officials/', include('officials.api.urls')),
