@@ -126,6 +126,9 @@ class Gameday(models.Model):
 
     class Meta:
         ordering = ['date']
+        indexes = [
+            models.Index(fields=['id', 'date']),
+        ]
 
     def __str__(self):
         return f'{self.pk}__{self.date} {self.name}'
@@ -146,6 +149,12 @@ class Gameinfo(models.Model):
 
     objects: QuerySet = models.Manager()
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['id', 'officials']),
+            models.Index(fields=['id', 'gameday']),
+        ]
+
     def __str__(self):
         return f'{self.gameday.pk}__{self.pk}__{self.field} - {self.scheduled}: {self.stage} / {self.standing} ' \
                f'- {self.officials} [{self.status}]'
@@ -160,6 +169,13 @@ class Gameresult(models.Model):
     isHome = models.BooleanField(default=False)
 
     objects: QuerySet = models.Manager()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['id', 'gameinfo', 'isHome']),
+            models.Index(fields=['id', 'gameinfo']),
+            models.Index(fields=['id', 'team']),
+        ]
 
     def __str__(self):
         if self.fh is None:
@@ -177,6 +193,11 @@ class GameOfficial(models.Model):
     position = models.CharField(max_length=100)
 
     objects: QuerySet = models.Manager()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['gameinfo', 'position']),
+        ]
 
     def __str__(self):
         name_or_official_name = f'{self.official.last_name}, {self.official.first_name}' \

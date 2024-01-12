@@ -1,8 +1,7 @@
-import datetime
+from datetime import datetime, date
 
 from django.test import TestCase
 
-from gamedays.models import GameOfficial
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer, \
     Obfuscator, OfficialGameCountSerializer
 from officials.models import Official
@@ -24,45 +23,72 @@ class TestObfuscator:
         assert Obfuscator.obfuscate(None, '', 'Nmae') == 'N****'
 
 
-class TestGameOfficialAllInfoSerializer(TestCase):
+class TestGameOfficialAllInfoSerializer:
+    def create_some_official(self, **kwargs):
+        defaults = {
+            'id': 77,
+            'name': 'Julia Kuli',
+            'position': 'Referee',
+            'gameinfo_id': 5,
+            'gameinfo__standing': 'group 1',
+            'gameinfo__gameday__date': datetime.today(),
+            'gameinfo__gameday__name': 'Some Bowl Name',
+            'gameinfo__officials_id': 7,
+            'gameinfo__officials__description': 'Some Team description',
+            'gameinfo__officials__name': 'Some Team name',
+            'official__first_name': 'Julia',
+            'official__last_name': 'Kuli',
+            'official__team__name': 'Some Official Team name',
+            'home': 'home team',
+            'away': 'away team',
+        }
+
+        defaults.update(kwargs)
+        return defaults
+
     def test_names_are_obfuscated(self):
-        DbSetupOfficials().create_officials_full_setup()
-        all_game_officials = GameOfficial.objects.all()
+        all_game_officials = [self.create_some_official(), self.create_some_official()]
         serializer = GameOfficialAllInfoSerializer(all_game_officials, many=True)
-        assert serializer.data[0].get('name') == 'F****F****'
+        assert serializer.data[0].get('name') == 'J****K****'
+
+    def test_names_are_unlinked(self):
+        all_game_officials = [self.create_some_official(official__first_name=None), self.create_some_official()]
+        serializer = GameOfficialAllInfoSerializer(all_game_officials, many=True)
+        assert serializer.data[0].get('name') == 'J****K**** ?'
 
     def test_names_are_clear_for_staff(self):
-        DbSetupOfficials().create_officials_full_setup()
-        all_game_officials = GameOfficial.objects.all()
+        all_game_officials = [self.create_some_official(), self.create_some_official()]
         serializer = GameOfficialAllInfoSerializer(all_game_officials, is_staff=True, many=True)
-        assert serializer.data[0].get('name') == 'Franzi Fedora'
+        assert serializer.data[0].get('name') == 'Julia Kuli'
 
     def test_names_are_clear_for_same_team_name(self):
-        DbSetupOfficials().create_officials_full_setup()
-        all_game_officials = GameOfficial.objects.all()
+        all_game_officials = [self.create_some_official(official__first_name=None), self.create_some_official()]
         serializer = GameOfficialAllInfoSerializer(
             instance=all_game_officials,
-            display_names_for_team='officials',
+            display_names_for_team='Some Team name',
             is_staff=True,
             many=True
         )
-        assert serializer.data[0].get('name') == 'Franzi Fedora'
+        assert serializer.data[0].get('name') == 'Julia Kuli ?'
+        serializer = GameOfficialAllInfoSerializer(
+            instance=all_game_officials,
+            display_names_for_team='Some Official Team name',
+            is_staff=True,
+            many=True
+        )
+        assert serializer.data[1].get('name') == 'Julia Kuli'
 
     def test_game_official_is_serialized(self):
-        DbSetupOfficials().create_officials_full_setup()
-        first_entry = GameOfficial.objects.first()
-        first_entry.name = ''
-        first_entry.save()
-        all_game_officials = GameOfficial.objects.all()
-        serializer = GameOfficialAllInfoSerializer(instance=all_game_officials, many=True)
-        assert serializer.data[0].get('name') == 'F****F****'
+        officials = self.create_some_official()
+        serializer = GameOfficialAllInfoSerializer(instance=officials)
+        assert serializer.data.get('name') == 'J****K****'
 
 
 class TestOfficialSerializer(TestCase):
     def test_official_serializer_with_license(self):
         DbSetupOfficials().create_officials_full_setup()
         official = Official.objects.first()
-        year = datetime.date.today().year + 1
+        year = datetime.today().year + 1
         assert OfficialSerializer(instance=official).data == {
             'association': 'ABBR',
             'email': '',
@@ -73,13 +99,13 @@ class TestOfficialSerializer(TestCase):
             'license': 'F1',
             'name': 'F****F****',
             'team': official.team.description,
-            'valid_until': datetime.date(year, 3, 31)
+            'valid_until': date(year, 3, 31)
         }
 
     def test_official_serializer_without_association(self):
         DbSetupOfficials().create_officials_full_setup()
         official = Official.objects.last()
-        year = datetime.date.today().year + 1
+        year = datetime.today().year + 1
         assert OfficialSerializer(instance=official, is_staff=True).data == {
             'association': 'Kein Verband hinterlegt',
             'email': '',
@@ -90,7 +116,7 @@ class TestOfficialSerializer(TestCase):
             'license': 'F2',
             'name': 'Julia Jegura',
             'team': official.team.description,
-            'valid_until': datetime.date(year, 3, 31)
+            'valid_until': date(year, 3, 31)
         }
 
 
@@ -99,7 +125,6 @@ class TestOfficialGamelistSerializer(TestCase):
         DbSetupOfficials().create_officials_full_setup()
         DbSetupOfficials().create_external_officials_entries()
         official = Official.objects.last()
-        from datetime import datetime
         season = datetime.today().year
         serializer = OfficialGamelistSerializer(instance=official, season=season, is_staff=False).data
         assert serializer['external_games']['number_games'] == 7
@@ -112,7 +137,6 @@ class TestOfficialGameCountSerializer(TestCase):
         DbSetupOfficials().create_officials_full_setup()
         DbSetupOfficials().create_external_officials_entries()
         official = Official.objects.last()
-        from datetime import datetime
         season = datetime.today().year
         serializer = OfficialGameCountSerializer(instance=official, season=season, is_staff=False).data
         assert serializer['position_count'] == {

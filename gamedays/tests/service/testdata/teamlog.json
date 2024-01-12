@@ -1,82 +1,82 @@
 {
-  "gameId": null,
-  "isFirstHalf": true,
-  "home": {
-    "name": "Home",
-    "score": 42,
+  "away": {
     "firsthalf": {
-      "score": 21,
+      "entries": [],
+      "score": 1
+    },
+    "name": "Away",
+    "score": 2,
+    "secondhalf": {
       "entries": [
         {
-          "sequence": 3,
-          "td": 19,
-          "pat1": 7
+          "Safety": 7,
+          "isDeleted": true,
+          "sequence": 11
         },
         {
+          "cop": true,
+          "name": "Interception",
+          "sequence": 10
+        },
+        {
+          "Safety": 7,
+          "sequence": 7
+        },
+        {
+          "cop": true,
+          "name": "Turnover",
+          "sequence": 6
+        },
+        {
+          "Safety": 7,
+          "sequence": 4
+        }
+      ],
+      "score": 1
+    }
+  },
+  "gameId": 101,
+  "home": {
+    "firsthalf": {
+      "entries": [
+        {
+          "pat1": 7,
+          "sequence": 3,
+          "td": 19
+        },
+        {
+          "pat2": 7,
           "sequence": 2,
-          "td": 19,
-          "pat2": 7
+          "td": 19
         },
         {
           "sequence": 1,
           "td": 19
         }
-      ]
+      ],
+      "score": 2
     },
+    "name": "Home",
+    "score": 3,
     "secondhalf": {
-      "score": 21,
       "entries": [
         {
+          "pat1": null,
           "sequence": 9,
-          "td": 19,
-          "pat1": null
+          "td": 19
         },
         {
+          "pat2": 7,
           "sequence": 8,
-          "td": 19,
-          "pat2": 7
+          "td": 19
         },
         {
           "sequence": 5,
           "td": 19
         }
-      ]
+      ],
+      "score": 1
     }
   },
-  "away": {
-    "name": "Away",
-    "score": 3,
-    "firsthalf": {
-      "score": 0,
-      "entries": []
-    },
-    "secondhalf": {
-      "score": 3,
-      "entries": [
-        {
-          "sequence": 11,
-          "Safety": 7,
-          "isDeleted": true
-        },
-        {
-          "sequence": 10,
-          "cop": true,
-          "name": "Interception"
-        },
-        {
-          "sequence": 7,
-          "Safety": 7
-        },
-        {
-          "sequence": 6,
-          "cop": true,
-          "name": "Turnover"
-        },
-        {
-          "sequence": 4,
-          "Safety": 7
-        }
-      ]
-    }
-  }
+  "isFirstHalf": true
 }

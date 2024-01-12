@@ -8,21 +8,45 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from gamedays.api.serializers import GameFinalizer, GameSetupSerializer
-from gamedays.models import Team, Gameinfo, GameSetup
+from gamedays.api.serializers import GameFinalizer, GameSetupSerializer, GameLogSerializer
+from gamedays.models import Team, Gameinfo, GameSetup, TeamLog
 from gamedays.service.game_service import GameService
 from gamedays.service.gameday_service import GamedayService
+from gamedays.service.model_helper import GameresultHelper, TeamLogHelper
 
 
 class GameLogAPIView(APIView):
 
     def get(self, request: Request, *args, **kwargs):
-        gameId = kwargs.get('id')
-        try:
-            gamelog = GameService(gameId).get_gamelog()
-            return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict))
-        except Gameinfo.DoesNotExist:
-            raise NotFound(detail=f'No game found for gameId {gameId}')
+        game_id = kwargs.get('id')
+        if request.query_params.get('other') is not None:
+            try:
+                gamelog = GameService(game_id).get_gamelog()
+                return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict))
+            except Gameinfo.DoesNotExist:
+                raise NotFound(detail=f'No game found for gameId {game_id}')
+        gamelog = Gameinfo.objects.filter(id=game_id).annotate(
+            home_id=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='id'),
+            home=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='name'),
+            away_id=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='id'),
+            away=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='name'),
+            score_home_overall=GameresultHelper.get_gameresult_score(True, True, True),
+            score_home_fh=GameresultHelper.get_gameresult_score(True, is_fh=True),
+            score_home_sh=GameresultHelper.get_gameresult_score(True, is_sh=True),
+            score_away_overall=GameresultHelper.get_gameresult_score(False, True, True),
+            score_away_fh=GameresultHelper.get_gameresult_score(False, is_fh=True),
+            score_away_sh=GameresultHelper.get_gameresult_score(False, is_sh=True),
+        ).values(*GameLogSerializer.ALL_FIELD_VALUES, 'home_id', 'away_id')
+        if not gamelog.exists():
+            raise NotFound(detail=f'No game found for gameId {game_id}')
+        gamelog = list(gamelog)[0]
+        gamelog.update({GameLogSerializer.TEAMLOG_HOME: list(
+            TeamLog.objects.filter(gameinfo=game_id, team=gamelog['home_id']).exclude(
+                event__in=TeamLogHelper.EXCLUDED_EVENTS).order_by('-sequence').values())})
+        gamelog.update({GameLogSerializer.TEAMLOG_AWAY: list(
+            TeamLog.objects.filter(gameinfo=game_id, team=gamelog['away_id']).exclude(
+                event__in=TeamLogHelper.EXCLUDED_EVENTS).order_by('-sequence').values())})
+        return Response(GameLogSerializer(instance=gamelog).data)
 
     def post(self, request, *args, **kwargs):
         try:
