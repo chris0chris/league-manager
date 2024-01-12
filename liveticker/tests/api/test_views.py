@@ -1,6 +1,7 @@
 from datetime import datetime
 from http import HTTPStatus
 
+from django.core.cache import cache
 from django.urls import reverse
 from django_webtest import WebTest
 
@@ -11,6 +12,7 @@ from liveticker.api.urls import API_LIVETICKER_ALL
 
 class TestLivetickerAPIView(WebTest):
     def test_no_liveticker_found(self):
+        cache.clear()
         response = self.app.get(reverse(API_LIVETICKER_ALL))
         assert response.json == []
 
