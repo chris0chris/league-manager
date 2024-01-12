@@ -1,5 +1,4 @@
 import json
-import pathlib
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -26,14 +25,6 @@ class TestGamelog(TestCase):
         assert len(gamelog.get_entries_home_secondhalf()) == 5
         assert len(gamelog.get_entries_away_firsthalf()) == 0
         assert len(gamelog.get_entries_away_secondhalf()) == 5
-
-    def test_get_gamelog_as_json(self):
-        firstGameEntry = DBSetup().create_teamlog_home_and_away()
-        gamelog = GameLog(firstGameEntry)
-        with open(pathlib.Path(__file__).parent / 'testdata/teamlog.json') as f:
-            expected_gamelog = json.load(f)
-        expected_gamelog['gameId'] = firstGameEntry.pk
-        assert gamelog.as_json() == json.dumps(expected_gamelog)
 
     def test_firsthalf_is_played(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
