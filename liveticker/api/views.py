@@ -7,6 +7,7 @@ from liveticker.service.liveticker_service import LivetickerService
 
 
 class LivetickerAPIView(APIView):
+    @method_decorator(cache_page(60))
     def get(self, request):
         league = request.query_params.get('league')
         league = [] if league is None or league == '' else league.split(',')
