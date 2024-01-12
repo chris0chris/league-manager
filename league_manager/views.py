@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.shortcuts import render
+from django.core.cache import cache
+from django.shortcuts import render, redirect
 from django.urls import URLPattern, URLResolver
 from django.views import View
 
@@ -10,6 +11,16 @@ def homeview(request):
 
 
 URLCONF = __import__(settings.ROOT_URLCONF, {}, {}, [''])
+
+
+class ClearCacheView(View, UserPassesTestMixin):
+
+    def get(self, request):
+        cache.clear()
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+
+    def test_func(self):
+        return self.request.user.is_staff
 
 
 class AllUrlsView(View, UserPassesTestMixin):

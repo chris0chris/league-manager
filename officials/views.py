@@ -6,8 +6,10 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Subquery, OuterRef, Q
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
 from django.views import View
+from django.views.decorators.cache import cache_page
 
 from gamedays.models import Team, Gameinfo, GameOfficial, Gameresult
 from league_manager.utils.view_utils import PermissionHelper
@@ -48,6 +50,7 @@ class OfficialsTeamListView(View):
 class AllOfficialsListView(View):
     template_name = 'officials/all_officials_list.html'
 
+    @method_decorator(cache_page(60 * 60 * 24))
     def get(self, request, **kwargs):
         all_teams = Team.objects.all().exclude(location='dummy').order_by('description')
         context = {'object_list': all_teams}
@@ -57,6 +60,7 @@ class AllOfficialsListView(View):
 class GameOfficialListView(View):
     template_name = 'officials/game_officials_list.html'
 
+    @method_decorator(cache_page(60 * 60 * 24))
     def get(self, request, **kwargs):
         year = kwargs.get('year', datetime.today().year)
         team_id = kwargs.get('pk')
