@@ -1,8 +1,8 @@
 import datetime
 
 from django.db.models import QuerySet, Max
-from rest_framework.fields import CharField, SerializerMethodField, BooleanField, DateField, FloatField
-from rest_framework.serializers import ModelSerializer
+from rest_framework.fields import CharField, SerializerMethodField, BooleanField, DateField, FloatField, IntegerField
+from rest_framework.serializers import ModelSerializer, Serializer
 
 from gamedays.models import GameOfficial
 from officials.models import Official, OfficialLicenseHistory, EmptyOfficialLicenseHistory, OfficialExternalGames
@@ -38,6 +38,14 @@ class OfficialExternalGamesSerializer(ModelSerializer):
         if self.is_staff:
             return obj.reporter_name
         return Obfuscator.obfuscate(*obj.reporter_name.split(' ')[:2])
+
+
+class OfficialTeamListScorecardSerializer(Serializer):
+    ALL_FIELD_VALUES = ['last_name', 'first_name', 'id', 'team__description']
+    team = CharField(source='team__description')
+    last_name = CharField()
+    first_name = CharField()
+    id = IntegerField()
 
 
 class OfficialSerializer(ModelSerializer):
@@ -213,57 +221,69 @@ class OfficialGamelistSerializer(OfficialSerializer):
         }
 
 
-class GameOfficialAllInfoSerializer(ModelSerializer):
-    info = SerializerMethodField('get_infos')
+class GameOfficialAllInfoSerializer(Serializer):
+    ID_C = 'id'
+    HOME_C = 'home'
+    AWAY_C = 'away'
+    NAME_C = 'name'
+    POSITION_C = 'position'
+    GAMEINFO_ID_C = 'gameinfo_id'
+    GAMEINFO_STANDING_C = 'gameinfo__standing'
+    GAMEDAY_NAME_C = 'gameinfo__gameday__name'
+    GAMEDAY_DATE_C = 'gameinfo__gameday__date'
+    GAMEINFO_OFFICIALS_ID_C = 'gameinfo__officials_id'
+    GAMEINFO_OFFICIALS_TEAM_DESCRIPTION_C = 'gameinfo__officials__description'
+    GAMEINFO_OFFICIALS_TEAM_NAME_C = 'gameinfo__officials__name'
+    OFFICIAL_FIRST_NAME_C = 'official__first_name'
+    OFFICIAL_LAST_NAME_C = 'official__last_name'
+    OFFICIAL_TEAM_NAME_C = 'official__team__name'
+    ALL_VALUE_FIELDS = [ID_C, HOME_C, AWAY_C, NAME_C, POSITION_C, GAMEINFO_ID_C, GAMEINFO_STANDING_C,
+                        GAMEDAY_DATE_C, GAMEDAY_NAME_C,
+                        GAMEINFO_OFFICIALS_ID_C, GAMEINFO_OFFICIALS_TEAM_DESCRIPTION_C,
+                        GAMEINFO_OFFICIALS_TEAM_NAME_C,
+                        OFFICIAL_FIRST_NAME_C, OFFICIAL_LAST_NAME_C, OFFICIAL_TEAM_NAME_C]
+
     name = SerializerMethodField('obfuscate_name')
+    id = CharField()
+    gameday_name = CharField(source=GAMEDAY_NAME_C)
+    gameday_date = SerializerMethodField()
+    gameinfo_id = CharField()
+    home = CharField()
+    away = CharField()
+    position = CharField()
+    team_official_id = CharField(source=GAMEINFO_OFFICIALS_ID_C)
+    team_name = CharField(source=GAMEINFO_OFFICIALS_TEAM_DESCRIPTION_C)
+    standing = CharField(source=GAMEINFO_STANDING_C)
+    official_first_name = CharField(source=OFFICIAL_FIRST_NAME_C)
+    official_last_name = CharField(source=OFFICIAL_LAST_NAME_C)
+    official_team_name = CharField(source=OFFICIAL_TEAM_NAME_C)
 
     def __init__(self, display_names_for_team=None, is_staff=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.display_names_for_team = display_names_for_team
         self.is_staff = is_staff
 
-    # noinspection PyMethodMayBeStatic
-    def get_infos(self, obj: GameOfficial):
-        home = obj.gameinfo.gameresult_set.get(isHome=True).team.name
-        away = obj.gameinfo.gameresult_set.get(isHome=False).team.name
-        if obj.official is not None:
-            team = obj.official.team
-            team_name = team.name
-            team_id = team.pk
-        else:
-            team_name = obj.gameinfo.officials.name
-            team_id = obj.gameinfo.officials.pk
-        return {
-            'team': team_name,
-            'team_id': team_id,
-            'game_official_id': obj.pk,
-            'gameinfo_id': obj.gameinfo.pk,
-            'gameday': obj.gameinfo.gameday.name,
-            'date': obj.gameinfo.gameday.date.strftime('%d.%m.%Y'),
-            'vs': home + ' vs ' + away,
-            'standing': obj.gameinfo.standing,
-        }
+    def get_gameday_date(self, obj):
+        return obj[self.GAMEDAY_DATE_C].strftime('%d.%m.%Y')
 
-    def obfuscate_name(self, obj: GameOfficial):
+    def obfuscate_name(self, obj: dict):
         official_name = self._get_official_name(obj)
-        if self.display_names_for_team == obj.gameinfo.officials.name or self.is_staff:
-            return official_name['name']
-        obfuscated_name = Obfuscator.obfuscate(*official_name['name'].split(' ')[:2])
+        if (self.display_names_for_team == obj[self.GAMEINFO_OFFICIALS_TEAM_NAME_C] or
+                self.display_names_for_team == obj[self.OFFICIAL_TEAM_NAME_C] or
+                self.is_staff):
+            name = official_name['name']
+        else:
+            name = Obfuscator.obfuscate(*official_name[self.NAME_C].split(' ')[:2])
         if official_name['is_mapped']:
-            return obfuscated_name
-        return f'{obfuscated_name} ?'
+            return name
+        return f'{name} ?'
 
-    # noinspection PyMethodMayBeStatic
-    def _get_official_name(self, game_official) -> dict:
-        if game_official.official is not None:
+    def _get_official_name(self, game_official: dict) -> dict:
+        if game_official.get(self.OFFICIAL_FIRST_NAME_C) is not None:
             return {
                 "is_mapped": True,
-                "name": f'{game_official.official.first_name} {game_official.official.last_name}'}
+                "name": f'{game_official[self.OFFICIAL_FIRST_NAME_C]} {game_official[self.OFFICIAL_LAST_NAME_C]}'}
         return {
             "is_mapped": False,
-            "name": game_official.name
+            "name": game_official.get(self.NAME_C)
         }
-
-    class Meta:
-        model = GameOfficial
-        fields = '__all__'

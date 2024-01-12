@@ -51,9 +51,17 @@
                     {% endif %}
                 </div>
                 <!-- Navbar Right Side -->
-                <div class="navbar-nav">
                     {% if user.is_authenticated %}
-                    <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
+                {% if user.is_staff %}
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link" href="{% url 'clear-cache' %}">
+                        <button class="btn btn-warning" type="button">Clear Cache</button>
+                    </a>
+                </div>
+                {% endif %}
+                <div class="navbar-nav">
+
+                <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
                     {% else %}
                     <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
                     {% endif %}

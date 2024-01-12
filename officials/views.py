@@ -4,11 +4,14 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db.models import Subquery, OuterRef, Q
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
 from django.views import View
+from django.views.decorators.cache import cache_page
 
-from gamedays.models import Team, Gameinfo, GameOfficial, Gameday
+from gamedays.models import Team, Gameinfo, GameOfficial, Gameresult
 from league_manager.utils.view_utils import PermissionHelper
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
 from officials.forms import AddInternalGameOfficialEntryForm
@@ -47,6 +50,7 @@ class OfficialsTeamListView(View):
 class AllOfficialsListView(View):
     template_name = 'officials/all_officials_list.html'
 
+    @method_decorator(cache_page(60 * 60 * 24))
     def get(self, request, **kwargs):
         all_teams = Team.objects.all().exclude(location='dummy').order_by('description')
         context = {'object_list': all_teams}
@@ -56,38 +60,56 @@ class AllOfficialsListView(View):
 class GameOfficialListView(View):
     template_name = 'officials/game_officials_list.html'
 
+    @method_decorator(cache_page(60 * 60 * 24))
     def get(self, request, **kwargs):
-        if Gameday.objects.filter(date=datetime.today()).exists():
-            return render(request, self.template_name, {
-                'gameday_is_running': True
-            })
         year = kwargs.get('year', datetime.today().year)
         team_id = kwargs.get('pk')
-        game_officials = GameOfficial.objects.filter(gameinfo__gameday__date__year=year).exclude(
-            position='Scorecard Judge')
-        game_officials = game_officials.order_by('gameinfo__gameday__date')
+        game_officials = (
+            GameOfficial.objects.filter(gameinfo__gameday__date__year=year)
+            .exclude(position='Scorecard Judge')
+        )
         if team_id:
-            game_officials_with_no_official = game_officials.filter(gameinfo__officials__pk=team_id, official=None)
-            game_officials_with_official_link = game_officials.filter(official__team__pk=team_id)
-            game_officials = game_officials_with_no_official.union(game_officials_with_official_link)
+            game_officials = game_officials.filter(
+                Q(gameinfo__officials__pk=team_id, official=None) |
+                Q(official__team__pk=team_id)
+            )
+        game_officials = game_officials.order_by('gameinfo__gameday__date')
         is_staff = request.user.is_staff
         team_name = request.user.username
 
-        paginator = Paginator(game_officials, 100)
+        paginator = Paginator(game_officials, 1000)
         page = request.GET.get('page')
         try:
-            game_officials = paginator.page(page)
+            game_officials_page = paginator.page(page)
         except PageNotAnInteger:
-            game_officials = paginator.page(1)
+            game_officials_page = paginator.page(1)
         except EmptyPage:
-            game_officials = paginator.page(paginator.num_pages)
+            game_officials_page = paginator.page(paginator.num_pages)
+        game_officials_object_list = game_officials_page.object_list.annotate(
+            home=self._get_subquery(is_home=True),
+            away=self._get_subquery(is_home=False),
+        )
         context = {
             'year': year,
-            'object_list': GameOfficialAllInfoSerializer(instance=game_officials, display_names_for_team=team_name,
-                                                         is_staff=is_staff, many=True).data,
-            'page_obj': game_officials,
+            'object_list':
+                GameOfficialAllInfoSerializer(
+                    instance=game_officials_object_list.values(*GameOfficialAllInfoSerializer.ALL_VALUE_FIELDS),
+                    display_names_for_team=team_name,
+                    is_staff=is_staff,
+                    many=True
+                ).data,
+            'page_obj': game_officials_page,
         }
         return render(request, self.template_name, context)
+
+    # noinspection PyMethodMayBeStatic
+    def _get_subquery(self, is_home: bool):
+        return Subquery(
+            Gameresult.objects.filter(
+                gameinfo=OuterRef('gameinfo'),
+                isHome=is_home
+            ).values('team__description')[:1]
+        )
 
 
 class AddInternalGameOfficialUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
