@@ -15,6 +15,8 @@ SCHEDULE_CHOICES = (
     ("9_2", "9 Teams 2 Felder"),
     ("9_3", "9 Teams 3 Felder"),
     ("11_3", "11 Teams 3 Felder"),
+    ("6_oneDivision_2", "DFFL 7er Division"),
+    ("7_oneDivision_2", "DFFL 8er Division"),
     ("6_sfl_2", "SFL - 3x3 Conference"),
     ("7_sfl_2", "SFL - 3x4 Conference"),
 )
@@ -47,7 +49,8 @@ class GamedayCreateForm(forms.ModelForm):
 class GamedayUpdateForm(forms.ModelForm):
     name = forms.CharField(max_length=100, initial=f'test {timezone.now()}')
     date = forms.DateField(widget=forms.DateInput(
-        attrs={'type': 'date'}
+        format='%Y-%m-%d',
+        attrs={'type': 'date'},
     ))
     start = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}))
     format = forms.ChoiceField(choices=SCHEDULE_CHOICES)
@@ -62,3 +65,10 @@ class GamedayUpdateForm(forms.ModelForm):
     class Meta:
         model = Gameday
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(GamedayUpdateForm, self).__init__(*args, **kwargs)
+        # Set the initial value for the date field
+        if 'instance' in kwargs:
+            self.fields['date'].initial = kwargs['instance'].date.strftime('%Y-%m-%d')
+            v = ''
