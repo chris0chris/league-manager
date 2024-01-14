@@ -1,8 +1,8 @@
-import PlayerLine from "./PlayerLine";
-import PlayerModal from "./PlayerModal";
-import Table from "react-bootstrap/Table";
-import { useState } from "react";
-import { jsonTypePlayerlist } from "../common/types";
+import PlayerLine from './PlayerLine';
+import PlayerModal from './PlayerModal';
+import Table from 'react-bootstrap/Table';
+import {useState} from 'react';
+import {jsonTypePlayerlist} from '../common/types';
 
 interface Props {
   players: jsonTypePlayerlist;
@@ -20,10 +20,9 @@ function PlayersTable({
   decreasePlayersCount,
   initModal,
   resetPageLoad,
-  gameday
+  gameday,
 }: Props) {
-
-  const [searchInput, setSearchInput] = useState(""); //Filter players by last name
+  const [searchInput, setSearchInput] = useState(''); //Filter players by last name
   const onChange = (event: any) => {
     //Searchbar is being used
     setSearchInput(event.target.value);
@@ -49,28 +48,31 @@ function PlayersTable({
   return (
     <>
       <input
-        className="form-control me-2"
-        id="searchbar"
-        type="search"
-        placeholder="Spieler Suchen"
-        aria-label="Search"
+        className='form-control me-2'
+        id='searchbar'
+        type='search'
+        placeholder='Spieler Suchen'
+        aria-label='Search'
         onChange={onChange}
         value={searchInput}
       />
-      <Table bordered hover size="sm" className="rounded-table">
+      <Table bordered hover size='sm' className='rounded-table'>
         <thead>
           <tr>
-            <th className="table-border">Lfd</th>
-            <th className="table-border">Name</th>
-            <th className="table-border">Trikot</th>
-            <th className="table-border">Pass</th>
+            <th className='table-border'>Lfd</th>
+            <th className='table-border'>Name</th>
+            <th className='table-border'>Trikot</th>
+            <th className='table-border'>Pass</th>
           </tr>
         </thead>
         <tbody>
           {playersData
             .filter((player: any) => {
               const searchTerm = searchInput.toLowerCase();
-              const playerName = player.firstname.toLowerCase() + ' ' + player.lastname.toLowerCase();
+              const playerName =
+                player.first_name.toLowerCase() +
+                ' ' +
+                player.last_name.toLowerCase();
               return playerName.startsWith(searchTerm);
             })
             .map(
@@ -78,7 +80,9 @@ function PlayersTable({
                 player: any //map each player in the array into one row of a table
               ) => (
                 <tr
-                  className={player.gamedays.includes(gameday) ? "table-success" : ""}
+                  className={
+                    player.gamedays.includes(gameday) ? 'table-success' : ''
+                  }
                   key={player.key}
                   onClick={() => {
                     //click the row to show the modal with the players infos
