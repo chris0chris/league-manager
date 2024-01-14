@@ -1,13 +1,13 @@
 export type jsonTypePlayerlist = {
-    firstname: string;
+    first_name: string;
     gamedays: number[];
     id: string;
     key: number;
-    lastname: string;
-    passnumber: string;
+    last_name: string;
+    pass_number: string;
     sex: string;
     team: number;
-    trikotnumber: number;
+    jersey_number: number;
     ownLeagueGamedaysPlayed: number;
     otherTeamGamedaysPlayed: number;
   }[];
