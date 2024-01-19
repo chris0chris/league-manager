@@ -1,15 +1,30 @@
-from rest_framework.fields import SerializerMethodField
-from rest_framework.serializers import ModelSerializer
 from django.contrib.auth.models import User
+from knox.models import AuthToken
+from rest_framework.fields import SerializerMethodField, CharField, IntegerField
+from rest_framework.serializers import ModelSerializer, Serializer
 
-
+from gamedays.models import Gameinfo, Team, Gameday
 # importing models
 from passcheck.models import Playerlist
-from gamedays.models import Gameinfo, Team, Gameday
-from knox.models import AuthToken
 
 
-# Serialize table data into json object
+class RosterSerializer(Serializer):
+    first_name = CharField()
+    last_name = CharField()
+    jersey_number = IntegerField()
+    pass_number = IntegerField()
+    sex = IntegerField()
+    gamedays_counter = SerializerMethodField()
+
+    def get_gamedays_counter(self, obj: dict):
+        all_leagues = self.context.get('all_leagues', [])
+        gamedays_counters = {}
+        for league in all_leagues:
+            field_name = f'{league["gamedays__league"]}'
+            gamedays_counters[field_name] = obj[field_name]
+        return gamedays_counters
+
+
 class PasscheckSerializer(ModelSerializer):
     ownLeagueGamedaysPlayed = SerializerMethodField('get_own')
     otherTeamGamedaysPlayed = SerializerMethodField('get_other')

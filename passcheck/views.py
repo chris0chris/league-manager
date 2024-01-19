@@ -2,10 +2,28 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.urls import reverse
+from django.views import View
 from django.views.generic import ListView, CreateView
 
+from gamedays.models import Team
 from .forms import PlayerlistCreateForm
 from .models import Playerlist
+from .service.passcheck_service import PasscheckService
+
+
+class PlayerlistView(View):
+    template_name = 'passcheck/playerlist_list.html'
+
+    def get(self, request, **kwargs):
+        team_id = kwargs.get('pk')
+
+        team = Team.objects.get(pk=team_id)
+        passcheck_service = PasscheckService()
+        context = {
+            'team': team.description,
+            'object_list': passcheck_service.get_roster(team)
+        }
+        return render(request, self.template_name, context)
 
 
 class PlayerlistCreateView(LoginRequiredMixin, CreateView):
