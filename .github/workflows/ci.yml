@@ -14,6 +14,21 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.9]
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          # The MySQL docker container requires these environment variables to be set
+          # so we can create and migrate the test database.
+          # See: https://hub.docker.com/_/mysql
+          MYSQL_DATABASE: test_test_db
+          MYSQL_USER: user
+          MYSQL_PASSWORD: user
+        ports:
+          # Opens port 3306 on service container and host
+          # https://docs.github.com/en/actions/using-containerized-services/about-service-containers
+          - 3306:3306
+        options: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
 
     steps:
     - uses: actions/checkout@v2
