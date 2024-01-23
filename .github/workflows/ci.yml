@@ -28,7 +28,7 @@ jobs:
           # Opens port 3306 on service container and host
           # https://docs.github.com/en/actions/using-containerized-services/about-service-containers
           - 3306:3306
-        options: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
+        options: ---health-cmd="mysqladmin ping"
 
     steps:
     - uses: actions/checkout@v2
