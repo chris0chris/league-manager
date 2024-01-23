@@ -47,3 +47,6 @@ jobs:
         pytest
       env:
         MYSQL_HOST: 0.0.0.0
+        SECRET_KEY: 123456-TEST
+        CIRCLECI: 1
+
