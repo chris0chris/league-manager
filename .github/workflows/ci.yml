@@ -43,3 +43,5 @@ jobs:
     - name: Run Tests
       run: |
         pytest
+      env:
+        MYSQL_HOST: 0.0.0.0
