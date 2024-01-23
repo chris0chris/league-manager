@@ -38,6 +38,8 @@ jobs:
 
       - run:
           name: run tests
+          environment:
+            SECRET_KEY: 123456-TEST
           command: |
             . ~/.venv/bin/activate
             pytest --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
