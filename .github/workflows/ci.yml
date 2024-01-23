@@ -24,6 +24,7 @@ jobs:
           MYSQL_DATABASE: test_test_db
           MYSQL_USER: user
           MYSQL_PASSWORD: user
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
         ports:
           # Opens port 3306 on service container and host
           # https://docs.github.com/en/actions/using-containerized-services/about-service-containers
