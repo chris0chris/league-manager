@@ -68,8 +68,8 @@ class OfficialGameCount:
             'team': self.official.team.description,
             'last_name': self.official.last_name,
             'first_name': self.official.first_name,
-            'last_license': license_history.license.name,
-            'license_year': license_history.created_at.year,
+            'last_license': license_history.license.name if license_history else 'Keine',
+            'license_year': license_history.created_at.year if license_history else '-',
             'current_season': self.get_current_season_internal() + self.get_current_season_external(),
             'overall': self.get_all_internal_games() + self.get_all_external_games(),
         }
