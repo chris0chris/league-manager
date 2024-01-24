@@ -78,11 +78,11 @@ class TestScheduleUpdate(TransactionTestCase):
 
     def test_update_7_teams_2_fields(self):
         gameday = DBSetup().create_empty_gameday()
-        gameday.format = "7_2"
+        gameday.format = "6_oneDivision_2"
         gameday.save()
-        group_B = DBSetup().create_teams('B', 3)
-        group_A = DBSetup().create_teams('A', 4)
-        groups = [group_A, group_B]
+        # group_B = DBSetup().create_teams('B', 3)
+        group_A = DBSetup().create_teams('A', 6)
+        groups = [group_A]
         DBSetup().create_playoff_placeholder_teams()
         sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
         sc.create()
