@@ -5,19 +5,9 @@ from rest_framework.fields import CharField, SerializerMethodField, BooleanField
 from rest_framework.serializers import ModelSerializer, Serializer
 
 from gamedays.models import GameOfficial
+from league_manager.utils.serializer_utils import Obfuscator
 from officials.models import Official, OfficialLicenseHistory, EmptyOfficialLicenseHistory, OfficialExternalGames
 from officials.service.moodle.moodle_service import MoodleService
-
-
-class Obfuscator:
-
-    @staticmethod
-    def obfuscate(*args: str):
-        obfuscated_text = ''
-        for current_arg in args:
-            if current_arg is not None and current_arg != '':
-                obfuscated_text += current_arg[0] + 4 * '*'
-        return obfuscated_text
 
 
 class OfficialExternalGamesSerializer(ModelSerializer):
