@@ -1,18 +1,16 @@
-import PlayersTable from "./PlayersTable";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
-import { useState, useEffect } from "react";
-import { jsonTypePlayerlist } from "../common/types";
+import PlayersTable from './PlayersTable';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import {useState, useEffect} from 'react';
+import {apiTeam, jsonTypePlayerlist} from '../common/types';
 import {useNavigate} from 'react-router-dom';
-import { submitRoster } from '../common/games';
-
-
+import {submitRoster} from '../common/games';
 
 interface Props {
-    team: string;
-    gameday: number;
-    players: jsonTypePlayerlist;
-    otherPlayers: jsonTypePlayerlist;
+  team?: apiTeam;
+  gameday: number;
+  players: jsonTypePlayerlist;
+  otherPlayers: jsonTypePlayerlist;
 }
 
 //component that shows all available players on the team in a table
@@ -32,26 +30,25 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
     setModalVisible(false);
   };
 
-  const [playersCount, setPlayersCount] = useState<number>(
-    players.reduce((count, player) => {
-      if (player.gamedays.includes(gameday)) {
-        count++;
-      }
-      return count;
-    }, 0)
-  );
+  const [playersCount, setPlayersCount] = useState<number>(0);
+  // players.reduce((count, player) => {
+  //   if (player.gamedays.includes(gameday)) {
+  //     count++;
+  //   }
+  //   return count;
+  // }, 0)
 
   // You can use useEffect to update the count when players or gameday changes
-  useEffect(() => {
-    const newPlayersCount = players.reduce((count, player) => {
-      if (player.gamedays.includes(gameday)) {
-        count++;
-      }
-      return count;
-    }, 0);
+  // // useEffect(() => {
+  // //   const newPlayersCount = players.reduce((count, player) => {
+  // //     if (player.gamedays.includes(gameday)) {
+  // //       count++;
+  // //     }
+  // //     return count;
+  // //   }, 0);
 
-    setPlayersCount(newPlayersCount);
-  }, [players, gameday]);
+  //   setPlayersCount(newPlayersCount);
+  // }, [players, gameday]);
   const increasePlayersCount = () => {
     setPlayersCount(playersCount + 1);
   };
@@ -71,26 +68,28 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
   };
 
   const onSubmitRoster = () => {
-    submitRoster(team, {
-        gameday: gameday,
-        roster: getCheckedPlayers(),
-    })
+    submitRoster(team?.id, {
+      gameday: gameday,
+      roster: getCheckedPlayers(),
+    });
     handleClose();
     navigate('/success');
   };
 
   const getCheckedPlayers = () => {
-    return players.map((player: any) => {
-        if(player.gamedays.includes(gameday)){
-            return player.id;
+    return players
+      .map((player: any) => {
+        if (player.gamedays.includes(gameday)) {
+          return player.id;
         }
-     }).filter((id) => id != null);
+      })
+      .filter((id) => id != null);
   };
 
   return (
     <>
-     <h1>Spielerliste {team}</h1>
-     <Button onClick={handleClickEvent}>Auswahl abbrechen</Button>
+      <h1>Spielerliste {team?.name}</h1>
+      <Button onClick={handleClickEvent}>Auswahl abbrechen</Button>
       <PlayersTable
         players={players}
         increasePlayersCount={increasePlayersCount}
@@ -101,15 +100,20 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
         }}
         gameday={gameday}
       />
-      {otherPlayers.length !== 0 && (<>
-      <Button
-        variant="secondary"
-        onClick={toggleSecondTeam}
-        className="full-width-button"
-      >{showSecondTeam ? ("weitere Pässe ausblenden") : ("weitere Pässe anzeigen")}
-
-      </Button>
-      <br /></>)}
+      {otherPlayers.length !== 0 && (
+        <>
+          <Button
+            variant='secondary'
+            onClick={toggleSecondTeam}
+            className='full-width-button'
+          >
+            {showSecondTeam
+              ? 'weitere Pässe ausblenden'
+              : 'weitere Pässe anzeigen'}
+          </Button>
+          <br />
+        </>
+      )}
       <br />
       {showSecondTeam && (
         <PlayersTable
@@ -123,40 +127,44 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
       )}
       <div>
         <input
-          type="text"
-          placeholder="Name Official"
-          className="officialNameInput form-control me-2"
+          type='text'
+          placeholder='Name Official'
+          className='officialNameInput form-control me-2'
         />
       </div>
       <div>
         <Button
-          variant="success"
-          type="submit"
+          variant='success'
+          type='submit'
           onClick={showModal}
-          className="full-width-button"
+          className='full-width-button'
         >
-          {" "}
-          Passliste abschicken {" "}
+          {' '}
+          Passliste abschicken{' '}
         </Button>
       </div>
       <Modal
         show={modalVisible}
         onHide={handleClose}
-        backdrop="static"
+        backdrop='static'
         keyboard={false}
       >
         <Modal.Header closeButton>
           <Modal.Title>Passliste bestätigen</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div>Team: {team}</div>
+          <div>Team: {team?.name}</div>
           <div>Es sind {playersCount} Spieler anwesend.</div>
         </Modal.Body>
-        <Modal.Footer className="modal-footer">
-          <Button variant="secondary" className="me-auto" onClick={handleClose}>
+        <Modal.Footer className='modal-footer'>
+          <Button variant='secondary' className='me-auto' onClick={handleClose}>
             Zurück
           </Button>
-          <Button variant="primary"  onClick={onSubmitRoster} className="ms-auto">
+          <Button
+            variant='primary'
+            onClick={onSubmitRoster}
+            className='ms-auto'
+          >
             Passliste bestätigen
           </Button>
         </Modal.Footer>

@@ -61,25 +61,27 @@ function PlayerModal({
       >
         <Modal.Header closeButton>
           <Modal.Title>
-            {playersData[index].first_name} {playersData[index].last_name}
+            {playersData[index]?.first_name} {playersData[index]?.last_name}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className='span-div'>
             <span className='left-span'>Name:</span>
             <span className='right-span'>
-              {playersData[index].first_name} {playersData[index].last_name}
+              {playersData[index]?.first_name} {playersData[index]?.last_name}
             </span>
           </div>
           <div className='span-div'>
             <span className='left-span'>Trikotnummer:</span>
             <span className='right-span'>
-              {playersData[index].jersey_number}
+              {playersData[index]?.jersey_number}
             </span>
           </div>
           <div className='span-div'>
             <span className='left-span'>Passnummer:</span>
-            <span className='right-span'>{playersData[index].pass_number}</span>
+            <span className='right-span'>
+              {playersData[index]?.pass_number}
+            </span>
           </div>
         </Modal.Body>
         <Modal.Footer className='modal-footer'>
@@ -106,18 +108,19 @@ function PlayerModal({
             </svg>
           </Button>
           <Button
-            variant={
-              playersData[index].gamedays.includes(gameday)
-                ? 'danger'
-                : 'success'
-            } //coloring the button depending on the state of the player
+            // variant={
+            //   playersData[index].gamedays.includes(gameday)
+            //     ? 'danger'
+            //     : 'success'
+            // } //coloring the button depending on the state of the player
             className='modal-button-middle'
             onClick={() => {
               update(); //Switch boolean of property "checked"
               playersData[index].gamedays.includes(gameday) && nextPlayer(); //Automatically load Modal with next Player in list when you check a player
             }}
           >
-            {/* following section alters icon depending on the state of the player */}
+            button
+            {/* following section alters icon depending on the state of the player
             {!playersData[index].gamedays.includes(gameday) && (
               <svg
                 xmlns='http://www.w3.org/2000/svg'
@@ -141,7 +144,7 @@ function PlayerModal({
               >
                 <path d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z' />
               </svg>
-            )}
+            )} */}
           </Button>
           <Button
             variant='secondary'

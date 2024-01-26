@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import QuerySet, Q
 
 # import other models
-from gamedays.models import Gameday, Team
+from gamedays.models import Gameday, Team, League
 
 
 class Playerlist(models.Model):
@@ -20,6 +20,7 @@ class Playerlist(models.Model):
     jersey_number = models.IntegerField()
     pass_number = models.IntegerField()
     sex = models.IntegerField(choices=SEX_CHOICES)
+    year_of_birth = models.PositiveIntegerField()
     gamedays = models.ManyToManyField(Gameday)
 
     objects: QuerySet = models.Manager()
@@ -37,3 +38,20 @@ class Playerlist(models.Model):
             return f"{self.first_name} {self.last_name}"
 
         return fullname()
+
+
+class EligibilityRule(models.Model):
+    league = models.ForeignKey(League, related_name='eligibility_for', on_delete=models.CASCADE)
+    eligible_in = models.ManyToManyField(League, related_name='eligible_in')
+    max_gamedays = models.IntegerField()
+    max_players = models.IntegerField(null=True, default=None, blank=True)
+    is_relegation_allowed = models.BooleanField(default=False)
+    min_gamedays_for_final = models.IntegerField(default=2)
+    ignore_player_age_unitl = models.IntegerField(default=19)
+    except_for_women = models.BooleanField(default=True)
+
+    objects: QuerySet = models.Manager()
+
+    def __str__(self):
+        emoji = "⬆️" if self.is_relegation_allowed else "⛔"
+        return f'{self.league} -> {[league.name for league in self.eligible_in.all()]} {emoji}'

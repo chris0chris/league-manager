@@ -35,7 +35,7 @@ class OfficialsTeamListView(View):
                 'object_list': official_service.get_all_officials_with_team_infos(
                     team_id,
                     year,
-                    PermissionHelper.has_staff_or_user_permission(request, team_id)
+                    PermissionHelper.has_staff_or_user_permission(request)
                 )
             }
         )
