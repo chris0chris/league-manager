@@ -7,13 +7,14 @@ from passcheck.models import Playerlist
 class PlayerlistCreateForm(forms.ModelForm):
     class Meta:
         model = Playerlist
-        fields = ['team', 'first_name', 'last_name', 'jersey_number', 'pass_number', 'sex']
+        fields = ['team', 'first_name', 'last_name', 'jersey_number', 'pass_number', 'year_of_birth', 'sex']
         labels = {
             'team': 'Team',
             'first_name': 'Vorname',
             'last_name': 'Nachname',
             'jersey_number': 'Trikotnummer',
             'pass_number': 'Passnummer',
+            'year_of_birth': 'Geburtsjahr',
             'sex': 'Geschlecht',
         }
 

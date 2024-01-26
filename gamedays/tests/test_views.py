@@ -105,5 +105,5 @@ class TestGamedayUpdateView(WebTest):
         resp = form.submit()
         assert resp.status_code == HTTPStatus.OK
         self.assertFormError(resp, 'form', None, [
-            'Spielplan konnte nicht erstellt werden, da dass Team "unknown team" nicht gefunden wurde.'])
+            'Spielplan konnte nicht erstellt werden, da das Team "unknown team" nicht gefunden wurde.'])
         assert Gameinfo.objects.all().count() == 0

@@ -70,9 +70,9 @@ function PlayersTable({
             .filter((player: any) => {
               const searchTerm = searchInput.toLowerCase();
               const playerName =
-                player.first_name.toLowerCase() +
+                player?.first_name.toLowerCase() +
                 ' ' +
-                player.last_name.toLowerCase();
+                player?.last_name.toLowerCase();
               return playerName.startsWith(searchTerm);
             })
             .map(
@@ -80,19 +80,19 @@ function PlayersTable({
                 player: any //map each player in the array into one row of a table
               ) => (
                 <tr
-                  className={
-                    player.gamedays.includes(gameday) ? 'table-success' : ''
-                  }
-                  key={player.key}
+                  // className={
+                  //   player.gamedays.includes(gameday) ? 'table-success' : ''
+                  // }
+                  key={player?.key}
                   onClick={() => {
                     //click the row to show the modal with the players infos
-                    showModal(player.key);
+                    showModal(player?.key);
                   }}
                 >
                   <PlayerLine //create one component for each row of the table
-                    key={player.key}
+                    key={player?.key}
                     playersData={playersData}
-                    index={player.key}
+                    index={player?.key}
                   />
                 </tr>
               )

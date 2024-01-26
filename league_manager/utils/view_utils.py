@@ -3,8 +3,11 @@ from gamedays.models import Team
 
 class PermissionHelper:
     @staticmethod
-    def has_staff_or_user_permission(request, team_id):
-        team = Team.objects.get(pk=team_id)
+    def has_staff_or_user_permission(request):
         if request.user.is_staff:
             return True
-        return request.user.username == team.name
+        try:
+            Team.objects.get(name=request.user.username)
+        except Team.DoesNotExist:
+            return False
+        return True

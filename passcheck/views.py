@@ -6,6 +6,7 @@ from django.views import View
 from django.views.generic import ListView, CreateView
 
 from gamedays.models import Team
+from league_manager.utils.decorators import is_staff
 from .forms import PlayerlistCreateForm
 from .models import Playerlist
 from .service.passcheck_service import PasscheckService
@@ -14,11 +15,12 @@ from .service.passcheck_service import PasscheckService
 class PlayerlistView(View):
     template_name = 'passcheck/playerlist_list.html'
 
+    @is_staff
     def get(self, request, **kwargs):
-        team_id = kwargs.get('pk')
-
+        team_id = kwargs.get('team')
+        is_staff = kwargs.get('is_staff')
         team = Team.objects.get(pk=team_id)
-        passcheck_service = PasscheckService()
+        passcheck_service = PasscheckService(is_staff=is_staff)
         context = {
             'team': team.description,
             'object_list': passcheck_service.get_roster(team)
@@ -53,7 +55,8 @@ class PlayerlistCreateView(LoginRequiredMixin, CreateView):
 # declaring Views via django views
 class PasscheckListView(ListView):
     model = Playerlist
-    ordering = ['trikotnumber']
+    ordering = ['jersey_number']
+
 
 # ToDo: check if should be class and document
 def passcheck_view(request):
