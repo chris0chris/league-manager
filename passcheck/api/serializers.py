@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from knox.models import AuthToken
-from rest_framework.fields import SerializerMethodField, IntegerField, TimeField
+from rest_framework.fields import SerializerMethodField, IntegerField, TimeField, BooleanField
 from rest_framework.serializers import ModelSerializer, Serializer
 
 from gamedays.models import Gameinfo, Team, Gameday
@@ -11,12 +11,14 @@ from passcheck.service.eligibility_validation import EligibilityValidator, Valid
 
 
 class RosterSerializer(ObfuscatorSerializer):
+    id = IntegerField()
     first_name = ObfuscateField(field_name='first_name')
     last_name = ObfuscateField(field_name='last_name')
     jersey_number = IntegerField()
     pass_number = IntegerField()
     sex = IntegerField()
     gamedays_counter = SerializerMethodField()
+    isSelected = BooleanField(source='is_selected')
 
     def get_gamedays_counter(self, obj: dict):
         all_leagues = self.context.get('all_leagues', [])

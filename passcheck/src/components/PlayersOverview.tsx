@@ -2,15 +2,15 @@ import PlayersTable from './PlayersTable';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {useState, useEffect} from 'react';
-import {apiTeam, jsonTypePlayerlist} from '../common/types';
+import {apiTeam, Player, Roster} from '../common/types';
 import {useNavigate} from 'react-router-dom';
 import {submitRoster} from '../common/games';
 
 interface Props {
   team?: apiTeam;
   gameday: number;
-  players: jsonTypePlayerlist;
-  otherPlayers: jsonTypePlayerlist;
+  players: Roster;
+  otherPlayers: Roster;
 }
 
 //component that shows all available players on the team in a table
@@ -68,22 +68,13 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
   };
 
   const onSubmitRoster = () => {
-    submitRoster(team?.id, {
-      gameday: gameday,
-      roster: getCheckedPlayers(),
-    });
+    submitRoster(team!.id, gameday, getCheckedPlayers());
     handleClose();
     navigate('/success');
   };
 
   const getCheckedPlayers = () => {
-    return players
-      .map((player: any) => {
-        if (player.gamedays.includes(gameday)) {
-          return player.id;
-        }
-      })
-      .filter((id) => id != null);
+    return players.filter((player: Player) => player.isSelected);
   };
 
   return (
@@ -139,8 +130,7 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
           onClick={showModal}
           className='full-width-button'
         >
-          {' '}
-          Passliste abschicken{' '}
+          Passliste abschicken
         </Button>
       </div>
       <Modal

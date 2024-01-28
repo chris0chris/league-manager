@@ -1,13 +1,13 @@
 from datetime import datetime
 from urllib.parse import unquote
 
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Value, OuterRef, Exists
 
 from gamedays.models import Team, Gameinfo, Gameday, SeasonLeagueTeam
 from gamedays.service.model_helper import GameresultHelper
 from passcheck.api.serializers import PasscheckGamesListSerializer, PasscheckSerializer, RosterSerializer, \
     RosterValidationSerializer
-from passcheck.models import Playerlist, EligibilityRule
+from passcheck.models import Playerlist, EligibilityRule, PlayerlistGameday
 from passcheck.service.eligibility_validation import EligibilityValidator
 
 
@@ -50,30 +50,43 @@ class PasscheckService:
         except Team.DoesNotExist:
             return None
 
-    def get_roster(self, team: Team):
-        all_leagues = Playerlist.objects.filter(team=team).exclude(gamedays__league__name=None).distinct().values(
+    def get_roster(self, team_id: int, gameday_id: int = None):
+        all_leagues = Playerlist.objects.filter(team_id=team_id).exclude(gamedays__league__name=None).distinct().values(
             'gamedays__league', 'gamedays__league__name')
         league_annotations = {
             f'{league["gamedays__league"]}': Count('gamedays__league',
                                                    filter=Q(gamedays__league=league['gamedays__league'])) for
-            league in all_leagues}
-        roster = Playerlist.objects.filter(team=team).annotate(**league_annotations).values()
+            league in all_leagues
+        }
+        roster = self._get_roster(team_id, gameday_id, league_annotations)
         return {
             'all_leagues': list(all_leagues),
             'roster': RosterSerializer(instance=roster, is_staff=self.is_staff,
-                                       context={'all_leagues': list(all_leagues)}, many=True).data
+                                       context={'all_leagues': list(all_leagues)},
+                                       many=True).data
         }
 
-    def get_roster_with_validation(self, team: Team, gameday: Gameday):
-        team = 23
-        seasonLeague: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(team=23)
-        gameday: Gameday = Gameday.objects.get(pk=147)
-        rule = EligibilityRule.objects.get(league=seasonLeague.league, eligible_in=gameday.league)
+    def _is_selected_query(self, gameday_id):
+        if gameday_id is None:
+            is_selected_query = Value(False)
+        else:
+            is_selected_query = Exists(
+                PlayerlistGameday.objects.filter(
+                    playerlist=OuterRef('id'),
+                    gameday=gameday_id
+                )
+            )
+        return is_selected_query
+
+    def get_roster_with_validation(self, team_id: int, gameday_id: int):
+        season_league: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(team_id=team_id)
+        gameday: Gameday = Gameday.objects.get(pk=gameday_id)
+        rule = EligibilityRule.objects.get(league=season_league.league, eligible_in=gameday.league)
         gameday_league_annotation = {
             f'{gameday.league_id}': Count('gamedays__league',
                                           filter=Q(gamedays__league=gameday.league))}
-        roster_second_team = Playerlist.objects.filter(team=team).annotate(**gameday_league_annotation).values()
-        roster = self.get_roster(team)
+        roster_second_team = self._get_roster(team_id, gameday_id, gameday_league_annotation)
+        roster = self.get_roster(team_id, gameday_id)
         ev = EligibilityValidator(rule, gameday)
         roster.update({
             'additionalRosters': RosterValidationSerializer(instance=roster_second_team, is_staff=self.is_staff,
@@ -83,6 +96,13 @@ class PasscheckService:
                                                             many=True).data
         })
         return roster
+
+    def _get_roster(self, team_id, gameday_id, league_annotations):
+        is_selected_query = self._is_selected_query(gameday_id)
+        return Playerlist.objects.filter(team=team_id).annotate(
+            **league_annotations,
+            is_selected=is_selected_query
+        ).values()
 
 
 class PasscheckServicePlayers:
@@ -97,10 +117,12 @@ class PasscheckServicePlayers:
             # 'otherPlayers': self.get_other_players(team=team),
         }
 
-    def create_roster(self, team, data):
-        gameday = data.get('gameday')
-        roster = data.get('roster')
-        for player in Playerlist.objects.filter(team__description=team, gamedays__id=gameday):
-            player.gamedays.clear()
-        for player in Playerlist.objects.filter(id__in=roster):
-            player.gamedays.add(gameday)
+    def create_roster(self, team_id, gameday_id, roster):
+        PlayerlistGameday.objects.filter(playerlist__team=team_id).delete()
+        for player in roster:
+            player_id = player['id']
+            PlayerlistGameday.objects.update_or_create(playerlist_id=player_id, gameday_id=gameday_id, defaults={
+                'playerlist_id': player_id,
+                'gameday_id': gameday_id,
+                'gameday_jersey': player['jersey_number'],
+            })

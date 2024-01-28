@@ -68,9 +68,9 @@ class BaseValidator:
 
 class MaxGameDaysValidator(BaseValidator):
     def is_valid(self, player):
-        if player[f'{self.gameday.league.pk}'] <= self.rule.max_gamedays:
+        if player[f'{self.gameday.league.pk}'] < self.rule.max_gamedays:
             return True
-        raise ValidationError(f"Person hat Maximum an erlaubte Spieltage ({self.rule.max_gamedays}) überschritten.")
+        raise ValidationError(f"Person hat Maximum an erlaubte Spieltage ({self.rule.max_gamedays}) erreicht.")
 
 
 class RelegationValidator(BaseValidator):

@@ -50,7 +50,7 @@ function App() {
   const loadTeam = (team: apiTeam) => {
     setTeam(team);
     if (team && playerlist.length === 0) {
-      getPlayerList(team.id).then((result) => {
+      getPlayerList(team.id, games[gameIndex].gameday_id).then((result) => {
         setLoading(false);
         if (
           result.roster.length !== 0 &&

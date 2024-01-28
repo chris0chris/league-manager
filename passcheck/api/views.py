@@ -69,20 +69,22 @@ class PasscheckGamesAPIView(APIView):
 
 class PasscheckRosterAPIView(APIView):
     @is_staff
-    def get(self, request, *args, **kwargs):
+    def get(self, request, **kwargs):
         team = kwargs.get('team')
+        gameday_id = kwargs.get('gameday')
         is_staff = kwargs.get('is_staff')
         if team:
             passcheck = PasscheckService(is_staff)
+            return Response(passcheck.get_roster_with_validation(team, gameday_id), status=HTTPStatus.OK)
 
-            return Response(passcheck.get_roster_with_validation(team, None), status=HTTPStatus.OK)
-
-    def put(self, request, *args, **kwargs):
+    def put(self, request, **kwargs):
         data = request.data
-        team = kwargs.get('team')
+        team_id = kwargs.get('team')
+        gameday_id = kwargs.get('gameday')
         passcheckservice = PasscheckServicePlayers()
-        passcheckservice.create_roster(team, data)
+        passcheckservice.create_roster(team_id, gameday_id, data)
         return Response(status=HTTPStatus.OK)
+
 
 class PasscheckGamedaysListAPIView(ListAPIView):
     serializer_class = PasscheckGamedaysListSerializer

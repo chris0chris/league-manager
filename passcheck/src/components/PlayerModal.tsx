@@ -1,11 +1,12 @@
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import {jsonTypePlayerlist} from '../common/types';
+import {Roster} from '../common/types';
+import {useEffect, useState} from 'react';
 
 interface Props {
   modalVisible: boolean;
   handleClose(): any;
-  playersData: jsonTypePlayerlist;
+  playersData: Roster;
   index: number;
   increaseIndex(): void;
   decreaseIndex(): void;
@@ -19,7 +20,7 @@ interface Props {
 function PlayerModal({
   modalVisible,
   handleClose,
-  playersData,
+  playersData: roster,
   index,
   increaseIndex,
   decreaseIndex,
@@ -29,16 +30,28 @@ function PlayerModal({
   decreasePlayersCount,
   gameday,
 }: Props) {
+  const [click, setClick] = useState<number>(0);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // simple click
+      setClick(0);
+    }, 250);
+
+    // the duration between this click and the previous one
+    // is less than the value of delay = double-click
+    if (click === 2) {
+      handleDoubleClick();
+    }
+
+    return () => clearTimeout(timer);
+  }, [click]);
   const update = () => {
     //Invert the checked status of the player
-    if (playersData[index].gamedays.includes(gameday)) {
-      playersData[index].gamedays.splice(
-        playersData[index].gamedays.indexOf(gameday),
-        1
-      );
+    if (roster[index].isSelected) {
+      roster[index].isSelected = false;
       decreasePlayersCount();
     } else {
-      playersData[index].gamedays.push(gameday);
+      roster[index].isSelected = true;
       increasePlayersCount();
     }
     //playersData[index].checked = !playersData[index].checked;
@@ -47,8 +60,19 @@ function PlayerModal({
   };
 
   const nextPlayer = () => {
-    index < playersData.length - 1 && increaseIndex();
-    index === playersData.length - 1 && minIndex(); //Edgecase last player in the list
+    index < roster.length - 1 && increaseIndex();
+    index === roster.length - 1 && minIndex(); //Edgecase last player in the list
+  };
+
+  const handleDoubleClick = () => {
+    const isSure = window.confirm(
+      'Wirklich 100 % sicher, dass die Person am Spieltag teilnehmen darf?!'
+    );
+
+    if (isSure) {
+      update();
+      nextPlayer();
+    }
   };
 
   return (
@@ -61,28 +85,30 @@ function PlayerModal({
       >
         <Modal.Header closeButton>
           <Modal.Title>
-            {playersData[index]?.first_name} {playersData[index]?.last_name}
+            {roster[index]?.first_name} {roster[index]?.last_name}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className='span-div'>
-            <span className='left-span'>Name:</span>
-            <span className='right-span'>
-              {playersData[index]?.first_name} {playersData[index]?.last_name}
-            </span>
+          <div className='row'>
+            <div className='col-4'>Name:</div>
+            <div className='col-8'>
+              {roster[index]?.first_name} {roster[index]?.last_name}
+            </div>
           </div>
-          <div className='span-div'>
-            <span className='left-span'>Trikotnummer:</span>
-            <span className='right-span'>
-              {playersData[index]?.jersey_number}
-            </span>
+          <div className='row'>
+            <div className='col-4'>Trikotnummer:</div>
+            <div className='col-8'>{roster[index]?.jersey_number}</div>
           </div>
-          <div className='span-div'>
-            <span className='left-span'>Passnummer:</span>
-            <span className='right-span'>
-              {playersData[index]?.pass_number}
-            </span>
+          <div className='row'>
+            <div className='col-4'>Passnummer:</div>
+            <div className='col-8'>{roster[index]?.pass_number}</div>
           </div>
+          {roster[index]?.validationError && (
+            <div className='row text-bg-danger'>
+              <div className='col-4'>Achtung:</div>
+              <div className='col-8'>{roster[index]?.validationError}</div>
+            </div>
+          )}
         </Modal.Body>
         <Modal.Footer className='modal-footer'>
           <Button
@@ -107,45 +133,76 @@ function PlayerModal({
               />
             </svg>
           </Button>
-          <Button
-            // variant={
-            //   playersData[index].gamedays.includes(gameday)
-            //     ? 'danger'
-            //     : 'success'
-            // } //coloring the button depending on the state of the player
-            className='modal-button-middle'
-            onClick={() => {
-              update(); //Switch boolean of property "checked"
-              playersData[index].gamedays.includes(gameday) && nextPlayer(); //Automatically load Modal with next Player in list when you check a player
-            }}
-          >
-            button
-            {/* following section alters icon depending on the state of the player
-            {!playersData[index].gamedays.includes(gameday) && (
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                width='30'
-                height='30'
-                fill='currentColor'
-                className='bi bi-check2'
-                viewBox='0 0 16 16'
-              >
-                <path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z' />
-              </svg>
-            )}
-            {playersData[index].gamedays.includes(gameday) && (
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                width='30'
-                height='30'
-                fill='currentColor'
-                className='bi bi-x'
-                viewBox='0 0 16 16'
-              >
-                <path d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z' />
-              </svg>
-            )} */}
-          </Button>
+          {roster[index]?.validationError && (
+            <Button
+              variant={'danger'}
+              className='modal-button-middle'
+              style={{opacity: 0.5}}
+              onClick={() => {
+                setClick(click + 1);
+              }}
+            >
+              {!roster[index]?.isSelected && (
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='30'
+                  height='30'
+                  fill='currentColor'
+                  className='bi bi-check2'
+                  viewBox='0 0 16 16'
+                >
+                  <path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z' />
+                </svg>
+              )}
+              {roster[index]?.isSelected && (
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='30'
+                  height='30'
+                  fill='currentColor'
+                  className='bi bi-x'
+                  viewBox='0 0 16 16'
+                >
+                  <path d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z' />
+                </svg>
+              )}
+            </Button>
+          )}
+          {!roster[index]?.validationError && (
+            <Button
+              variant={roster[index]?.isSelected ? 'danger' : 'success'} //coloring the button depending on the state of the player
+              className='modal-button-middle'
+              onClick={() => {
+                update();
+                nextPlayer();
+              }}
+            >
+              {!roster[index]?.isSelected && (
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='30'
+                  height='30'
+                  fill='currentColor'
+                  className='bi bi-check2'
+                  viewBox='0 0 16 16'
+                >
+                  <path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z' />
+                </svg>
+              )}
+              {roster[index]?.isSelected && (
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='30'
+                  height='30'
+                  fill='currentColor'
+                  className='bi bi-x'
+                  viewBox='0 0 16 16'
+                >
+                  <path d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z' />
+                </svg>
+              )}
+            </Button>
+          )}
           <Button
             variant='secondary'
             className='modal-button-right ms-auto'
