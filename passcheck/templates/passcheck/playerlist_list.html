@@ -10,7 +10,6 @@
                 <th scope="col">Trikot</th>
                 <th scope="col">Vorname</th>
                 <th scope="col">Nachname</th>
-                <th scope="col">Geschlecht</th>
                 <th scope="col">Passnummer</th>
                 {% for league in object_list.all_leagues %}
                 <th scope="col">#{{league.gamedays__league__name}}</th>
@@ -24,7 +23,6 @@
                 <td>{{player.first_name}}</td>
                 <td>{{player.last_name}}</td>
                 <td>{{player.pass_number}}</td>
-                <td>{{player.sex}}</td>
                 {% for league in object_list.all_leagues %}
                 {% with field_name=league.gamedays__league %}
                 <td>{{ player.gamedays_counter|get_item:field_name }}</td>
