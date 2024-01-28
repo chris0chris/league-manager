@@ -2,27 +2,26 @@ import {useState} from 'react';
 import {Button} from 'react-bootstrap';
 import {Card} from 'react-bootstrap';
 import ListGroup from 'react-bootstrap/ListGroup';
-import {jsonTypeTeam, jsonTypeGames, apiGames} from '../common/types';
+import {jsonTypeTeam, apiGames, Game} from '../common/types';
 import {PLAYERS_URL} from '../common/urls';
 
 import {useNavigate} from 'react-router-dom';
 
 interface Props {
-  index: number;
-  loadIndex: (index: number) => void;
+  loadIndex: (game: Game) => void;
   officialsTeam: string;
-  games: jsonTypeGames;
+  game: Game;
 }
 
-function GameCard({index, officialsTeam, games, loadIndex}: Props) {
+function GameCard({officialsTeam, game, loadIndex}: Props) {
   const [checkedTeam, setChecked] = useState<boolean>(false);
   const navigate = useNavigate();
   const clickHandler = () => {
-    console.log('index:', index);
+    console.log('index:', game);
     /* setChecked(!checkedTeam);
     teams[index].checked = checkedTeam;
     console.log(teams[index].checked); */
-    loadIndex(index);
+    loadIndex(game);
     navigate('/teams');
   };
 
@@ -33,14 +32,14 @@ function GameCard({index, officialsTeam, games, loadIndex}: Props) {
       <Card style={{width: '20rem'}}>
         <Card.Img variant='top'></Card.Img>
         <Card.Header>
-          {games[index].home.name} - {games[index].away.name}
+          {game.home.name} - {game.away.name}
         </Card.Header>
         <Card.Body>
           <ListGroup variant='flush'>
             <ListGroup.Item>
-              Kickoff: {games[index].scheduled.slice(0, 5)} Uhr
+              Kickoff: {game.scheduled.slice(0, 5)} Uhr
             </ListGroup.Item>
-            <ListGroup.Item>Feld {games[index].field}</ListGroup.Item>
+            <ListGroup.Item>Feld {game.field}</ListGroup.Item>
             <ListGroup.Item>
               {checkedTeam && (
                 <span style={{color: 'green'}}>

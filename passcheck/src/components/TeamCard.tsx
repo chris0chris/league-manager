@@ -2,20 +2,19 @@ import {useState} from 'react';
 import {Button} from 'react-bootstrap';
 import {Card} from 'react-bootstrap';
 import ListGroup from 'react-bootstrap/ListGroup';
-import {jsonTypeTeam, jsonTypeGames, apiGames, apiTeam} from '../common/types';
+import {jsonTypeTeam, GameList, apiGames, apiTeam, Game} from '../common/types';
 import {PLAYERS_URL} from '../common/urls';
 
 import {useNavigate} from 'react-router-dom';
 
 interface Props {
   team: apiTeam;
-  index: number;
-  games: jsonTypeGames;
+  game: Game;
   loadTeam: (team: apiTeam) => void;
   playersLoaded: boolean;
 }
 
-function TeamCard({team, games, index, loadTeam, playersLoaded}: Props) {
+function TeamCard({team, game, loadTeam, playersLoaded}: Props) {
   const [checkedTeam, setChecked] = useState<boolean>(false);
   const navigate = useNavigate();
   const clickHandler = () => {
@@ -40,9 +39,9 @@ function TeamCard({team, games, index, loadTeam, playersLoaded}: Props) {
         <Card.Body>
           <ListGroup variant='flush'>
             <ListGroup.Item>
-              Kickoff: {games[index].scheduled.slice(0, 5)} Uhr
+              Kickoff: {game.scheduled.slice(0, 5)} Uhr
             </ListGroup.Item>
-            <ListGroup.Item>Feld {games[index].field}</ListGroup.Item>
+            <ListGroup.Item>Feld {game.field}</ListGroup.Item>
             <ListGroup.Item>
               {checkedTeam && (
                 <span style={{color: 'green'}}>

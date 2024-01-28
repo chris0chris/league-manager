@@ -19,7 +19,7 @@ export type jsonTypeTeam = {
   checked: boolean;
 }[];
 
-export type jsonTypeGames = {
+export type Game = {
   id: number;
   field: number;
   scheduled: string;
@@ -27,7 +27,9 @@ export type jsonTypeGames = {
   gameday: number;
   away: apiTeam;
   home: apiTeam;
-}[];
+};
+
+export type GameList = Game[];
 
 export type apiTeam = {
   id: number;

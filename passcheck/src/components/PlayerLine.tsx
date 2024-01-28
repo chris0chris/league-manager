@@ -3,13 +3,16 @@ import {Player} from '../common/types';
 
 interface Props {
   playersData: Player;
+  index: number;
 }
 
 //component that fills one row of the table in PlayersOverview
-function PlayerLine({playersData: player}: Props) {
+function PlayerLine({playersData: player, index}: Props) {
   return (
     <>
-      <td className='table-border'>{player.key + 1}</td>
+      <td className='table-border'>
+        {player.key ? player.key + 1 : index + 1}
+      </td>
       <td className='table-border'>
         <span>
           {player.first_name} {player.last_name}

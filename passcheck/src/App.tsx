@@ -7,7 +7,7 @@ import Button from 'react-bootstrap/Button';
 import {getPasscheckData, getPlayerList} from './common/games';
 
 import {HashRouter as Router, Route, Routes} from 'react-router-dom';
-import {apiTeam} from './common/types';
+import {Game, apiTeam} from './common/types';
 
 //import {TEAMS_URL, PLAYERS_URL} from "./common/urls";
 
@@ -17,8 +17,16 @@ function App() {
   const [gamesWithKeys, setGamesWithKeys] = useState<any>([]);
   const [officials, setOfficials] = useState<string>('');
   const [tokenKey, setTokenKey] = useState<string>('');
-  const [gameIndex, setGameIndex] = useState<number>(0);
-  const [team, setTeam] = useState<apiTeam>();
+  const [gameIndex, setGameIndex] = useState<Game>({
+    away: {id: -1, name: 'away team'},
+    field: -1,
+    gameday: -1,
+    home: {id: -1, name: 'home team'},
+    id: -1,
+    officials: -1,
+    scheduled: '00:00',
+  });
+  const [team, setTeam] = useState<apiTeam>({id: -1, name: 'Loading ...'});
   const [playerlist, setPlayerlist] = useState<any>([]);
   const [playersWithKeys, setPlayersWithKeys] = useState<any>([]);
   const [otherPlayers, setOtherPlayers] = useState<any>([]);
@@ -43,14 +51,14 @@ function App() {
     }
   }, [tokenKey]);
 
-  const loadIndex = (index: number) => {
-    setGameIndex(index);
+  const loadIndex = (game: Game) => {
+    setGameIndex(game);
   };
 
   const loadTeam = (team: apiTeam) => {
     setTeam(team);
     if (team && playerlist.length === 0) {
-      getPlayerList(team.id, games[gameIndex].gameday_id).then((result) => {
+      getPlayerList(team.id, gameIndex.id).then((result) => {
         setLoading(false);
         if (
           result.roster.length !== 0 &&
@@ -116,8 +124,7 @@ function App() {
               path='/teams'
               element={
                 <TeamOverview
-                  index={gameIndex}
-                  games={gamesWithKeys}
+                  game={gameIndex}
                   officials={officials}
                   loadTeam={loadTeam}
                   playersLoaded={playersLoaded}
@@ -129,7 +136,7 @@ function App() {
               element={
                 <PlayersOverview
                   team={team}
-                  gameday={games[gameIndex].gameday_id}
+                  gameday={gameIndex.id}
                   players={playersWithKeys}
                   otherPlayers={otherPlayersWithKeys}
                 />
