@@ -10,7 +10,22 @@ from passcheck.tests.setup_factories.factories_passcheck import PlayerlistFactor
 
 class DbSetupPasscheck:
     @staticmethod
-    def create_playerlist_for_team() -> tuple[League, Season, Team]:
+    def create_playerlist_for_team(team=None, gamedays=()) -> tuple[Team, Playerlist, Playerlist, Playerlist]:
+        if team is None:
+            team = TeamFactory(name='Passcheck team')
+        today = datetime.today()
+        female = PlayerlistFactory(team=team, first_name='Fia', last_name='Female', jersey_number=7,
+                                   pass_number=7777777,
+                                   sex=Playerlist.FEMALE, year_of_birth=1982, gamedays=[*gamedays])
+        young = PlayerlistFactory(team=team, first_name='Yonathan', last_name='Young', jersey_number=1, pass_number=123,
+                                  sex=Playerlist.MALE, year_of_birth=today.year - 18,
+                                  gamedays=[*gamedays])
+        old = PlayerlistFactory(team=team, first_name='Oscar', last_name='Old', jersey_number=99, pass_number=9999999,
+                                sex=Playerlist.MALE, year_of_birth=1900, gamedays=[*gamedays])
+        return team, female, young, old
+
+    @staticmethod
+    def create_playerlist_for_team_with_eligibility_rule() -> tuple[League, Season, Team]:
         prime_league, second_league, third_league, season, team = DbSetupPasscheck.create_eligibility_rules()
         DBSetup().create_new_user(team.name)
         prime_gameday = GamedayFactory(season=season, league=prime_league)
@@ -18,14 +33,7 @@ class DbSetupPasscheck:
         EligibilityRuleFactory(league=second_league, eligible_in=[prime_league], max_gamedays=3,
                                is_relegation_allowed=True)
         EligibilityRuleFactory(league=second_league, eligible_in=[third_league], max_gamedays=2, max_players=2, )
-        today = datetime.today()
-        PlayerlistFactory(team=team, first_name='Fia', last_name='Female', jersey_number=7, pass_number=7777777,
-                          sex=Playerlist.FEMALE, year_of_birth=1982, gamedays=[prime_gameday, third_league_gameday])
-        PlayerlistFactory(team=team, first_name='Yonathan', last_name='Young', jersey_number=1, pass_number=123,
-                          sex=Playerlist.MALE, year_of_birth=today.year - 18,
-                          gamedays=[prime_gameday, third_league_gameday])
-        PlayerlistFactory(team=team, first_name='Oscar', last_name='Old', jersey_number=99, pass_number=9999999,
-                          sex=Playerlist.MALE, year_of_birth=1900, gamedays=[prime_gameday, third_league_gameday])
+        DbSetupPasscheck.create_playerlist_for_team(team, [prime_gameday, third_league_gameday])
         return prime_league, season, team
 
     @staticmethod

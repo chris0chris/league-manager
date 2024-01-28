@@ -20,10 +20,10 @@ class TestValidators(TestCase):
         max_game_days_validator = MaxGameDaysValidator(rule, prime_gameday)
         league_id = f'{prime_gameday.league.pk}'
         with pytest.raises(ValidationError) as exception:
-            max_game_days_validator.check({league_id: 4})
-        expected_error_message = "Person hat Maximum an erlaubte Spieltage (3) überschritten."
+            max_game_days_validator.check({league_id: 3})
+        expected_error_message = "Person hat Maximum an erlaubte Spieltage (3) erreicht."
         assert str(exception.value) == expected_error_message
-        assert max_game_days_validator.check({league_id: 3}) is True
+        assert max_game_days_validator.check({league_id: 2}) is True
 
     def test_is_relegation_allowed_validator(self):
         prime_league, _, third_league, season, team = DbSetupPasscheck.create_eligibility_rules()
@@ -67,7 +67,7 @@ class TestValidators(TestCase):
         }
         with pytest.raises(ValidationError) as exception:
             ev.validate(senior_player)
-        expected_error_message = "Person hat Maximum an erlaubte Spieltage (3) überschritten."
+        expected_error_message = "Person hat Maximum an erlaubte Spieltage (3) erreicht."
         assert str(exception.value) == expected_error_message
 
     def test_female_player_are_excepted(self):
@@ -90,7 +90,7 @@ class TestValidators(TestCase):
         }
         with pytest.raises(ValidationError) as exception:
             ev.validate(male_player)
-        expected_error_message = "Person hat Maximum an erlaubte Spieltage (3) überschritten."
+        expected_error_message = "Person hat Maximum an erlaubte Spieltage (3) erreicht."
         assert str(exception.value) == expected_error_message
 
     def test_validate_final_gameday(self):
@@ -100,7 +100,8 @@ class TestValidators(TestCase):
         rule = EligibilityRule.objects.get(league=season_league.league, eligible_in=final_gameday.league)
         league_id = f'{final_gameday.league.pk}'
         ev = EligibilityValidator(rule, final_gameday)
-        expected_error_message = 'Person darf nicht an Finaltag teilnehmen, weil sie nicht Mindestanzahl an Spiele erreicht hat.'
+        expected_error_message = ('Person darf nicht an Finaltag teilnehmen, '
+                                  'weil sie nicht Mindestanzahl an Spiele erreicht hat.')
 
         female_player = {
             'year_of_birth': 1982,

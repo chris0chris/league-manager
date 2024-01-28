@@ -21,7 +21,7 @@ class Playerlist(models.Model):
     pass_number = models.IntegerField()
     sex = models.IntegerField(choices=SEX_CHOICES)
     year_of_birth = models.PositiveIntegerField()
-    gamedays = models.ManyToManyField(Gameday)
+    gamedays = models.ManyToManyField(Gameday, through='PlayerlistGameday')
 
     objects: QuerySet = models.Manager()
 
@@ -38,6 +38,22 @@ class Playerlist(models.Model):
             return f"{self.first_name} {self.last_name}"
 
         return fullname()
+
+
+class PlayerlistGameday(models.Model):
+    playerlist = models.ForeignKey(Playerlist, on_delete=models.CASCADE)
+    gameday = models.ForeignKey(Gameday, on_delete=models.CASCADE)
+    gameday_jersey = models.IntegerField()
+
+    class Meta:
+        db_table = 'passcheck_playerlist_gamedays'
+        constraints = [
+            models.CheckConstraint(check=Q(gameday_jersey__gte=0) & Q(gameday_jersey__lte=99),
+                                   name='gameday_jersey_number_btw_0_and_99'),
+        ]
+
+    objects: QuerySet = models.Manager()
+
 
 
 class EligibilityRule(models.Model):

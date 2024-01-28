@@ -15,5 +15,6 @@ urlpatterns = [
     path('list/', PasscheckListAPIView.as_view(), name=API_PASSCHECK_LIST),
     path('games/', PasscheckGamesAPIView.as_view(), name=API_PASSCHECK_SERVICE),
     path('games/<int:team>/', PasscheckGamesAPIView.as_view(), name=API_PASSCHECK_SERVICE),
-    path('roster/<int:team>/', PasscheckRosterAPIView.as_view(), name=API_PASSCHECK_SERVICE_PLAYERS),
+    path('roster/<int:team>/gameday/<int:gameday>/', PasscheckRosterAPIView.as_view(),
+         name=API_PASSCHECK_SERVICE_PLAYERS),
 ]

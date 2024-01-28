@@ -1,16 +1,15 @@
-export type jsonTypePlayerlist = {
+export type Roster = Player[];
+
+export type Player = {
   first_name: string;
-  gamedays: number[];
   id: string;
   key: number;
   last_name: string;
   pass_number: string;
-  sex: string;
-  team: number;
   jersey_number: number;
-  ownLeagueGamedaysPlayed: number;
-  otherTeamGamedaysPlayed: number;
-}[];
+  isSelected: boolean;
+  validationError?: string;
+};
 
 export type jsonTypeTeam = {
   id: string;

@@ -2,10 +2,10 @@ import PlayerLine from './PlayerLine';
 import PlayerModal from './PlayerModal';
 import Table from 'react-bootstrap/Table';
 import {useState} from 'react';
-import {jsonTypePlayerlist} from '../common/types';
+import {Player, Roster} from '../common/types';
 
 interface Props {
-  players: jsonTypePlayerlist;
+  players: Roster;
   increasePlayersCount(): void;
   decreasePlayersCount(): void;
   initModal: boolean;
@@ -27,12 +27,12 @@ function PlayersTable({
     //Searchbar is being used
     setSearchInput(event.target.value);
   };
-  const [playersData, setPlayersData] = useState<jsonTypePlayerlist>(players); //store array with indexes in useState
+  const [player, setPlayersData] = useState<Roster>(players); //store array with indexes in useState
   const [modalKey, setModalKey] = useState<number>(0); //store current key to keep track of the active player
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
   const showModal = (key: number) => {
     //set modal visible
-    setModalKey(playersData[key].key);
+    setModalKey(player[key].key);
     setModalVisible(true);
   };
   const handleClose = () => {
@@ -66,8 +66,8 @@ function PlayersTable({
           </tr>
         </thead>
         <tbody>
-          {playersData
-            .filter((player: any) => {
+          {player
+            .filter((player: Player) => {
               const searchTerm = searchInput.toLowerCase();
               const playerName =
                 player?.first_name.toLowerCase() +
@@ -77,12 +77,12 @@ function PlayersTable({
             })
             .map(
               (
-                player: any //map each player in the array into one row of a table
+                player: Player //map each player in the array into one row of a table
               ) => (
                 <tr
-                  // className={
-                  //   player.gamedays.includes(gameday) ? 'table-success' : ''
-                  // }
+                  className={`${player?.isSelected ? 'table-success' : ''} ${
+                    player?.validationError ? 'disabled-row' : ''
+                  }`}
                   key={player?.key}
                   onClick={() => {
                     //click the row to show the modal with the players infos
@@ -91,8 +91,7 @@ function PlayersTable({
                 >
                   <PlayerLine //create one component for each row of the table
                     key={player?.key}
-                    playersData={playersData}
-                    index={player?.key}
+                    playersData={player}
                   />
                 </tr>
               )
@@ -102,7 +101,7 @@ function PlayersTable({
       <PlayerModal //load the modal with details about the active player
         modalVisible={modalVisible}
         handleClose={handleClose}
-        playersData={playersData}
+        playersData={player}
         index={modalKey} //active player
         //handle different cases for jumping to next player inside the modal
         increaseIndex={() => {
@@ -117,7 +116,7 @@ function PlayersTable({
           handleClose();
         }}
         maxIndex={() => {
-          setModalKey(playersData.length - 1);
+          setModalKey(player.length - 1);
         }}
         increasePlayersCount={increasePlayersCount}
         decreasePlayersCount={decreasePlayersCount}
