@@ -7,10 +7,10 @@ import {useNavigate} from 'react-router-dom';
 import {submitRoster} from '../common/games';
 
 interface Props {
-  team?: apiTeam;
+  team: apiTeam;
   gameday: number;
   players: Roster;
-  otherPlayers: Roster;
+  otherPlayers: {name: string; roster: Roster}[];
 }
 
 //component that shows all available players on the team in a table
@@ -19,6 +19,7 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
   const toggleSecondTeam = () => {
     setShowSecondTeam(!showSecondTeam);
   };
+  console.log('PlayersOverview', team, gameday, players, otherPlayers);
 
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
   const showModal = () => {
@@ -74,6 +75,7 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
   };
 
   const getCheckedPlayers = () => {
+    console.log('otherPlayers', otherPlayers);
     return players.filter((player: Player) => player.isSelected);
   };
 
@@ -82,6 +84,7 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
       <h1>Spielerliste {team?.name}</h1>
       <Button onClick={handleClickEvent}>Auswahl abbrechen</Button>
       <PlayersTable
+        teamName={team.name}
         players={players}
         increasePlayersCount={increasePlayersCount}
         decreasePlayersCount={decreasePlayersCount}
@@ -106,16 +109,19 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
         </>
       )}
       <br />
-      {showSecondTeam && (
-        <PlayersTable
-          players={otherPlayers}
-          increasePlayersCount={increasePlayersCount}
-          decreasePlayersCount={decreasePlayersCount}
-          initModal={false}
-          resetPageLoad={() => {}}
-          gameday={gameday}
-        />
-      )}
+      {showSecondTeam &&
+        otherPlayers.map((additionalTeam, index) => (
+          <PlayersTable
+            key={index}
+            teamName={additionalTeam.name}
+            players={additionalTeam.roster}
+            increasePlayersCount={increasePlayersCount}
+            decreasePlayersCount={decreasePlayersCount}
+            initModal={false}
+            resetPageLoad={() => {}}
+            gameday={gameday}
+          />
+        ))}
       <div>
         <input
           type='text'

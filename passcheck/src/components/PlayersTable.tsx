@@ -5,6 +5,7 @@ import {useState} from 'react';
 import {Player, Roster} from '../common/types';
 
 interface Props {
+  teamName: string;
   players: Roster;
   increasePlayersCount(): void;
   decreasePlayersCount(): void;
@@ -15,6 +16,7 @@ interface Props {
 
 //component that shows all available players on the team in a table
 function PlayersTable({
+  teamName,
   players,
   increasePlayersCount,
   decreasePlayersCount,
@@ -32,7 +34,7 @@ function PlayersTable({
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
   const showModal = (key: number) => {
     //set modal visible
-    setModalKey(player[key].key);
+    setModalKey(key);
     setModalVisible(true);
   };
   const handleClose = () => {
@@ -47,6 +49,7 @@ function PlayersTable({
 
   return (
     <>
+      <h2>Spielerliste {teamName}</h2>
       <input
         className='form-control me-2'
         id='searchbar'
@@ -67,35 +70,32 @@ function PlayersTable({
         </thead>
         <tbody>
           {player
-            .filter((player: Player) => {
-              const searchTerm = searchInput.toLowerCase();
-              const playerName =
-                player?.first_name.toLowerCase() +
-                ' ' +
-                player?.last_name.toLowerCase();
-              return playerName.startsWith(searchTerm);
-            })
-            .map(
-              (
-                player: Player //map each player in the array into one row of a table
-              ) => (
-                <tr
-                  className={`${player?.isSelected ? 'table-success' : ''} ${
-                    player?.validationError ? 'disabled-row' : ''
-                  }`}
+            // .filter((player: Player) => {
+            //   const searchTerm = searchInput.toLowerCase();
+            //   const playerName =
+            //     player?.first_name.toLowerCase() +
+            //     ' ' +
+            //     player?.last_name.toLowerCase();
+            //   return playerName.startsWith(searchTerm);
+            // })
+            .map((player: Player, index) => (
+              <tr
+                className={`${player?.isSelected ? 'table-success' : ''} ${
+                  player?.validationError ? 'disabled-row' : ''
+                }`}
+                key={index}
+                onClick={() => {
+                  //click the row to show the modal with the players infos
+                  showModal(player?.key ?? index);
+                }}
+              >
+                <PlayerLine //create one component for each row of the table
                   key={player?.key}
-                  onClick={() => {
-                    //click the row to show the modal with the players infos
-                    showModal(player?.key);
-                  }}
-                >
-                  <PlayerLine //create one component for each row of the table
-                    key={player?.key}
-                    playersData={player}
-                  />
-                </tr>
-              )
-            )}
+                  index={index}
+                  playersData={player}
+                />
+              </tr>
+            ))}
         </tbody>
       </Table>
       <PlayerModal //load the modal with details about the active player
