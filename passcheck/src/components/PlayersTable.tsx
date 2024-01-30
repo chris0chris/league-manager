@@ -7,29 +7,23 @@ import {Player, Roster} from '../common/types';
 interface Props {
   teamName: string;
   players: Roster;
-  increasePlayersCount(): void;
-  decreasePlayersCount(): void;
   initModal: boolean;
   resetPageLoad(): void;
-  gameday: number;
 }
 
 //component that shows all available players on the team in a table
 function PlayersTable({
   teamName,
-  players,
-  increasePlayersCount,
-  decreasePlayersCount,
+  players: playersData,
   initModal,
   resetPageLoad,
-  gameday,
 }: Props) {
   const [searchInput, setSearchInput] = useState(''); //Filter players by last name
   const onChange = (event: any) => {
     //Searchbar is being used
     setSearchInput(event.target.value);
   };
-  const [player, setPlayersData] = useState<Roster>(players); //store array with indexes in useState
+  const [roster, setRoster] = useState<Roster>(playersData); //store array with indexes in useState
   const [modalKey, setModalKey] = useState<number>(0); //store current key to keep track of the active player
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
   const showModal = (key: number) => {
@@ -69,7 +63,7 @@ function PlayersTable({
           </tr>
         </thead>
         <tbody>
-          {player
+          {roster
             // .filter((player: Player) => {
             //   const searchTerm = searchInput.toLowerCase();
             //   const playerName =
@@ -86,11 +80,11 @@ function PlayersTable({
                 key={index}
                 onClick={() => {
                   //click the row to show the modal with the players infos
-                  showModal(player?.key ?? index);
+                  showModal(index);
                 }}
               >
                 <PlayerLine //create one component for each row of the table
-                  key={player?.key}
+                  key={index}
                   index={index}
                   playersData={player}
                 />
@@ -101,26 +95,17 @@ function PlayersTable({
       <PlayerModal //load the modal with details about the active player
         modalVisible={modalVisible}
         handleClose={handleClose}
-        playersData={player}
+        playersData={roster}
         index={modalKey} //active player
         //handle different cases for jumping to next player inside the modal
-        increaseIndex={() => {
-          setModalKey(modalKey + 1);
-        }}
-        decreaseIndex={() => {
-          setModalKey(modalKey - 1);
-        }}
         minIndex={() => {
           //chose wether or not you want to loop at the end or just close the modal
           //setModalKey(0);
           handleClose();
         }}
         maxIndex={() => {
-          setModalKey(player.length - 1);
+          setModalKey(roster.length - 1);
         }}
-        increasePlayersCount={increasePlayersCount}
-        decreasePlayersCount={decreasePlayersCount}
-        gameday={gameday}
       />
     </>
   );

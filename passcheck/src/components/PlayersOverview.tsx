@@ -19,11 +19,11 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
   const toggleSecondTeam = () => {
     setShowSecondTeam(!showSecondTeam);
   };
-  console.log('PlayersOverview', team, gameday, players, otherPlayers);
 
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
   const showModal = () => {
     //set modal visible
+    getCheckedPlayers();
     setModalVisible(true);
   };
   const handleClose = () => {
@@ -50,12 +50,6 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
 
   //   setPlayersCount(newPlayersCount);
   // }, [players, gameday]);
-  const increasePlayersCount = () => {
-    setPlayersCount(playersCount + 1);
-  };
-  const decreasePlayersCount = () => {
-    setPlayersCount(playersCount - 1);
-  };
 
   const [pageLoad, setPageLoad] = useState<boolean>(false);
   useEffect(() => {
@@ -76,7 +70,17 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
 
   const getCheckedPlayers = () => {
     console.log('otherPlayers', otherPlayers);
-    return players.filter((player: Player) => player.isSelected);
+    const selectedPlayers = players.filter(
+      (player: Player) => player.isSelected
+    );
+    const additionalPlayers = otherPlayers.flatMap((value) =>
+      value.roster.filter((player) => player.isSelected)
+    );
+    console.log('selectedPlayers + additionalPlayers', [
+      ...selectedPlayers,
+      ...additionalPlayers,
+    ]);
+    return [...selectedPlayers, ...additionalPlayers];
   };
 
   return (
@@ -86,13 +90,10 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
       <PlayersTable
         teamName={team.name}
         players={players}
-        increasePlayersCount={increasePlayersCount}
-        decreasePlayersCount={decreasePlayersCount}
         initModal={pageLoad}
         resetPageLoad={() => {
           setPageLoad(false);
         }}
-        gameday={gameday}
       />
       {otherPlayers.length !== 0 && (
         <>
@@ -102,8 +103,8 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
             className='full-width-button'
           >
             {showSecondTeam
-              ? 'weitere Pässe ausblenden'
-              : 'weitere Pässe anzeigen'}
+              ? 'weitere Teams ausblenden'
+              : 'weitere Teams anzeigen'}
           </Button>
           <br />
         </>
@@ -115,11 +116,8 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
             key={index}
             teamName={additionalTeam.name}
             players={additionalTeam.roster}
-            increasePlayersCount={increasePlayersCount}
-            decreasePlayersCount={decreasePlayersCount}
             initModal={false}
             resetPageLoad={() => {}}
-            gameday={gameday}
           />
         ))}
       <div>
@@ -150,7 +148,7 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
         </Modal.Header>
         <Modal.Body>
           <div>Team: {team?.name}</div>
-          <div>Es sind {playersCount} Spieler anwesend.</div>
+          <div>Es sind {getCheckedPlayers().length} Spieler anwesend.</div>
         </Modal.Body>
         <Modal.Footer className='modal-footer'>
           <Button variant='secondary' className='me-auto' onClick={handleClose}>

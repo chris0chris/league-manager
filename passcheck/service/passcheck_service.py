@@ -1,13 +1,14 @@
 from datetime import datetime
 from urllib.parse import unquote
 
+from django.conf import settings
 from django.db.models import Count, Q, Value, OuterRef, Exists
 
-from gamedays.models import Team, Gameinfo, Gameday, SeasonLeagueTeam
+from gamedays.models import Team, Gameinfo, Gameday
 from gamedays.service.model_helper import GameresultHelper
 from passcheck.api.serializers import PasscheckGamesListSerializer, PasscheckSerializer, RosterSerializer, \
     RosterValidationSerializer
-from passcheck.models import Playerlist, EligibilityRule, PlayerlistGameday
+from passcheck.models import Playerlist, EligibilityRule, PlayerlistGameday, TeamRelationship
 from passcheck.service.eligibility_validation import EligibilityValidator
 
 
@@ -17,7 +18,8 @@ class PasscheckService:
 
     def get_officiating_games(self, officials_team):
         date = datetime.today()
-        date = '2023-08-05'
+        if settings.DEBUG:
+            date = '2023-08-05'
         if officials_team is None and self.is_staff:
             gameinfo = Gameinfo.objects.filter(gameday__date=date)
         else:
@@ -79,22 +81,36 @@ class PasscheckService:
         return is_selected_query
 
     def get_roster_with_validation(self, team_id: int, gameday_id: int):
-        season_league: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(team_id=team_id)
         gameday: Gameday = Gameday.objects.get(pk=gameday_id)
-        rule = EligibilityRule.objects.get(league=season_league.league, eligible_in=gameday.league)
-        gameday_league_annotation = {
-            f'{gameday.league_id}': Count('gamedays__league',
-                                          filter=Q(gamedays__league=gameday.league))}
-        roster_second_team = self._get_roster(team_id, gameday_id, gameday_league_annotation)
         roster = self.get_roster(team_id, gameday_id)
-        ev = EligibilityValidator(rule, gameday)
-        roster.update({
-            'additionalRosters': RosterValidationSerializer(instance=roster_second_team, is_staff=self.is_staff,
-                                                            context={'validator': ev, 'all_leagues': [
-                                                                {'gamedays__league': gameday.league_id}]
-                                                                     },
-                                                            many=True).data
-        })
+        try:
+            relationship = TeamRelationship.objects.get(team=team_id)
+            relationship = relationship.additional_teams.all()
+        except TeamRelationship.DoesNotExist:
+            relationship = []
+        additional_rosters_serialized = []
+        for additional_team_link in relationship:
+            additional_relation = additional_team_link.relationship_team.first()
+            rule = EligibilityRule.objects.get(league=additional_relation.league, eligible_in=gameday.league)
+            gameday_league_annotation = {
+                f'{gameday.league_id}': Count('gamedays__league',
+                                              filter=Q(gamedays__league=gameday.league))}
+            roster_addiational_team = self._get_roster(additional_relation.team.pk, gameday_id,
+                                                       gameday_league_annotation)
+            if not roster_addiational_team.exists():
+                continue
+            ev = EligibilityValidator(rule, gameday)
+            additional_rosters_serialized.append(
+                {
+                    'name': additional_relation.team.description,
+                    'roster': RosterValidationSerializer(instance=roster_addiational_team, is_staff=self.is_staff,
+                                                         context={'validator': ev, 'all_leagues': [
+                                                             {'gamedays__league': gameday.league_id}]
+                                                                  },
+                                                         many=True).data
+                }
+            )
+        roster['additionalRosters'] = additional_rosters_serialized
         return roster
 
     def _get_roster(self, team_id, gameday_id, league_annotations):

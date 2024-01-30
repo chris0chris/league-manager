@@ -7,14 +7,13 @@ import Button from 'react-bootstrap/Button';
 import {getPasscheckData, getPlayerList} from './common/games';
 
 import {HashRouter as Router, Route, Routes} from 'react-router-dom';
-import {Game, apiTeam} from './common/types';
+import {Game, GameList, Roster, apiTeam} from './common/types';
 
 //import {TEAMS_URL, PLAYERS_URL} from "./common/urls";
 
 function App() {
   //componentDidMount() {
-  const [games, setGames] = useState<any>([]);
-  const [gamesWithKeys, setGamesWithKeys] = useState<any>([]);
+  const [games, setGames] = useState<GameList>([]);
   const [officials, setOfficials] = useState<string>('');
   const [tokenKey, setTokenKey] = useState<string>('');
   const [gameIndex, setGameIndex] = useState<Game>({
@@ -22,15 +21,13 @@ function App() {
     field: -1,
     gameday: -1,
     home: {id: -1, name: 'home team'},
-    id: -1,
+    gameday_id: -1,
     officials: -1,
     scheduled: '00:00',
   });
   const [team, setTeam] = useState<apiTeam>({id: -1, name: 'Loading ...'});
-  const [playerlist, setPlayerlist] = useState<any>([]);
-  const [playersWithKeys, setPlayersWithKeys] = useState<any>([]);
+  const [playerlist, setPlayerlist] = useState<Roster>([]);
   const [otherPlayers, setOtherPlayers] = useState<any>([]);
-  const [otherPlayersWithKeys, setOtherPlayersWithKeys] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [playersLoaded, setPlayersLoaded] = useState<boolean>(false);
   let otherPlayersFound = false;
@@ -52,55 +49,23 @@ function App() {
   }, [tokenKey]);
 
   const loadIndex = (game: Game) => {
+    console.log('loadIndex:', game);
     setGameIndex(game);
   };
 
   const loadTeam = (team: apiTeam) => {
+    console.log('loadTeam :>>', gameIndex, team);
     setTeam(team);
     if (team && playerlist.length === 0) {
-      getPlayerList(team.id, gameIndex.id).then((result) => {
+      getPlayerList(team.id, gameIndex.gameday_id).then((result) => {
+        console.log('result :>>', result);
         setLoading(false);
-        if (
-          result.roster.length !== 0 &&
-          result.additionalRosters.length !== 0
-        ) {
-          setOtherPlayers(result.additionalRosters);
-          setPlayerlist(result.roster);
-          otherPlayersFound = true;
-          if (otherPlayersFound && otherPlayersWithKeys.length === 0) {
-            const keys = result.additionalRosters.map(
-              (obj: any, index: any) => ({
-                ...obj,
-                key: index,
-              })
-            );
-            setOtherPlayersWithKeys(keys);
-          }
-          if (playersWithKeys.length === 0) {
-            const keys = result.roster.map((obj: any, index: any) => ({
-              ...obj,
-              key: index,
-            }));
-            setPlayersWithKeys(keys);
-          }
-        }
+        setOtherPlayers(result.additionalRosters);
+        setPlayerlist(result.roster);
+        setPlayersLoaded(true);
       });
     }
   };
-
-  useEffect(() => {
-    if (playersWithKeys.length !== 0 && otherPlayersWithKeys.length !== 0) {
-      setPlayersLoaded(true);
-    }
-  }, [playersWithKeys, otherPlayersWithKeys]);
-
-  useEffect(() => {
-    const keys = games.map((obj: any, index: any) => ({
-      ...obj,
-      key: index,
-    }));
-    setGamesWithKeys(keys);
-  }, [games]);
 
   if (loading) {
     return <p>loading...</p>;
@@ -114,7 +79,7 @@ function App() {
               path='/'
               element={
                 <GameOverview
-                  gamesWithKeys={gamesWithKeys}
+                  games={games}
                   officials={officials}
                   loadIndex={loadIndex}
                 />
@@ -136,9 +101,9 @@ function App() {
               element={
                 <PlayersOverview
                   team={team}
-                  gameday={gameIndex.id}
-                  players={playersWithKeys}
-                  otherPlayers={otherPlayersWithKeys}
+                  gameday={gameIndex.gameday_id}
+                  players={playerlist}
+                  otherPlayers={otherPlayers}
                 />
               }
             />

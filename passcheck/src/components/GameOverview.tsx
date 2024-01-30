@@ -1,22 +1,19 @@
-import {Button} from 'react-bootstrap';
-import GameCard from './GameCard';
-import {useState, useEffect} from 'react';
 import {Game, GameList} from '../common/types';
+import GameCard from './GameCard';
 //import { getGames, getOfficials, getTeams, getGamedays } from "../common/games";
-import {getPasscheckData} from '../common/games';
 
 interface Props {
-  gamesWithKeys: GameList;
+  games: GameList;
   officials: string;
   loadIndex: (game: Game) => void;
 }
 
-function GameOverview({gamesWithKeys, officials, loadIndex}: Props) {
+function GameOverview({games, officials, loadIndex}: Props) {
   return (
     <>
       <h1>Herzlich willkommen, {officials}.</h1>
       <div>Bitte ein Spiel auswählen:</div>
-      {gamesWithKeys.map((game: Game, index: number) => (
+      {games.map((game: Game, index: number) => (
         <div>
           <GameCard
             key={index}
