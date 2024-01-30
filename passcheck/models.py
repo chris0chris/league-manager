@@ -55,6 +55,16 @@ class PlayerlistGameday(models.Model):
     objects: QuerySet = models.Manager()
 
 
+class TeamRelationship(models.Model):
+    team = models.ForeignKey(Team, related_name='relationship_team', on_delete=models.CASCADE, unique=True)
+    league = models.ForeignKey(League, on_delete=models.CASCADE)
+    additional_teams = models.ManyToManyField(Team, related_name='relationship_additional_teams')
+
+    objects: QuerySet = models.Manager()
+
+    def __str__(self):
+        return f"{self.team} # {self.league.name} - {[team.name for team in self.additional_teams.all()]}"
+
 
 class EligibilityRule(models.Model):
     league = models.ForeignKey(League, related_name='eligibility_for', on_delete=models.CASCADE)

@@ -8,13 +8,8 @@ interface Props {
   handleClose(): any;
   playersData: Roster;
   index: number;
-  increaseIndex(): void;
-  decreaseIndex(): void;
   maxIndex(): void;
   minIndex(): void;
-  increasePlayersCount(): void;
-  decreasePlayersCount(): void;
-  gameday: number;
 }
 
 function PlayerModal({
@@ -22,15 +17,15 @@ function PlayerModal({
   handleClose,
   playersData: roster,
   index,
-  increaseIndex,
-  decreaseIndex,
   minIndex,
   maxIndex,
-  increasePlayersCount,
-  decreasePlayersCount,
-  gameday,
 }: Props) {
   const [click, setClick] = useState<number>(0);
+  const [currentIndex, setCurrentIndex] = useState(index);
+  useEffect(() => {
+    setCurrentIndex(index);
+  }, [index]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       // simple click
@@ -47,21 +42,19 @@ function PlayerModal({
   }, [click]);
   const update = () => {
     //Invert the checked status of the player
-    if (roster[index].isSelected) {
-      roster[index].isSelected = false;
-      decreasePlayersCount();
+    if (roster[currentIndex].isSelected) {
+      roster[currentIndex].isSelected = false;
     } else {
-      roster[index].isSelected = true;
-      increasePlayersCount();
+      roster[currentIndex].isSelected = true;
     }
-    //playersData[index].checked = !playersData[index].checked;
+    //playersData[currentIndex].checked = !playersData[currentIndex].checked;
     //Increase or decrease active player count for final output
-    //playersData[index].checked
+    //playersData[currentIndex].checked
   };
 
   const nextPlayer = () => {
-    index < roster.length - 1 && increaseIndex();
-    index === roster.length - 1 && minIndex(); //Edgecase last player in the list
+    currentIndex < roster.length - 1 && setCurrentIndex(currentIndex + 1);
+    currentIndex === roster.length - 1 && minIndex(); //Edgecase last player in the list
   };
 
   const handleDoubleClick = () => {
@@ -74,39 +67,45 @@ function PlayerModal({
       nextPlayer();
     }
   };
-
+  console.log('currentIndex :>>', currentIndex, index);
   return (
     <>
       <Modal
         show={modalVisible}
-        onHide={handleClose}
+        onHide={() => {
+          setCurrentIndex(index);
+          handleClose();
+        }}
         backdrop='static'
         keyboard={false}
       >
         <Modal.Header closeButton>
           <Modal.Title>
-            {roster[index]?.first_name} {roster[index]?.last_name}
+            {roster[currentIndex]?.first_name} {roster[currentIndex]?.last_name}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className='row'>
             <div className='col-4'>Name:</div>
             <div className='col-8'>
-              {roster[index]?.first_name} {roster[index]?.last_name}
+              {roster[currentIndex]?.first_name}{' '}
+              {roster[currentIndex]?.last_name}
             </div>
           </div>
           <div className='row'>
             <div className='col-4'>Trikotnummer:</div>
-            <div className='col-8'>{roster[index]?.jersey_number}</div>
+            <div className='col-8'>{roster[currentIndex]?.jersey_number}</div>
           </div>
           <div className='row'>
             <div className='col-4'>Passnummer:</div>
-            <div className='col-8'>{roster[index]?.pass_number}</div>
+            <div className='col-8'>{roster[currentIndex]?.pass_number}</div>
           </div>
-          {roster[index]?.validationError && (
+          {roster[currentIndex]?.validationError && (
             <div className='row text-bg-danger'>
               <div className='col-4'>Achtung:</div>
-              <div className='col-8'>{roster[index]?.validationError}</div>
+              <div className='col-8'>
+                {roster[currentIndex]?.validationError}
+              </div>
             </div>
           )}
         </Modal.Body>
@@ -115,8 +114,8 @@ function PlayerModal({
             variant='secondary'
             className='modal-button-left me-auto'
             onClick={() => {
-              index > 0 && decreaseIndex();
-              index === 0 && maxIndex(); //Edgecase first player in the list
+              currentIndex > 0 && setCurrentIndex(currentIndex - 1);
+              currentIndex === 0 && maxIndex(); //Edgecase first player in the list
             }}
           >
             <svg
@@ -133,7 +132,7 @@ function PlayerModal({
               />
             </svg>
           </Button>
-          {roster[index]?.validationError && (
+          {roster[currentIndex]?.validationError && (
             <Button
               variant={'danger'}
               className='modal-button-middle'
@@ -142,7 +141,7 @@ function PlayerModal({
                 setClick(click + 1);
               }}
             >
-              {!roster[index]?.isSelected && (
+              {!roster[currentIndex]?.isSelected && (
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   width='30'
@@ -154,7 +153,7 @@ function PlayerModal({
                   <path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z' />
                 </svg>
               )}
-              {roster[index]?.isSelected && (
+              {roster[currentIndex]?.isSelected && (
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   width='30'
@@ -168,16 +167,16 @@ function PlayerModal({
               )}
             </Button>
           )}
-          {!roster[index]?.validationError && (
+          {!roster[currentIndex]?.validationError && (
             <Button
-              variant={roster[index]?.isSelected ? 'danger' : 'success'} //coloring the button depending on the state of the player
+              variant={roster[currentIndex]?.isSelected ? 'danger' : 'success'} //coloring the button depending on the state of the player
               className='modal-button-middle'
               onClick={() => {
                 update();
                 nextPlayer();
               }}
             >
-              {!roster[index]?.isSelected && (
+              {!roster[currentIndex]?.isSelected && (
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   width='30'
@@ -189,7 +188,7 @@ function PlayerModal({
                   <path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z' />
                 </svg>
               )}
-              {roster[index]?.isSelected && (
+              {roster[currentIndex]?.isSelected && (
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   width='30'

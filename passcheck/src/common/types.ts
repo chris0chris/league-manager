@@ -3,7 +3,6 @@ export type Roster = Player[];
 export type Player = {
   first_name: string;
   id: string;
-  key: number;
   last_name: string;
   pass_number: string;
   jersey_number: number;
@@ -20,7 +19,7 @@ export type jsonTypeTeam = {
 }[];
 
 export type Game = {
-  id: number;
+  gameday_id: number;
   field: number;
   scheduled: string;
   officials: number;
