@@ -14,14 +14,12 @@ function GameOverview({games, officials, loadIndex}: Props) {
       <h1>Herzlich willkommen, {officials}.</h1>
       <div>Bitte ein Spiel auswählen:</div>
       {games.map((game: Game, index: number) => (
-        <div>
-          <GameCard
-            key={index}
-            officialsTeam={officials}
-            game={game}
-            loadIndex={loadIndex}
-          />
-        </div>
+        <GameCard
+          key={index}
+          officialsTeam={officials}
+          game={game}
+          loadIndex={loadIndex}
+        />
       ))}
     </>
   );

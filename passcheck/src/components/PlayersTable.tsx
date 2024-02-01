@@ -8,16 +8,10 @@ interface Props {
   teamName: string;
   players: Roster;
   initModal: boolean;
-  resetPageLoad(): void;
 }
 
 //component that shows all available players on the team in a table
-function PlayersTable({
-  teamName,
-  players: playersData,
-  initModal,
-  resetPageLoad,
-}: Props) {
+function PlayersTable({teamName, players: playersData, initModal}: Props) {
   const [searchInput, setSearchInput] = useState(''); //Filter players by last name
   const onChange = (event: any) => {
     //Searchbar is being used
@@ -38,7 +32,6 @@ function PlayersTable({
 
   if (initModal && !modalVisible) {
     showModal(0);
-    resetPageLoad();
   }
 
   return (
