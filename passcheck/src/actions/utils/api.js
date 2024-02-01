@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {SCORECARD_URL} from '../../common/routes';
 //
 //export const apiPost = (url, body, successType, errorType) => async (
 //    dispatch,
@@ -48,26 +49,35 @@ export const apiPut = async (url, body) => {
   const header = tokenConfig();
 
   await axios
-      .put(url, body, header)
-      .then((res) => {
-      })
-      .catch((err) => {
-        console.error(err)
-      });
+    .put(url, body, header)
+    .then((res) => {})
+    .catch((err) => {
+      console.error(err);
+    });
 };
 
 export const apiGet = async (url) => {
   return await axios
-      .get(url, tokenConfig())
-      .then((res) => {
-        if (res.data) {
-          return res.data;
+    .get(url, tokenConfig())
+    .then((res) => {
+      if (res.data) {
+        return res.data;
+      }
+    })
+    .catch((error) => {
+      console.log('api.get ERROR', error);
+      if (error.response && error.response.status === 401) {
+        if (process.env.NODE_ENV === 'production') {
+          window.location.href = SCORECARD_URL;
+        } else {
+          alert(
+            "`localStorage.setItem('token', '${localStorage.getItem('token')}')`"
+          );
         }
-
-      })
-      .catch((err) =>
-        console.error(err)
-      );
+      } else {
+        console.error('Error fetching data:', error.message);
+      }
+    });
 };
 
 const tokenConfig = () => {

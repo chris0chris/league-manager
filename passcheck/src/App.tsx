@@ -8,6 +8,13 @@ import {getPasscheckData, getPlayerList} from './common/games';
 
 import {HashRouter as Router, Route, Routes} from 'react-router-dom';
 import {Game, GameList, Roster, apiTeam} from './common/types';
+import {
+  SUCCESS_URL,
+  PLAYERS_URL,
+  ROOT_URL,
+  TEAMS_URL,
+  PASSCHECK_URL,
+} from './common/routes';
 
 //import {TEAMS_URL, PLAYERS_URL} from "./common/urls";
 
@@ -30,7 +37,6 @@ function App() {
   const [otherPlayers, setOtherPlayers] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [playersLoaded, setPlayersLoaded] = useState<boolean>(false);
-  let otherPlayersFound = false;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -43,8 +49,6 @@ function App() {
           setLoading(false);
         });
       }
-    } else {
-      //window.location.href = "/scorecard/";
     }
   }, [tokenKey]);
 
@@ -76,7 +80,7 @@ function App() {
         <div>
           <Routes>
             <Route
-              path='/'
+              path={ROOT_URL}
               element={
                 <GameOverview
                   games={games}
@@ -86,7 +90,7 @@ function App() {
               }
             />
             <Route
-              path='/teams'
+              path={TEAMS_URL}
               element={
                 <TeamOverview
                   game={gameIndex}
@@ -97,7 +101,7 @@ function App() {
               }
             />
             <Route
-              path='/players'
+              path={PLAYERS_URL}
               element={
                 <PlayersOverview
                   team={team}
@@ -108,7 +112,7 @@ function App() {
               }
             />
             <Route
-              path='/success'
+              path={SUCCESS_URL}
               element={
                 <div>
                   <main style={{padding: '1rem'}}>
@@ -116,7 +120,7 @@ function App() {
                   </main>
                   <Button
                     onClick={() => {
-                      window.location.href = '/passcheck/';
+                      window.location.href = PASSCHECK_URL;
                     }}
                   >
                     Zurück
