@@ -3,7 +3,7 @@ import {Button} from 'react-bootstrap';
 import {Card} from 'react-bootstrap';
 import ListGroup from 'react-bootstrap/ListGroup';
 import {jsonTypeTeam, GameList, apiGames, apiTeam, Game} from '../common/types';
-import {PLAYERS_URL} from '../common/urls';
+import {PLAYERS_URL} from '../common/routes';
 
 import {useNavigate} from 'react-router-dom';
 
