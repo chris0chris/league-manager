@@ -31,32 +31,6 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
     setModalVisible(false);
   };
 
-  const [playersCount, setPlayersCount] = useState<number>(0);
-  // players.reduce((count, player) => {
-  //   if (player.gamedays.includes(gameday)) {
-  //     count++;
-  //   }
-  //   return count;
-  // }, 0)
-
-  // You can use useEffect to update the count when players or gameday changes
-  // // useEffect(() => {
-  // //   const newPlayersCount = players.reduce((count, player) => {
-  // //     if (player.gamedays.includes(gameday)) {
-  // //       count++;
-  // //     }
-  // //     return count;
-  // //   }, 0);
-
-  //   setPlayersCount(newPlayersCount);
-  // }, [players, gameday]);
-
-  const [pageLoad, setPageLoad] = useState<boolean>(false);
-  useEffect(() => {
-    //load first modal
-    setPageLoad(true);
-  }, []);
-
   const navigate = useNavigate();
   const handleClickEvent = () => {
     navigate('/');
@@ -87,14 +61,7 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
     <>
       <h1>Spielerliste {team?.name}</h1>
       <Button onClick={handleClickEvent}>Auswahl abbrechen</Button>
-      <PlayersTable
-        teamName={team.name}
-        players={players}
-        initModal={pageLoad}
-        resetPageLoad={() => {
-          setPageLoad(false);
-        }}
-      />
+      <PlayersTable teamName={team.name} players={players} initModal={false} />
       {otherPlayers.length !== 0 && (
         <>
           <Button
@@ -117,7 +84,6 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
             teamName={additionalTeam.name}
             players={additionalTeam.roster}
             initModal={false}
-            resetPageLoad={() => {}}
           />
         ))}
       <div>
