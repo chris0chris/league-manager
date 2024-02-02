@@ -42,7 +42,7 @@ class PasscheckService:
             'games': self.get_officiating_games(officials_team=team),
         }
 
-    def _get_team(self, team_id):
+    def _get_team(self, team_id) -> Team:
         try:
             if type(team_id) is str:
                 team = Team.objects.get(name=team_id)
@@ -53,19 +53,22 @@ class PasscheckService:
             return None
 
     def get_roster(self, team_id: int, gameday_id: int = None):
-        all_leagues = Playerlist.objects.filter(team_id=team_id).exclude(gamedays__league__name=None).distinct().values(
+        team = self._get_team(team_id)
+        all_leagues = Playerlist.objects.filter(team=team).exclude(gamedays__league__name=None).distinct().values(
             'gamedays__league', 'gamedays__league__name')
         league_annotations = {
             f'{league["gamedays__league"]}': Count('gamedays__league',
                                                    filter=Q(gamedays__league=league['gamedays__league'])) for
             league in all_leagues
         }
-        roster = self._get_roster(team_id, gameday_id, league_annotations)
+        roster = self._get_roster(team, gameday_id, league_annotations)
         return {
             'all_leagues': list(all_leagues),
-            'roster': RosterSerializer(instance=roster, is_staff=self.is_staff,
-                                       context={'all_leagues': list(all_leagues)},
-                                       many=True).data
+            'team': {
+                'name': team.description,
+                'roster': RosterSerializer(instance=roster, is_staff=self.is_staff,
+                                           context={'all_leagues': list(all_leagues)},
+                                           many=True).data}
         }
 
     def _is_selected_query(self, gameday_id):
@@ -88,7 +91,7 @@ class PasscheckService:
             relationship = relationship.additional_teams.all()
         except TeamRelationship.DoesNotExist:
             relationship = []
-        additional_rosters_serialized = []
+        additional_teams_serialized = []
         for additional_team_link in relationship:
             additional_relation = additional_team_link.relationship_team.first()
             rule = EligibilityRule.objects.get(league=additional_relation.league, eligible_in=gameday.league)
@@ -100,7 +103,7 @@ class PasscheckService:
             if not roster_addiational_team.exists():
                 continue
             ev = EligibilityValidator(rule, gameday)
-            additional_rosters_serialized.append(
+            additional_teams_serialized.append(
                 {
                     'name': additional_relation.team.description,
                     'roster': RosterValidationSerializer(instance=roster_addiational_team, is_staff=self.is_staff,
@@ -110,12 +113,12 @@ class PasscheckService:
                                                          many=True).data
                 }
             )
-        roster['additionalRosters'] = additional_rosters_serialized
+        roster['additionalTeams'] = additional_teams_serialized
         return roster
 
-    def _get_roster(self, team_id, gameday_id, league_annotations):
+    def _get_roster(self, team, gameday_id, league_annotations):
         is_selected_query = self._is_selected_query(gameday_id)
-        return Playerlist.objects.filter(team=team_id).annotate(
+        return Playerlist.objects.filter(team=team).annotate(
             **league_annotations,
             is_selected=is_selected_query
         ).values()

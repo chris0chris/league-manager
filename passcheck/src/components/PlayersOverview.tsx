@@ -2,23 +2,40 @@ import PlayersTable from './PlayersTable';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {useState, useEffect} from 'react';
-import {apiTeam, Player, Roster} from '../common/types';
-import {useNavigate} from 'react-router-dom';
-import {submitRoster} from '../common/games';
-
-interface Props {
-  team: apiTeam;
-  gameday: number;
-  players: Roster;
-  otherPlayers: {name: string; roster: Roster}[];
-}
+import {Team, apiTeam, Player, Roster} from '../common/types';
+import {useNavigate, useParams} from 'react-router-dom';
+import {getPlayerList as getRosterList, submitRoster} from '../common/games';
 
 //component that shows all available players on the team in a table
-function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
-  const [showSecondTeam, setShowSecondTeam] = useState<boolean>(false);
-  const toggleSecondTeam = () => {
-    setShowSecondTeam(!showSecondTeam);
-  };
+function PlayersOverview() {
+  const [showAdditionalRosters, setShowAdditionalRosters] =
+    useState<boolean>(false);
+  // const [team, setTeam] = useState<apiTeam>({id: -1, name: 'Loading ...'});
+  const [team, setTeam] = useState<Team>({
+    name: 'Loading...',
+    roster: [],
+  });
+  const [additionalTeams, setAdditionalTeams] = useState<Team[]>([]);
+  const navigate = useNavigate();
+  const {teamId} = useParams();
+  const {gamedayId} = useParams();
+
+  if (isNaN(teamId as any) || isNaN(gamedayId as any)) {
+    navigate('/error', {
+      state: {
+        message:
+          'Die URL benötigt eine TeamId und eine GamedayId als Zahl! /#/team/:teamId/gameday/:gamedayId',
+      },
+    });
+  }
+  useEffect(() => {
+    getRosterList(teamId!, gamedayId!).then(
+      (result: {team: Team; additionalTeams: Team[]}) => {
+        setAdditionalTeams(result.additionalTeams);
+        setTeam(result.team);
+      }
+    );
+  }, [teamId, gamedayId]);
 
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
   const showModal = () => {
@@ -31,23 +48,21 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
     setModalVisible(false);
   };
 
-  const navigate = useNavigate();
   const handleClickEvent = () => {
     navigate('/');
   };
 
   const onSubmitRoster = () => {
-    submitRoster(team!.id, gameday, getCheckedPlayers());
+    submitRoster(teamId!, gamedayId!, getCheckedPlayers());
     handleClose();
     navigate('/success');
   };
 
   const getCheckedPlayers = () => {
-    console.log('otherPlayers', otherPlayers);
-    const selectedPlayers = players.filter(
+    const selectedPlayers = team.roster.filter(
       (player: Player) => player.isSelected
     );
-    const additionalPlayers = otherPlayers.flatMap((value) =>
+    const additionalPlayers = additionalTeams.flatMap((value: Team) =>
       value.roster.filter((player) => player.isSelected)
     );
     console.log('selectedPlayers + additionalPlayers', [
@@ -59,17 +74,21 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
 
   return (
     <>
-      <h1>Spielerliste {team?.name}</h1>
+      <h1>Spielerliste {team.name}</h1>
       <Button onClick={handleClickEvent}>Auswahl abbrechen</Button>
-      <PlayersTable teamName={team.name} players={players} initModal={false} />
-      {otherPlayers.length !== 0 && (
+      <PlayersTable
+        teamName={team.name}
+        roster={team.roster}
+        initModal={false}
+      />
+      {additionalTeams.length !== 0 && (
         <>
           <Button
             variant='secondary'
-            onClick={toggleSecondTeam}
+            onClick={() => setShowAdditionalRosters(!showAdditionalRosters)}
             className='full-width-button'
           >
-            {showSecondTeam
+            {showAdditionalRosters
               ? 'weitere Teams ausblenden'
               : 'weitere Teams anzeigen'}
           </Button>
@@ -77,12 +96,12 @@ function PlayersOverview({team, gameday, players, otherPlayers}: Props) {
         </>
       )}
       <br />
-      {showSecondTeam &&
-        otherPlayers.map((additionalTeam, index) => (
+      {showAdditionalRosters &&
+        additionalTeams.map((roster: Team, index: number) => (
           <PlayersTable
             key={index}
-            teamName={additionalTeam.name}
-            players={additionalTeam.roster}
+            teamName={roster.name}
+            roster={roster.roster}
             initModal={false}
           />
         ))}

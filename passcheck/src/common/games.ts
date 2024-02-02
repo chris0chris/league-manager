@@ -10,7 +10,7 @@ export const getPasscheckData = async (team_id?: string | null) => {
   return data;
 };
 
-export const getPlayerList = async (team_id: number, gameday_id: number) => {
+export const getPlayerList = async (team_id: string, gameday_id: string) => {
   const players = await apiGet(
     `/api/passcheck/roster/${team_id}/gameday/${gameday_id}/`
   );
@@ -18,8 +18,8 @@ export const getPlayerList = async (team_id: number, gameday_id: number) => {
 };
 
 export const submitRoster = async (
-  team: number,
-  gameday_id: number,
+  team: string,
+  gameday_id: string,
   roster: Roster
 ) => {
   await apiPut(`/api/passcheck/roster/${team}/gameday/${gameday_id}/`, roster);
