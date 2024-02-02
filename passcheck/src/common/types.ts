@@ -1,5 +1,12 @@
 export type Roster = Player[];
 
+export type Team = {
+  name: string;
+  roster: Roster;
+};
+
+export type AdditionalTeams = Team[];
+
 export type Player = {
   first_name: string;
   id: string;
@@ -22,8 +29,6 @@ export type Game = {
   gameday_id: number;
   field: number;
   scheduled: string;
-  officials: number;
-  gameday: number;
   away: apiTeam;
   home: apiTeam;
 };

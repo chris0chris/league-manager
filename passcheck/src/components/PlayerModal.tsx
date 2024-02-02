@@ -6,7 +6,7 @@ import {useEffect, useState} from 'react';
 interface Props {
   modalVisible: boolean;
   handleClose(): any;
-  playersData: Roster;
+  roster: Roster;
   index: number;
   maxIndex(): void;
   minIndex(): void;
@@ -15,7 +15,7 @@ interface Props {
 function PlayerModal({
   modalVisible,
   handleClose,
-  playersData: roster,
+  roster,
   index,
   minIndex,
   maxIndex,
@@ -31,7 +31,6 @@ function PlayerModal({
       // simple click
       setClick(0);
     }, 250);
-
     // the duration between this click and the previous one
     // is less than the value of delay = double-click
     if (click === 2) {
@@ -41,15 +40,11 @@ function PlayerModal({
     return () => clearTimeout(timer);
   }, [click]);
   const update = () => {
-    //Invert the checked status of the player
     if (roster[currentIndex].isSelected) {
       roster[currentIndex].isSelected = false;
     } else {
       roster[currentIndex].isSelected = true;
     }
-    //playersData[currentIndex].checked = !playersData[currentIndex].checked;
-    //Increase or decrease active player count for final output
-    //playersData[currentIndex].checked
   };
 
   const nextPlayer = () => {
@@ -67,7 +62,6 @@ function PlayerModal({
       nextPlayer();
     }
   };
-  console.log('currentIndex :>>', currentIndex, index);
   return (
     <>
       <Modal

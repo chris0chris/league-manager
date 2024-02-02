@@ -6,18 +6,17 @@ import {Player, Roster} from '../common/types';
 
 interface Props {
   teamName: string;
-  players: Roster;
+  roster: Roster;
   initModal: boolean;
 }
 
 //component that shows all available players on the team in a table
-function PlayersTable({teamName, players: playersData, initModal}: Props) {
+function PlayersTable({teamName, roster, initModal}: Props) {
   const [searchInput, setSearchInput] = useState(''); //Filter players by last name
   const onChange = (event: any) => {
     //Searchbar is being used
     setSearchInput(event.target.value);
   };
-  const [roster, setRoster] = useState<Roster>(playersData); //store array with indexes in useState
   const [modalKey, setModalKey] = useState<number>(0); //store current key to keep track of the active player
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
   const showModal = (key: number) => {
@@ -33,6 +32,8 @@ function PlayersTable({teamName, players: playersData, initModal}: Props) {
   if (initModal && !modalVisible) {
     showModal(0);
   }
+
+  console.log('players', roster);
 
   return (
     <>
@@ -88,7 +89,7 @@ function PlayersTable({teamName, players: playersData, initModal}: Props) {
       <PlayerModal //load the modal with details about the active player
         modalVisible={modalVisible}
         handleClose={handleClose}
-        playersData={roster}
+        roster={roster}
         index={modalKey} //active player
         //handle different cases for jumping to next player inside the modal
         minIndex={() => {
