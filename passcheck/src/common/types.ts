@@ -8,10 +8,10 @@ export type Team = {
 export type AdditionalTeams = Team[];
 
 export type Player = {
+  id: number;
   first_name: string;
-  id: string;
   last_name: string;
-  pass_number: string;
+  pass_number: number;
   jersey_number: number;
   isSelected: boolean;
   validationError?: string;

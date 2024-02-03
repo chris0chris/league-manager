@@ -1,30 +1,17 @@
+import { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import {Roster} from '../common/types';
-import {useEffect, useState} from 'react';
+import { Player } from '../common/types';
 
 interface Props {
   modalVisible: boolean;
   handleClose(): any;
-  roster: Roster;
-  index: number;
-  maxIndex(): void;
-  minIndex(): void;
+  nextPlayer(value: number | null): void;
+  player: Player;
 }
 
-function PlayerModal({
-  modalVisible,
-  handleClose,
-  roster,
-  index,
-  minIndex,
-  maxIndex,
-}: Props) {
+function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
   const [click, setClick] = useState<number>(0);
-  const [currentIndex, setCurrentIndex] = useState(index);
-  useEffect(() => {
-    setCurrentIndex(index);
-  }, [index]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -40,16 +27,7 @@ function PlayerModal({
     return () => clearTimeout(timer);
   }, [click]);
   const update = () => {
-    if (roster[currentIndex].isSelected) {
-      roster[currentIndex].isSelected = false;
-    } else {
-      roster[currentIndex].isSelected = true;
-    }
-  };
-
-  const nextPlayer = () => {
-    currentIndex < roster.length - 1 && setCurrentIndex(currentIndex + 1);
-    currentIndex === roster.length - 1 && minIndex(); //Edgecase last player in the list
+    player.isSelected = !player.isSelected;
   };
 
   const handleDoubleClick = () => {
@@ -59,7 +37,7 @@ function PlayerModal({
 
     if (isSure) {
       update();
-      nextPlayer();
+      nextPlayer(1);
     }
   };
   return (
@@ -67,7 +45,7 @@ function PlayerModal({
       <Modal
         show={modalVisible}
         onHide={() => {
-          setCurrentIndex(index);
+          nextPlayer(null);
           handleClose();
         }}
         backdrop='static'
@@ -75,31 +53,28 @@ function PlayerModal({
       >
         <Modal.Header closeButton>
           <Modal.Title>
-            {roster[currentIndex]?.first_name} {roster[currentIndex]?.last_name}
+            {player.first_name} {player.last_name}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className='row'>
             <div className='col-4'>Name:</div>
             <div className='col-8'>
-              {roster[currentIndex]?.first_name}{' '}
-              {roster[currentIndex]?.last_name}
+              {player.first_name} {player.last_name}
             </div>
           </div>
           <div className='row'>
             <div className='col-4'>Trikotnummer:</div>
-            <div className='col-8'>{roster[currentIndex]?.jersey_number}</div>
+            <div className='col-8'>{player.jersey_number}</div>
           </div>
           <div className='row'>
             <div className='col-4'>Passnummer:</div>
-            <div className='col-8'>{roster[currentIndex]?.pass_number}</div>
+            <div className='col-8'>{player.pass_number}</div>
           </div>
-          {roster[currentIndex]?.validationError && (
+          {player.validationError && (
             <div className='row text-bg-danger'>
               <div className='col-4'>Achtung:</div>
-              <div className='col-8'>
-                {roster[currentIndex]?.validationError}
-              </div>
+              <div className='col-8'>{player.validationError}</div>
             </div>
           )}
         </Modal.Body>
@@ -107,10 +82,7 @@ function PlayerModal({
           <Button
             variant='secondary'
             className='modal-button-left me-auto'
-            onClick={() => {
-              currentIndex > 0 && setCurrentIndex(currentIndex - 1);
-              currentIndex === 0 && maxIndex(); //Edgecase first player in the list
-            }}
+            onClick={() => nextPlayer(-1)}
           >
             <svg
               xmlns='http://www.w3.org/2000/svg'
@@ -126,7 +98,7 @@ function PlayerModal({
               />
             </svg>
           </Button>
-          {roster[currentIndex]?.validationError && (
+          {player.validationError && (
             <Button
               variant={'danger'}
               className='modal-button-middle'
@@ -135,7 +107,7 @@ function PlayerModal({
                 setClick(click + 1);
               }}
             >
-              {!roster[currentIndex]?.isSelected && (
+              {!player.isSelected && (
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   width='30'
@@ -147,7 +119,7 @@ function PlayerModal({
                   <path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z' />
                 </svg>
               )}
-              {roster[currentIndex]?.isSelected && (
+              {player.isSelected && (
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   width='30'
@@ -161,16 +133,16 @@ function PlayerModal({
               )}
             </Button>
           )}
-          {!roster[currentIndex]?.validationError && (
+          {!player.validationError && (
             <Button
-              variant={roster[currentIndex]?.isSelected ? 'danger' : 'success'} //coloring the button depending on the state of the player
+              variant={player.isSelected ? 'danger' : 'success'} //coloring the button depending on the state of the player
               className='modal-button-middle'
               onClick={() => {
                 update();
-                nextPlayer();
+                nextPlayer(1);
               }}
             >
-              {!roster[currentIndex]?.isSelected && (
+              {!player.isSelected && (
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   width='30'
@@ -182,7 +154,7 @@ function PlayerModal({
                   <path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z' />
                 </svg>
               )}
-              {roster[currentIndex]?.isSelected && (
+              {player.isSelected && (
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   width='30'
@@ -199,7 +171,7 @@ function PlayerModal({
           <Button
             variant='secondary'
             className='modal-button-right ms-auto'
-            onClick={nextPlayer}
+            onClick={() => nextPlayer(1)}
           >
             <svg
               xmlns='http://www.w3.org/2000/svg'

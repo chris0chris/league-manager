@@ -1,39 +1,68 @@
+import { useEffect, useState } from 'react';
+import Table from 'react-bootstrap/Table';
+import { Player, Roster } from '../common/types';
 import PlayerLine from './PlayerLine';
 import PlayerModal from './PlayerModal';
-import Table from 'react-bootstrap/Table';
-import {useState} from 'react';
-import {Player, Roster} from '../common/types';
 
 interface Props {
   teamName: string;
   roster: Roster;
-  initModal: boolean;
+  showModal: boolean;
+  onModalClose(): void;
 }
 
 //component that shows all available players on the team in a table
-function PlayersTable({teamName, roster, initModal}: Props) {
+function PlayersTable({teamName, roster, showModal, onModalClose}: Props) {
   const [searchInput, setSearchInput] = useState(''); //Filter players by last name
   const onChange = (event: any) => {
     //Searchbar is being used
     setSearchInput(event.target.value);
   };
-  const [modalKey, setModalKey] = useState<number>(0); //store current key to keep track of the active player
-  const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
-  const showModal = (key: number) => {
-    //set modal visible
-    setModalKey(key);
+  const [modalPlayer, setModalPlayer] = useState<Player>({
+    id: -1,
+    first_name: 'Loading ...',
+    last_name: 'Loading ...',
+    pass_number: -1,
+    jersey_number: -1,
+    isSelected: false,
+  }); //store current key to keep track of the active player
+  const [modalVisible, setModalVisible] = useState<boolean>(showModal); //set modal for playerview visible or invisible
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
+  const showModalFor = (player: Player) => {
+    console.log('showModal player', player);
+    setModalPlayer(player);
     setModalVisible(true);
   };
+  useEffect(() => {
+    if (roster[0]) {
+      setModalPlayer(roster[0]);
+    }
+  }, [roster]);
+  useEffect(() => {
+    setModalVisible(showModal);
+  }, [showModal]);
   const handleClose = () => {
-    //set modal invisible
     setModalVisible(false);
+    onModalClose();
   };
-
-  if (initModal && !modalVisible) {
-    showModal(0);
-  }
-
-  console.log('players', roster);
+  const handleNextPlayer = (value: number | null) => {
+    let index = 0;
+    if (value) {
+      index = currentPlayerIndex + value;
+    }
+    switch (index) {
+      case roster.length:
+        setCurrentPlayerIndex(0);
+        setModalPlayer(roster[0]);
+        handleClose();
+        break;
+      case -1:
+        break;
+      default:
+        setCurrentPlayerIndex(index);
+        setModalPlayer(roster[index]);
+    }
+  };
 
   return (
     <>
@@ -74,7 +103,8 @@ function PlayersTable({teamName, roster, initModal}: Props) {
                 key={index}
                 onClick={() => {
                   //click the row to show the modal with the players infos
-                  showModal(index);
+                  showModalFor(player);
+                  setCurrentPlayerIndex(index);
                 }}
               >
                 <PlayerLine //create one component for each row of the table
@@ -89,17 +119,9 @@ function PlayersTable({teamName, roster, initModal}: Props) {
       <PlayerModal //load the modal with details about the active player
         modalVisible={modalVisible}
         handleClose={handleClose}
-        roster={roster}
-        index={modalKey} //active player
+        nextPlayer={(value: number | null): void => handleNextPlayer(value)}
+        player={modalPlayer} //active player
         //handle different cases for jumping to next player inside the modal
-        minIndex={() => {
-          //chose wether or not you want to loop at the end or just close the modal
-          //setModalKey(0);
-          handleClose();
-        }}
-        maxIndex={() => {
-          setModalKey(roster.length - 1);
-        }}
       />
     </>
   );

@@ -1,6 +1,6 @@
 import Button from 'react-bootstrap/Button';
 import GameOverview from './components/GameOverview';
-import PlayersOverview from './components/PlayersOverview';
+import RosterOverview from './components/PlayersOverview';
 
 import {Route, HashRouter as Router, Routes} from 'react-router-dom';
 import {PASSCHECK_URL, ROOT_URL, SUCCESS_URL} from './common/routes';
@@ -17,7 +17,7 @@ function App() {
             <Route path={ROOT_URL} element={<GameOverview />} />
             <Route
               path={`/team/:teamId/gameday/:gamedayId`}
-              element={<PlayersOverview />}
+              element={<RosterOverview />}
             />
             <Route
               path={SUCCESS_URL}
