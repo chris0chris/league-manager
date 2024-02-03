@@ -1,12 +1,11 @@
 from datetime import datetime
-from urllib.parse import unquote
 
 from django.conf import settings
 from django.db.models import Count, Q, Value, OuterRef, Exists
 
 from gamedays.models import Team, Gameinfo, Gameday
 from gamedays.service.model_helper import GameresultHelper
-from passcheck.api.serializers import PasscheckGamesListSerializer, PasscheckSerializer, RosterSerializer, \
+from passcheck.api.serializers import PasscheckGamesListSerializer, RosterSerializer, \
     RosterValidationSerializer
 from passcheck.models import Playerlist, EligibilityRule, PlayerlistGameday, TeamRelationship, PasscheckVerification
 from passcheck.service.eligibility_validation import EligibilityValidator
@@ -133,17 +132,6 @@ class PasscheckService:
 
 
 class PasscheckServicePlayers:
-    def get_players(self, team):
-        return PasscheckSerializer(Playerlist.objects.filter(team__description=team), many=True).data
-
-    def get_playerlist_data(self, team):
-        description = unquote(team)
-        return {
-            'players': self.get_players(team=description),
-            'otherPlayers': self.get_players(team=description),
-            # 'otherPlayers': self.get_other_players(team=team),
-        }
-
     def create_roster(self, team_id, gameday_id, roster):
         PlayerlistGameday.objects.filter(playerlist__team=team_id).delete()
         for player in roster:

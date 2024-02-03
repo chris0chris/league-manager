@@ -1,11 +1,7 @@
-from django.contrib.auth.models import User
-from knox.models import AuthToken
 from rest_framework.fields import SerializerMethodField, IntegerField, TimeField, BooleanField
-from rest_framework.serializers import ModelSerializer, Serializer
+from rest_framework.serializers import Serializer
 
-from gamedays.models import Gameinfo, Team, Gameday
 from league_manager.utils.serializer_utils import ObfuscatorSerializer, ObfuscateField
-from passcheck.models import Playerlist
 from passcheck.service.eligibility_validation import EligibilityValidator, ValidationError
 
 
@@ -51,21 +47,6 @@ class RosterValidationSerializer(RosterSerializer):
         return data
 
 
-class PasscheckSerializer(ModelSerializer):
-    ownLeagueGamedaysPlayed = SerializerMethodField('get_own')
-    otherTeamGamedaysPlayed = SerializerMethodField('get_other')
-
-    def get_own(self, obj: Playerlist):
-        return 0
-
-    def get_other(self, obj: Playerlist):
-        return 0
-
-    class Meta:
-        model = Playerlist
-        fields = '__all__'
-
-
 class PasscheckGamesListSerializer(Serializer):
     SCHEDULED_C = 'scheduled'
     FIELD_C = 'field'
@@ -91,43 +72,10 @@ class PasscheckGamesListSerializer(Serializer):
     def get_away(self, obj: dict):
         return self._get_team_values(obj[self.AWAY_C], obj[self.AWAY_ID_C], obj[self.CHECKED_AWAY])
 
-    def _get_team_values(self, name, id, is_checked):
+    # noinspection PyMethodMayBeStatic
+    def _get_team_values(self, name, team_id, is_checked):
         return {
-            'id': id,
+            'id': team_id,
             'name': name,
             'isChecked': is_checked,
         }
-
-
-class PasscheckTeamInfoSerializer(ModelSerializer):
-    class Meta:
-        model = Gameinfo
-
-
-class PasscheckOfficialsAuthSerializer(ModelSerializer):
-    class Meta:
-        model = AuthToken
-        fields = ('token_key', 'user_id')
-
-
-class PasscheckGamedayTeamsSerializer(ModelSerializer):
-    class Meta:
-        model = Team
-        fields = ('id', 'name')
-
-
-class PasscheckGamedaysListSerializer(ModelSerializer):
-    class Meta:
-        model = Gameday
-        fields = ('id', 'league_id', 'season_id', 'date')
-
-
-class PasscheckUsernamesSerializer(ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'username')
-
-
-class PasscheckServiceSerializer:
-    class Meta:
-        fields = '__all__'
