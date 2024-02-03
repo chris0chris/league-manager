@@ -10,7 +10,7 @@ import Error from './components/Error';
 
 function App() {
   return (
-    <>
+    <div className='container'>
       <Router>
         <div>
           <Routes>
@@ -48,7 +48,7 @@ function App() {
           </Routes>
         </div>
       </Router>
-    </>
+    </div>
   );
 }
 

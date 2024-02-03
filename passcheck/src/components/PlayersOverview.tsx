@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import { useNavigate, useParams } from 'react-router-dom';
-import { getPlayerList as getRosterList, submitRoster } from '../common/games';
-import { Player, Team } from '../common/types';
+import {useNavigate, useParams} from 'react-router-dom';
+import {getPlayerList as getRosterList, submitRoster} from '../common/games';
+import {Player, Team} from '../common/types';
 import PlayersTable from './PlayersTable';
 
 //component that shows all available players on the team in a table
@@ -55,19 +55,20 @@ function RosterOverview() {
     handleClose();
     navigate('/success');
   };
+  const additionalPlayersList = additionalTeams.flatMap((value: Team) =>
+    value.roster.filter((player) => player.isSelected)
+  );
 
   const getCheckedPlayers = () => {
     const selectedPlayers = team.roster.filter(
       (player: Player) => player.isSelected
     );
-    const additionalPlayers = additionalTeams.flatMap((value: Team) =>
-      value.roster.filter((player) => player.isSelected)
-    );
+
     console.log('selectedPlayers + additionalPlayers', [
       ...selectedPlayers,
-      ...additionalPlayers,
+      ...additionalPlayersList,
     ]);
-    return [...selectedPlayers, ...additionalPlayers];
+    return [...selectedPlayers, ...additionalPlayersList];
   };
 
   return (
@@ -88,7 +89,11 @@ function RosterOverview() {
           >
             {showAdditionalRosters
               ? 'weitere Teams ausblenden'
-              : 'weitere Teams anzeigen'}
+              : `weitere Teams anzeigen ${
+                  additionalPlayersList.length
+                    ? ' -> ' + additionalPlayersList.length + ' ✅'
+                    : ''
+                }`}
           </Button>
           <br />
         </>
