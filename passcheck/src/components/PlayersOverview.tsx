@@ -1,16 +1,18 @@
-import PlayersTable from './PlayersTable';
+import { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import {useState, useEffect} from 'react';
-import {Team, apiTeam, Player, Roster} from '../common/types';
-import {useNavigate, useParams} from 'react-router-dom';
-import {getPlayerList as getRosterList, submitRoster} from '../common/games';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getPlayerList as getRosterList, submitRoster } from '../common/games';
+import { Player, Team } from '../common/types';
+import PlayersTable from './PlayersTable';
 
 //component that shows all available players on the team in a table
-function PlayersOverview() {
+function RosterOverview() {
   const [showAdditionalRosters, setShowAdditionalRosters] =
     useState<boolean>(false);
-  // const [team, setTeam] = useState<apiTeam>({id: -1, name: 'Loading ...'});
+  const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
+  const [showStartButton, setShowStartButton] = useState(true);
+  const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [team, setTeam] = useState<Team>({
     name: 'Loading...',
     roster: [],
@@ -37,14 +39,10 @@ function PlayersOverview() {
     );
   }, [teamId, gamedayId]);
 
-  const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
   const showModal = () => {
-    //set modal visible
-    getCheckedPlayers();
     setModalVisible(true);
   };
   const handleClose = () => {
-    //set modal invisible
     setModalVisible(false);
   };
 
@@ -74,12 +72,12 @@ function PlayersOverview() {
 
   return (
     <>
-      <h1>Spielerliste {team.name}</h1>
       <Button onClick={handleClickEvent}>Auswahl abbrechen</Button>
       <PlayersTable
         teamName={team.name}
         roster={team.roster}
-        initModal={false}
+        showModal={showPlayerModal}
+        onModalClose={() => setShowStartButton(false)}
       />
       {additionalTeams.length !== 0 && (
         <>
@@ -102,26 +100,47 @@ function PlayersOverview() {
             key={index}
             teamName={roster.name}
             roster={roster.roster}
-            initModal={false}
+            showModal={false}
+            onModalClose={() => setShowStartButton(false)}
           />
         ))}
-      <div>
-        <input
-          type='text'
-          placeholder='Name Official'
-          className='officialNameInput form-control me-2'
-        />
-      </div>
-      <div>
-        <Button
-          variant='success'
-          type='submit'
-          onClick={showModal}
-          className='full-width-button'
-        >
-          Passliste abschicken
-        </Button>
-      </div>
+      {showStartButton && (
+        <>
+          <Button
+            variant='success'
+            type='button'
+            onClick={() => {
+              setShowPlayerModal(true);
+              setShowStartButton(false);
+            }}
+            className='full-width-button'
+          >
+            Passcheck starten
+          </Button>
+        </>
+      )}
+      {!showStartButton && (
+        <>
+          <div>
+            <input
+              type='text'
+              placeholder='Name Official'
+              className='officialNameInput form-control me-2'
+            />
+          </div>
+          <div>
+            <Button
+              variant='success'
+              type='submit'
+              onClick={showModal}
+              className='full-width-button'
+            >
+              Passliste abschicken
+            </Button>
+          </div>
+        </>
+      )}
+
       <Modal
         show={modalVisible}
         onHide={handleClose}
@@ -152,4 +171,4 @@ function PlayersOverview() {
   );
 }
 
-export default PlayersOverview;
+export default RosterOverview;
