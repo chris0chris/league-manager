@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import Table from 'react-bootstrap/Table';
-import { Player, Roster } from '../common/types';
+import {Player, Roster} from '../common/types';
 import PlayerLine from './PlayerLine';
 import PlayerModal from './PlayerModal';
 
@@ -63,10 +63,15 @@ function PlayersTable({teamName, roster, showModal, onModalClose}: Props) {
         setModalPlayer(roster[index]);
     }
   };
+  const numberSelectedPlayers = (): number => {
+    return roster.filter((player: Player) => player.isSelected).length;
+  };
 
   return (
     <>
-      <h2>Spielerliste {teamName}</h2>
+      <h2>
+        Spielerliste {teamName}        
+      </h2>
       <input
         className='form-control me-2'
         id='searchbar'
@@ -76,6 +81,9 @@ function PlayersTable({teamName, roster, showModal, onModalClose}: Props) {
         onChange={onChange}
         value={searchInput}
       />
+      <div>
+        Ausgewählte Personen: {numberSelectedPlayers()}
+      </div>
       <Table bordered hover size='sm' className='rounded-table'>
         <thead>
           <tr>
