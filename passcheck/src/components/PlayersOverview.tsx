@@ -39,6 +39,13 @@ function RosterOverview() {
     );
   }, [teamId, gamedayId]);
 
+  useEffect(() => {
+    if (getCheckedPlayers().length) {
+      setShowStartButton(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [team, additionalTeams]);
+
   const showModal = () => {
     setModalVisible(true);
   };
