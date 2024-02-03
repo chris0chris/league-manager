@@ -8,7 +8,7 @@ from gamedays.models import Team, Gameinfo, Gameday
 from gamedays.service.model_helper import GameresultHelper
 from passcheck.api.serializers import PasscheckGamesListSerializer, PasscheckSerializer, RosterSerializer, \
     RosterValidationSerializer
-from passcheck.models import Playerlist, EligibilityRule, PlayerlistGameday, TeamRelationship
+from passcheck.models import Playerlist, EligibilityRule, PlayerlistGameday, TeamRelationship, PasscheckVerification
 from passcheck.service.eligibility_validation import EligibilityValidator
 
 
@@ -29,6 +29,14 @@ class PasscheckService:
             home=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='description'),
             away_id=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='id'),
             away=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='description'),
+        )
+        gameinfo = gameinfo.annotate(
+            is_checked_home=Exists(PasscheckVerification.objects.filter(
+                team=OuterRef('home_id'),
+                gameday__date=date)),
+            is_checked_away=Exists(PasscheckVerification.objects.filter(
+                team=OuterRef('away_id'),
+                gameday__date=date))
         )
         return PasscheckGamesListSerializer(
             gameinfo.values(*PasscheckGamesListSerializer.ALL_FIELD_VALUES),

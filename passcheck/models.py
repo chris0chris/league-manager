@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import QuerySet, Q
 
@@ -55,8 +56,22 @@ class PlayerlistGameday(models.Model):
     objects: QuerySet = models.Manager()
 
 
+class PasscheckVerification(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
+    official_name = models.CharField(max_length=100)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    gameday = models.ForeignKey(Gameday, on_delete=models.CASCADE)
+
+    objects: QuerySet = models.Manager()
+
+    def __str__(self):
+        return f"{self.gameday} # {self.team.description} - {self.official_name} ({self.user})"
+
+
 class TeamRelationship(models.Model):
-    team = models.ForeignKey(Team, related_name='relationship_team', on_delete=models.CASCADE, unique=True)
+    team = models.OneToOneField(Team, related_name='relationship_team', on_delete=models.CASCADE)
     league = models.ForeignKey(League, on_delete=models.CASCADE)
     additional_teams = models.ManyToManyField(Team, related_name='relationship_additional_teams')
 

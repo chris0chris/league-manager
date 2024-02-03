@@ -1,8 +1,8 @@
 from .base import *
 
 DEBUG = True
-# DEBUG_TOOLBAR = True
-DEBUG_TOOLBAR = False
+DEBUG_TOOLBAR = True
+# DEBUG_TOOLBAR = False
 # PROFILING = True
 PROFILING = False
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
