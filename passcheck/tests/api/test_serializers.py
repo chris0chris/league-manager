@@ -1,11 +1,45 @@
+from datetime import time
+
 from django.test import TestCase
 
 from gamedays.models import SeasonLeagueTeam
 from gamedays.tests.setup_factories.factories import GamedayFactory
-from passcheck.api.serializers import RosterValidationSerializer
+from passcheck.api.serializers import RosterValidationSerializer, PasscheckGamesListSerializer
 from passcheck.models import EligibilityRule
 from passcheck.service.eligibility_validation import EligibilityValidator
 from passcheck.tests.setup_factories.db_setup_passcheck import DbSetupPasscheck
+
+
+class TestPasscheckGamesListSerializer:
+    def test_serializer_output(self):
+        input_data = [{
+            'home': 'TeamA',
+            'home_id': 101,
+            'away': 'TeamB',
+            'away_id': 102,
+            'is_checked_home': True,
+            'is_checked_away': False,
+            'gameday_id': 1,
+            'field': 2,
+            'scheduled': time(14, 30),
+        }]
+        serializer = PasscheckGamesListSerializer(input_data, many=True)
+
+        assert dict(serializer.data[0]) == {
+            'gameday_id': 1,
+            'field': 2,
+            'scheduled': '14:30:00',
+            'home': {
+                'id': 101,
+                'name': 'TeamA',
+                'isChecked': True,
+            },
+            'away': {
+                'id': 102,
+                'name': 'TeamB',
+                'isChecked': False,
+            },
+        }
 
 
 class TestRosterValidationSerializer(TestCase):

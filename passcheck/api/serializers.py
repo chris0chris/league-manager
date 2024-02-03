@@ -5,7 +5,6 @@ from rest_framework.serializers import ModelSerializer, Serializer
 
 from gamedays.models import Gameinfo, Team, Gameday
 from league_manager.utils.serializer_utils import ObfuscatorSerializer, ObfuscateField
-# importing models
 from passcheck.models import Playerlist
 from passcheck.service.eligibility_validation import EligibilityValidator, ValidationError
 
@@ -75,8 +74,11 @@ class PasscheckGamesListSerializer(Serializer):
     AWAY_C = 'away'
     HOME_ID_C = 'home_id'
     HOME_C = 'home'
+    CHECKED_HOME = 'is_checked_home'
+    CHECKED_AWAY = 'is_checked_away'
 
-    ALL_FIELD_VALUES = [GAMEDAY_ID_C, FIELD_C, SCHEDULED_C, HOME_C, HOME_ID_C, AWAY_C, AWAY_ID_C]
+    ALL_FIELD_VALUES = [GAMEDAY_ID_C, FIELD_C, SCHEDULED_C, HOME_C, HOME_ID_C, AWAY_C, AWAY_ID_C, CHECKED_HOME,
+                        CHECKED_AWAY]
     gameday_id = IntegerField()
     field = IntegerField()
     scheduled = TimeField()
@@ -84,26 +86,17 @@ class PasscheckGamesListSerializer(Serializer):
     away = SerializerMethodField()
 
     def get_home(self, obj: dict):
-        return {
-            'name': obj[self.HOME_C],
-            'id': obj[self.HOME_ID_C],
-        }
+        return self._get_team_values(obj[self.HOME_C], obj[self.HOME_ID_C], obj[self.CHECKED_HOME])
 
     def get_away(self, obj: dict):
-        return {
-            'name': obj[self.AWAY_C],
-            'id': obj[self.AWAY_ID_C],
-        }
+        return self._get_team_values(obj[self.AWAY_C], obj[self.AWAY_ID_C], obj[self.CHECKED_AWAY])
 
-    class Meta:
-        model = Gameinfo
-        fields = ('id',
-                  'field',
-                  'scheduled',
-                  'officials',
-                  'gameday_id',
-                  'home',
-                  'away')
+    def _get_team_values(self, name, id, is_checked):
+        return {
+            'id': id,
+            'name': name,
+            'isChecked': is_checked,
+        }
 
 
 class PasscheckTeamInfoSerializer(ModelSerializer):
