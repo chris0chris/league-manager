@@ -45,10 +45,10 @@ import {SCORECARD_URL} from '../../common/routes';
 //      });
 //};
 
-export const apiPut = async (url, body) => {
+export const apiPut = (url, body) => {
   const header = tokenConfig();
 
-  await axios
+  axios
     .put(url, body, header)
     .then((res) => {})
     .catch((err) => {
@@ -56,8 +56,8 @@ export const apiPut = async (url, body) => {
     });
 };
 
-export const apiGet = async (url) => {
-  return await axios
+export const apiGet = (url) => {
+  return axios
     .get(url, tokenConfig())
     .then((res) => {
       if (res.data) {

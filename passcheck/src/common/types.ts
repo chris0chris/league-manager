@@ -38,6 +38,7 @@ export type GameList = Game[];
 export type apiTeam = {
   id: number;
   name: string;
+  isChecked: boolean;
 };
 
 export type apiTokens = {

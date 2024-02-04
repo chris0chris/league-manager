@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {SyntheticEvent, useEffect, useState} from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {useNavigate, useParams} from 'react-router-dom';
@@ -18,6 +18,7 @@ function RosterOverview() {
     roster: [],
   });
   const [additionalTeams, setAdditionalTeams] = useState<Team[]>([]);
+  const [officialName, setOfficialName] = useState<string>('');
   const navigate = useNavigate();
   const {teamId} = useParams();
   const {gamedayId} = useParams();
@@ -32,9 +33,14 @@ function RosterOverview() {
   }
   useEffect(() => {
     getRosterList(teamId!, gamedayId!).then(
-      (result: {team: Team; additionalTeams: Team[]}) => {
+      (result: {
+        team: Team;
+        additionalTeams: Team[];
+        official_name: string;
+      }) => {
         setAdditionalTeams(result.additionalTeams);
         setTeam(result.team);
+        setOfficialName(result.official_name);
       }
     );
   }, [teamId, gamedayId]);
@@ -46,7 +52,8 @@ function RosterOverview() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [team, additionalTeams]);
 
-  const showModal = () => {
+  const handleSubmit = (event: SyntheticEvent) => {
+    event.preventDefault();
     setModalVisible(true);
   };
   const handleClose = () => {
@@ -58,7 +65,7 @@ function RosterOverview() {
   };
 
   const onSubmitRoster = () => {
-    submitRoster(teamId!, gamedayId!, getCheckedPlayers());
+    submitRoster(teamId!, gamedayId!, officialName, getCheckedPlayers());
     handleClose();
     navigate('/success');
   };
@@ -116,7 +123,7 @@ function RosterOverview() {
             onModalClose={() => setShowStartButton(false)}
           />
         ))}
-      {showStartButton && (
+      {showStartButton && !officialName && (
         <>
           <Button
             variant='success'
@@ -132,25 +139,27 @@ function RosterOverview() {
         </>
       )}
       {!showStartButton && (
-        <>
+        <form onSubmit={handleSubmit}>
           <div>
             <input
               type='text'
-              placeholder='Name Official'
+              placeholder='Vor- und Nachname Official'
+              required
               className='officialNameInput form-control me-2'
+              value={officialName}
+              onChange={(event) => setOfficialName(event.target.value)}
             />
           </div>
           <div>
             <Button
               variant='success'
               type='submit'
-              onClick={showModal}
               className='full-width-button'
             >
               Passliste abschicken
             </Button>
           </div>
-        </>
+        </form>
       )}
 
       <Modal
@@ -163,8 +172,11 @@ function RosterOverview() {
           <Modal.Title>Passliste bestätigen</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div>Team: {team?.name}</div>
-          <div>Es sind {getCheckedPlayers().length} Spieler anwesend.</div>
+          <div className='mb-2'>
+            Anzahl Spielende: {getCheckedPlayers().length}
+          </div>
+          <div className='mb-2'>Team: {team.name}</div>
+          <div>Abgenommen durch: {officialName}</div>
         </Modal.Body>
         <Modal.Footer className='modal-footer'>
           <Button variant='secondary' className='me-auto' onClick={handleClose}>
