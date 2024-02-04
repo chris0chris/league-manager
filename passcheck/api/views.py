@@ -32,5 +32,5 @@ class PasscheckRosterAPIView(APIView):
         team_id = kwargs.get('team')
         gameday_id = kwargs.get('gameday')
         passcheckservice = PasscheckServicePlayers()
-        passcheckservice.create_roster(team_id, gameday_id, data)
+        passcheckservice.create_roster_and_passcheck_verification(team_id, gameday_id, request.user, data)
         return Response(status=HTTPStatus.OK)

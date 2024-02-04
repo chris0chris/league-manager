@@ -20,7 +20,11 @@ export const getPlayerList = async (team_id: string, gameday_id: string) => {
 export const submitRoster = async (
   team: string,
   gameday_id: string,
+  officialName: string,
   roster: Roster
 ) => {
-  await apiPut(`/api/passcheck/roster/${team}/gameday/${gameday_id}/`, roster);
+  await apiPut(`/api/passcheck/roster/${team}/gameday/${gameday_id}/`, {
+    official_name: officialName,
+    roster: roster,
+  });
 };

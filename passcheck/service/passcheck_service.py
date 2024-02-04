@@ -32,10 +32,10 @@ class PasscheckService:
         gameinfo = gameinfo.annotate(
             is_checked_home=Exists(PasscheckVerification.objects.filter(
                 team=OuterRef('home_id'),
-                gameday__date=date)),
+                gameday=OuterRef('gameday_id'))),
             is_checked_away=Exists(PasscheckVerification.objects.filter(
                 team=OuterRef('away_id'),
-                gameday__date=date))
+                gameday=OuterRef('gameday_id')))
         )
         return PasscheckGamesListSerializer(
             gameinfo.values(*PasscheckGamesListSerializer.ALL_FIELD_VALUES),
@@ -94,13 +94,18 @@ class PasscheckService:
         gameday: Gameday = Gameday.objects.get(pk=gameday_id)
         roster = self.get_roster(team_id, gameday_id)
         try:
+            official_name = PasscheckVerification.objects.get(team=team_id, gameday=gameday_id).official_name
+        except PasscheckVerification.DoesNotExist:
+            official_name = ''
+        roster['official_name'] = official_name
+        try:
             relationship = TeamRelationship.objects.get(team=team_id)
             relationship = relationship.additional_teams.all()
         except TeamRelationship.DoesNotExist:
             relationship = []
         additional_teams_serialized = []
         for additional_team_link in relationship:
-            additional_relation = additional_team_link.relationship_team.first()
+            additional_relation = additional_team_link.relationship_team
             rule = EligibilityRule.objects.get(league=additional_relation.league, eligible_in=gameday.league)
             gameday_league_annotation = {
                 f'{gameday.league_id}': Count('gamedays__league',
@@ -132,8 +137,13 @@ class PasscheckService:
 
 
 class PasscheckServicePlayers:
-    def create_roster(self, team_id, gameday_id, roster):
+    def create_roster_and_passcheck_verification(self, team_id, gameday_id, user, data):
         PlayerlistGameday.objects.filter(playerlist__team=team_id).delete()
+        self._create_roster(gameday_id, data['roster'])
+        self._create_passcheck_verification(gameday_id, team_id, user, data['official_name'])
+
+    # noinspection PyMethodMayBeStatic
+    def _create_roster(self, gameday_id, roster: []):
         for player in roster:
             player_id = player['id']
             PlayerlistGameday.objects.update_or_create(playerlist_id=player_id, gameday_id=gameday_id, defaults={
@@ -141,3 +151,15 @@ class PasscheckServicePlayers:
                 'gameday_id': gameday_id,
                 'gameday_jersey': player['jersey_number'],
             })
+
+    # noinspection PyMethodMayBeStatic
+    def _create_passcheck_verification(self, gameday_id, team_id, user, official_name):
+        PasscheckVerification.objects.update_or_create(
+            team_id=team_id, gameday_id=gameday_id,
+            defaults={
+                'official_name': official_name,
+                'user': user,
+                'gameday_id': gameday_id,
+                'team_id': team_id,
+            }
+        )

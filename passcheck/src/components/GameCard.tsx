@@ -9,7 +9,7 @@ interface Props {
 function GameCard({game}: Props) {
   return (
     <div className='card-div'>
-      <Card style={{width: '20rem'}}>
+      <Card>
         <Card.Img variant='top'></Card.Img>
         <Card.Header>
           {game.scheduled.slice(0, 5)} Uhr: Feld {game.field}
@@ -18,14 +18,14 @@ function GameCard({game}: Props) {
           <div className='d-grid gap-2'>
             <Button
               href={`/#${TEAM_URL}/${game.home.id}/gameday/${game.gameday_id}`}
-              variant='primary'
+              variant={`${game.home.isChecked ? 'success' : 'primary'}`}
               size='lg'
             >
               {game.home.name}
             </Button>
             <Button
               href={`/#${TEAM_URL}/${game.away.id}/gameday/${game.gameday_id}`}
-              variant='primary'
+              variant={`${game.away.isChecked ? 'success' : 'primary'}`}
               size='lg'
             >
               {game.away.name}
