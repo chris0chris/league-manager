@@ -17,7 +17,7 @@ class TestValidators(TestCase):
         season_league: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(team=team)
         prime_gameday = GamedayFactory(season=season, league=prime_league)
         rule = EligibilityRule.objects.get(league=season_league.league, eligible_in=prime_gameday.league)
-        max_game_days_validator = MaxGameDaysValidator(rule, prime_gameday)
+        max_game_days_validator = MaxGameDaysValidator(prime_gameday.league.pk, rule.max_gamedays)
         league_id = f'{prime_gameday.league.pk}'
         with pytest.raises(ValidationError) as exception:
             max_game_days_validator.check({league_id: 3})
@@ -30,17 +30,17 @@ class TestValidators(TestCase):
         season_league: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(team=team)
         some_prime_gameday = GamedayFactory(season=season, league=prime_league)
         rule = EligibilityRule.objects.get(league=season_league.league, eligible_in=some_prime_gameday.league)
-        relegation_validator = RelegationValidator(rule, some_prime_gameday)
+        relegation_validator = RelegationValidator(some_prime_gameday.name, rule.is_relegation_allowed)
         assert relegation_validator.check({}) is True
 
         prime_relegation_gameday = GamedayFactory(season=season, league=prime_league, name='Prime Relegation Gameday')
         rule = EligibilityRule.objects.get(league=season_league.league, eligible_in=some_prime_gameday.league)
-        relegation_validator = RelegationValidator(rule, prime_relegation_gameday)
+        relegation_validator = RelegationValidator(prime_relegation_gameday.name, rule.is_relegation_allowed)
         assert relegation_validator.check({}) is True
 
         third_league_gameday = GamedayFactory(season=season, league=third_league, name='Some Relegation Gameday')
         rule = EligibilityRule.objects.get(league=season_league.league, eligible_in=third_league_gameday.league)
-        relegation_validator = RelegationValidator(rule, third_league_gameday)
+        relegation_validator = RelegationValidator(third_league_gameday.name, rule.is_relegation_allowed)
         with pytest.raises(ValidationError) as exception:
             relegation_validator.check({})
         expected_error_message = ("Person darf nicht an Relegation teilnehmen, "
@@ -51,14 +51,13 @@ class TestValidators(TestCase):
         prime_league, _, _, season, team = DbSetupPasscheck.create_eligibility_rules()
         season_league: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(team=team)
         prime_gameday = GamedayFactory(season=season, league=prime_league)
-        rule = EligibilityRule.objects.get(league=season_league.league, eligible_in=prime_gameday.league)
         today = datetime.today()
         league_id = f'{prime_gameday.league.pk}'
         youth_player = {
             'year_of_birth': today.year - 18,
             league_id: 4,
         }
-        ev = EligibilityValidator(rule, prime_gameday)
+        ev = EligibilityValidator(season_league.league, prime_gameday)
         assert ev.validate(youth_player) is True
         senior_player = {
             'year_of_birth': today.year - 19,
@@ -74,14 +73,13 @@ class TestValidators(TestCase):
         prime_league, _, _, season, team = DbSetupPasscheck.create_eligibility_rules()
         season_league: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(team=team)
         prime_gameday = GamedayFactory(season=season, league=prime_league)
-        rule = EligibilityRule.objects.get(league=season_league.league, eligible_in=prime_gameday.league)
         league_id = f'{prime_gameday.league.pk}'
         female_player = {
             'year_of_birth': 1982,
             league_id: 4,
             'sex': Playerlist.FEMALE,
         }
-        ev = EligibilityValidator(rule, prime_gameday)
+        ev = EligibilityValidator(season_league.league, prime_gameday)
         assert ev.validate(female_player) is True
         male_player = {
             'year_of_birth': 1982,
@@ -97,9 +95,8 @@ class TestValidators(TestCase):
         prime_league, _, _, season, team = DbSetupPasscheck.create_eligibility_rules()
         season_league: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(team=team)
         final_gameday = GamedayFactory(season=season, league=prime_league, name='Final8')
-        rule = EligibilityRule.objects.get(league=season_league.league, eligible_in=final_gameday.league)
         league_id = f'{final_gameday.league.pk}'
-        ev = EligibilityValidator(rule, final_gameday)
+        ev = EligibilityValidator(season_league.league, final_gameday)
         expected_error_message = ('Person darf nicht an Finaltag teilnehmen, '
                                   'weil sie nicht Mindestanzahl an Spiele erreicht hat.')
 

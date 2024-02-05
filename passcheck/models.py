@@ -85,13 +85,22 @@ class EligibilityRule(models.Model):
     league = models.ForeignKey(League, related_name='eligibility_for', on_delete=models.CASCADE)
     eligible_in = models.ManyToManyField(League, related_name='eligible_in')
     max_gamedays = models.IntegerField()
-    max_players = models.IntegerField(null=True, default=None, blank=True)
+    max_subs_in_other_leagues = models.IntegerField(null=True, default=None, blank=True)
+    minimum_player_strength = models.IntegerField()
+    maximum_player_strength = models.IntegerField(null=True, default=None, blank=True)
     is_relegation_allowed = models.BooleanField(default=False)
     min_gamedays_for_final = models.IntegerField(default=2)
-    ignore_player_age_unitl = models.IntegerField(default=19)
+    ignore_player_age_until = models.IntegerField(default=19)
     except_for_women = models.BooleanField(default=True)
 
     objects: QuerySet = models.Manager()
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=models.Q(maximum_player_strength__gte=models.F('minimum_player_strength')),
+                                   name='maximum_player_strength_must_be_greater_equal_minimum'),
+
+        ]
 
     def __str__(self):
         emoji = "⬆️" if self.is_relegation_allowed else "⛔"

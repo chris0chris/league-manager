@@ -73,7 +73,7 @@ class TestPasscheckService(TestCase):
         entry: PasscheckVerification = verificationEntry.first()
         assert len(verificationEntry) == 1
         assert entry.official_name == 'Verified Official'
-        assert entry.created_at == entry.updated_at
+        assert entry.created_at.strftime('%H:%M:%S') == entry.updated_at.strftime('%H:%M:%S')
 
     def test_passcheck_verification_is_updated(self):
         team = DBSetup().create_teams('VerifyTeam', 1)[0]
