@@ -42,9 +42,20 @@ class DbSetupPasscheck:
         prime_league = LeagueFactory(name='Prime League')
         third_league = LeagueFactory(name='Third League')
         season = SeasonFactory(name='Season 1')
-        team = TeamFactory(name='Some team')
-        SeasonLeagueTeamFactory(season=season, league=second_league, team=team)
-        EligibilityRuleFactory(league=second_league, eligible_in=[prime_league], max_gamedays=3,
-                               is_relegation_allowed=True)
-        EligibilityRuleFactory(league=second_league, eligible_in=[third_league], max_gamedays=2, max_players=2, )
-        return prime_league, second_league, third_league, season, team
+        second_league_team = TeamFactory(name='Second league team')
+        SeasonLeagueTeamFactory(season=season, league=second_league, team=second_league_team)
+        EligibilityRuleFactory(
+            league=second_league,
+            eligible_in=[prime_league],
+            max_gamedays=3,
+            minimum_player_strength=0,
+            is_relegation_allowed=True,
+        )
+        EligibilityRuleFactory(
+            league=second_league,
+            eligible_in=[third_league],
+            max_gamedays=2,
+            minimum_player_strength=0,
+            max_subs_in_other_leagues=2,
+        )
+        return prime_league, second_league, third_league, season, second_league_team

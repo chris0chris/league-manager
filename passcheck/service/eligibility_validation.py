@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from gamedays.models import Gameday
+from gamedays.models import Gameday, League
 from passcheck.models import EligibilityRule, Playerlist
 
 
@@ -9,21 +9,20 @@ class ValidationError(Exception):
 
 
 class EligibilityValidator:
-    def __init__(self, rule: EligibilityRule, gameday: Gameday):
-        self.rule = rule
+    def __init__(self, eligible_league: League, gameday: Gameday):
+        self.rule: EligibilityRule = EligibilityRule.objects.get(league=eligible_league, eligible_in=gameday.league)
         self.gameday = gameday
         self.validators = []
-        self.add_validator(RelegationValidator(rule, gameday))
-        self.add_validator(MaxGameDaysValidator(rule, gameday))
-        self.add_validator(FinalsValidator(rule, gameday))
+        self.final_validator = FinalsValidator(gameday.name, self.rule.min_gamedays_for_final, gameday.league.pk)
+        self.add_validator(RelegationValidator(gameday.name, self.rule.is_relegation_allowed))
+        self.add_validator(MaxGameDaysValidator(gameday.league.pk, self.rule.max_gamedays))
+        self.add_validator(self.final_validator)
 
     def add_validator(self, validator):
         self.validators.append(validator)
 
     def validate(self, player):
-        if self._is_youth_player(player):
-            return True
-        if self._is_female_player(player):
+        if self._is_youth_player(player) or self._is_female_player(player):
             return True
         for validator in self.validators:
             if not validator.check(player):
@@ -31,25 +30,21 @@ class EligibilityValidator:
         return True
 
     def _is_youth_player(self, player):
-        player_age = datetime.today().year - player['year_of_birth']
-        if player_age < self.rule.ignore_player_age_unitl:
-            return self._check_for_finals(player)
-        return False
+        youth_player_validator = YouthPlayerValidator(self.rule.ignore_player_age_until)
+        youth_player_validator.set_next_validator(self.final_validator)
+        return youth_player_validator.check(player)
 
     def _is_female_player(self, player):
-        if self.rule.except_for_women and player['sex'] == Playerlist.FEMALE:
-            return self._check_for_finals(player)
-        return False
+        woman_player_validator = WomanPlayerValidator(self.rule.except_for_women)
+        woman_player_validator.set_next_validator(self.final_validator)
+        return woman_player_validator.check(player)
 
     def _check_for_finals(self, player):
-        final_validator = FinalsValidator(self.rule, self.gameday)
-        return final_validator.check(player)
+        return self.final_validator.is_valid(player)
 
 
 class BaseValidator:
-    def __init__(self, rule: EligibilityRule, gameday: Gameday):
-        self.rule = rule
-        self.gameday = gameday
+    def __init__(self):
         self.next_validator = None
 
     def set_next_validator(self, next_validator):
@@ -62,21 +57,31 @@ class BaseValidator:
             return self.next_validator.check(player)
         return True
 
-    def is_valid(self, player):
+    def is_valid(self, player) -> bool:
         raise NotImplementedError("Subclasses must implement is_valid.")
 
 
 class MaxGameDaysValidator(BaseValidator):
+    def __init__(self, gameday_league_id: int, max_gamedays: int):
+        super().__init__()
+        self.gameday_league_id = f'{gameday_league_id}'
+        self.max_gamedays = max_gamedays
+
     def is_valid(self, player):
-        if player[f'{self.gameday.league.pk}'] < self.rule.max_gamedays:
+        if player[self.gameday_league_id] < self.max_gamedays:
             return True
-        raise ValidationError(f"Person hat Maximum an erlaubte Spieltage ({self.rule.max_gamedays}) erreicht.")
+        raise ValidationError(f"Person hat Maximum an erlaubte Spieltage ({self.max_gamedays}) erreicht.")
 
 
 class RelegationValidator(BaseValidator):
+    def __init__(self, gameday_name: str, is_relegation_allowed: bool):
+        super().__init__()
+        self.gameday_name = gameday_name.lower()
+        self.is_relegation_allowed = is_relegation_allowed
+
     def is_valid(self, player):
-        if 'relegation' in self.gameday.name.lower():
-            if self.rule.is_relegation_allowed:
+        if 'relegation' in self.gameday_name:
+            if self.is_relegation_allowed:
                 return True
             raise ValidationError(
                 'Person darf nicht an Relegation teilnehmen, weil sie in einer höheren Liga gemeldet ist.')
@@ -84,11 +89,35 @@ class RelegationValidator(BaseValidator):
 
 
 class FinalsValidator(BaseValidator):
+    def __init__(self, gameday_name, min_gamedays_for_final, league_id):
+        super().__init__()
+        self.gameday_name = gameday_name.lower()
+        self.min_gamedays_for_final = min_gamedays_for_final
+        self.league_id = league_id
+
     def is_valid(self, player):
-        gameday_name = self.gameday.name.lower()
-        if 'final4' in gameday_name or 'final8' in gameday_name:
-            if player[f'{self.gameday.league.pk}'] >= self.rule.min_gamedays_for_final:
+        if 'final4' in self.gameday_name or 'final8' in self.gameday_name:
+            if player[f'{self.league_id}'] >= self.min_gamedays_for_final:
                 return True
             raise ValidationError(
                 'Person darf nicht an Finaltag teilnehmen, weil sie nicht Mindestanzahl an Spiele erreicht hat.')
         return True
+
+
+class YouthPlayerValidator(BaseValidator):
+    def __init__(self, ignore_player_age_until):
+        super().__init__()
+        self.ignore_player_age_until = ignore_player_age_until
+
+    def is_valid(self, player):
+        player_age = datetime.today().year - player['year_of_birth']
+        return player_age < self.ignore_player_age_until
+
+
+class WomanPlayerValidator(BaseValidator):
+    def __init__(self, except_for_women):
+        super().__init__()
+        self.except_for_women = except_for_women
+
+    def is_valid(self, player):
+        return self.except_for_women and player['sex'] == Playerlist.FEMALE

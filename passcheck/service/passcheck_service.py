@@ -7,7 +7,7 @@ from gamedays.models import Team, Gameinfo, Gameday
 from gamedays.service.model_helper import GameresultHelper
 from passcheck.api.serializers import PasscheckGamesListSerializer, RosterSerializer, \
     RosterValidationSerializer
-from passcheck.models import Playerlist, EligibilityRule, PlayerlistGameday, TeamRelationship, PasscheckVerification
+from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, PasscheckVerification
 from passcheck.service.eligibility_validation import EligibilityValidator
 
 
@@ -106,7 +106,6 @@ class PasscheckService:
         additional_teams_serialized = []
         for additional_team_link in relationship:
             additional_relation = additional_team_link.relationship_team
-            rule = EligibilityRule.objects.get(league=additional_relation.league, eligible_in=gameday.league)
             gameday_league_annotation = {
                 f'{gameday.league_id}': Count('gamedays__league',
                                               filter=Q(gamedays__league=gameday.league))}
@@ -114,7 +113,7 @@ class PasscheckService:
                                                        gameday_league_annotation)
             if not roster_addiational_team.exists():
                 continue
-            ev = EligibilityValidator(rule, gameday)
+            ev = EligibilityValidator(additional_relation.league, gameday)
             additional_teams_serialized.append(
                 {
                     'name': additional_relation.team.description,
@@ -122,7 +121,7 @@ class PasscheckService:
                                                          context={'validator': ev, 'all_leagues': [
                                                              {'gamedays__league': gameday.league_id}]
                                                                   },
-                                                         many=True).data
+                                                         many=True).data,
                 }
             )
         roster['additionalTeams'] = additional_teams_serialized

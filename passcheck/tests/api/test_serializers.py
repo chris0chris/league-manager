@@ -5,7 +5,6 @@ from django.test import TestCase
 from gamedays.models import SeasonLeagueTeam
 from gamedays.tests.setup_factories.factories import GamedayFactory
 from passcheck.api.serializers import RosterValidationSerializer, PasscheckGamesListSerializer
-from passcheck.models import EligibilityRule
 from passcheck.service.eligibility_validation import EligibilityValidator
 from passcheck.tests.setup_factories.db_setup_passcheck import DbSetupPasscheck
 
@@ -44,18 +43,18 @@ class TestPasscheckGamesListSerializer:
 
 class TestRosterValidationSerializer(TestCase):
     def test_serializer_is_working_with_validator(self):
-        prime_league, _, _, season, team = DbSetupPasscheck.create_eligibility_rules()
-        season_league: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(team=team)
+        prime_league, _, _, season, second_league_team = DbSetupPasscheck.create_eligibility_rules()
+        season_league: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(team=second_league_team)
         prime_gameday = GamedayFactory(season=season, league=prime_league)
-        rule = EligibilityRule.objects.get(league=season_league.league, eligible_in=prime_gameday.league)
-        ev = EligibilityValidator(rule, prime_gameday)
+        ev = EligibilityValidator(season_league.league, prime_gameday)
         league_id = f'{prime_gameday.league_id}'
-        team = [{'id': 7, 'first_name': 'Oscarius', 'last_name': 'Oldus', 'jersey_number': 98, 'pass_number': 9898989,
+        second_league_team = [
+            {'id': 7, 'first_name': 'Oscarius', 'last_name': 'Oldus', 'jersey_number': 98, 'pass_number': 9898989,
                  'sex': 2, 'year_of_birth': 1909, league_id: 55, 'is_selected': True},
                 {'id': 8, 'team_id': 23, 'first_name': 'Juli', 'last_name': 'Jemale', 'jersey_number': 7,
                  'pass_number': 7,
                  'sex': 1, 'year_of_birth': 1982, league_id: 7, 'is_selected': False}, ]
-        serializer = RosterValidationSerializer(instance=team, context={'validator': ev, 'all_leagues': [
+        serializer = RosterValidationSerializer(instance=second_league_team, context={'validator': ev, 'all_leagues': [
             {'gamedays__league': prime_gameday.league_id}]}, many=True).data
         assert len(serializer) == 2
         assert dict(serializer[0]) == {
