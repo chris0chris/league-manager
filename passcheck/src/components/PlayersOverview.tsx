@@ -4,11 +4,13 @@ import Modal from 'react-bootstrap/Modal';
 import {useNavigate, useParams} from 'react-router-dom';
 import {getPlayerList as getRosterList, submitRoster} from '../common/games';
 import {Player, Roster, Team} from '../common/types';
-import RosterTable from './PlayersTable';
+import useError from '../hooks/useError';
 import Validator from '../utils/validation';
+import RosterTable from './PlayersTable';
 
 //component that shows all available players on the team in a table
 function RosterOverview() {
+  const {setError} = useError();
   const [showAdditionalRosters, setShowAdditionalRosters] =
     useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
@@ -25,15 +27,6 @@ function RosterOverview() {
   const navigate = useNavigate();
   const {teamId} = useParams();
   const {gamedayId} = useParams();
-
-  if (isNaN(teamId as any) || isNaN(gamedayId as any)) {
-    navigate('/error', {
-      state: {
-        message:
-          'Die URL benötigt eine TeamId und eine GamedayId als Zahl! /#/team/:teamId/gameday/:gamedayId',
-      },
-    });
-  }
   useEffect(() => {
     getRosterList(teamId!, gamedayId!).then(
       (result: {
@@ -82,12 +75,16 @@ function RosterOverview() {
     );
     return [...selectedPlayers, ...additionalPlayersList];
   };
-  const checkValidation = () => {
-    const validator = new Validator(team.validator);
+  const getAllRoster = () => {
     let allRoster: Roster = team.roster;
     additionalTeams.forEach((currentTeam: Team) => {
       allRoster = [...allRoster, ...currentTeam.roster];
     });
+    return allRoster;
+  };
+  const checkValidation = () => {
+    const validator = new Validator(team.validator);
+    let allRoster: Roster = getAllRoster();
     validator.validateAndUpdate(allRoster);
     setUpdateFlag(!updateFlag);
   };

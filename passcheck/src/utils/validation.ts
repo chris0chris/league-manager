@@ -65,7 +65,7 @@ class MaxSubsInOtherLeagues extends BaseValidator {
   }
 }
 
-class MinimumPlayerStrengthValidator extends BaseValidator {
+export class MinimumPlayerStrengthValidator extends BaseValidator {
   minimumPlayerStrengthValidator: number;
   constructor(minimumPlayerStrengthValidator: number) {
     super();
