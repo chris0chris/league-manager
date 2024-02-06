@@ -3,8 +3,9 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {useNavigate, useParams} from 'react-router-dom';
 import {getPlayerList as getRosterList, submitRoster} from '../common/games';
-import {Player, Team} from '../common/types';
-import PlayersTable from './PlayersTable';
+import {Player, Roster, Team} from '../common/types';
+import RosterTable from './PlayersTable';
+import Validator from '../utils/validation';
 
 //component that shows all available players on the team in a table
 function RosterOverview() {
@@ -13,9 +14,11 @@ function RosterOverview() {
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
   const [showStartButton, setShowStartButton] = useState(true);
   const [showPlayerModal, setShowPlayerModal] = useState(false);
+  const [updateFlag, setUpdateFlag] = useState(false);
   const [team, setTeam] = useState<Team>({
     name: 'Loading...',
     roster: [],
+    validator: {},
   });
   const [additionalTeams, setAdditionalTeams] = useState<Team[]>([]);
   const [officialName, setOfficialName] = useState<string>('');
@@ -77,22 +80,29 @@ function RosterOverview() {
     const selectedPlayers = team.roster.filter(
       (player: Player) => player.isSelected
     );
-
-    console.log('selectedPlayers + additionalPlayers', [
-      ...selectedPlayers,
-      ...additionalPlayersList,
-    ]);
     return [...selectedPlayers, ...additionalPlayersList];
+  };
+  const checkValidation = () => {
+    const validator = new Validator(team.validator);
+    let allRoster: Roster = team.roster;
+    additionalTeams.forEach((currentTeam: Team) => {
+      allRoster = [...allRoster, ...currentTeam.roster];
+    });
+    validator.validateAndUpdate(allRoster);
+    setUpdateFlag(!updateFlag);
   };
 
   return (
     <>
       <Button onClick={handleClickEvent}>Auswahl abbrechen</Button>
-      <PlayersTable
-        teamName={team.name}
-        roster={team.roster}
+      <RosterTable
+        team={team}
         showModal={showPlayerModal}
-        onModalClose={() => setShowStartButton(false)}
+        onUpdate={checkValidation}
+        onModalClose={() => {
+          setShowStartButton(false);
+          checkValidation();
+        }}
       />
       {additionalTeams.length !== 0 && (
         <>
@@ -114,12 +124,12 @@ function RosterOverview() {
       )}
       <br />
       {showAdditionalRosters &&
-        additionalTeams.map((roster: Team, index: number) => (
-          <PlayersTable
+        additionalTeams.map((team: Team, index: number) => (
+          <RosterTable
             key={index}
-            teamName={roster.name}
-            roster={roster.roster}
+            team={team}
             showModal={false}
+            onUpdate={checkValidation}
             onModalClose={() => setShowStartButton(false)}
           />
         ))}

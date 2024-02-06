@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import { Player } from '../common/types';
+import {Player} from '../common/types';
 
 interface Props {
   modalVisible: boolean;
@@ -28,6 +28,7 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
   }, [click]);
   const update = () => {
     player.isSelected = !player.isSelected;
+    nextPlayer(1);
   };
 
   const handleDoubleClick = () => {
@@ -37,7 +38,6 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
 
     if (isSure) {
       update();
-      nextPlayer(1);
     }
   };
   return (
@@ -45,8 +45,8 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
       <Modal
         show={modalVisible}
         onHide={() => {
-          nextPlayer(null);
           handleClose();
+          nextPlayer(null);
         }}
         backdrop='static'
         keyboard={false}
@@ -99,39 +99,47 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
             </svg>
           </Button>
           {player.validationError && (
-            <Button
-              variant={'danger'}
-              className='modal-button-middle'
-              style={{opacity: 0.5}}
-              onClick={() => {
-                setClick(click + 1);
-              }}
-            >
+            <>
               {!player.isSelected && (
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  width='30'
-                  height='30'
-                  fill='currentColor'
-                  className='bi bi-check2'
-                  viewBox='0 0 16 16'
+                <Button
+                  variant={'danger'}
+                  className='modal-button-middle'
+                  style={{opacity: 0.5}}
+                  onClick={() => {
+                    setClick(click + 1);
+                  }}
                 >
-                  <path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z' />
-                </svg>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='30'
+                    height='30'
+                    fill='currentColor'
+                    className='bi bi-check2'
+                    viewBox='0 0 16 16'
+                  >
+                    <path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z' />
+                  </svg>
+                </Button>
               )}
               {player.isSelected && (
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  width='30'
-                  height='30'
-                  fill='currentColor'
-                  className='bi bi-x'
-                  viewBox='0 0 16 16'
+                <Button
+                  variant={'danger'}
+                  className='modal-button-middle'
+                  onClick={() => update()}
                 >
-                  <path d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z' />
-                </svg>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='30'
+                    height='30'
+                    fill='currentColor'
+                    className='bi bi-x'
+                    viewBox='0 0 16 16'
+                  >
+                    <path d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z' />
+                  </svg>
+                </Button>
               )}
-            </Button>
+            </>
           )}
           {!player.validationError && (
             <Button
@@ -139,7 +147,6 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
               className='modal-button-middle'
               onClick={() => {
                 update();
-                nextPlayer(1);
               }}
             >
               {!player.isSelected && (
