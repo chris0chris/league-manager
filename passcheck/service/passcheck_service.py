@@ -96,7 +96,7 @@ class PasscheckService:
     def get_roster_with_validation(self, team_id: int, gameday_id: int):
         gameday: Gameday = Gameday.objects.get(pk=gameday_id)
         roster = self._get_roster(team_id, gameday_id, {})
-        team_data = {'team': TeamData(
+        team = {'team': TeamData(
             name=self._get_team(team_id).description,
             roster=RosterSerializer(instance=roster, is_staff=self.is_staff, many=True).data,
             validator=EligibilityValidator(gameday.league, gameday).get_player_strength()
@@ -105,7 +105,7 @@ class PasscheckService:
             official_name = PasscheckVerification.objects.get(team=team_id, gameday=gameday_id).official_name
         except PasscheckVerification.DoesNotExist:
             official_name = ''
-        team_data['official_name'] = official_name
+        team['official_name'] = official_name
         try:
             relationship = TeamRelationship.objects.get(team=team_id)
             relationship = relationship.additional_teams.all()
@@ -132,8 +132,8 @@ class PasscheckService:
                 validator=ev.get_max_subs()
             )
             additional_teams_serialized.append(team_data)
-        team_data['additionalTeams'] = additional_teams_serialized
-        return team_data
+        team['additionalTeams'] = additional_teams_serialized
+        return team
 
     def _get_roster(self, team, gameday_id, league_annotations):
         is_selected_query = self._is_selected_query(gameday_id)
