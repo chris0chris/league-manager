@@ -4,14 +4,18 @@ import Modal from 'react-bootstrap/Modal';
 import {useNavigate, useParams} from 'react-router-dom';
 import {getPlayerList as getRosterList, submitRoster} from '../common/games';
 import {Player, Roster, Team} from '../common/types';
-import useError from '../hooks/useError';
-import Validator, {MinimumPlayerStrengthValidator} from '../utils/validation';
+import useMessage from '../hooks/useMessage';
+import Validator, {
+  MaximumPlayerStrengthValidator,
+  MinimumPlayerStrengthValidator,
+} from '../utils/validation';
 import RosterTable from './PlayersTable';
 import {Accordion, Badge, FloatingLabel, Form} from 'react-bootstrap';
+import {MessageColor} from '../context/MessageContext';
 
 //component that shows all available players on the team in a table
 function RosterOverview() {
-  const {setError} = useError();
+  const {setMessage} = useMessage();
   const [showAdditionalRosters, setShowAdditionalRosters] =
     useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
@@ -59,7 +63,7 @@ function RosterOverview() {
   };
 
   const handleClickEvent = () => {
-    setError(null);
+    setMessage({text: ''});
     navigate('/');
   };
 
@@ -89,16 +93,31 @@ function RosterOverview() {
     return allRoster;
   };
   const checkValidation = () => {
-    const validator = new Validator(team.validator);
     let allRoster: Roster = getAllRoster();
-    validator.validateAndUpdate(allRoster);
+    if (team.validator.maximum_player_strength) {
+      const maximumStrengthValidator = new MaximumPlayerStrengthValidator(
+        team.validator.maximum_player_strength!
+      );
+      if (!maximumStrengthValidator.isValid(allRoster)) {
+        setMessage({
+          text: maximumStrengthValidator.getValidationError(),
+          color: MessageColor.Warning,
+        });
+        return;
+      } else {
+        setMessage({text: ''});
+      }
+    }
     const minimumStrengthValidator = new MinimumPlayerStrengthValidator(
       team.validator.minimum_player_strength!
     );
     if (!minimumStrengthValidator.isValid(allRoster)) {
-      setError(new Error(minimumStrengthValidator.getValidationError()));
+      setMessage({
+        text: minimumStrengthValidator.getValidationError(),
+        color: MessageColor.Danger,
+      });
     } else {
-      setError(null);
+      setMessage({text: ''});
     }
     setUpdateFlag(!updateFlag);
   };

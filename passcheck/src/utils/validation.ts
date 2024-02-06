@@ -81,7 +81,7 @@ export class MinimumPlayerStrengthValidator extends BaseValidator {
   }
 }
 
-class MaximumPlayerStrengthValidator extends BaseValidator {
+export class MaximumPlayerStrengthValidator extends BaseValidator {
   maximumPlayerStrength: number;
   constructor(maximumPlayerStrengthValidator: number) {
     super();

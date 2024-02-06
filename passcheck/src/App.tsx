@@ -1,18 +1,18 @@
 import React from 'react';
 import {HashRouter as Router, Routes, Route} from 'react-router-dom';
-import ErrorMessage from './components/ErrorMessage';
-import ErrorProvider from './components/ErrorProvider'; // Import ErrorProvider as the default export
+import Message from './components/Message';
+import MessageProvider from './components/MessageProvider'; // Import ErrorProvider as the default export
 
 // Import your components and route paths
 import GameOverview from './components/GameOverview';
 import RosterOverview from './components/PlayersOverview';
 import {PASSCHECK_URL, ROOT_URL, SUCCESS_URL} from './common/routes';
-import useError from './hooks/useError';
+import useMessage from './hooks/useMessage';
 
 function App() {
   return (
     <div className='container'>
-      <ErrorProvider>
+      <MessageProvider>
         <Router>
           <div>
             <Routes>
@@ -37,9 +37,9 @@ function App() {
           </div>
         </Router>
         <div className='mt-2'>
-          <ErrorMessage />
+          <Message />
         </div>
-      </ErrorProvider>
+      </MessageProvider>
     </div>
   );
 }
