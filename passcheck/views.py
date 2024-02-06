@@ -5,7 +5,6 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import ListView, CreateView
 
-from gamedays.models import Team
 from league_manager.utils.decorators import is_staff
 from .forms import PlayerlistCreateForm
 from .models import Playerlist
@@ -19,11 +18,9 @@ class PlayerlistView(View):
     def get(self, request, **kwargs):
         team_id = kwargs.get('team')
         is_staff = kwargs.get('is_staff')
-        team = Team.objects.get(pk=team_id)
         passcheck_service = PasscheckService(is_staff=is_staff)
         context = {
-            'team': team.description,
-            'object_list': passcheck_service.get_roster(team)
+            'object_list': passcheck_service.get_roster(team_id)
         }
         return render(request, self.template_name, context)
 
