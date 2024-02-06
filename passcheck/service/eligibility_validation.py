@@ -42,6 +42,17 @@ class EligibilityValidator:
     def _check_for_finals(self, player):
         return self.final_validator.is_valid(player)
 
+    def get_max_subs(self):
+        return {
+            'max_subs_in_other_leagues': self.rule.max_subs_in_other_leagues
+        }
+
+    def get_player_strength(self):
+        return {
+            'minimum_player_strength': self.rule.minimum_player_strength,
+            'maximum_player_strength': self.rule.maximum_player_strength,
+        }
+
 
 class BaseValidator:
     def __init__(self):
@@ -68,7 +79,7 @@ class MaxGameDaysValidator(BaseValidator):
         self.max_gamedays = max_gamedays
 
     def is_valid(self, player):
-        if player[self.gameday_league_id] < self.max_gamedays:
+        if player[self.gameday_league_id] < self.max_gamedays or self.max_gamedays <= 0:
             return True
         raise ValidationError(f"Person hat Maximum an erlaubte Spieltage ({self.max_gamedays}) erreicht.")
 

@@ -3,9 +3,16 @@ export type Roster = Player[];
 export type Team = {
   name: string;
   roster: Roster;
+  validator: TeamValidator;
 };
 
 export type AdditionalTeams = Team[];
+
+export type TeamValidator = {
+  max_subs_in_other_leagues?: number;
+  minimum_player_strength?: number;
+  maximum_player_strength?: number | null;
+};
 
 export type Player = {
   id: number;

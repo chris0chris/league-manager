@@ -1,18 +1,19 @@
 import {useEffect, useState} from 'react';
 import Table from 'react-bootstrap/Table';
-import {Player, Roster} from '../common/types';
+import {Player, Team} from '../common/types';
 import PlayerLine from './PlayerLine';
 import PlayerModal from './PlayerModal';
+import Validator from '../utils/validation';
 
 interface Props {
-  teamName: string;
-  roster: Roster;
+  team: Team;
   showModal: boolean;
+  onUpdate(): void;
   onModalClose(): void;
 }
 
 //component that shows all available players on the team in a table
-function PlayersTable({teamName, roster, showModal, onModalClose}: Props) {
+function RosterTable({team, showModal, onModalClose, onUpdate}: Props) {
   const [searchInput, setSearchInput] = useState(''); //Filter players by last name
   const onChange = (event: any) => {
     //Searchbar is being used
@@ -34,10 +35,10 @@ function PlayersTable({teamName, roster, showModal, onModalClose}: Props) {
     setModalVisible(true);
   };
   useEffect(() => {
-    if (roster[0]) {
-      setModalPlayer(roster[0]);
+    if (team.roster[0]) {
+      setModalPlayer(team.roster[0]);
     }
-  }, [roster]);
+  }, [team]);
   useEffect(() => {
     setModalVisible(showModal);
   }, [showModal]);
@@ -45,33 +46,40 @@ function PlayersTable({teamName, roster, showModal, onModalClose}: Props) {
     setModalVisible(false);
     onModalClose();
   };
+  const checkValidation = () => {
+    const validator = new Validator(team.validator);
+    validator.validateAndUpdate(team.roster);
+  };
   const handleNextPlayer = (value: number | null) => {
     let index = 0;
     if (value) {
       index = currentPlayerIndex + value;
     }
     switch (index) {
-      case roster.length:
+      case team.roster.length:
         setCurrentPlayerIndex(0);
-        setModalPlayer(roster[0]);
+        setModalPlayer(team.roster[0]);
         handleClose();
-        break;
+        return;
       case -1:
         break;
       default:
         setCurrentPlayerIndex(index);
-        setModalPlayer(roster[index]);
+        setModalPlayer(team.roster[index]);
     }
+    checkValidation();
+    onUpdate();
+  };
+  const getSelectedPlayers = () => {
+    return team.roster.filter((player: Player) => player.isSelected);
   };
   const numberSelectedPlayers = (): number => {
-    return roster.filter((player: Player) => player.isSelected).length;
+    return team.roster.filter((player: Player) => player.isSelected).length;
   };
 
   return (
     <>
-      <h2>
-        Spielerliste {teamName}        
-      </h2>
+      <h2>Spielerliste {team.name}</h2>
       <input
         className='form-control me-2'
         id='searchbar'
@@ -81,9 +89,7 @@ function PlayersTable({teamName, roster, showModal, onModalClose}: Props) {
         onChange={onChange}
         value={searchInput}
       />
-      <div>
-        Ausgewählte Personen: {numberSelectedPlayers()}
-      </div>
+      <div>Ausgewählte Personen: {numberSelectedPlayers()}</div>
       <Table bordered hover size='sm' className='rounded-table'>
         <thead>
           <tr>
@@ -94,7 +100,7 @@ function PlayersTable({teamName, roster, showModal, onModalClose}: Props) {
           </tr>
         </thead>
         <tbody>
-          {roster
+          {team.roster
             // .filter((player: Player) => {
             //   const searchTerm = searchInput.toLowerCase();
             //   const playerName =
@@ -135,4 +141,4 @@ function PlayersTable({teamName, roster, showModal, onModalClose}: Props) {
   );
 }
 
-export default PlayersTable;
+export default RosterTable;
