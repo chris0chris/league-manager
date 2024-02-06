@@ -79,7 +79,6 @@ function RosterTable({team, showModal, onModalClose, onUpdate}: Props) {
 
   return (
     <>
-      <h2>Spielerliste {team.name}</h2>
       <input
         className='form-control me-2'
         id='searchbar'

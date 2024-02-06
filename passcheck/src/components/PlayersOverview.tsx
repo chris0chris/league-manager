@@ -7,6 +7,7 @@ import {Player, Roster, Team} from '../common/types';
 import useError from '../hooks/useError';
 import Validator, {MinimumPlayerStrengthValidator} from '../utils/validation';
 import RosterTable from './PlayersTable';
+import {Accordion, Badge, FloatingLabel, Form} from 'react-bootstrap';
 
 //component that shows all available players on the team in a table
 function RosterOverview() {
@@ -42,9 +43,10 @@ function RosterOverview() {
   }, [teamId, gamedayId]);
 
   useEffect(() => {
-    if (getCheckedPlayers().length && !officialName) {
+    if (getAllCheckedPlayers().length && !officialName) {
       setShowStartButton(false);
     }
+    checkValidation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [team, additionalTeams]);
 
@@ -62,7 +64,7 @@ function RosterOverview() {
   };
 
   const onSubmitRoster = () => {
-    submitRoster(teamId!, gamedayId!, officialName, getCheckedPlayers());
+    submitRoster(teamId!, gamedayId!, officialName, getAllCheckedPlayers());
     handleClose();
     navigate('/success');
   };
@@ -70,11 +72,14 @@ function RosterOverview() {
     value.roster.filter((player) => player.isSelected)
   );
 
-  const getCheckedPlayers = () => {
+  const getAllCheckedPlayers = () => {
     const selectedPlayers = team.roster.filter(
       (player: Player) => player.isSelected
     );
     return [...selectedPlayers, ...additionalPlayersList];
+  };
+  const countCheckedPlayersFor = (roster: Roster): number => {
+    return roster.filter((player: Player) => player.isSelected).length;
   };
   const getAllRoster = () => {
     let allRoster: Roster = team.roster;
@@ -101,6 +106,7 @@ function RosterOverview() {
   return (
     <>
       <Button onClick={handleClickEvent}>Auswahl abbrechen</Button>
+      <h2>Spielerliste {team.name}</h2>
       <RosterTable
         team={team}
         showModal={showPlayerModal}
@@ -110,35 +116,33 @@ function RosterOverview() {
           checkValidation();
         }}
       />
-      {additionalTeams.length !== 0 && (
-        <>
-          <Button
-            variant='secondary'
-            onClick={() => setShowAdditionalRosters(!showAdditionalRosters)}
-            className='full-width-button'
-          >
-            {showAdditionalRosters
-              ? 'weitere Teams ausblenden'
-              : `weitere Teams anzeigen ${
-                  additionalPlayersList.length
-                    ? ' -> ' + additionalPlayersList.length + ' ✅'
-                    : ''
-                }`}
-          </Button>
-          <br />
-        </>
-      )}
-      <br />
-      {showAdditionalRosters &&
-        additionalTeams.map((team: Team, index: number) => (
-          <RosterTable
-            key={index}
-            team={team}
-            showModal={false}
-            onUpdate={checkValidation}
-            onModalClose={() => setShowStartButton(false)}
-          />
+      <Accordion defaultActiveKey={[]} alwaysOpen className='mb-2'>
+        {additionalTeams.map((team: Team, index: number) => (
+          <Accordion.Item key={index} eventKey={`${index}`}>
+            <Accordion.Header>
+              <div className='additional-team-header'>
+                {team.name}{' '}
+                {countCheckedPlayersFor(team.roster) !== 0 && (
+                  <Badge bg='success'>
+                    <i className='bi bi-check-lg'></i>
+                    {'  '}
+                    {countCheckedPlayersFor(team.roster)}
+                  </Badge>
+                )}
+              </div>
+            </Accordion.Header>
+            <Accordion.Body>
+              <RosterTable
+                key={index}
+                team={team}
+                showModal={false}
+                onUpdate={checkValidation}
+                onModalClose={() => setShowStartButton(false)}
+              />
+            </Accordion.Body>
+          </Accordion.Item>
         ))}
+      </Accordion>
       {showStartButton && (
         <>
           <Button
@@ -156,16 +160,19 @@ function RosterOverview() {
       )}
       {!showStartButton && (
         <form onSubmit={handleSubmit}>
-          <div>
-            <input
+          <FloatingLabel
+            controlId='officialNameInput'
+            label='Vor- und Nachname Official'
+            className='mb-3'
+          >
+            <Form.Control
               type='text'
               placeholder='Vor- und Nachname Official'
               required
-              className='officialNameInput form-control me-2'
               value={officialName}
               onChange={(event) => setOfficialName(event.target.value)}
             />
-          </div>
+          </FloatingLabel>
           <div>
             <Button
               variant='success'
@@ -189,7 +196,7 @@ function RosterOverview() {
         </Modal.Header>
         <Modal.Body>
           <div className='mb-2'>
-            Anzahl Spielende: {getCheckedPlayers().length}
+            Anzahl Spielende: {getAllCheckedPlayers().length}
           </div>
           <div className='mb-2'>Team: {team.name}</div>
           <div>Abgenommen durch: {officialName}</div>

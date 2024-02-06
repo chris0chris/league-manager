@@ -15,6 +15,16 @@
   pointer-events: none; /* Disable pointer events on the row */
 }
 
+button.accordion-button {
+  background-color: #f8f9fa;
+  text-align: center;
+}
+
+.additional-team-header {
+  text-align: center;
+  width: 100%;
+}
+
 tr {
   height: 40px;
 }
