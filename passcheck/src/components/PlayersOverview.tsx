@@ -5,7 +5,7 @@ import {useNavigate, useParams} from 'react-router-dom';
 import {getPlayerList as getRosterList, submitRoster} from '../common/games';
 import {Player, Roster, Team} from '../common/types';
 import useError from '../hooks/useError';
-import Validator from '../utils/validation';
+import Validator, {MinimumPlayerStrengthValidator} from '../utils/validation';
 import RosterTable from './PlayersTable';
 
 //component that shows all available players on the team in a table
@@ -14,9 +14,9 @@ function RosterOverview() {
   const [showAdditionalRosters, setShowAdditionalRosters] =
     useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
-  const [showStartButton, setShowStartButton] = useState(true);
-  const [showPlayerModal, setShowPlayerModal] = useState(false);
-  const [updateFlag, setUpdateFlag] = useState(false);
+  const [showStartButton, setShowStartButton] = useState<boolean>(true);
+  const [showPlayerModal, setShowPlayerModal] = useState<boolean>(false);
+  const [updateFlag, setUpdateFlag] = useState<boolean>(false);
   const [team, setTeam] = useState<Team>({
     name: 'Loading...',
     roster: [],
@@ -42,7 +42,7 @@ function RosterOverview() {
   }, [teamId, gamedayId]);
 
   useEffect(() => {
-    if (getCheckedPlayers().length) {
+    if (getCheckedPlayers().length && !officialName) {
       setShowStartButton(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -57,6 +57,7 @@ function RosterOverview() {
   };
 
   const handleClickEvent = () => {
+    setError(null);
     navigate('/');
   };
 
@@ -86,6 +87,14 @@ function RosterOverview() {
     const validator = new Validator(team.validator);
     let allRoster: Roster = getAllRoster();
     validator.validateAndUpdate(allRoster);
+    const minimumStrengthValidator = new MinimumPlayerStrengthValidator(
+      team.validator.minimum_player_strength!
+    );
+    if (!minimumStrengthValidator.isValid(allRoster)) {
+      setError(new Error(minimumStrengthValidator.getValidationError()));
+    } else {
+      setError(null);
+    }
     setUpdateFlag(!updateFlag);
   };
 
@@ -130,7 +139,7 @@ function RosterOverview() {
             onModalClose={() => setShowStartButton(false)}
           />
         ))}
-      {showStartButton && !officialName && (
+      {showStartButton && (
         <>
           <Button
             variant='success'
