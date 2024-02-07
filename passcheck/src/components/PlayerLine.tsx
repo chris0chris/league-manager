@@ -1,4 +1,3 @@
-//import { useState } from "react";
 import {Player} from '../common/types';
 
 interface Props {
@@ -6,7 +5,6 @@ interface Props {
   index: number;
 }
 
-//component that fills one row of the table in PlayersOverview
 function PlayerLine({playersData: player, index}: Props) {
   return (
     <>

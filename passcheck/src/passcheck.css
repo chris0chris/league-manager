@@ -25,6 +25,10 @@ button.accordion-button {
   width: 100%;
 }
 
+i.bi {
+  font-size: x-large;
+}
+
 tr {
   height: 40px;
 }

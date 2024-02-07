@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {SCORECARD_URL} from '../../common/routes';
+import {SCORECARD_URL} from '../common/routes';
 //
 //export const apiPost = (url, body, successType, errorType) => async (
 //    dispatch,

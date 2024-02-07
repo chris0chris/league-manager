@@ -3,7 +3,6 @@ import {Game, GameList} from '../common/types';
 import GameCard from './GameCard';
 import {getPasscheckData} from '../common/games';
 import {SCORECARD_URL} from '../common/routes';
-//import { getGames, getOfficials, getTeams, getGamedays } from "../common/games";
 
 function GameOverview() {
   const [games, setGames] = useState<GameList>([]);
