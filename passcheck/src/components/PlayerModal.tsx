@@ -35,7 +35,6 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
     const isSure = window.confirm(
       'Wirklich 100 % sicher, dass die Person am Spieltag teilnehmen darf?!'
     );
-
     if (isSure) {
       update();
     }
@@ -84,19 +83,7 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
             className='modal-button-left me-auto'
             onClick={() => nextPlayer(-1)}
           >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='26'
-              height='26'
-              fill='currentColor'
-              className='bi bi-arrow-left'
-              viewBox='0 0 16 16'
-            >
-              <path
-                fillRule='evenodd'
-                d='M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z'
-              />
-            </svg>
+            <i className='bi bi-arrow-left'></i>
           </Button>
           {player.validationError && (
             <>
@@ -109,16 +96,7 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
                     setClick(click + 1);
                   }}
                 >
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    width='30'
-                    height='30'
-                    fill='currentColor'
-                    className='bi bi-check2'
-                    viewBox='0 0 16 16'
-                  >
-                    <path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z' />
-                  </svg>
+                  <i className='bi bi-check2'></i>
                 </Button>
               )}
               {player.isSelected && (
@@ -127,16 +105,7 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
                   className='modal-button-middle'
                   onClick={() => update()}
                 >
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    width='30'
-                    height='30'
-                    fill='currentColor'
-                    className='bi bi-x'
-                    viewBox='0 0 16 16'
-                  >
-                    <path d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z' />
-                  </svg>
+                  <i className='bi bi-x-lg'></i>
                 </Button>
               )}
             </>
@@ -149,30 +118,8 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
                 update();
               }}
             >
-              {!player.isSelected && (
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  width='30'
-                  height='30'
-                  fill='currentColor'
-                  className='bi bi-check2'
-                  viewBox='0 0 16 16'
-                >
-                  <path d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z' />
-                </svg>
-              )}
-              {player.isSelected && (
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  width='30'
-                  height='30'
-                  fill='currentColor'
-                  className='bi bi-x'
-                  viewBox='0 0 16 16'
-                >
-                  <path d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z' />
-                </svg>
-              )}
+              {!player.isSelected && <i className='bi bi-check2'></i>}
+              {player.isSelected && <i className='bi bi-x-lg'></i>}
             </Button>
           )}
           <Button
@@ -180,19 +127,7 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
             className='modal-button-right ms-auto'
             onClick={() => nextPlayer(1)}
           >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='26'
-              height='26'
-              fill='currentColor'
-              className='bi bi-arrow-right'
-              viewBox='0 0 16 16'
-            >
-              <path
-                fillRule='evenodd'
-                d='M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z'
-              />
-            </svg>
+            <i className='bi bi-arrow-right'></i>
           </Button>
         </Modal.Footer>
       </Modal>

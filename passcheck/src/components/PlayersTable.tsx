@@ -12,13 +12,8 @@ interface Props {
   onModalClose(): void;
 }
 
-//component that shows all available players on the team in a table
 function RosterTable({team, showModal, onModalClose, onUpdate}: Props) {
-  const [searchInput, setSearchInput] = useState(''); //Filter players by last name
-  const onChange = (event: any) => {
-    //Searchbar is being used
-    setSearchInput(event.target.value);
-  };
+  const [searchInput, setSearchInput] = useState('');
   const [modalPlayer, setModalPlayer] = useState<Player>({
     id: -1,
     first_name: 'Loading ...',
@@ -26,14 +21,9 @@ function RosterTable({team, showModal, onModalClose, onUpdate}: Props) {
     pass_number: -1,
     jersey_number: -1,
     isSelected: false,
-  }); //store current key to keep track of the active player
-  const [modalVisible, setModalVisible] = useState<boolean>(showModal); //set modal for playerview visible or invisible
+  });
+  const [modalVisible, setModalVisible] = useState<boolean>(showModal);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
-  const showModalFor = (player: Player) => {
-    console.log('showModal player', player);
-    setModalPlayer(player);
-    setModalVisible(true);
-  };
   useEffect(() => {
     if (team.roster[0]) {
       setModalPlayer(team.roster[0]);
@@ -42,6 +32,13 @@ function RosterTable({team, showModal, onModalClose, onUpdate}: Props) {
   useEffect(() => {
     setModalVisible(showModal);
   }, [showModal]);
+  const onChange = (event: any) => {
+    setSearchInput(event.target.value);
+  };
+  const showModalFor = (player: Player) => {
+    setModalPlayer(player);
+    setModalVisible(true);
+  };
   const handleClose = () => {
     setModalVisible(false);
     onModalClose();
@@ -70,13 +67,9 @@ function RosterTable({team, showModal, onModalClose, onUpdate}: Props) {
     checkValidation();
     onUpdate();
   };
-  const getSelectedPlayers = () => {
-    return team.roster.filter((player: Player) => player.isSelected);
-  };
   const numberSelectedPlayers = (): number => {
     return team.roster.filter((player: Player) => player.isSelected).length;
   };
-
   return (
     <>
       <input
@@ -115,26 +108,20 @@ function RosterTable({team, showModal, onModalClose, onUpdate}: Props) {
                 }`}
                 key={index}
                 onClick={() => {
-                  //click the row to show the modal with the players infos
                   showModalFor(player);
                   setCurrentPlayerIndex(index);
                 }}
               >
-                <PlayerLine //create one component for each row of the table
-                  key={index}
-                  index={index}
-                  playersData={player}
-                />
+                <PlayerLine key={index} index={index} playersData={player} />
               </tr>
             ))}
         </tbody>
       </Table>
-      <PlayerModal //load the modal with details about the active player
+      <PlayerModal
         modalVisible={modalVisible}
         handleClose={handleClose}
         nextPlayer={(value: number | null): void => handleNextPlayer(value)}
-        player={modalPlayer} //active player
-        //handle different cases for jumping to next player inside the modal
+        player={modalPlayer}
       />
     </>
   );

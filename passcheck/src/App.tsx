@@ -1,13 +1,10 @@
-import React from 'react';
-import {HashRouter as Router, Routes, Route} from 'react-router-dom';
+import { Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Message from './components/Message';
-import MessageProvider from './components/MessageProvider'; // Import ErrorProvider as the default export
+import MessageProvider from './components/MessageProvider';
 
-// Import your components and route paths
+import { ROOT_URL, SUCCESS_URL } from './common/routes';
 import GameOverview from './components/GameOverview';
 import RosterOverview from './components/PlayersOverview';
-import {PASSCHECK_URL, ROOT_URL, SUCCESS_URL} from './common/routes';
-import useMessage from './hooks/useMessage';
 
 function App() {
   return (
@@ -28,11 +25,9 @@ function App() {
                     <main style={{padding: '1rem'}}>
                       <p>Passcheck erfolgreich!</p>
                     </main>
-                    {/* Your button component */}
                   </div>
                 }
               />
-              {/* Other routes */}
             </Routes>
           </div>
         </Router>

@@ -9,7 +9,6 @@ import useMessage from '../hooks/useMessage';
 import Validator from '../utils/validation';
 import RosterTable from './PlayersTable';
 
-//component that shows all available players on the team in a table
 function RosterOverview() {
   const {setMessage} = useMessage();
   const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible

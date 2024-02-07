@@ -1,4 +1,4 @@
-import {apiGet, apiPut} from '../actions/utils/api';
+import {apiGet, apiPut} from '../utils/api';
 import {Roster} from './types';
 
 export const getPasscheckData = async (team_id?: string | null) => {
