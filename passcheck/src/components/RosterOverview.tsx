@@ -40,7 +40,7 @@ function RosterOverview() {
   }, [teamId, gamedayId]);
 
   useEffect(() => {
-    if (getAllCheckedPlayers().length && officialName) {
+    if (getAllSelectedPlayers().length && officialName) {
       setShowStartButton(false);
     }
     checkValidation();
@@ -61,7 +61,7 @@ function RosterOverview() {
   };
 
   const onSubmitRoster = () => {
-    submitRoster(teamId!, gamedayId!, officialName, getAllCheckedPlayers());
+    submitRoster(teamId!, gamedayId!, officialName, getAllSelectedPlayers());
     handleClose();
     navigate('/success');
   };
@@ -69,7 +69,7 @@ function RosterOverview() {
     value.roster.filter((player) => player.isSelected)
   );
 
-  const getAllCheckedPlayers = () => {
+  const getAllSelectedPlayers = () => {
     const selectedPlayers = team.roster.filter(
       (player: Player) => player.isSelected
     );
@@ -86,8 +86,8 @@ function RosterOverview() {
     return allRoster;
   };
   const checkValidation = () => {
-    const validator = new Validator(team.validator);
-    validator.validateAndUpdate(getAllRoster(), setMessage);
+    const validator = new Validator(team.validator, getAllRoster());
+    validator.validateAndUpdate(setMessage);
     setUpdateFlag(!updateFlag);
   };
 
@@ -99,6 +99,7 @@ function RosterOverview() {
         team={team}
         showModal={showPlayerModal}
         onUpdate={checkValidation}
+        allSelectedPlayers={getAllSelectedPlayers()}
         onModalClose={() => {
           setShowStartButton(false);
           checkValidation();
@@ -126,6 +127,7 @@ function RosterOverview() {
               <RosterTable
                 key={index}
                 team={team}
+                allSelectedPlayers={getAllSelectedPlayers()}
                 showModal={false}
                 onUpdate={checkValidation}
                 onModalClose={() => setShowStartButton(false)}
@@ -187,7 +189,7 @@ function RosterOverview() {
         </Modal.Header>
         <Modal.Body>
           <div className='mb-2'>
-            Anzahl Spielende: {getAllCheckedPlayers().length}
+            Anzahl Spielende: {getAllSelectedPlayers().length}
           </div>
           <div className='mb-2'>Team: {team.name}</div>
           <div>Abgenommen durch: {officialName}</div>

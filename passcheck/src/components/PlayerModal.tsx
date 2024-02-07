@@ -2,17 +2,26 @@ import {useEffect, useState} from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {Player} from '../common/types';
+import Validator from '../utils/validation';
 
 interface Props {
   modalVisible: boolean;
   handleClose(): any;
   nextPlayer(value: number | null): void;
   player: Player;
+  validator: Validator;
 }
 
-function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
+function PlayerModal({
+  modalVisible,
+  handleClose,
+  nextPlayer,
+  player,
+  validator,
+}: Props) {
   const [click, setClick] = useState<number>(0);
-
+  const [jerseyNumber, setJerseyNumber] = useState(player.jersey_number);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
   useEffect(() => {
     const timer = setTimeout(() => {
       // simple click
@@ -26,8 +35,16 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
 
     return () => clearTimeout(timer);
   }, [click]);
+  useEffect(() => {
+    setJerseyNumber(player.jersey_number);
+  }, [player]);
+
   const update = () => {
+    if (errorMessages.length > 0) {
+      return;
+    }
     player.isSelected = !player.isSelected;
+    player.jersey_number = jerseyNumber;
     nextPlayer(1);
   };
 
@@ -45,6 +62,7 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
         show={modalVisible}
         onHide={() => {
           handleClose();
+          setErrorMessages([]);
           nextPlayer(null);
         }}
         backdrop='static'
@@ -56,19 +74,57 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className='row'>
+          <div className='row mb-2 align-items-center'>
             <div className='col-4'>Name:</div>
             <div className='col-8'>
-              {player.first_name} {player.last_name}
+              <input
+                type='text'
+                className='form-control'
+                disabled
+                value={`${player.first_name} ${player.last_name}`}
+              />
             </div>
           </div>
-          <div className='row'>
-            <div className='col-4'>Trikotnummer:</div>
-            <div className='col-8'>{player.jersey_number}</div>
-          </div>
-          <div className='row'>
+          <div className='row mb-2 align-items-center'>
             <div className='col-4'>Passnummer:</div>
-            <div className='col-8'>{player.pass_number}</div>
+            <div className='col-8'>
+              <input
+                disabled
+                type='text'
+                className='form-control'
+                value={player.pass_number}
+              />
+            </div>
+          </div>
+          <div className='row mb-2 align-items-center'>
+            <div className='col-4'>Trikotnummer:</div>
+            <div className='col-8'>
+              <input
+                type='text'
+                required
+                disabled={player.isSelected || !!player.validationError}
+                className='form-control'
+                id='exampleFormControlInput1'
+                placeholder='Trikotnummer'
+                value={jerseyNumber}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (!isNaN(Number(value))) {
+                    const jersNumber = Number(event.target.value);
+                    setJerseyNumber(jersNumber);
+                    setErrorMessages(
+                      validator.validateAndGetErrors({
+                        ...player,
+                        jersey_number: jersNumber,
+                      })
+                    );
+                  } else {
+                    setJerseyNumber(0);
+                    setErrorMessages(['Trikotnummer muss eine Zahl sein.']);
+                  }
+                }}
+              />
+            </div>
           </div>
           {player.validationError && (
             <div className='row text-bg-danger'>
@@ -76,12 +132,28 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
               <div className='col-8'>{player.validationError}</div>
             </div>
           )}
+          {errorMessages.length > 0 && (
+            <div className='row text-bg-danger'>
+              <div className='col-4'>Fehler:</div>
+              <div className='col-8'>
+                {errorMessages.map((errorMessage: string, index: number) => (
+                  <div key={index}>
+                    {errorMessage}
+                    <br />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </Modal.Body>
         <Modal.Footer className='modal-footer'>
           <Button
             variant='secondary'
             className='modal-button-left me-auto'
-            onClick={() => nextPlayer(-1)}
+            onClick={() => {
+              nextPlayer(-1);
+              setErrorMessages([]);
+            }}
           >
             <i className='bi bi-arrow-left'></i>
           </Button>
@@ -125,7 +197,10 @@ function PlayerModal({modalVisible, handleClose, nextPlayer, player}: Props) {
           <Button
             variant='secondary'
             className='modal-button-right ms-auto'
-            onClick={() => nextPlayer(1)}
+            onClick={() => {
+              nextPlayer(1);
+              setErrorMessages([]);
+            }}
           >
             <i className='bi bi-arrow-right'></i>
           </Button>

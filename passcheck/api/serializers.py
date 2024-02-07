@@ -6,14 +6,20 @@ from passcheck.service.eligibility_validation import EligibilityValidator, Valid
 
 
 class RosterSerializer(ObfuscatorSerializer):
+    jersey_number = SerializerMethodField()
     id = IntegerField()
     first_name = ObfuscateField(field_name='first_name')
     last_name = ObfuscateField(field_name='last_name')
-    jersey_number = IntegerField()
     pass_number = IntegerField()
     sex = IntegerField()
     gamedays_counter = SerializerMethodField()
     isSelected = BooleanField(source='is_selected')
+
+    def get_jersey_number(self, obj: dict):
+        gameday_jersey = obj['gameday_jersey']
+        if gameday_jersey is not None:
+            return gameday_jersey
+        return obj['jersey_number']
 
     def get_gamedays_counter(self, obj: dict):
         all_leagues = self.context.get('all_leagues', [])

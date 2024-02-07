@@ -1,9 +1,9 @@
-import {Roster, TeamValidator} from '../common/types';
+import {Player, Roster, TeamValidator} from '../common/types';
 import {Message, MessageColor} from '../context/MessageContext';
 
 abstract class BaseValidator {
-  check(roster: Roster): boolean {
-    if (!this.isValid(roster)) {
+  check(roster: Roster, player: Player | null = null): boolean {
+    if (!this.isValid(roster, player)) {
       return false;
     }
     if (this.nextValidator) {
@@ -11,7 +11,7 @@ abstract class BaseValidator {
     }
     return true;
   }
-  abstract isValid(roster: Roster): boolean;
+  abstract isValid(roster: Roster, player: Player | null): boolean;
   abstract getValidationError(): string;
   getMessageColor(): MessageColor {
     return MessageColor.Danger;
@@ -69,6 +69,53 @@ class MaxSubsInOtherLeagues extends BaseValidator {
   }
 }
 
+class JerseyNumberBetweenValidator extends BaseValidator {
+  minimumNumber: number;
+  maximumNumber: number;
+  constructor(minimumNumber: number, maximumNumber: number) {
+    super();
+    this.minimumNumber = minimumNumber;
+    this.maximumNumber = maximumNumber;
+  }
+  isValid(roster: Roster, player: Player | null): boolean {
+    if (!player) {
+      return false;
+    }
+    return (
+      player.jersey_number >= this.minimumNumber &&
+      player.jersey_number <= this.maximumNumber
+    );
+  }
+  getValidationError(): string {
+    return `Trikotnummer muss eine Zahl zwischen ${this.minimumNumber} und ${this.maximumNumber} sein.`;
+  }
+}
+
+class UniqueJerseyNumber extends BaseValidator {
+  constructor() {
+    super();
+  }
+  isValid(roster: Roster, player: Player | null): boolean {
+    if (!player) {
+      return false;
+    }
+    let allJerseryNumbers: number[] = [];
+    let isValid = true;
+    roster.forEach((currentPlayer) => {
+      if (currentPlayer.id !== player.id) {
+        allJerseryNumbers = [...allJerseryNumbers, currentPlayer.jersey_number];
+        if (allJerseryNumbers.includes(player?.jersey_number)) {
+          isValid = false;
+        }
+      }
+    });
+    return isValid;
+  }
+  getValidationError(): string {
+    return 'Trikotnummer ist bereits in Verwendung und darf nur einmal vorkommen.';
+  }
+}
+
 class MinimumPlayerStrengthValidator extends BaseValidator {
   minimumPlayerStrengthValidator: number;
   constructor(minimumPlayerStrengthValidator: number) {
@@ -108,7 +155,9 @@ class MaximumPlayerStrengthValidator extends BaseValidator {
 
 class Validator {
   validators: BaseValidator[] = [];
-  constructor(validator: TeamValidator) {
+  roster: Roster;
+  constructor(validator: TeamValidator, roster: Roster) {
+    this.roster = roster;
     if (validator.max_subs_in_other_leagues) {
       this.addValidator(
         new MaxSubsInOtherLeagues(validator.max_subs_in_other_leagues)
@@ -124,19 +173,25 @@ class Validator {
         new MaximumPlayerStrengthValidator(validator.maximum_player_strength)
       );
     }
+    if (validator.jerseyNumberBetween) {
+      this.addValidator(
+        new JerseyNumberBetweenValidator(
+          validator.jerseyNumberBetween.min,
+          validator.jerseyNumberBetween.max
+        )
+      );
+      this.addValidator(new UniqueJerseyNumber());
+    }
   }
 
   addValidator(validator: BaseValidator) {
     this.validators.push(validator);
   }
 
-  validateAndUpdate(
-    roster: Roster,
-    setMessage: ((message: Message) => void) | null = null
-  ) {
+  validateAndUpdate(setMessage: ((message: Message) => void) | null = null) {
     let isValid = true;
     this.validators.forEach((currentValidator) => {
-      if (!currentValidator.check(roster)) {
+      if (!currentValidator.check(this.roster)) {
         isValid = false;
         if (setMessage) {
           setMessage({
@@ -151,6 +206,16 @@ class Validator {
       setMessage({text: ''});
     }
     return isValid;
+  }
+  validateAndGetErrors(player: Player): string[] {
+    console.log('first');
+    let errors: string[] = [];
+    this.validators.forEach((currentValidator) => {
+      if (!currentValidator.check(this.roster, player)) {
+        errors = [...errors, currentValidator.getValidationError()];
+      }
+    });
+    return errors;
   }
 }
 

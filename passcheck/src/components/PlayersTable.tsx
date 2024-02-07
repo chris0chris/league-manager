@@ -8,11 +8,18 @@ import Validator from '../utils/validation';
 type Props = {
   team: Team;
   showModal: boolean;
+  allSelectedPlayers: Player[];
   onUpdate(): void;
   onModalClose(): void;
-}
+};
 
-function RosterTable({team, showModal, onModalClose, onUpdate}: Props) {
+function RosterTable({
+  team,
+  showModal,
+  allSelectedPlayers,
+  onModalClose,
+  onUpdate,
+}: Props) {
   const [searchInput, setSearchInput] = useState('');
   const [modalPlayer, setModalPlayer] = useState<Player>({
     id: -1,
@@ -24,11 +31,23 @@ function RosterTable({team, showModal, onModalClose, onUpdate}: Props) {
   });
   const [modalVisible, setModalVisible] = useState<boolean>(showModal);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
+  const [jerseyNumberValidator, setJerseyNumberValidator] = useState(
+    new Validator({jerseyNumberBetween: {min: 0, max: 99}}, [])
+  );
   useEffect(() => {
     if (team.roster[0]) {
       setModalPlayer(team.roster[0]);
     }
   }, [team]);
+  useEffect(() => {
+    setJerseyNumberValidator(
+      new Validator(
+        {jerseyNumberBetween: {min: 0, max: 99}},
+        allSelectedPlayers
+      )
+    );
+  }, [allSelectedPlayers]);
+
   useEffect(() => {
     setModalVisible(showModal);
   }, [showModal]);
@@ -44,8 +63,8 @@ function RosterTable({team, showModal, onModalClose, onUpdate}: Props) {
     onModalClose();
   };
   const checkValidation = () => {
-    const validator = new Validator(team.validator);
-    validator.validateAndUpdate(team.roster);
+    const validator = new Validator(team.validator, team.roster);
+    validator.validateAndUpdate();
   };
   const handleNextPlayer = (value: number | null) => {
     let index = 0;
@@ -122,6 +141,7 @@ function RosterTable({team, showModal, onModalClose, onUpdate}: Props) {
         handleClose={handleClose}
         nextPlayer={(value: number | null): void => handleNextPlayer(value)}
         player={modalPlayer}
+        validator={jerseyNumberValidator}
       />
     </>
   );
