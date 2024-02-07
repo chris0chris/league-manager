@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.conf import settings
-from django.db.models import Count, Q, Value, OuterRef, Exists
+from django.db.models import Count, Q, Value, OuterRef, Exists, Subquery
 
 from gamedays.models import Team, Gameinfo, Gameday
 from gamedays.service.model_helper import GameresultHelper
@@ -81,18 +81,6 @@ class PasscheckService:
             'team': team_data
         }
 
-    def _is_selected_query(self, gameday_id):
-        if gameday_id is None:
-            is_selected_query = Value(False)
-        else:
-            is_selected_query = Exists(
-                PlayerlistGameday.objects.filter(
-                    playerlist=OuterRef('id'),
-                    gameday=gameday_id
-                )
-            )
-        return is_selected_query
-
     def get_roster_with_validation(self, team_id: int, gameday_id: int):
         gameday: Gameday = Gameday.objects.get(pk=gameday_id)
         roster = self._get_roster(team_id, gameday_id, {})
@@ -137,15 +125,37 @@ class PasscheckService:
 
     def _get_roster(self, team, gameday_id, league_annotations):
         is_selected_query = self._is_selected_query(gameday_id)
+        gameday_jersey = self._get_gameday_jersey_query(gameday_id)
         return Playerlist.objects.filter(team=team).annotate(
             **league_annotations,
-            is_selected=is_selected_query
+            is_selected=is_selected_query,
+            gameday_jersey=gameday_jersey
         ).values()
+
+    def _is_selected_query(self, gameday_id):
+        if gameday_id is None:
+            is_selected_query = Value(False)
+        else:
+            is_selected_query = Exists(
+                PlayerlistGameday.objects.filter(
+                    playerlist=OuterRef('id'),
+                    gameday=gameday_id
+                )
+            )
+        return is_selected_query
+
+    def _get_gameday_jersey_query(self, gameday_id):
+        return Subquery(
+            PlayerlistGameday.objects.filter(playerlist=OuterRef('id'), gameday=gameday_id).values('gameday_jersey')
+        )
 
 
 class PasscheckServicePlayers:
     def create_roster_and_passcheck_verification(self, team_id, gameday_id, user, data):
-        PlayerlistGameday.objects.filter(playerlist__team=team_id).delete()
+        all_relevant_team_ids = list(
+            Team.objects.get(pk=team_id).relationship_additional_teams.all().values_list('team__id', flat=True)) + [
+                                    team_id]
+        PlayerlistGameday.objects.filter(playerlist__team__in=all_relevant_team_ids).delete()
         self._create_roster(gameday_id, data['roster'])
         self._create_passcheck_verification(gameday_id, team_id, user, data['official_name'])
 
@@ -174,4 +184,5 @@ class PasscheckServicePlayers:
 
 class TeamData(dict):
     def __init__(self, name, roster, validator):
+        roster = sorted(roster, key=lambda x: x.get('jersey_number'))
         super().__init__(name=name, roster=roster, validator=validator)

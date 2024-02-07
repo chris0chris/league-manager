@@ -12,14 +12,18 @@ export type TeamValidator = {
   max_subs_in_other_leagues?: number;
   minimum_player_strength?: number;
   maximum_player_strength?: number | null;
+  jerseyNumberBetween?: {
+    min: number;
+    max: number;
+  };
 };
 
 export type Player = {
+  jersey_number: number;
   id: number;
   first_name: string;
   last_name: string;
   pass_number: number;
-  jersey_number: number;
   isSelected: boolean;
   validationError?: string;
 };
