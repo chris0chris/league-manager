@@ -1,6 +1,6 @@
 import {Player} from '../common/types';
 
-interface Props {
+type Props = {
   playersData: Player;
   index: number;
 }

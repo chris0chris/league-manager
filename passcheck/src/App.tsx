@@ -1,8 +1,8 @@
-import { Route, HashRouter as Router, Routes } from 'react-router-dom';
+import {Route, HashRouter as Router, Routes} from 'react-router-dom';
 import Message from './components/Message';
 import MessageProvider from './components/MessageProvider';
 
-import { ROOT_URL, SUCCESS_URL } from './common/routes';
+import {ROOT_URL, SUCCESS_URL} from './common/routes';
 import GameOverview from './components/GameOverview';
 import RosterOverview from './components/RosterOverview';
 

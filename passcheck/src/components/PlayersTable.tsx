@@ -5,7 +5,7 @@ import PlayerLine from './PlayerLine';
 import PlayerModal from './PlayerModal';
 import Validator from '../utils/validation';
 
-interface Props {
+type Props = {
   team: Team;
   showModal: boolean;
   onUpdate(): void;

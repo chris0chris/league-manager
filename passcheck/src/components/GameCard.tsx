@@ -2,9 +2,9 @@ import {Button, Card} from 'react-bootstrap';
 import {TEAM_URL} from '../common/routes';
 import {Game} from '../common/types';
 
-interface Props {
+type Props = {
   game: Game;
-}
+};
 
 function GameCard({game}: Props) {
   return (
@@ -17,14 +17,14 @@ function GameCard({game}: Props) {
         <Card.Body>
           <div className='d-grid gap-2'>
             <Button
-              href={`/#${TEAM_URL}/${game.home.id}/gameday/${game.gameday_id}`}
+              href={`#${TEAM_URL}/${game.home.id}/gameday/${game.gameday_id}`}
               variant={`${game.home.isChecked ? 'success' : 'primary'}`}
               size='lg'
             >
               {game.home.name}
             </Button>
             <Button
-              href={`/#${TEAM_URL}/${game.away.id}/gameday/${game.gameday_id}`}
+              href={`#${TEAM_URL}/${game.away.id}/gameday/${game.gameday_id}`}
               variant={`${game.away.isChecked ? 'success' : 'primary'}`}
               size='lg'
             >

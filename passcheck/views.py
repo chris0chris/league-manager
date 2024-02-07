@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, TemplateView
 
 from league_manager.utils.decorators import is_staff
 from .forms import PlayerlistCreateForm
@@ -55,6 +55,5 @@ class PasscheckListView(ListView):
     ordering = ['jersey_number']
 
 
-# ToDo: check if should be class and document
-def passcheck_view(request):
-    return render(request, 'passcheck/index.html')
+class PasscheckView(TemplateView):
+    template_name = 'passcheck/index.html'

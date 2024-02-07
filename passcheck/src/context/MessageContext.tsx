@@ -11,10 +11,10 @@ export enum MessageColor {
   Dark = 'dark',
 }
 
-export interface Message {
+export type Message = {
   text: string;
   color?: MessageColor;
-}
+};
 
 const MessageContext = createContext<{
   message: Message;
