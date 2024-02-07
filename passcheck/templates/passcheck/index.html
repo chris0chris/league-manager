@@ -1,15 +1,9 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta
-            content="width=device-width, height=device-height, initial-scale=1.0"
-            name="viewport"
-    />
-    <meta content="#000000" name="theme-color"/>
-    <meta
-            content="Web site created using create-react-app"
-            name="description"
+    <meta content="width=device-width, height=device-height, initial-scale=1.0" name="viewport"
     />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link
@@ -18,14 +12,12 @@
             integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
             rel="stylesheet"
     />
-    {% load static %}
     <link href='{% static "passcheck/css/passcheck.css" %}' rel="stylesheet"/>
     <title>5er DFFL - Passcheck</title>
 </head>
 <body>
 <noscript>You need to enable JavaScript to run this app.</noscript>
 <div id="passcheck"></div>
-<script src='{% static "passcheck/js/passcheck.chunk.js" %}'></script>
 <script src='{% static "passcheck/js/passcheck.js" %}'></script>
 <script>
     const DEBUG = false;

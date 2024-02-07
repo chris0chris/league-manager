@@ -2,55 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0" />
-    <meta name="theme-color" content="#000000" />
     <meta
-      name="description"
-      content="Web site created using create-react-app"
+            content="width=device-width, height=device-height, initial-scale=1.0"
+            name="viewport"
     />
-    <!--<link
+    <meta content="#000000" name="theme-color"/>
+    <meta
+            content="Web site created using create-react-app"
+      name="description"
+    />
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
       rel="stylesheet"
+    />
+    <link
+            crossorigin="anonymous"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
-      crossorigin="anonymous"
-    />-->
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-    -->
+            rel="stylesheet"
+    />
 
-    {% load static %}
-    <link href='{% static "passcheck/css/passcheck.css" %}' rel="stylesheet"/>
+    <link href="../static/passcheck/css/passcheck.css" rel="stylesheet"/>
     <title>5er DFFL - Passcheck</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="passcheck"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-
-    <script src='{% static "passcheck/js/787.b55a9b03.chunk.js" %}'></script>
-    <script src='{% static "passcheck/js/main.19fa58ff.js" %}'></script>
-    <!-- <script>
-      const DEBUG = false;
-      if (!DEBUG) {
-        $(window).bind('beforeunload', function () {
-          return '';
-        });
-      }
-    </script> -->
   </body>
 </html>

@@ -1,18 +1,26 @@
 const path = require('path');
 
 module.exports = {
-  // other webpack configuration...
-
-  optimization: {
-    splitChunks: {
-      cacheGroups: {
-        default: false,
-      },
-    },
-  },
-
+  entry: path.resolve(__dirname, 'src/index.tsx'),
   output: {
-    filename: 'passcheck.js',
     path: path.resolve(__dirname, 'static/passcheck/js'),
-    },
+    filename: 'passcheck.js',
+  },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+  },
+  plugins: [],
+  module: {
+    rules: [
+      {
+        test: /\.(ts|tsx)$/,
+        exclude: /\node_modules/,
+        use: 'ts-loader',
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader', 'postcss-loader'],
+      },
+    ],
+  },
 };
