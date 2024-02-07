@@ -11,7 +11,7 @@ import RosterTable from './PlayersTable';
 
 function RosterOverview() {
   const {setMessage} = useMessage();
-  const [modalVisible, setModalVisible] = useState<boolean>(false); //set modal for playerview visible or invisible
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [showStartButton, setShowStartButton] = useState<boolean>(true);
   const [showPlayerModal, setShowPlayerModal] = useState<boolean>(false);
   const [updateFlag, setUpdateFlag] = useState<boolean>(false);
