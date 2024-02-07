@@ -40,7 +40,7 @@ function RosterOverview() {
   }, [teamId, gamedayId]);
 
   useEffect(() => {
-    if (getAllCheckedPlayers().length && !officialName) {
+    if (getAllCheckedPlayers().length && officialName) {
       setShowStartButton(false);
     }
     checkValidation();
@@ -112,7 +112,10 @@ function RosterOverview() {
                 {team.name}{' '}
                 {countCheckedPlayersFor(team.roster) !== 0 && (
                   <Badge bg='success'>
-                    <i className='bi bi-check-lg'></i>
+                    <i
+                      className='bi bi-check-lg'
+                      style={{fontSize: '1rem'}}
+                    ></i>
                     {'  '}
                     {countCheckedPlayersFor(team.roster)}
                   </Badge>
