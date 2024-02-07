@@ -1,4 +1,5 @@
 import {Roster, TeamValidator} from '../common/types';
+import {Message, MessageColor} from '../context/MessageContext';
 
 abstract class BaseValidator {
   check(roster: Roster): boolean {
@@ -12,6 +13,9 @@ abstract class BaseValidator {
   }
   abstract isValid(roster: Roster): boolean;
   abstract getValidationError(): string;
+  getMessageColor(): MessageColor {
+    return MessageColor.Danger;
+  }
 
   nextValidator: BaseValidator | null;
   constructor() {
@@ -65,7 +69,7 @@ class MaxSubsInOtherLeagues extends BaseValidator {
   }
 }
 
-export class MinimumPlayerStrengthValidator extends BaseValidator {
+class MinimumPlayerStrengthValidator extends BaseValidator {
   minimumPlayerStrengthValidator: number;
   constructor(minimumPlayerStrengthValidator: number) {
     super();
@@ -81,7 +85,7 @@ export class MinimumPlayerStrengthValidator extends BaseValidator {
   }
 }
 
-export class MaximumPlayerStrengthValidator extends BaseValidator {
+class MaximumPlayerStrengthValidator extends BaseValidator {
   maximumPlayerStrength: number;
   constructor(maximumPlayerStrengthValidator: number) {
     super();
@@ -96,6 +100,9 @@ export class MaximumPlayerStrengthValidator extends BaseValidator {
   getValidationError(): string {
     return `Maximalspielstärke von ${this.maximumPlayerStrength} Personen wurde erreicht.
     Zum Auswählen muss eine vorherige Auswahl verworfen werden.`;
+  }
+  getMessageColor(): MessageColor {
+    return MessageColor.Warning;
   }
 }
 
@@ -123,13 +130,27 @@ class Validator {
     this.validators.push(validator);
   }
 
-  validateAndUpdate(roster: Roster) {
+  validateAndUpdate(
+    roster: Roster,
+    setMessage: ((message: Message) => void) | null = null
+  ) {
+    let isValid = true;
     this.validators.forEach((currentValidator) => {
       if (!currentValidator.check(roster)) {
-        return false;
+        isValid = false;
+        if (setMessage) {
+          setMessage({
+            text: currentValidator.getValidationError(),
+            color: currentValidator.getMessageColor(),
+          });
+        }
+        return;
       }
     });
-    return true;
+    if (isValid && setMessage) {
+      setMessage({text: ''});
+    }
+    return isValid;
   }
 }
 
