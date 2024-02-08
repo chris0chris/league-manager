@@ -1,3 +1,14 @@
+export type GameOverviewInfo = {
+  officialsTeamName: string;
+  games: Game[];
+  gamedays: Gameday[];
+};
+
+export type Gameday = {
+  id: number;
+  name: string;
+};
+
 export type Roster = Player[];
 
 export type TeamData = {

@@ -15,6 +15,10 @@ function App() {
             <Routes>
               <Route path={ROOT_URL} element={<GameOverview />} />
               <Route
+                path={`${ROOT_URL}gameday/:gamedayId`}
+                element={<GameOverview />}
+              />
+              <Route
                 path={`/team/:teamId/gameday/:gamedayId`}
                 element={<RosterOverview />}
               />

@@ -11,12 +11,17 @@ from passcheck.service.passcheck_service import PasscheckService, PasscheckServi
 
 class PasscheckGamesAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
     @get_user_request_permission
     def get(self, request, *args, **kwargs):
         user_permission = kwargs.get('user_permission')
-        team_id = kwargs.get('team', request.user.username)
+        gameday_id = kwargs.get('gameday')
+        team_id = request.user.username
         passcheck = PasscheckService(user_permission=user_permission)
-        return Response(passcheck.get_passcheck_data(team_id=team_id), status=HTTPStatus.OK)
+        try:
+            return Response(passcheck.get_passcheck_data(team_id=team_id, gameday_id=gameday_id), status=HTTPStatus.OK)
+        except PasscheckException as exception:
+            raise PermissionDenied(detail=str(exception))
 
 
 class PasscheckRosterAPIView(APIView):
