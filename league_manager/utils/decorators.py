@@ -13,3 +13,13 @@ def is_staff(view_func):
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
+
+
+def get_user_request_permission(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request: View, *args, **kwargs):
+        user_permission = PermissionHelper.get_staff_or_user_permission(request.request)
+        kwargs['user_permission'] = user_permission
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view

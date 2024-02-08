@@ -4,8 +4,9 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {useNavigate, useParams} from 'react-router-dom';
 import {getPlayerList as getRosterList, submitRoster} from '../common/games';
-import {Player, Roster, Team} from '../common/types';
+import {Player, Roster, Team, TeamData} from '../common/types';
 import useMessage from '../hooks/useMessage';
+import {ApiError} from '../utils/api';
 import Validator from '../utils/validation';
 import RosterTable from './PlayersTable';
 
@@ -26,17 +27,15 @@ function RosterOverview() {
   const {teamId} = useParams();
   const {gamedayId} = useParams();
   useEffect(() => {
-    getRosterList(teamId!, gamedayId!).then(
-      (result: {
-        team: Team;
-        additionalTeams: Team[];
-        official_name: string;
-      }) => {
+    getRosterList(teamId!, gamedayId!)
+      .then((result: TeamData) => {
         setAdditionalTeams(result.additionalTeams);
         setTeam(result.team);
         setOfficialName(result.official_name);
-      }
-    );
+      })
+      .catch((error: ApiError) => {
+        setMessage({text: error.message});
+      });
   }, [teamId, gamedayId]);
 
   useEffect(() => {

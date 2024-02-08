@@ -1,5 +1,5 @@
 import {apiGet, apiPut} from '../utils/api';
-import {Roster} from './types';
+import {Roster, TeamData} from './types';
 
 export const getPasscheckData = async (team_id?: string | null) => {
   if (!team_id) {
@@ -10,7 +10,10 @@ export const getPasscheckData = async (team_id?: string | null) => {
   return data;
 };
 
-export const getPlayerList = async (team_id: string, gameday_id: string) => {
+export const getPlayerList = async (
+  team_id: string,
+  gameday_id: string
+): Promise<TeamData> => {
   const players = await apiGet(
     `/api/passcheck/roster/${team_id}/gameday/${gameday_id}/`
   );
