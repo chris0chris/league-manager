@@ -14,8 +14,7 @@ type Headers = {
 
 export const apiPut = (url: string, body: any) => {
   const header = tokenConfig();
-
-  axios
+  return axios
     .put(url, body, header)
     .then((res) => {})
     .catch((err) => {
