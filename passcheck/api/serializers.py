@@ -1,4 +1,4 @@
-from rest_framework.fields import SerializerMethodField, IntegerField, TimeField, BooleanField
+from rest_framework.fields import SerializerMethodField, IntegerField, TimeField, BooleanField, CharField
 from rest_framework.serializers import Serializer
 
 from league_manager.utils.serializer_utils import ObfuscatorSerializer, ObfuscateField
@@ -85,3 +85,11 @@ class PasscheckGamesListSerializer(Serializer):
             'name': name,
             'isChecked': is_checked,
         }
+
+
+class PlayerAllGamedaysSerializer(Serializer):
+    name = CharField(source='gameday__name')
+    date = SerializerMethodField(source='gameday__date')
+
+    def get_date(self, obj: dict):
+        return obj['gameday__date'].strftime("%d.%m.%Y")

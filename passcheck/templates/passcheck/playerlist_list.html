@@ -25,7 +25,11 @@
                 <td>{{player.pass_number}}</td>
                 {% for league in object_list.all_leagues %}
                 {% with field_name=league.gamedays__league %}
-                <td>{{ player.gamedays_counter|get_item:field_name }}</td>
+                <td>
+                    <a href="{% url 'passcheck-player-games-list' id=player.id %}">
+                        {{ player.gamedays_counter|get_item:field_name }}
+                    </a>
+                </td>
                 {% endwith %}
                 {% endfor %}
             </tr>

@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import ListView, CreateView, TemplateView
+from django.views.generic import CreateView, TemplateView
 
 from league_manager.utils.decorators import get_user_request_permission
 from .forms import PlayerlistCreateForm
@@ -50,9 +50,15 @@ class PlayerlistCreateView(LoginRequiredMixin, CreateView):
 
 
 # declaring Views via django views
-class PasscheckListView(ListView):
-    model = Playerlist
-    ordering = ['jersey_number']
+class PasscheckPlayerGamesList(View):
+    template_name = 'passcheck/player_games_list.html'
+
+    @get_user_request_permission
+    def get(self, request, **kwargs):
+        player_id = kwargs.get('id')
+        user_permission = kwargs.get('user_permission')
+        passcheck_service = PasscheckService(user_permission=user_permission)
+        return render(request, self.template_name, passcheck_service.get_player_gamedays(player_id))
 
 
 class PasscheckView(TemplateView):

@@ -1,14 +1,14 @@
 import datetime
 
 from django.conf import settings
-from django.db.models import Count, Q, Value, OuterRef, Exists, Subquery
+from django.db.models import Count, Q, Value, OuterRef, Exists, Subquery, IntegerField
 
 from gamedays.api.serializers import GamedayInfoSerializer
 from gamedays.models import Team, Gameinfo, Gameday
 from gamedays.service.model_helper import GameresultHelper
 from league_manager.utils.view_utils import UserRequestPermission
 from passcheck.api.serializers import PasscheckGamesListSerializer, RosterSerializer, \
-    RosterValidationSerializer
+    RosterValidationSerializer, PlayerAllGamedaysSerializer
 from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, PasscheckVerification
 from passcheck.service.eligibility_validation import EligibilityValidator
 
@@ -179,6 +179,34 @@ class PasscheckService:
         return Subquery(
             PlayerlistGameday.objects.filter(playerlist=OuterRef('id'), gameday=gameday_id).values('gameday_jersey')
         )
+
+    def get_player_gamedays(self, player_id):
+        player = Playerlist.objects.filter(id=player_id)
+        all_gamedays = PlayerlistGameday.objects.filter(playerlist__in=player)
+        all_leagues = all_gamedays.values_list('gameday__league__name', flat=True).distinct()
+        all_years = all_gamedays.values_list('gameday__date__year', flat=True).distinct()
+        all_gamedays = all_gamedays.order_by('gameday__league', 'gameday__date')
+        league_list = []
+        for current_league in all_leagues:
+            league_list.append({
+                'league_name': current_league,
+                'gamedays': PlayerAllGamedaysSerializer(
+                    instance=all_gamedays.filter(gameday__league__name=current_league).values('gameday__date',
+                                                                                              'gameday__name'),
+                    many=True).data
+            })
+        player_values = player.annotate(
+            gameday_jersey=Value(None, output_field=IntegerField()),
+            is_selected=Value(False)).values()
+        team = player.first().team
+        return {
+            'years': all_years,
+            'team': team.description,
+            'team_id': team.id,
+            'player': RosterSerializer(instance=player_values, is_staff=self.user_permission.is_user_or_staff(),
+                                       many=True).data[0],
+            'entries': league_list,
+        }
 
 
 class PasscheckServicePlayers:
