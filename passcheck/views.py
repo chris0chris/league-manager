@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import ListView, CreateView, TemplateView
 
-from league_manager.utils.decorators import is_staff
+from league_manager.utils.decorators import get_user_request_permission
 from .forms import PlayerlistCreateForm
 from .models import Playerlist
 from .service.passcheck_service import PasscheckService
@@ -14,11 +14,11 @@ from .service.passcheck_service import PasscheckService
 class PlayerlistView(View):
     template_name = 'passcheck/playerlist_list.html'
 
-    @is_staff
+    @get_user_request_permission
     def get(self, request, **kwargs):
         team_id = kwargs.get('team')
-        is_staff = kwargs.get('is_staff')
-        passcheck_service = PasscheckService(is_staff=is_staff)
+        user_permission = kwargs.get('user_permission')
+        passcheck_service = PasscheckService(user_permission=user_permission)
         context = {
             'object_list': passcheck_service.get_roster(team_id)
         }

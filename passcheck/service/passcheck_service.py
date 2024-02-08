@@ -1,25 +1,30 @@
-from datetime import datetime
+import datetime
 
 from django.conf import settings
 from django.db.models import Count, Q, Value, OuterRef, Exists, Subquery
 
 from gamedays.models import Team, Gameinfo, Gameday
 from gamedays.service.model_helper import GameresultHelper
+from league_manager.utils.view_utils import UserRequestPermission
 from passcheck.api.serializers import PasscheckGamesListSerializer, RosterSerializer, \
     RosterValidationSerializer
 from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, PasscheckVerification
 from passcheck.service.eligibility_validation import EligibilityValidator
 
 
+class PasscheckException(Exception):
+    pass
+
+
 class PasscheckService:
-    def __init__(self, is_staff=False):
-        self.is_staff = is_staff
+    def __init__(self, user_permission=UserRequestPermission()):
+        self.user_permission = user_permission
 
     def get_officiating_games(self, officials_team):
-        date = datetime.today()
+        date = datetime.datetime.today()
         if settings.DEBUG:
             date = '2023-08-05'
-        if officials_team is None and self.is_staff:
+        if officials_team is None and self.user_permission.is_staff:
             gameinfo = Gameinfo.objects.filter(gameday__date=date)
         else:
             gameinfo = Gameinfo.objects.filter(officials_id=officials_team, gameday__date=date)
@@ -71,7 +76,7 @@ class PasscheckService:
         roster = self._get_roster(team, gameday_id, league_annotations)
         team_data = TeamData(
             name=team.description,
-            roster=RosterSerializer(instance=roster, is_staff=self.is_staff,
+            roster=RosterSerializer(instance=roster, is_staff=(self.user_permission.is_user_or_staff()),
                                     context={'all_leagues': list(all_leagues)},
                                     many=True).data,
             validator='',
@@ -83,10 +88,17 @@ class PasscheckService:
 
     def get_roster_with_validation(self, team_id: int, gameday_id: int):
         gameday: Gameday = Gameday.objects.get(pk=gameday_id)
+        if not self.user_permission.is_staff:
+            today = datetime.datetime.today()
+            if settings.DEBUG:
+                today = datetime.date(2023, 8, 5)
+            if today != gameday.date:
+                raise PasscheckException(
+                    f'Passcheck nicht erlaubt für Spieltag: {gameday_id}. Nur heutige Spieltage sind erlaubt.')
         roster = self._get_roster(team_id, gameday_id, {})
         team = {'team': TeamData(
             name=self._get_team(team_id).description,
-            roster=RosterSerializer(instance=roster, is_staff=self.is_staff, many=True).data,
+            roster=RosterSerializer(instance=roster, is_staff=self.user_permission.is_user_or_staff(), many=True).data,
             validator=EligibilityValidator(gameday.league, gameday).get_player_strength()
         )}
         try:
@@ -114,7 +126,8 @@ class PasscheckService:
             ev = EligibilityValidator(additional_relation.league, gameday)
             team_data = TeamData(
                 name=additional_relation.team.description,
-                roster=RosterValidationSerializer(instance=roster_addiational_team, is_staff=self.is_staff,
+                roster=RosterValidationSerializer(instance=roster_addiational_team,
+                                                  is_staff=self.user_permission.is_user_or_staff(),
                                                   context={'validator': ev, 'all_leagues': [
                                                       {'gamedays__league': gameday.league_id}]
                                                            },

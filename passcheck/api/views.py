@@ -1,31 +1,35 @@
 from http import HTTPStatus
 
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from league_manager.utils.decorators import is_staff
-from passcheck.service.passcheck_service import PasscheckService, PasscheckServicePlayers
+from league_manager.utils.decorators import get_user_request_permission
+from passcheck.service.passcheck_service import PasscheckService, PasscheckServicePlayers, PasscheckException
 
 
 class PasscheckGamesAPIView(APIView):
 
-    @is_staff
+    @get_user_request_permission
     def get(self, request, *args, **kwargs):
-        is_staff = kwargs.get('is_staff')
+        user_permission = kwargs.get('user_permission')
         team_id = kwargs.get('team', request.user.username)
-        passcheck = PasscheckService(is_staff=is_staff)
+        passcheck = PasscheckService(user_permission=user_permission)
         return Response(passcheck.get_passcheck_data(team_id=team_id), status=HTTPStatus.OK)
 
 
 class PasscheckRosterAPIView(APIView):
-    @is_staff
+    @get_user_request_permission
     def get(self, request, **kwargs):
         team = kwargs.get('team')
         gameday_id = kwargs.get('gameday')
-        is_staff = kwargs.get('is_staff')
+        user_permission = kwargs.get('user_permission')
         if team:
-            passcheck = PasscheckService(is_staff)
-            return Response(passcheck.get_roster_with_validation(team, gameday_id), status=HTTPStatus.OK)
+            passcheck = PasscheckService(user_permission)
+            try:
+                return Response(passcheck.get_roster_with_validation(team, gameday_id), status=HTTPStatus.OK)
+            except PasscheckException as exception:
+                raise PermissionDenied(detail=str(exception))
 
     def put(self, request, **kwargs):
         data = request.data

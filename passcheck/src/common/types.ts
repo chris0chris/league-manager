@@ -1,5 +1,11 @@
 export type Roster = Player[];
 
+export type TeamData = {
+  team: Team;
+  additionalTeams: Team[];
+  official_name: string;
+};
+
 export type Team = {
   name: string;
   roster: Roster;

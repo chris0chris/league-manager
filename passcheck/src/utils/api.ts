@@ -1,7 +1,19 @@
-import axios from 'axios';
+import axios, {AxiosError} from 'axios';
 import {SCORECARD_URL} from '../common/routes';
+import { instanceOf } from 'prop-types';
 
-export const apiPut = (url, body) => {
+export type ApiError = {
+  message: string;
+};
+
+type Headers = {
+  headers: {
+    Authorization?: string;
+    'Content-Type': string;
+  };
+};
+
+export const apiPut = (url: string, body: any) => {
   const header = tokenConfig();
 
   axios
@@ -12,7 +24,7 @@ export const apiPut = (url, body) => {
     });
 };
 
-export const apiGet = (url) => {
+export const apiGet = (url: string): any => {
   return axios
     .get(url, tokenConfig())
     .then((res) => {
@@ -20,7 +32,7 @@ export const apiGet = (url) => {
         return res.data;
       }
     })
-    .catch((error) => {
+    .catch((error: AxiosError) => {
       console.log('api.get ERROR', error);
       if (error.response && error.response.status === 401) {
         if (process.env.NODE_ENV === 'production') {
@@ -29,9 +41,20 @@ export const apiGet = (url) => {
           alert(
             "`localStorage.setItem('token', '${localStorage.getItem('token')}')`"
           );
+          const apiError: ApiError = {
+            message: 'Bitte erst anmelden',
+          };
+          throw apiError;
         }
       } else {
-        console.error('Error fetching data:', error.message);
+        let message = error.message;
+        if (error.response) {
+          message = (error.response as any).data.detail;
+        }
+        const apiError: ApiError = {
+          message: message,
+        };
+        throw apiError;
       }
     });
 };
@@ -39,7 +62,7 @@ export const apiGet = (url) => {
 const tokenConfig = () => {
   const token = localStorage.getItem('token');
 
-  const config = {
+  const config: Headers = {
     headers: {
       'Content-Type': 'application/json',
     },
