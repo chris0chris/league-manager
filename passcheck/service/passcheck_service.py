@@ -25,9 +25,10 @@ class PasscheckService:
         if settings.DEBUG:
             date = '2023-08-05'
         if officials_team is None and self.user_permission.is_staff:
-            gameinfo = Gameinfo.objects.filter(gameday__date=date)
+            gameinfo = Gameinfo.objects.filter(gameday__date=date).order_by('scheduled')
         else:
-            gameinfo = Gameinfo.objects.filter(officials_id=officials_team, gameday__date=date)
+            gameinfo = Gameinfo.objects.filter(officials_id=officials_team, gameday__date=date).order_by('scheduled')
+            gameinfo = gameinfo.filter(scheduled__lte=gameinfo.first().scheduled)
         gameinfo = gameinfo.annotate(
             home_id=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='id'),
             home=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='description'),
