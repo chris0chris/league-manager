@@ -12,6 +12,14 @@ class GamedaySerializer(ModelSerializer):
         extra_kwargs = {'start': {'format': '%H:%M'}}
 
 
+class GamedayInfoSerializer(Serializer):
+    id = IntegerField()
+    name = SerializerMethodField()
+
+    def get_name(self, obj: dict):
+        return f'{obj["name"]} ({obj["league__name"]})'
+
+
 class GameOfficialSerializer(ModelSerializer):
     class Meta:
         model = GameOfficial

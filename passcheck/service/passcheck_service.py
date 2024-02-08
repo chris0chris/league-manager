@@ -3,6 +3,7 @@ import datetime
 from django.conf import settings
 from django.db.models import Count, Q, Value, OuterRef, Exists, Subquery
 
+from gamedays.api.serializers import GamedayInfoSerializer
 from gamedays.models import Team, Gameinfo, Gameday
 from gamedays.service.model_helper import GameresultHelper
 from league_manager.utils.view_utils import UserRequestPermission
@@ -20,14 +21,16 @@ class PasscheckService:
     def __init__(self, user_permission=UserRequestPermission()):
         self.user_permission = user_permission
 
-    def get_officiating_games(self, officials_team):
-        date = datetime.datetime.today()
-        if settings.DEBUG:
-            date = '2023-08-05'
-        if officials_team is None and self.user_permission.is_staff:
-            gameinfo = Gameinfo.objects.filter(gameday__date=date).order_by('scheduled')
+    def get_officiating_games(self, officials_team_id, gameday, all_games_wanted=False):
+        if officials_team_id is None and self.user_permission.is_staff:
+            gameinfo = Gameinfo.objects.filter(gameday__in=gameday).order_by('scheduled')
+        elif all_games_wanted:
+            gameinfo = Gameinfo.objects.filter(gameday__in=gameday).order_by('scheduled')
+            if not gameinfo.filter(officials=officials_team_id).exists():
+                raise PasscheckException('Passcheck nicht erlaubt, da ihr als Team nicht am Spieltag spielt!')
         else:
-            gameinfo = Gameinfo.objects.filter(officials_id=officials_team, gameday__date=date).order_by('scheduled')
+            gameinfo = Gameinfo.objects.filter(officials_id=officials_team_id, gameday__in=gameday).order_by(
+                'scheduled')
             gameinfo = gameinfo.filter(scheduled__lte=gameinfo.first().scheduled)
         gameinfo = gameinfo.annotate(
             home_id=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='id'),
@@ -48,11 +51,23 @@ class PasscheckService:
             many=True
         ).data
 
-    def get_passcheck_data(self, team_id):
+    def get_passcheck_data(self, team_id, gameday_id=None):
         team = self._get_team(team_id)
+        date = datetime.datetime.today()
+        all_games_wanted = False
+        if settings.DEBUG:
+            date = '2023-08-05'
+        if gameday_id is None:
+            gameday = Gameday.objects.filter(date=date)
+        else:
+            gameday = Gameday.objects.filter(id=gameday_id)
+            all_games_wanted = True
+
         return {
             'officialsTeamName': team.description if team else team_id,
-            'games': self.get_officiating_games(officials_team=team),
+            'games': self.get_officiating_games(officials_team_id=team, gameday=gameday,
+                                                all_games_wanted=all_games_wanted),
+            'gamedays': GamedayInfoSerializer(instance=gameday.values('id', 'name', 'league__name'), many=True).data
         }
 
     def _get_team(self, team_id) -> Team:

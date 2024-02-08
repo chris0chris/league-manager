@@ -70,8 +70,11 @@ const throwApiError = (error: AxiosError<unknown, any> | string) => {
     message = error;
   } else {
     message = error.message;
-    if (error.response) {
-      message = (error.response as any).data.detail;
+    if (
+      typeof error.response?.data === 'object' &&
+      'detail' in error.response?.data!
+    ) {
+      message = error.response?.data?.detail as string;
     }
   }
   const apiError: ApiError = {

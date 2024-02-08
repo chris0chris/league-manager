@@ -1,12 +1,12 @@
 import {apiGet, apiPut} from '../utils/api';
 import {Roster, TeamData} from './types';
 
-export const getPasscheckData = async (team_id?: string | null) => {
-  if (!team_id) {
+export const getPasscheckData = async (gameday_id?: string | null) => {
+  if (!gameday_id) {
     return await apiGet(`/api/passcheck/games/`);
   }
 
-  const data = await apiGet(`/api/passcheck/games/${team_id}/`);
+  const data = await apiGet(`/api/passcheck/games/${gameday_id}/`);
   return data;
 };
 
