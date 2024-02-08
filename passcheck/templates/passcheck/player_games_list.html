@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block content %}
+<article class="media content-section">
+    <div class="media-body">
+        <h1>{{ player.first_name }} {{ player.last_name }}</h1>
+        <div class="row">
+            <div class="col-4">
+                Team:
+            </div>
+            <div class="col-8">
+                <a href="{% url 'passcheck-roster-list' team=team_id %}">{{ team }}</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4">
+                Trikotnummer:
+            </div>
+            <div class="col-8">
+                {{ player.jersey_number }}
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-4">
+                Passnummer:
+            </div>
+            <div class="col-8">
+                {{ player.pass_number }}
+            </div>
+        </div>
+        {% for current_entry in entries %}
+        <h3>{{ current_entry.league_name }} - {{ current_entry.gamedays | length }}</h3>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th class="col-4" scope="col">Datum</th>
+                <th class="col-8" scope="col">Spieltag</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for current_gameday in current_entry.gamedays %}
+            <tr>
+                <td class="col-4">{{current_gameday.date}}</td>
+                <td class="col-80">{{current_gameday.name}}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endfor %}
+
+    </div>
+</article>
+{% endblock content %}
