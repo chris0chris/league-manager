@@ -104,7 +104,8 @@ class PasscheckService:
             additional_relation = additional_team_link.relationship_team
             gameday_league_annotation = {
                 f'{gameday.league_id}': Count('gamedays__league',
-                                              filter=Q(gamedays__league=gameday.league))}
+                                              filter=(Q(gamedays__league=gameday.league) & ~Q(
+                                                  gamedays__id=gameday_id)))}
             roster_addiational_team = self._get_roster(additional_relation.team.pk, gameday_id,
                                                        gameday_league_annotation)
             if not roster_addiational_team.exists():
