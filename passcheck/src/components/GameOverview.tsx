@@ -3,33 +3,25 @@ import {Game, GameList} from '../common/types';
 import GameCard from './GameCard';
 import {getPasscheckData} from '../common/games';
 import {SCORECARD_URL} from '../common/routes';
+import useMessage from '../hooks/useMessage';
+import {ApiError} from '../utils/api';
 
 function GameOverview() {
   const [games, setGames] = useState<GameList>([]);
   const [officials, setOfficials] = useState<string>('');
   const [tokenKey, setTokenKey] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const {setMessage} = useMessage();
+
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token !== null) {
-      setTokenKey(token.slice(0, 8));
-      if (tokenKey !== '') {
-        getPasscheckData().then((result) => {
-          setGames(result.games);
-          setOfficials(result.officialsTeamName);
-          setLoading(false);
-        });
-      }
-    } else {
-      if (process.env.NODE_ENV === 'production') {
-        window.location.href = SCORECARD_URL;
-      } else {
-        alert(
-          "`localStorage.setItem('token', '${localStorage.getItem('token')}')`"
-        );
-      }
-    }
-  }, [tokenKey]);
+    getPasscheckData()
+      .then((result) => {
+        setGames(result.games);
+        setOfficials(result.officialsTeamName);
+        setLoading(false);
+      })
+      .catch((error: ApiError) => setMessage({text: error.message}));
+  }, []);
 
   return (
     <>

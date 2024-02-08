@@ -1,6 +1,5 @@
 import axios, {AxiosError} from 'axios';
 import {SCORECARD_URL} from '../common/routes';
-import { instanceOf } from 'prop-types';
 
 export type ApiError = {
   message: string;
@@ -21,6 +20,7 @@ export const apiPut = (url: string, body: any) => {
     .then((res) => {})
     .catch((err) => {
       console.error(err);
+      throwApiError(err);
     });
 };
 
@@ -33,7 +33,7 @@ export const apiGet = (url: string): any => {
       }
     })
     .catch((error: AxiosError) => {
-      console.log('api.get ERROR', error);
+      console.error('api ERROR', error);
       if (error.response && error.response.status === 401) {
         if (process.env.NODE_ENV === 'production') {
           window.location.href = SCORECARD_URL;
@@ -41,20 +41,10 @@ export const apiGet = (url: string): any => {
           alert(
             "`localStorage.setItem('token', '${localStorage.getItem('token')}')`"
           );
-          const apiError: ApiError = {
-            message: 'Bitte erst anmelden',
-          };
-          throw apiError;
+          throwApiError('Bitte erst anmelden.');
         }
       } else {
-        let message = error.message;
-        if (error.response) {
-          message = (error.response as any).data.detail;
-        }
-        const apiError: ApiError = {
-          message: message,
-        };
-        throw apiError;
+        throwApiError(error);
       }
     });
 };
@@ -73,4 +63,20 @@ const tokenConfig = () => {
   }
 
   return config;
+};
+
+const throwApiError = (error: AxiosError<unknown, any> | string) => {
+  let message = '';
+  if (typeof error === 'string') {
+    message = error;
+  } else {
+    message = error.message;
+    if (error.response) {
+      message = (error.response as any).data.detail;
+    }
+  }
+  const apiError: ApiError = {
+    message: message,
+  };
+  throw apiError;
 };
