@@ -155,7 +155,7 @@ class PasscheckServicePlayers:
         all_relevant_team_ids = list(
             Team.objects.get(pk=team_id).relationship_additional_teams.all().values_list('team__id', flat=True)) + [
                                     team_id]
-        PlayerlistGameday.objects.filter(playerlist__team__in=all_relevant_team_ids).delete()
+        PlayerlistGameday.objects.filter(playerlist__team__in=all_relevant_team_ids, gameday=gameday_id).delete()
         self._create_roster(gameday_id, data['roster'])
         self._create_passcheck_verification(gameday_id, team_id, user, data['official_name'])
 
