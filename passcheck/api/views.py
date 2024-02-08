@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+from rest_framework import permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,7 +10,7 @@ from passcheck.service.passcheck_service import PasscheckService, PasscheckServi
 
 
 class PasscheckGamesAPIView(APIView):
-
+    permission_classes = [permissions.IsAuthenticated]
     @get_user_request_permission
     def get(self, request, *args, **kwargs):
         user_permission = kwargs.get('user_permission')
