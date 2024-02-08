@@ -9,6 +9,7 @@ import useMessage from '../hooks/useMessage';
 import {ApiError} from '../utils/api';
 import Validator from '../utils/validation';
 import RosterTable from './PlayersTable';
+import {MessageColor} from '../context/MessageContext';
 
 function RosterOverview() {
   const {setMessage} = useMessage();
@@ -60,9 +61,16 @@ function RosterOverview() {
   };
 
   const onSubmitRoster = () => {
-    submitRoster(teamId!, gamedayId!, officialName, getAllSelectedPlayers());
     handleClose();
-    navigate('/success');
+    submitRoster(teamId!, gamedayId!, officialName, getAllSelectedPlayers())
+      .then(() => {
+        setMessage({
+          text: 'Erfolgreich gespeichert.',
+          color: MessageColor.Success,
+        });
+        navigate('/');
+      })
+      .catch((error: ApiError) => setMessage({text: error.message}));
   };
   const additionalPlayersList = additionalTeams.flatMap((value: Team) =>
     value.roster.filter((player) => player.isSelected)
