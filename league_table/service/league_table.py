@@ -22,7 +22,7 @@ class LeagueTable:
         for gameday in all_gamedays:
             try:
                 gmw = GamedayModelWrapper(gameday.pk)
-                all_standings = all_standings.append(gmw.get_final_table(), ignore_index=True)
+                all_standings = pd.concat([all_standings, gmw.get_final_table()], ignore_index=True)
             except Gameinfo.DoesNotExist:
                 pass
         if all_standings.empty:

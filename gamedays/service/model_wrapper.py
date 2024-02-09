@@ -151,7 +151,8 @@ class GamedayModelWrapper:
 
     def get_qualify_team_by(self, place, standing):
         qualify_round = self._get_table()
-        return qualify_round.groupby(STANDING).nth(place - 1).loc[standing][TEAM_NAME]
+        nth_standing = qualify_round.groupby(STANDING).nth(place - 1)
+        return nth_standing[nth_standing[STANDING] == standing][TEAM_NAME].iloc[0]
 
     def get_team_by_points(self, place, standing, points):
         teams = self._get_teams_by(standing, points)
@@ -168,7 +169,7 @@ class GamedayModelWrapper:
     def is_finished(self, check):
         if self._has_standing(check):
             return len(self._gameinfo[(self._gameinfo[STANDING] == check) & (self._gameinfo[STATUS] == FINISHED)]) \
-                   == len(self._gameinfo[(self._gameinfo[STANDING] == check)])
+                == len(self._gameinfo[(self._gameinfo[STANDING] == check)])
 
         return len(self._gameinfo[(self._gameinfo[STAGE] == check) & (self._gameinfo[STATUS] == FINISHED)]) == len(
             self._gameinfo[(self._gameinfo[STAGE] == check)])
