@@ -11,6 +11,7 @@
                 <th scope="col">Vorname</th>
                 <th scope="col">Nachname</th>
                 <th scope="col">Passnummer</th>
+                <th scope="col">Geburtsjahr</th>
                 {% for league in object_list.all_leagues %}
                 <th scope="col">#{{league.gamedays__league__name}}</th>
                 {% endfor %}
@@ -23,6 +24,7 @@
                 <td>{{player.first_name}}</td>
                 <td>{{player.last_name}}</td>
                 <td>{{player.pass_number}}</td>
+                <td>{{player.year_of_birth}}</td>
                 {% for league in object_list.all_leagues %}
                 {% with field_name=league.gamedays__league %}
                 <td>

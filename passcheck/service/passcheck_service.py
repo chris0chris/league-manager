@@ -55,8 +55,8 @@ class PasscheckService:
         team = self._get_team(team_id)
         date = datetime.datetime.today()
         all_games_wanted = False
-        if settings.DEBUG:
-            date = '2023-08-05'
+        # if settings.DEBUG:
+        #     date = '2023-08-05'
         if gameday_id is None:
             gameday = Gameday.objects.filter(date=date)
         else:

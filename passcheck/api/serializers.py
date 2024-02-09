@@ -11,6 +11,7 @@ class RosterSerializer(ObfuscatorSerializer):
     first_name = ObfuscateField(field_name='first_name')
     last_name = ObfuscateField(field_name='last_name')
     pass_number = IntegerField()
+    year_of_birth = IntegerField()
     sex = IntegerField()
     gamedays_counter = SerializerMethodField()
     isSelected = BooleanField(source='is_selected')
