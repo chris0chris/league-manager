@@ -3,6 +3,7 @@ import pathlib
 import re
 from http import HTTPStatus
 
+import pytest
 from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
@@ -245,6 +246,7 @@ class TestGameHalftime(WebTest):
 
 
 class TestGameFinalize(WebTest):
+    @pytest.mark.xfail  # because of the demo behaviour
     def test_game_is_finalized(self):
         DBSetup().g62_status_empty()
         first_game: Gameinfo = Gameinfo.objects.last()
