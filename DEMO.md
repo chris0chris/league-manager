@@ -22,6 +22,14 @@ Import the initial dummy data so the project is ready to be used.
 python manage.py loaddata demo_database.json
 ```
 
+#### Dump dummy data
+
+Dump the dummy data if something changed.
+
+```
+python -Xutf8 manage.py dumpdata > demo_database.json
+```
+
 #### Access images and CSS
 
 Run in Terminal
