@@ -58,7 +58,7 @@ class PasscheckService:
         today_gamedays = Gameday.objects.filter(date__gte=PASSCHECK_DATE)
         all_games_wanted = False
         if gameday_id is None:
-            gameday = today_gamedays
+            gameday = Gameday.objects.filter(date__gte=PASSCHECK_DATE)
         else:
             gameday = Gameday.objects.filter(id=gameday_id)
             all_games_wanted = True
