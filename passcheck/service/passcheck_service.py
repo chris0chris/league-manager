@@ -1,6 +1,5 @@
 import datetime
 
-from django.conf import settings
 from django.db.models import Count, Q, Value, OuterRef, Exists, Subquery, IntegerField
 
 from gamedays.api.serializers import GamedayInfoSerializer
@@ -11,6 +10,8 @@ from passcheck.api.serializers import PasscheckGamesListSerializer, RosterSerial
     RosterValidationSerializer, PlayerAllGamedaysSerializer
 from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, PasscheckVerification
 from passcheck.service.eligibility_validation import EligibilityValidator
+
+PASSCHECK_DATE = datetime.date(2024, 2, 1)
 
 
 class PasscheckException(Exception):
@@ -53,11 +54,9 @@ class PasscheckService:
 
     def get_passcheck_data(self, team_id, gameday_id=None):
         team = self._get_team(team_id)
-        date = datetime.datetime.today()
         all_games_wanted = False
-        date = '2024-02-01'
         if gameday_id is None:
-            gameday = Gameday.objects.filter(date__gte=date)
+            gameday = Gameday.objects.filter(date__gte=PASSCHECK_DATE)
         else:
             gameday = Gameday.objects.filter(id=gameday_id)
             all_games_wanted = True
@@ -104,10 +103,7 @@ class PasscheckService:
     def get_roster_with_validation(self, team_id: int, gameday_id: int):
         gameday: Gameday = Gameday.objects.get(pk=gameday_id)
         if not self.user_permission.is_staff:
-            today = datetime.datetime.today()
-            if settings.DEBUG:
-                today = datetime.date(2023, 8, 5)
-            if today != gameday.date:
+            if gameday.date <= PASSCHECK_DATE:
                 raise PasscheckException(
                     f'Passcheck nicht erlaubt für Spieltag: {gameday_id}. Nur heutige Spieltage sind erlaubt.')
         roster = self._get_roster(team_id, gameday_id, {})
