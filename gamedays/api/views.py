@@ -17,7 +17,7 @@ class GamedayListAPIView(ListAPIView):
     serializer_class = GamedaySerializer
 
     def get_queryset(self):
-        return Gameday.objects.all()
+        return Gameday.objects.filter(pk__in=[1, 2])
 
 
 class GameinfoUpdateAPIView(RetrieveUpdateAPIView):
