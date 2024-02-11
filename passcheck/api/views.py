@@ -19,7 +19,7 @@ class PasscheckGamesAPIView(APIView):
         team_id = request.user.username
         passcheck = PasscheckService(user_permission=user_permission)
         try:
-            return Response(passcheck.get_passcheck_data(team_id=team_id, gameday_id=gameday_id), status=HTTPStatus.OK)
+            return Response(passcheck.get_passcheck_games(team_id=team_id, gameday_id=gameday_id), status=HTTPStatus.OK)
         except PasscheckException as exception:
             raise PermissionDenied(detail=str(exception))
 

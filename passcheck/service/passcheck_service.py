@@ -12,6 +12,8 @@ from passcheck.api.serializers import PasscheckGamesListSerializer, RosterSerial
 from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, PasscheckVerification
 from passcheck.service.eligibility_validation import EligibilityValidator
 
+PASSCHECK_DATE = datetime.date(2024, 2, 3)
+
 
 class PasscheckException(Exception):
     pass
@@ -51,14 +53,15 @@ class PasscheckService:
             many=True
         ).data
 
-    def get_passcheck_data(self, team_id, gameday_id=None):
+    def get_passcheck_games(self, team_id, gameday_id=None):
         team = self._get_team(team_id)
         date = datetime.datetime.today()
-        all_games_wanted = False
         if settings.DEBUG:
-            date = '2024-02-03'
+            date = PASSCHECK_DATE
+        today_gamedays = Gameday.objects.filter(date__gte=date)
+        all_games_wanted = False
         if gameday_id is None:
-            gameday = Gameday.objects.filter(date=date)
+            gameday = today_gamedays
         else:
             gameday = Gameday.objects.filter(id=gameday_id)
             all_games_wanted = True
@@ -67,7 +70,8 @@ class PasscheckService:
             'officialsTeamName': team.description if team else team_id,
             'games': self.get_officiating_games(officials_team_id=team, gameday=gameday,
                                                 all_games_wanted=all_games_wanted),
-            'gamedays': GamedayInfoSerializer(instance=gameday.values('id', 'name', 'league__name'), many=True).data
+            'gamedays': GamedayInfoSerializer(instance=today_gamedays.values('id', 'name', 'league__name'),
+                                              many=True).data
         }
 
     def _get_team(self, team_id) -> Team:
@@ -107,7 +111,7 @@ class PasscheckService:
         if not self.user_permission.is_staff:
             today = datetime.datetime.today()
             if settings.DEBUG:
-                today = datetime.date(2024, 2, 3)
+                today = PASSCHECK_DATE
             if today != gameday.date:
                 raise PasscheckException(
                     f'Passcheck nicht erlaubt für Spieltag: {gameday_id}. Nur heutige Spieltage sind erlaubt.')

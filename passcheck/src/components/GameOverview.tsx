@@ -18,7 +18,6 @@ function GameOverview() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('gamedayId GameOverview', gamedayId);
     getPasscheckData(gamedayId)
       .then((result: GameOverviewInfo) => {
         setGames(result.games);
@@ -30,6 +29,7 @@ function GameOverview() {
       .catch((error: ApiError) => {
         setMessage({text: error.message});
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gamedayId]);
 
   return (
@@ -48,7 +48,12 @@ function GameOverview() {
                 type={'checkbox'}
                 id='select-all-gamedays-checkbox'
                 label='Alle Spiele auswählen'
-                onClick={() => setShowAllGamedays(!showAllGamedays)}
+                onClick={() => {
+                  setShowAllGamedays(!showAllGamedays);
+                  if (showAllGamedays) {
+                    navigate('/');
+                  }
+                }}
               />
             </div>
           </div>
