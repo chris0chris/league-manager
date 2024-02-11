@@ -60,6 +60,19 @@ function RosterOverview() {
     navigate('/');
   };
 
+  const getPlayerCounterElement = (roster: Roster) => {
+    if (countCheckedPlayersFor(roster) === 0) {
+      return null;
+    }
+    return (
+      <Badge bg='success'>
+        <i className='bi bi-check-lg' style={{fontSize: '1rem'}}></i>
+        {'  '}
+        {countCheckedPlayersFor(roster)}
+      </Badge>
+    );
+  };
+
   const onSubmitRoster = () => {
     handleClose();
     submitRoster(teamId!, gamedayId!, officialName, getAllSelectedPlayers())
@@ -101,7 +114,10 @@ function RosterOverview() {
   return (
     <>
       <Button onClick={handleClickEvent}>Auswahl abbrechen</Button>
-      <h2>Spielerliste {team.name}</h2>
+      <h2>
+        Spielendenliste {team.name}{' '}
+        {getPlayerCounterElement(getAllSelectedPlayers())}
+      </h2>
       <RosterTable
         team={team}
         showModal={showPlayerModal}
@@ -117,17 +133,7 @@ function RosterOverview() {
           <Accordion.Item key={index} eventKey={`${index}`}>
             <Accordion.Header>
               <div className='additional-team-header'>
-                {team.name}{' '}
-                {countCheckedPlayersFor(team.roster) !== 0 && (
-                  <Badge bg='success'>
-                    <i
-                      className='bi bi-check-lg'
-                      style={{fontSize: '1rem'}}
-                    ></i>
-                    {'  '}
-                    {countCheckedPlayersFor(team.roster)}
-                  </Badge>
-                )}
+                {team.name} {getPlayerCounterElement(team.roster)}
               </div>
             </Accordion.Header>
             <Accordion.Body>

@@ -56,7 +56,7 @@ class PasscheckService:
         date = datetime.datetime.today()
         all_games_wanted = False
         if settings.DEBUG:
-            date = '2023-08-05'
+            date = '2024-02-03'
         if gameday_id is None:
             gameday = Gameday.objects.filter(date=date)
         else:
@@ -107,7 +107,7 @@ class PasscheckService:
         if not self.user_permission.is_staff:
             today = datetime.datetime.today()
             if settings.DEBUG:
-                today = datetime.date(2023, 8, 5)
+                today = datetime.date(2024, 2, 3)
             if today != gameday.date:
                 raise PasscheckException(
                     f'Passcheck nicht erlaubt für Spieltag: {gameday_id}. Nur heutige Spieltage sind erlaubt.')
