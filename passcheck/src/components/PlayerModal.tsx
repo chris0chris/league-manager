@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {Player} from '../common/types';
 import Validator from '../utils/validation';
+import {Alert} from 'react-bootstrap';
 
 interface Props {
   modalVisible: boolean;
@@ -22,6 +23,7 @@ function PlayerModal({
   const [click, setClick] = useState<number>(0);
   const [jerseyNumber, setJerseyNumber] = useState(player.jersey_number);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
+  const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   useEffect(() => {
     const timer = setTimeout(() => {
       // simple click
@@ -43,9 +45,13 @@ function PlayerModal({
     if (errorMessages.length > 0) {
       return;
     }
+    setShowSuccessMessage(true);
     player.isSelected = !player.isSelected;
     player.jersey_number = jerseyNumber;
-    nextPlayer(1);
+    setTimeout(() => {
+      nextPlayer(1);
+      setShowSuccessMessage(false);
+    }, 1500);
   };
 
   const handleDoubleClick = () => {
@@ -145,11 +151,26 @@ function PlayerModal({
               </div>
             </div>
           )}
+          <div className='row'>
+            <div className='col'>
+              {showSuccessMessage && (
+                <>
+                  {player.isSelected && (
+                    <Alert variant='success'>Person wurde hinzugefügt.</Alert>
+                  )}
+                  {!player.isSelected && (
+                    <Alert variant='success'>Person wurde entfernt.</Alert>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
         </Modal.Body>
         <Modal.Footer className='modal-footer'>
           <Button
             variant='secondary'
             className='modal-button-left me-auto'
+            disabled={showSuccessMessage}
             onClick={() => {
               nextPlayer(-1);
               setErrorMessages([]);
@@ -164,6 +185,7 @@ function PlayerModal({
                   variant={'danger'}
                   className='modal-button-middle'
                   style={{opacity: 0.5}}
+                  disabled={showSuccessMessage}
                   onClick={() => {
                     setClick(click + 1);
                   }}
@@ -175,6 +197,7 @@ function PlayerModal({
                 <Button
                   variant={'danger'}
                   className='modal-button-middle'
+                  disabled={showSuccessMessage}
                   onClick={() => update()}
                 >
                   <i className='bi bi-x-lg'></i>
@@ -186,6 +209,7 @@ function PlayerModal({
             <Button
               variant={player.isSelected ? 'danger' : 'success'} //coloring the button depending on the state of the player
               className='modal-button-middle'
+              disabled={showSuccessMessage}
               onClick={() => {
                 update();
               }}
@@ -197,6 +221,7 @@ function PlayerModal({
           <Button
             variant='secondary'
             className='modal-button-right ms-auto'
+            disabled={showSuccessMessage}
             onClick={() => {
               nextPlayer(1);
               setErrorMessages([]);
