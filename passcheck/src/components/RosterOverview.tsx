@@ -1,15 +1,22 @@
-import {SyntheticEvent, useEffect, useState} from 'react';
-import {Accordion, Badge, FloatingLabel, Form} from 'react-bootstrap';
+import {SyntheticEvent, useEffect, useRef, useState} from 'react';
+import {
+  Accordion,
+  Badge,
+  CloseButton,
+  FloatingLabel,
+  Form,
+} from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import {AccordionEventKey} from 'react-bootstrap/esm/AccordionContext';
 import {useNavigate, useParams} from 'react-router-dom';
 import {getPlayerList as getRosterList, submitRoster} from '../common/games';
 import {Player, Roster, Team, TeamData} from '../common/types';
+import {MessageColor} from '../context/MessageContext';
 import useMessage from '../hooks/useMessage';
 import {ApiError} from '../utils/api';
 import Validator from '../utils/validation';
 import RosterTable from './PlayersTable';
-import {MessageColor} from '../context/MessageContext';
 
 function RosterOverview() {
   const {setMessage} = useMessage();
@@ -24,6 +31,15 @@ function RosterOverview() {
   });
   const [additionalTeams, setAdditionalTeams] = useState<Team[]>([]);
   const [officialName, setOfficialName] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [filteredAdditionalRosters, setFilteredAdditionalRosters] = useState<
+    Roster[]
+  >([]);
+  const [filteredRoster, setFilteredRoster] = useState<Roster>([]);
+  const [activeAccordionKey, setActiveAccordionKey] = useState<string[] | null>(
+    null
+  );
+  const searchQueryRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const {teamId} = useParams();
   const {gamedayId} = useParams();
@@ -39,6 +55,28 @@ function RosterOverview() {
       });
   }, [teamId, gamedayId]);
 
+  useEffect(() => {
+    setFilteredRoster(rosterFilter(team.roster));
+    let additionalRostersFiltered: Roster[] = [];
+    additionalTeams.forEach((currentTeam) => {
+      additionalRostersFiltered = [
+        ...additionalRostersFiltered,
+        rosterFilter(currentTeam.roster),
+      ];
+    });
+    setFilteredAdditionalRosters(additionalRostersFiltered);
+    checkValidation();
+  }, [searchQuery, team, JSON.stringify(additionalTeams)]);
+  const rosterFilter = (roster: Roster) => {
+    const lowercasedQuery = searchQuery.toLowerCase();
+    return roster.filter(
+      (player) =>
+        player.first_name.toLowerCase().includes(lowercasedQuery) ||
+        player.last_name.toLowerCase().includes(lowercasedQuery) ||
+        player.pass_number.toString().includes(lowercasedQuery) ||
+        player.jersey_number.toString().includes(lowercasedQuery)
+    );
+  };
   useEffect(() => {
     if (getAllSelectedPlayers().length && officialName) {
       setShowStartButton(false);
@@ -118,8 +156,49 @@ function RosterOverview() {
         Spielendenliste {team.name}{' '}
         {getPlayerCounterElement(getAllSelectedPlayers())}
       </h2>
+      <div className='row g-2 mb-3'>
+        <div className='col position-relative'>
+          <FloatingLabel
+            controlId='playerListSearch'
+            label={`${
+              additionalTeams.length > 0
+                ? 'Listen durchsuchen ...'
+                : team.name + ' durchsuchen ...'
+            }`}
+          >
+            <Form.Control
+              type='text'
+              placeholder={`${
+                additionalTeams.length > 0
+                  ? 'Listen durchsuchen ...'
+                  : team.name + ' durchsuchen ...'
+              }`}
+              required
+              value={searchQuery}
+              ref={searchQueryRef}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+                setActiveAccordionKey(
+                  filteredAdditionalRosters.map((_, index) => `${index}`)
+                );
+              }}
+            />
+          </FloatingLabel>
+          {searchQuery.length > 0 && (
+            <CloseButton
+              className='btn-close position-absolute top-50 translate-middle'
+              style={{right: '5px'}}
+              onClick={() => {
+                setSearchQuery('');
+                searchQueryRef.current!.focus();
+              }}
+            />
+          )}
+        </div>
+      </div>
       <RosterTable
         team={team}
+        filteredRoster={filteredRoster}
         showModal={showPlayerModal}
         onUpdate={checkValidation}
         allSelectedPlayers={getAllSelectedPlayers()}
@@ -128,18 +207,30 @@ function RosterOverview() {
           checkValidation();
         }}
       />
-      <Accordion defaultActiveKey={[]} alwaysOpen className='mb-2'>
-        {additionalTeams.map((team: Team, index: number) => (
+      <Accordion
+        defaultActiveKey={[]}
+        activeKey={activeAccordionKey}
+        alwaysOpen
+        onSelect={(key: AccordionEventKey) => {
+          setActiveAccordionKey(
+            key === activeAccordionKey ? null : (key as string[])
+          );
+        }}
+        className='mb-2'
+      >
+        {filteredAdditionalRosters.map((roster: Roster, index: number) => (
           <Accordion.Item key={index} eventKey={`${index}`}>
             <Accordion.Header>
               <div className='additional-team-header'>
-                {team.name} {getPlayerCounterElement(team.roster)}
+                {additionalTeams[index].name}{' '}
+                {getPlayerCounterElement(additionalTeams[index].roster)}
               </div>
             </Accordion.Header>
             <Accordion.Body>
               <RosterTable
                 key={index}
-                team={team}
+                team={additionalTeams[index]}
+                filteredRoster={roster}
                 allSelectedPlayers={getAllSelectedPlayers()}
                 showModal={false}
                 onUpdate={checkValidation}

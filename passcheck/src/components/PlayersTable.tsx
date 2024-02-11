@@ -1,12 +1,13 @@
 import {useEffect, useState} from 'react';
 import Table from 'react-bootstrap/Table';
-import {Player, Team} from '../common/types';
+import {Player, Roster, Team, TeamValidator} from '../common/types';
+import Validator from '../utils/validation';
 import PlayerLine from './PlayerLine';
 import PlayerModal from './PlayerModal';
-import Validator from '../utils/validation';
 
 type Props = {
   team: Team;
+  filteredRoster: Roster;
   showModal: boolean;
   allSelectedPlayers: Player[];
   onUpdate(): void;
@@ -15,6 +16,7 @@ type Props = {
 
 function RosterTable({
   team,
+  filteredRoster,
   showModal,
   allSelectedPlayers,
   onModalClose,
@@ -31,14 +33,28 @@ function RosterTable({
   });
   const [modalVisible, setModalVisible] = useState<boolean>(showModal);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
+  const [componentFilteredRoster, setComponentFilteredRoster] =
+    useState(filteredRoster);
   const [jerseyNumberValidator, setJerseyNumberValidator] = useState(
     new Validator({jerseyNumberBetween: {min: 0, max: 99}}, [])
   );
   useEffect(() => {
-    if (team.roster[0]) {
-      setModalPlayer(team.roster[0]);
+    if (filteredRoster[0]) {
+      setModalPlayer(filteredRoster[currentPlayerIndex]);
     }
-  }, [team]);
+  }, [filteredRoster]);
+  useEffect(() => {
+    const lowercasedQuery = searchInput.toLowerCase();
+    const filtered = filteredRoster.filter(
+      (player: Player) =>
+        player.first_name.toLowerCase().includes(lowercasedQuery) ||
+        player.last_name.toLowerCase().includes(lowercasedQuery) ||
+        player.pass_number.toString().includes(lowercasedQuery) ||
+        player.jersey_number.toString().includes(lowercasedQuery)
+    );
+    setComponentFilteredRoster(filtered);
+  }, [searchInput, filteredRoster]);
+
   useEffect(() => {
     setJerseyNumberValidator(
       new Validator(
@@ -47,13 +63,9 @@ function RosterTable({
       )
     );
   }, [allSelectedPlayers]);
-
   useEffect(() => {
     setModalVisible(showModal);
   }, [showModal]);
-  const onChange = (event: any) => {
-    setSearchInput(event.target.value);
-  };
   const showModalFor = (player: Player) => {
     setModalPlayer(player);
     setModalVisible(true);
@@ -63,44 +75,40 @@ function RosterTable({
     onModalClose();
   };
   const checkValidation = () => {
-    const validator = new Validator(team.validator, team.roster);
-    validator.validateAndUpdate();
+    const teamValidator = new Validator(team.validator, team.roster);
+    teamValidator.validateAndUpdate();
   };
   const handleNextPlayer = (value: number | null) => {
     let index = 0;
     if (value) {
       index = currentPlayerIndex + value;
     }
+    onUpdate();
     switch (index) {
-      case team.roster.length:
+      case filteredRoster.length:
         setCurrentPlayerIndex(0);
-        setModalPlayer(team.roster[0]);
+        setModalPlayer(filteredRoster[0]);
         handleClose();
         return;
       case -1:
         break;
       default:
         setCurrentPlayerIndex(index);
-        setModalPlayer(team.roster[index]);
+        setModalPlayer(filteredRoster[index]);
     }
-    checkValidation();
-    onUpdate();
   };
-  const numberSelectedPlayers = (): number => {
-    return team.roster.filter((player: Player) => player.isSelected).length;
-  };
+  checkValidation();
   return (
     <>
       <input
         className='form-control me-2'
         id='searchbar'
         type='search'
-        placeholder='Spieler Suchen'
+        placeholder='Liste durchsuchen'
         aria-label='Search'
-        onChange={onChange}
+        onChange={(e) => setSearchInput(e.target.value)}
         value={searchInput}
       />
-      <div>Ausgewählte Personen: {numberSelectedPlayers()}</div>
       <Table bordered hover size='sm' className='rounded-table'>
         <thead>
           <tr>
@@ -111,7 +119,7 @@ function RosterTable({
           </tr>
         </thead>
         <tbody>
-          {team.roster
+          {componentFilteredRoster
             // .filter((player: Player) => {
             //   const searchTerm = searchInput.toLowerCase();
             //   const playerName =
@@ -120,7 +128,7 @@ function RosterTable({
             //     player?.last_name.toLowerCase();
             //   return playerName.startsWith(searchTerm);
             // })
-            .map((player: Player, index) => (
+            .map((player: Player, index: number) => (
               <tr
                 className={`${player?.isSelected ? 'table-success' : ''} ${
                   player?.validationError ? 'disabled-row' : ''
