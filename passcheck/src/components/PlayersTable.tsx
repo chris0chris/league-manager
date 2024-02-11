@@ -22,7 +22,6 @@ function RosterTable({
   onModalClose,
   onUpdate,
 }: Props) {
-  const [searchInput, setSearchInput] = useState('');
   const [modalPlayer, setModalPlayer] = useState<Player>({
     id: -1,
     first_name: 'Loading ...',
@@ -33,8 +32,6 @@ function RosterTable({
   });
   const [modalVisible, setModalVisible] = useState<boolean>(showModal);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
-  const [componentFilteredRoster, setComponentFilteredRoster] =
-    useState(filteredRoster);
   const [jerseyNumberValidator, setJerseyNumberValidator] = useState(
     new Validator({jerseyNumberBetween: {min: 0, max: 99}}, [])
   );
@@ -43,17 +40,6 @@ function RosterTable({
       setModalPlayer(filteredRoster[currentPlayerIndex]);
     }
   }, [filteredRoster]);
-  useEffect(() => {
-    const lowercasedQuery = searchInput.toLowerCase();
-    const filtered = filteredRoster.filter(
-      (player: Player) =>
-        player.first_name.toLowerCase().includes(lowercasedQuery) ||
-        player.last_name.toLowerCase().includes(lowercasedQuery) ||
-        player.pass_number.toString().includes(lowercasedQuery) ||
-        player.jersey_number.toString().includes(lowercasedQuery)
-    );
-    setComponentFilteredRoster(filtered);
-  }, [searchInput, filteredRoster]);
 
   useEffect(() => {
     setJerseyNumberValidator(
@@ -100,15 +86,6 @@ function RosterTable({
   checkValidation();
   return (
     <>
-      <input
-        className='form-control me-2'
-        id='searchbar'
-        type='search'
-        placeholder='Liste durchsuchen'
-        aria-label='Search'
-        onChange={(e) => setSearchInput(e.target.value)}
-        value={searchInput}
-      />
       <Table bordered hover size='sm' className='rounded-table'>
         <thead>
           <tr>
@@ -119,29 +96,20 @@ function RosterTable({
           </tr>
         </thead>
         <tbody>
-          {componentFilteredRoster
-            // .filter((player: Player) => {
-            //   const searchTerm = searchInput.toLowerCase();
-            //   const playerName =
-            //     player?.first_name.toLowerCase() +
-            //     ' ' +
-            //     player?.last_name.toLowerCase();
-            //   return playerName.startsWith(searchTerm);
-            // })
-            .map((player: Player, index: number) => (
-              <tr
-                className={`${player?.isSelected ? 'table-success' : ''} ${
-                  player?.validationError ? 'disabled-row' : ''
-                }`}
-                key={index}
-                onClick={() => {
-                  showModalFor(player);
-                  setCurrentPlayerIndex(index);
-                }}
-              >
-                <PlayerLine key={index} index={index} playersData={player} />
-              </tr>
-            ))}
+          {filteredRoster.map((player: Player, index: number) => (
+            <tr
+              className={`${player?.isSelected ? 'table-success' : ''} ${
+                player?.validationError ? 'disabled-row' : ''
+              }`}
+              key={index}
+              onClick={() => {
+                showModalFor(player);
+                setCurrentPlayerIndex(index);
+              }}
+            >
+              <PlayerLine key={index} index={index} playersData={player} />
+            </tr>
+          ))}
         </tbody>
       </Table>
       <PlayerModal
