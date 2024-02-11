@@ -55,6 +55,8 @@ class PasscheckService:
     def get_passcheck_data(self, team_id, gameday_id=None):
         team = self._get_team(team_id)
         all_games_wanted = False
+        if settings.DEBUG:
+            date = '2024-02-03'
         if gameday_id is None:
             gameday = Gameday.objects.filter(date__gte=PASSCHECK_DATE)
         else:
