@@ -103,7 +103,8 @@ class PasscheckService:
         )
         return {
             'all_leagues': list(all_leagues),
-            'team': team_data
+            'team': team_data,
+            'related_teams': list(team.relationship_additional_teams.all().values('team__description', 'team__id'))
         }
 
     def get_roster_with_validation(self, team_id: int, gameday_id: int):
@@ -126,11 +127,7 @@ class PasscheckService:
         except PasscheckVerification.DoesNotExist:
             official_name = ''
         team['official_name'] = official_name
-        try:
-            relationship = TeamRelationship.objects.get(team=team_id)
-            relationship = relationship.additional_teams.all()
-        except TeamRelationship.DoesNotExist:
-            relationship = []
+        relationship = self._get_team_relationship(team_id)
         additional_teams_serialized = []
         for additional_team_link in relationship:
             additional_relation = additional_team_link.relationship_team
@@ -157,6 +154,14 @@ class PasscheckService:
             additional_teams_serialized.append(team_data)
         team['additionalTeams'] = additional_teams_serialized
         return team
+
+    def _get_team_relationship(self, team_id):
+        try:
+            relationship = TeamRelationship.objects.get(team=team_id)
+            relationship = relationship.additional_teams.all()
+        except TeamRelationship.DoesNotExist:
+            relationship = []
+        return relationship
 
     def _get_roster(self, team, gameday_id, league_annotations):
         is_selected_query = self._is_selected_query(gameday_id)
