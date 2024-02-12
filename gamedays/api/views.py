@@ -20,7 +20,7 @@ class GamedayListAPIView(ListAPIView):
 
     def get_queryset(self):
         if settings.DEBUG:
-            return [Gameday.objects.get(pk=81)]
+            return [Gameday.objects.get(pk=1)]
         return Gameday.objects.filter(date=datetime.today())
 
 

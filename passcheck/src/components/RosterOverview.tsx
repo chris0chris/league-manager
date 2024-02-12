@@ -16,7 +16,7 @@ import {MessageColor} from '../context/MessageContext';
 import useMessage from '../hooks/useMessage';
 import {ApiError} from '../utils/api';
 import Validator from '../utils/validation';
-import RosterTable from './PlayersTable';
+import RosterTable from './RosterTable';
 
 function RosterOverview() {
   const {setMessage} = useMessage();
