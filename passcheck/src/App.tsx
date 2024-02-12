@@ -5,6 +5,7 @@ import MessageProvider from './components/MessageProvider';
 import {ROOT_URL, SUCCESS_URL} from './common/routes';
 import GameOverview from './components/GameOverview';
 import RosterOverview from './components/RosterOverview';
+import NavigationBar from './components/NavigationBar';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         <div className='mt-2'>
           <Message />
         </div>
+        <NavigationBar />
       </MessageProvider>
     </div>
   );
