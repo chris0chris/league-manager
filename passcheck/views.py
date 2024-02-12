@@ -51,7 +51,7 @@ class PlayerlistCreateView(LoginRequiredMixin, CreateView):
 
 # declaring Views via django views
 class PasscheckPlayerGamesList(View):
-    template_name = 'passcheck/player_games_list.html'
+    template_name = 'passcheck/player_gamedays_list.html'
 
     @get_user_request_permission
     def get(self, request, **kwargs):
