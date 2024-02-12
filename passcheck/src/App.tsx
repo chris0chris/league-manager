@@ -9,39 +9,41 @@ import NavigationBar from './components/NavigationBar';
 
 function App() {
   return (
-    <div className='container'>
-      <MessageProvider>
-        <Router>
-          <div>
-            <Routes>
-              <Route path={ROOT_URL} element={<GameOverview />} />
-              <Route
-                path={`${ROOT_URL}gameday/:gamedayId`}
-                element={<GameOverview />}
-              />
-              <Route
-                path={`/team/:teamId/gameday/:gamedayId`}
-                element={<RosterOverview />}
-              />
-              <Route
-                path={SUCCESS_URL}
-                element={
-                  <div>
-                    <main style={{padding: '1rem'}}>
-                      <p>Passcheck erfolgreich!</p>
-                    </main>
-                  </div>
-                }
-              />
-            </Routes>
+    <>
+      <div className='container pb-5'>
+        <MessageProvider>
+          <Router>
+            <div>
+              <Routes>
+                <Route path={ROOT_URL} element={<GameOverview />} />
+                <Route
+                  path={`${ROOT_URL}gameday/:gamedayId`}
+                  element={<GameOverview />}
+                />
+                <Route
+                  path={`/team/:teamId/gameday/:gamedayId`}
+                  element={<RosterOverview />}
+                />
+                <Route
+                  path={SUCCESS_URL}
+                  element={
+                    <div>
+                      <main style={{padding: '1rem'}}>
+                        <p>Passcheck erfolgreich!</p>
+                      </main>
+                    </div>
+                  }
+                />
+              </Routes>
+            </div>
+          </Router>
+          <div className='mt-2'>
+            <Message />
           </div>
-        </Router>
-        <div className='mt-2'>
-          <Message />
-        </div>
-        <NavigationBar />
-      </MessageProvider>
-    </div>
+        </MessageProvider>
+      </div>
+      <NavigationBar />
+    </>
   );
 }
 

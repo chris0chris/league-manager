@@ -151,7 +151,12 @@ function RosterOverview() {
 
   return (
     <>
-      <Button onClick={handleClickEvent}>Auswahl abbrechen</Button>
+      <Button
+        onClick={handleClickEvent}
+        className='full-width-button mt-1 mb-2'
+      >
+        Auswahl abbrechen
+      </Button>
       <h2>
         Spielendenliste {team.name}{' '}
         {getPlayerCounterElement(getAllSelectedPlayers())}

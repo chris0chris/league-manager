@@ -37,8 +37,7 @@ function GameOverview() {
       {loading && <p>loading...</p>}
       {!loading && (
         <>
-          <h1>Herzlich willkommen, {officials}.</h1>
-          <div>Bitte ein Spiel auswählen:</div>
+          <h2>Bitte ein Spiel auswählen:</h2>
           {games.map((game: Game, index: number) => (
             <GameCard key={index} game={game} />
           ))}
