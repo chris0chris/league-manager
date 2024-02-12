@@ -19,10 +19,7 @@ class PlayerlistView(View):
         team_id = kwargs.get('team')
         user_permission = kwargs.get('user_permission')
         passcheck_service = PasscheckService(user_permission=user_permission)
-        context = {
-            'object_list': passcheck_service.get_roster(team_id)
-        }
-        return render(request, self.template_name, context)
+        return render(request, self.template_name, passcheck_service.get_roster(team_id))
 
 
 class PlayerlistCreateView(LoginRequiredMixin, CreateView):

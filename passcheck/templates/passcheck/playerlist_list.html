@@ -3,8 +3,21 @@
 {% block content %}
 <article class="media content-section">
     <div class="media-body">
-        <h1>Roster {{ object_list.team.name }}</h1>
-        <p>{{ object_list.team.roster | length }} Personen</p>
+        <h1>Roster {{ team.name }}</h1>
+        {% if related_teams|length > 0 %}
+        dazugehörige Teams:
+        <ul class="nav nav-pills">
+            {% for current_team in related_teams %}
+            <li class="nav-item">
+                <a class="nav-link"
+                   href="{% url 'passcheck-roster-list' team=current_team.team__id %}">{{ current_team.team__description
+                    }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <br/>
+        <p>{{ team.roster | length }} Personen</p>
         <table class="table table-hover">
             <thead>
             <tr>
@@ -13,20 +26,20 @@
                 <th scope="col">Nachname</th>
                 <th scope="col">Passnummer</th>
                 <th scope="col">Geburtsjahr</th>
-                {% for league in object_list.all_leagues %}
+                {% for league in all_leagues %}
                 <th scope="col">#{{league.gamedays__league__name}}</th>
                 {% endfor %}
             </tr>
             </thead>
             <tbody>
-            {% for player in object_list.team.roster %}
+            {% for player in team.roster %}
             <tr>
                 <td>{{player.jersey_number}}</td>
                 <td>{{player.first_name}}</td>
                 <td>{{player.last_name}}</td>
                 <td>{{player.pass_number}}</td>
                 <td>{{player.year_of_birth}}</td>
-                {% for league in object_list.all_leagues %}
+                {% for league in all_leagues %}
                 {% with field_name=league.gamedays__league %}
                 <td>
                     <a href="{% url 'passcheck-player-games-list' id=player.id %}">
