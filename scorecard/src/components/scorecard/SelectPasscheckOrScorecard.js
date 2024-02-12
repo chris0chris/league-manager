@@ -2,10 +2,18 @@
 import React from 'react';
 import {Navigate} from 'react-router-dom';
 import {SELECT_GAME_URL} from '../common/urls';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
 const SelectPasscheckOrScorecard = () => {
   const [redirectToScorecard, setRedirectToScorecard] = useState(false);
+
+  useEffect(() => {
+  window.removeEventListener('beforeunload', handleBeforeUnload);
+
+  return () => {
+    window.addEventListener('beforeunload', handleBeforeUnload);
+  };
+}, []);
 
   const redirectToPasscheck = () => {
     window.location.href = '/passcheck';
