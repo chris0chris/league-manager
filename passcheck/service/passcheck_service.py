@@ -102,6 +102,7 @@ class PasscheckService:
             validator='',
         )
         return {
+            'is_user_or_staff': self.user_permission.is_user_or_staff(),
             'all_leagues': list(all_leagues),
             'team': team_data,
             'related_teams': list(team.relationship_additional_teams.all().values('team__description', 'team__id'))

@@ -12,21 +12,21 @@ class UserRequestPermission:
 
 class PermissionHelper:
     @staticmethod
-    def has_staff_or_user_permission(request):
+    def has_staff_or_user_permission(request, team_id=None):
         if request.user.is_staff:
             return True
         try:
-            Team.objects.get(name=request.user.username)
+            team = Team.objects.get(pk=team_id)
         except Team.DoesNotExist:
             return False
-        return True
+        return team.name == request.user.username
 
     @staticmethod
-    def get_staff_or_user_permission(request):
+    def get_staff_or_user_permission(request, team_id):
         if request.user.is_staff:
             return UserRequestPermission(is_staff=True)
         try:
-            Team.objects.get(name=request.user.username)
+            team = Team.objects.get(pk=team_id)
         except Team.DoesNotExist:
             return UserRequestPermission()
-        return UserRequestPermission(is_user=True)
+        return UserRequestPermission(is_user=(team.name == request.user.username))
