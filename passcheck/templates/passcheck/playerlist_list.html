@@ -23,7 +23,8 @@
             <thead>
             <tr>
                 {% if is_user_or_staff %}
-                <th>Edit</th>
+                <th><a href="{% url 'passcheck-player-create' %}" title="Neue Person zum Roster hinzufügen"><i
+                        class="bi bi-person-plus-fill"></i></a></th>
                 {% endif %}
                 <th scope="col">Trikot</th>
                 <th scope="col">Vorname</th>
