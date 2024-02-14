@@ -89,6 +89,7 @@ class PasscheckGamesListSerializer(Serializer):
 
 
 class PlayerAllGamedaysSerializer(Serializer):
+    id = IntegerField()
     name = CharField(source='gameday__name')
     date = SerializerMethodField(source='gameday__date')
 
