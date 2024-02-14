@@ -202,7 +202,8 @@ class PasscheckService:
                 'league_name': current_league,
                 'gamedays': PlayerAllGamedaysSerializer(
                     instance=all_gamedays.filter(gameday__league__name=current_league).values('gameday__date',
-                                                                                              'gameday__name'),
+                                                                                              'gameday__name',
+                                                                                              'id'),
                     many=True).data
             })
         player_values = player.annotate(
