@@ -15,6 +15,7 @@ SCHEDULE_CHOICES = (
     ("9_2", "9 Teams 2 Felder"),
     ("9_3", "9 Teams 3 Felder"),
     ("11_3", "11 Teams 3 Felder"),
+    ("5_dfflf_2", "DFFL Frauen 5 Teams 2 Felder"),
     ("6_oneDivision_2", "DFFL 7er Division"),
     ("7_oneDivision_2", "DFFL 8er Division"),
     ("6_sfl_2", "SFL - 3x3 Conference"),
