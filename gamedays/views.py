@@ -39,7 +39,7 @@ class GamedayDetailView(DetailView):
         return context
 
 
-class GamedayCreateView(LoginRequiredMixin, CreateView):
+class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = GamedayCreateForm
     template_name = 'gamedays/gameday_form.html'
     model = Gameday
@@ -51,6 +51,9 @@ class GamedayCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse('league-gameday-detail', kwargs={'pk': self.object.pk})
+
+    def test_func(self):
+        return self.request.user.is_staff
 
 
 class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
