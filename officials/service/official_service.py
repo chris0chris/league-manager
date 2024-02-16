@@ -27,8 +27,10 @@ class OfficialService:
             ),
             reverse=True
         )
+        from officials.urls import OFFICIALS_LIST_FOR_TEAM_AND_YEAR
         return {
             'season': season,
+            'url_pattern': OFFICIALS_LIST_FOR_TEAM_AND_YEAR,
             'team_id': team_repository_service.get_team_id(),
             'team': team_repository_service.get_team_description(),
             'years': all_team_years_with_official_license,

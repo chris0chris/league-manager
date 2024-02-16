@@ -16,16 +16,7 @@
             Bei fehlenden Einsätzen, unabhänig ob DFFL, außerhalb der Liga oder Flag & Fun Turnieren, kannst du diese <a
                 href="https://offd.de/offd/moodle/mod/page/view.php?id=315" target="_blank">hier</a> nachmelden.<br/>
         </p>
-        <ul class="nav nav-pills">
-            {% for year in years %}
-            <li class="nav-item">
-                <a class="nav-link {% if year == season %}active{% endif %}"
-                   href="/officials/team/{{team_id}}/list/{{year}}">{{ year }}</a>
-            </li>
-            {% endfor %}
-        </ul>
-
-
+        {% include 'utils/year_filter.html' %}
         <h3>
             {{ officials_list|length }} - Offizielle
         </h3>
@@ -70,7 +61,7 @@
             {% for official in officials_list %}
             <tr>
                 <th scope="row"><a
-                        href="{% url 'view-officials-profile-gamelist' license_id=official.id season=season %}">{{official.id}}</a>
+                        href="{% url 'view-officials-profile-gamelist' pk=official.id season=season %}">{{official.id}}</a>
                 </th>
                 <td>{{official.last_name}}</td>
                 <td>{{official.first_name}}</td>

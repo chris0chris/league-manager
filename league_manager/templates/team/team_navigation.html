@@ -14,7 +14,7 @@
                     <a aria-current="page" class="nav-link active" href="{{ officials_list_for_team }}">Officials</a>
                 </li>
                 {% endif %}
-                {% url 'passcheck-roster-list' team=team_id as passcheck_roster_list %}
+                {% url 'passcheck-roster-list' pk=team_id as passcheck_roster_list %}
                 {% if passcheck_roster_list %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ passcheck_roster_list }}">Spieltage</a>
