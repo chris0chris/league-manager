@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load custom_filters %}
 {% block content %}
 <article class="media content-section">
+    {% include 'team/team_navigation.html' %}
     <div class="media-body">
         <h1>{{ player.first_name }} {{ player.last_name }}</h1>
         <div class="row">

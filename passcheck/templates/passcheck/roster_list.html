@@ -2,6 +2,7 @@
 {% load custom_filters %}
 {% block content %}
 <article class="media content-section">
+    {% include 'team/team_navigation.html' %}
     <div class="media-body">
         <h1>Roster {{ team.name }}</h1>
         {% if related_teams|length > 0 %}

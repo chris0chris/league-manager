@@ -1,0 +1,31 @@
+{% load custom_filters %}
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Team Navigation</a>
+        <button aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+                data-bs-target="#navbarTogglerDemo02" data-bs-toggle="collapse" type="button">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% url 'view-officials-list-for-team' pk=team_id as officials_list_for_team %}
+                {% if officials_list_for_team %}
+                <li class="nav-item">
+                    <a aria-current="page" class="nav-link active" href="{{ officials_list_for_team }}">Officials</a>
+                </li>
+                {% endif %}
+                {% url 'passcheck-roster-list' team=team_id as passcheck_roster_list %}
+                {% if passcheck_roster_list %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ passcheck_roster_list }}">Spieltage</a>
+                </li>
+                {% endif %}
+                {% if False %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url '' %}">Pricing</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

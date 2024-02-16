@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, TemplateView, UpdateView
 
+from gamedays.models import Team
 from league_manager.utils.decorators import get_user_request_permission
 from league_manager.utils.view_utils import PermissionHelper
 from .forms import PlayerlistCreateForm
@@ -13,7 +14,7 @@ from .service.passcheck_service import PasscheckService
 
 
 class RosterView(View):
-    template_name = 'passcheck/playerlist_list.html'
+    template_name = 'passcheck/roster_list.html'
 
     @get_user_request_permission
     def get(self, request, **kwargs):
@@ -27,6 +28,15 @@ class PlayerlistCommonMixin(LoginRequiredMixin):
     form_class = PlayerlistCreateForm
     template_name = 'passcheck/playerlist_form.html'
     model = Playerlist
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            team_id = Team.objects.get(name=self.request.user).pk
+        except Team.DoesNotExist:
+            team_id = None
+        context['team_id'] = team_id
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
