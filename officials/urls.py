@@ -20,7 +20,7 @@ OFFICIALS_ASSOCIATION_LIST = 'view-officials-association-list'
 
 urlpatterns = [
     path('team/<int:pk>/list', OfficialsTeamListView.as_view(), name=OFFICIALS_LIST_FOR_TEAM),
-    path('team/<int:pk>/list/<int:year>', OfficialsTeamListView.as_view(), name=OFFICIALS_LIST_FOR_TEAM_AND_YEAR),
+    path('team/<int:pk>/list/<int:season>', OfficialsTeamListView.as_view(), name=OFFICIALS_LIST_FOR_TEAM_AND_YEAR),
     path('team/all/list', AllOfficialsListView.as_view(), name=OFFICIALS_LIST_FOR_ALL_TEAMS),
     path('team/all/list/<int:year>', AllOfficialsListView.as_view(), name=OFFICIALS_LIST_FOR_ALL_TEAMS_AND_YEAR),
     path('einsaetze', GameOfficialListView.as_view(), name=OFFICIALS_GAME_OFFICIALS_APPEARANCE),
@@ -33,8 +33,8 @@ urlpatterns = [
          name=OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE),
     path('licensecheck/<int:year>/<int:course_id>', LicenseCheckForOfficials.as_view(), name=OFFICIALS_LICENSE_CHECK),
     path('moodle-report', MoodleReportView.as_view(), name=OFFICIALS_MOODLE_REPORT),
-    path('profile/<int:license_id>/license', OfficialProfileLicenseView.as_view(), name=OFFICIALS_PROFILE_LICENSE),
-    path('profile/<int:license_id>/gamelist/<int:season>', OfficialProfileGamelistView.as_view(),
+    path('profile/<int:pk>/license', OfficialProfileLicenseView.as_view(), name=OFFICIALS_PROFILE_LICENSE),
+    path('profile/<int:pk>/gamelist/<int:season>', OfficialProfileGamelistView.as_view(),
          name=OFFICIALS_PROFILE_GAMELIST),
     path('<str:abbr>/list', OfficialAssociationListView.as_view(), name=OFFICIALS_ASSOCIATION_LIST),
 

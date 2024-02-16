@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load custom_filters %}
 {% block content %}
 <article class="media content-section">
+    {% include 'team/team_navigation.html' %}
     <div class="media-body">
         <h1>{{ player.first_name }} {{ player.last_name }}</h1>
         <div class="row">
@@ -9,7 +9,7 @@
                 Team:
             </div>
             <div class="col-8">
-                <a href="{% url 'passcheck-roster-list' team=team_id %}">{{ team }}</a>
+                <a href="{% url 'passcheck-roster-list' pk=team_id %}">{{ team }}</a>
             </div>
         </div>
         <div class="row">
@@ -33,14 +33,16 @@
         <table class="table table-hover">
             <thead>
             <tr>
-                <th class="col-4" scope="col">Datum</th>
+                <th class="col-2" scope="col">ID</th>
+                <th class="col-2" scope="col">Datum</th>
                 <th class="col-8" scope="col">Spieltag</th>
             </tr>
             </thead>
             <tbody>
             {% for current_gameday in current_entry.gamedays %}
             <tr>
-                <td class="col-4">{{current_gameday.date}}</td>
+                <td class="col-2">{{current_gameday.id}}</td>
+                <td class="col-2">{{current_gameday.date}}</td>
                 <td class="col-80">{{current_gameday.name}}</td>
             </tr>
             {% endfor %}

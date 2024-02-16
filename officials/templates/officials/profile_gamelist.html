@@ -1,9 +1,9 @@
 {% extends "officials/profile_license.html" %}
 {% block license_status %}
-{% if year != season %}
+{% if current_year != season %}
 <div class="row bg-info text-white mb-2">
     <div class="text-center">Status Lizenzverlängerung unklar, da Season ({{ season }}) nicht mit aktuellem Jahr
-        ({{ year }}) übereinstimmt. <br/>
+        ({{ current_year }}) übereinstimmt. <br/>
         {% if needed_games_for_license < 1 %}
         Für die Season {{ season }} kann eine Lizenzverlängerung erfolgen.
         {% else %}
@@ -39,6 +39,7 @@
 </p>
 {% else %}
 <br/>
+{% include 'utils/year_filter.html' %}
 <h2>{{ season }} DFFL Spiele (und Ligen mit Scorecard)</h2>
 <table class="table table-hover">
     <thead>

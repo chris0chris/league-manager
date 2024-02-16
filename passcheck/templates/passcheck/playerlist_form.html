@@ -2,15 +2,29 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="content-section">
+    {% include 'team/team_navigation.html' %}
     <form method="POST">
         {% csrf_token %}
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Erstellen der Rosterliste von {{ user }}</legend>
+            <legend class="border-bottom mb-4">
+                {% if object %}
+                Aktualisieren der Rosterliste von {{ user }}
+                {% else %}
+                Erstellen der Rosterliste von {{ user }}
+                {% endif %}
+            </legend>
             {{ form|crispy }}
         </fieldset>
         <div class="form-group">
-            <button class="btn btn-outline-info" type="submit">Erstellen</button>
+            <button class="btn btn-outline-info" type="submit">
+                {% if object %}
+                Aktualisieren
+                {% else %}
+                Erstellen
+                {% endif %}
+            </button>
         </div>
     </form>
 </div>
+
 {% endblock content %}

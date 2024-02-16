@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block content %}
+<article class="media content-section">
+    {% include 'team/team_navigation.html' %}
+    <div class="media-body">
+        <h1>Roster {{ team.name }}</h1>
+        {% if related_teams|length > 0 %}
+        dazugehörige Teams:
+        <ul class="nav nav-pills">
+            {% for current_team in related_teams %}
+            <li class="nav-item">
+                <a class="nav-link"
+                   href="{% url 'passcheck-roster-list' pk=current_team.team__id %}">
+                    {{ current_team.team__description }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <br/>
+        <h3>
+            {{ team.roster | length }} Personen
+            {% if is_user_or_staff %}
+            <a class="btn btn-primary" href="{% url 'passcheck-player-create' %}" role="button"><i
+                    class="bi bi-person-plus-fill"></i> Person hinzufügen</a>
+            {% endif %}
+        </h3>
+
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                {% if is_user_or_staff %}
+                <th><a href="{% url 'passcheck-player-create' %}" title="Neue Person zum Roster hinzufügen"><i
+                        class="bi bi-person-plus-fill"></i></a></th>
+                {% endif %}
+                <th scope="col">Trikot</th>
+                <th scope="col">Vorname</th>
+                <th scope="col">Nachname</th>
+                <th scope="col">Passnummer</th>
+                {% for league in all_leagues %}
+                <th scope="col">#{{league.gamedays__league__name}}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for player in team.roster %}
+            <tr>
+                {% if is_user_or_staff %}
+                <td><a href="{% url 'passcheck-player-update' pk=player.id %}"
+                       title="{{player.first_name}} {{player.last_name}} bearbeiten"><i
+                        class="bi bi-pencil"></i></a></td>
+                {% endif %}
+                <td>{{player.jersey_number}}</td>
+                <td>{{player.first_name}}</td>
+                <td>{{player.last_name}}</td>
+                <td>{{player.pass_number}}</td>
+                {% for league in all_leagues %}
+                {% with field_name=league.gamedays__league %}
+                <td>
+                    <a href="{% url 'passcheck-player-games-list' id=player.id %}">
+                        {{ player.gamedays_counter|get_item:field_name }}
+                    </a>
+                </td>
+                {% endwith %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</article>
+{% endblock content %}
