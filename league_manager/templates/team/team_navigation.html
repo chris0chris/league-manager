@@ -2,11 +2,12 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Team Navigation</a>
-        <button aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
-                data-bs-target="#navbarTogglerDemo02" data-bs-toggle="collapse" type="button">
+        <button aria-controls="teamNavbar" aria-expanded="false" aria-label="Toggle Team navigation"
+                class="navbar-toggler"
+                data-bs-target="#teamNavbar" data-bs-toggle="collapse" type="button">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarText">
+        <div class="collapse navbar-collapse" id="teamNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 {% url 'view-officials-list-for-team' pk=team_id as officials_list_for_team %}
                 {% if officials_list_for_team %}
