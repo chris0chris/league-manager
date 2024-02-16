@@ -102,6 +102,7 @@ class PasscheckService:
             'is_user_or_staff': self.user_permission.is_user_or_staff(),
             'all_leagues': list(all_leagues),
             'team': team_data,
+            'team_id': team_id,
             'related_teams': list(team.relationship_additional_teams.all().values('team__description', 'team__id'))
         }
 

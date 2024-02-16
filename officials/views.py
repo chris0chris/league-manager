@@ -31,13 +31,11 @@ class OfficialsTeamListView(View):
         return render(
             request,
             self.template_name,
-            context={
-                'object_list': official_service.get_all_officials_with_team_infos(
-                    team_id,
-                    year,
-                    PermissionHelper.has_staff_or_user_permission(request)
-                )
-            }
+            official_service.get_all_officials_with_team_infos(
+                team_id,
+                year,
+                PermissionHelper.has_staff_or_user_permission(request)
+            )
         )
 
     def is_user_allowed_to_see_official_names(self, team_id):
