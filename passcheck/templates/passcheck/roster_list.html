@@ -19,7 +19,14 @@
         </ul>
         {% endif %}
         <br/>
-        <h3>{{ team.roster | length }} Personen</h3>
+        <h3>
+            {{ team.roster | length }} Personen
+            {% if is_user_or_staff %}
+            <a class="btn btn-primary" href="{% url 'passcheck-player-create' %}" role="button"><i
+                    class="bi bi-person-plus-fill"></i> Person hinzufügen</a>
+            {% endif %}
+        </h3>
+
         <table class="table table-hover">
             <thead>
             <tr>
