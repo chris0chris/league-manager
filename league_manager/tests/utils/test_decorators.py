@@ -1,20 +1,27 @@
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
-from league_manager.utils.decorators import is_staff
+from django.http import HttpRequest
 
-
-@is_staff
-def example_view(request, *args, **kwargs):
-    return kwargs
+from league_manager.utils.decorators import get_user_request_permission
 
 
-class TestIsStaffDecorator:
-    @patch('league_manager.utils.view_utils.PermissionHelper.has_staff_or_user_permission')
-    def test_is_staff_decorator(self, permission_helper_mock: Mock):
-        permission_helper_mock.return_value = True
-        mock_request = Mock(request=Mock())
+class TestGetUserRequestPermission:
 
-        kwargs = example_view(mock_request, team=7)
+    @patch('league_manager.utils.view_utils.PermissionHelper.get_staff_or_user_permission')
+    def test_user_request_permission(self, get_permission_mock):
+        def dummy_view(request, *args, **kwargs):
+            return kwargs['user_permission']
 
-        assert kwargs['is_staff'] is True
-        assert permission_helper_mock.call_count == 1
+        get_permission_mock.return_value = 'some_permission'
+
+        decorated_view = get_user_request_permission(dummy_view)
+
+        request = HttpRequest()
+        request.user = 'some_user'
+        request.request = request
+
+        user_permission = decorated_view(request, pk=1)
+
+        assert user_permission == 'some_permission'
+
+        get_permission_mock.assert_called_once_with(request, 1)

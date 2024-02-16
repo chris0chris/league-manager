@@ -20,8 +20,8 @@ class TestOfficialListView(WebTest):
         team = DbSetupOfficials().create_officials_full_setup()
         response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
         assert response.status_code == HTTPStatus.OK
-        context_items = response.context['object_list']
-        first_official: dict = context_items.get('officials_list')[0]
+        officials_list = response.context['officials_list']
+        first_official: dict = officials_list[0]
         assert first_official.get('first_name') == 'F****'
         assert first_official.get('last_name') == 'F****'
 
@@ -31,8 +31,8 @@ class TestOfficialListView(WebTest):
         team = DbSetupOfficials().create_officials_full_setup()
         response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
         assert response.status_code == HTTPStatus.OK
-        context_items = response.context['object_list']
-        first_official: dict = context_items.get('officials_list')[1]
+        officials_list = response.context['officials_list']
+        first_official: dict = officials_list[1]
         assert first_official.get('first_name') == 'J****'
         assert first_official.get('last_name') == 'J****'
 
@@ -40,9 +40,9 @@ class TestOfficialListView(WebTest):
         team = DbSetupOfficials().create_officials_full_setup()
         self.app.set_user(User.objects.first())
         response = self.app.get(reverse(OFFICIALS_LIST_FOR_TEAM, kwargs={'pk': team.pk}))
-        context_items = response.context['object_list']
+        officials_list = response.context['officials_list']
         all_officials = Official.objects.all()
-        assert len(context_items['officials_list']) == len(all_officials)
+        assert len(officials_list) == len(all_officials)
 
 
 class TestAddInternalGameOfficialUpdateView(WebTest):
