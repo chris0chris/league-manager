@@ -31,7 +31,8 @@ class OfficialService:
         return {
             'season': season,
             'url_pattern': OFFICIALS_LIST_FOR_TEAM_AND_YEAR,
-            'team_id': team_repository_service.get_team_id(),
+            'pk': team_id,
+            'team_id': team_id,
             'team': team_repository_service.get_team_description(),
             'years': all_team_years_with_official_license,
             'officials_list': OfficialGameCountSerializer(

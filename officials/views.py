@@ -232,7 +232,7 @@ class OfficialProfileGamelistView(View):
                 "team_id": official.team_id,
                 "current_year": year,
                 "years": official.gameofficial_set.all().values_list(
-                    'gameinfo__gameday__date__year', flat=True).distinct(),
+                    'gameinfo__gameday__date__year', flat=True).order_by('-gameinfo__gameday__date__year').distinct(),
                 "season": season,
                 "official_info": official_info,
                 "needed_games_for_license": 4 - (
