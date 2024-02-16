@@ -26,7 +26,7 @@ class OfficialsTeamListView(View):
 
     def get(self, request, **kwargs):
         team_id = kwargs.get('pk')
-        year = kwargs.get('year', datetime.today().year)
+        year = kwargs.get('season', datetime.today().year)
         official_service = OfficialService()
         return render(
             request,
@@ -34,7 +34,7 @@ class OfficialsTeamListView(View):
             official_service.get_all_officials_with_team_infos(
                 team_id,
                 year,
-                PermissionHelper.has_staff_or_user_permission(request)
+                PermissionHelper.has_staff_or_user_permission(request, team_id)
             )
         )
 
@@ -88,7 +88,8 @@ class GameOfficialListView(View):
             away=self._get_subquery(is_home=False),
         )
         context = {
-            'year': year,
+            'season': year,
+            'pk': team_id,
             'object_list':
                 GameOfficialAllInfoSerializer(
                     instance=game_officials_object_list.values(*GameOfficialAllInfoSerializer.ALL_VALUE_FIELDS),
@@ -199,12 +200,13 @@ class OfficialProfileLicenseView(View):
     template_name = 'officials/profile_license.html'
 
     def get(self, request, *args, **kwargs):
-        license_id = kwargs.get('license_id')
+        license_id = kwargs.get('pk')
         official = Official.objects.get(id=license_id)
         return render(
             request,
             self.template_name,
-            {'official_info': OfficialSerializer(instance=official, is_staff=self.request.user.is_staff).data}
+            {
+                'official_info': OfficialSerializer(instance=official, is_staff=self.request.user.is_staff).data}
         )
 
 
@@ -214,17 +216,23 @@ class OfficialProfileGamelistView(View):
     def get(self, request, *args, **kwargs):
         year = datetime.today().year
         season = kwargs.get('season', year)
-        license_id = kwargs.get('license_id')
+        license_id = kwargs.get('pk')
         official = Official.objects.get(id=license_id)
         official_info = OfficialGamelistSerializer(
             instance=official,
             season=season,
             is_staff=PermissionHelper.has_staff_or_user_permission(request, official.team.pk)).data
+        from officials.urls import OFFICIALS_PROFILE_GAMELIST
         return render(
             request,
             self.template_name,
             context={
-                "year": year,
+                "url_pattern": OFFICIALS_PROFILE_GAMELIST,
+                "pk": license_id,
+                "team_id": official.team_id,
+                "current_year": year,
+                "years": official.gameofficial_set.all().values_list(
+                    'gameinfo__gameday__date__year', flat=True).distinct(),
                 "season": season,
                 "official_info": official_info,
                 "needed_games_for_license": 4 - (

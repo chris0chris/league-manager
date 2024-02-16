@@ -15,5 +15,5 @@ urlpatterns = [
     path('player/<int:id>/games/list', PasscheckPlayerGamesList.as_view(), name=PASSCHECK_PLAYER_GAMES_LIST),
     path('player/create', PlayerlistCreateView.as_view(), name=PASSCHECK_PLAYER_CREATE),
     path('player/<int:pk>/update', PlayerlistUpdateView.as_view(), name=PASSCHECK_ROSTER_UPDATE),
-    path('roster/<int:team>/list', RosterView.as_view(), name=PASSCHECK_ROSTER_LIST),
+    path('roster/<int:pk>/list', RosterView.as_view(), name=PASSCHECK_ROSTER_LIST),
 ]

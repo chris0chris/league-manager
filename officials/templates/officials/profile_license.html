@@ -3,6 +3,7 @@
 {% load static %}
 <link href='{% static "officials/css/main.css" %}' rel="stylesheet" type="text/css">
 <article class="media content-section">
+    {% include 'team/team_navigation.html' %}
     <div class="media-body">
         {% block license_status %}
         {% if official_info.is_valid %}

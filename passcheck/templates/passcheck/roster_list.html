@@ -11,7 +11,7 @@
             {% for current_team in related_teams %}
             <li class="nav-item">
                 <a class="nav-link"
-                   href="{% url 'passcheck-roster-list' team=current_team.team__id %}">
+                   href="{% url 'passcheck-roster-list' pk=current_team.team__id %}">
                     {{ current_team.team__description }}
                 </a>
             </li>

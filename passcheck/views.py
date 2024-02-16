@@ -18,7 +18,7 @@ class RosterView(View):
 
     @get_user_request_permission
     def get(self, request, **kwargs):
-        team_id = kwargs.get('team')
+        team_id = kwargs.get('pk')
         user_permission = kwargs.get('user_permission')
         passcheck_service = PasscheckService(user_permission=user_permission)
         return render(request, self.template_name, passcheck_service.get_roster(team_id))
