@@ -24,6 +24,10 @@ function PlayerModal({
   const [jerseyNumber, setJerseyNumber] = useState(player.jersey_number);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
+  let timeoutTillNextPlayer = 1500;
+  if (process.env.NODE_ENV === 'development') {
+    timeoutTillNextPlayer = 1;
+  }
   useEffect(() => {
     const timer = setTimeout(() => {
       // simple click
@@ -51,7 +55,7 @@ function PlayerModal({
     setTimeout(() => {
       nextPlayer(1);
       setShowSuccessMessage(false);
-    }, 1500);
+    }, timeoutTillNextPlayer);
   };
 
   const handleDoubleClick = () => {
