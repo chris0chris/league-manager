@@ -26,7 +26,7 @@ function PlayerModal({
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   let timeoutTillNextPlayer = 1500;
   if (process.env.NODE_ENV === 'development') {
-    timeoutTillNextPlayer = 1;
+    // timeoutTillNextPlayer = 1;
   }
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -53,7 +53,11 @@ function PlayerModal({
     player.isSelected = !player.isSelected;
     player.jersey_number = jerseyNumber;
     setTimeout(() => {
-      nextPlayer(1);
+      // only move on to next player if player is checked
+      console.log('hel');
+      if (player.isSelected === true) {
+        nextPlayer(1);
+      }
       setShowSuccessMessage(false);
     }, timeoutTillNextPlayer);
   };
