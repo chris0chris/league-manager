@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from league_manager.utils.decorators import get_user_request_permission
+from league_manager.utils.view_utils import UserRequestPermission
 from passcheck.service.passcheck_service import PasscheckService, PasscheckServicePlayers, PasscheckException
 
 
@@ -25,11 +26,14 @@ class PasscheckGamesAPIView(APIView):
 
 
 class PasscheckRosterAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     @get_user_request_permission
     def get(self, request, **kwargs):
-        team = kwargs.get('team')
+        team = kwargs.get('pk')
         gameday_id = kwargs.get('gameday')
-        user_permission = kwargs.get('user_permission')
+        user_permission: UserRequestPermission = kwargs.get('user_permission')
+        user_permission.is_user = True
         if team:
             passcheck = PasscheckService(user_permission)
             try:
@@ -39,7 +43,7 @@ class PasscheckRosterAPIView(APIView):
 
     def put(self, request, **kwargs):
         data = request.data
-        team_id = kwargs.get('team')
+        team_id = kwargs.get('pk')
         gameday_id = kwargs.get('gameday')
         passcheckservice = PasscheckServicePlayers()
         passcheckservice.create_roster_and_passcheck_verification(team_id, gameday_id, request.user, data)
