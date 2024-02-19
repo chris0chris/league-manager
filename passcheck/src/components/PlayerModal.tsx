@@ -24,6 +24,10 @@ function PlayerModal({
   const [jerseyNumber, setJerseyNumber] = useState(player.jersey_number);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
+  let timeoutTillNextPlayer = 1500;
+  if (process.env.NODE_ENV === 'development') {
+    timeoutTillNextPlayer = 200;
+  }
   useEffect(() => {
     const timer = setTimeout(() => {
       // simple click
@@ -42,16 +46,19 @@ function PlayerModal({
   }, [player]);
 
   const update = () => {
-    if (errorMessages.length > 0) {
+    if (!isJerseyNumberValid(`${jerseyNumber}`) || errorMessages.length > 0) {
       return;
     }
     setShowSuccessMessage(true);
     player.isSelected = !player.isSelected;
     player.jersey_number = jerseyNumber;
     setTimeout(() => {
-      nextPlayer(1);
+      // only move on to next player if player is checked
+      if (player.isSelected === true) {
+        nextPlayer(1);
+      }
       setShowSuccessMessage(false);
-    }, 1500);
+    }, timeoutTillNextPlayer);
   };
 
   const handleDoubleClick = () => {
@@ -62,6 +69,23 @@ function PlayerModal({
       update();
     }
   };
+  const isJerseyNumberValid = (value: string) => {
+    if (!isNaN(Number(value))) {
+      const jersNumber = Number(value);
+      setJerseyNumber(jersNumber);
+      const errors = validator.validateAndGetErrors({
+        ...player,
+        jersey_number: jersNumber,
+      });
+      setErrorMessages(errors);
+      return errors.length === 0;
+    } else {
+      setJerseyNumber(0);
+      setErrorMessages(['Trikotnummer muss eine Zahl sein.']);
+    }
+    return false;
+  };
+
   return (
     <>
       <Modal
@@ -113,22 +137,7 @@ function PlayerModal({
                 id='exampleFormControlInput1'
                 placeholder='Trikotnummer'
                 value={jerseyNumber}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  if (!isNaN(Number(value))) {
-                    const jersNumber = Number(event.target.value);
-                    setJerseyNumber(jersNumber);
-                    setErrorMessages(
-                      validator.validateAndGetErrors({
-                        ...player,
-                        jersey_number: jersNumber,
-                      })
-                    );
-                  } else {
-                    setJerseyNumber(0);
-                    setErrorMessages(['Trikotnummer muss eine Zahl sein.']);
-                  }
-                }}
+                onChange={(event) => isJerseyNumberValid(event.target.value)}
               />
             </div>
           </div>
@@ -207,7 +216,7 @@ function PlayerModal({
           )}
           {!player.validationError && (
             <Button
-              variant={player.isSelected ? 'danger' : 'success'} //coloring the button depending on the state of the player
+              variant={player.isSelected ? 'danger' : 'success'}
               className='modal-button-middle'
               disabled={showSuccessMessage}
               onClick={() => {

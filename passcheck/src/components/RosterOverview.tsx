@@ -23,6 +23,7 @@ function RosterOverview() {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [showStartButton, setShowStartButton] = useState<boolean>(true);
   const [showPlayerModal, setShowPlayerModal] = useState<boolean>(false);
+  const [isValid, setIsValid] = useState<boolean>(false);
   const [updateFlag, setUpdateFlag] = useState<boolean>(false);
   const [team, setTeam] = useState<Team>({
     name: 'Loading...',
@@ -145,7 +146,7 @@ function RosterOverview() {
   };
   const checkValidation = () => {
     const validator = new Validator(team.validator, getAllRoster());
-    validator.validateAndUpdate(setMessage);
+    setIsValid(validator.validateAndUpdate(setMessage));
     setUpdateFlag(!updateFlag);
   };
 
@@ -280,6 +281,10 @@ function RosterOverview() {
               variant='success'
               type='submit'
               className='full-width-button'
+              disabled={
+                getAllSelectedPlayers().length <
+                team.validator.minimum_player_strength!
+              }
             >
               Passliste abschicken
             </Button>

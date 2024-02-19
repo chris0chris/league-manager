@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django import forms
 
 from gamedays.models import Team
@@ -21,10 +23,11 @@ class PlayerlistCreateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(PlayerlistCreateForm, self).__init__(*args, **kwargs)
 
-        # Check if the logged-in user is a staff member
         user = kwargs.get('initial', {}).get('user')
+        current_year = datetime.today().year
+        self.fields['year_of_birth'].widget.attrs['min'] = current_year - 70
+        self.fields['year_of_birth'].widget.attrs['max'] = current_year - 15
         is_staff = user and user.is_staff
-        self.fields['sex'].initial = 2
         try:
             self.fields['team'].initial = Team.objects.get(name=user.username)
         except Team.DoesNotExist:
