@@ -12,7 +12,7 @@
                 {% url 'view-officials-list-for-team' pk=team_id as officials_list_for_team %}
                 {% if officials_list_for_team %}
                 <li class="nav-item">
-                    <a aria-current="page" class="nav-link active" href="{{ officials_list_for_team }}">Officials</a>
+                    <a aria-current="page" class="nav-link" href="{{ officials_list_for_team }}">Officials</a>
                 </li>
                 {% endif %}
                 {% url 'passcheck-roster-list' pk=team_id as passcheck_roster_list %}
