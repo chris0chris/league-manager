@@ -66,6 +66,7 @@ class TestRosterValidationSerializer(TestCase):
             'pass_number': 9898989,
             'validationError': 'Person hat Maximum an erlaubte Spieltage (3) erreicht.',
             'isSelected': True,
+            'year_of_birth': 1909
         }
 
     def test_serializer_sets_validationError_when_no_validator_is_set(self):
@@ -83,4 +84,5 @@ class TestRosterValidationSerializer(TestCase):
             'pass_number': 0000000,
             'validationError': 'Could not validate player due missing validator.',
             'isSelected': False,
+            'year_of_birth': 1909,
         }
