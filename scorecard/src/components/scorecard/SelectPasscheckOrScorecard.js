@@ -1,25 +1,33 @@
 /* eslint-disable max-len */
+import PropTypes from 'prop-types';
 import React from 'react';
 import {Navigate} from 'react-router-dom';
 import {SELECT_GAME_URL} from '../common/urls';
 import {useEffect, useState} from 'react';
+import {connect} from 'react-redux';
+import {getPasscheckStatus} from '../../actions/passcheck';
 
-const SelectPasscheckOrScorecard = () => {
+const SelectPasscheckOrScorecard = ({
+  isPasscheckStatusCompleted,
+  getPasscheckStatus,
+}) => {
   const [redirectToScorecard, setRedirectToScorecard] = useState(false);
 
   useEffect(() => {
-  window.removeEventListener('beforeunload', handleBeforeUnload);
+    getPasscheckStatus();
+  }, [isPasscheckStatusCompleted]);
 
-  return () => {
-    window.addEventListener('beforeunload', handleBeforeUnload);
-  };
-}, []);
+  useEffect(() => {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   const redirectToPasscheck = () => {
     window.location.href = '/passcheck';
   };
-  if (redirectToScorecard) {
-    console.log('navigating to ', SELECT_GAME_URL);
+  if (redirectToScorecard || isPasscheckStatusCompleted) {
     return <Navigate to={SELECT_GAME_URL} />;
   }
   return (
@@ -39,6 +47,15 @@ const SelectPasscheckOrScorecard = () => {
     </div>
   );
 };
-SelectPasscheckOrScorecard.propTypes = {};
+SelectPasscheckOrScorecard.propTypes = {
+  getPasscheckStatus: PropTypes.func.isRequired,
+  isPasscheckStatusCompleted: PropTypes.bool.isRequired,
+};
 
-export default SelectPasscheckOrScorecard;
+const mapStateToProps = (state) => ({
+  isPasscheckStatusCompleted: state.passcheckReducer.completed,
+});
+
+export default connect(mapStateToProps, {getPasscheckStatus})(
+  SelectPasscheckOrScorecard
+);

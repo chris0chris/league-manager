@@ -7,12 +7,9 @@ import {LOGIN_URL} from './urls';
 const PrivateRoute = ({component: Component, auth, ...rest}) => {
   return (
     <div>
-      {auth.isLoading &&
-          <h2>Loading ... </h2>}
-      {!auth.isAuthenticated &&
-      <Navigate to={LOGIN_URL} />}
-      {!auth.isLoading && auth.isAuthenticated &&
-         <Component />}
+      {auth.isLoading && <h2>Loading ... </h2>}
+      {!auth.isAuthenticated && <Navigate to={LOGIN_URL} />}
+      {!auth.isLoading && auth.isAuthenticated && <Component {...rest} />}
     </div>
   );
 };
@@ -22,7 +19,7 @@ const mapStateToProps = (state) => ({
 });
 
 PrivateRoute.propTypes = {
-  component: PropTypes.object.isRequired,
+  component: PropTypes.elementType.isRequired,
   auth: PropTypes.object.isRequired,
 };
 
