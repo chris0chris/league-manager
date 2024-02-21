@@ -23,15 +23,15 @@ class PasscheckService:
     def __init__(self, user_permission=UserRequestPermission()):
         self.user_permission = user_permission
 
-    def get_officiating_games(self, officials_team_id, gameday, all_games_wanted=False):
-        if officials_team_id is None and self.user_permission.is_staff:
+    def get_officiating_games(self, officials_team: Team, gameday, all_games_wanted=False):
+        if officials_team is None and self.user_permission.is_staff:
             gameinfo = Gameinfo.objects.filter(gameday__in=gameday).order_by('scheduled')
         elif all_games_wanted:
             gameinfo = Gameinfo.objects.filter(gameday__in=gameday).order_by('scheduled')
-            if not gameinfo.filter(officials=officials_team_id).exists():
+            if not gameinfo.filter(officials=officials_team).exists():
                 raise PasscheckException('Passcheck nicht erlaubt, da ihr als Team nicht am Spieltag spielt!')
         else:
-            gameinfo = Gameinfo.objects.filter(officials_id=officials_team_id, gameday__in=gameday).order_by(
+            gameinfo = Gameinfo.objects.filter(officials_id=officials_team, gameday__in=gameday).order_by(
                 'scheduled')
             gameinfo = gameinfo.filter(scheduled__lte=gameinfo.first().scheduled)
         gameinfo = gameinfo.annotate(
@@ -68,7 +68,7 @@ class PasscheckService:
 
         return {
             'officialsTeamName': team.description if team else team_id,
-            'games': self.get_officiating_games(officials_team_id=team, gameday=gameday,
+            'games': self.get_officiating_games(officials_team=team, gameday=gameday,
                                                 all_games_wanted=all_games_wanted),
             'gamedays': GamedayInfoSerializer(instance=today_gamedays.values('id', 'name', 'league__name'),
                                               many=True).data
@@ -218,6 +218,21 @@ class PasscheckService:
             'player': RosterSerializer(instance=player_values, is_staff=self.user_permission.is_user_or_staff(),
                                        many=True).data[0],
             'entries': league_list,
+        }
+
+    def get_passcheck_status(self, officials_team: str):
+        team = self._get_team(officials_team)
+        date = datetime.datetime.today()
+        if settings.DEBUG:
+            date = PASSCHECK_DATE
+        today_gamedays = Gameday.objects.filter(date__gte=date)
+        gameinfo = Gameinfo.objects.filter(officials_id=team, gameday__in=today_gamedays).order_by(
+            'scheduled')
+        games_to_check = gameinfo.filter(scheduled__lte=gameinfo.first().scheduled)
+        number_of_teams_to_check = games_to_check.count() * 2
+        verified_teams = PasscheckVerification.objects.filter(user__username=officials_team, gameday__in=today_gamedays)
+        return {
+            'completed': True if number_of_teams_to_check == verified_teams.count() else False
         }
 
 

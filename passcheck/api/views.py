@@ -25,6 +25,17 @@ class PasscheckGamesAPIView(APIView):
             raise PermissionDenied(detail=str(exception))
 
 
+class PasscheckGamesStatusAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @get_user_request_permission
+    def get(self, request, *args, **kwargs):
+        user_permission = kwargs.get('user_permission')
+        passcheck = PasscheckService(user_permission=user_permission)
+        return Response(passcheck.get_passcheck_status(officials_team=request.user.username), status=HTTPStatus.OK)
+
+
+
 class PasscheckRosterAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
