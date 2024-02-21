@@ -89,10 +89,9 @@ function RosterTable({
       <Table bordered hover size='sm' className='rounded-table'>
         <thead>
           <tr>
-            <th className='table-border'>Lfd</th>
-            <th className='table-border'>Name</th>
             <th className='table-border'>Trikot</th>
-            <th className='table-border'>Pass</th>
+            <th className='table-border'>Name</th>
+            <th className='table-border'>Passnr</th>
           </tr>
         </thead>
         <tbody>
@@ -107,7 +106,7 @@ function RosterTable({
                 setCurrentPlayerIndex(index);
               }}
             >
-              <PlayerLine key={index} index={index} playersData={player} />
+              <PlayerLine key={index} playersData={player} />
             </tr>
           ))}
         </tbody>
