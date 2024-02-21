@@ -69,13 +69,15 @@ class TestPasscheckService(TestCase):
         user = User.objects.first()
         passcheck_service_players = PasscheckServicePlayers()
         passcheck_service_players.create_roster_and_passcheck_verification(team_id=team.pk, gameday_id=gameday.pk,
-                                                                           user=user, data={
-                'official_name': 'Verified Official',
-                'roster': []})
-        verificationEntry = PasscheckVerification.objects.all()
-        entry: PasscheckVerification = verificationEntry.first()
-        assert len(verificationEntry) == 1
+                                                                           user=user,
+                                                                           data={'official_name': 'Verified Official',
+                                                                                 'note': 'some note',
+                                                                                 'roster': []})
+        verification_entry = PasscheckVerification.objects.all()
+        entry: PasscheckVerification = verification_entry.first()
+        assert len(verification_entry) == 1
         assert entry.official_name == 'Verified Official'
+        assert entry.note == 'some note'
         assert entry.created_at.strftime('%H:%M:%S') == entry.updated_at.strftime('%H:%M:%S')
 
     def test_passcheck_verification_is_updated(self):

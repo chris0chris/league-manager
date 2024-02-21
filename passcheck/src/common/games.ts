@@ -1,5 +1,5 @@
-import {apiGet, apiPut} from '../utils/api';
-import {Roster, TeamData} from './types';
+import { apiGet, apiPut } from '../utils/api';
+import { PasscheckVerification, TeamData } from './types';
 
 export const getPasscheckData = async (gameday_id?: string | null) => {
   if (!gameday_id) {
@@ -21,13 +21,10 @@ export const getPlayerList = async (
 };
 
 export const submitRoster = async (
-  team: string,
-  gameday_id: string,
-  officialName: string,
-  roster: Roster
+  passcheckVerification: PasscheckVerification
 ) => {
-  await apiPut(`/api/passcheck/roster/${team}/gameday/${gameday_id}/`, {
-    official_name: officialName,
-    roster: roster,
-  });
+  await apiPut(
+    `/api/passcheck/roster/${passcheckVerification.teamId}/gameday/${passcheckVerification.gamedayId}/`,
+    {...passcheckVerification.data}
+  );
 };

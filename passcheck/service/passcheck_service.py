@@ -9,7 +9,8 @@ from gamedays.service.model_helper import GameresultHelper
 from league_manager.utils.view_utils import UserRequestPermission
 from passcheck.api.serializers import PasscheckGamesListSerializer, RosterSerializer, \
     RosterValidationSerializer, PlayerAllGamedaysSerializer
-from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, PasscheckVerification
+from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, PasscheckVerification, \
+    EmptyPasscheckVerification
 from passcheck.service.eligibility_validation import EligibilityValidator
 
 PASSCHECK_DATE = datetime.date(2024, 2, 3)
@@ -125,10 +126,11 @@ class PasscheckService:
             validator=EligibilityValidator(gameday.league, gameday).get_player_strength()
         )}
         try:
-            official_name = PasscheckVerification.objects.get(team=team_id, gameday=gameday_id).official_name
+            passcheck_verification = PasscheckVerification.objects.get(team=team_id, gameday=gameday_id)
         except PasscheckVerification.DoesNotExist:
-            official_name = ''
-        team['official_name'] = official_name
+            passcheck_verification = EmptyPasscheckVerification()
+        team['official_name'] = passcheck_verification.official_name
+        team['note'] = passcheck_verification.note
         relationship = self._get_team_relationship(team_id)
         additional_teams_serialized = []
         for additional_team_link in relationship:
@@ -243,7 +245,7 @@ class PasscheckServicePlayers:
                                     team_id]
         PlayerlistGameday.objects.filter(playerlist__team__in=all_relevant_team_ids, gameday=gameday_id).delete()
         self._create_roster(gameday_id, data['roster'])
-        self._create_passcheck_verification(gameday_id, team_id, user, data['official_name'])
+        self._create_passcheck_verification(gameday_id, team_id, user, data.get('official_name'), data.get('note'))
 
     # noinspection PyMethodMayBeStatic
     def _create_roster(self, gameday_id, roster: []):
@@ -256,7 +258,7 @@ class PasscheckServicePlayers:
             })
 
     # noinspection PyMethodMayBeStatic
-    def _create_passcheck_verification(self, gameday_id, team_id, user, official_name):
+    def _create_passcheck_verification(self, gameday_id, team_id, user, official_name, note):
         PasscheckVerification.objects.update_or_create(
             team_id=team_id, gameday_id=gameday_id,
             defaults={
@@ -264,6 +266,7 @@ class PasscheckServicePlayers:
                 'user': user,
                 'gameday_id': gameday_id,
                 'team_id': team_id,
+                'note': note,
             }
         )
 

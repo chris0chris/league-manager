@@ -23,7 +23,6 @@ function RosterOverview() {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [showStartButton, setShowStartButton] = useState<boolean>(true);
   const [showPlayerModal, setShowPlayerModal] = useState<boolean>(false);
-  const [isValid, setIsValid] = useState<boolean>(false);
   const [updateFlag, setUpdateFlag] = useState<boolean>(false);
   const [team, setTeam] = useState<Team>({
     name: 'Loading...',
@@ -32,6 +31,7 @@ function RosterOverview() {
   });
   const [additionalTeams, setAdditionalTeams] = useState<Team[]>([]);
   const [officialName, setOfficialName] = useState<string>('');
+  const [note, setNote] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filteredAdditionalRosters, setFilteredAdditionalRosters] = useState<
     Roster[]
@@ -50,6 +50,7 @@ function RosterOverview() {
         setAdditionalTeams(result.additionalTeams);
         setTeam(result.team);
         setOfficialName(result.official_name);
+        setNote(result.note);
       })
       .catch((error: ApiError) => {
         setMessage({text: error.message});
@@ -114,7 +115,15 @@ function RosterOverview() {
 
   const onSubmitRoster = () => {
     handleClose();
-    submitRoster(teamId!, gamedayId!, officialName, getAllSelectedPlayers())
+    submitRoster({
+      teamId: teamId!,
+      gamedayId: gamedayId!,
+      data: {
+        official_name: officialName,
+        note: note,
+        roster: getAllSelectedPlayers(),
+      },
+    })
       .then(() => {
         setMessage({
           text: 'Erfolgreich gespeichert.',
@@ -146,7 +155,7 @@ function RosterOverview() {
   };
   const checkValidation = () => {
     const validator = new Validator(team.validator, getAllRoster());
-    setIsValid(validator.validateAndUpdate(setMessage));
+    validator.validateAndUpdate(setMessage);
     setUpdateFlag(!updateFlag);
   };
 
@@ -265,7 +274,7 @@ function RosterOverview() {
         <form onSubmit={handleSubmit}>
           <FloatingLabel
             controlId='officialNameInput'
-            label='Vor- und Nachname Official'
+            label='Vor- und Nachname Official *'
             className='mb-3'
           >
             <Form.Control
@@ -274,6 +283,19 @@ function RosterOverview() {
               required
               value={officialName}
               onChange={(event) => setOfficialName(event.target.value)}
+            />
+          </FloatingLabel>
+          <FloatingLabel
+            controlId='noteInpput'
+            label='Anmerkungen'
+            className='mb-3'
+          >
+            <Form.Control
+              as='textarea'
+              type='textarea'
+              placeholder='Anmerkungen - z.B. Equipmentauffälligkeiten, Feedback zum Tool, etc.'
+              value={`${note ? note : undefined}`}
+              onChange={(event) => setNote(event.target.value)}
             />
           </FloatingLabel>
           <div>
@@ -306,7 +328,8 @@ function RosterOverview() {
             Anzahl Spielende: {getAllSelectedPlayers().length}
           </div>
           <div className='mb-2'>Team: {team.name}</div>
-          <div>Abgenommen durch: {officialName}</div>
+          <div className='mb-2'>Abgenommen durch: {officialName}</div>
+          <div>Anmerkungen: {`${note ? note : '-'}`}</div>
         </Modal.Body>
         <Modal.Footer className='modal-footer'>
           <Button variant='secondary' className='me-auto' onClick={handleClose}>

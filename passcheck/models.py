@@ -56,6 +56,11 @@ class PlayerlistGameday(models.Model):
     objects: QuerySet = models.Manager()
 
 
+class EmptyPasscheckVerification:
+    official_name = ''
+    note = ''
+
+
 class PasscheckVerification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -63,6 +68,7 @@ class PasscheckVerification(models.Model):
     official_name = models.CharField(max_length=100)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     gameday = models.ForeignKey(Gameday, on_delete=models.CASCADE)
+    note = models.TextField(default=None, blank=True, null=True)
 
     objects: QuerySet = models.Manager()
 

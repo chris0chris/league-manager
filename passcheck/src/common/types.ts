@@ -15,6 +15,7 @@ export type TeamData = {
   team: Team;
   additionalTeams: Team[];
   official_name: string;
+  note: string | null;
 };
 
 export type Team = {
@@ -99,4 +100,14 @@ export type apiGamedays = {
 export type apiUsernames = {
   id: number;
   username: string;
+};
+
+export type PasscheckVerification = {
+  teamId: string;
+  gamedayId: string;
+  data: {
+    official_name: string;
+    note: string | null;
+    roster: Player[];
+  };
 };
