@@ -12,7 +12,6 @@
 
 .disabled-row {
   opacity: 0.5; /* You can adjust the opacity to make it visually appear disabled */
-  pointer-events: none; /* Disable pointer events on the row */
 }
 
 button.accordion-button {
