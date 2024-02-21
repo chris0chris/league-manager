@@ -24,7 +24,7 @@ function PlayerModal({
   const [jerseyNumber, setJerseyNumber] = useState(player.jersey_number);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
-  let timeoutTillNextPlayer = 1500;
+  let timeoutTillNextPlayer = 500;
   if (process.env.NODE_ENV === 'development') {
     timeoutTillNextPlayer = 200;
   }
