@@ -213,6 +213,7 @@ class GameSetup(models.Model):
     homeCaptain = models.CharField(max_length=100, blank=True)
     awayCaptain = models.CharField(max_length=100, blank=True)
     hasFinalScoreChanged = models.BooleanField(default=False)
+    note = models.TextField(default=None, blank=True, null=True)
 
     objects: QuerySet = models.Manager()
 

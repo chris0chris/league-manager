@@ -45,7 +45,7 @@ class GameSetupSerializer(ModelSerializer):
 class GameFinalizer(ModelSerializer):
     class Meta:
         model = GameSetup
-        fields = ['homeCaptain', 'awayCaptain', 'hasFinalScoreChanged']
+        fields = ['homeCaptain', 'awayCaptain', 'hasFinalScoreChanged', 'note']
 
 
 class GameLogSerializer(Serializer):

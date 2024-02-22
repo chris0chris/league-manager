@@ -252,6 +252,7 @@ class TestGameFinalize(WebTest):
         response = self.app.put_json(reverse(API_GAME_FINALIZE, kwargs={'pk': first_game.pk}), {
             'homeCaptain': 'Home Captain',
             'awayCaptain': 'Away Captain',
+            'note': 'some final note',
             'hasFinalScoreChanged': True
         }, headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.OK
@@ -259,6 +260,7 @@ class TestGameFinalize(WebTest):
         assert gamesetup.homeCaptain == 'Home Captain'
         assert gamesetup.awayCaptain == 'Away Captain'
         assert gamesetup.hasFinalScoreChanged is True
+        assert gamesetup.note == 'some final note'
         first_game: Gameinfo = Gameinfo.objects.last()
         assert first_game.status == 'beendet'
         assert re.match(r'^(0\d|1\d|2[0-3]):[0-5]\d', str(first_game.gameFinished))
