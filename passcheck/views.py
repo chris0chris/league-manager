@@ -75,14 +75,13 @@ class PlayerlistUpdateView(PlayerlistCommonMixin, UserPassesTestMixin, UpdateVie
         return PermissionHelper.has_staff_or_user_permission(self.request, player.team_id)
 
 
-# declaring Views via django views
 class PasscheckPlayerGamesList(View):
     template_name = 'passcheck/player_gamedays_list.html'
 
-    @get_user_request_permission
     def get(self, request, **kwargs):
         player_id = kwargs.get('id')
-        user_permission = kwargs.get('user_permission')
+        player = Playerlist.objects.get(pk=player_id)
+        user_permission = PermissionHelper.get_user_request_permission(self.request, player.team_id)
         passcheck_service = PasscheckService(user_permission=user_permission)
         return render(request, self.template_name, passcheck_service.get_player_gamedays(player_id))
 

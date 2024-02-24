@@ -1,4 +1,5 @@
 {% load custom_filters %}
+{% if team_id %}
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Team Navigation</a>
@@ -11,8 +12,17 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 {% url 'view-officials-list-for-team' pk=team_id as officials_list_for_team %}
                 {% if officials_list_for_team %}
-                <li class="nav-item">
-                    <a aria-current="page" class="nav-link" href="{{ officials_list_for_team }}">Officials</a>
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       role="button">
+                        Officials
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ officials_list_for_team }}">Übersicht</a></li>
+                        <li><a class="dropdown-item"
+                               href="{% url 'view-officials-game-officials-appearance-for-team-and-year' pk=team_id %}">Alle
+                            Einsätze</a></li>
+                    </ul>
                 </li>
                 {% endif %}
                 {% url 'passcheck-roster-list' pk=team_id as passcheck_roster_list %}
@@ -30,3 +40,4 @@
         </div>
     </div>
 </nav>
+{% endif %}

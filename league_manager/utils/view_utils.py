@@ -22,11 +22,13 @@ class PermissionHelper:
         return team.name == request.user.username
 
     @staticmethod
-    def get_staff_or_user_permission(request, team_id):
+    def get_user_request_permission(request, team_id):
+        user_request = UserRequestPermission()
         if request.user.is_staff:
-            return UserRequestPermission(is_staff=True)
+            user_request.is_staff = True
         try:
             team = Team.objects.get(pk=team_id)
+            user_request.is_user = team.name == request.user.username
         except Team.DoesNotExist:
-            return UserRequestPermission()
-        return UserRequestPermission(is_user=(team.name == request.user.username))
+            pass
+        return user_request

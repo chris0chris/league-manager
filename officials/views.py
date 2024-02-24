@@ -60,17 +60,29 @@ class GameOfficialListView(View):
 
     @method_decorator(cache_page(60 * 60 * 24))
     def get(self, request, **kwargs):
-        year = kwargs.get('year', datetime.today().year)
+        year_str = kwargs.get('season', datetime.today().year)
+        year = int(year_str) if year_str else None
         team_id = kwargs.get('pk')
+        try:
+            team_id = int(team_id) if team_id else None
+        except ValueError:
+            team_id = None
         game_officials = (
             GameOfficial.objects.filter(gameinfo__gameday__date__year=year)
             .exclude(position='Scorecard Judge')
         )
         if team_id:
+            team = Team.objects.get(pk=team_id).description
             game_officials = game_officials.filter(
                 Q(gameinfo__officials__pk=team_id, official=None) |
                 Q(official__team__pk=team_id)
             )
+            years = GameOfficial.objects.filter(Q(gameinfo__officials__pk=team_id, official=None) |
+                                                Q(official__team__pk=team_id)).values_list(
+                'gameinfo__gameday__date__year', flat=True).distinct()
+        else:
+            years = GameOfficial.objects.all().values_list('gameinfo__gameday__date__year', flat=True).distinct()
+            team = None
         game_officials = game_officials.order_by('gameinfo__gameday__date')
         is_staff = request.user.is_staff
         team_name = request.user.username
@@ -87,8 +99,13 @@ class GameOfficialListView(View):
             home=self._get_subquery(is_home=True),
             away=self._get_subquery(is_home=False),
         )
+        from officials.urls import OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_TEAM_AND_YEAR
         context = {
             'season': year,
+            'team': team,
+            'team_id': team_id,
+            'years': sorted(years, reverse=True),
+            'url_pattern': OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_TEAM_AND_YEAR,
             'pk': team_id,
             'object_list':
                 GameOfficialAllInfoSerializer(

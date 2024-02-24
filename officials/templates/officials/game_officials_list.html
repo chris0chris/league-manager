@@ -8,13 +8,15 @@
             Bitte probiere es an einem anderen Tag.
         </p>
         {% else %}
-
+        {% include 'team/team_navigation.html' %}
+        <h1>{{ season }} - {% if team %} {{ team }} alle Einsätze {% else %} Alle Einsätze {% endif %}</h1>
         <p>
             Personen die ein <b>Fragezeichen</b> (<b>?</b>) hinter dem Namen haben, deren Spiele werden nicht gezählt,
             da für diese kein Eintrag gefunden wurde. Entweder haben diese keine Lizenz oder
             der Name wurde nicht über die Scorecard ausgewählt / gesucht.<br/>
             Bei Fragen bitte an Chris wenden: c.kaempfe@afvd.de
         </p>
+        {% include 'utils/year_filter.html' %}
         {% include 'officials/_pagination_game_officials_list.html' %}
         <table class="table table-hover">
             <thead>
@@ -35,7 +37,9 @@
                 <th scope="row">{{official.id}}</th>
                 <td>{{official.gameday_date}}</td>
                 <td>{{official.gameday_name}}</td>
-                <td><a href="/officials/team/{{official.team_official_id}}/gamelist">{{official.team_name}}</a></td>
+                <td>
+                    <a href="{% url url_pattern pk=official.team_official_id season=season %}">{{official.team_name}}</a>
+                </td>
                 <td>{{official.name}}</td>
                 <td>{{official.position}}</td>
                 <td>{{official.home}} vs {{official.away}} (#{{official.gameinfo_id}})</td>
