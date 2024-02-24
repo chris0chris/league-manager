@@ -7,7 +7,7 @@ from league_manager.utils.decorators import get_user_request_permission
 
 class TestGetUserRequestPermission:
 
-    @patch('league_manager.utils.view_utils.PermissionHelper.get_staff_or_user_permission')
+    @patch('league_manager.utils.view_utils.PermissionHelper.get_user_request_permission')
     def test_user_request_permission(self, get_permission_mock):
         def dummy_view(request, *args, **kwargs):
             return kwargs['user_permission']
