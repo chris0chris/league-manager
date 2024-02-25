@@ -34,6 +34,8 @@ class PasscheckService:
         else:
             gameinfo = Gameinfo.objects.filter(officials_id=officials_team, gameday__in=gameday).order_by(
                 'scheduled')
+            if not gameinfo.exists():
+                raise PasscheckException('Ihr spielt heute nicht, deswegen gibt es keine Spiele für den Passcheck.')
             gameinfo = gameinfo.filter(scheduled__lte=gameinfo.first().scheduled)
         gameinfo = gameinfo.annotate(
             home_id=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='id'),
@@ -59,7 +61,7 @@ class PasscheckService:
         date = datetime.datetime.today()
         if settings.DEBUG:
             date = PASSCHECK_DATE
-        today_gamedays = Gameday.objects.filter(date__gte=date)
+        today_gamedays = Gameday.objects.filter(date=date)
         all_games_wanted = False
         if gameday_id is None:
             gameday = today_gamedays
