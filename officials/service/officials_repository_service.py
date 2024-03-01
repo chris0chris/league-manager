@@ -8,12 +8,13 @@ class OfficialsRepositoryService:
     # noinspection PyMethodMayBeStatic
     def get_officials_game_count_for_license(self, year, external_ids):
         if not external_ids:
-            officials = Official.objects.all()
+            return []
         else:
             officials = Official.objects.filter(external_id__in=external_ids)
         all_officials = []
         official: Official
         for official in officials:
+            external_ids.remove(int(official.external_id))
             official_qs = GameOfficial.objects.filter(official=official).exclude(position='Scorecard Judge')
             external_official_qs = OfficialExternalGames.objects.filter(official=official)
             all_officials += [OfficialGameCount(
@@ -22,6 +23,19 @@ class OfficialsRepositoryService:
                 official_qs,
                 external_official_qs,
             ).as_json()]
+        for missing_external_id in external_ids:
+            all_officials += [
+                {
+                    'external_id': missing_external_id,
+                    'team': 'Person hat noch nie an einem Kurs teilgenommen',
+                    'last_name': '',
+                    'first_name': '',
+                    'last_license': 'Keine',
+                    'license_year': '-',
+                    'current_season': 0,
+                    'overall': 0,
+                }
+            ]
         return all_officials
 
     # noinspection PyMethodMayBeStatic
