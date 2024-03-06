@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, TemplateView, UpdateView
@@ -59,10 +59,23 @@ class PlayerlistCommonMixin(LoginRequiredMixin):
         return super().form_valid(form)
 
 
-class PlayerlistCreateView(PlayerlistCommonMixin, CreateView):
+class PlayerlistCreateView(PlayerlistCommonMixin, UserPassesTestMixin, CreateView):
     def get_success_url(self):
         from passcheck.urls import PASSCHECK_PLAYER_CREATE
         return reverse(PASSCHECK_PLAYER_CREATE)
+
+    def handle_no_permission(self):
+        from passcheck.urls import PASSCHECK_TEAM_NOT_EXISTENT
+        return redirect(PASSCHECK_TEAM_NOT_EXISTENT)
+
+    def test_func(self):
+        user = self.request.user
+        try:
+            Team.objects.get(name=user)
+        except Team.DoesNotExist:
+            if not user.is_staff:
+                return False
+        return True
 
 
 class PlayerlistUpdateView(PlayerlistCommonMixin, UserPassesTestMixin, UpdateView):
