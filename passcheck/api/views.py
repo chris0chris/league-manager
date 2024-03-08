@@ -1,13 +1,14 @@
 from http import HTTPStatus
 
 from rest_framework import permissions
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from league_manager.utils.decorators import get_user_request_permission
 from league_manager.utils.view_utils import UserRequestPermission
 from passcheck.service.passcheck_service import PasscheckService, PasscheckServicePlayers, PasscheckException
+from passcheck.service.request_api_service import RequestApiService
 
 
 class PasscheckGamesAPIView(APIView):
@@ -25,6 +26,19 @@ class PasscheckGamesAPIView(APIView):
             raise PermissionDenied(detail=str(exception))
 
 
+class PasscheckApprovalUrlAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, **kwargs):
+        team_id = kwargs.get('team_id')
+        try:
+            return Response(RequestApiService.get_equipment_approval_url(team_id), status=HTTPStatus.OK)
+        except ValueError:
+            raise NotFound(detail=f'Keine Equipment-Genehmigung gefunden für das Team: {team_id}')
+        except PermissionError:
+            raise PermissionDenied(detail=f'Kein Zugriff auf die Equipment-Genehmigung. Bitte an Admin wenden (403).')
+
+
 class PasscheckGamesStatusAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -33,7 +47,6 @@ class PasscheckGamesStatusAPIView(APIView):
         user_permission = kwargs.get('user_permission')
         passcheck = PasscheckService(user_permission=user_permission)
         return Response(passcheck.get_passcheck_status(officials_team=request.user.username), status=HTTPStatus.OK)
-
 
 
 class PasscheckRosterAPIView(APIView):

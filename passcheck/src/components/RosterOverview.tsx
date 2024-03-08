@@ -1,38 +1,39 @@
-import {SyntheticEvent, useEffect, useRef, useState} from 'react';
+import { SyntheticEvent, useEffect, useRef, useState } from "react";
 import {
   Accordion,
   Badge,
   CloseButton,
   FloatingLabel,
   Form,
-} from 'react-bootstrap';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import {AccordionEventKey} from 'react-bootstrap/esm/AccordionContext';
-import {useNavigate, useParams} from 'react-router-dom';
-import {getPlayerList as getRosterList, submitRoster} from '../common/games';
-import {Player, Roster, Team, TeamData} from '../common/types';
-import {MessageColor} from '../context/MessageContext';
-import useMessage from '../hooks/useMessage';
-import {ApiError} from '../utils/api';
-import Validator from '../utils/validation';
-import RosterTable from './RosterTable';
+} from "react-bootstrap";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
+import { useNavigate, useParams } from "react-router-dom";
+import { getRosterList, submitRoster, getApprovalUrl } from "../common/games";
+import { Player, Roster, Team, TeamData } from "../common/types";
+import { MessageColor } from "../context/MessageContext";
+import useMessage from "../hooks/useMessage";
+import { ApiError } from "../utils/api";
+import Validator from "../utils/validation";
+import RosterTable from "./RosterTable";
 
 function RosterOverview() {
-  const {setMessage} = useMessage();
+  const { setMessage } = useMessage();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [showStartButton, setShowStartButton] = useState<boolean>(true);
   const [showPlayerModal, setShowPlayerModal] = useState<boolean>(false);
   const [updateFlag, setUpdateFlag] = useState<boolean>(false);
+  const [isApprovalUrlLoaded, setApprovalUrlLoaded] = useState<boolean>(false);
   const [team, setTeam] = useState<Team>({
-    name: 'Loading...',
+    name: "Loading...",
     roster: [],
     validator: {},
   });
   const [additionalTeams, setAdditionalTeams] = useState<Team[]>([]);
-  const [officialName, setOfficialName] = useState<string>('');
+  const [officialName, setOfficialName] = useState<string>("");
   const [note, setNote] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredAdditionalRosters, setFilteredAdditionalRosters] = useState<
     Roster[]
   >([]);
@@ -42,8 +43,8 @@ function RosterOverview() {
   );
   const searchQueryRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const {teamId} = useParams();
-  const {gamedayId} = useParams();
+  const { teamId } = useParams();
+  const { gamedayId } = useParams();
   useEffect(() => {
     getRosterList(teamId!, gamedayId!)
       .then((result: TeamData) => {
@@ -53,7 +54,7 @@ function RosterOverview() {
         setNote(result.note);
       })
       .catch((error: ApiError) => {
-        setMessage({text: error.message});
+        setMessage({ text: error.message });
       });
   }, [teamId, gamedayId]);
 
@@ -96,8 +97,8 @@ function RosterOverview() {
   };
 
   const handleClickEvent = () => {
-    setMessage({text: ''});
-    navigate('/');
+    setMessage({ text: "" });
+    navigate("/");
   };
 
   const getPlayerCounterElement = (roster: Roster) => {
@@ -105,9 +106,9 @@ function RosterOverview() {
       return null;
     }
     return (
-      <Badge bg='success'>
-        <i className='bi bi-check-lg' style={{fontSize: '1rem'}}></i>
-        {'  '}
+      <Badge bg="success">
+        <i className="bi bi-check-lg" style={{ fontSize: "1rem" }}></i>
+        {"  "}
         {countCheckedPlayersFor(roster)}
       </Badge>
     );
@@ -126,12 +127,12 @@ function RosterOverview() {
     })
       .then(() => {
         setMessage({
-          text: 'Erfolgreich gespeichert.',
+          text: "Erfolgreich gespeichert.",
           color: MessageColor.Success,
         });
-        navigate('/');
+        navigate("/");
       })
-      .catch((error: ApiError) => setMessage({text: error.message}));
+      .catch((error: ApiError) => setMessage({ text: error.message }));
   };
   const additionalPlayersList = additionalTeams.flatMap((value: Team) =>
     value.roster.filter((player) => player.isSelected)
@@ -158,35 +159,49 @@ function RosterOverview() {
     validator.validateAndUpdate(setMessage);
     setUpdateFlag(!updateFlag);
   };
+  const loadApprovalUrl = () => { 
+    setApprovalUrlLoaded(true)
+    getApprovalUrl(teamId!).then((redirectedUrl) => {
+      window.open(redirectedUrl, '_blank');
+      setApprovalUrlLoaded(false);
+      setMessage({ text: "" });
+      checkValidation();
+    })
+    .catch(
+      (error: ApiError) => {
+        setMessage({ text: error.message });
+        setApprovalUrlLoaded(false);
+      });
+   }
 
   return (
     <>
       <Button
         onClick={handleClickEvent}
-        className='full-width-button mt-1 mb-2'
+        className="full-width-button mt-1 mb-2"
       >
         Auswahl abbrechen
       </Button>
       <h2>
-        Spielendenliste {team.name}{' '}
+        Spielendenliste {team.name}{" "}
         {getPlayerCounterElement(getAllSelectedPlayers())}
       </h2>
-      <div className='row g-2 mb-3'>
-        <div className='col position-relative'>
+      <div className="row g-2 mb-3">
+        <div className="col position-relative">
           <FloatingLabel
-            controlId='playerListSearch'
+            controlId="playerListSearch"
             label={`${
               additionalTeams.length > 0
-                ? 'Listen durchsuchen ...'
-                : team.name + ' durchsuchen ...'
+                ? "Listen durchsuchen ..."
+                : team.name + " durchsuchen ..."
             }`}
           >
             <Form.Control
-              type='text'
+              type="text"
               placeholder={`${
                 additionalTeams.length > 0
-                  ? 'Listen durchsuchen ...'
-                  : team.name + ' durchsuchen ...'
+                  ? "Listen durchsuchen ..."
+                  : team.name + " durchsuchen ..."
               }`}
               required
               value={searchQuery}
@@ -201,10 +216,10 @@ function RosterOverview() {
           </FloatingLabel>
           {searchQuery.length > 0 && (
             <CloseButton
-              className='btn-close position-absolute top-50 translate-middle'
-              style={{right: '5px'}}
+              className="btn-close position-absolute top-50 translate-middle"
+              style={{ right: "5px" }}
               onClick={() => {
-                setSearchQuery('');
+                setSearchQuery("");
                 searchQueryRef.current!.focus();
               }}
             />
@@ -231,13 +246,13 @@ function RosterOverview() {
             key === activeAccordionKey ? null : (key as string[])
           );
         }}
-        className='mb-2'
+        className="mb-2"
       >
         {filteredAdditionalRosters.map((roster: Roster, index: number) => (
           <Accordion.Item key={index} eventKey={`${index}`}>
             <Accordion.Header>
-              <div className='additional-team-header'>
-                {additionalTeams[index].name}{' '}
+              <div className="additional-team-header">
+                {additionalTeams[index].name}{" "}
                 {getPlayerCounterElement(additionalTeams[index].roster)}
               </div>
             </Accordion.Header>
@@ -255,16 +270,27 @@ function RosterOverview() {
           </Accordion.Item>
         ))}
       </Accordion>
+      <div className="mb-2">
+        <Button
+          variant="warning"
+          type="submit"
+          className="full-width-button"
+          onClick={() => loadApprovalUrl()}
+          disabled={isApprovalUrlLoaded}
+        >
+          {isApprovalUrlLoaded ? 'Genehmigung wird geladen ...': 'Equipment-Genehmigung öffnen'}
+        </Button>
+      </div>
       {showStartButton && (
         <>
           <Button
-            variant='success'
-            type='button'
+            variant="success"
+            type="button"
             onClick={() => {
               setShowPlayerModal(true);
               setShowStartButton(false);
             }}
-            className='full-width-button'
+            className="full-width-button"
           >
             Passcheck starten
           </Button>
@@ -273,36 +299,36 @@ function RosterOverview() {
       {!showStartButton && (
         <form onSubmit={handleSubmit}>
           <FloatingLabel
-            controlId='officialNameInput'
-            label='Vor- und Nachname Official *'
-            className='mb-3'
+            controlId="officialNameInput"
+            label="Vor- und Nachname Official *"
+            className="mb-3"
           >
             <Form.Control
-              type='text'
-              placeholder='Vor- und Nachname Official'
+              type="text"
+              placeholder="Vor- und Nachname Official"
               required
               value={officialName}
               onChange={(event) => setOfficialName(event.target.value)}
             />
           </FloatingLabel>
           <FloatingLabel
-            controlId='noteInpput'
-            label='Anmerkungen'
-            className='mb-3'
+            controlId="noteInpput"
+            label="Anmerkungen"
+            className="mb-3"
           >
             <Form.Control
-              as='textarea'
-              type='textarea'
-              placeholder='Anmerkungen - z.B. Equipmentauffälligkeiten, Feedback zum Tool, etc.'
-              value={`${note ? note : undefined}`}
+              as="textarea"
+              type="textarea"
+              placeholder="Anmerkungen - z.B. Equipmentauffälligkeiten, Feedback zum Tool, etc."
+              value={`${note ? note : ""}`}
               onChange={(event) => setNote(event.target.value)}
             />
           </FloatingLabel>
           <div>
             <Button
-              variant='success'
-              type='submit'
-              className='full-width-button'
+              variant="success"
+              type="submit"
+              className="full-width-button"
               disabled={
                 getAllSelectedPlayers().length <
                 team.validator.minimum_player_strength!
@@ -317,28 +343,28 @@ function RosterOverview() {
       <Modal
         show={modalVisible}
         onHide={handleClose}
-        backdrop='static'
+        backdrop="static"
         keyboard={false}
       >
         <Modal.Header closeButton>
           <Modal.Title>Passliste bestätigen</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className='mb-2'>
+          <div className="mb-2">
             Anzahl Spielende: {getAllSelectedPlayers().length}
           </div>
-          <div className='mb-2'>Team: {team.name}</div>
-          <div className='mb-2'>Abgenommen durch: {officialName}</div>
-          <div>Anmerkungen: {`${note ? note : '-'}`}</div>
+          <div className="mb-2">Team: {team.name}</div>
+          <div className="mb-2">Abgenommen durch: {officialName}</div>
+          <div>Anmerkungen: {`${note ? note : "-"}`}</div>
         </Modal.Body>
-        <Modal.Footer className='modal-footer'>
-          <Button variant='secondary' className='me-auto' onClick={handleClose}>
+        <Modal.Footer className="modal-footer">
+          <Button variant="secondary" className="me-auto" onClick={handleClose}>
             Zurück
           </Button>
           <Button
-            variant='primary'
+            variant="primary"
             onClick={onSubmitRoster}
-            className='ms-auto'
+            className="ms-auto"
           >
             Passliste bestätigen
           </Button>

@@ -13,7 +13,7 @@ from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, Pa
     EmptyPasscheckVerification
 from passcheck.service.eligibility_validation import EligibilityValidator
 
-PASSCHECK_DATE = datetime.date(2024, 2, 3)
+PASSCHECK_DATE = datetime.date(2021, 6, 26)
 
 
 class PasscheckException(Exception):
@@ -109,7 +109,7 @@ class PasscheckService:
             'all_leagues': list(all_leagues),
             'team': team_data,
             'team_id': team_id,
-            'related_teams': list(team.relationship_additional_teams.all().values('team__description', 'team__id'))
+            'related_teams': list(team.relationship_additional_teams.all().values('team__description', 'team__id')),
         }
 
     def get_roster_with_validation(self, team_id: int, gameday_id: int):
