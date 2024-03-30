@@ -13,7 +13,8 @@ from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, Pa
     EmptyPasscheckVerification
 from passcheck.service.eligibility_validation import EligibilityValidator
 
-PASSCHECK_DATE = datetime.date(2021, 6, 26)
+# PASSCHECK_DATE = datetime.date(2021, 6, 26)
+PASSCHECK_DATE = datetime.date(2024, 3, 30)
 
 
 class PasscheckException(Exception):
@@ -115,7 +116,7 @@ class PasscheckService:
     def get_roster_with_validation(self, team_id: int, gameday_id: int):
         gameday: Gameday = Gameday.objects.get(pk=gameday_id)
         if not self.user_permission.is_staff:
-            today = datetime.datetime.today()
+            today = datetime.date.today()
             if settings.DEBUG:
                 today = PASSCHECK_DATE
             if today != gameday.date:
