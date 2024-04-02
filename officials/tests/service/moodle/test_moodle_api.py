@@ -25,7 +25,7 @@ class TestMoodleApi:
     @pytest.mark.skipif('CIRCLECI' in os.environ, reason='CIRCLECI will reveal secrets')
     def test_get_user_info(self):
         moodle_api = MoodleApi()
-        user_info: ApiUserInfo = moodle_api.get_user_info(11)
+        user_info: ApiUserInfo = moodle_api.get_user_info_by_id(11)
         assert user_info.get_first_name() == 'Y'
         assert user_info.get_last_name() == 'Testuser'
         assert user_info.get_team() == 'Ich finde mein Team nicht.'

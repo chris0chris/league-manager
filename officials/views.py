@@ -4,20 +4,25 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db import IntegrityError
 from django.db.models import Subquery, OuterRef, Q
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
 from django.views import View
 from django.views.decorators.cache import cache_page
 
-from gamedays.models import Team, Gameinfo, GameOfficial, Gameresult
+from gamedays.models import Team, Gameinfo, GameOfficial, Gameresult, Gameday
 from league_manager.utils.view_utils import PermissionHelper
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
-from officials.forms import AddInternalGameOfficialEntryForm
-from officials.models import Official
+from officials.forms import AddInternalGameOfficialEntryForm, MoodleLoginForm, OfficialGamesSignupForm
+from officials.models import Official, OfficialGamesSignup
+from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
 from officials.service.official_service import OfficialService
+
+MOODLE_LOGGED_IN_USER = 'moodle_logged_in_user'
 
 
 class OfficialsTeamListView(View):
@@ -286,3 +291,66 @@ class OfficialAssociationListView(View):
         if self.request.user.is_staff:
             return True
         return self.request.user.username == association
+
+
+class MoodleLoginView(View):
+    template_name = 'officials/signup/moodle_login.html'
+    form_class = MoodleLoginForm
+
+    def get(self, request, *args, **kwargs):
+        return render(
+            request,
+            self.template_name,
+            {'form': MoodleLoginForm()}
+        )
+
+    def post(self, request, *args, **kwargs):
+        form = MoodleLoginForm(request.POST)
+        try:
+            if form.is_valid():
+                username = form.cleaned_data['username']
+                password = form.cleaned_data['password']
+                moodle_service = MoodleService()
+                official_id = moodle_service.login(username, password)
+                request.session[MOODLE_LOGGED_IN_USER] = official_id
+
+                from officials.urls import OFFICIALS_SIGN_UP_LIST
+                return redirect(reverse(OFFICIALS_SIGN_UP_LIST))
+        except MoodleApiException as error:
+            form.add_error('', f'{error}')
+        return render(request, self.template_name, {'form': form})
+
+
+class OfficialSignUpListView(View):
+    template_name = 'officials/signup/sign_up_list.html'
+
+    def get(self, request, *args, **kwargs):
+        if request.session.get(MOODLE_LOGGED_IN_USER) is None:
+            from officials.urls import OFFICIALS_MOODLE_LOGIN
+            return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
+        request.session.set_expiry(600)
+        gamedays = Gameday.objects.filter(date__gte=datetime.today())
+        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
+        from officials.urls import OFFICIALS_SIGN_UP_FOR_GAMEDAY
+        context = {
+            'gamedays': gamedays,
+            'url_pattern_gameday': LEAGUE_GAMEDAY_DETAIL,
+            'url_pattern_signup': OFFICIALS_SIGN_UP_FOR_GAMEDAY,
+        }
+        return render(request, self.template_name, context)
+
+
+class OfficialSignUpView(View):
+    def get(self, request, *args, **kwargs):
+        gameday_id = kwargs.get('gameday')
+        official_id = request.session.get(MOODLE_LOGGED_IN_USER)
+        if official_id is None:
+            messages.error(request, 'Die Session der Moodle-Anmeldung ist ausgelaufen. Bitte erneut anmelden.')
+            from officials.urls import OFFICIALS_MOODLE_LOGIN
+            return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
+        try:
+            OfficialGamesSignup.objects.create(gameday_id=gameday_id, official_id=official_id)
+        except IntegrityError:
+            messages.error(request, 'Du bist bereits für den Spieltag gemeldet.')
+        from officials.urls import OFFICIALS_SIGN_UP_LIST
+        return redirect(reverse(OFFICIALS_SIGN_UP_LIST))

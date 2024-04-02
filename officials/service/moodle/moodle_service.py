@@ -106,7 +106,7 @@ class MoodleService:
         return None, [], []
 
     def get_info_of_user_with_result(self, course, participant):
-        user_info: ApiUserInfo = self.moodle_api.get_user_info(participant.get_user_id())
+        user_info: ApiUserInfo = self.moodle_api.get_user_info_by_id(participant.get_user_id())
         team: Team = self._get_first(Team.objects.filter(description=user_info.get_team()))
         if team is None:
             missed_officials = [
@@ -165,4 +165,12 @@ class MoodleService:
         return query_set.first()
 
     def get_user_info_by(self, external_id) -> ApiUserInfo:
-        return self.moodle_api.get_user_info(external_id)
+        return self.moodle_api.get_user_info_by_id(external_id)
+
+    def login(self, username, password) -> int:
+        self.moodle_api.confirm_user_auth(username, password)
+        user = self.moodle_api.get_user_info_by_username(username)
+        if user == -1:
+            user = self.moodle_api.get_user_info_by_email(username)
+        return Official.objects.get(external_id=user.get_id()).pk
+

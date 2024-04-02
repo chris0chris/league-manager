@@ -4,7 +4,7 @@ from datetime import date
 from django.db import models
 from django.db.models import QuerySet, ExpressionWrapper, Case, When, F, FloatField, Value, Sum
 
-from gamedays.models import Association, Team
+from gamedays.models import Association, Team, Gameday
 
 
 class Official(models.Model):
@@ -25,6 +25,22 @@ class Official(models.Model):
     def __str__(self):
         return (f'{self.team.description}__{self.last_name}, {self.first_name} - ('
                 f'{"NONE" if self.association is None else self.association.name})')
+
+
+class OfficialGamesSignup(models.Model):
+    gameday = models.ForeignKey(Gameday, on_delete=models.CASCADE)
+    official = models.ForeignKey(Official, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects: QuerySet = models.Manager()
+
+    def __str__(self):
+        return f'{self.gameday.name} - {self.official.name}'
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['gameday', 'official'], name='unique_gameday_and_official_id'),
+        ]
 
 
 class OfficialLicense(models.Model):

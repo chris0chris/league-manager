@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Datum</th>
+            <th scope="col">Spieltag</th>
+            <th scope="col">Liga</th>
+            <th scope="col">Anzahl</th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for gameday in gamedays %}
+        <tr>
+            <th scope="row">{{ gameday.date }}</th>
+            <td><a href="{% url url_pattern_gameday pk=gameday.pk %}">{{ gameday.name }}</a></td>
+            <td>{{ gameday.league.name }}</td>
+            <td>
+                <!-- Add other fields for the signup form (e.g., official's name, role) -->
+            </td>
+            <td>
+                <a href="{% url url_pattern_signup gameday=gameday.pk %}" class="btn btn-success"
+                   type="submit">Anmelden</a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

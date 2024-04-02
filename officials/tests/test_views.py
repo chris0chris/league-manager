@@ -3,16 +3,20 @@ from http import HTTPStatus
 from unittest.mock import patch, MagicMock
 
 from django.contrib.auth.models import User
+from django.contrib.messages import get_messages
+from django.test import TestCase, Client
 from django_webtest import WebTest, DjangoWebtestResponse
 from rest_framework.reverse import reverse
 
 from gamedays.models import Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from officials.models import Official
+from officials.models import Official, OfficialGamesSignup
+from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 from officials.urls import OFFICIALS_LIST_FOR_TEAM, OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE, \
-    OFFICIALS_LICENSE_CHECK
+    OFFICIALS_LICENSE_CHECK, OFFICIALS_MOODLE_LOGIN, OFFICIALS_SIGN_UP_LIST, OFFICIALS_SIGN_UP_FOR_GAMEDAY
+from officials.views import MOODLE_LOGGED_IN_USER, OfficialSignUpView
 
 
 class TestOfficialListView(WebTest):
@@ -114,3 +118,63 @@ class TestGameCountOfficials(WebTest):
         )
         assert len(response.context['officials_list']) == Official.objects.all().count()
         assert response.context['season'] == year
+
+
+class TestMoodleLogin(WebTest):
+    @patch.object(MoodleService, 'login')
+    def test_login_fails_with_form_error(self, moodle_login_mock: MagicMock):
+        error_text = 'Invalid login'
+        moodle_login_mock.side_effect = MoodleApiException(error_text)
+
+        response: DjangoWebtestResponse = self.app.get(
+            reverse(OFFICIALS_MOODLE_LOGIN)
+        )
+        response.form['username'] = 'invalid username'
+        response.form['password'] = 'secret password'
+        response = response.form.submit()
+        self.assertFormError(response, 'form', None, [error_text])
+
+    @patch.object(MoodleService, 'login')
+    def test_login_is_successful(self, moodle_login_mock: MagicMock):
+        official_id = 7
+        moodle_login_mock.return_value = official_id
+
+        response: DjangoWebtestResponse = self.app.get(
+            reverse(OFFICIALS_MOODLE_LOGIN)
+        )
+        response.form['username'] = 'valid username'
+        response.form['password'] = 'secret password'
+        response = response.form.submit()
+        assert response.client.session.get(MOODLE_LOGGED_IN_USER) == official_id
+        assert response.url == reverse(OFFICIALS_SIGN_UP_LIST)
+
+
+class TestOfficialSignUpListView(WebTest):
+    def test_redirect_to_login(self):
+        response: DjangoWebtestResponse = self.client.get(
+            reverse(OFFICIALS_SIGN_UP_LIST)
+        )
+        assert response.url == reverse(OFFICIALS_MOODLE_LOGIN)
+
+
+class TestOfficialSignUpView(TestCase):
+    def test_official_id_not_found_in_session(self):
+        response = self.client.get(reverse(OFFICIALS_SIGN_UP_FOR_GAMEDAY, args=[5]))
+        messages = list(get_messages(response.wsgi_request))
+        assert response.url == reverse(OFFICIALS_MOODLE_LOGIN)
+        assert messages[0].message == 'Die Session der Moodle-Anmeldung ist ausgelaufen. Bitte erneut anmelden.'
+
+    def test_user_is_already_signed_up_for_gameday(self):
+        DbSetupOfficials().create_officials_and_team()
+        gameday = DBSetup().create_empty_gameday()
+        official = Official.objects.first()
+        OfficialGamesSignup.objects.create(official=official, gameday=gameday)
+        self.client = Client()
+        session = self.client.session
+        session[MOODLE_LOGGED_IN_USER] = official.pk
+        session.save()
+
+        response = self.client.get(reverse(OFFICIALS_SIGN_UP_FOR_GAMEDAY, args=[gameday.pk]))
+        messages = list(get_messages(response.wsgi_request))
+        assert response.url == reverse(OFFICIALS_SIGN_UP_LIST)
+        assert messages[0].message == 'Du bist bereits für den Spieltag gemeldet.'

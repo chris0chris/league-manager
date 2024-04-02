@@ -2,7 +2,8 @@ from django.urls import path, re_path
 
 from officials.views import OfficialsTeamListView, AllOfficialsListView, GameOfficialListView, \
     AddInternalGameOfficialUpdateView, LicenseCheckForOfficials, MoodleReportView, \
-    OfficialProfileLicenseView, OfficialAssociationListView, OfficialProfileGamelistView
+    OfficialProfileLicenseView, OfficialAssociationListView, OfficialProfileGamelistView, OfficialSignUpListView, \
+    MoodleLoginView, OfficialSignUpView
 
 OFFICIALS_LIST_FOR_TEAM = 'view-officials-list-for-team'
 OFFICIALS_LIST_FOR_TEAM_AND_YEAR = 'view-officials-list-for-team-and-year'
@@ -17,6 +18,9 @@ OFFICIALS_MOODLE_REPORT = 'view-officials-moodle-report'
 OFFICIALS_PROFILE_LICENSE = 'view-officials-profile-license'
 OFFICIALS_PROFILE_GAMELIST = 'view-officials-profile-gamelist'
 OFFICIALS_ASSOCIATION_LIST = 'view-officials-association-list'
+OFFICIALS_MOODLE_LOGIN = 'view-officials-moodle-login'
+OFFICIALS_SIGN_UP_LIST = 'view-officials-sign-up-list'
+OFFICIALS_SIGN_UP_FOR_GAMEDAY = 'view-officials-sign-up-for-gameday'
 
 urlpatterns = [
     path('team/<int:pk>/list', OfficialsTeamListView.as_view(), name=OFFICIALS_LIST_FOR_TEAM),
@@ -34,5 +38,8 @@ urlpatterns = [
     path('profile/<int:pk>/gamelist/<int:season>', OfficialProfileGamelistView.as_view(),
          name=OFFICIALS_PROFILE_GAMELIST),
     path('<str:abbr>/list', OfficialAssociationListView.as_view(), name=OFFICIALS_ASSOCIATION_LIST),
+    path('games/sign-up/login', MoodleLoginView.as_view(), name=OFFICIALS_MOODLE_LOGIN),
+    path('games/sign-up', OfficialSignUpListView.as_view(), name=OFFICIALS_SIGN_UP_LIST),
+    path('games/sign-up/<int:gameday>', OfficialSignUpView.as_view(), name=OFFICIALS_SIGN_UP_FOR_GAMEDAY),
 
 ]

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="content-section">
+    <form method="POST">
+        {% csrf_token %}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">
+                Moodle-Login
+            </legend>
+            <p>
+                Um sich für einen Spieltag anzumelden, muss vorher über deinen Moodle-Account überprüft werden,
+                wer du bist und ob du eine Lizenz hast.<br/>
+                Gib hierzu bitte deine Moodle-Login Daten ein
+            </p>
+            {{ form | crispy }}
+        </fieldset>
+        <div class="form-group">
+            <button class="btn btn-outline-info" type="submit">
+                Anmelden
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock content %}
