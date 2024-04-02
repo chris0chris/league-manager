@@ -14,9 +14,3 @@ class MoodleLoginForm(forms.Form):
     username = forms.CharField(label='Benutername',
                                widget=forms.TextInput(attrs={'placeholder': 'Benutername / E-Mail-Adresse'}))
     password = forms.CharField(label='Passwort', widget=forms.PasswordInput(attrs={'placeholder': 'Passwort'}))
-
-
-class OfficialGamesSignupForm(forms.ModelForm):
-    class Meta:
-        model = OfficialGamesSignup
-        fields = ['gameday', 'official']

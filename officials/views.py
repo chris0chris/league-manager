@@ -16,7 +16,7 @@ from django.views.decorators.cache import cache_page
 from gamedays.models import Team, Gameinfo, GameOfficial, Gameresult, Gameday
 from league_manager.utils.view_utils import PermissionHelper
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
-from officials.forms import AddInternalGameOfficialEntryForm, MoodleLoginForm, OfficialGamesSignupForm
+from officials.forms import AddInternalGameOfficialEntryForm, MoodleLoginForm
 from officials.models import Official, OfficialGamesSignup
 from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
