@@ -1,33 +1,62 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="content-section">
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th scope="col">Datum</th>
-            <th scope="col">Spieltag</th>
-            <th scope="col">Liga</th>
-            <th scope="col">Anzahl</th>
-            <th scope="col"></th>
-            <th scope="col"></th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for gameday in gamedays %}
-        <tr>
-            <th scope="row">{{ gameday.date }}</th>
-            <td><a href="{% url url_pattern_gameday pk=gameday.pk %}">{{ gameday.name }}</a></td>
-            <td>{{ gameday.league.name }}</td>
-            <td>
-                <!-- Add other fields for the signup form (e.g., official's name, role) -->
-            </td>
-            <td>
-                <a href="{% url url_pattern_signup gameday=gameday.pk %}" class="btn btn-success"
-                   type="submit">Anmelden</a>
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="media-body">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Datum</th>
+                <th scope="col">Spieltag</th>
+                <th scope="col">Liga</th>
+                <th scope="col">Anzahl</th>
+                <th scope="col">Status</th>
+                <th scope="col">Gemeldet</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for gameday in gamedays %}
+            <tr>
+                <th scope="row">{{ gameday.date }}</th>
+                <td><a href="{% url url_pattern_gameday pk=gameday.pk %}">{{ gameday.name }}</a></td>
+                <td>{{ gameday.league }}</td>
+                <td>
+                    <span data-bs-title="{{ gameday.official_names }}" data-bs-toggle="tooltip">{{ gameday.count_signup }} / {{ gameday.limit_signup}}</span>
+                </td>
+                <td>
+                    <div class="d-grid">
+                        {% if gameday.has_signed_up %}
+                        <a href="{% url url_pattern_signup gameday=gameday.pk %}" role="button"
+                           class="btn btn-danger">Abmelden</a>
+                        {% else %}
+                        {% if gameday.count_signup == gameday.limit_signup %}
+                        <a href="#" role="button" class="btn btn-warning disabled" tabindex="-1"
+                           aria-disabled="true">Ausgebucht</a>
+                        {% else %}
+                        <a href="{% url url_pattern_signup gameday=gameday.pk %}" role="button"
+                           class="btn btn-success">Anmelden</a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    {% for official in gameday.officials %}
+                    {% if official.pk == official_id %}
+                    <a href="{% url url_pattern_official pk=official.pk %}"><span
+                            class="badge text-bg-success rounded-pill">{{ official.name }}</span></a>
+                    {% else %}
+                    <a href="{% url url_pattern_official pk=official.pk %}"><span
+                            class="badge text-bg-primary rounded-pill">{{ official.name }}</span></a>
+                    {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
 {% endblock content %}

@@ -1,10 +1,10 @@
 import json
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db import IntegrityError
 from django.db.models import Subquery, OuterRef, Q
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -13,14 +13,14 @@ from django.utils.safestring import mark_safe
 from django.views import View
 from django.views.decorators.cache import cache_page
 
-from gamedays.models import Team, Gameinfo, GameOfficial, Gameresult, Gameday
+from gamedays.models import Team, Gameinfo, GameOfficial, Gameresult
 from league_manager.utils.view_utils import PermissionHelper
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
 from officials.forms import AddInternalGameOfficialEntryForm, MoodleLoginForm
-from officials.models import Official, OfficialGamesSignup
+from officials.models import Official
 from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
-from officials.service.official_service import OfficialService
+from officials.service.official_service import OfficialService, DuplicateEntryError
 
 MOODLE_LOGGED_IN_USER = 'moodle_logged_in_user'
 
@@ -325,17 +325,23 @@ class OfficialSignUpListView(View):
     template_name = 'officials/signup/sign_up_list.html'
 
     def get(self, request, *args, **kwargs):
-        if request.session.get(MOODLE_LOGGED_IN_USER) is None:
-            from officials.urls import OFFICIALS_MOODLE_LOGIN
-            return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
+        official_id = request.session.get(MOODLE_LOGGED_IN_USER)
+        if official_id is None:
+            if settings.DEBUG:
+                official_id = 1
+            else:
+                from officials.urls import OFFICIALS_MOODLE_LOGIN
+                return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
         request.session.set_expiry(600)
-        gamedays = Gameday.objects.filter(date__gte=datetime.today())
         from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
         from officials.urls import OFFICIALS_SIGN_UP_FOR_GAMEDAY
+        from officials.urls import OFFICIALS_PROFILE_LICENSE
         context = {
-            'gamedays': gamedays,
+            'gamedays': OfficialService.get_signup_data(official_id),
+            'official_id': official_id,
             'url_pattern_gameday': LEAGUE_GAMEDAY_DETAIL,
             'url_pattern_signup': OFFICIALS_SIGN_UP_FOR_GAMEDAY,
+            'url_pattern_official': OFFICIALS_PROFILE_LICENSE,
         }
         return render(request, self.template_name, context)
 
@@ -349,8 +355,8 @@ class OfficialSignUpView(View):
             from officials.urls import OFFICIALS_MOODLE_LOGIN
             return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
         try:
-            OfficialGamesSignup.objects.create(gameday_id=gameday_id, official_id=official_id)
-        except IntegrityError:
-            messages.error(request, 'Du bist bereits für den Spieltag gemeldet.')
+            OfficialService.create_signup(gameday_id=gameday_id, official_id=official_id)
+        except DuplicateEntryError as exception:
+            messages.error(request, f'Du bist bereits für den Spieltag gemeldet: {exception}')
         from officials.urls import OFFICIALS_SIGN_UP_LIST
         return redirect(reverse(OFFICIALS_SIGN_UP_LIST))

@@ -27,7 +27,7 @@ class Official(models.Model):
                 f'{"NONE" if self.association is None else self.association.name})')
 
 
-class OfficialGamesSignup(models.Model):
+class OfficialGamedaySignup(models.Model):
     gameday = models.ForeignKey(Gameday, on_delete=models.CASCADE)
     official = models.ForeignKey(Official, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

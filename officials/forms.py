@@ -1,7 +1,5 @@
 from django import forms
 
-from officials.models import OfficialGamesSignup
-
 
 class AddInternalGameOfficialEntryForm(forms.Form):
     entries = forms.CharField(widget=forms.Textarea, label='Spieleinträge',

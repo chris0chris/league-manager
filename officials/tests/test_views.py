@@ -10,7 +10,7 @@ from rest_framework.reverse import reverse
 
 from gamedays.models import Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from officials.models import Official, OfficialGamesSignup
+from officials.models import Official, OfficialGamedaySignup
 from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
@@ -168,7 +168,7 @@ class TestOfficialSignUpView(TestCase):
         DbSetupOfficials().create_officials_and_team()
         gameday = DBSetup().create_empty_gameday()
         official = Official.objects.first()
-        OfficialGamesSignup.objects.create(official=official, gameday=gameday)
+        OfficialGamedaySignup.objects.create(official=official, gameday=gameday)
         self.client = Client()
         session = self.client.session
         session[MOODLE_LOGGED_IN_USER] = official.pk
@@ -177,4 +177,4 @@ class TestOfficialSignUpView(TestCase):
         response = self.client.get(reverse(OFFICIALS_SIGN_UP_FOR_GAMEDAY, args=[gameday.pk]))
         messages = list(get_messages(response.wsgi_request))
         assert response.url == reverse(OFFICIALS_SIGN_UP_LIST)
-        assert messages[0].message == 'Du bist bereits für den Spieltag gemeldet.'
+        assert messages[0].message == 'Du bist bereits für den Spieltag gemeldet: Test Spieltag'

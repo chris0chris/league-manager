@@ -1,14 +1,24 @@
 from datetime import datetime
 
-from django.db.models import Sum
+from django.db import IntegrityError
+from django.db.models import Sum, Case, When, BooleanField, Count, OuterRef, Exists, Subquery, Func, IntegerField, F, \
+    Value, CharField
+from django.db.models.functions import Concat
 
-from gamedays.models import Team
+from gamedays.models import Team, Gameday
 from gamedays.service.team_repository_service import TeamRepositoryService
 from officials.api.serializers import OfficialGameCountSerializer
-from officials.models import Official
+from officials.models import Official, OfficialGamedaySignup
+from officials.serializers import OfficialGamedaySignupSerializer
 from officials.service.game_official_entries import InternalGameOfficialEntry, ExternalGameOfficialEntry
 from officials.service.moodle.moodle_service import MoodleService
 from officials.service.officials_repository_service import OfficialsRepositoryService
+
+OFFICIALS_PER_FIELD = 6
+
+
+class DuplicateEntryError(Exception):
+    pass
 
 
 class OfficialService:
@@ -86,3 +96,55 @@ class OfficialService:
         all_external_games_count = external_official_qs.aggregate(num_games=Sum('number_games')).get('num_games',
                                                                                                      0) or 0
         return all_external_games_count
+
+    @staticmethod
+    def create_signup(gameday_id, official_id):
+        gameday = Gameday.objects.get(pk=gameday_id)
+        try:
+            OfficialGamedaySignup.objects.create(gameday=gameday, official_id=official_id)
+        except IntegrityError:
+            raise DuplicateEntryError(f'{gameday.name}')
+
+    @staticmethod
+    def get_signup_data(official_id):
+        signed_up_officials = OfficialGamedaySignup.objects.filter(
+            gameday_id=OuterRef('pk'),
+            official_id=official_id
+        ).values('gameday_id')
+
+        names_signed_up_officials = OfficialGamedaySignup.objects.filter(
+            gameday_id=OuterRef('pk')
+        ).annotate(
+            full_name=Concat('official__pk', Value('#'), 'official__first_name', Value(' '), 'official__last_name')
+        ).order_by('official__first_name').values_list('full_name', flat=True)
+
+        all_gamedays = Gameday.objects.filter(date__gte=datetime.today()).annotate(
+            has_signed_up=Case(
+                When(pk__in=Subquery(signed_up_officials), then=True),
+                default=False,
+                output_field=BooleanField()
+            ),
+            count_signup=Count('officialgamedaysignup'),
+            limit_signup=(GetFieldPart(F('format'), output_field=IntegerField())) * OFFICIALS_PER_FIELD,
+            official_names=Subquery(
+                names_signed_up_officials.annotate(
+                    names=ConcatOfficialsNames(F('full_name'))
+                ).order_by('full_name').values('names'),
+                output_field=CharField()
+            )
+        ).order_by('date', 'pk')
+
+        return OfficialGamedaySignupSerializer(all_gamedays.values(*OfficialGamedaySignupSerializer.ALL_FIELD_VALUES),
+                                               many=True).data
+
+
+class GetFieldPart(Func):
+    function = 'SUBSTRING_INDEX'
+    template = "%(function)s(%(expressions)s, '_', -1)"
+    output_field = IntegerField()
+
+
+class ConcatOfficialsNames(Func):
+    function = 'GROUP_CONCAT'
+    template = "%(function)s(%(expressions)s SEPARATOR ', ')"
+    output_field = CharField()
