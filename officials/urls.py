@@ -38,8 +38,8 @@ urlpatterns = [
     path('profile/<int:pk>/gamelist/<int:season>', OfficialProfileGamelistView.as_view(),
          name=OFFICIALS_PROFILE_GAMELIST),
     path('<str:abbr>/list', OfficialAssociationListView.as_view(), name=OFFICIALS_ASSOCIATION_LIST),
-    path('games/sign-up/login', MoodleLoginView.as_view(), name=OFFICIALS_MOODLE_LOGIN),
-    path('games/sign-up', OfficialSignUpListView.as_view(), name=OFFICIALS_SIGN_UP_LIST),
-    path('games/sign-up/<int:gameday>', OfficialSignUpView.as_view(), name=OFFICIALS_SIGN_UP_FOR_GAMEDAY),
+    path('gameday/sign-up/login', MoodleLoginView.as_view(), name=OFFICIALS_MOODLE_LOGIN),
+    path('gameday/sign-up', OfficialSignUpListView.as_view(), name=OFFICIALS_SIGN_UP_LIST),
+    path('gameday/sign-up/<int:gameday>', OfficialSignUpView.as_view(), name=OFFICIALS_SIGN_UP_FOR_GAMEDAY),
 
 ]

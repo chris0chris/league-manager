@@ -20,7 +20,8 @@ from officials.forms import AddInternalGameOfficialEntryForm, MoodleLoginForm
 from officials.models import Official
 from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
-from officials.service.official_service import OfficialService, DuplicateEntryError
+from officials.service.official_service import OfficialService
+from officials.service.signup_service import OfficialSignupService, DuplicateSignupError
 
 MOODLE_LOGGED_IN_USER = 'moodle_logged_in_user'
 
@@ -337,7 +338,7 @@ class OfficialSignUpListView(View):
         from officials.urls import OFFICIALS_SIGN_UP_FOR_GAMEDAY
         from officials.urls import OFFICIALS_PROFILE_LICENSE
         context = {
-            'gamedays': OfficialService.get_signup_data(official_id),
+            'gamedays': OfficialSignupService.get_signup_data(official_id),
             'official_id': official_id,
             'url_pattern_gameday': LEAGUE_GAMEDAY_DETAIL,
             'url_pattern_signup': OFFICIALS_SIGN_UP_FOR_GAMEDAY,
@@ -355,8 +356,8 @@ class OfficialSignUpView(View):
             from officials.urls import OFFICIALS_MOODLE_LOGIN
             return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
         try:
-            OfficialService.create_signup(gameday_id=gameday_id, official_id=official_id)
-        except DuplicateEntryError as exception:
+            OfficialSignupService.create_signup(gameday_id=gameday_id, official_id=official_id)
+        except DuplicateSignupError as exception:
             messages.error(request, f'Du bist bereits für den Spieltag gemeldet: {exception}')
         from officials.urls import OFFICIALS_SIGN_UP_LIST
         return redirect(reverse(OFFICIALS_SIGN_UP_LIST))

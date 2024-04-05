@@ -9,6 +9,24 @@ from officials.tests.setup_factories.factories_officials import OfficialFactory,
 
 
 class DbSetupOfficials:
+    def create_multiple_officials(self, number: int, team: Team=None):
+        if team is None:
+            team_name = 'Test Team'
+            DBSetup().create_new_user(team_name)
+            team = TeamFactory(name=team_name)
+        association = DBSetup().create_new_association()
+        license_f2 = OfficialLicenseFactory(name='F2')
+        license_f1 = OfficialLicenseFactory(name='F1')
+        for i in range(number):
+            official = OfficialFactory(first_name='Juli' + 'i'*i, last_name='Jarula' + 'a'*i, team=team, association=association,
+                                       external_id=i*10)
+            if i % 2 == 0:
+                OfficialLicenseHistoryFactory(license=license_f1, official=official,
+                                              created_at='2020-07-07')
+            else:
+                OfficialLicenseHistoryFactory(license=license_f2, official=official,
+                                              created_at='2020-07-07')
+
     # noinspection PyMethodMayBeStatic
     def create_officials_and_team(self) -> Team:
         team_name = 'Test Team'
