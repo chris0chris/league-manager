@@ -44,14 +44,18 @@ class ApiUserInfo:
         value = self._get_custom_field_value(1, 'Landesverband')
         return value == 'Ja.'
 
-    def _get_custom_field_value(self, custom_field_index: int, expected_field_name):
+    def _get_custom_field_value(self, f, expected_field_name):
+        found_entry = {}
         try:
-            custom_field = self.custom_fields[custom_field_index]
+            for item in self.custom_fields:
+                if item.get('shortname') == expected_field_name:
+                    found_entry = item
+                    break
         except IndexError:
             return ''
-        if custom_field.get('shortname', expected_field_name) != expected_field_name:
+        if found_entry == {}:
             raise FieldNotFoundException(expected_field_name, self.custom_fields)
-        return custom_field.get('value', '')
+        return found_entry.get('value', '')
 
     def __str__(self):
         return f'{self.id}: {self.last_name}, {self.first_name} -> {self.get_team()}'
@@ -175,8 +179,11 @@ class MoodleApi:
     def __str__(self):
         return f'{settings.MOODLE_URL}'
 
-    def get_courses(self) -> ApiCourses:
-        return ApiCourses(self._send_request('&wsfunction=core_course_get_courses_by_field'))
+    def get_courses(self, ids: str = None) -> ApiCourses:
+        if ids is None:
+            return ApiCourses(self._send_request('&wsfunction=core_course_get_courses_by_field'))
+        return ApiCourses(self._send_request(f'&wsfunction=core_course_get_courses_by_field&field=ids&value={ids}'))
+
 
     def get_participants_for_course(self, course_id) -> ApiParticipants:
         return ApiParticipants(self._send_request(

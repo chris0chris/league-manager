@@ -62,7 +62,9 @@ class MoodleService:
         return participants_ids
 
     def update_licenses(self):
-        courses: ApiCourses = self.moodle_api.get_courses()
+        course_ids = None
+        # course_ids = '28'
+        courses: ApiCourses = self.moodle_api.get_courses(course_ids)
         missing_team_names = set()
         result_list = []
         missed_officials_list = []
