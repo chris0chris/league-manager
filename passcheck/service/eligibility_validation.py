@@ -43,6 +43,8 @@ class EligibilityValidator:
         return self.final_validator.is_valid(player)
 
     def get_max_subs(self):
+        if self.rule.max_subs_in_other_leagues < 0:
+            return {}
         return {
             'max_subs_in_other_leagues': self.rule.max_subs_in_other_leagues
         }
