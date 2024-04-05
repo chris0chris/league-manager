@@ -14,7 +14,7 @@ from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, Pa
 from passcheck.service.eligibility_validation import EligibilityValidator
 
 # PASSCHECK_DATE = datetime.date(2021, 6, 26)
-PASSCHECK_DATE = datetime.date(2024, 3, 30)
+PASSCHECK_DATE = datetime.date(2024, 4, 6)
 
 
 class PasscheckException(Exception):
@@ -227,6 +227,10 @@ class PasscheckService:
 
     def get_passcheck_status(self, officials_team: str):
         team = self._get_team(officials_team)
+        if team is None:
+            return {
+                'completed': False
+            }
         date = datetime.datetime.today()
         if settings.DEBUG:
             date = PASSCHECK_DATE

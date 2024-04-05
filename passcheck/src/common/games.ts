@@ -30,5 +30,5 @@ export const submitRoster = async (
 };
 
 export const getApprovalUrl = async (teamId: string): Promise<string> => {
-  return await apiGet(`api/passcheck/approval/team/${teamId}`)
+  return await apiGet(`/api/passcheck/approval/team/${teamId}`)
 }
