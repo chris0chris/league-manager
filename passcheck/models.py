@@ -103,7 +103,8 @@ class EligibilityRule(models.Model):
 
     class Meta:
         constraints = [
-            models.CheckConstraint(check=models.Q(maximum_player_strength__gte=models.F('minimum_player_strength')),
+            models.CheckConstraint(check=(Q(maximum_player_strength=-1) | models.Q(
+                maximum_player_strength__gte=models.F('minimum_player_strength'))),
                                    name='maximum_player_strength_must_be_greater_equal_minimum'),
 
         ]

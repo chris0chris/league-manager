@@ -48,6 +48,10 @@ class EligibilityValidator:
         }
 
     def get_player_strength(self):
+        if self.rule.maximum_player_strength < 0:
+            return {
+                'minimum_player_strength': self.rule.minimum_player_strength,
+            }
         return {
             'minimum_player_strength': self.rule.minimum_player_strength,
             'maximum_player_strength': self.rule.maximum_player_strength,
