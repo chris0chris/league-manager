@@ -13,6 +13,12 @@
                 Erstellen der Rosterliste von {{ user }}
                 {% endif %}
             </legend>
+            {% if object %}
+            <div class="alert alert-warning" role="alert">
+                Die <b>Passnummer</b> ist nicht bearbeitbar. Wenn diese nicht stimmen sollte, dann schicke bitte eine
+                entsprechende Mail an deine Ligaorganisation.
+            </div>
+            {% endif %}
             {{ form|crispy }}
         </fieldset>
         <div class="form-group">

@@ -36,3 +36,14 @@ class PlayerlistCreateForm(forms.ModelForm):
             self.fields['team'].queryset = Team.objects.all()
         else:
             self.fields['team'].widget = forms.HiddenInput()
+
+
+class PlayerlistUpdateForm(PlayerlistCreateForm):
+
+    def __init__(self, *args, **kwargs):
+        super(PlayerlistCreateForm, self).__init__(*args, **kwargs)
+
+        self.fields['pass_number'].widget.attrs['readonly'] = 'true'
+        self.fields['pass_number'].help_text = ('Die Passnummer ist nicht bearbeitbar. '
+                                                'Wenn diese nicht stimmen sollte, '
+                                                'dann schicke bitte eine entsprechende Mail an deine Ligaorganisation.')

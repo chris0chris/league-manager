@@ -8,7 +8,7 @@ from django.views.generic import CreateView, TemplateView, UpdateView
 from gamedays.models import Team
 from league_manager.utils.decorators import get_user_request_permission
 from league_manager.utils.view_utils import PermissionHelper
-from .forms import PlayerlistCreateForm
+from .forms import PlayerlistCreateForm, PlayerlistUpdateForm
 from .models import Playerlist
 from .service.passcheck_service import PasscheckService
 
@@ -79,9 +79,11 @@ class PlayerlistCreateView(PlayerlistCommonMixin, UserPassesTestMixin, CreateVie
 
 
 class PlayerlistUpdateView(PlayerlistCommonMixin, UserPassesTestMixin, UpdateView):
+    form_class = PlayerlistUpdateForm
+
     def get_success_url(self):
         from passcheck.urls import PASSCHECK_ROSTER_LIST
-        return reverse(PASSCHECK_ROSTER_LIST, kwargs={'team': self.object.team_id})
+        return reverse(PASSCHECK_ROSTER_LIST, kwargs={'pk': self.object.team_id})
 
     def test_func(self):
         player = Playerlist.objects.get(pk=self.kwargs.get('pk'))
