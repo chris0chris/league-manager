@@ -137,27 +137,30 @@ class PasscheckService:
         relationship = self._get_team_relationship(team_id)
         additional_teams_serialized = []
         for additional_team_link in relationship:
-            additional_relation = additional_team_link.relationship_team
-            gameday_league_annotation = {
-                f'{gameday.league_id}': Count('gamedays__league',
-                                              filter=(Q(gamedays__league=gameday.league) &
-                                                      Q(gamedays__date__year=gameday.date.year) &
-                                                      ~Q(gamedays__id=gameday_id)))}
-            roster_addiational_team = self._get_roster(additional_relation.team.pk, gameday_id,
-                                                       gameday_league_annotation)
-            if not roster_addiational_team.exists():
-                continue
-            ev = EligibilityValidator(additional_relation.league, gameday)
-            team_data = TeamData(
-                name=additional_relation.team.description,
-                roster=RosterValidationSerializer(instance=roster_addiational_team,
-                                                  is_staff=self.user_permission.is_user_or_staff(),
-                                                  context={'validator': ev, 'all_leagues': [
-                                                      {'gamedays__league': gameday.league_id}]
-                                                           },
-                                                  many=True).data,
-                validator=ev.get_max_subs()
-            )
+            try:
+                additional_relation = additional_team_link.relationship_team
+                gameday_league_annotation = {
+                    f'{gameday.league_id}': Count('gamedays__league',
+                                                  filter=(Q(gamedays__league=gameday.league) &
+                                                          Q(gamedays__date__year=gameday.date.year) &
+                                                          ~Q(gamedays__id=gameday_id)))}
+                roster_addiational_team = self._get_roster(additional_relation.team.pk, gameday_id,
+                                                           gameday_league_annotation)
+                if not roster_addiational_team.exists():
+                    continue
+                ev = EligibilityValidator(additional_relation.league, gameday)
+                team_data = TeamData(
+                    name=additional_relation.team.description,
+                    roster=RosterValidationSerializer(instance=roster_addiational_team,
+                                                      is_staff=self.user_permission.is_user_or_staff(),
+                                                      context={'validator': ev, 'all_leagues': [
+                                                          {'gamedays__league': gameday.league_id}]
+                                                               },
+                                                      many=True).data,
+                    validator=ev.get_max_subs()
+                )
+            except Team.relationship_team.RelatedObjectDoesNotExist:
+                team_data = TeamData(f'{additional_team_link.description} fehlt als Relationship Team', [], {})
             additional_teams_serialized.append(team_data)
         team['additionalTeams'] = additional_teams_serialized
         return team
