@@ -21,7 +21,7 @@ from officials.models import Official
 from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
 from officials.service.official_service import OfficialService
-from officials.service.signup_service import OfficialSignupService, DuplicateSignupError
+from officials.service.signup_service import OfficialSignupService, DuplicateSignupError, MaxSignupError
 
 MOODLE_LOGGED_IN_USER = 'moodle_logged_in_user'
 
@@ -348,7 +348,7 @@ class OfficialSignUpListView(View):
 
 
 class OfficialSignUpView(View):
-    def get(self, request, *args, **kwargs):
+    def get(self, request, **kwargs):
         gameday_id = kwargs.get('gameday')
         official_id = request.session.get(MOODLE_LOGGED_IN_USER)
         if official_id is None:
@@ -359,5 +359,7 @@ class OfficialSignUpView(View):
             OfficialSignupService.create_signup(gameday_id=gameday_id, official_id=official_id)
         except DuplicateSignupError as exception:
             messages.error(request, f'Du bist bereits für den Spieltag gemeldet: {exception}')
+        except MaxSignupError as exception:
+            messages.error(request, f'{exception}')
         from officials.urls import OFFICIALS_SIGN_UP_LIST
         return redirect(reverse(OFFICIALS_SIGN_UP_LIST))

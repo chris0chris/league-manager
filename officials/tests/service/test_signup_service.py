@@ -36,4 +36,3 @@ class TestOfficialSignupService(TestCase):
         signup = OfficialGamedaySignup.objects.first()
         assert signup.gameday == gameday
         assert signup.official == official
-

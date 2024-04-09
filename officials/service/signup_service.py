@@ -7,7 +7,7 @@ from django.db.models.functions import Concat
 
 from gamedays.models import Gameday
 from officials.models import OfficialGamedaySignup
-from officials.serializers import OfficialGamedaySignupSerializer
+from officials.serializers import OfficialGamedaySignupSerializer, GamedaySignedUpOfficialsSerializer
 
 OFFICIALS_PER_FIELD = 6
 
@@ -64,6 +64,14 @@ class OfficialSignupService:
 
         return OfficialGamedaySignupSerializer(all_gamedays.values(*OfficialGamedaySignupSerializer.ALL_FIELD_VALUES),
                                                many=True).data
+
+    @staticmethod
+    def get_signed_up_officials(gameday_id, show_officials_names):
+        signed_up_officials = OfficialGamedaySignup.objects.filter(gameday_id=gameday_id)
+        return GamedaySignedUpOfficialsSerializer(
+            instance=signed_up_officials.values(*GamedaySignedUpOfficialsSerializer.ALL_FIELD_VALUES),
+            is_staff=show_officials_names,
+            many=True).data
 
 
 class ExtractFieldPart(Func):

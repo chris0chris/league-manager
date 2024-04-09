@@ -1,6 +1,10 @@
 from rest_framework.fields import CharField, SerializerMethodField, BooleanField, IntegerField, DateField
 from rest_framework.serializers import Serializer
 
+from league_manager.utils.serializer_utils import ObfuscatorSerializer, ObfuscateField
+
+
+
 
 class OfficialGamedaySignupSerializer(Serializer):
     PK_C = 'pk'
@@ -12,7 +16,8 @@ class OfficialGamedaySignupSerializer(Serializer):
     COUNT_SIGNUP_C = 'count_signup'
     LEAGUE__NAME = 'league__name'
 
-    ALL_FIELD_VALUES = [PK_C, DATE_C, NAME_C, OFFICIAL_NAMES_C, HAS_SIGNED_UP_C, LIMIT_SIGNUP_C, COUNT_SIGNUP_C, LEAGUE__NAME]
+    ALL_FIELD_VALUES = [PK_C, DATE_C, NAME_C, OFFICIAL_NAMES_C, HAS_SIGNED_UP_C, LIMIT_SIGNUP_C, COUNT_SIGNUP_C,
+                        LEAGUE__NAME]
     pk = CharField()
     date = DateField()
     name = CharField()
@@ -34,3 +39,13 @@ class OfficialGamedaySignupSerializer(Serializer):
                 'name': official_pk_and_name[1]
             }]
         return all_officials
+
+
+class GamedaySignedUpOfficialsSerializer(ObfuscatorSerializer):
+    LAST_NAME_C = 'official__last_name'
+    FIRST_NAME_C = 'official__first_name'
+    PK = 'official__pk'
+    ALL_FIELD_VALUES = [PK, FIRST_NAME_C, LAST_NAME_C]
+    id = IntegerField(source=PK)
+    first_name = ObfuscateField(field_name=FIRST_NAME_C)
+    last_name = ObfuscateField(field_name=LAST_NAME_C)
