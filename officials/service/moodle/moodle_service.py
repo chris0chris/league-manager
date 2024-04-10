@@ -1,9 +1,28 @@
+import concurrent
+from concurrent.futures import ThreadPoolExecutor
+from time import time
+
 from django.core.exceptions import MultipleObjectsReturned
 from django.db.models import QuerySet
 
 from gamedays.models import Association, Team
 from officials.models import OfficialLicenseHistory, Official
-from officials.service.moodle.moodle_api import MoodleApi, ApiUserInfo, ApiCourses, ApiParticipants, ApiUpdateUser
+from officials.service.moodle.moodle_api import MoodleApi, ApiUserInfo, ApiCourses, ApiParticipants, ApiUpdateUser, \
+    ApiCourse
+
+
+def measure_execution_time(func):
+    def wrapper(*args, **kwargs):
+        start_time = time()
+        result = func(*args, **kwargs)
+        end_time = time()
+        execution_time = end_time - start_time
+        minutes = int(execution_time // 60)
+        seconds = int(execution_time % 60)
+        formatted_time = f"{minutes:02d}:{seconds:02d}"
+        return result, formatted_time
+
+    return wrapper
 
 
 class LicenseCalculator:
@@ -61,28 +80,51 @@ class MoodleService:
             participants_ids += [current_participant.user_id]
         return participants_ids
 
-    def update_licenses(self):
-        course_ids = None
-        # course_ids = '28'
+    @measure_execution_time
+    def update_licenses(self, course_ids: str = None):
         courses: ApiCourses = self.moodle_api.get_courses(course_ids)
         missing_team_names = set()
         result_list = []
         missed_officials_list = []
-        for current_course in courses.get_all():
-            team_name_set, missed_official, officials = self.get_participants_from_course(current_course)
-            missing_team_names.update(team_name_set)
-            missed_officials_list += missed_official
-            result_list += officials
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            # Submit each course update task to the thread pool
+            futures = {executor.submit(self.get_participants_from_course, current_course): current_course for
+                       current_course in
+                       courses.get_all()}
+
+            for future in concurrent.futures.as_completed(futures):
+                course = futures[future]
+                try:
+                    team_name_set, missed_official, course_result = future.result()
+                    missing_team_names.update(team_name_set)
+                    missed_officials_list += missed_official
+                    result_list += [course_result]
+                except Exception as e:
+                    print(f"An error occurred while processing course {course}: {e}")
 
         return {
             'items_result_list': len(result_list),
             'items_missed_officials': len(missed_officials_list),
             'result_list': result_list,
             'missed_officials': missed_officials_list,
-            'missing_team_names': sorted(missing_team_names)
+            'missing_team_names': sorted(missing_team_names),
         }
 
-    def get_participants_from_course(self, course):
+    def get_participants_from_course(self, course: ApiCourse):
+        result = self.get_participants_from_course_with_time_measure(course)
+        team_name_set, missed_official, officials = result[0]
+        formatted_time = result[1]
+        course_result = {
+            "course": course.get_name(),
+            "execution_time": formatted_time,
+            "officials_count": len(officials),
+            "officials": officials,
+        }
+        return team_name_set, missed_official, course_result
+
+    @measure_execution_time
+    def get_participants_from_course_with_time_measure(self, course: ApiCourse):
         if course.is_relevant():
             self.license_history = OfficialLicenseHistory.objects.filter(created_at__year=course.get_year())
             return self.get_participants_from_relevant_course(course)

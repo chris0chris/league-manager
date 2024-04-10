@@ -66,6 +66,7 @@ class ApiCourse:
         self.end_date = datetime.fromtimestamp(course_json['enddate'])
         self.license_id = self._map_category_to_license_id(course_json['categoryid'])
         self.course_id = course_json['id']
+        self.name = course_json['fullname']
 
     def __str__(self):
         return f'{self.course_id}: license_id {self.license_id} # {self.end_date}'
@@ -101,6 +102,9 @@ class ApiCourse:
         if self.course_id == 15:
             return 1
         return self.license_id
+
+    def get_name(self):
+        return self.name
 
 
 class ApiCourses:
