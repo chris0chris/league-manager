@@ -1,6 +1,7 @@
 import concurrent
 from concurrent.futures import ThreadPoolExecutor
 from time import time
+from datetime import datetime
 
 from django.core.exceptions import MultipleObjectsReturned
 from django.db.models import QuerySet
@@ -86,7 +87,8 @@ class MoodleService:
         missing_team_names = set()
         result_list = []
         missed_officials_list = []
-
+        year = datetime.today().year
+        self.license_history = OfficialLicenseHistory.objects.filter(created_at__year=year)
         with ThreadPoolExecutor(max_workers=10) as executor:
             # Submit each course update task to the thread pool
             futures = {executor.submit(self.get_participants_from_course, current_course): current_course for
@@ -126,7 +128,6 @@ class MoodleService:
     @measure_execution_time
     def get_participants_from_course_with_time_measure(self, course: ApiCourse):
         if course.is_relevant():
-            self.license_history = OfficialLicenseHistory.objects.filter(created_at__year=course.get_year())
             return self.get_participants_from_relevant_course(course)
         return set(), [], []
 
