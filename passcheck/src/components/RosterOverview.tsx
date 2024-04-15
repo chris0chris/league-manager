@@ -226,6 +226,28 @@ function RosterOverview() {
           )}
         </div>
       </div>
+      {showStartButton && (
+        <>
+          <Button
+            variant="success"
+            type="button"
+            onClick={() => {
+              setShowPlayerModal(true);
+              setShowStartButton(false);
+            }}
+            className="full-width-button mb-3"
+          >
+            Passcheck starten
+          </Button>
+        </>
+      )}
+      {!showStartButton && (
+        <div className="row justify-content-center">
+        <div className="col-auto">
+        Zum Auswählen auf Name klicken
+        </div>
+      </div>
+      )}
       <RosterTable
         team={team}
         filteredRoster={filteredRoster}
@@ -281,21 +303,6 @@ function RosterOverview() {
           {isApprovalUrlLoaded ? 'Genehmigung wird geladen ...': 'Equipment-Genehmigung öffnen'}
         </Button>
       </div>
-      {showStartButton && (
-        <>
-          <Button
-            variant="success"
-            type="button"
-            onClick={() => {
-              setShowPlayerModal(true);
-              setShowStartButton(false);
-            }}
-            className="full-width-button"
-          >
-            Passcheck starten
-          </Button>
-        </>
-      )}
       {!showStartButton && (
         <form onSubmit={handleSubmit}>
           <FloatingLabel
