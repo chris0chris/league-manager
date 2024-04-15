@@ -10,11 +10,11 @@ from league_manager.utils.view_utils import UserRequestPermission
 from passcheck.api.serializers import PasscheckGamesListSerializer, RosterSerializer, \
     RosterValidationSerializer, PlayerAllGamedaysSerializer
 from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, PasscheckVerification, \
-    EmptyPasscheckVerification
+    EmptyPasscheckVerification, EligibilityRule
 from passcheck.service.eligibility_validation import EligibilityValidator
 
 # PASSCHECK_DATE = datetime.date(2021, 6, 26)
-PASSCHECK_DATE = datetime.date(2024, 4, 6)
+PASSCHECK_DATE = datetime.date(2024, 4, 13)
 
 
 class PasscheckException(Exception):
@@ -160,7 +160,9 @@ class PasscheckService:
                     validator=ev.get_max_subs()
                 )
             except Team.relationship_team.RelatedObjectDoesNotExist:
-                team_data = TeamData(f'{additional_team_link.description} fehlt als Relationship Team', [], {})
+                team_data = TeamData(f'{additional_team_link.description} -> fehlt als Relationship Team', [], {})
+            except EligibilityRule.DoesNotExist:
+                team_data = TeamData(f'{additional_team_link.description} -> darf nicht in der Liga spielen', [], {})
             additional_teams_serialized.append(team_data)
         team['additionalTeams'] = additional_teams_serialized
         return team
