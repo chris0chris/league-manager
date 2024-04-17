@@ -68,6 +68,7 @@ class GamedayUpdateForm(forms.ModelForm):
                              help_text='Bitte Teams mit Komma separieren')
     group4 = forms.CharField(max_length=100, label='Gruppe 4', required=False,
                              help_text='Bitte Teams mit Komma separieren')
+    address = forms.CharField(label='Adresse')
 
     class Meta:
         model = Gameday
