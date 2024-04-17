@@ -25,19 +25,25 @@ SCHEDULE_CHOICES = (
 
 class GamedayCreateForm(forms.ModelForm):
     name = forms.CharField(max_length=100)
-    season = forms.ModelChoiceField(queryset=Season.objects.all(), initial=1)
+    season = forms.ModelChoiceField(queryset=Season.objects.all())
     league = forms.ModelChoiceField(queryset=League.objects.all(), initial=1)
     format = forms.ChoiceField(choices=SCHEDULE_CHOICES)
 
     class Meta:
         model = Gameday
-        exclude = ['author']
+        fields = ['name', 'season', 'league', 'format', 'date', 'start']
         widgets = {
             'date': forms.DateInput(format='%d.%m.%Y',
                                     attrs={'type': 'date'}
                                     ),
             'start': forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'value': '10:00'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super(GamedayCreateForm, self).__init__(*args, **kwargs)
+        last_season = Season.objects.last()
+        if last_season:
+            self.fields['season'].initial = last_season.id
 
     def save(self, user=None):
         gameday = super(GamedayCreateForm, self).save(commit=False)
@@ -65,11 +71,9 @@ class GamedayUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Gameday
-        fields = '__all__'
+        fields = ['name', 'date', 'start', 'format', 'address', 'group1', 'group2', 'group3', 'group4']
 
     def __init__(self, *args, **kwargs):
         super(GamedayUpdateForm, self).__init__(*args, **kwargs)
-        # Set the initial value for the date field
         if 'instance' in kwargs:
             self.fields['date'].initial = kwargs['instance'].date.strftime('%Y-%m-%d')
-            v = ''

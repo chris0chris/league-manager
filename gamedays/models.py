@@ -121,6 +121,7 @@ class Gameday(models.Model):
     start = models.TimeField()
     format = models.CharField(max_length=100, default='6_2', blank=True)
     author = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
+    address = models.TextField(default='', blank=True)
 
     objects: QuerySet = models.Manager()
 

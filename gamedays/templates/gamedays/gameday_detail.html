@@ -10,6 +10,10 @@
 <div class="row mb-1">
     <div class="col">Turnierbeginn: {{ object.start|time:"H:i" }} Uhr</div>
 </div>
+<div class="row mb-1">
+    <div class="col">Adresse: <a href="https://www.google.com/maps/search/?api=1&query={{object.address}}"
+                                 target="_blank">{{ object.address }}</a></div>
+</div>
 <div class="card" style="overflow: auto">
     <div aria-controls="collapseSchedule" aria-expanded="false" class="card-header" data-bs-target="#collapseSchedule"
          data-bs-toggle="collapse" role="button">
