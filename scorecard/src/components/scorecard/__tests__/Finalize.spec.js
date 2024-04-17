@@ -56,19 +56,19 @@ describe('Finalize component', () => {
   it('should disable edit score button, when home confirm button is clicked', async () => {
     const user = userEvent.setup();
     setup();
-    await user.type(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.home.name}-Captain Name`), 'Home Captain');
+    await user.type(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.home.name}-Captain Name*`), 'Home Captain');
     await user.click(screen.getByTestId('confirmHomeButton'));
     expect(screen.getByRole('button', {name: 'Spielstand bearbeiten'})).toBeDisabled();
-    expect(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.home.name}-Captain Name`)).toBeDisabled();
+    expect(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.home.name}-Captain Name*`)).toBeDisabled();
     expect(screen.getByRole('button', {name: 'Zurück'})).toBeInTheDocument();
   });
   it('should disable edit score button, when away confirm button is clicked', async () => {
     const user = userEvent.setup();
     setup();
-    await user.type(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.away.name}-Captain Name`), 'Away Captain');
+    await user.type(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.away.name}-Captain Name*`), 'Away Captain');
     await user.click(screen.getByTestId('confirmAwayButton'));
     expect(screen.getByRole('button', {name: 'Spielstand bearbeiten'})).toBeDisabled();
-    expect(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.away.name}-Captain Name`)).toBeDisabled();
+    expect(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.away.name}-Captain Name*`)).toBeDisabled();
     expect(screen.getByRole('button', {name: 'Zurück'})).toBeInTheDocument();
   });
   it('should do nothing, when away captain is empty and confirm button is clicked', async () => {
@@ -76,7 +76,7 @@ describe('Finalize component', () => {
     setup();
     await user.click(screen.getByTestId('confirmAwayButton'));
     expect(screen.getByRole('button', {name: 'Spielstand bearbeiten'})).not.toBeDisabled();
-    expect(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.away.name}-Captain Name`)).not.toBeDisabled();
+    expect(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.away.name}-Captain Name*`)).not.toBeDisabled();
     expect(screen.queryByRole('button', {name: 'Zurück'})).not.toBeInTheDocument();
   });
   it('should display game log, when checkbox is activated', async () => {
@@ -88,9 +88,10 @@ describe('Finalize component', () => {
   it('should call apiPut, when submit final score button is clicked', async () => {
     const user = userEvent.setup();
     setup();
-    await user.type(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.home.name}-Captain Name`), 'Home Cptn');
-    await user.type(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.away.name}-Captain Name`), 'Away Cptn');
+    await user.type(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.home.name}-Captain Name*`), 'Home Cptn');
+    await user.type(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.away.name}-Captain Name*`), 'Away Cptn');
     await user.click(screen.getByRole('button', {name: 'Ergebnis abschicken'}));
+    console.log('apiPut.mock', apiPut.mock);
     expect(apiPut.mock.calls[0][0]).toBe(`/api/game/${GAME_LOG_COMPLETE_GAME.gameId}/finalize`);
     expect(screen.getByText('SelectGame Page')).toBeInTheDocument();
   });
