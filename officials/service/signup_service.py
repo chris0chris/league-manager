@@ -24,7 +24,7 @@ class OfficialSignupService:
     @staticmethod
     def create_signup(gameday_id, official_id):
         gameday = Gameday.objects.get(pk=gameday_id)
-        number_fields = int(gameday.format.split('_')[1])
+        number_fields = int(gameday.format.split('_')[-1])
         officials_limit = number_fields * OFFICIALS_PER_FIELD
         if OfficialGamedaySignup.objects.filter(gameday=gameday).count() >= officials_limit:
             raise MaxSignupError(f'{gameday.name} - Das Limit von {officials_limit} wurde erreicht.')
