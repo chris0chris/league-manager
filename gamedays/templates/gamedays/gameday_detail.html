@@ -20,9 +20,18 @@
             {% if info.schedule == None %}
             Spielplan wurde noch nicht erstellt.
             {% else %}
-            {% for official in info.officials %}
-             <a href="#">{{ official.id}} {{ official.first_name }} {{ official.last_name}}</a>
-            {% endfor %}
+            <div class="row">
+                <div class="col-12 col-md-3">
+                    Gemeldete Offizielle: {% if not info.officials %} - {% endif %}<br />{% if info.url_pattern_official_signup %} <a href="{% url info.url_pattern_official_signup %}" class="btn btn-secondary">Zur Anmeldung</a> {% endif %}
+                </div>
+                <div class="col-12 col-md-9">
+                    {% for official in info.officials %}
+                    <a href="{% url info.url_pattern_official pk=official.id %}"><span
+                            class="badge text-bg-primary rounded-pill">{{ official.first_name }} {{ official.last_name}}</span></a>
+                    {% endfor %}
+                </div>
+            </div>
+            <br>
             <input class="mb-1" id="search" placeholder="Suche nach Teamname" type="text"><br/>
             {{ info.schedule | safe }}
             {% endif %}
