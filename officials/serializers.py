@@ -4,8 +4,6 @@ from rest_framework.serializers import Serializer
 from league_manager.utils.serializer_utils import ObfuscatorSerializer, ObfuscateField
 
 
-
-
 class OfficialGamedaySignupSerializer(Serializer):
     PK_C = 'pk'
     DATE_C = 'date'
@@ -19,7 +17,7 @@ class OfficialGamedaySignupSerializer(Serializer):
     ALL_FIELD_VALUES = [PK_C, DATE_C, NAME_C, OFFICIAL_NAMES_C, HAS_SIGNED_UP_C, LIMIT_SIGNUP_C, COUNT_SIGNUP_C,
                         LEAGUE__NAME]
     pk = CharField()
-    date = DateField()
+    date = DateField(format='%d.%m.%Y')
     name = CharField()
     league = CharField(source=LEAGUE__NAME)
     count_signup = IntegerField()
