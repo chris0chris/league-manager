@@ -19,7 +19,7 @@ class ApiUserInfo:
         self.first_name = user_info_json[0].get('firstname', '')
         self.last_name = user_info_json[0].get('lastname', '')
         self.custom_fields = user_info_json[0].get('customfields', [{}, {}, {}])
-        self.id = user_info_json[0].get('id', '')
+        self.id = user_info_json[0].get('id', -1)
         self.email = user_info_json[0].get('email', '')
 
     def get_first_name(self) -> str:
@@ -171,6 +171,17 @@ class ApiUpdateUser:
                f'license_id={self.license_name})'
 
 
+class MoodleApiException(Exception):
+    pass
+
+
+class MoodleAuth:
+    def __init__(self, auth_json):
+        self.error = auth_json.get('error')
+        if self.error is not None:
+            raise MoodleApiException(f'Moodle-Fehler: {self.error}')
+
+
 class MoodleApi:
     def __init__(self):
         self.moodle_url = f'{settings.MOODLE_URL}/offd/moodle/webservice/rest/server.php' \
@@ -178,6 +189,13 @@ class MoodleApi:
 
     def __str__(self):
         return f'{settings.MOODLE_URL}'
+
+    def confirm_user_auth(self, username, password):
+        return MoodleAuth(requests.get(f'{settings.MOODLE_URL}/offd/moodle/login/token.php', {
+            'username': username,
+            'password': password,
+            'service': 'moodle_mobile_app'
+        }).json())
 
     def get_courses(self, ids: str = None) -> ApiCourses:
         if ids is None:
@@ -189,9 +207,18 @@ class MoodleApi:
         return ApiParticipants(self._send_request(
             f'&wsfunction=gradereport_user_get_grade_items&courseid={course_id}'))
 
-    def get_user_info(self, user_id) -> ApiUserInfo:
+    def get_user_info_by_id(self, user_id) -> ApiUserInfo:
+        return self._get_user_info_by('id', user_id)
+
+    def get_user_info_by_username(self, username) -> ApiUserInfo:
+        return self._get_user_info_by('username', username)
+
+    def get_user_info_by_email(self, email) -> ApiUserInfo:
+        return self._get_user_info_by('email', email)
+
+    def _get_user_info_by(self, fieldname, value) -> ApiUserInfo:
         return ApiUserInfo(self._send_request(
-            f'&wsfunction=core_user_get_users_by_field&field=id&values[0]={user_id}'))
+            f'&wsfunction=core_user_get_users_by_field&field={fieldname}&values[0]={value}'))
 
     def update_user(self, api_user: ApiUpdateUser):
         self._send_request(f'&wsfunction=core_user_update_users&users[0][id]={api_user.user_id}'

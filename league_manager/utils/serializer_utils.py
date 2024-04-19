@@ -28,8 +28,8 @@ class ObfuscatorSerializer(Serializer):
 class ObfuscateField(SerializerMethodField):
     def __init__(self, field_name, **kwargs):
         super().__init__(method_name='obfuscate_field_if_necessary', **kwargs)
-        self.field_name = field_name
+        self.db_field_name = field_name
 
     def to_representation(self, value):
         method = getattr(self.parent, self.method_name)
-        return method(self.field_name, value)
+        return method(self.db_field_name, value)

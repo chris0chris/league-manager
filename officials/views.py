@@ -1,11 +1,13 @@
 import json
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Subquery, OuterRef, Q
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
 from django.views import View
@@ -14,10 +16,14 @@ from django.views.decorators.cache import cache_page
 from gamedays.models import Team, Gameinfo, GameOfficial, Gameresult
 from league_manager.utils.view_utils import PermissionHelper
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
-from officials.forms import AddInternalGameOfficialEntryForm
+from officials.forms import AddInternalGameOfficialEntryForm, MoodleLoginForm
 from officials.models import Official
+from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
 from officials.service.official_service import OfficialService
+from officials.service.signup_service import OfficialSignupService, DuplicateSignupError, MaxSignupError
+
+MOODLE_LOGGED_IN_USER = 'moodle_logged_in_user'
 
 
 class OfficialsTeamListView(View):
@@ -286,3 +292,75 @@ class OfficialAssociationListView(View):
         if self.request.user.is_staff:
             return True
         return self.request.user.username == association
+
+
+class MoodleLoginView(View):
+    template_name = 'officials/signup/moodle_login.html'
+    form_class = MoodleLoginForm
+
+    def get(self, request, *args, **kwargs):
+        return render(
+            request,
+            self.template_name,
+            {'form': MoodleLoginForm()}
+        )
+
+    def post(self, request, *args, **kwargs):
+        form = MoodleLoginForm(request.POST)
+        try:
+            if form.is_valid():
+                username = form.cleaned_data['username']
+                password = form.cleaned_data['password']
+                moodle_service = MoodleService()
+                official_id = moodle_service.login(username, password)
+                request.session[MOODLE_LOGGED_IN_USER] = official_id
+
+                from officials.urls import OFFICIALS_SIGN_UP_LIST
+                return redirect(reverse(OFFICIALS_SIGN_UP_LIST))
+        except MoodleApiException as error:
+            form.add_error('', f'{error}')
+        return render(request, self.template_name, {'form': form})
+
+
+class OfficialSignUpListView(View):
+    template_name = 'officials/signup/sign_up_list.html'
+
+    def get(self, request, *args, **kwargs):
+        official_id = request.session.get(MOODLE_LOGGED_IN_USER)
+        if official_id is None:
+            if settings.DEBUG:
+                official_id = 1
+            else:
+                from officials.urls import OFFICIALS_MOODLE_LOGIN
+                return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
+        request.session.set_expiry(600)
+        league = request.GET.get('league')
+        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
+        from officials.urls import OFFICIALS_SIGN_UP_FOR_GAMEDAY, OFFICIALS_PROFILE_LICENSE, OFFICIALS_SIGN_UP_LIST
+        context = {
+            **OfficialSignupService.get_signup_data(official_id, league),
+            'official_id': official_id,
+            'url_pattern_gameday': LEAGUE_GAMEDAY_DETAIL,
+            'url_pattern_signup': OFFICIALS_SIGN_UP_FOR_GAMEDAY,
+            'url_pattern_signup_list': OFFICIALS_SIGN_UP_LIST,
+            'url_pattern_official': OFFICIALS_PROFILE_LICENSE,
+        }
+        return render(request, self.template_name, context)
+
+
+class OfficialSignUpView(View):
+    def get(self, request, **kwargs):
+        gameday_id = kwargs.get('gameday')
+        official_id = request.session.get(MOODLE_LOGGED_IN_USER)
+        if official_id is None:
+            messages.error(request, 'Die Session der Moodle-Anmeldung ist ausgelaufen. Bitte erneut anmelden.')
+            from officials.urls import OFFICIALS_MOODLE_LOGIN
+            return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
+        try:
+            OfficialSignupService.create_signup(gameday_id=gameday_id, official_id=official_id)
+        except DuplicateSignupError as exception:
+            messages.error(request, f'Du bist bereits für den Spieltag gemeldet: {exception}')
+        except MaxSignupError as exception:
+            messages.error(request, f'{exception}')
+        from officials.urls import OFFICIALS_SIGN_UP_LIST
+        return redirect(reverse(OFFICIALS_SIGN_UP_LIST))

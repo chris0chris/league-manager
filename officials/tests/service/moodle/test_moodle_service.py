@@ -62,7 +62,7 @@ class TestGameService(TestCase):
     @patch.object(MoodleApi, 'update_user')
     @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
-    @patch.object(MoodleApi, 'get_user_info')
+    @patch.object(MoodleApi, 'get_user_info_by_id')
     def test_update_licenses_with_no_matching_category_id(self, user_mock: MagicMock, participants_mock: MagicMock,
                                                           courses_mock: MagicMock, update_user_mock: MagicMock):
         courses_mock.return_value = ApiCourses({
@@ -86,7 +86,7 @@ class TestGameService(TestCase):
     @patch.object(MoodleApi, 'update_user')
     @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
-    @patch.object(MoodleApi, 'get_user_info')
+    @patch.object(MoodleApi, 'get_user_info_by_id')
     def test_update_licenses_no_matching_teams(self, user_mock: MagicMock, participants_mock: MagicMock,
                                                courses_mock: MagicMock, update_user_mock: MagicMock):
         user_id = 1
@@ -154,7 +154,7 @@ class TestGameService(TestCase):
     @patch.object(MoodleApi, 'update_user')
     @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
-    @patch.object(MoodleApi, 'get_user_info')
+    @patch.object(MoodleApi, 'get_user_info_by_id')
     def test_update_licenses_create_official(self, user_mock: MagicMock, participants_mock: MagicMock,
                                              courses_mock: MagicMock, update_user_mock: MagicMock):
         user_id = 82
@@ -211,7 +211,7 @@ class TestGameService(TestCase):
     @patch.object(MoodleApi, 'update_user')
     @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
-    @patch.object(MoodleApi, 'get_user_info')
+    @patch.object(MoodleApi, 'get_user_info_by_id')
     def test_update_licenses_update_official(self, user_mock: MagicMock, participants_mock: MagicMock,
                                              courses_mock: MagicMock, update_user_mock: MagicMock):
         team = DbSetupOfficials().create_officials_and_team()
@@ -272,7 +272,7 @@ class TestGameService(TestCase):
     @patch.object(MoodleApi, 'update_user')
     @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
-    @patch.object(MoodleApi, 'get_user_info')
+    @patch.object(MoodleApi, 'get_user_info_by_id')
     def test_update_licenses_user_has_no_result(self, user_mock: MagicMock, participants_mock: MagicMock,
                                                 courses_mock: MagicMock, update_user_mock: MagicMock):
         user_id = 7

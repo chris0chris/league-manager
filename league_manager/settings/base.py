@@ -1,5 +1,6 @@
 import os
 
+from django.contrib import messages
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from dotenv import load_dotenv
 
@@ -65,6 +66,10 @@ TEMPLATES = [
         },
     },
 ]
+
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger',
+}
 
 WSGI_APPLICATION = 'league_manager.wsgi.application'
 

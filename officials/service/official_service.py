@@ -1,8 +1,5 @@
-from datetime import datetime
-
 from django.db.models import Sum
 
-from gamedays.models import Team
 from gamedays.service.team_repository_service import TeamRepositoryService
 from officials.api.serializers import OfficialGameCountSerializer
 from officials.models import Official
@@ -52,21 +49,6 @@ class OfficialService:
         first_letter = name[0]
         all_other_letters = name[1:]
         return "".join((first_letter, all_other_letters.replace(all_other_letters, "****")))
-
-    def get_all_officials(self, year, are_names_obfuscated=True):
-        if year is None:
-            today = datetime.today()
-            year = today.year
-        all_teams = Team.objects.all().order_by('description')
-        result_list = []
-        current_team: Official
-        for current_team in all_teams:
-            current_result_list = self.get_officials_for(current_team.pk, year, are_names_obfuscated)
-            result_list += current_result_list.get('officials_list')
-        return {
-            'year': year,
-            'officials_list': result_list
-        }
 
     @staticmethod
     def create_game_official_entry(result) -> str:

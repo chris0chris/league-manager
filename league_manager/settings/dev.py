@@ -5,7 +5,7 @@ DEBUG_TOOLBAR = True
 # DEBUG_TOOLBAR = False
 # PROFILING = True
 PROFILING = False
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', '.ngrok-free.app', 'localhost']
 
 if PROFILING:
     INSTALLED_APPS = [
