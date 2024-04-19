@@ -2,6 +2,26 @@
 {% block content %}
 <div class="content-section">
     <div class="media-body">
+        <p>Ligenauswahl:</p>
+        <ul class="nav nav-pills">
+            {% with active_league=request.GET.league|urlize %}
+            {% if not active_league %}
+                <a class="nav-link active" aria-current="page" href="#">Alle</a>
+            {% else %}
+                <a class="nav-link" aria-current="page" href="{% url url_pattern_signup_list %}">Alle</a>
+            {% endif %}
+            {% for current_league in leagues %}
+            <li class="nav-item">
+                {% if current_league == active_league %}
+                <a class="nav-link active" aria-current="page" href="{% url url_pattern_signup_list %}?league={{ current_league }}">{{ current_league }}</a>
+                {% else %}
+                <a class="nav-link" aria-current="page" href="{% url url_pattern_signup_list %}?league={{ current_league }}">{{ current_league }}</a>
+                {% endif %}
+            </li>
+            {% endfor %}
+            {% endwith %}
+        </ul>
+        <hr>
         <table class="table table-hover">
             <thead>
             <tr>
@@ -20,7 +40,7 @@
                 <td><a href="{% url url_pattern_gameday pk=gameday.pk %}">{{ gameday.name }}</a></td>
                 <td>{{ gameday.league }}</td>
                 <td>
-                    <span data-bs-title="{{ gameday.official_names }}" data-bs-toggle="tooltip">{{ gameday.count_signup }} / {{ gameday.limit_signup}}</span>
+                    {{ gameday.count_signup }} / {{ gameday.limit_signup}}
                 </td>
                 <td>
                     <div class="d-grid">
@@ -55,8 +75,4 @@
         </table>
     </div>
 </div>
-<script>
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-</script>
 {% endblock content %}

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.db import IntegrityError
 from django.db.models import Func, IntegerField, CharField, Subquery, Count, F, BooleanField, Case, When, OuterRef, \
-    Value
+    Value, Q
 from django.db.models.functions import Concat
 
 from gamedays.models import Gameday
@@ -34,7 +34,7 @@ class OfficialSignupService:
             raise DuplicateSignupError(f'{gameday.name}')
 
     @staticmethod
-    def get_signup_data(official_id):
+    def get_signup_data(official_id, league):
         signed_up_officials = OfficialGamedaySignup.objects.filter(
             gameday_id=OuterRef('pk'),
             official_id=official_id
@@ -46,7 +46,10 @@ class OfficialSignupService:
             full_name=Concat('official__pk', Value('#'), 'official__first_name', Value(' '), 'official__last_name')
         ).order_by('official__first_name').values_list('full_name', flat=True)
 
-        all_gamedays = Gameday.objects.filter(date__gte=datetime.today()).annotate(
+
+        all_gamedays = Gameday.objects.filter(date__gte=datetime.today())
+        relevant_leagues = all_gamedays.order_by().values_list('league__name', flat=True).distinct()
+        all_gamedays = all_gamedays.filter(Q(league__name=league) if league else Q(),).annotate(
             count_signup=Count('officialgamedaysignup'),
             limit_signup=(ExtractFieldPart(F('format'), output_field=IntegerField())) * OFFICIALS_PER_FIELD,
             has_signed_up=Case(
@@ -61,9 +64,12 @@ class OfficialSignupService:
                 output_field=CharField()
             )
         ).order_by('date', 'pk')
-
-        return OfficialGamedaySignupSerializer(all_gamedays.values(*OfficialGamedaySignupSerializer.ALL_FIELD_VALUES),
-                                               many=True).data
+        return {
+            'gamedays': OfficialGamedaySignupSerializer(
+                all_gamedays.values(*OfficialGamedaySignupSerializer.ALL_FIELD_VALUES),
+                many=True).data,
+            'leagues': relevant_leagues,
+        }
 
     @staticmethod
     def get_signed_up_officials(gameday_id, show_officials_names):

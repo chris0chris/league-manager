@@ -334,14 +334,15 @@ class OfficialSignUpListView(View):
                 from officials.urls import OFFICIALS_MOODLE_LOGIN
                 return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
         request.session.set_expiry(600)
+        league = request.GET.get('league')
         from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
-        from officials.urls import OFFICIALS_SIGN_UP_FOR_GAMEDAY
-        from officials.urls import OFFICIALS_PROFILE_LICENSE
+        from officials.urls import OFFICIALS_SIGN_UP_FOR_GAMEDAY, OFFICIALS_PROFILE_LICENSE, OFFICIALS_SIGN_UP_LIST
         context = {
-            'gamedays': OfficialSignupService.get_signup_data(official_id),
+            **OfficialSignupService.get_signup_data(official_id, league),
             'official_id': official_id,
             'url_pattern_gameday': LEAGUE_GAMEDAY_DETAIL,
             'url_pattern_signup': OFFICIALS_SIGN_UP_FOR_GAMEDAY,
+            'url_pattern_signup_list': OFFICIALS_SIGN_UP_LIST,
             'url_pattern_official': OFFICIALS_PROFILE_LICENSE,
         }
         return render(request, self.template_name, context)
