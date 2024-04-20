@@ -17,7 +17,7 @@ class OfficialGamedaySignupSerializer(Serializer):
     ALL_FIELD_VALUES = [PK_C, DATE_C, NAME_C, OFFICIAL_NAMES_C, HAS_SIGNED_UP_C, LIMIT_SIGNUP_C, COUNT_SIGNUP_C,
                         LEAGUE__NAME]
     pk = CharField()
-    date = DateField(format='%d.%m.%Y')
+    date = DateField(format='%d.%m.')
     name = CharField()
     league = CharField(source=LEAGUE__NAME)
     count_signup = IntegerField()
