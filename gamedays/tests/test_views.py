@@ -69,6 +69,7 @@ class TestGamedayUpdateView(WebTest):
         self.gameday_id = gameday.pk
         self.app.set_user(User.objects.all().first())
         self.form: Form = self.app.get(reverse('league-gameday-update', args=[self.gameday_id])).form
+        self.form['address'] = 'some address'
 
     def test_creates_schedule(self):
         assert not Gameinfo.objects.filter(gameday_id=self.gameday_id).exists()
