@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 
 from django.test import TestCase
 
+from gamedays.models import Team
 from officials.models import Official, OfficialLicenseHistory, OfficialLicense
 from officials.service.moodle.moodle_api import MoodleApi, ApiCourses, ApiParticipants, ApiUserInfo, ApiUpdateUser
 from officials.service.moodle.moodle_service import MoodleService, LicenseCalculator
@@ -70,7 +71,8 @@ class TestGameService(TestCase):
                 {
                     "id": 1,
                     "categoryid": 5,
-                    "enddate": 0
+                    "enddate": 0,
+                    "fullname": "course name 4",
                 },
             ]
         })
@@ -96,7 +98,8 @@ class TestGameService(TestCase):
                 {
                     "id": 1,
                     "categoryid": 2,
-                    "enddate": time.time()
+                    "enddate": time.time(),
+                    "fullname": "course name 1",
                 },
             ]
         })
@@ -167,7 +170,8 @@ class TestGameService(TestCase):
                 {
                     "id": 1,
                     "categoryid": 4,
-                    "enddate": time.time()
+                    "enddate": time.time(),
+                    "fullname": "course name",
                 },
             ]
         })
@@ -190,13 +194,14 @@ class TestGameService(TestCase):
                     'lastname': 'moodle insert last',
                     'id': user_id,
                     'customfields': [{
-                        'name': 'Teamname',
+                        'shortname': 'Team',
                         'value': team.description
                     }]
                 }]),
         }.get
         moodle_service = MoodleService()
         result = moodle_service.update_licenses()
+        time.sleep(5)
         created_official: Official = Official.objects.last()
         assert created_official.last_name == 'moodle insert last'
         assert OfficialLicenseHistory.objects.get(official=created_official).result == 70
@@ -227,7 +232,8 @@ class TestGameService(TestCase):
                 {
                     "id": 1,
                     "categoryid": 3,
-                    "enddate": time.time()
+                    "enddate": time.time(),
+                    "fullname": "course name 2",
                 },
             ]
         })
@@ -281,7 +287,8 @@ class TestGameService(TestCase):
                 {
                     "id": 1,
                     "categoryid": 3,
-                    "enddate": time.time()
+                    "enddate": time.time(),
+                    "fullname": "course name 3",
                 },
             ]
         })

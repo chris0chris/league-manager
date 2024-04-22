@@ -87,8 +87,6 @@ class MoodleService:
         missing_team_names = set()
         result_list = []
         missed_officials_list = []
-        year = datetime.today().year
-        self.license_history = OfficialLicenseHistory.objects.filter(created_at__year=year)
         with ThreadPoolExecutor(max_workers=10) as executor:
             # Submit each course update task to the thread pool
             futures = {executor.submit(self.get_participants_from_course, current_course): current_course for
@@ -128,6 +126,8 @@ class MoodleService:
     @measure_execution_time
     def get_participants_from_course_with_time_measure(self, course: ApiCourse):
         if course.is_relevant():
+            year = datetime.today().year
+            self.license_history = OfficialLicenseHistory.objects.filter(created_at__year=year)
             return self.get_participants_from_relevant_course(course)
         return set(), [], []
 
@@ -152,12 +152,13 @@ class MoodleService:
 
     def get_info_of_user_with_result(self, course, participant):
         user_info: ApiUserInfo = self.moodle_api.get_user_info_by_id(participant.get_user_id())
-        team: Team = self._get_first(Team.objects.filter(description=user_info.get_team()))
+        team_description = user_info.get_team()
+        team: Team = self._get_first(Team.objects.filter(description=team_description))
         if team is None:
             missed_officials = [
                 f'{course.get_id()}: {user_info.id} - {user_info.get_last_name()} '
-                f'-> fehlendes Team: {user_info.get_team()}']
-            return user_info.get_team(), missed_officials, []
+                f'-> fehlendes Team: {team_description}']
+            return team_description, missed_officials, []
         else:
             official = self.create_new_or_update_existing_official(user_info)
         self.create_new_or_update_license_history(official, course, participant)
