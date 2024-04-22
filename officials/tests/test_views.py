@@ -110,7 +110,7 @@ class TestGameCountOfficials(WebTest):
         all_official_ids = []
         current_official: Official
         for current_official in Official.objects.all():
-            all_official_ids += [current_official.external_id]
+            all_official_ids += [int(current_official.external_id)]
         moodle_service_mock.return_value = all_official_ids
         year = datetime.today().year
         response: DjangoWebtestResponse = self.app.get(

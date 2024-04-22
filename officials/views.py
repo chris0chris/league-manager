@@ -208,10 +208,12 @@ class MoodleReportView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'officials/moodle_report.html'
 
     def get(self, request, *args, **kwargs):
+        course_ids = request.GET.get('ids')
         moodle_service = MoodleService()
-        result = moodle_service.update_licenses()
+        result = moodle_service.update_licenses(course_ids)
         context = {
-            'result': json.dumps(result, indent=4)
+            'time': result[1],
+            'result': json.dumps(result[0], indent=4)
         }
         return render(request, self.template_name, context)
 
