@@ -3,9 +3,8 @@ from unittest.mock import patch, MagicMock
 
 from django.test import TestCase
 
-from gamedays.models import Team
 from officials.models import Official, OfficialLicenseHistory, OfficialLicense
-from officials.service.moodle.moodle_api import MoodleApi, ApiCourses, ApiParticipants, ApiUserInfo, ApiUpdateUser
+from officials.service.moodle.moodle_api import MoodleApi, ApiCourse, ApiParticipants, ApiUserInfo, ApiUpdateUser
 from officials.service.moodle.moodle_service import MoodleService, LicenseCalculator
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 
@@ -61,47 +60,41 @@ class TestLicenseCalculator:
 
 class TestGameService(TestCase):
     @patch.object(MoodleApi, 'update_user')
-    @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
     @patch.object(MoodleApi, 'get_user_info_by_id')
     def test_update_licenses_with_no_matching_category_id(self, user_mock: MagicMock, participants_mock: MagicMock,
-                                                          courses_mock: MagicMock, update_user_mock: MagicMock):
-        courses_mock.return_value = ApiCourses({
-            "courses": [
-                {
-                    "id": 1,
-                    "categoryid": 5,
-                    "enddate": 0,
-                    "fullname": "course name 4",
-                },
-            ]
+                                                          update_user_mock: MagicMock):
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 5,
+            "enddate": time.time(),
+            "fullname": "course name 4",
         })
         moodle_service = MoodleService()
-        result = moodle_service.update_licenses()
+        result = moodle_service.get_participants_from_course(course)
         participants_mock.assert_not_called()
         user_mock.assert_not_called()
         update_user_mock.assert_not_called()
-        assert len(result['missing_team_names']) == 0
-        assert len(result['missed_officials']) == 0
-        assert len(result['result_list']) == 0
+        team_name_set_index, missed_official_index, course_result_index = 0, 1, 2
+        assert len(result[team_name_set_index]) == 0
+        assert len(result[missed_official_index]) == 0
+        course_result = result[course_result_index]
+        assert course_result['course'] == 'course name 4'
+        assert course_result['officials_count'] == 0
+        assert len(course_result['officials']) == 0
 
     @patch.object(MoodleApi, 'update_user')
-    @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
     @patch.object(MoodleApi, 'get_user_info_by_id')
     def test_update_licenses_no_matching_teams(self, user_mock: MagicMock, participants_mock: MagicMock,
-                                               courses_mock: MagicMock, update_user_mock: MagicMock):
+                                               update_user_mock: MagicMock):
         user_id = 1
         user_id_2 = 2
-        courses_mock.return_value = ApiCourses({
-            "courses": [
-                {
-                    "id": 1,
-                    "categoryid": 2,
-                    "enddate": time.time(),
-                    "fullname": "course name 1",
-                },
-            ]
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 2,
+            "enddate": time.time(),
+            "fullname": "course name 1",
         })
         participants_mock.return_value = ApiParticipants({
             'usergrades': [
@@ -130,7 +123,7 @@ class TestGameService(TestCase):
                     'lastname': 'last moodle',
                     'id': user_id_2,
                     'customfields': [{
-                        'name': 'Teamname',
+                        'shortname': 'Team',
                         'value': 'teamname moodle'
                     }]
                 }]),
@@ -140,40 +133,39 @@ class TestGameService(TestCase):
                     'lastname': 'moodle last',
                     'id': user_id,
                     'customfields': [{
-                        'name': 'Teamname',
+                        'shortname': 'Team',
                         'value': 'moodle teamname'
                     }]
                 }]),
         }.get
         moodle_service = MoodleService()
-        result = moodle_service.update_licenses()
+        result = moodle_service.get_participants_from_course(course)
         assert participants_mock.call_count == 1
         assert user_mock.call_count == 2
-        assert result['missing_team_names'] == ['moodle teamname', 'teamname moodle']
-        assert len(result['missed_officials']) == 2
-        assert len(result['result_list']) == 0
+        team_name_set_index, missed_official_index, course_result_index = 0, 1, 2
+        assert result[team_name_set_index] == {'moodle teamname', 'teamname moodle'}
+        assert len(result[missed_official_index]) == 2
+        course_result = result[course_result_index]
+        assert course_result['course'] == 'course name 1'
+        assert course_result['officials_count'] == 0
+        assert len(course_result['officials']) == 0
         update_user_mock.assert_not_called()
 
     @patch.object(MoodleApi, 'update_user')
-    @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
     @patch.object(MoodleApi, 'get_user_info_by_id')
     def test_update_licenses_create_official(self, user_mock: MagicMock, participants_mock: MagicMock,
-                                             courses_mock: MagicMock, update_user_mock: MagicMock):
+                                             update_user_mock: MagicMock):
         user_id = 82
         team = DbSetupOfficials().create_officials_and_team()
         license_f1 = OfficialLicense.objects.get(name='F1')
         license_f1.id = 1
         license_f1.save()
-        courses_mock.return_value = ApiCourses({
-            "courses": [
-                {
-                    "id": 1,
-                    "categoryid": 4,
-                    "enddate": time.time(),
-                    "fullname": "course name",
-                },
-            ]
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 4,
+            "enddate": time.time(),
+            "fullname": "course name",
         })
         participants_mock.return_value = ApiParticipants({
             'usergrades': [
@@ -193,32 +185,43 @@ class TestGameService(TestCase):
                     'firstname': 'moodle insert last',
                     'lastname': 'moodle insert last',
                     'id': user_id,
-                    'customfields': [{
-                        'shortname': 'Team',
-                        'value': team.description
-                    }]
+                    'customfields': [
+                        {
+                            'shortname': 'Team',
+                            'value': team.description
+                        }, {
+                            'shortname': 'Landesverband',
+                            'value': 'Ja.'
+                        }, {
+                            'shortname': 'LandesverbandAuswahl',
+                            'value': 'Association name'
+                        },
+                    ]
                 }]),
         }.get
         moodle_service = MoodleService()
-        result = moodle_service.update_licenses()
-        time.sleep(5)
+        result = moodle_service.get_participants_from_course(course)
         created_official: Official = Official.objects.last()
         assert created_official.last_name == 'moodle insert last'
+        assert created_official.association.name == 'Association name'
         assert OfficialLicenseHistory.objects.get(official=created_official).result == 70
-        assert len(result['missing_team_names']) == 0
-        assert len(result['missed_officials']) == 0
-        assert len(result['result_list']) == 1
+        team_name_set_index, missed_official_index, course_result_index = 0, 1, 2
+        course_result = result[course_result_index]
+        assert course_result['course'] == 'course name'
+        assert course_result['officials_count'] == 1
+        assert len(course_result['officials']) == 1
+        assert len(result[team_name_set_index]) == 0
+        assert len(result[missed_official_index]) == 0
         actual_api_user_update: ApiUpdateUser = update_user_mock.call_args[0][0]
         assert actual_api_user_update.user_id == user_id
         assert actual_api_user_update.license_number == created_official.pk
         assert actual_api_user_update.license_name == 'F1'
 
     @patch.object(MoodleApi, 'update_user')
-    @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
     @patch.object(MoodleApi, 'get_user_info_by_id')
     def test_update_licenses_update_official(self, user_mock: MagicMock, participants_mock: MagicMock,
-                                             courses_mock: MagicMock, update_user_mock: MagicMock):
+                                             update_user_mock: MagicMock):
         team = DbSetupOfficials().create_officials_and_team()
         # id workaround need to be done due testdatabase ids are not reset
         official: Official = Official.objects.last()
@@ -227,15 +230,11 @@ class TestGameService(TestCase):
         official_license = OfficialLicense.objects.filter(name='F2').first()
         official_license.id = 3
         official_license.save()
-        courses_mock.return_value = ApiCourses({
-            "courses": [
-                {
-                    "id": 1,
-                    "categoryid": 3,
-                    "enddate": time.time(),
-                    "fullname": "course name 2",
-                },
-            ]
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 3,
+            "enddate": time.time(),
+            "fullname": "course name 2",
         })
         participants_mock.return_value = ApiParticipants({
             'usergrades': [
@@ -255,42 +254,48 @@ class TestGameService(TestCase):
                     'firstname': 'moodle insert last',
                     'lastname': 'moodle insert last',
                     'id': official.external_id,
-                    'customfields': [{
-                        'name': 'Teamname',
-                        'value': team.description
-                    }]
+                    'customfields': [
+                        {
+                            'shortname': 'Team',
+                            'value': team.description,
+                        },
+                        {
+                            'shortname': 'Landesverband',
+                            'value': 'Nein.',
+                        },
+                    ]
                 }]),
         }.get
         moodle_service = MoodleService()
-        result = moodle_service.update_licenses()
+        result = moodle_service.get_participants_from_course(course)
         updated_official: Official = Official.objects.get(pk=official.pk)
         assert updated_official.last_name == 'moodle insert last'
+        assert updated_official.association is None
         assert OfficialLicenseHistory.objects.filter(official=updated_official).count() == 2
         assert OfficialLicenseHistory.objects.filter(official=updated_official).last().result == 70
-        assert len(result['missing_team_names']) == 0
-        assert len(result['missed_officials']) == 0
-        assert len(result['result_list']) == 1
+        team_name_set_index, missed_official_index, course_result_index = 0, 1, 2
+        course_result = result[course_result_index]
+        assert course_result['course'] == 'course name 2'
+        assert course_result['officials_count'] == 1
+        assert len(course_result['officials']) == 1
+        assert len(result[team_name_set_index]) == 0
+        assert len(result[missed_official_index]) == 0
         actual_api_user_update: ApiUpdateUser = update_user_mock.call_args[0][0]
         assert actual_api_user_update.user_id == updated_official.external_id
         assert actual_api_user_update.license_number == updated_official.pk
         assert actual_api_user_update.license_name == 'F2'
 
     @patch.object(MoodleApi, 'update_user')
-    @patch.object(MoodleApi, 'get_courses')
     @patch.object(MoodleApi, 'get_participants_for_course')
     @patch.object(MoodleApi, 'get_user_info_by_id')
     def test_update_licenses_user_has_no_result(self, user_mock: MagicMock, participants_mock: MagicMock,
-                                                courses_mock: MagicMock, update_user_mock: MagicMock):
+                                                update_user_mock: MagicMock):
         user_id = 7
-        courses_mock.return_value = ApiCourses({
-            "courses": [
-                {
-                    "id": 1,
-                    "categoryid": 3,
-                    "enddate": time.time(),
-                    "fullname": "course name 3",
-                },
-            ]
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 3,
+            "enddate": time.time(),
+            "fullname": "course name 3",
         })
         participants_mock.return_value = ApiParticipants({
             'usergrades': [
@@ -305,12 +310,16 @@ class TestGameService(TestCase):
             ]
         })
         moodle_service = MoodleService()
-        result = moodle_service.update_licenses()
+        result = moodle_service.get_participants_from_course(course)
         user_mock.assert_not_called()
         update_user_mock.assert_not_called()
-        assert len(result['missing_team_names']) == 0
-        assert len(result['missed_officials']) == 0
-        assert len(result['result_list']) == 0
+        team_name_set_index, missed_official_index, course_result_index = 0, 1, 2
+        course_result = result[course_result_index]
+        assert course_result['course'] == 'course name 3'
+        assert course_result['officials_count'] == 0
+        assert len(course_result['officials']) == 0
+        assert len(result[team_name_set_index]) == 0
+        assert len(result[missed_official_index]) == 0
 
     @patch.object(MoodleApi, 'get_participants_for_course')
     def test_get_all_users_for_course(self, participants_mock: MagicMock):
