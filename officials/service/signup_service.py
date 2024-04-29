@@ -34,6 +34,11 @@ class OfficialSignupService:
             raise DuplicateSignupError(f'{gameday.name}')
 
     @staticmethod
+    def cancel_signup(gameday_id, official_id):
+        OfficialGamedaySignup.objects.filter(gameday_id=gameday_id, official_id=official_id).delete()
+
+
+    @staticmethod
     def get_signup_data(official_id, league):
         signed_up_officials = OfficialGamedaySignup.objects.filter(
             gameday_id=OuterRef('pk'),

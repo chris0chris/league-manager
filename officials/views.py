@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Subquery, OuterRef, Q
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -338,7 +339,8 @@ class OfficialSignUpListView(View):
         request.session.set_expiry(600)
         league = request.GET.get('league')
         from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
-        from officials.urls import OFFICIALS_SIGN_UP_FOR_GAMEDAY, OFFICIALS_PROFILE_LICENSE, OFFICIALS_SIGN_UP_LIST
+        from officials.urls import OFFICIALS_SIGN_UP_FOR_GAMEDAY, OFFICIALS_PROFILE_LICENSE, OFFICIALS_SIGN_UP_LIST, \
+            OFFICIALS_SIGN_UP_CANCEL_FOR_GAMEDAY
         context = {
             **OfficialSignupService.get_signup_data(official_id, league),
             'official_id': official_id,
@@ -346,23 +348,45 @@ class OfficialSignUpListView(View):
             'url_pattern_signup': OFFICIALS_SIGN_UP_FOR_GAMEDAY,
             'url_pattern_signup_list': OFFICIALS_SIGN_UP_LIST,
             'url_pattern_official': OFFICIALS_PROFILE_LICENSE,
+            'url_pattern_signup_cancel': OFFICIALS_SIGN_UP_CANCEL_FOR_GAMEDAY,
         }
         return render(request, self.template_name, context)
 
 
-class OfficialSignUpView(View):
-    def get(self, request, **kwargs):
-        gameday_id = kwargs.get('gameday')
+class CheckMoodleSessionMixin:
+    def get_official_id(self, request):
         official_id = request.session.get(MOODLE_LOGGED_IN_USER)
         if official_id is None:
             messages.error(request, 'Die Session der Moodle-Anmeldung ist ausgelaufen. Bitte erneut anmelden.')
             from officials.urls import OFFICIALS_MOODLE_LOGIN
             return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
+        return official_id
+
+
+class OfficialSignUpView(CheckMoodleSessionMixin, View):
+    def get(self, request, **kwargs):
+        gameday_id = kwargs.get('gameday')
+        official_id = self.get_official_id(request)
+        if isinstance(official_id, HttpResponse):
+            # redirect to login page
+            return official_id
         try:
             OfficialSignupService.create_signup(gameday_id=gameday_id, official_id=official_id)
         except DuplicateSignupError as exception:
             messages.error(request, f'Du bist bereits für den Spieltag gemeldet: {exception}')
         except MaxSignupError as exception:
             messages.error(request, f'{exception}')
+        from officials.urls import OFFICIALS_SIGN_UP_LIST
+        return redirect(reverse(OFFICIALS_SIGN_UP_LIST))
+
+
+class OfficialSignUpCancelView(CheckMoodleSessionMixin, View):
+    def get(self, request, **kwargs):
+        gameday_id = kwargs.get('gameday')
+        official_id = self.get_official_id(request)
+        if isinstance(official_id, HttpResponse):
+            # redirect to login page
+            return official_id
+        OfficialSignupService.cancel_signup(gameday_id=gameday_id, official_id=official_id)
         from officials.urls import OFFICIALS_SIGN_UP_LIST
         return redirect(reverse(OFFICIALS_SIGN_UP_LIST))
