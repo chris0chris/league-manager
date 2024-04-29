@@ -46,6 +46,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'league_manager.middleware.maintenance.MaintenanceModeMiddleware',
 ]
 
 ROOT_URLCONF = 'league_manager.urls'
@@ -151,6 +152,15 @@ MOODLE_URL = os.environ.get('MOODLE_URL')
 MOODLE_WSTOKEN = os.environ.get('MOODLE_WSTOKEN')
 EQUIPMENT_APPROVAL_ENDPOINT = os.environ.get('EQUIPMENT_APPROVAL_ENDPOINT')
 EQUIPMENT_APPROVAL_TOKEN = os.environ.get('EQUIPMENT_APPROVAL_TOKEN')
+
+MAINTENANCE_MODE = False
+MAINTENANCE_PAGES = [
+    '/gamedays/gameday/new/',
+    r'^/gamedays/gameday/\d+/update$',
+    '/passcheck/player/create',
+    r'^/passcheck/player/\d+/update$',
+    '/officials/gameday/sign-up',
+]
 
 # ToDo deleteMe
 X_FRAME_OPTIONS = 'ALLOWALL'
