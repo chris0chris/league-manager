@@ -35,16 +35,16 @@ class ApiUserInfo:
         return self.email
 
     def get_team(self) -> str:
-        return self._get_custom_field_value(0, 'Team')
+        return self._get_custom_field_value('Team')
 
     def get_association(self) -> str:
-        return self._get_custom_field_value(2, 'LandesverbandAuswahl')
+        return self._get_custom_field_value('LandesverbandAuswahl')
 
     def whistle_for_association(self) -> bool:
-        value = self._get_custom_field_value(1, 'Landesverband')
+        value = self._get_custom_field_value('Landesverband')
         return value == 'Ja.'
 
-    def _get_custom_field_value(self, f, expected_field_name):
+    def _get_custom_field_value(self,expected_field_name):
         found_entry = {}
         try:
             for item in self.custom_fields:
