@@ -65,8 +65,10 @@ class PlayerlistCreateView(PlayerlistCommonMixin, UserPassesTestMixin, CreateVie
         return reverse(PASSCHECK_PLAYER_CREATE)
 
     def handle_no_permission(self):
-        from passcheck.urls import PASSCHECK_TEAM_NOT_EXISTENT
-        return redirect(PASSCHECK_TEAM_NOT_EXISTENT)
+        if self.request.user.is_authenticated:
+            from passcheck.urls import PASSCHECK_TEAM_NOT_EXISTENT
+            return redirect(PASSCHECK_TEAM_NOT_EXISTENT)
+        return super().handle_no_permission()
 
     def test_func(self):
         user = self.request.user
