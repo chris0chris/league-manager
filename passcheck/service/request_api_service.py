@@ -21,6 +21,5 @@ class RequestApiService:
                     raise ValueError(data['error'])
             return data['url']
         except requests.exceptions.RequestException as e:
-            # Handle exceptions (e.g., connection error, timeout, etc.)
             print(f"Error accessing JSON endpoint: {e}")
             return None

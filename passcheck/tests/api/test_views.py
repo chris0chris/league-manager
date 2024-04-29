@@ -35,7 +35,7 @@ class TestPasscheckApprovalUrl:
 
     @patch('passcheck.service.request_api_service.RequestApiService.get_equipment_approval_url')
     def test_team_has_no_approval_url(self, mock_get_equipment_approval_url):
-        error_message = "team not found"
+        error_message = "Keine Equipment-Genehmigung gefunden für das Team: None"
         mock_get_equipment_approval_url.side_effect = ValueError(error_message)
         url = reverse(API_PASSCHECK_EQUIPMENT_APPROVAL_URL, kwargs={'team_id': 7})
         request = self.factory.get(url)
