@@ -92,7 +92,7 @@ class TestGamedayUpdateView(WebTest):
         form = self.form
         form['group1'] = 'too few teams'
         resp = form.submit()
-        self.assertFormError(resp, 'form', None, [
+        self.assertFormError(resp.context['form'], None, [
             'Spielplan konnte nicht erstellt werden, da die Kombination #Teams und #Format nicht zum Spielplan passen'])
         assert not Gameinfo.objects.filter(gameday_id=self.gameday_id).exists()
 
@@ -105,6 +105,6 @@ class TestGamedayUpdateView(WebTest):
         form['group2'] = 'B1, B2, B3'
         resp = form.submit()
         assert resp.status_code == HTTPStatus.OK
-        self.assertFormError(resp, 'form', None, [
+        self.assertFormError(resp.context['form'], None, [
             'Spielplan konnte nicht erstellt werden, da das Team "unknown team" nicht gefunden wurde.'])
         assert Gameinfo.objects.all().count() == 0

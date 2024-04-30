@@ -56,7 +56,7 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
         response.form['entries'] = 'str, 2, position'
         response = response.form.submit()
-        self.assertFormError(response, 'form', 'entries', ['gameinfo_id muss eine Zahl sein!'])
+        self.assertFormError(response.context['form'], 'entries', ['gameinfo_id muss eine Zahl sein!'])
 
     def test_gameinfo_id_not_found(self):
         user = DBSetup().create_new_user('some user', is_staff=True)
@@ -64,7 +64,7 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
         response.form['entries'] = '0, 0, Referee'
         response = response.form.submit()
-        self.assertFormError(response, 'form', 'entries', ['gameinfo_id nicht gefunden!'])
+        self.assertFormError(response.context['form'], 'entries', ['gameinfo_id nicht gefunden!'])
 
     def test_official_id_not_found(self):
         user = DBSetup().create_new_user('some user', is_staff=True)
@@ -74,7 +74,7 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
         response.form['entries'] = f'{first_game.pk}, 9999, Field Judge'
         response = response.form.submit()
-        self.assertFormError(response, 'form', 'entries', ['official_id nicht gefunden!'])
+        self.assertFormError(response.context['form'], 'entries', ['official_id nicht gefunden!'])
 
     def test_position_illegal_entry(self):
         user = DBSetup().create_new_user('some user', is_staff=True)
@@ -84,7 +84,7 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
         response.form['entries'] = '1, 2, down judge'
         response = response.form.submit()
-        self.assertFormError(response, 'form', 'entries', ['Position muss genau einen der Werte haben: '
+        self.assertFormError(response.context['form'], 'entries', ['Position muss genau einen der Werte haben: '
                                                            'Referee, Down Judge, Field Judge, Side Judge!'])
 
     def test_game_official_entry_successfull(self):
@@ -132,7 +132,7 @@ class TestMoodleLogin(WebTest):
         response.form['username'] = 'invalid username'
         response.form['password'] = 'secret password'
         response = response.form.submit()
-        self.assertFormError(response, 'form', None, [error_text])
+        self.assertFormError(response.context['form'], None, [error_text])
 
     @patch.object(MoodleService, 'login')
     def test_login_is_successful(self, moodle_login_mock: MagicMock):
