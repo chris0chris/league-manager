@@ -13,9 +13,6 @@ from passcheck.models import Playerlist, PlayerlistGameday, TeamRelationship, Pa
     EmptyPasscheckVerification, EligibilityRule
 from passcheck.service.eligibility_validation import EligibilityValidator
 
-# PASSCHECK_DATE = datetime.date(2021, 6, 26)
-PASSCHECK_DATE = datetime.date(2024, 4, 13)
-
 
 class PasscheckException(Exception):
     pass
@@ -61,7 +58,7 @@ class PasscheckService:
         team = self._get_team(team_id)
         date = datetime.datetime.today()
         if settings.DEBUG:
-            date = PASSCHECK_DATE
+            date = settings.DEBUG_DATE
         today_gamedays = Gameday.objects.filter(date=date)
         all_games_wanted = False
         if gameday_id is None:
@@ -118,7 +115,7 @@ class PasscheckService:
         if not self.user_permission.is_staff:
             today = datetime.date.today()
             if settings.DEBUG:
-                today = PASSCHECK_DATE
+                today = settings.DEBUG_DATE
             if today != gameday.date:
                 raise PasscheckException(
                     f'Passcheck nicht erlaubt für Spieltag: {gameday_id}. Nur heutige Spieltage sind erlaubt.')
@@ -238,7 +235,7 @@ class PasscheckService:
             }
         date = datetime.datetime.today()
         if settings.DEBUG:
-            date = PASSCHECK_DATE
+            date = settings.DEBUG_DATE
         today_gamedays = Gameday.objects.filter(date__gte=date)
         gameinfo = Gameinfo.objects.filter(officials_id=team, gameday__in=today_gamedays).order_by(
             'scheduled')
