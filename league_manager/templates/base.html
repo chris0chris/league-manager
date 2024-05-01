@@ -61,8 +61,10 @@
                 </div>
                 {% endif %}
                 <div class="navbar-nav">
-
-                    <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
+                    <form id="logout-form" method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="nav-item nav-link" type="submit">Logout</button>
+                    </form>
                     {% else %}
                     <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
                     {% endif %}
