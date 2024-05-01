@@ -142,6 +142,7 @@ const Finalize = (props) => {
             type='textarea'
             text='Anmerkungen (z.B. DQ, längere Pause, ...)'
             value={`${note ?? ''}`}
+            required={false}
             onChange={setNote}
           />
         </div>
