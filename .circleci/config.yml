@@ -31,7 +31,7 @@ jobs:
             pip install -r test_requirements.txt
       - save_cache:
           paths:
-            - ~/.venv
+            - ~/.pyenv
           key: v2-dependencies-{{ checksum "requirements.txt" }}
 
       - run:
@@ -39,7 +39,6 @@ jobs:
           environment:
             SECRET_KEY: 123456-TEST
           command: |
-            . ~/.venv/bin/activate
             pytest --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
       - store_test_results:
           path: test-reports
