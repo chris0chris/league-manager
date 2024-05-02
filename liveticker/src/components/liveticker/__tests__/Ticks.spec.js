@@ -7,7 +7,7 @@ import {LIVETICKER_DATA} from '../../../__tests__/testdata/livetickerData';
 
 const setup = () => {
   const ticks = LIVETICKER_DATA[0].ticks;
-  render(<Ticks entries={ticks} />);
+  render(<Ticks entries={ticks} gameStatus={LIVETICKER_DATA[0].status}/>);
 };
 
 describe('Ticks component', () => {
