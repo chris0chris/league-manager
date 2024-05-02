@@ -89,7 +89,6 @@ const Finalize = (props) => {
                 setIsHomeConfirmed(!isHomeConfirmed);
               }
             }}
-            checked={isHomeConfirmed}
             className={
               isHomeConfirmed ? 'btn btn-success' : 'btn btn-outline-success'
             }

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const apiGet = (url, successType) => async (dispatch, getState) => {
+export const apiGet = (url, successType) => async (dispatch) => {
   await axios
       .get(url)
       .then((res) => {

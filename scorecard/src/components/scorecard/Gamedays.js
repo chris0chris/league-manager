@@ -29,7 +29,7 @@ const Gamedays = ({gamedays, onClick: emitEvent}) => {
               <td>{gameday.name}</td>
               <td>
                 <button
-                  onClick={(e) => {
+                  onClick={() => {
                     setActiveRow(gameday.id);
                     emitEvent(gameday.id);
                   }}

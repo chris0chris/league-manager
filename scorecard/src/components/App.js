@@ -25,7 +25,7 @@ import Finalize from './scorecard/Finalize';
 import MessageToaster from './scorecard/MessageToaster';
 import SelectPasscheckOrScorecard from './scorecard/SelectPasscheckOrScorecard';
 
-const App = (props) => {
+const App = () => {
   useEffect(() => {
     store.dispatch(loadUser());
   });
