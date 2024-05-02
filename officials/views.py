@@ -18,7 +18,7 @@ from gamedays.models import Team, Gameinfo, GameOfficial, Gameresult
 from league_manager.utils.view_utils import PermissionHelper
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
 from officials.forms import AddInternalGameOfficialEntryForm, MoodleLoginForm
-from officials.models import Official
+from officials.models import Official, OfficialLicenseHistory
 from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
 from officials.service.official_service import OfficialService
@@ -273,11 +273,13 @@ class OfficialAssociationListView(View):
     def get(self, request, *args, **kwargs):
         association_abbreviation = kwargs.get('abbr')
         year = datetime.today().year
-        official_list = Official.objects \
-            .filter(association__abbr=association_abbreviation,
-                    officiallicensehistory__created_at__year=year) \
-            .exclude(officiallicensehistory__license_id=4) \
-            .order_by('team__description', 'last_name')
+        valid_licenses = OfficialLicenseHistory.objects.filter(
+            created_at__year=year
+        ).exclude(license__id=4)
+        officials_with_valid_licenses = valid_licenses.values('official').distinct()
+        official_list = (
+            Official.objects.filter(id__in=officials_with_valid_licenses, association__abbr=association_abbreviation)
+            .order_by('team__description', 'last_name'))
         return render(
             request,
             self.template_name,
