@@ -1,15 +1,15 @@
 /* eslint-disable max-len */
-import React, {useEffect, useState} from 'react';
-import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
-import {getLiveticker} from '../../actions/liveticker';
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { getLiveticker } from "../../actions/liveticker";
 
-import GameTicker from './GameTicker';
+import GameTicker from "./GameTicker";
 
 const Liveticker = (props) => {
   const [endlessCounter, setEndlessCounter] = useState(0);
   const searchParams = new URLSearchParams(document.location.search);
-  const league = searchParams.get('league') || '';
+  const league = searchParams.get("league") || "";
   // eslint-disable-next-line no-unused-vars
   const [gamesToDisplayAllTicks, setGamesToDisplayAllTicks] = useState([]);
   const timer = () => setEndlessCounter(endlessCounter + 1);
@@ -40,12 +40,17 @@ const Liveticker = (props) => {
   };
   return (
     <>
-      {props.liveticker.length == 0 &&
+      {props.liveticker.length == 0 && (
         <div>Aktuell finden keine Spiele statt.</div>
-      }
+      )}
       {props.liveticker.map((teamEntry, index) => {
         return (
-          <GameTicker {...teamEntry} gameIndex={index} key={index} updateGamesToDisplay={updateGamesToDisplay} />
+          <GameTicker
+            {...teamEntry}
+            gameIndex={index}
+            key={index}
+            updateGamesToDisplay={updateGamesToDisplay}
+          />
         );
       })}
     </>
@@ -60,4 +65,4 @@ const mapStateToProps = (state) => ({
   liveticker: state.livetickerReducer.liveticker,
 });
 
-export default connect(mapStateToProps, {getLiveticker})(Liveticker);
+export default connect(mapStateToProps, { getLiveticker })(Liveticker);
