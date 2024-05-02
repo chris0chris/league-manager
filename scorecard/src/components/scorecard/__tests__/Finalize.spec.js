@@ -91,7 +91,6 @@ describe('Finalize component', () => {
     await user.type(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.home.name}-Captain Name*`), 'Home Cptn');
     await user.type(screen.getByPlaceholderText(`${GAME_LOG_COMPLETE_GAME.away.name}-Captain Name*`), 'Away Cptn');
     await user.click(screen.getByRole('button', {name: 'Ergebnis abschicken'}));
-    console.log('apiPut.mock', apiPut.mock);
     expect(apiPut.mock.calls[0][0]).toBe(`/api/game/${GAME_LOG_COMPLETE_GAME.gameId}/finalize`);
     expect(screen.getByText('SelectGame Page')).toBeInTheDocument();
   });
