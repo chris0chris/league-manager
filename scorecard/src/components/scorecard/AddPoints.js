@@ -10,8 +10,8 @@ const AddPoints = (props) => {
   let event = null;
   let isAgainstOpponent = false;
   const {onSubmit: updateParent} = props;
-  const [showTD, setShowTD] = useState(true);
-  const [showSerie, setShowSerie] = useState(false);
+  const [showTD, setShowTD] = useState(false);
+  const [showSerie, setShowSerie] = useState(true);
   const [showGameEvent, setShowGameEvent] = useState(false);
   const [reset, setReset] = useState(false);
   const handlePointsSelection = (value) => {
@@ -38,7 +38,7 @@ const AddPoints = (props) => {
   };
   const handleSubmit = (formEvent) => {
     formEvent.preventDefault();
-    setShowStates(true, false, false);
+    setShowStates(false, true, false);
     setReset(true);
     updateParent(event, isAgainstOpponent);
   };

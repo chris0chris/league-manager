@@ -13,10 +13,10 @@ const setup = () => {
 describe('AddPoints component', () => {
   it('should render correct', () => {
     setup();
-    const touchdownButton = screen.getByRole('radio', {name: 'Touchdown'});
+    const touchdownButton = screen.getByRole('radio', {name: 'Serie'});
     expect(touchdownButton).toBeInTheDocument();
     expect(touchdownButton).toBeChecked();
-    expect(screen.getByRole('radio', {name: 'Serie'})).toBeInTheDocument();
+    expect(screen.getByRole('radio', {name: 'Touchdown'})).toBeInTheDocument();
     expect(screen.getByRole('radio', {name: 'Mehr...'})).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Eintrag speichern'})).toBeInTheDocument();
   });
@@ -33,7 +33,7 @@ describe('AddPoints component', () => {
     await user.click(screen.getByRole('radio', {name: 'Serie'}));
     expect(screen.getByPlaceholderText('First Down - Nummer optional')).toBeInTheDocument();
     await user.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
-    expect(screen.getByRole('radio', {name: 'Touchdown'})).toBeChecked();
+    expect(screen.getByRole('radio', {name: 'Serie'})).toBeChecked();
     expect(mockFunc.mock.calls).toHaveLength(1);
   });
 });

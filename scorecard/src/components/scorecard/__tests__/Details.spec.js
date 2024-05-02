@@ -98,6 +98,7 @@ describe('Details component', () => {
     expect(homeButton).not.toBeChecked();
     expect(awayButton).toBeChecked();
     expect(screen.getByText('Einträge Gast')).toBeInTheDocument();
+    await user.click(screen.getByRole('radio', {name: 'Touchdown'}));
     await user.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');
     await user.type(screen.getByRole('spinbutton', {name: 'PAT number'}), '7');
     await user.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
@@ -134,6 +135,7 @@ describe('Details component', () => {
   it('should send a post api call with correct half, when points input was submitted', async () => {
     const user = userEvent.setup();
     setup();
+    await user.click(screen.getByRole('radio', {name: 'Touchdown'}));
     await user.type(screen.getByRole('spinbutton', {name: 'touchdown number'}), '19');
     await user.type(screen.getByRole('spinbutton', {name: 'PAT number'}), '7');
     await user.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
