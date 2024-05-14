@@ -20,7 +20,7 @@ class TestGamedayCreateView(WebTest):
         self.app.set_user(User.objects.all().first())
         response: DjangoWebtestResponse = self.app.get(reverse('league-gameday-create'))
         assert response.status_code == HTTPStatus.OK
-        form = response.form
+        form = response.forms[1]
         form['name'] = 'New Test Gameday'
         form['date'] = '2021-07-22'
         response: DjangoWebtestResponse = form.submit().follow()
@@ -68,7 +68,7 @@ class TestGamedayUpdateView(WebTest):
         self.gameday = gameday
         self.gameday_id = gameday.pk
         self.app.set_user(User.objects.all().first())
-        self.form: Form = self.app.get(reverse('league-gameday-update', args=[self.gameday_id])).form
+        self.form: Form = self.app.get(reverse('league-gameday-update', args=[self.gameday_id])).forms[1]
         self.form['address'] = 'some address'
 
     def test_creates_schedule(self):
