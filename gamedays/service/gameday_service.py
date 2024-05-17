@@ -152,5 +152,5 @@ class GamedayService:
             home=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='description'),
             away_id=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='id'),
             away=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='description'),
-        ).order_by('scheduled')
+        ).order_by('scheduled', 'field')
         return gameinfo
