@@ -7,7 +7,7 @@ from django.views.generic import ListView, DetailView, UpdateView, CreateView
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
 from .forms import GamedayCreateForm, GamedayUpdateForm
 from .models import Gameday
-from .service.gameday_service import GamedayService
+from .service.gameday_service import GamedayServiceDeprecated
 
 
 class GamedayListView(ListView):
@@ -24,7 +24,7 @@ class GamedayDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(GamedayDetailView, self).get_context_data()
         pk = context['gameday'].pk
-        gs = GamedayService.create(pk)
+        gs = GamedayServiceDeprecated.create(pk)
         render_configs = {
             'index': False,
             'classes': ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center'],

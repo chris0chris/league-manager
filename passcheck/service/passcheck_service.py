@@ -1,11 +1,13 @@
 import datetime
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Q, Value, OuterRef, Exists, Subquery, IntegerField
 
 from gamedays.api.serializers import GamedayInfoSerializer
 from gamedays.models import Team, Gameinfo, Gameday
-from gamedays.service.model_helper import GameresultHelper
+from gamedays.service.gameday_service import GamedayService
+from gamedays.service.team_service import TeamService
 from league_manager.utils.view_utils import UserRequestPermission
 from passcheck.api.serializers import PasscheckGamesListSerializer, RosterSerializer, \
     RosterValidationSerializer, PlayerAllGamedaysSerializer
@@ -23,24 +25,13 @@ class PasscheckService:
         self.user_permission = user_permission
 
     def get_officiating_games(self, officials_team: Team, gameday, all_games_wanted=False):
-        if officials_team is None and self.user_permission.is_staff:
-            gameinfo = Gameinfo.objects.filter(gameday__in=gameday).order_by('scheduled')
-        elif all_games_wanted:
-            gameinfo = Gameinfo.objects.filter(gameday__in=gameday).order_by('scheduled')
-            if not gameinfo.filter(officials=officials_team).exists():
-                raise PasscheckException('Passcheck nicht erlaubt, da ihr als Team nicht am Spieltag spielt!')
-        else:
-            gameinfo = Gameinfo.objects.filter(officials_id=officials_team, gameday__in=gameday).order_by(
-                'scheduled')
-            if not gameinfo.exists():
-                raise PasscheckException('Ihr spielt heute nicht, deswegen gibt es keine Spiele für den Passcheck.')
+        gameday_service = GamedayService(self.user_permission)
+        try:
+            gameinfo = gameday_service.get_officiating_gameinfo(officials_team, gameday, all_games_wanted)
+        except ObjectDoesNotExist:
+            raise PasscheckException('Passcheck nicht erlaubt, da ihr als Team nicht am Spieltag spielt!')
+        if officials_team is not None and not all_games_wanted:
             gameinfo = gameinfo.filter(scheduled__lte=gameinfo.first().scheduled)
-        gameinfo = gameinfo.annotate(
-            home_id=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='id'),
-            home=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='description'),
-            away_id=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='id'),
-            away=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='description'),
-        )
         gameinfo = gameinfo.annotate(
             is_checked_home=Exists(PasscheckVerification.objects.filter(
                 team=OuterRef('home_id'),
@@ -55,7 +46,7 @@ class PasscheckService:
         ).data
 
     def get_passcheck_games(self, team_id, gameday_id=None):
-        team = self._get_team(team_id)
+        team = TeamService.get_team_by_id_or_name(team_id)
         date = datetime.datetime.today()
         if settings.DEBUG:
             date = settings.DEBUG_DATE
@@ -75,18 +66,8 @@ class PasscheckService:
                                               many=True).data
         }
 
-    def _get_team(self, team_id) -> Team:
-        try:
-            if type(team_id) is str:
-                team = Team.objects.get(name=team_id)
-            else:
-                team = Team.objects.get(pk=team_id)
-            return team
-        except Team.DoesNotExist:
-            return None
-
     def get_roster(self, team_id: int, gameday_id: int = None):
-        team = self._get_team(team_id)
+        team = TeamService.get_team_by_id_or_name(team_id)
         all_leagues = Playerlist.objects.filter(team=team).exclude(gamedays__league__name=None).distinct().values(
             'gamedays__league', 'gamedays__league__name')
         league_annotations = {
@@ -121,7 +102,7 @@ class PasscheckService:
                     f'Passcheck nicht erlaubt für Spieltag: {gameday_id}. Nur heutige Spieltage sind erlaubt.')
         roster = self._get_roster(team_id, gameday_id, {})
         team = {'team': TeamData(
-            name=self._get_team(team_id).description,
+            name=TeamService.get_team_by_id_or_name(team_id).description,
             roster=RosterSerializer(instance=roster, is_staff=self.user_permission.is_user_or_staff(), many=True).data,
             validator=EligibilityValidator(gameday.league, gameday).get_player_strength()
         )}
@@ -228,7 +209,7 @@ class PasscheckService:
         }
 
     def get_passcheck_status(self, officials_team: str):
-        team = self._get_team(officials_team)
+        team = TeamService.get_team_by_id_or_name(officials_team)
         if team is None:
             return {
                 'completed': False

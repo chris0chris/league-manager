@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from gamedays.api.serializers import GameFinalizer, GameSetupSerializer, GameLogSerializer
 from gamedays.models import Team, Gameinfo, GameSetup, TeamLog
 from gamedays.service.game_service import GameService
-from gamedays.service.gameday_service import GamedayService
+from gamedays.service.gameday_service import GamedayServiceDeprecated
 from gamedays.service.model_helper import GameresultHelper, TeamLogHelper
 
 
@@ -124,7 +124,7 @@ class GameSetupCreateOrUpdateView(RetrieveUpdateAPIView):
 
 class GamesToWhistleAPIView(APIView):
     def get(self, request, *args, **kwargs):
-        gs = GamedayService.create(kwargs['pk'])
+        gs = GamedayServiceDeprecated.create(kwargs['pk'])
         games_to_whistle = gs.get_games_to_whistle(kwargs.get('team'))
         games_to_whistle = games_to_whistle.to_json(orient='records')
         print(json.dumps(json.loads(games_to_whistle), indent=2))

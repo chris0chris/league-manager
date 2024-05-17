@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, GameOfficialSerializer
 from gamedays.models import Gameday, Gameinfo, GameOfficial
-from gamedays.service.gameday_service import GamedayService
+from gamedays.service.gameday_service import GamedayServiceDeprecated
 
 
 class GamedayListAPIView(ListAPIView):
@@ -65,7 +65,7 @@ class GamedayScheduleView(APIView):
 
     # noinspection PyMethodMayBeStatic
     def get(self, request: Request, *args, **kwargs):
-        gs = GamedayService.create(kwargs['pk'])
+        gs = GamedayServiceDeprecated.create(kwargs['pk'])
         get = request.query_params.get('get')
         response = '{"error": "Please use parameter - get "}'
         orient = request.query_params.get('orient')
