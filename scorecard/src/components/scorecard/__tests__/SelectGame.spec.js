@@ -79,7 +79,7 @@ describe("SelectGame component", () => {
     await user.click(firstStartGameButton);
     expect(apiGet.mock.calls[1][0]).toBe(
       // eslint-disable-next-line max-len
-      `/api/gameday/${TWO_GAMEDAYS.gamedays[1].id}/officials/OfficialsTeam`,
+      `/api/scorecard/gameday/${TWO_GAMEDAYS.gamedays[1].id}`,
     );
     expect(apiGet.mock.calls[2][0]).toBe(
       `/api/game/${TWO_GAMES.games[0].id}/officials`,

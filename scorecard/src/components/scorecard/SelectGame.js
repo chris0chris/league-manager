@@ -40,7 +40,7 @@ const SelectGame = (props) => {
       }
       return;
     }
-    props.getGames(id, loadAll ? "*" : props.user.username);
+    props.getGames(id, loadAll);
     setSelectedGamedayId(id);
     setGamesForGamedayLoaded(true);
   }, [searchParams]);

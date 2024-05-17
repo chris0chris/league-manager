@@ -39,6 +39,7 @@ urlpatterns = [
                   path('api/passcheck/', include('passcheck.api.urls')),
                   path('officials/', include('officials.urls')),
                   path('teammanager/', include('teammanager.urls')),
+                  path('api/scorecard/', include('scorecard.api.urls')),
                   path('scorecard/', include('scorecard.urls')),
                   path('liveticker/', include('liveticker.urls')),
                   path('leaguetable/', include('league_table.urls')),

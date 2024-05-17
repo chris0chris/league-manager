@@ -13,8 +13,11 @@ import {
   UPDATE_TEAM_IN_POSSESSION,
 } from "./types";
 
-export const getGames = (gamedayId, team) => {
-  return apiGet(`/api/gameday/${gamedayId}/officials/${team}`, GET_GAMES);
+export const getGames = (gamedayId, loadAllGames) => {
+  return apiGet(
+    `/api/scorecard/gameday/${gamedayId}${loadAllGames ? "?loadAllGames=true" : ""}`,
+    GET_GAMES,
+  );
 };
 
 export const setSelectedGame = (selectedGame) => (dispatch) => {
