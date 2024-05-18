@@ -5,6 +5,7 @@ from gamedays.models import Season, League, Gameday
 
 SCHEDULE_CHOICES = (
     ("3_1", "3 Teams 1 Feld"),
+    ("3_hinrunde_1", "3 Teams 1 Feld (nur Hinrunde)"),
     ("4_1", "4 Teams 1 Feld"),
     ("5_dffl1_2", "5 Teams 2 Felder (DFFL1)"),
     ("5_2", "5 Teams 2 Felder (DFFL2"),
