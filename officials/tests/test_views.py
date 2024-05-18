@@ -54,16 +54,18 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
         user = DBSetup().create_new_user('some user', is_staff=True)
         self.app.set_user(user)
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
-        response.form['entries'] = 'str, 2, position'
-        response = response.form.submit()
+        form = response.forms[1]
+        form['entries'] = 'str, 2, position'
+        response = form.submit()
         self.assertFormError(response.context['form'], 'entries', ['gameinfo_id muss eine Zahl sein!'])
 
     def test_gameinfo_id_not_found(self):
         user = DBSetup().create_new_user('some user', is_staff=True)
         self.app.set_user(user)
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
-        response.form['entries'] = '0, 0, Referee'
-        response = response.form.submit()
+        form = response.forms[1]
+        form['entries'] = '0, 0, Referee'
+        response = form.submit()
         self.assertFormError(response.context['form'], 'entries', ['gameinfo_id nicht gefunden!'])
 
     def test_official_id_not_found(self):
@@ -72,8 +74,9 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
         DBSetup().g62_status_empty()
         first_game = Gameinfo.objects.first()
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
-        response.form['entries'] = f'{first_game.pk}, 9999, Field Judge'
-        response = response.form.submit()
+        form = response.forms[1]
+        form['entries'] = f'{first_game.pk}, 9999, Field Judge'
+        response = form.submit()
         self.assertFormError(response.context['form'], 'entries', ['official_id nicht gefunden!'])
 
     def test_position_illegal_entry(self):
@@ -82,8 +85,9 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
         DBSetup().g62_status_empty()
         DbSetupOfficials().create_officials_and_team()
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
-        response.form['entries'] = '1, 2, down judge'
-        response = response.form.submit()
+        form = response.forms[1]
+        form['entries'] = '1, 2, down judge'
+        response = form.submit()
         self.assertFormError(response.context['form'], 'entries', ['Position muss genau einen der Werte haben: '
                                                            'Referee, Down Judge, Field Judge, Side Judge!'])
 
@@ -95,8 +99,9 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
         first_game = Gameinfo.objects.first()
         first_official = Official.objects.first()
         response: DjangoWebtestResponse = self.app.get(reverse(OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE))
-        response.form['entries'] = f'{first_game.pk}, {first_official.pk + 1}, Side Judge'
-        response = response.form.submit()
+        form = response.forms[1]
+        form['entries'] = f'{first_game.pk}, {first_official.pk + 1}, Side Judge'
+        response = form.submit()
         assert ' - Julia Jegura als Side Judge' in \
                response.html.find_all("div", {"class": "alert-success"})[0].text
 
