@@ -22,12 +22,12 @@ export const saveGameSetup = (gameId, gameSetup) => {
 };
 
 export const getOfficials = (gameId) => {
-  return apiGet(`/api/game/${gameId}/officials`, GET_GAME_OFFICIALS);
+  return apiGet(`/api/scorecard/game/${gameId}/officials`, GET_GAME_OFFICIALS);
 };
 
 export const saveOfficials = (gameId, officials) => {
   return apiPut(
-    `/api/game/${gameId}/officials`,
+    `/api/scorecard/game/${gameId}/officials`,
     officials,
     GAME_SETUP_OFFICIALS_SUCCESS,
     GAME_SETUP_OFFICIALS_FAIL,

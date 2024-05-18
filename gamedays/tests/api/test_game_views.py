@@ -7,41 +7,9 @@ from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
 from gamedays.api.urls import (API_GAME_POSSESSION, API_CONFIG_SCORECARD_PENALTIES, API_GAME_FINALIZE,
-                               API_GAME_HALFTIME, API_GAMELOG, API_GAME_SETUP, API_GAME_OFFICIALS)
+                               API_GAME_HALFTIME, API_GAMELOG, API_GAME_SETUP)
 from gamedays.models import Gameinfo, Gameresult, GameOfficial, GameSetup, TeamLog
 from gamedays.tests.setup_factories.db_setup import DBSetup
-
-
-class TestRetrieveUpdateOfficials(WebTest):
-
-    def test_create_officials(self):
-        DBSetup().g62_status_empty()
-        last_game = Gameinfo.objects.last()
-        assert len(GameOfficial.objects.all()) == 0
-        response = self.app.put_json(reverse(API_GAME_OFFICIALS, kwargs={'pk': last_game.pk}), [
-            {"name": "Saskia", "position": "referee"},
-            {"name": "Franz", "position": "side jude"}], headers=DBSetup().get_token_header())
-        assert response.status_code == HTTPStatus.OK
-        assert len(GameOfficial.objects.all()) == 2
-
-    def test_officials_will_be_updated(self):
-        DBSetup().g62_status_empty()
-        last_game = Gameinfo.objects.last()
-        DBSetup().create_game_officials(last_game)
-        assert len(GameOfficial.objects.all()) == 5
-        response = self.app.put_json(reverse(API_GAME_OFFICIALS, kwargs={'pk': last_game.pk}), [
-            {"name": "Saskia", "position": "Referee"},
-            {"name": "Franz", "position": "Side Judge"}], headers=DBSetup().get_token_header())
-        assert response.status_code == HTTPStatus.OK
-        assert len(GameOfficial.objects.all()) == 5
-
-    def test_officials_get(self):
-        DBSetup().g62_status_empty()
-        last_game = Gameinfo.objects.last()
-        DBSetup().create_game_officials(last_game)
-        response = self.app.get(reverse(API_GAME_OFFICIALS, kwargs={'pk': last_game.pk}))
-        assert response.status_code == HTTPStatus.OK
-        assert len(response.json) == 5
 
 
 class TestGameSetup(WebTest):

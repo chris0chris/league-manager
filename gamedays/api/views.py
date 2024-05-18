@@ -1,17 +1,15 @@
 import json
 from collections import OrderedDict
 from datetime import datetime
-from http import HTTPStatus
 
 from django.conf import settings
-from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, GameOfficialSerializer
-from gamedays.models import Gameday, Gameinfo, GameOfficial
+from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
+from gamedays.models import Gameday, Gameinfo
 from gamedays.service.gameday_service import GamedayServiceDeprecated
 
 
@@ -32,33 +30,6 @@ class GameinfoUpdateAPIView(RetrieveUpdateAPIView):
 class GamedayRetrieveUpdate(RetrieveUpdateAPIView):
     serializer_class = GamedaySerializer
     queryset = Gameday.objects.all()
-
-
-class GameOfficialCreateOrUpdateView(RetrieveUpdateAPIView):
-    serializer_class = GameOfficialSerializer
-    queryset = GameOfficial.objects.all()
-
-    def get(self, request, *args, **kwargs):
-        game_id = kwargs.get('pk')
-        try:
-            officials = GameOfficial.objects.filter(gameinfo_id=game_id)
-            serializer = GameOfficialSerializer(instance=officials, many=True)
-            return Response(serializer.data, status=HTTPStatus.OK)
-        except GameOfficial.DoesNotExist:
-            raise NotFound(detail=f'No officials found for gameId {game_id}')
-
-    def update(self, request, *args, **kwargs):
-        pk = kwargs.get('pk')
-        response_data = []
-        for item in request.data:
-            official, _ = GameOfficial.objects.get_or_create(gameinfo_id=pk, position=item['position'])
-            serializer = GameOfficialSerializer(instance=official, data=item)
-            if serializer.is_valid():
-                serializer.save()
-                response_data.append(serializer.data)
-            else:
-                return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
-        return Response(response_data, status=HTTPStatus.OK)
 
 
 class GamedayScheduleView(APIView):

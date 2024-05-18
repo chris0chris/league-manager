@@ -1,5 +1,7 @@
 from rest_framework.fields import SerializerMethodField, TimeField, IntegerField, CharField
-from rest_framework.serializers import Serializer
+from rest_framework.serializers import Serializer, ModelSerializer
+
+from gamedays.models import GameOfficial
 
 
 class ScorecardGameinfoSerializer(Serializer):
@@ -25,3 +27,9 @@ class ScorecardGameinfoSerializer(Serializer):
 
     def get_isFinished(self, obj: dict) -> bool:
         return obj.get(self.GAME_FINISHED_C) is not None
+
+
+class GameOfficialSerializer(ModelSerializer):
+    class Meta:
+        model = GameOfficial
+        exclude = ('gameinfo',)

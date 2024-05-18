@@ -20,12 +20,6 @@ class GamedayInfoSerializer(Serializer):
         return f'{obj["name"]} ({obj["league__name"]})'
 
 
-class GameOfficialSerializer(ModelSerializer):
-    class Meta:
-        model = GameOfficial
-        exclude = ('gameinfo',)
-
-
 class GameinfoSerializer(ModelSerializer):
     class Meta:
         model = Gameinfo
