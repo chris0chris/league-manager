@@ -1,10 +1,14 @@
 import pandas as pd
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import QuerySet
 
-from gamedays.models import Gameinfo
+from gamedays.models import Gameinfo, Team
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     POINTS_HOME, \
     POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL
+from gamedays.service.model_helper import GameresultHelper
 from gamedays.service.model_wrapper import GamedayModelWrapper
+from league_manager.utils.view_utils import UserRequestPermission
 
 EMPTY_DATA = '[]'
 
@@ -81,7 +85,7 @@ class EmptyGamedayService:
         return EmptyFinalTable
 
 
-class GamedayService:
+class GamedayServiceDeprecated:
     @classmethod
     def create(cls, gameday_pk):
         try:
@@ -127,3 +131,28 @@ class GamedayService:
         games_to_whistle = games_to_whistle[columns]
         games_to_whistle = games_to_whistle.rename(columns={OFFICIALS: 'officialsId', OFFICIALS_NAME: OFFICIALS})
         return games_to_whistle
+
+
+class GamedayService:
+    def __init__(self, user_permission=UserRequestPermission()):
+        self.user_permission = user_permission
+
+    def get_officiating_gameinfo(self, officiating_team: Team | None, gameday, all_games_wanted=False) -> QuerySet[
+        Gameinfo]:
+        if officiating_team is None and self.user_permission.is_staff:
+            gameinfo = Gameinfo.objects.filter(gameday__in=gameday)
+        elif all_games_wanted:
+            gameinfo = Gameinfo.objects.filter(gameday__in=gameday)
+            if not gameinfo.filter(officials=officiating_team).exists():
+                raise ObjectDoesNotExist()
+        else:
+            gameinfo = Gameinfo.objects.filter(officials_id=officiating_team, gameday__in=gameday)
+            if not gameinfo.exists():
+                raise ObjectDoesNotExist()
+        gameinfo = gameinfo.annotate(
+            home_id=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='id'),
+            home=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='description'),
+            away_id=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='id'),
+            away=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='description'),
+        ).order_by('scheduled', 'field')
+        return gameinfo

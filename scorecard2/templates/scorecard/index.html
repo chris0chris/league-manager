@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+    />
+    {% load static %}
+    <link href='{% static "scorecard/css/scorecard.css" %}' rel="stylesheet"/>
+    <title>5er DFFL - Scorecard</title>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js" crossorigin></script>
+<script
+        src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js"
+        crossorigin></script>
+<script
+        src="https://cdn.jsdelivr.net/npm/react-bootstrap@next/dist/react-bootstrap.min.js"
+        crossorigin></script>
+<script>var Alert = ReactBootstrap.Alert;</script>
+<script src='{% static "scorecard/js/scorecard.js" %}'></script>
+<script>
+    const handleBeforeUnload = (e) => {
+        // Cancel the event
+        e.preventDefault();
+        // Chrome requires returnValue to be set
+        e.returnValue = '';
+
+        // Prompt the user with a confirmation dialog
+        const confirmationMessage = 'Are you sure you want to leave this page? Your changes may not be saved.';
+        (e || window.event).returnValue = confirmationMessage; // For IE and Firefox
+        return confirmationMessage; // For Safari
+      };
+      const DEBUG = false;
+    if (!DEBUG) {
+        window.addEventListener('beforeunload', handleBeforeUnload);
+    }
+</script>
+</body>
+</html>
