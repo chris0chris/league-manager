@@ -10,11 +10,12 @@
             crossorigin="anonymous"
     />
     {% load static %}
-    <link href='{% static "scorecard/css/scorecard.css" %}' rel="stylesheet"/>
+    <link href='{% static "scorecard2/css/scorecard.css" %}' rel="stylesheet"/>
     <title>5er DFFL - Scorecard</title>
 </head>
 <body>
-<div id="app"></div>
+<h1>hello world 2</h1>
+<div id="scorecard-app"></div>
 <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js" crossorigin></script>
 <script
         src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js"
@@ -23,7 +24,7 @@
         src="https://cdn.jsdelivr.net/npm/react-bootstrap@next/dist/react-bootstrap.min.js"
         crossorigin></script>
 <script>var Alert = ReactBootstrap.Alert;</script>
-<script src='{% static "scorecard/js/scorecard.js" %}'></script>
+<script src='{% static "scorecard2/js/scorecard.js" %}'></script>
 <script>
     const handleBeforeUnload = (e) => {
         // Cancel the event
