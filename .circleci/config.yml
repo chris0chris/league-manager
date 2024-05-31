@@ -74,13 +74,13 @@ jobs:
     steps:
       - checkout
       - node/install-packages:
-          app-dir: scorecard2/
+          app-dir: scorecard2/app
       - run:
           name: "JavaScript Test Suite"
-          command: npm --prefix scorecard2/ run jest
+          command: npm --prefix scorecard2/app run ci-jest
       - run:
           name: "JavaScript Linter"
-          command: npm --prefix scorecard2/ run eslint
+          command: npm --prefix scorecard2/app run ci-eslint
       - store_test_results:
           path: /tmp/eslint
 
