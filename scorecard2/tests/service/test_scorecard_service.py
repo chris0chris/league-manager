@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from gamedays.models import Team, Gameinfo, Gameday
+from gamedays.models import Team, Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from league_manager.utils.view_utils import UserRequestPermission
 from scorecard2.service.scorecard_service import ScorecardGamedayService

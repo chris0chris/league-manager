@@ -26,11 +26,14 @@ class ScorecardGamedayService:
             instance=self._merge_gamedays_and_gameinfos(gamedays, gameinfo),
             many=True).data
 
+    # noinspection PyMethodMayBeStatic
     def _merge_gamedays_and_gameinfos(self, gamedays, gameinfo):
         all_gamdays = list(gamedays.values(*ScorecardGamedaySerializer.ALL_FIELD_VALUES))
         for current_gameday in all_gamdays:
-            current_gameday[ScorecardGamedaySerializer.GAMES_C] = list(gameinfo.filter(gameday=current_gameday[ScorecardGamedaySerializer.ID_C]).values(
-                *ScorecardGameinfoSerializer.ALL_FIELD_VALUES))
+            current_gameday[ScorecardGamedaySerializer.GAMES_C] = list(
+                gameinfo.filter(gameday=current_gameday[ScorecardGamedaySerializer.ID_C]).values(
+                    *ScorecardGameinfoSerializer.ALL_FIELD_VALUES)
+            )
         return all_gamdays
 
     def _get_gamedays_for_team(self, team_id):
