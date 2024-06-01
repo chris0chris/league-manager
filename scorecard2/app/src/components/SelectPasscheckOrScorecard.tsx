@@ -44,11 +44,11 @@ const SelectPasscheckOrScorecard: React.FC = () => {
   }
   return (
     <Container
-      className="d-flex align-items-center justify-content-center"
+      className="d-flex justify-content-center"
       style={{ height: "100vh" }}
     >
       <Row>
-        <Col className="d-flex justify-content-center">
+        <Col>
           <Button
             className="m-2"
             size="lg"
