@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth.models import User
 
 from gamedays.models import Team, Gameday, Gameinfo
@@ -72,47 +74,49 @@ class DBSetup:
         #
         # for fixture in fixtures:
         #     print(fixture)
-
+        finished = None
+        if status == 'beendet':
+            finished = datetime.datetime.now()
         gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official,
-                             in_possession=teams[0].name, scheduled='10:00')
+                             in_possession=teams[0].name, scheduled='10:00', gameFinished=finished)
         GameresultFactory(gameinfo=gi, team=teams[0], fh=2, sh=1, pa=2, isHome=True)
         GameresultFactory(gameinfo=gi, team=teams[1], fh=1, sh=1, pa=3)
         gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official,
-                             scheduled='11:10')
+                             scheduled='11:10', gameFinished=finished)
         GameresultFactory(gameinfo=gi, team=teams[1], fh=1, sh=1, pa=1, isHome=True)
         GameresultFactory(gameinfo=gi, team=teams[2], fh=1, sh=0, pa=2)
         gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official,
-                             scheduled='12:20')
+                             scheduled='12:20', gameFinished=finished)
         GameresultFactory(gameinfo=gi, team=teams[2], fh=1, sh=0, pa=3, isHome=True)
         GameresultFactory(gameinfo=gi, team=teams[0], fh=2, sh=1, pa=1)
         if number_teams > 3:
             gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official,
-                                 scheduled='13:30')
+                                 scheduled='13:30', gameFinished=finished)
             GameresultFactory(gameinfo=gi, team=teams[3], fh=0, sh=0, pa=3, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[0], fh=2, sh=1, pa=0)
             gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official,
-                                 scheduled='14:40')
+                                 scheduled='14:40', gameFinished=finished)
             GameresultFactory(gameinfo=gi, team=teams[1], fh=1, sh=1, pa=0, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[3], fh=0, sh=0, pa=2)
             gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official,
-                                 scheduled='15:50')
+                                 scheduled='15:50', gameFinished=finished)
             GameresultFactory(gameinfo=gi, team=teams[3], fh=0, sh=0, pa=1, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[2], fh=1, sh=0, pa=0)
         if number_teams > 4:
             gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official,
-                                 scheduled='17:00')
+                                 scheduled='17:00', gameFinished=finished)
             GameresultFactory(gameinfo=gi, team=teams[4], fh=0, sh=0, pa=3, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[0], fh=2, sh=1, pa=0)
             gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official,
-                                 scheduled='18:10')
+                                 scheduled='18:10', gameFinished=finished)
             GameresultFactory(gameinfo=gi, team=teams[1], fh=1, sh=1, pa=0, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[4], fh=0, sh=0, pa=2)
             gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official,
-                                 scheduled='19:20')
+                                 scheduled='19:20', gameFinished=finished)
             GameresultFactory(gameinfo=gi, team=teams[4], fh=0, sh=0, pa=1, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[2], fh=1, sh=0, pa=0)
             gi = GameinfoFactory(gameday=gameday, stage=stage, standing=standing, status=status, officials=official,
-                                 scheduled='20:30')
+                                 scheduled='20:30', gameFinished=finished)
             GameresultFactory(gameinfo=gi, team=teams[3], fh=1, sh=0, pa=0, isHome=True)
             GameresultFactory(gameinfo=gi, team=teams[4], fh=0, sh=0, pa=1)
         return teams
@@ -168,7 +172,7 @@ class DBSetup:
     def create_finalround_game(self, gameday, standing, status, home, away, scheduled='10:00'):
         if status == 'beendet':
             gi = GameinfoFactory(gameday=gameday, stage='Finalrunde', standing=standing, status=status,
-                                 in_possession=home.name, scheduled=scheduled)
+                                 in_possession=home.name, scheduled=scheduled, gameFinished=datetime.datetime.now())
             GameresultFactory(gameinfo=gi, team=home, fh=1, sh=1, pa=3, isHome=True)
             GameresultFactory(gameinfo=gi, team=away, fh=2, sh=1, pa=2)
             return gi

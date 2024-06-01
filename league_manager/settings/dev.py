@@ -28,4 +28,8 @@ if DEBUG_TOOLBAR:
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     ]
 
+REST_KNOX = {
+    'TOKEN_TTL': datetime.timedelta(days=5),
+}
+
 INTERNAL_IPS = ['127.0.0.1']

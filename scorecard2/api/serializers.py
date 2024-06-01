@@ -1,4 +1,4 @@
-from rest_framework.fields import SerializerMethodField, TimeField, IntegerField, CharField
+from rest_framework.fields import SerializerMethodField, TimeField, IntegerField, CharField, DateField
 from rest_framework.serializers import Serializer, ModelSerializer
 
 from gamedays.models import GameOfficial
@@ -27,6 +27,20 @@ class ScorecardGameinfoSerializer(Serializer):
 
     def get_isFinished(self, obj: dict) -> bool:
         return obj.get(self.GAME_FINISHED_C) is not None
+
+
+class ScorecardGamedaySerializer(Serializer):
+    DATE_C = 'date'
+    NAME_C = 'name'
+    GAMES_C = 'games'
+    ID_C = 'id'
+
+    ALL_FIELD_VALUES = [ID_C, DATE_C, NAME_C]
+
+    id = IntegerField()
+    date = DateField(format='%d.%m.%Y')
+    name = CharField()
+    games = ScorecardGameinfoSerializer(many=True)
 
 
 class GameOfficialSerializer(ModelSerializer):

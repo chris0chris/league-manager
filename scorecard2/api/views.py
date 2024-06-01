@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,21 +11,24 @@ from scorecard2.api.serializers import GameOfficialSerializer
 from scorecard2.service.scorecard_service import ScorecardGamedayService
 
 
-class GamesToOfficiateAPIView(APIView):
+class SpecificGamedayAndGamesToOfficiateAPIView(APIView):
     @get_user_request_permission
     def get(self, request, *args, **kwargs):
         user_permission = kwargs.get('user_permission')
         gameday_id = kwargs.get('pk')
         team_id = request.user.username
         scorecard_gameday_service = ScorecardGamedayService(gameday_id, user_permission)
-        load_all_games = False if request.GET.get('loadAllGames') is None else True
         try:
             return Response(
-                scorecard_gameday_service.get_officiating_games(team_id, load_all_games),
+                scorecard_gameday_service.get_officiating_games(team_id),
                 status=HTTPStatus.OK
             )
-        except PermissionError:
-            return Response(status=HTTPStatus.FORBIDDEN)
+        except PermissionError as exception:
+            raise PermissionDenied(detail=str(exception))
+
+
+class GamedaysAndGamesToOfficiateAPIView(SpecificGamedayAndGamesToOfficiateAPIView):
+    pass
 
 
 class GameOfficialCreateOrUpdateView(RetrieveUpdateAPIView):

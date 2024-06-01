@@ -2,7 +2,7 @@ import pandas as pd
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import QuerySet
 
-from gamedays.models import Gameinfo, Team
+from gamedays.models import Gameinfo
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     POINTS_HOME, \
     POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL
@@ -137,22 +137,13 @@ class GamedayService:
     def __init__(self, user_permission=UserRequestPermission()):
         self.user_permission = user_permission
 
-    def get_officiating_gameinfo(self, officiating_team: Team | None, gameday, all_games_wanted=False) -> QuerySet[
-        Gameinfo]:
-        if officiating_team is None and self.user_permission.is_staff:
-            gameinfo = Gameinfo.objects.filter(gameday__in=gameday)
-        elif all_games_wanted:
-            gameinfo = Gameinfo.objects.filter(gameday__in=gameday)
-            if not gameinfo.filter(officials=officiating_team).exists():
-                raise ObjectDoesNotExist()
-        else:
-            gameinfo = Gameinfo.objects.filter(officials_id=officiating_team, gameday__in=gameday)
-            if not gameinfo.exists():
-                raise ObjectDoesNotExist()
-        gameinfo = gameinfo.annotate(
+    def get_officiating_gameinfo(self, gameday) -> QuerySet[Gameinfo]:
+        gameinfo = Gameinfo.objects.filter(gameday__in=gameday).annotate(
             home_id=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='id'),
             home=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='description'),
             away_id=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='id'),
             away=GameresultHelper.get_gameresult_team_subquery(is_home=False, team_column='description'),
         ).order_by('scheduled', 'field')
+        if not self.user_permission.is_staff:
+            gameinfo = gameinfo.filter(gameFinished__isnull=True)
         return gameinfo
