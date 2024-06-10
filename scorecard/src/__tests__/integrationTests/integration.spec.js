@@ -11,6 +11,7 @@ describe('getGames action', () => {
     moxios.uninstall();
   });
 
+  /*eslint jest/no-done-callback: 1*/
   test('Store is updated correctly', (done) => {
     const expectedState = {
       data: {

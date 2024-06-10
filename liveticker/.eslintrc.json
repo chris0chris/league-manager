@@ -6,6 +6,7 @@
     },
     "extends": [
       "plugin:react/recommended",
+      "plugin:jest/recommended"
     ],
     "parserOptions": {
       "ecmaFeatures": {
@@ -15,7 +16,8 @@
       "sourceType": "module"
     },
     "plugins": [
-      "react"
+      "react",
+      "jest"
     ],
     "rules": {
       "linebreak-style": 0,

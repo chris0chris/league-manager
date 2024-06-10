@@ -54,7 +54,7 @@ const setup = () => {
 };
 
 describe('SelectGame component', () => {
-  it('it should render correct with empty games', () => {
+  it('should render correct with empty games', () => {
     setup();
     expect(screen.getAllByRole('button').length).toBe(2);
     expect(screen.getAllByRole('table')).toHaveLength(1);
