@@ -56,7 +56,7 @@
     "testj": "jest --maxWorkers=1 --env=jsdom",
     "testj:watch": "jest --env=jsdom --watch",
     "jest": "jest --env=jsdom --ci --coverage && codecov",
-    "eslint": "eslint ./src "
+    "eslint": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-scorecard.xml"
   },
   "eslintConfig": {
     "extends": [
