@@ -11,7 +11,7 @@ describe('getGames action', () => {
     moxios.uninstall();
   });
 
-  test('Store is updated correctly', (done) => {
+  test('Store is updated correctly', () => {
     const expectedState = {
       data: {
         date: '2020-07-12',
@@ -25,10 +25,9 @@ describe('getGames action', () => {
         status: 200,
         response: expectedState,
       });
-      done();
     });
 
-    store.dispatch(getGamedays()).then(() => {
+    return store.dispatch(getGamedays()).then(() => {
       const newState = store.getState();
       expect(newState.gamedays).toBe(expectedState.data);
     });
