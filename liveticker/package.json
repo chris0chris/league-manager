@@ -46,7 +46,7 @@
     "build": "webpack --mode production --config webpack.config.js",
     "dev": "webpack --mode development --config webpack.config.js",
     "dev:watch": "webpack --mode development --watch --config webpack.config.js",
-    "eslint": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-liveticker.xml",
+    "eslint": "eslint ./src ",
     "jest": "jest --env=jsdom --ci --coverage && codecov",
     "test": "react-scripts test",
     "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache test -- --config jest.config.js",

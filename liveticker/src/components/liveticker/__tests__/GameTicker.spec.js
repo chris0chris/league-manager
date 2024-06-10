@@ -21,7 +21,7 @@ describe('GameTicker component', () => {
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.home.name))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(GAME_TICKER_DATA.away.name))).toBeInTheDocument();
     expect(screen.getByTitle('Team hat Ballbesitz')).toBeInTheDocument();
-    expect(screen.getByTitle('Klicken, um alle Einträge anzuzeigen'));
+    expect(screen.getByTitle('Klicken, um alle Einträge anzuzeigen')).toBeInTheDocument();
   });
   it('should call updateGamesToDisplay, when clicked on icon', async () => {
     const user = userEvent.setup();
