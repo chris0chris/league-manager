@@ -42,10 +42,10 @@
     "start": "react-scripts start",
     "build": "webpack --mode production --config webpack.config.js",
     "test": "react-scripts test --env=jsdom --detectOpenHandles",
-    "testj:watch": "jest --env=jsdom --watch",
+    "testj:watch": "jest --env=jsdom --watch --config=jest.config.js",
     "testj": "jest --env=jsdom --coverage --config=jest.config.js",
     "eject": "react-scripts eject",
-    "ci-jest": "jest --env=jsdom --ci --coverage && codecov",
+    "ci-jest": "jest --env=jsdom --ci --coverage --config=jest.config.js && codecov",
     "ci-eslint": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-scorecard.xml"
   },
   "eslintConfig": {

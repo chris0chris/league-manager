@@ -32,6 +32,16 @@ class Association(models.Model):
         return f'{self.pk}: {self.abbr} - {self.name}'
 
 
+class EmptyTeam:
+    def __init__(self, name):
+        self.id = 0
+        self.name = name
+        self.description = name
+        self.location = ''
+        self.logo = ''
+        self.association = None
+
+
 class Team(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=255, unique=True)

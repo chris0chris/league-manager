@@ -37,6 +37,7 @@ describe("Login Component", () => {
   });
 
   test("redirects to SELECT_APP_URL on successful login", async () => {
+    const user = userEvent.setup();
     (login as jest.Mock).mockResolvedValueOnce(true);
 
     render(
@@ -51,9 +52,9 @@ describe("Login Component", () => {
       </MemoryRouter>,
     );
 
-    userEvent.type(screen.getByLabelText(/username/i), "testuser");
-    userEvent.type(screen.getByLabelText(/passwort/i), "password");
-    userEvent.click(screen.getByRole("button", { name: /anmelden/i }));
+    await user.type(screen.getByLabelText(/username/i), "testuser");
+    await user.type(screen.getByLabelText(/passwort/i), "password");
+    await user.click(screen.getByRole("button", { name: /anmelden/i }));
 
     await waitFor(() => {
       expect(screen.queryByText(/anmelden/i)).not.toBeInTheDocument();
@@ -64,6 +65,7 @@ describe("Login Component", () => {
   });
 
   test("shows notification on login failure", async () => {
+    const user = userEvent.setup();
     const errorMessage = "Invalid credentials";
     (login as jest.Mock).mockRejectedValueOnce(new Error(errorMessage));
 
@@ -73,9 +75,9 @@ describe("Login Component", () => {
       </MemoryRouter>,
     );
 
-    userEvent.type(screen.getByLabelText(/username/i), "testuser");
-    userEvent.type(screen.getByLabelText(/passwort/i), "wrong password");
-    userEvent.click(screen.getByRole("button", { name: /anmelden/i }));
+    await user.type(screen.getByLabelText(/username/i), "testuser");
+    await user.type(screen.getByLabelText(/passwort/i), "wrong password");
+    await user.click(screen.getByRole("button", { name: /anmelden/i }));
 
     await waitFor(() => {
       expect(setNotificationMock).toHaveBeenCalledWith({ text: errorMessage });

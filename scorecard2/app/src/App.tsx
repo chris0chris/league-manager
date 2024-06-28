@@ -1,26 +1,37 @@
 import { HashRouter, Route, Routes } from "react-router-dom";
 import Login from "./components/Login";
-import { LOGIN_URL, SELECT_APP_URL } from "./common/routes";
-import { useEffect } from "react";
+import { LOGIN_URL, OFFICIALS_URL, SELECT_APP_URL } from "./common/routes";
+import { useEffect, useState } from "react";
 import { loadUser } from "./common/api/auth";
 import SelectPasscheckOrScorecard from "./components/SelectPasscheckOrScorecard";
-import SelectGame from "./components/SelectGame";
+import SelectGame from "./components/SelectGame/SelectGame";
 import NotificationProvider from "./components/provider/NotificationProvider";
 import Notification from "./components/Notification";
 
 function App() {
+  const [isUserStatusChecked, setIsUserStatusChecked] = useState(false);
   useEffect(() => {
-    loadUser();
+    const fetchData = async () => {
+      const isLoaded = await loadUser();
+      setIsUserStatusChecked(isLoaded);
+    };
+    fetchData();
   }, []);
   return (
     <NotificationProvider>
-      <HashRouter>
-        <div className="container mt-2">
-          <div className="row">
-            <Routes>
-              <Route path={LOGIN_URL} element={<Login />} />
-              <Route path="/*" element={<SelectGame />} />
-              {/* <Route
+      {!isUserStatusChecked && (
+        <main style={{ padding: "1rem" }}>
+          <h1>Loading...</h1>
+        </main>
+      )}
+      {isUserStatusChecked && (
+        <HashRouter>
+          <div className="container mt-2">
+            <div className="row">
+              <Routes>
+                <Route path={LOGIN_URL} element={<Login />} />
+                <Route path="/*" element={<SelectGame />} />
+                {/* <Route
               exact
               path={OFFICIALS_URL}
               element={<PrivateRoute component={Officials} />}
@@ -40,11 +51,15 @@ function App() {
               path={SELECT_GAME_URL}
               element={<PrivateRoute component={SelectGame} />}
             /> */}
-              <Route
-                path={SELECT_APP_URL}
-                element={<SelectPasscheckOrScorecard />}
-              />
-              {/* <Route
+                <Route
+                  path={SELECT_APP_URL}
+                  element={<SelectPasscheckOrScorecard />}
+                />
+                <Route
+                  path={OFFICIALS_URL}
+                  element={<SelectPasscheckOrScorecard />}
+                />
+                {/* <Route
               path="*"
               element={
                 <main style={{ padding: "1rem" }}>
@@ -52,16 +67,17 @@ function App() {
                 </main>
               }
             /> */}
-            </Routes>
-          </div>
-          {/* <div className="row">
+              </Routes>
+            </div>
+            {/* <div className="row">
           <MessageToaster />
         </div> */}
-        </div>
-        {/* <div className="container my-1 py-4">
+          </div>
+          {/* <div className="container my-1 py-4">
         <Navbar />
       </div> */}
-      </HashRouter>
+        </HashRouter>
+      )}
       <Notification />
     </NotificationProvider>
   );

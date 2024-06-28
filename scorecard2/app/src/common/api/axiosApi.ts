@@ -13,18 +13,21 @@ type Headers = {
   };
 };
 
-export const loginStatus = (): void => {
+export const loginStatus = (): Promise<boolean> => {
   const header = tokenConfig();
 
-  axios
+  return axios
     .get("/accounts/auth/user/", header)
-    .then((res) => {})
+    .then((res) => {
+      return true;
+    })
     .catch((error) => {
       if (error.response.status === 401) {
         navigateTo(`#${LOGIN_URL}`);
       } else {
         throwApiError(error);
       }
+      return true;
     });
 };
 

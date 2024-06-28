@@ -21,21 +21,21 @@ class TestScorecardGamedayService(TestCase):
 
     def test_get_officiating_games_for_staff_user(self):
         gameday_service = ScorecardGamedayService(gameday_id=None, user_permission=UserRequestPermission(is_staff=True))
-        result = gameday_service.get_officiating_games(None)
+        result = gameday_service.get_officiating_games(None)['gamedays']
         assert len(result) == 2
         assert len(result[0]['games']) == 11
         assert len(result[1]['games']) == 11
 
     def test_get_officiating_games_for_participating_non_staff_team(self):
         gameday_service = ScorecardGamedayService(gameday_id=None, user_permission=UserRequestPermission(is_staff=True))
-        result = gameday_service.get_officiating_games(self.team1.pk)
+        result = gameday_service.get_officiating_games(self.team1.pk)['gamedays']
         assert len(result) == 1
         assert len(result[0]['games']) == 11
 
     def test_get_officiating_games_for_participating_non_staff_team_only_non_finished_games(self):
         gameday_service = ScorecardGamedayService(gameday_id=None,
                                                   user_permission=UserRequestPermission(is_staff=False))
-        result = gameday_service.get_officiating_games(self.team2.pk)
+        result = gameday_service.get_officiating_games(self.team2.pk)['gamedays']
         assert len(result) == 1
         assert len(result[0]['games']) == 5
 
@@ -43,5 +43,19 @@ class TestScorecardGamedayService(TestCase):
         team3 = Team.objects.create(name="Team C", description="Team  C", location="City C")
         gameday_service = ScorecardGamedayService(gameday_id=None,
                                                   user_permission=UserRequestPermission(is_staff=False))
-        with self.assertRaises(PermissionError):
+        with self.assertRaises(PermissionError) as error:
             gameday_service.get_officiating_games(team3.name)
+        assert str(error.exception) == 'Zugriff auf Spieltag nicht erlaubt, da ihr als Team nicht am Spieltag teilnehmt.'
+
+    def test_get_officiating_gameinfo_for_previous_gamedays(self):
+        gameday = DBSetup().g62_qualify_finished()
+        gameday.date = '2022-01-07'
+        gameday.save()
+        game: Gameinfo = Gameinfo.objects.last()
+        game.officials = self.team1
+        game.save()
+        gameday_service = ScorecardGamedayService(gameday_id=gameday.pk,
+                                                  user_permission=UserRequestPermission(is_staff=False))
+        with self.assertRaises(PermissionError) as error:
+            gameday_service.get_officiating_games(self.team1.pk)
+        assert str(error.exception) == 'Zugriff auf Spieltag nicht erlaubt, da der Spieltag nicht heute stattfindet.'

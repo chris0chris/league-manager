@@ -1,10 +1,10 @@
-from gamedays.models import Team
+from gamedays.models import Team, EmptyTeam
 
 
 class TeamService:
 
     @staticmethod
-    def get_team_by_id_or_name(team) -> Team | None:
+    def get_team_by_id_or_name(team) -> Team | EmptyTeam:
         try:
             if type(team) is str:
                 team = Team.objects.get(name=team)
@@ -12,4 +12,4 @@ class TeamService:
                 team = Team.objects.get(pk=team)
             return team
         except Team.DoesNotExist:
-            return None
+            return EmptyTeam(team)

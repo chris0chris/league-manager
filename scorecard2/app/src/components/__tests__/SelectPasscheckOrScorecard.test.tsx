@@ -5,7 +5,7 @@ import { getPasscheckStatus } from "../../common/api/config";
 import { SELECT_GAME_URL } from "../../common/routes";
 import { navigateTo } from "../../common/utils";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import SelectGame from "../SelectGame";
+import SelectGame from "../SelectGame/SelectGame";
 
 jest.mock("../../common/api/config", () => ({
   getPasscheckStatus: jest.fn(),
@@ -13,7 +13,9 @@ jest.mock("../../common/api/config", () => ({
 jest.mock("../../common/utils", () => ({
   navigateTo: jest.fn(),
 }));
-jest.mock("../SelectGame", () => () => <div>SelectGame Component</div>);
+jest.mock("../SelectGame/SelectGame", () => () => (
+  <div>SelectGame Component</div>
+));
 
 describe("SelectPasscheckOrScorecard", () => {
   beforeEach(() => {

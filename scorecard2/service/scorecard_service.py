@@ -2,7 +2,7 @@ import datetime
 
 from django.conf import settings
 
-from gamedays.models import Gameday
+from gamedays.models import Gameday, Team, EmptyTeam
 from gamedays.service.gameday_service import GamedayService
 from gamedays.service.team_service import TeamService
 from league_manager.utils.view_utils import UserRequestPermission
@@ -19,12 +19,15 @@ class ScorecardGamedayService:
         self.gameday_id = gameday_id
 
     def get_officiating_games(self, team_id):
-        gamedays = self._get_gamedays_for_team(team_id)
+        officiating_team = TeamService.get_team_by_id_or_name(team_id)
+        gamedays = self._get_gamedays_for_team(officiating_team)
         gameday_service = GamedayService(self.user_permission)
         gameinfo = gameday_service.get_officiating_gameinfo(gamedays)
-        return ScorecardGamedaySerializer(
+        return {
+            "officiatingTeamId": officiating_team.id,
+            "gamedays": ScorecardGamedaySerializer(
             instance=self._merge_gamedays_and_gameinfos(gamedays, gameinfo),
-            many=True).data
+            many=True).data}
 
     # noinspection PyMethodMayBeStatic
     def _merge_gamedays_and_gameinfos(self, gamedays, gameinfo):
@@ -36,19 +39,22 @@ class ScorecardGamedayService:
             )
         return all_gamdays
 
-    def _get_gamedays_for_team(self, team_id):
-        officiating_team = TeamService.get_team_by_id_or_name(team_id)
+    def _get_gamedays_for_team(self, officiating_team: Team):
+        date = datetime.datetime.today()
+        if settings.DEBUG:
+            date = settings.DEBUG_DATE
         if self.gameday_id is None:
-            date = datetime.datetime.today()
-            if settings.DEBUG:
-                date = settings.DEBUG_DATE
             gamedays = Gameday.objects.filter(date=date)
         else:
             gamedays = Gameday.objects.filter(id=self.gameday_id)
-        if officiating_team is not None or not self.user_permission.is_staff:
+        if type(officiating_team) is not EmptyTeam or not self.user_permission.is_staff:
             gamedays = Gameday.objects.filter(id__in=gamedays,
                                               gameinfo__officials=officiating_team).distinct()
             if not gamedays.exists():
                 raise PermissionError(
                     'Zugriff auf Spieltag nicht erlaubt, da ihr als Team nicht am Spieltag teilnehmt.')
+            gamedays = gamedays.filter(date=date)
+            if not gamedays.exists():
+                raise PermissionError(
+                    'Zugriff auf Spieltag nicht erlaubt, da der Spieltag nicht heute stattfindet.')
         return gamedays

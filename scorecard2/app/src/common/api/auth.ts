@@ -7,6 +7,6 @@ export const login = async (
   return loginUser(username, password);
 };
 
-export const loadUser = (): void => {
-  loginStatus();
+export const loadUser = (): Promise<boolean> => {
+  return loginStatus();
 };
