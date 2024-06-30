@@ -7,6 +7,16 @@ from django.db.models import QuerySet, ExpressionWrapper, Case, When, F, FloatFi
 from gamedays.models import Association, Team, Gameday
 
 
+class OfficialPosition(models.Model):
+    name = models.CharField(max_length=100)
+    is_position_counted_as_entry = models.BooleanField(default=True)
+
+    objects: QuerySet = models.Manager()
+
+    def __str__(self):
+        return f'{self.name} {"✔" if self.is_position_counted_as_entry else "❌"}'
+
+
 class Official(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
