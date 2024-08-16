@@ -1,0 +1,49 @@
+[
+  {
+    "field": "3",
+    "games": [
+      {
+        "stage": "Vorrunde",
+        "standing": "Spiel 1",
+        "home": "0_0",
+        "away": "0_1",
+        "official": "0_2"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Spiel 2",
+        "home": "0_2",
+        "away": "0_3",
+        "official": "0_0"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "Spiel 3",
+        "home": "Verlierer Spiel 1",
+        "away": "Verlierer Spiel 2",
+        "official": "Gewinner Spiel 1"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "Spiel 4",
+        "home": "Gewinner Spiel 1",
+        "away": "Gewinner Spiel 2",
+        "official": "Verlierer Spiel 3"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "Spiel 5",
+        "home": "Verlierer Spiel 4",
+        "away": "Gewinner Spiel 3",
+        "official": "Verlierer Spiel 3"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P1",
+        "home": "Gewinner Spiel 5",
+        "away": "Gewinner Spiel 4",
+        "official": "Verlierer Spiel 5"
+      }
+    ]
+  }
+]

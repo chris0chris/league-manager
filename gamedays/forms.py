@@ -21,6 +21,8 @@ SCHEDULE_CHOICES = (
     ("7_oneDivision_2", "DFFL 8er Division"),
     ("6_sfl_2", "SFL - 3x3 Conference"),
     ("7_sfl_2", "SFL - 3x4 Conference"),
+    ("4_final4_1", "Final 4"),
+    ("8_final8_3", "Final 8"),
 )
 
 
