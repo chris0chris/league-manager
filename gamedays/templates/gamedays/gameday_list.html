@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-{% for gameday in object_list %}
+<ul class="nav nav-pills mb-3">
+    {% for year in years %}
+    <li class="nav-item">
+        <a class="nav-link {% if year == season %}active{% endif %}"
+           href="{% url url_pattern season=year%}">{{ year }}</a>
+    </li>
+    {% endfor %}
+</ul>{% for gameday in gamedays %}
 <article class="media content-section">
     <div class="media-body">
         <div class="article-metadata">

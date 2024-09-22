@@ -1,8 +1,13 @@
+from datetime import datetime
+
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models.functions import ExtractYear
 from django.forms import Form
+from django.shortcuts import render
 from django.urls import reverse
-from django.views.generic import ListView, DetailView, UpdateView, CreateView
+from django.views import View
+from django.views.generic import  DetailView, UpdateView, CreateView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
 from .forms import GamedayCreateForm, GamedayUpdateForm
@@ -10,11 +15,23 @@ from .models import Gameday
 from .service.gameday_service import GamedayService
 
 
-class GamedayListView(ListView):
+class GamedayListView(View):
     model = Gameday
     template_name = 'gamedays/gameday_list.html'
 
-    ordering = ['-date']
+    def get(self, request, **kwargs):
+        year = kwargs.get('season', datetime.today().year)
+        from gamedays.urls import LEAGUE_GAMEDAY_LIST_AND_YEAR
+        return render(
+            request,
+            self.template_name,
+            {
+                "gamedays": Gameday.objects.filter(date__year=year).order_by('-date'),
+                "years":Gameday.objects.annotate(year=ExtractYear('date')).values_list('year', flat=True).distinct().order_by('-year'),
+                "season": year,
+                "url_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR,
+            }
+        )
 
 
 class GamedayDetailView(DetailView):
