@@ -64,6 +64,8 @@ class PasscheckRosterAPIView(APIView):
                 return Response(passcheck.get_roster_with_validation(team, gameday_id), status=HTTPStatus.OK)
             except PasscheckException as exception:
                 raise PermissionDenied(detail=str(exception))
+            except LookupError as exception:
+                raise NotFound(detail=str(exception))
 
     def put(self, request, **kwargs):
         data = request.data
