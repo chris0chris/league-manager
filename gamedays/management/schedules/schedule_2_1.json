@@ -1,0 +1,22 @@
+[
+  {
+    "field": "1",
+    "games": [
+      {
+        "break_after": 30,
+        "stage": "Hauptrunde",
+        "standing": "Gruppe 1",
+        "home": "0_0",
+        "away": "0_1",
+        "official": "0_0"
+      },
+      {
+        "stage": "Hauptrunde",
+        "standing": "Gruppe 1",
+        "home": "0_1",
+        "away": "0_0",
+        "official": "0_1"
+      }
+    ]
+  }
+]

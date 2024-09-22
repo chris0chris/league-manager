@@ -7,7 +7,7 @@ from django.forms import Form
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import  DetailView, UpdateView, CreateView
+from django.views.generic import DetailView, UpdateView, CreateView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
 from .forms import GamedayCreateForm, GamedayUpdateForm
@@ -21,15 +21,24 @@ class GamedayListView(View):
 
     def get(self, request, **kwargs):
         year = kwargs.get('season', datetime.today().year)
-        from gamedays.urls import LEAGUE_GAMEDAY_LIST_AND_YEAR
+        league = kwargs.get('league')
+        gamedays = Gameday.objects.filter(date__year=year).order_by('-date')
+        gamedays_filtered_by_league = gamedays.filter(league__name=league) if league else gamedays
+        from gamedays.urls import LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE, LEAGUE_GAMEDAY_LIST_AND_YEAR
         return render(
             request,
             self.template_name,
             {
-                "gamedays": Gameday.objects.filter(date__year=year).order_by('-date'),
-                "years":Gameday.objects.annotate(year=ExtractYear('date')).values_list('year', flat=True).distinct().order_by('-year'),
+                "gamedays": gamedays_filtered_by_league,
+                "years": Gameday.objects.annotate(year=ExtractYear('date')).values_list('year',
+                                                                                        flat=True).distinct().order_by(
+                    '-year'),
                 "season": year,
-                "url_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR,
+                "leagues": gamedays.values_list('league__name', flat=True).distinct().order_by(
+                    '-league__name'),
+                "current_league": league,
+                "season_year_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR,
+                "season_year_league_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
             }
         )
 
