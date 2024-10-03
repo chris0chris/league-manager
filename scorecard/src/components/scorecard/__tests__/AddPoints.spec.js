@@ -24,6 +24,7 @@ describe('AddPoints component', () => {
     const user = userEvent.setup();
     setup();
     await user.click(screen.getByRole('radio', {name: 'Serie'}));
+    expect(screen.getByRole('spinbutton', {name: 'number'})).toBeInTheDocument();
     await user.type(screen.getByRole('spinbutton', {name: 'number'}), '19');
     await user.click(screen.getByRole('button', {name: 'Eintrag speichern'}));
   });
