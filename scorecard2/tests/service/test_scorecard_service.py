@@ -3,7 +3,9 @@ from django.test import TestCase
 from gamedays.models import Team, Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from league_manager.utils.view_utils import UserRequestPermission
-from scorecard2.service.scorecard_service import ScorecardGamedayService
+from scorecard2.api.serializers import ScorecardConfigSerializer
+from scorecard2.service.scorecard_service import ScorecardGamedayService, ScorecardConfigService
+from scorecard2.tests.setup_factories.db_setup import DbSetupScorecard
 
 
 class TestScorecardGamedayService(TestCase):
@@ -45,7 +47,8 @@ class TestScorecardGamedayService(TestCase):
                                                   user_permission=UserRequestPermission(is_staff=False))
         with self.assertRaises(PermissionError) as error:
             gameday_service.get_officiating_games(team3.name)
-        assert str(error.exception) == 'Zugriff auf Spieltag nicht erlaubt, da ihr als Team nicht am Spieltag teilnehmt.'
+        assert str(
+            error.exception) == 'Zugriff auf Spieltag nicht erlaubt, da ihr als Team nicht am Spieltag teilnehmt.'
 
     def test_get_officiating_gameinfo_for_previous_gamedays(self):
         gameday = DBSetup().g62_qualify_finished()
@@ -59,3 +62,25 @@ class TestScorecardGamedayService(TestCase):
         with self.assertRaises(PermissionError) as error:
             gameday_service.get_officiating_games(self.team1.pk)
         assert str(error.exception) == 'Zugriff auf Spieltag nicht erlaubt, da der Spieltag nicht heute stattfindet.'
+
+
+class ScorecardConfigServiceTest(TestCase):
+
+    def setUp(self):
+        self.gameday = DBSetup().g62_qualify_finished()
+        self.gameinfo_id = self.gameday.gameinfo_set.first().id
+
+    def test_no_config_found(self):
+        with self.assertRaises(PermissionError) as error:
+            service = ScorecardConfigService(gameinfo_id=self.gameinfo_id)
+            service.get_kickoff_config()
+        assert str(error.exception) == 'Keine Scorecard-Config für some_division gefunden.'
+
+    def test_get_kickoff_config_success(self):
+        scorecard_config = DbSetupScorecard.create_full_scorecard_config(self.gameday.league)
+
+        service = ScorecardConfigService(gameinfo_id=self.gameinfo_id)
+        result = service.get_kickoff_config()
+
+        expected_data = ScorecardConfigSerializer(instance=scorecard_config).data
+        self.assertEqual(result, expected_data)

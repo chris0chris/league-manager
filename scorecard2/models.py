@@ -23,7 +23,7 @@ class ScorecardOfficial(models.Model):
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.scorecard_config.name} - {self.official_position.name}'
+        return f'{self.scorecard_config.name} - {self.official_position} {"(❓)" if self.is_optional else ''}'
 
 
 class ScorecardCategory(models.Model):

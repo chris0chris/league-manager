@@ -2,15 +2,13 @@ import datetime
 
 from django.conf import settings
 
-from gamedays.models import Gameday, Team, EmptyTeam
+from gamedays.models import Gameday, Team, EmptyTeam, Gameinfo
 from gamedays.service.gameday_service import GamedayService
 from gamedays.service.team_service import TeamService
 from league_manager.utils.view_utils import UserRequestPermission
-from scorecard2.api.serializers import ScorecardGameinfoSerializer, ScorecardGamedaySerializer
-
-
-class ScorecardException(Exception):
-    pass
+from scorecard2.api.serializers import ScorecardGameinfoSerializer, ScorecardGamedaySerializer, \
+    ScorecardConfigSerializer
+from scorecard2.models import ScorecardConfig
 
 
 class ScorecardGamedayService:
@@ -26,8 +24,8 @@ class ScorecardGamedayService:
         return {
             "officiatingTeamId": officiating_team.id,
             "gamedays": ScorecardGamedaySerializer(
-            instance=self._merge_gamedays_and_gameinfos(gamedays, gameinfo),
-            many=True).data}
+                instance=self._merge_gamedays_and_gameinfos(gamedays, gameinfo),
+                many=True).data}
 
     # noinspection PyMethodMayBeStatic
     def _merge_gamedays_and_gameinfos(self, gamedays, gameinfo):
@@ -58,3 +56,15 @@ class ScorecardGamedayService:
                 raise PermissionError(
                     'Zugriff auf Spieltag nicht erlaubt, da der Spieltag nicht heute stattfindet.')
         return gamedays
+
+
+class ScorecardConfigService:
+    def __init__(self, gameinfo_id):
+        self.gameinfo_id = gameinfo_id
+
+    def get_kickoff_config(self):
+        gameinfo = Gameinfo.objects.get(id=self.gameinfo_id)
+        config = ScorecardConfig.objects.filter(leagues=gameinfo.gameday.league).first()
+        if config is None:
+            raise PermissionError(f'Keine Scorecard-Config für {gameinfo.gameday.league} gefunden.')
+        return ScorecardConfigSerializer(instance=config).data

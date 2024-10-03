@@ -2,6 +2,7 @@ from rest_framework.fields import SerializerMethodField, TimeField, IntegerField
 from rest_framework.serializers import Serializer, ModelSerializer
 
 from gamedays.models import GameOfficial
+from scorecard2.models import ScorecardOfficial, ScorecardCategory, ScorecardCategoryValue, ScorecardConfig
 
 
 class ScorecardGameinfoSerializer(Serializer):
@@ -47,3 +48,37 @@ class GameOfficialSerializer(ModelSerializer):
     class Meta:
         model = GameOfficial
         exclude = ('gameinfo',)
+
+
+class ScorecardCategoryValueSerializer(ModelSerializer):
+    class Meta:
+        model = ScorecardCategoryValue
+        fields = ['value']
+
+
+class ScorecardCategorySerializer(ModelSerializer):
+    values = ScorecardCategoryValueSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ScorecardCategory
+        fields = ['name', 'team_option', 'values']
+
+
+class ScorecardOfficialSerializer(ModelSerializer):
+    position_name = SerializerMethodField(source='official_position')
+
+    def get_position_name(self, obj: dict):
+        return obj.official_position.name
+
+    class Meta:
+        model = ScorecardOfficial
+        fields = ['position_name', 'is_optional']
+
+
+class ScorecardConfigSerializer(ModelSerializer):
+    categories = ScorecardCategorySerializer(many=True, read_only=True, source='scorecardcategory_set')
+    officials = ScorecardOfficialSerializer(many=True, read_only=True, source='scorecardofficial_set')
+
+    class Meta:
+        model = ScorecardConfig
+        fields = ['officials', 'categories']

@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from gamedays.models import GameOfficial
 from league_manager.utils.decorators import get_user_request_permission
 from scorecard2.api.serializers import GameOfficialSerializer
-from scorecard2.service.scorecard_service import ScorecardGamedayService
+from scorecard2.service.scorecard_service import ScorecardGamedayService, ScorecardConfigService
 
 
 class SpecificGamedayAndGamesToOfficiateAPIView(APIView):
@@ -56,3 +56,17 @@ class GameOfficialCreateOrUpdateView(RetrieveUpdateAPIView):
             else:
                 return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
         return Response(response_data, status=HTTPStatus.OK)
+
+
+class ConfigKickoffGameAPIView(APIView):
+    # noinspection PyMethodMayBeStatic
+    def get(self, **kwargs):
+        gameinfo_id = kwargs.get('pk')
+        scorecard_config_service = ScorecardConfigService(gameinfo_id)
+        try:
+            return Response(
+                scorecard_config_service.get_kickoff_config(),
+                status=HTTPStatus.OK
+            )
+        except PermissionError as exception:
+            raise PermissionDenied(detail=str(exception))
