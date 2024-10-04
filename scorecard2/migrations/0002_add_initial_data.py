@@ -47,10 +47,14 @@ def add_initial_data(apps, schema_editor):
     ]
     ScorecardOfficial.objects.bulk_create(scorecard_officials)
 
-    league_1 = League.objects.get(id=1)
-    league_2 = League.objects.get(id=2)
-    scorecard_config.leagues.add(league_1)
-    scorecard_config.leagues.add(league_2)
+    scorecard_config.leagues.add(League.objects.get(id=7))
+    scorecard_config.leagues.add(League.objects.get(id=8))
+    scorecard_config.leagues.add(League.objects.get(id=9))
+    scorecard_config.leagues.add(League.objects.get(id=10))
+    scorecard_config.leagues.add(League.objects.get(id=11))
+    scorecard_config.leagues.add(League.objects.get(id=12))
+    scorecard_config.leagues.add(League.objects.get(id=13))
+    scorecard_config.leagues.add(League.objects.get(id=14))
 
 
 class Migration(migrations.Migration):
