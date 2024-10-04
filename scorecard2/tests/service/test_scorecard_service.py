@@ -4,7 +4,7 @@ from gamedays.models import Team, Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from league_manager.utils.view_utils import UserRequestPermission
 from scorecard2.api.serializers import ScorecardConfigSerializer
-from scorecard2.service.scorecard_service import ScorecardGamedayService, ScorecardConfigService
+from scorecard2.service.scorecard_service import ScorecardGamedayService, ScorecardConfigService, ScorecardGameService
 from scorecard2.tests.setup_factories.db_setup import DbSetupScorecard
 
 
@@ -84,3 +84,19 @@ class ScorecardConfigServiceTest(TestCase):
 
         expected_data = ScorecardConfigSerializer(instance=scorecard_config).data
         self.assertEqual(result, expected_data)
+
+
+class ScorecardGameServiceTest(TestCase):
+    def test_game_info_correct_retrieved(self):
+        DBSetup().g62_status_empty()
+        gameinfo = Gameinfo.objects.first()
+        scorecard_game_service = ScorecardGameService(gameinfo_id=gameinfo.pk,
+                                                      user_permission=UserRequestPermission(is_staff=True))
+        result = scorecard_game_service.get_game_info()
+        assert result == {'field': 1, 'stage': 'Vorrunde', 'standing': 'Gruppe 1', 'scheduled': '10:00',
+                          'home': 'AAAAAAA1', 'away': 'AAAAAAA2'}
+
+    def test_raises_value_error_if_gameinfo_id_not_found(self):
+        with self.assertRaises(ValueError) as error:
+            ScorecardGameService(gameinfo_id=-1, user_permission=UserRequestPermission(is_staff=True))
+        assert str(error.exception) == 'No entry found for game_id: -1'

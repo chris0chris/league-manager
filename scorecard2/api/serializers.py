@@ -9,22 +9,38 @@ class ScorecardGameinfoSerializer(Serializer):
     ID_C = 'id'
     FIELD_C = 'field'
     SCHEDULED_C = 'scheduled'
+    STAGE_C = 'stage'
+    STANDING_C = 'standing'
     GAME_FINISHED_C = 'gameFinished'
     OFFICIALS_ID_C = 'officials_id'
     OFFICIALS_DESC_C = 'officials__description'
     HOME_C = 'home'
     AWAY_C = 'away'
 
-    ALL_FIELD_VALUES = [ID_C, FIELD_C, SCHEDULED_C, OFFICIALS_ID_C, OFFICIALS_DESC_C, HOME_C, AWAY_C, GAME_FINISHED_C]
+    ALL_FIELD_VALUES = [ID_C, FIELD_C, SCHEDULED_C, OFFICIALS_ID_C, OFFICIALS_DESC_C, HOME_C, STAGE_C, STANDING_C, AWAY_C, GAME_FINISHED_C]
+    ALL_GAME_OVERVIEW_VALUES = [ID_C, FIELD_C, SCHEDULED_C, OFFICIALS_ID_C, OFFICIALS_DESC_C, HOME_C, AWAY_C, GAME_FINISHED_C]
+    ALL_SETUP_VALUES = [FIELD_C, SCHEDULED_C, HOME_C, STAGE_C, STANDING_C, AWAY_C]
 
     id = IntegerField()
     field = IntegerField()
+    stage = CharField()
+    standing = CharField()
     scheduled = TimeField(format='%H:%M')
     isFinished = SerializerMethodField()
     officialsId = IntegerField(source=OFFICIALS_ID_C)
     officials = CharField(source=OFFICIALS_DESC_C)
     home = CharField()
     away = CharField()
+
+    def __init__(self, *args, **kwargs):
+        fields = kwargs.pop('fields', None)
+        super().__init__(*args, **kwargs)
+
+        if fields:
+            allowed = set(fields)
+            existing = set(self.fields.keys())
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
 
     def get_isFinished(self, obj: dict) -> bool:
         return obj.get(self.GAME_FINISHED_C) is not None
@@ -41,7 +57,7 @@ class ScorecardGamedaySerializer(Serializer):
     id = IntegerField()
     date = DateField(format='%d.%m.%Y')
     name = CharField()
-    games = ScorecardGameinfoSerializer(many=True)
+    games = ScorecardGameinfoSerializer(many=True, fields=ScorecardGameinfoSerializer.ALL_GAME_OVERVIEW_VALUES)
 
 
 class GameOfficialSerializer(ModelSerializer):

@@ -1,10 +1,12 @@
 import datetime
 
 from django.conf import settings
+from django.db.models import QuerySet
 
 from gamedays.models import Gameday, Team, EmptyTeam, Gameinfo
 from gamedays.service.gameday_service import GamedayService
 from gamedays.service.team_service import TeamService
+from gamedays.service.wrapper.gameinfo_wrapper import GameinfoWrapper
 from league_manager.utils.view_utils import UserRequestPermission
 from scorecard2.api.serializers import ScorecardGameinfoSerializer, ScorecardGamedaySerializer, \
     ScorecardConfigSerializer
@@ -33,7 +35,7 @@ class ScorecardGamedayService:
         for current_gameday in all_gamdays:
             current_gameday[ScorecardGamedaySerializer.GAMES_C] = list(
                 gameinfo.filter(gameday=current_gameday[ScorecardGamedaySerializer.ID_C]).values(
-                    *ScorecardGameinfoSerializer.ALL_FIELD_VALUES)
+                    *ScorecardGameinfoSerializer.ALL_GAME_OVERVIEW_VALUES)
             )
         return all_gamdays
 
@@ -56,6 +58,18 @@ class ScorecardGamedayService:
                 raise PermissionError(
                     'Zugriff auf Spieltag nicht erlaubt, da der Spieltag nicht heute stattfindet.')
         return gamedays
+
+
+class ScorecardGameService:
+    def __init__(self, gameinfo_id: int, user_permission: UserRequestPermission):
+        self.user_permission = user_permission
+        self.gameinfo_wrapper = GameinfoWrapper(gameinfo_id, user_permission)
+
+    def get_game_info(self):
+        gameinfo: QuerySet[Gameinfo] = self.gameinfo_wrapper.get_game_info_with_home_and_away()
+        return ScorecardGameinfoSerializer(
+            instance=gameinfo.values(*ScorecardGameinfoSerializer.ALL_SETUP_VALUES).first(),
+            fields=ScorecardGameinfoSerializer.ALL_SETUP_VALUES).data
 
 
 class ScorecardConfigService:

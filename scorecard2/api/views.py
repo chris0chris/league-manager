@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+from rest_framework import permissions
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
@@ -7,8 +8,9 @@ from rest_framework.views import APIView
 
 from gamedays.models import GameOfficial
 from league_manager.utils.decorators import get_user_request_permission
+from officials.service.official_service import OfficialService
 from scorecard2.api.serializers import GameOfficialSerializer
-from scorecard2.service.scorecard_service import ScorecardGamedayService, ScorecardConfigService
+from scorecard2.service.scorecard_service import ScorecardGamedayService, ScorecardConfigService, ScorecardGameService
 
 
 class SpecificGamedayAndGamesToOfficiateAPIView(APIView):
@@ -58,14 +60,23 @@ class GameOfficialCreateOrUpdateView(RetrieveUpdateAPIView):
         return Response(response_data, status=HTTPStatus.OK)
 
 
-class ConfigKickoffGameAPIView(APIView):
+class GameSetupAPIView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    @get_user_request_permission
     # noinspection PyMethodMayBeStatic
-    def get(self, **kwargs):
+    def get(self, request, **kwargs):
         gameinfo_id = kwargs.get('pk')
+        user_permission = kwargs.get('user_permission')
         scorecard_config_service = ScorecardConfigService(gameinfo_id)
+        official_service = OfficialService()
+        gameinfo_service = ScorecardGameService(gameinfo_id, user_permission)
         try:
             return Response(
-                scorecard_config_service.get_kickoff_config(),
+                {"scorecard": scorecard_config_service.get_kickoff_config(),
+                 "teamOfficials": official_service.get_team_officials_by_gameinfo(gameinfo_id),
+                 "gameInfo": gameinfo_service.get_game_info(),
+                 },
                 status=HTTPStatus.OK
             )
         except PermissionError as exception:

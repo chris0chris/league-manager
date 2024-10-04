@@ -1,7 +1,8 @@
 from django.db.models import Sum
 
+from gamedays.models import Gameinfo
 from gamedays.service.team_repository_service import TeamRepositoryService
-from officials.api.serializers import OfficialGameCountSerializer
+from officials.api.serializers import OfficialGameCountSerializer, OfficialTeamListScorecardSerializer
 from officials.models import Official
 from officials.service.game_official_entries import InternalGameOfficialEntry, ExternalGameOfficialEntry
 from officials.service.moodle.moodle_service import MoodleService
@@ -68,3 +69,14 @@ class OfficialService:
         all_external_games_count = external_official_qs.aggregate(num_games=Sum('number_games')).get('num_games',
                                                                                                      0) or 0
         return all_external_games_count
+
+    def get_team_officials_by_gameinfo(self, gameinfo_id):
+        gameinfo = Gameinfo.objects.get(pk=gameinfo_id)
+        return self.get_team_officials_by_team_id(gameinfo.officials.pk)
+
+    def get_team_officials_by_team_id(self, team_id):
+        officials = Official.objects.filter(team_id=team_id).order_by('first_name', 'last_name').values(
+            *OfficialTeamListScorecardSerializer.ALL_FIELD_VALUES
+        )
+        return OfficialTeamListScorecardSerializer(instance=officials, many=True).data
+

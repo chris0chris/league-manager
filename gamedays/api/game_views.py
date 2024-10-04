@@ -23,7 +23,7 @@ class GameLogAPIView(APIView):
             try:
                 gamelog = GameService(game_id).get_gamelog()
                 return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict))
-            except Gameinfo.DoesNotExist:
+            except ValueError:
                 raise NotFound(detail=f'No game found for gameId {game_id}')
         gamelog = Gameinfo.objects.filter(id=game_id).annotate(
             home_id=GameresultHelper.get_gameresult_team_subquery(is_home=True, team_column='id'),
@@ -55,7 +55,7 @@ class GameLogAPIView(APIView):
             gamelog = game_service.create_gamelog(data.get('team'), data.get('event'), request.user, data.get('half'))
             game_service.update_score(gamelog)
             return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict), status=HTTPStatus.CREATED)
-        except Gameinfo.DoesNotExist:
+        except ValueError:
             raise NotFound(detail=f'Could not create team logs ... gameId {request.data.get("gameId")} not found')
         except Team.DoesNotExist:
             raise NotFound(detail=f'Could not create team logs ... team {request.data.get("team")} not found')
@@ -67,7 +67,7 @@ class GameLogAPIView(APIView):
             gamelog = game_service.delete_gamelog(request.data.get('sequence'))
             game_service.update_score(gamelog)
             return Response(json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict), status=HTTPStatus.OK)
-        except Gameinfo.DoesNotExist:
+        except ValueError:
             raise NotFound(detail=f'Could not delete team logs ... gameId {game_id} not found')
 
 
