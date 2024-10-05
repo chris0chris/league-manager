@@ -35,6 +35,7 @@ class ScorecardCategory(models.Model):
 
     scorecard_config = models.ForeignKey(ScorecardConfig, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    is_required = models.BooleanField(default=False)
     team_option = models.CharField(max_length=4, choices=TEAM_CHOICES, default='none',
                                    help_text='Shall there be a team name displayed?')
 

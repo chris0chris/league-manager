@@ -20,11 +20,12 @@ def add_initial_data(apps, schema_editor):
     scorecard_config = ScorecardConfig.objects.create(name='Default 5er Config')
 
     categories = [
-        ScorecardCategory(id=1, name='Münzwurf', team_option='away', scorecard_config=scorecard_config),
+        ScorecardCategory(id=1, name='Münzwurf hat:', team_option='away',
+                          scorecard_config=scorecard_config, is_required=True),
         ScorecardCategory(id=2, name='Team mit Ballbesitz in der 1. Halbzeit', team_option='none',
-                          scorecard_config=scorecard_config),
+                          scorecard_config=scorecard_config, is_required=True),
         ScorecardCategory(id=3, name='Spielrichtung 1. Halbzeit (aus Blick Scorecard Judge)', team_option='none',
-                          scorecard_config=scorecard_config),
+                          scorecard_config=scorecard_config, is_required=True),
     ]
     ScorecardCategory.objects.bulk_create(categories)
 

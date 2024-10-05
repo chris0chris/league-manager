@@ -17,8 +17,10 @@ class ScorecardGameinfoSerializer(Serializer):
     HOME_C = 'home'
     AWAY_C = 'away'
 
-    ALL_FIELD_VALUES = [ID_C, FIELD_C, SCHEDULED_C, OFFICIALS_ID_C, OFFICIALS_DESC_C, HOME_C, STAGE_C, STANDING_C, AWAY_C, GAME_FINISHED_C]
-    ALL_GAME_OVERVIEW_VALUES = [ID_C, FIELD_C, SCHEDULED_C, OFFICIALS_ID_C, OFFICIALS_DESC_C, HOME_C, AWAY_C, GAME_FINISHED_C]
+    ALL_FIELD_VALUES = [ID_C, FIELD_C, SCHEDULED_C, OFFICIALS_ID_C, OFFICIALS_DESC_C, HOME_C, STAGE_C, STANDING_C,
+                        AWAY_C, GAME_FINISHED_C]
+    ALL_GAME_OVERVIEW_VALUES = [ID_C, FIELD_C, SCHEDULED_C, OFFICIALS_ID_C, OFFICIALS_DESC_C, HOME_C, AWAY_C,
+                                GAME_FINISHED_C]
     ALL_SETUP_VALUES = [FIELD_C, SCHEDULED_C, HOME_C, STAGE_C, STANDING_C, AWAY_C]
 
     id = IntegerField()
@@ -69,7 +71,7 @@ class GameOfficialSerializer(ModelSerializer):
 class ScorecardCategoryValueSerializer(ModelSerializer):
     class Meta:
         model = ScorecardCategoryValue
-        fields = ['value']
+        fields = ['id', 'value']
 
 
 class ScorecardCategorySerializer(ModelSerializer):
@@ -77,7 +79,7 @@ class ScorecardCategorySerializer(ModelSerializer):
 
     class Meta:
         model = ScorecardCategory
-        fields = ['name', 'team_option', 'values']
+        fields = ['id', 'name', 'team_option', 'values', 'is_required']
 
 
 class ScorecardOfficialSerializer(ModelSerializer):
