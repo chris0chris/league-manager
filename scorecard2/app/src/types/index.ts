@@ -25,3 +25,9 @@ export type SelectedGame = {
   isSelected: boolean;
   gameId: number;
 };
+
+export type InputDropdownItem = {
+  id: number;
+  text: string;
+  subtext: string;
+};

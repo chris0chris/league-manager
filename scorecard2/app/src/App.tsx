@@ -7,6 +7,7 @@ import SelectPasscheckOrScorecard from "./components/SelectPasscheckOrScorecard"
 import SelectGame from "./components/SelectGame/SelectGame";
 import NotificationProvider from "./components/provider/NotificationProvider";
 import Notification from "./components/Notification";
+import Officials from "./components/Officials/Officials";
 
 function App() {
   const [isUserStatusChecked, setIsUserStatusChecked] = useState(false);
@@ -31,12 +32,8 @@ function App() {
               <Routes>
                 <Route path={LOGIN_URL} element={<Login />} />
                 <Route path="/*" element={<SelectGame />} />
+                <Route path={OFFICIALS_URL} element={<Officials />} />
                 {/* <Route
-              exact
-              path={OFFICIALS_URL}
-              element={<PrivateRoute component={Officials} />}
-            />
-            <Route
               exact
               path={DETAILS_URL}
               element={<PrivateRoute component={Details} />}

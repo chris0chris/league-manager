@@ -67,7 +67,6 @@ export const axiosGet = async (url: string): Promise<any> => {
       console.error("api ERROR", error);
       if (error.response && error.response.status === 401) {
         window.location.href = "#/login";
-        //   throwApiError("Bitte erst anmelden.");
       }
       throwApiError(error);
     });
