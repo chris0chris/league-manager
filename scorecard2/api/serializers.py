@@ -17,11 +17,24 @@ class ScorecardGameinfoSerializer(Serializer):
     HOME_C = 'home'
     AWAY_C = 'away'
 
+    FIELD_MAPPING = {
+        ID_C: 'id',
+        FIELD_C: 'field',
+        SCHEDULED_C: 'scheduled',
+        STAGE_C: 'stage',
+        STANDING_C: 'standing',
+        'isFinished': 'gameFinished',
+        'officialsId': 'officials_id',
+        'officials': 'officials__description',
+        HOME_C: 'home',
+        AWAY_C: 'away',
+    }
+
     ALL_FIELD_VALUES = [ID_C, FIELD_C, SCHEDULED_C, OFFICIALS_ID_C, OFFICIALS_DESC_C, HOME_C, STAGE_C, STANDING_C,
                         AWAY_C, GAME_FINISHED_C]
-    ALL_GAME_OVERVIEW_VALUES = [ID_C, FIELD_C, SCHEDULED_C, OFFICIALS_ID_C, OFFICIALS_DESC_C, HOME_C, AWAY_C,
+    ALL_GAME_OVERVIEW_FIELDS = [ID_C, FIELD_C, SCHEDULED_C, OFFICIALS_ID_C, OFFICIALS_DESC_C, HOME_C, AWAY_C,
                                 GAME_FINISHED_C]
-    ALL_SETUP_VALUES = [FIELD_C, SCHEDULED_C, HOME_C, STAGE_C, STANDING_C, AWAY_C]
+    ALL_SETUP_FIELDS = [FIELD_C, SCHEDULED_C, HOME_C, STAGE_C, STANDING_C, AWAY_C]
 
     id = IntegerField()
     field = IntegerField()
@@ -41,6 +54,16 @@ class ScorecardGameinfoSerializer(Serializer):
         if fields:
             allowed = set(fields)
             existing = set(self.fields.keys())
+
+            # Keep track of which fields to retain based on the mapping
+            fields_to_keep = set(self.FIELD_MAPPING.values()).intersection(allowed)
+
+            # Always include fields that have mappings, even if not in the original fields
+            for constant, field_name in self.FIELD_MAPPING.items():
+                if field_name in allowed or field_name in fields_to_keep:
+                    allowed.add(constant)
+
+            # Remove fields that are not allowed
             for field_name in existing - allowed:
                 self.fields.pop(field_name)
 
@@ -59,7 +82,7 @@ class ScorecardGamedaySerializer(Serializer):
     id = IntegerField()
     date = DateField(format='%d.%m.%Y')
     name = CharField()
-    games = ScorecardGameinfoSerializer(many=True, fields=ScorecardGameinfoSerializer.ALL_GAME_OVERVIEW_VALUES)
+    games = ScorecardGameinfoSerializer(many=True, fields=ScorecardGameinfoSerializer.ALL_GAME_OVERVIEW_FIELDS)
 
 
 class GameOfficialSerializer(ModelSerializer):
