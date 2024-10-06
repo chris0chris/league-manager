@@ -1,6 +1,6 @@
 from gamedays.api.serializers import GameOfficialSerializer
 from gamedays.models import GameOfficial
-from scorecard2.api.serializers import GameSetupCategoryValueSerializer
+from scorecard2.api.serializers import GameSetupCategoryValueSerializer, ScorecardGameSetupSerializer
 from scorecard2.models import ScorecardGameSetup, GameSetupCategoryValue
 
 
@@ -38,3 +38,10 @@ class GameSetupWrapper:
             else:
                 error.append(serializer.errors)
         return result, error
+
+    def get_game_setup(self):
+        return {
+            **ScorecardGameSetupSerializer(instance=ScorecardGameSetup.objects.get(gameinfo_id=self.gameinfo_id)).data,
+            'officials': GameOfficialSerializer(instance=GameOfficial.objects.filter(gameinfo_id=self.gameinfo_id), many=True).data,
+        }
+

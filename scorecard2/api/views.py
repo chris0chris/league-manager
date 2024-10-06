@@ -68,15 +68,10 @@ class GameSetupAPIView(APIView):
     # noinspection PyMethodMayBeStatic
     def get(self, request, **kwargs):
         gameinfo_id = kwargs.get('pk')
-        scorecard_config_service = ScorecardConfigService(gameinfo_id)
-        official_service = OfficialService()
-        gameinfo_service = ScorecardGameService(gameinfo_id)
+        game_setup_service = ScorecardGameSetupService(gameinfo_id)
         try:
             return Response(
-                {"scorecard": scorecard_config_service.get_kickoff_config(),
-                 "teamOfficials": official_service.get_team_officials_by_gameinfo(gameinfo_id),
-                 "gameInfo": gameinfo_service.get_game_info(),
-                 },
+                game_setup_service.get_game_setup(),
                 status=HTTPStatus.OK
             )
         except PermissionError as exception:

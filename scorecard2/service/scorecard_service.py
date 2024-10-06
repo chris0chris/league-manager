@@ -9,6 +9,7 @@ from gamedays.service.gameday_service import GamedayService
 from gamedays.service.team_service import TeamService
 from gamedays.service.wrapper.gameinfo_wrapper import GameinfoWrapper
 from league_manager.utils.view_utils import UserRequestPermission
+from officials.service.official_service import OfficialService
 from scorecard2.api.serializers import ScorecardGameinfoSerializer, ScorecardGamedaySerializer, \
     ScorecardConfigSerializer
 from scorecard2.models import ScorecardConfig
@@ -88,11 +89,11 @@ class ScorecardConfigService:
 class ScorecardGameSetupService:
     def __init__(self, gameinfo_id):
         self.gameinfo_id = gameinfo_id
+        self.game_setup_wrapper = GameSetupWrapper(self.gameinfo_id)
 
     def save_game_setup(self, data, user):
-        game_setup_wrapper = GameSetupWrapper(self.gameinfo_id)
-        categories, was_game_setup_created = game_setup_wrapper.create_or_update_game_setup(data.get('categories'))
-        officials, officials_errors = game_setup_wrapper.create_or_update_game_officials(data.get('officials'))
+        categories, was_game_setup_created = self.game_setup_wrapper.create_or_update_game_setup(data.get('categories'))
+        officials, officials_errors = self.game_setup_wrapper.create_or_update_game_officials(data.get('officials'))
         v = ''
         if was_game_setup_created:
             game_service = GameService(self.gameinfo_id)
@@ -100,3 +101,14 @@ class ScorecardGameSetupService:
         if len(officials_errors):
             raise ValueError(officials_errors)
         return {'categories': categories, 'officials': officials}
+
+    def get_game_setup(self):
+        scorecard_config_service = ScorecardConfigService(self.gameinfo_id)
+        official_service = OfficialService()
+        gameinfo_service = ScorecardGameService(self.gameinfo_id)
+        return {
+            "scorecard": scorecard_config_service.get_kickoff_config(),
+            "teamOfficials": official_service.get_team_officials_by_gameinfo(self.gameinfo_id),
+            "gameInfo": gameinfo_service.get_game_info(),
+            "initial": self.game_setup_wrapper.get_game_setup(),
+        }

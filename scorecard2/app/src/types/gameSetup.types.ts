@@ -59,4 +59,8 @@ export type GameSetup = {
   scorecard: ScorecardConfig;
   teamOfficials: Official[];
   gameInfo: GameInfo;
+  initial: {
+    officials: SelectedOfficial[];
+    categories: SelectedCategory[];
+  };
 };

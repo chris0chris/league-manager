@@ -23,7 +23,7 @@ class GamedayInfoSerializer(Serializer):
 class GameOfficialSerializer(ModelSerializer):
     class Meta:
         model = GameOfficial
-        exclude = ('gameinfo',)
+        exclude = ('gameinfo', 'id')
 
 
 class GameinfoSerializer(ModelSerializer):

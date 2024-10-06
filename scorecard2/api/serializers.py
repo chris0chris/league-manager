@@ -133,12 +133,17 @@ class ScorecardConfigSerializer(ModelSerializer):
 
 
 class GameSetupCategoryValueSerializer(ModelSerializer):
+    category = IntegerField(source='category.id', read_only=True)
+    category_value = IntegerField(source='category_value.id', read_only=True)
+
     class Meta:
         model = GameSetupCategoryValue
-        fields = ['game_setup', 'category', 'category_value']
+        fields = ['category', 'category_value']
 
 
 class ScorecardGameSetupSerializer(ModelSerializer):
+    categories = GameSetupCategoryValueSerializer(many=True, read_only=True, source='game_setup_category_values')
+
     class Meta:
         model = ScorecardGameSetup
-        fields = ['gameinfo', 'homeCaptain', 'awayCaptain', 'hasFinalScoreChanged', 'note']
+        fields = ['gameinfo', 'homeCaptain', 'awayCaptain', 'hasFinalScoreChanged', 'note', 'categories']

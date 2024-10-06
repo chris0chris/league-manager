@@ -1,6 +1,6 @@
 import { Button, Col, FloatingLabel, Form, Row } from "react-bootstrap";
 import { InputDropdownItem } from "../../types";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   focus?: boolean;
@@ -35,8 +35,16 @@ const InputDropdown: React.FC<Props> = ({
 }) => {
   const [hasFocus, setHasFocus] = useState<boolean>(focus);
   const [disabled, setDisabled] = useState(isDisabled);
-  const [inputValue, setInputValue] = useState(initialValue);
+  const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    if (initialValue) {
+      setInputValue(initialValue);
+      setDisabled(true);
+      setHasFocus(false);
+    }
+  }, [initialValue]);
+
   if (!placeholder) {
     placeholder = label;
   }

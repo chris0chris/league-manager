@@ -50,6 +50,8 @@ const Officials: React.FC = () => {
         setScorecardConfig(gameSetup.scorecard);
         setTeamOfficials(gameSetup.teamOfficials);
         setGameInfo(gameSetup.gameInfo);
+        setSelectedCategories(gameSetup.initial.categories);
+        setSelectedOfficials(gameSetup.initial.officials);
       } catch (error: any) {
         console.log("error", error);
         setNotification({ text: error.message });
@@ -158,7 +160,12 @@ const Officials: React.FC = () => {
             onReset={() =>
               resetSelectedOfficials(currentOfficialPosition.position_name)
             }
-            // initValues={scJudgeInit}
+            initialValue={
+              selectedOfficials.find(
+                (selected) =>
+                  selected.position === currentOfficialPosition.position_name,
+              )?.name || ""
+            }
             // searchForText={searchForOfficials}
             items={officialsAsDropdownItem}
           />
