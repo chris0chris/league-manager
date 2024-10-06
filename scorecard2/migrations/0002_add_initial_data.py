@@ -1,7 +1,10 @@
-from django.db import migrations
+from django.db import migrations, connection
 
 
 def add_initial_data(apps, schema_editor):
+    if connection.settings_dict['NAME'].startswith('test'):
+        return
+
     OfficialPosition = apps.get_model('officials', 'OfficialPosition')
     ScorecardConfig = apps.get_model('scorecard2', 'ScorecardConfig')
     ScorecardCategory = apps.get_model('scorecard2', 'ScorecardCategory')

@@ -3,12 +3,10 @@ from datetime import datetime
 from django.db.models import Subquery, OuterRef
 
 from gamedays.models import Gameinfo, Gameresult
-from league_manager.utils.view_utils import UserRequestPermission
 
 
 class GameinfoWrapper(object):
-    def __init__(self, game_id, user_permission: UserRequestPermission = UserRequestPermission()):
-        self.user_permission = user_permission
+    def __init__(self, game_id: int):
         try:
             self.gameinfo = Gameinfo.objects.get(id=game_id)
         except Gameinfo.DoesNotExist:

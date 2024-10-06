@@ -202,6 +202,7 @@ class GameOfficial(models.Model):
     official = models.ForeignKey('officials.Official', on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=100, null=True, blank=True)
     position = models.CharField(max_length=100)
+    official_position = models.ForeignKey('officials.OfficialPosition', on_delete=models.CASCADE, null=True, blank=True)
 
     objects: QuerySet = models.Manager()
 

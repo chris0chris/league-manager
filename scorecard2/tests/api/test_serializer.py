@@ -1,6 +1,9 @@
-from datetime import date
+from django.test import TestCase
 
-from scorecard2.api.serializers import ScorecardGamedaySerializer, ScorecardGameinfoSerializer
+from officials.models import OfficialPosition
+from scorecard2.api.serializers import ScorecardGamedaySerializer, ScorecardGameinfoSerializer, \
+    ScorecardOfficialSerializer
+from scorecard2.models import ScorecardOfficial, ScorecardConfig
 
 
 def create_some_input_game_data(**kwargs):
@@ -24,7 +27,7 @@ def create_some_input_gameday_data(**kwargs):
     defaults = [
         {
             "id": 248,
-            "date": date.today(),
+            "date": "05.10.2024",
             "name": "Gameday name",
             "games": [
                 create_some_input_game_data()
@@ -103,4 +106,30 @@ class TestScorecardGameinfoSerializer:
             "isFinished": True,
             "officials": "Officials Team",
             "officialsId": 75,
+        }
+
+
+class TestScorecardOfficialSerializer(TestCase):
+    def test_serializer_with_no_official_position(self):
+        position_name = 'some position'
+        config = ScorecardConfig.objects.create(name='Some scorecard config')
+        scorecard_official = ScorecardOfficial.objects.create(scorecard_config=config, position_name=position_name)
+        result = ScorecardOfficialSerializer(instance=scorecard_official).data
+        assert dict(result) == {
+            "position_name": position_name,
+            "position_id": None,
+            "is_optional": False,
+        }
+
+    def test_serializer_with_official_position(self):
+        position_name = 'THE official position'
+        config = ScorecardConfig.objects.create(name='Some scorecard config')
+        official_position = OfficialPosition.objects.create(name=position_name)
+        scorecard_official = ScorecardOfficial.objects.create(scorecard_config=config,
+                                                              official_position=official_position, is_optional=True)
+        result = ScorecardOfficialSerializer(instance=scorecard_official).data
+        assert dict(result) == {
+            "position_name": position_name,
+            "position_id": official_position.pk,
+            "is_optional": True,
         }

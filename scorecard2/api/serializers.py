@@ -2,7 +2,8 @@ from rest_framework.fields import SerializerMethodField, TimeField, IntegerField
 from rest_framework.serializers import Serializer, ModelSerializer
 
 from gamedays.models import GameOfficial
-from scorecard2.models import ScorecardOfficial, ScorecardCategory, ScorecardCategoryValue, ScorecardConfig
+from scorecard2.models import ScorecardOfficial, ScorecardCategory, ScorecardCategoryValue, ScorecardConfig, \
+    ScorecardGameSetup, GameSetupCategoryValue
 
 
 class ScorecardGameinfoSerializer(Serializer):
@@ -106,14 +107,20 @@ class ScorecardCategorySerializer(ModelSerializer):
 
 
 class ScorecardOfficialSerializer(ModelSerializer):
-    position_name = SerializerMethodField(source='official_position')
+    position_name = SerializerMethodField()
+    position_id = SerializerMethodField()
 
+    # noinspection PyMethodMayBeStatic
     def get_position_name(self, obj: dict):
-        return obj.official_position.name
+        return obj.official_position.name if obj.official_position else obj.position_name
+
+    # noinspection PyMethodMayBeStatic
+    def get_position_id(self, obj: dict):
+        return obj.official_position.pk if obj.official_position else None
 
     class Meta:
         model = ScorecardOfficial
-        fields = ['position_name', 'is_optional']
+        fields = ['position_name', 'is_optional', 'position_id']
 
 
 class ScorecardConfigSerializer(ModelSerializer):
@@ -123,3 +130,15 @@ class ScorecardConfigSerializer(ModelSerializer):
     class Meta:
         model = ScorecardConfig
         fields = ['officials', 'categories']
+
+
+class GameSetupCategoryValueSerializer(ModelSerializer):
+    class Meta:
+        model = GameSetupCategoryValue
+        fields = ['game_setup', 'category', 'category_value']
+
+
+class ScorecardGameSetupSerializer(ModelSerializer):
+    class Meta:
+        model = ScorecardGameSetup
+        fields = ['gameinfo', 'homeCaptain', 'awayCaptain', 'hasFinalScoreChanged', 'note']

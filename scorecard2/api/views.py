@@ -1,16 +1,18 @@
 from http import HTTPStatus
 
 from rest_framework import permissions
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from gamedays.models import GameOfficial
 from league_manager.utils.decorators import get_user_request_permission
+from league_manager.utils.permissions import IsStaffOrTeamParticipatingInGameday
 from officials.service.official_service import OfficialService
 from scorecard2.api.serializers import GameOfficialSerializer
-from scorecard2.service.scorecard_service import ScorecardGamedayService, ScorecardConfigService, ScorecardGameService
+from scorecard2.service.scorecard_service import ScorecardGamedayService, ScorecardConfigService, ScorecardGameService, \
+    ScorecardGameSetupService
 
 
 class SpecificGamedayAndGamesToOfficiateAPIView(APIView):
@@ -61,16 +63,14 @@ class GameOfficialCreateOrUpdateView(RetrieveUpdateAPIView):
 
 
 class GameSetupAPIView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, IsStaffOrTeamParticipatingInGameday)
 
-    @get_user_request_permission
     # noinspection PyMethodMayBeStatic
     def get(self, request, **kwargs):
         gameinfo_id = kwargs.get('pk')
-        user_permission = kwargs.get('user_permission')
         scorecard_config_service = ScorecardConfigService(gameinfo_id)
         official_service = OfficialService()
-        gameinfo_service = ScorecardGameService(gameinfo_id, user_permission)
+        gameinfo_service = ScorecardGameService(gameinfo_id)
         try:
             return Response(
                 {"scorecard": scorecard_config_service.get_kickoff_config(),
@@ -81,3 +81,15 @@ class GameSetupAPIView(APIView):
             )
         except PermissionError as exception:
             raise PermissionDenied(detail=str(exception))
+
+    # noinspection PyMethodMayBeStatic
+    def put(self, request, *args, **kwargs):
+        gameinfo_id = kwargs.get('pk')
+        game_setup_service = ScorecardGameSetupService(gameinfo_id)
+        try:
+            return Response(
+                game_setup_service.save_game_setup(request.data, request.user),
+                status=HTTPStatus.OK
+            )
+        except ValueError as error:
+            raise ValidationError(detail=str(error))

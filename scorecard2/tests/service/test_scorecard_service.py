@@ -87,16 +87,16 @@ class ScorecardConfigServiceTest(TestCase):
 
 
 class ScorecardGameServiceTest(TestCase):
+    # noinspection PyMethodMayBeStatic
     def test_game_info_correct_retrieved(self):
         DBSetup().g62_status_empty()
         gameinfo = Gameinfo.objects.first()
-        scorecard_game_service = ScorecardGameService(gameinfo_id=gameinfo.pk,
-                                                      user_permission=UserRequestPermission(is_staff=True))
+        scorecard_game_service = ScorecardGameService(gameinfo_id=gameinfo.pk)
         result = scorecard_game_service.get_game_info()
         assert result == {'field': 1, 'stage': 'Vorrunde', 'standing': 'Gruppe 1', 'scheduled': '10:00',
                           'home': 'AAAAAAA1', 'away': 'AAAAAAA2'}
 
     def test_raises_value_error_if_gameinfo_id_not_found(self):
         with self.assertRaises(ValueError) as error:
-            ScorecardGameService(gameinfo_id=-1, user_permission=UserRequestPermission(is_staff=True))
+            ScorecardGameService(gameinfo_id=-1)
         assert str(error.exception) == 'No entry found for game_id: -1'

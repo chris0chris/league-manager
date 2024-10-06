@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db.models import QuerySet
 
 from gamedays.models import Gameday, Team, EmptyTeam, Gameinfo
+from gamedays.service.game_service import GameService
 from gamedays.service.gameday_service import GamedayService
 from gamedays.service.team_service import TeamService
 from gamedays.service.wrapper.gameinfo_wrapper import GameinfoWrapper
@@ -11,6 +12,7 @@ from league_manager.utils.view_utils import UserRequestPermission
 from scorecard2.api.serializers import ScorecardGameinfoSerializer, ScorecardGamedaySerializer, \
     ScorecardConfigSerializer
 from scorecard2.models import ScorecardConfig
+from scorecard2.service.wrapper.gamesetup_wrapper import GameSetupWrapper
 
 
 class ScorecardGamedayService:
@@ -61,9 +63,8 @@ class ScorecardGamedayService:
 
 
 class ScorecardGameService:
-    def __init__(self, gameinfo_id: int, user_permission: UserRequestPermission):
-        self.user_permission = user_permission
-        self.gameinfo_wrapper = GameinfoWrapper(gameinfo_id, user_permission)
+    def __init__(self, gameinfo_id: int):
+        self.gameinfo_wrapper = GameinfoWrapper(gameinfo_id)
 
     def get_game_info(self):
         gameinfo: QuerySet[Gameinfo] = self.gameinfo_wrapper.get_game_info_with_home_and_away()
@@ -82,3 +83,20 @@ class ScorecardConfigService:
         if config is None:
             raise PermissionError(f'Keine Scorecard-Config für {gameinfo.gameday.league} gefunden.')
         return ScorecardConfigSerializer(instance=config).data
+
+
+class ScorecardGameSetupService:
+    def __init__(self, gameinfo_id):
+        self.gameinfo_id = gameinfo_id
+
+    def save_game_setup(self, data, user):
+        game_setup_wrapper = GameSetupWrapper(self.gameinfo_id)
+        categories, was_game_setup_created = game_setup_wrapper.create_or_update_game_setup(data.get('categories'))
+        officials, officials_errors = game_setup_wrapper.create_or_update_game_officials(data.get('officials'))
+        v = ''
+        if was_game_setup_created:
+            game_service = GameService(self.gameinfo_id)
+            game_service.update_gamestart(user)
+        if len(officials_errors):
+            raise ValueError(officials_errors)
+        return {'categories': categories, 'officials': officials}
