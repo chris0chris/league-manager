@@ -72,30 +72,30 @@ export const axiosGet = async (url: string): Promise<any> => {
     });
 };
 
-// export const axiosPost = (url: string, body: any): any => {
-//   return axios
-//     .get(url, tokenConfig())
-//     .then((res) => {
-//       if (res.data) {
-//         return res.data;
-//       }
-//     })
-//     .catch((error: AxiosError) => {
-//       console.error("api ERROR", error);
-//       if (error.response && error.response.status === 401) {
-//         if (process.env.NODE_ENV === "production") {
-//           window.location.href = SCORECARD_URL;
-//         } else {
-//           alert(
-//             "`localStorage.setItem('token', '${localStorage.getItem('token')}')`",
-//           );
-//           throwApiError("Bitte erst anmelden.");
-//         }
-//       } else {
-//         throwApiError(error);
-//       }
-//     });
-// };
+export const axiosPut = (url: string, body: any): any => {
+  return axios
+    .put(url, body, tokenConfig())
+    .then((res) => {
+      if (res.data) {
+        return res.data;
+      }
+    })
+    .catch((error: AxiosError) => {
+      console.error("api ERROR", error);
+      if (error.response && error.response.status === 401) {
+        if (process.env.NODE_ENV === "production") {
+          window.location.href = "#/login";
+        } else {
+          alert(
+            "`localStorage.setItem('token', '${localStorage.getItem('token')}')`",
+          );
+          throwApiError("Bitte erst anmelden.");
+        }
+      } else {
+        throwApiError(error);
+      }
+    });
+};
 
 const tokenConfig = () => {
   const token = localStorage.getItem("token");

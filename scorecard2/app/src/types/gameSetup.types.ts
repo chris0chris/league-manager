@@ -1,6 +1,7 @@
 export type ScorecardOfficialPosition = {
   position_name: string;
   is_optional: boolean;
+  position_id: number;
 };
 
 export type ScorecardCategoryValues = {
@@ -24,15 +25,20 @@ export type Official = {
 };
 
 export type SelectedOfficial = {
-  position: string;
   name: string;
-  id: number | null;
+  official: number | null;
+  official_position: number | null;
+  position: string;
 };
 
 export type SelectedCategory = {
-  id: number;
-  // name: string;
-  valueId: number;
+  category: number;
+  category_value: number;
+};
+
+export type SelectedGameSetup = {
+  officials: SelectedOfficial[];
+  categories: SelectedCategory[];
 };
 
 export type ScorecardConfig = {

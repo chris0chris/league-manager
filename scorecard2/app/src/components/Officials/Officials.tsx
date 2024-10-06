@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { SyntheticEvent, useEffect, useState } from "react";
+import { Navigate, useSearchParams } from "react-router-dom";
 import useNotification from "../../hooks/useNotification";
-import { loadGameSetup } from "../../common/api/setup";
+import { loadGameSetup, saveGameSetup } from "../../common/api/setup";
 import {
   GameInfo,
   GameSetup,
@@ -14,6 +14,8 @@ import { Button, Col, Form, Row } from "react-bootstrap";
 import InputDropdown from "../shared/InputDropdown";
 import { InputDropdownItemFactory } from "../../common/factories/input-dropdown.factory";
 import Category from "./Category";
+import { SelectedGame } from "../../types";
+import { DASHBOARD_URL } from "../../common/routes";
 
 const Officials: React.FC = () => {
   const { setNotification } = useNotification();
@@ -29,6 +31,10 @@ const Officials: React.FC = () => {
   const [selectedCategories, setSelectedCategories] = useState<
     SelectedCategory[]
   >([]);
+  const [selectedGame, setSelectedGame] = useState<SelectedGame>({
+    isSelected: false,
+    gameId: -1,
+  });
   const [gameInfo, setGameInfo] = useState<GameInfo>({
     away: "away",
     field: 0,
@@ -51,7 +57,9 @@ const Officials: React.FC = () => {
     };
     const gameId = searchParams.get("gameId");
     if (gameId) {
-      fetchData(parseInt(gameId));
+      const gameIdAsInt = parseInt(gameId);
+      setSelectedGame({ gameId: gameIdAsInt, isSelected: false });
+      fetchData(gameIdAsInt);
     }
   }, [searchParams]);
   const addOrUpdateOfficial = (newOfficial: SelectedOfficial) => {
@@ -61,7 +69,7 @@ const Officials: React.FC = () => {
       );
       if (existingPosition) {
         return prevOfficials.map((official) =>
-          official.id === newOfficial.id
+          official.official === newOfficial.official
             ? { ...official, position: newOfficial.position }
             : official,
         );
@@ -73,12 +81,12 @@ const Officials: React.FC = () => {
   const addOrUpdateCategory = (newCategory: SelectedCategory) => {
     setSelectedCategories((prevCategories) => {
       const existingCategory = prevCategories.some(
-        (category) => category.id === newCategory.id,
+        (category) => category.category === newCategory.category,
       );
       if (existingCategory) {
         return prevCategories.map((category) =>
-          category.id === newCategory.id
-            ? { ...category, valueId: newCategory.valueId }
+          category.category === newCategory.category
+            ? { ...category, category_value: newCategory.category_value }
             : category,
         );
       } else {
@@ -95,17 +103,33 @@ const Officials: React.FC = () => {
   const filteredOfficials = teamOfficials.filter(
     (item) =>
       !selectedOfficials.some(
-        (selectedOfficial) => selectedOfficial.id === item.id,
+        (selectedOfficial) => selectedOfficial.official === item.id,
       ),
   );
   // setTeamOfficials(filteredOfficials);
-  const handleSubmit = (event: any) => {
+  const handleSubmit = async (event: SyntheticEvent) => {
     event.preventDefault();
+    console.log("event", event, selectedCategories, selectedOfficials);
+    try {
+      await saveGameSetup(selectedGame.gameId, {
+        officials: selectedOfficials,
+        categories: selectedCategories,
+      });
+      setSelectedGame({
+        ...selectedGame,
+        isSelected: true,
+      });
+    } catch (error: any) {
+      setNotification({ text: error.message });
+    }
   };
   const officialsAsDropdownItem = filteredOfficials.map(
     InputDropdownItemFactory.createFromOfficial,
   );
   console.log("selectedObjects", selectedCategories, selectedOfficials);
+  if (selectedGame.isSelected) {
+    return <Navigate to={`${DASHBOARD_URL}?gameId=${selectedGame.gameId}`} />;
+  }
   return (
     <>
       <div className="text-muted fs6">
@@ -126,8 +150,9 @@ const Officials: React.FC = () => {
             onSelected={(id, text) =>
               addOrUpdateOfficial({
                 name: text,
-                id: id,
+                official: id,
                 position: currentOfficialPosition.position_name,
+                official_position: currentOfficialPosition.position_id,
               })
             }
             onReset={() =>

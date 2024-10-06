@@ -7,26 +7,26 @@ import {
 import RadioButton from "../shared/RadioButton";
 
 type Props = {
-  value: ScorecardCategory;
-  home: string;
   away: string;
+  home: string;
   onCategoryChange: (categories: SelectedCategory) => void;
+  value: ScorecardCategory;
 };
 
 const Category: React.FC<Props> = ({
-  value: category,
-  home = "home",
   away = "away",
+  home = "home",
   onCategoryChange,
+  value: category,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<SelectedCategory>({
-    id: -1,
-    valueId: -1,
+    category: -1,
+    category_value: -1,
   });
 
   const addOrUpdateCategory = (newCategory: SelectedCategory) => {
-    console.log("addOrUpdateCategory newCategory.id", newCategory.id);
-    if (newCategory.valueId !== selectedCategory.valueId) {
+    console.log("addOrUpdateCategory newCategory.id", newCategory.category);
+    if (newCategory.category_value !== selectedCategory.category_value) {
       setSelectedCategory(newCategory);
       onCategoryChange(newCategory);
     }
@@ -55,13 +55,13 @@ const Category: React.FC<Props> = ({
             color="secondary"
             onChange={(valueId: number) =>
               addOrUpdateCategory({
-                id: category.id,
-                valueId: valueId,
+                category: category.id,
+                category_value: valueId,
               })
             }
             text={currentValue.value}
             value={currentValue.id}
-            checked={selectedCategory.valueId === currentValue.id}
+            checked={selectedCategory.category_value === currentValue.id}
           />
         ))}
       </Row>

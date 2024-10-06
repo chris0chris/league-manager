@@ -1,35 +1,35 @@
-import { ButtonGroup, ToggleButton } from "react-bootstrap";
+import { ButtonGroup } from "react-bootstrap";
 
 type Props = {
-  id: string;
-  required?: boolean;
-  name: string;
-  onChange: (valueId: number) => void;
-  text: string;
-  value?: number;
-  color?: string;
   checked?: boolean;
   className?: string;
+  color?: string;
+  id: string;
+  name: string;
+  onChange: (valueId: number) => void;
+  required?: boolean;
+  text: string;
+  value?: number;
 };
 
 const RadioButton: React.FC<Props> = ({
-  id,
-  required = false,
-  name,
-  onChange: setValue,
-  text,
-  value,
-  color = "secondary",
   checked = false,
   className = "",
+  color = "secondary",
+  id,
+  name,
+  onChange: setValue,
+  required = false,
+  text,
+  value,
 }) => {
   return (
     <ButtonGroup className={`col d-grid ${className}`}>
       <input
         type="radio"
         className={`btn-check outline-${color}`}
-        // name={name}
-        // id={id}
+        name={name}
+        id={id}
         autoComplete="off"
         defaultValue={value ? value : text}
         onChange={(ev) => setValue(parseInt(ev.currentTarget.value))}
