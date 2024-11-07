@@ -22,6 +22,7 @@ from officials.models import Official, OfficialLicenseHistory
 from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
 from officials.service.official_service import OfficialService
+from officials.service.serializers import ParticipationValidator
 from officials.service.signup_service import OfficialSignupService, DuplicateSignupError, MaxSignupError
 
 MOODLE_LOGGED_IN_USER = 'moodle_logged_in_user'
@@ -185,9 +186,14 @@ class LicenseCheckForOfficials(LoginRequiredMixin, UserPassesTestMixin, View):
         year = kwargs.get('year', datetime.today().year)
         course_id = kwargs.get('course_id')
         official_service = OfficialService()
+        from officials.urls import OFFICIALS_PROFILE_GAMELIST
+        officials_list, license_id = official_service.get_game_count_for_license(year, course_id)
         context = {
+            'license_requirements': ParticipationValidator.course_mapping(license_id),
             'season': year,
-            'officials_list': official_service.get_game_count_for_license(year, course_id)
+            'license_id': license_id,
+            'profile_url': OFFICIALS_PROFILE_GAMELIST,
+            'officials_list': officials_list,
         }
         return render(request, self.template_name, context)
 

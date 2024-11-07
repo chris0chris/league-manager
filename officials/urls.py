@@ -3,7 +3,7 @@ from django.urls import path, re_path
 from officials.views import OfficialsTeamListView, AllOfficialsListView, GameOfficialListView, \
     AddInternalGameOfficialUpdateView, LicenseCheckForOfficials, MoodleReportView, \
     OfficialProfileLicenseView, OfficialAssociationListView, OfficialProfileGamelistView, OfficialSignUpListView, \
-    MoodleLoginView, OfficialSignUpView, OfficialSignUpCancelView
+    MoodleLoginView, OfficialSignUpView, OfficialSignUpCancelView, LicenseCheckForOfficials
 
 OFFICIALS_LIST_FOR_TEAM = 'view-officials-list-for-team'
 OFFICIALS_LIST_FOR_TEAM_AND_YEAR = 'view-officials-list-for-team-and-year'

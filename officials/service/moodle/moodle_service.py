@@ -81,6 +81,9 @@ class MoodleService:
             participants_ids += [current_participant.user_id]
         return participants_ids
 
+    def get_course_by_id(self, course_id):
+        return self.moodle_api.get_courses(course_id).get_all()[0]
+
     @measure_execution_time
     def update_licenses(self, course_ids: str = None):
         courses: ApiCourses = self.moodle_api.get_courses(course_ids)

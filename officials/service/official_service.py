@@ -6,6 +6,7 @@ from officials.models import Official
 from officials.service.game_official_entries import InternalGameOfficialEntry, ExternalGameOfficialEntry
 from officials.service.moodle.moodle_service import MoodleService
 from officials.service.officials_repository_service import OfficialsRepositoryService
+from officials.service.serializers import OfficialLicenseCheckSerializer
 
 
 class OfficialService:
@@ -61,8 +62,31 @@ class OfficialService:
 
     def get_game_count_for_license(self, year: int, course_id: int) -> []:
         moodle_service = MoodleService()
-        external_ids = moodle_service.get_all_users_for_course(course_id)
-        return self.official_repository_service.get_officials_game_count_for_license(year, external_ids)
+        course = moodle_service.get_course_by_id(course_id)
+        license_id = course.get_license_id()
+        external_ids: [] = moodle_service.get_all_users_for_course(course_id)
+        officials = list(
+            self.official_repository_service.get_officials_game_count_for_license(year, external_ids).values(
+                *OfficialLicenseCheckSerializer.ALL_FIELD_VALUES))
+        for official in officials:
+            external_ids.remove(int(official['external_id']))
+        for current_external_id in external_ids:
+            officials.append(self._get_official_not_in_database(current_external_id))
+        return OfficialLicenseCheckSerializer(instance=officials, context={'license_id': license_id},
+                                              many=True).data, license_id
+
+    def _get_official_not_in_database(self, external_id):
+        return {
+            'external_id': f'{external_id}',
+            'id': None,
+            'first_name': '',
+            'last_name': '',
+            'license_name': '-',
+            'license_years': '-',
+            'team__description': 'Person hat noch nie an einem Kurs teilgenommen',
+            'total_games': 0,
+            'total_season_games': 0
+        }
 
     def _aggregate_games(self, external_official_qs):
         all_external_games_count = external_official_qs.aggregate(num_games=Sum('number_games')).get('num_games',
