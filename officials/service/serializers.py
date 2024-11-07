@@ -11,8 +11,8 @@ class ParticipationValidator:
 
     course_mapping = {
         F1: {
-            'name': 'F1',
-            'current_license': {
+            'course_license': 'F1',
+            'user_current_license': {
                 F1: {
                     'name': 'F1',
                     'minimum_season_games': 5,
@@ -28,8 +28,8 @@ class ParticipationValidator:
             },
         },
         F2: {
-            'name': 'F2',
-            'current_license': {
+            'course_license': 'F2',
+            'user_current_license': {
                 F2: {
                     'name': 'F2',
                     'minimum_season_games': 5,
@@ -45,8 +45,8 @@ class ParticipationValidator:
             },
         },
         F3: {
-            'name': 'F3',
-            'current_license': {
+            'course_license': 'F3',
+            'user_current_license': {
                 F3: {
                     'name': 'F3',
                     'minimum_season_games': 4,
@@ -62,8 +62,8 @@ class ParticipationValidator:
             },
         },
         F4: {
-            'name': 'F4',
-            'current_license': {
+            'course_license': 'F4',
+            'user_current_license': {
                 None: {
                     'name': 'keine Lizenz',
                     'minimum_season_games': 0,
@@ -75,7 +75,7 @@ class ParticipationValidator:
     }.get
 
     def __init__(self, course_license):
-        self.course = self.course_mapping(course_license).get('current_license')
+        self.course = self.course_mapping(course_license).get('user_current_license')
 
     def fails_minimum_season_games(self, participant_license, minimum_season_games):
         return self._evaluate_requirement(participant_license, minimum_season_games, 'minimum_season_games')
