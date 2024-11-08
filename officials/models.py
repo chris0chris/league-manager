@@ -96,36 +96,39 @@ class OfficialExternalGames(models.Model):
 
     objects: QuerySet = models.Manager()
 
+    @staticmethod
+    def calculated_games_expression(field_prefix=''):
+        """
+        Returns an ExpressionWrapper that calculates the adjusted number of games.
+        """
+        return ExpressionWrapper(
+            Case(
+                When(
+                    **{f"{field_prefix}has_clockcontrol": True, f"{field_prefix}halftime_duration__gte": 15},
+                    then=F(f"{field_prefix}number_games")
+                ),
+                When(
+                    **{f"{field_prefix}has_clockcontrol": True, f"{field_prefix}halftime_duration__lt": 15},
+                    then=F(f"{field_prefix}number_games") * 0.5
+                ),
+                When(
+                    **{f"{field_prefix}has_clockcontrol": False, f"{field_prefix}halftime_duration__gte": 23},
+                    then=F(f"{field_prefix}number_games")
+                ),
+                When(
+                    **{f"{field_prefix}has_clockcontrol": False, f"{field_prefix}halftime_duration__lt": 23},
+                    then=F(f"{field_prefix}number_games") * 0.5
+                ),
+                default=Value(0),
+                output_field=FloatField()
+            ),
+            output_field=FloatField()
+        )
+
     @property
     def calculated_number_games(self):
         return OfficialExternalGames.objects.filter(pk=self.pk).annotate(
-            adjusted_number_games=ExpressionWrapper(
-                Case(
-                    When(
-                        has_clockcontrol=True,
-                        halftime_duration__gte=15,
-                        then=F('number_games')
-                    ),
-                    When(
-                        has_clockcontrol=True,
-                        halftime_duration__lt=15,
-                        then=F('number_games') * 0.5
-                    ),
-                    When(
-                        has_clockcontrol=False,
-                        halftime_duration__gte=23,
-                        then=F('number_games')
-                    ),
-                    When(
-                        has_clockcontrol=False,
-                        halftime_duration__lt=23,
-                        then=F('number_games') * 0.5
-                    ),
-                    default=Value(0),  # Default case if none of the conditions match
-                    output_field=FloatField()
-                ),
-                output_field=FloatField()
-            )
+            adjusted_number_games=OfficialExternalGames.calculated_games_expression()
         ).aggregate(
             total_calculated_number_games=Sum('adjusted_number_games')
         )['total_calculated_number_games']

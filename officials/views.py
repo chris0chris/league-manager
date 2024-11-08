@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib import messages
@@ -183,15 +183,16 @@ class LicenseCheckForOfficials(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'officials/license_check.html'
 
     def get(self, request, *args, **kwargs):
-        year = kwargs.get('year', datetime.today().year)
         course_id = kwargs.get('course_id')
         official_service = OfficialService()
         from officials.urls import OFFICIALS_PROFILE_GAMELIST
-        officials_list, license_id = official_service.get_game_count_for_license(year, course_id)
+        officials_list, course = official_service.get_game_count_for_license(course_id)
+        license_id = course.get_license_id()
         context = {
             'license_requirements': ParticipationValidator.course_mapping(license_id),
-            'season': year,
             'license_id': license_id,
+            'course_date': course.get_date(),
+            'year_before_course_date': course.get_date() - timedelta(days=365),
             'profile_url': OFFICIALS_PROFILE_GAMELIST,
             'officials_list': officials_list,
         }

@@ -4,6 +4,7 @@ from gamedays.service.team_repository_service import TeamRepositoryService
 from officials.api.serializers import OfficialGameCountSerializer
 from officials.models import Official
 from officials.service.game_official_entries import InternalGameOfficialEntry, ExternalGameOfficialEntry
+from officials.service.moodle.moodle_api import ApiCourse
 from officials.service.moodle.moodle_service import MoodleService
 from officials.service.officials_repository_service import OfficialsRepositoryService
 from officials.service.serializers import OfficialLicenseCheckSerializer
@@ -60,20 +61,19 @@ class OfficialService:
         entry = ExternalGameOfficialEntry(*result)
         return entry.save()
 
-    def get_game_count_for_license(self, year: int, course_id: int) -> []:
+    def get_game_count_for_license(self, course_id: int) -> tuple[dict, ApiCourse]:
         moodle_service = MoodleService()
         course = moodle_service.get_course_by_id(course_id)
-        license_id = course.get_license_id()
         external_ids: [] = moodle_service.get_all_users_for_course(course_id)
         officials = list(
-            self.official_repository_service.get_officials_game_count_for_license(year, external_ids).values(
+            self.official_repository_service.get_officials_game_count_for_license(course.get_date(), external_ids).values(
                 *OfficialLicenseCheckSerializer.ALL_FIELD_VALUES))
         for official in officials:
             external_ids.remove(int(official['external_id']))
         for current_external_id in external_ids:
             officials.append(self._get_official_not_in_database(current_external_id))
-        return OfficialLicenseCheckSerializer(instance=officials, context={'license_id': license_id},
-                                              many=True).data, license_id
+        return OfficialLicenseCheckSerializer(instance=officials, context={'license_id': course.get_license_id()},
+                                              many=True).data, course
 
     def _get_official_not_in_database(self, external_id):
         return {

@@ -33,7 +33,7 @@ urlpatterns = [
             name=OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_TEAM_AND_YEAR),
     path('gameofficial/internal/create', AddInternalGameOfficialUpdateView.as_view(),
          name=OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE),
-    path('licensecheck/<int:year>/<int:course_id>', LicenseCheckForOfficials.as_view(), name=OFFICIALS_LICENSE_CHECK),
+    path('licensecheck/<int:course_id>', LicenseCheckForOfficials.as_view(), name=OFFICIALS_LICENSE_CHECK),
     path('moodle-report', MoodleReportView.as_view(), name=OFFICIALS_MOODLE_REPORT),
     path('profile/<int:pk>/license', OfficialProfileLicenseView.as_view(), name=OFFICIALS_PROFILE_LICENSE),
     path('profile/<int:pk>/gamelist/<int:season>', OfficialProfileGamelistView.as_view(),

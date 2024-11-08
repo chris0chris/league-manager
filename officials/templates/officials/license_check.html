@@ -3,6 +3,10 @@
 <article class="media content-section">
     Vorraussetzungen: <pre id="req"></pre>
     <pre>{{ license_requirements|json_script:"requirements-json" }}</pre>
+    <div class="row">
+        <div class="col-12">Kursdatum: {{ course_date | date:"d.m.Y" }}</div>
+        <div class="col-12">Saison-Zeitraum: {{ year_before_course_date | date:"d.m.Y" }} - {{ course_date | date:"d.m.Y" }}</div>
+    </div>
     <div class="media-body">
         <table class="table table-hover">
             <thead>
@@ -13,7 +17,7 @@
                 <th scope="col">Nachname</th>
                 <th scope="col">Vorname</th>
                 <th scope="col">aktuelle Lizenz</th>
-                <th scope="col">#Saison {{ season }}</th>
+                <th scope="col">#Saison</th>
                 <th scope="col">#Insgesamt</th>
                 {% if license_id == 1 %}
                 <th scope="col">Jahre mit F2/F1</th>
@@ -22,11 +26,11 @@
             </thead>
             <tbody>
             {% for official in officials_list %}
-            <tr class="{% if official.license_year < season %}bg-danger text-white{% endif %}">
+            <tr class="{% if official.license_year < course_date.year %}bg-danger text-white{% endif %}">
                 <th scope="row"><a href="https://offd.de/offd/moodle/user/profile.php?id={{official.external_id}}"
                                    target=”_blank”>{{official.external_id}}</a></th>
                 {% if official.id %}
-                <td><a href=" {% url profile_url pk=official.id season=season}" target=”_blank”>{{official.id}}</a></td>
+                <td><a href=" {% url profile_url pk=official.id season=course_date.year}" target=”_blank”>{{official.id}}</a></td>
                 <td>{{official.team}}</td>
                 <td>{{official.last_name}}</td>
                 <td>{{official.first_name}}</td>

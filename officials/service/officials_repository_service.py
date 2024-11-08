@@ -1,14 +1,16 @@
-from django.db.models import Sum, Count, Q, OuterRef, Subquery, Value
+from datetime import datetime, timedelta
+
+from django.db.models import Sum, Count, Q, OuterRef, Subquery, Value, ExpressionWrapper, Case, When, F, IntegerField, \
+    FloatField
 from django.db.models.functions import Coalesce
 
-from officials.models import Official, OfficialLicenseHistory
+from officials.models import Official, OfficialLicenseHistory, OfficialExternalGames
 
 
 class OfficialsRepositoryService:
-    EXCLUDE_SCORECARD_JUDGE = ~Q(gameofficial__position='Scorecard Judge')
-
     # noinspection PyMethodMayBeStatic
-    def get_officials_game_count_for_license(self, year: int, external_ids: list[str], license_ids: list[int] = (1, 3)):
+    def get_officials_game_count_for_license(self, latest_date: datetime, external_ids: list[str],
+                                             license_ids: list[int] = (1, 3)):
         license_ids_sql = self._construct_license_sql(license_ids)
 
         officials = (
@@ -16,16 +18,31 @@ class OfficialsRepositoryService:
             .filter(external_id__in=external_ids)
             .extra(select={"license_years": license_ids_sql})
             .annotate(
-                license_name=Coalesce(Subquery(self._license_name_subquery(year)), Value('-')),
-                license_id=Subquery(self._license_id_subquery(year)),
-                total_games=Subquery(self._internal_games_subquery(year)) + Subquery(self._external_games_subquery(year)),
-                total_season_games=Subquery(self._current_season_external_subquery(year)) + Subquery(
-                    self._current_season_internal_subquery(year)
+                license_name=Coalesce(Subquery(self._license_name_subquery(latest_date.year)), Value('-')),
+                license_id=Subquery(self._license_id_subquery(latest_date.year)),
+                total_games=Subquery(self._internal_games_subquery(latest_date)) + Subquery(
+                    self._external_games_subquery(latest_date)),
+                total_season_games=Subquery(self._current_season_external_subquery(latest_date)) + Subquery(
+                    self._current_season_internal_subquery(latest_date)
                 )
             ).order_by('last_name')
         )
 
         return officials
+
+    @classmethod
+    def _generic_games_subquery_with_calculation(cls, query_filter: Q):
+        """
+        Subquery that calculates and sums `calculated_number_games` for official external games.
+        """
+        calculated_number_games = OfficialExternalGames.calculated_games_expression('officialexternalgames__')
+
+        return Official.objects.filter(pk=OuterRef('pk')).annotate(
+            games=Coalesce(
+                Sum(calculated_number_games, filter=query_filter, output_field=FloatField()),
+                Value(0), output_field=FloatField()
+            )
+        ).values('games')[:1]
 
     @staticmethod
     def _construct_license_sql(license_ids: list[int]) -> str:
@@ -58,14 +75,14 @@ class OfficialsRepositoryService:
 
     @staticmethod
     def _license_name_subquery(year: int):
-        return OfficialsRepositoryService._license_subquery(year=year, field='license__name')
+        return OfficialsRepositoryService._license_subquery(year=year - 1, field='license__name')
 
     @staticmethod
     def _license_id_subquery(year: int):
-        return OfficialsRepositoryService._license_subquery(year=year, field='license__pk')
+        return OfficialsRepositoryService._license_subquery(year=year - 1, field='license__pk')
 
-    @classmethod
-    def _generic_games_subquery(cls, field: str, aggregation, query_filter: Q,
+    @staticmethod
+    def _generic_games_subquery(field: str, aggregation, query_filter: Q,
                                 exclude_scorecard_judge: bool = False):
         """
         Helper method to generate subqueries for various game counts.
@@ -77,7 +94,7 @@ class OfficialsRepositoryService:
         :return: Subquery for the aggregated games count.
         """
         if exclude_scorecard_judge:
-            query_filter &= cls.EXCLUDE_SCORECARD_JUDGE
+            query_filter &= ~Q(gameofficial__position='Scorecard Judge')
 
         return Official.objects.filter(pk=OuterRef('pk')).annotate(
             games=Coalesce(
@@ -87,36 +104,39 @@ class OfficialsRepositoryService:
         ).values('games')[:1]
 
     @classmethod
-    def _external_games_subquery(cls, year: int):
-        return cls._generic_games_subquery(
-            field='officialexternalgames__number_games',
-            query_filter=Q(officialexternalgames__date__year__lte=year),
-            aggregation=Sum,
-            exclude_scorecard_judge=True,
+    def _external_games_subquery(cls, date: datetime):
+        return cls._generic_games_subquery_with_calculation(
+            query_filter=Q(officialexternalgames__date__lte=date)
         )
 
     @classmethod
-    def _current_season_external_subquery(cls, year: int):
-        return cls._generic_games_subquery(
-            field='officialexternalgames__number_games',
-            query_filter=Q(officialexternalgames__date__year=year),
-            aggregation=Sum,
+    def _current_season_external_subquery(cls, date: datetime):
+        return cls._generic_games_subquery_with_calculation(
+            query_filter=(
+                    Q(officialexternalgames__date__lte=date) &
+                    Q(officialexternalgames__date__gte=OfficialsRepositoryService.sub_one_year_from(date))
+            )
         )
 
     @classmethod
-    def _internal_games_subquery(cls, year: int):
+    def sub_one_year_from(cls, date: datetime):
+        return date - timedelta(days=365)
+
+    @classmethod
+    def _internal_games_subquery(cls, date: datetime):
         return cls._generic_games_subquery(
             field='gameofficial',
-            query_filter=Q(gameofficial__gameinfo__gameday__date__year__lte=year),
+            query_filter=Q(gameofficial__gameinfo__gameday__date__lte=date),
             aggregation=Count,
             exclude_scorecard_judge=True,
         )
 
     @classmethod
-    def _current_season_internal_subquery(cls, year: int):
+    def _current_season_internal_subquery(cls, date: datetime):
         return cls._generic_games_subquery(
             field='gameofficial',
-            query_filter=Q(gameofficial__gameinfo__gameday__date__year=year),
+            query_filter=(Q(gameofficial__gameinfo__gameday__date__lte=date) & Q(
+                gameofficial__gameinfo__gameday__date__gte=OfficialsRepositoryService.sub_one_year_from(date))),
             aggregation=Count,
             exclude_scorecard_judge=True,
         )
