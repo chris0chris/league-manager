@@ -19,10 +19,10 @@ from league_manager.utils.view_utils import PermissionHelper
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
 from officials.forms import AddInternalGameOfficialEntryForm, MoodleLoginForm
 from officials.models import Official, OfficialLicenseHistory
+from officials.service.boff_license_calculation import LicenseStrategy
 from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
 from officials.service.official_service import OfficialService
-from officials.service.serializers import ParticipationValidator
 from officials.service.signup_service import OfficialSignupService, DuplicateSignupError, MaxSignupError
 
 MOODLE_LOGGED_IN_USER = 'moodle_logged_in_user'
@@ -189,7 +189,7 @@ class LicenseCheckForOfficials(LoginRequiredMixin, UserPassesTestMixin, View):
         officials_list, course = official_service.get_game_count_for_license(course_id)
         license_id = course.get_license_id()
         context = {
-            'license_requirements': ParticipationValidator.course_mapping(license_id),
+            'license_requirements': LicenseStrategy.COURSE_MAPPING(license_id),
             'license_id': license_id,
             'course_date': course.get_date(),
             'year_before_course_date': course.get_date() - timedelta(days=365),
@@ -200,16 +200,6 @@ class LicenseCheckForOfficials(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         return self.request.user.is_staff
-
-    def get_external_ids_as_int(self, external_ids):
-        ids_as_array = external_ids.split(',')
-        all_ids_as_int = []
-        for current_id in ids_as_array:
-            try:
-                all_ids_as_int += [int(current_id)]
-            except ValueError:
-                continue
-        return all_ids_as_int
 
 
 class MoodleReportView(LoginRequiredMixin, UserPassesTestMixin, View):

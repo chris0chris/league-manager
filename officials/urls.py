@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 
 from officials.views import OfficialsTeamListView, AllOfficialsListView, GameOfficialListView, \
-    AddInternalGameOfficialUpdateView, LicenseCheckForOfficials, MoodleReportView, \
+    AddInternalGameOfficialUpdateView, MoodleReportView, \
     OfficialProfileLicenseView, OfficialAssociationListView, OfficialProfileGamelistView, OfficialSignUpListView, \
     MoodleLoginView, OfficialSignUpView, OfficialSignUpCancelView, LicenseCheckForOfficials
 
@@ -42,6 +42,7 @@ urlpatterns = [
     path('gameday/sign-up/login', MoodleLoginView.as_view(), name=OFFICIALS_MOODLE_LOGIN),
     path('gameday/sign-up', OfficialSignUpListView.as_view(), name=OFFICIALS_SIGN_UP_LIST),
     path('gameday/sign-up/<int:gameday>/add', OfficialSignUpView.as_view(), name=OFFICIALS_SIGN_UP_FOR_GAMEDAY),
-    path('gameday/sign-up/<int:gameday>/cancel', OfficialSignUpCancelView.as_view(), name=OFFICIALS_SIGN_UP_CANCEL_FOR_GAMEDAY),
+    path('gameday/sign-up/<int:gameday>/cancel', OfficialSignUpCancelView.as_view(),
+         name=OFFICIALS_SIGN_UP_CANCEL_FOR_GAMEDAY),
 
 ]
