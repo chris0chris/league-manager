@@ -199,7 +199,7 @@ class LicenseCheckForOfficials(LoginRequiredMixin, UserPassesTestMixin, View):
         return render(request, self.template_name, context)
 
     def test_func(self):
-        return self.request.user.is_staff
+        return self.request.user.is_staff or self.request.user.username == 'offd'
 
 
 class MoodleReportView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -216,7 +216,7 @@ class MoodleReportView(LoginRequiredMixin, UserPassesTestMixin, View):
         return render(request, self.template_name, context)
 
     def test_func(self):
-        return self.request.user.is_staff
+        return self.request.user.is_staff or self.request.user.username == 'offd'
 
 
 class OfficialProfileLicenseView(View):
