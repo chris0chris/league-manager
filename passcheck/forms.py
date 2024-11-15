@@ -48,11 +48,11 @@ class PlayerlistCreateForm(forms.ModelForm):
             self.fields['sex'].initial = self.instance.player.person.sex
 
     def save(self, commit=True):
-        first_name = self.cleaned_data.pop('first_name')
-        last_name = self.cleaned_data.pop('last_name')
-        year_of_birth = self.cleaned_data.pop('year_of_birth')
-        sex = self.cleaned_data.pop('sex')
-        pass_number = self.cleaned_data.pop('pass_number')
+        first_name = self.cleaned_data.get('first_name')
+        last_name = self.cleaned_data.get('last_name')
+        year_of_birth = self.cleaned_data.get('year_of_birth')
+        sex = self.cleaned_data.get('sex')
+        pass_number = self.cleaned_data.get('pass_number')
 
         person = Person.objects.create(
             first_name=first_name,

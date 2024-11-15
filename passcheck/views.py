@@ -44,18 +44,21 @@ class PlayerlistCommonMixin(LoginRequiredMixin):
         return kwargs
 
     def form_valid(self, form):
+        action_msg = 'wird bearbeitet'
         if self.request.method == 'POST':
             if isinstance(self, PlayerlistCreateView):
                 action_msg = 'erstellt'
             elif isinstance(self, PlayerlistUpdateView):
                 action_msg = 'aktualisiert'
-            else:
-                action_msg = 'processed'
 
-            msg = (f'Player {action_msg}: #{form.instance.jersey_number} '
-                   f'{form.instance.first_name} {form.instance.last_name} '
-                   f'({form.instance.pass_number})')
-            messages.success(self.request, msg)
+        form.instance = form.save()
+
+        # Now all data should be accessible in form.instance
+        msg = (f'Player {action_msg}: #{form.instance.jersey_number} '
+               f'{form.instance.player.person.first_name} {form.instance.player.person.last_name} '
+               f'({form.instance.player.pass_number})')
+
+        messages.success(self.request, msg)
         return super().form_valid(form)
 
 
