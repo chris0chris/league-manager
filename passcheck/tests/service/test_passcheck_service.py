@@ -24,11 +24,11 @@ class TestPasscheckService(TestCase):
                      'sex': 1,
                      'gamedays_counter': {'6': 4, '7': 3, '8': 3}, 'key': 1, 'isSelected': True}]})
         all_playerlist_gamedays = PlayerlistGameday.objects.all()
-        first_entry: PlayerlistGameday = all_playerlist_gamedays.first()
-        assert all_playerlist_gamedays.count() == 2
-        assert first_entry.gameday_id == gameday.pk
-        assert first_entry.gameday_jersey == 4
-        assert first_entry.playerlist_id == young.pk
+        last_entry: PlayerlistGameday = all_playerlist_gamedays.last()
+        assert all_playerlist_gamedays.count() == 8
+        assert last_entry.gameday_id == gameday.pk
+        assert last_entry.gameday_jersey == 7
+        assert last_entry.playerlist_id == female.pk
 
     def test_entries_playerlist_gameday_are_updated(self):
         team, female, _, _ = DbSetupPasscheck.create_playerlist_for_team()
@@ -44,7 +44,7 @@ class TestPasscheckService(TestCase):
                 'roster': [{'id': female.pk, 'jersey_number': 7}]})
         all_playerlist_gamedays = PlayerlistGameday.objects.all()
         first_entry: PlayerlistGameday = all_playerlist_gamedays.last()
-        assert all_playerlist_gamedays.count() == 2
+        assert all_playerlist_gamedays.count() == 8
         assert first_entry.gameday_jersey == 7
 
     def test_entries_are_deleted_and_created(self):
@@ -61,7 +61,7 @@ class TestPasscheckService(TestCase):
                      'sex': 2,
                      'gamedays_counter': {'6': 4, '7': 3, '8': 3}, 'key': 1, 'isSelected': True}]})
         all_playerlist_gamedays = PlayerlistGameday.objects.all()
-        assert all_playerlist_gamedays.count() == 1
+        assert all_playerlist_gamedays.count() == 7
 
     def test_passcheck_verification_is_created(self):
         team = DBSetup().create_teams('VerifyTeam', 1)[0]

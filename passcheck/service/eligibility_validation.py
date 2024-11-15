@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from gamedays.models import Gameday, League
-from passcheck.models import EligibilityRule, Playerlist
+from gamedays.models import Gameday, League, Person
+from passcheck.models import EligibilityRule
 
 
 class ValidationError(Exception):
@@ -127,7 +127,8 @@ class YouthPlayerValidator(BaseValidator):
         self.ignore_player_age_until = ignore_player_age_until
 
     def is_valid(self, player):
-        player_age = datetime.today().year - player['year_of_birth']
+        from passcheck.api.serializers import RosterSerializer
+        player_age = datetime.today().year - player[RosterSerializer.YEAR_OF_BIRTH_C]
         return player_age < self.ignore_player_age_until
 
 
@@ -137,4 +138,5 @@ class WomanPlayerValidator(BaseValidator):
         self.except_for_women = except_for_women
 
     def is_valid(self, player):
-        return self.except_for_women and player['sex'] == Playerlist.FEMALE
+        from passcheck.api.serializers import RosterSerializer
+        return self.except_for_women and player[RosterSerializer.SEX_C] == Person.FEMALE

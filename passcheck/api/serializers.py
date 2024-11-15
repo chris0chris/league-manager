@@ -5,13 +5,23 @@ from league_manager.utils.serializer_utils import ObfuscatorSerializer, Obfuscat
 from passcheck.service.eligibility_validation import EligibilityValidator, ValidationError
 
 
+
 class RosterSerializer(ObfuscatorSerializer):
+    JERSEY_NUMBER_C = 'jersey_number'
+    FIRST_NAME_C = 'player__person__first_name'
+    LAST_NAME_C = 'player__person__last_name'
+    PASS_NUMBER_C = 'player__pass_number'
+    SEX_C = 'player__person__sex'
+    YEAR_OF_BIRTH_C = 'player__person__year_of_birth'
+
+    ALL_FIELD_VALUES = ['id', JERSEY_NUMBER_C, 'gameday_jersey', FIRST_NAME_C, LAST_NAME_C,
+                        PASS_NUMBER_C, SEX_C, YEAR_OF_BIRTH_C, 'is_selected']
     jersey_number = SerializerMethodField()
     id = IntegerField()
-    first_name = ObfuscateField(field_name='first_name')
-    last_name = ObfuscateField(field_name='last_name')
-    pass_number = IntegerField()
-    sex = IntegerField()
+    first_name = ObfuscateField(field_name=FIRST_NAME_C)
+    last_name = ObfuscateField(field_name=LAST_NAME_C)
+    pass_number = IntegerField(source=PASS_NUMBER_C)
+    sex = IntegerField(source=SEX_C)
     gamedays_counter = SerializerMethodField()
     isSelected = BooleanField(source='is_selected')
 
@@ -19,7 +29,7 @@ class RosterSerializer(ObfuscatorSerializer):
         gameday_jersey = obj['gameday_jersey']
         if gameday_jersey is not None:
             return gameday_jersey
-        return obj['jersey_number']
+        return obj[self.JERSEY_NUMBER_C]
 
     def get_gamedays_counter(self, obj: dict):
         all_leagues = self.context.get('all_leagues', [])
@@ -49,7 +59,7 @@ class RosterValidationSerializer(RosterSerializer):
             del data['validationError']
         ignore_fields = ['sex', 'gamedays_counter']
         for field in ignore_fields:
-            del data[field]
+            data.pop(field, None)
         return data
 
 

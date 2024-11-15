@@ -181,11 +181,13 @@ class PasscheckService:
     def _get_roster(self, team, gameday_id, league_annotations):
         is_selected_query = self._is_selected_query(gameday_id)
         gameday_jersey = self._get_gameday_jersey_query(gameday_id)
-        return Playerlist.objects.filter(team=team).annotate(
+        league_ids = list(league_annotations.keys())
+
+        return Playerlist.objects.filter(team=team, left_on=None).annotate(
             **league_annotations,
             is_selected=is_selected_query,
-            gameday_jersey=gameday_jersey
-        ).values()
+            gameday_jersey=gameday_jersey,
+        ).values(*RosterSerializer.ALL_FIELD_VALUES, *league_ids)
 
     def _is_selected_query(self, gameday_id):
         if gameday_id is None:
@@ -222,7 +224,7 @@ class PasscheckService:
             })
         player_values = player.annotate(
             gameday_jersey=Value(None, output_field=IntegerField()),
-            is_selected=Value(False)).values()
+            is_selected=Value(False)).values(*RosterSerializer.ALL_FIELD_VALUES)
         team = player.first().team
         return {
             'years': all_years,

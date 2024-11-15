@@ -96,7 +96,7 @@ class PasscheckPlayerGamesList(View):
     template_name = 'passcheck/player_gamedays_list.html'
 
     def get(self, request, **kwargs):
-        player_id = kwargs.get('id')
+        player_id = kwargs.get('pk')
         player = Playerlist.objects.get(pk=player_id)
         user_permission = PermissionHelper.get_user_request_permission(self.request, player.team_id)
         passcheck_service = PasscheckService(user_permission=user_permission)

@@ -58,7 +58,7 @@
                 {% for league in all_leagues %}
                 {% with field_name=league.gamedays__league %}
                 <td>
-                    <a href="{% url 'passcheck-player-games-list' id=player.id %}">
+                    <a href="{% url 'passcheck-player-games-list' pk=player.id %}">
                         {{ player.gamedays_counter|get_item:field_name }}
                     </a>
                 </td>

@@ -14,8 +14,8 @@ PASSCHECK_TEAM_NOT_EXISTENT = 'passcheck-team-not-existent'
 urlpatterns = [
     path('', PasscheckView.as_view(), name=PASSCHECK_APP),
     path('team/not-existent', TemplateView.as_view(template_name='passcheck/team-not-existent.html'), name=PASSCHECK_TEAM_NOT_EXISTENT),
-    path('player/<int:id>/games/list/<int:year>', PasscheckPlayerGamesList.as_view(), name=PASSCHECK_PLAYER_GAMES_LIST),
-    path('player/<int:id>/games/list', PasscheckPlayerGamesList.as_view(), name=PASSCHECK_PLAYER_GAMES_LIST),
+    path('player/<int:pk>/games/list/<int:year>', PasscheckPlayerGamesList.as_view(), name=PASSCHECK_PLAYER_GAMES_LIST),
+    path('player/<int:pk>/games/list', PasscheckPlayerGamesList.as_view(), name=PASSCHECK_PLAYER_GAMES_LIST),
     path('player/create', PlayerlistCreateView.as_view(), name=PASSCHECK_PLAYER_CREATE),
     path('player/<int:pk>/update', PlayerlistUpdateView.as_view(), name=PASSCHECK_ROSTER_UPDATE),
     path('roster/<int:pk>/list', RosterView.as_view(), name=PASSCHECK_ROSTER_LIST),

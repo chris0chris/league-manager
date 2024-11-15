@@ -1,44 +1,43 @@
+from datetime import date
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import QuerySet, Q
 
-# import other models
-from gamedays.models import Gameday, Team, League
+from gamedays.models import Gameday, Team, League, Person
+
+
+class Player(models.Model):
+    person = models.ForeignKey(Person, on_delete=models.DO_NOTHING)
+    pass_number = models.IntegerField()
+
+    objects: QuerySet = models.Manager()
 
 
 class Playerlist(models.Model):
-    FEMALE = 1
-    MALE = 2
-
-    SEX_CHOICES = [
-        (FEMALE, 'Weiblich'),
-        (MALE, 'Männlich'),
-    ]
-
     team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    player = models.ForeignKey(Player, on_delete=models.DO_NOTHING)
     jersey_number = models.IntegerField()
-    pass_number = models.IntegerField()
-    sex = models.IntegerField(choices=SEX_CHOICES)
-    year_of_birth = models.PositiveIntegerField()
+    joined_on = models.DateField(default=date.today)
+    left_on = models.DateField(null=True, blank=True, default=None)
     gamedays = models.ManyToManyField(Gameday, through='PlayerlistGameday')
 
     objects: QuerySet = models.Manager()
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['team', 'jersey_number'], name='unique_team_jersey_number'),
-            models.UniqueConstraint(fields=['team', 'pass_number'], name='unique_team_pass_number'),
+            models.UniqueConstraint(
+                fields=['team', 'jersey_number'],
+                name='unique_team_jersey_number',
+                condition=models.Q(left_on=None)
+            ),
             models.CheckConstraint(check=Q(jersey_number__gte=0) & Q(jersey_number__lte=99),
                                    name='jersey_number_btw_0_and_99'),
         ]
 
     def __str__(self):
-        def fullname():
-            return f"{self.first_name} {self.last_name}"
-
-        return fullname()
+        return (f'{self.team.description}: {self.player.person.first_name} '
+                f'{self.player.person.last_name} ({self.player.pass_number}) #{self.jersey_number}')
 
 
 class PlayerlistGameday(models.Model):
