@@ -10,10 +10,7 @@ class ValidationError(Exception):
 
 class EligibilityValidator:
     def __init__(self, eligible_league: League, gameday: Gameday):
-        try:
-            self.rule: EligibilityRule = EligibilityRule.objects.get(league=eligible_league, eligible_in=gameday.league)
-        except EligibilityRule.DoesNotExist:
-            raise LookupError(f'No EligibilityRule "{eligible_league}" for gameday "{gameday.name}" found')
+        self.rule: EligibilityRule = EligibilityRule.objects.get(league=eligible_league, eligible_in=gameday.league)
         self.gameday = gameday
         self.validators = []
         self.final_validator = FinalsValidator(gameday.name, self.rule.min_gamedays_for_final, gameday.league.pk)

@@ -120,11 +120,15 @@ class PasscheckService:
                 raise PasscheckException(
                     f'Passcheck nicht erlaubt für Spieltag: {gameday_id}. Nur heutige Spieltage sind erlaubt.')
         roster = self._get_roster(team_id, gameday_id, {})
-        team = {'team': TeamData(
-            name=self._get_team(team_id).description,
-            roster=RosterSerializer(instance=roster, is_staff=self.user_permission.is_user_or_staff(), many=True).data,
-            validator=EligibilityValidator(gameday.league, gameday).get_player_strength()
-        )}
+        try:
+            team = {'team': TeamData(
+                name=self._get_team(team_id).description,
+                roster=RosterSerializer(instance=roster, is_staff=self.user_permission.is_user_or_staff(),
+                                        many=True).data,
+                validator=EligibilityValidator(gameday.league, gameday).get_player_strength()
+            )}
+        except EligibilityRule.DoesNotExist:
+            raise LookupError(f'No EligibilityRule "{gameday.league}" for gameday "{gameday.name}" found')
         try:
             passcheck_verification = PasscheckVerification.objects.get(team=team_id, gameday=gameday_id)
         except PasscheckVerification.DoesNotExist:
