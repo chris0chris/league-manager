@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, redirect
@@ -19,9 +21,17 @@ class RosterView(View):
     @get_user_request_permission
     def get(self, request, **kwargs):
         team_id = kwargs.get('pk')
+        year = kwargs.get('season', datetime.today().year)
         user_permission = kwargs.get('user_permission')
         passcheck_service = PasscheckService(user_permission=user_permission)
-        return render(request, self.template_name, passcheck_service.get_roster(team_id))
+        from passcheck.urls import PASSCHECK_ROSTER_LIST_FOR_YEAR
+        context = {
+            'season': year,
+            'url_pattern': PASSCHECK_ROSTER_LIST_FOR_YEAR,
+            'pk': team_id,
+            **passcheck_service.get_roster(team_id, year)
+        }
+        return render(request, self.template_name, context)
 
 
 class PlayerlistCommonMixin(LoginRequiredMixin):

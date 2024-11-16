@@ -8,6 +8,7 @@ PASSCHECK_APP = 'passcheck-app-view'
 PASSCHECK_PLAYER_GAMES_LIST = 'passcheck-player-games-list'
 PASSCHECK_PLAYER_CREATE = 'passcheck-player-create'
 PASSCHECK_ROSTER_LIST = 'passcheck-roster-list'
+PASSCHECK_ROSTER_LIST_FOR_YEAR = 'passcheck-roster-list-for-year'
 PASSCHECK_ROSTER_UPDATE = 'passcheck-player-update'
 PASSCHECK_TEAM_NOT_EXISTENT = 'passcheck-team-not-existent'
 
@@ -19,4 +20,5 @@ urlpatterns = [
     path('player/create', PlayerlistCreateView.as_view(), name=PASSCHECK_PLAYER_CREATE),
     path('player/<int:pk>/update', PlayerlistUpdateView.as_view(), name=PASSCHECK_ROSTER_UPDATE),
     path('roster/<int:pk>/list', RosterView.as_view(), name=PASSCHECK_ROSTER_LIST),
+    path('roster/<int:pk>/list/<int:season>', RosterView.as_view(), name=PASSCHECK_ROSTER_LIST_FOR_YEAR),
 ]
