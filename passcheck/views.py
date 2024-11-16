@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, redirect
@@ -19,9 +21,17 @@ class RosterView(View):
     @get_user_request_permission
     def get(self, request, **kwargs):
         team_id = kwargs.get('pk')
+        year = kwargs.get('season', datetime.today().year)
         user_permission = kwargs.get('user_permission')
         passcheck_service = PasscheckService(user_permission=user_permission)
-        return render(request, self.template_name, passcheck_service.get_roster(team_id))
+        from passcheck.urls import PASSCHECK_ROSTER_LIST_FOR_YEAR
+        context = {
+            'season': year,
+            'url_pattern': PASSCHECK_ROSTER_LIST_FOR_YEAR,
+            'pk': team_id,
+            **passcheck_service.get_roster(team_id, year)
+        }
+        return render(request, self.template_name, context)
 
 
 class PlayerlistCommonMixin(LoginRequiredMixin):
@@ -44,18 +54,21 @@ class PlayerlistCommonMixin(LoginRequiredMixin):
         return kwargs
 
     def form_valid(self, form):
+        action_msg = 'wird bearbeitet'
         if self.request.method == 'POST':
             if isinstance(self, PlayerlistCreateView):
                 action_msg = 'erstellt'
             elif isinstance(self, PlayerlistUpdateView):
                 action_msg = 'aktualisiert'
-            else:
-                action_msg = 'processed'
 
-            msg = (f'Player {action_msg}: #{form.instance.jersey_number} '
-                   f'{form.instance.first_name} {form.instance.last_name} '
-                   f'({form.instance.pass_number})')
-            messages.success(self.request, msg)
+        form.instance = form.save()
+
+        # Now all data should be accessible in form.instance
+        msg = (f'Player {action_msg}: #{form.instance.jersey_number} '
+               f'{form.instance.player.person.first_name} {form.instance.player.person.last_name} '
+               f'({form.instance.player.pass_number})')
+
+        messages.success(self.request, msg)
         return super().form_valid(form)
 
 
@@ -96,7 +109,7 @@ class PasscheckPlayerGamesList(View):
     template_name = 'passcheck/player_gamedays_list.html'
 
     def get(self, request, **kwargs):
-        player_id = kwargs.get('id')
+        player_id = kwargs.get('pk')
         player = Playerlist.objects.get(pk=player_id)
         user_permission = PermissionHelper.get_user_request_permission(self.request, player.team_id)
         passcheck_service = PasscheckService(user_permission=user_permission)

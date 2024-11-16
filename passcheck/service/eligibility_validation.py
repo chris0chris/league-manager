@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from gamedays.models import Gameday, League
-from passcheck.models import EligibilityRule, Playerlist
+from gamedays.models import Gameday, League, Person
+from passcheck.models import EligibilityRule
 
 
 class ValidationError(Exception):
@@ -10,10 +10,7 @@ class ValidationError(Exception):
 
 class EligibilityValidator:
     def __init__(self, eligible_league: League, gameday: Gameday):
-        try:
-            self.rule: EligibilityRule = EligibilityRule.objects.get(league=eligible_league, eligible_in=gameday.league)
-        except EligibilityRule.DoesNotExist:
-            raise LookupError(f'No EligibilityRule "{eligible_league}" for gameday "{gameday.name}" found')
+        self.rule: EligibilityRule = EligibilityRule.objects.get(league=eligible_league, eligible_in=gameday.league)
         self.gameday = gameday
         self.validators = []
         self.final_validator = FinalsValidator(gameday.name, self.rule.min_gamedays_for_final, gameday.league.pk)
@@ -130,7 +127,8 @@ class YouthPlayerValidator(BaseValidator):
         self.ignore_player_age_until = ignore_player_age_until
 
     def is_valid(self, player):
-        player_age = datetime.today().year - player['year_of_birth']
+        from passcheck.api.serializers import RosterSerializer
+        player_age = datetime.today().year - player[RosterSerializer.YEAR_OF_BIRTH_C]
         return player_age < self.ignore_player_age_until
 
 
@@ -140,4 +138,5 @@ class WomanPlayerValidator(BaseValidator):
         self.except_for_women = except_for_women
 
     def is_valid(self, player):
-        return self.except_for_women and player['sex'] == Playerlist.FEMALE
+        from passcheck.api.serializers import RosterSerializer
+        return self.except_for_women and player[RosterSerializer.SEX_C] == Person.FEMALE

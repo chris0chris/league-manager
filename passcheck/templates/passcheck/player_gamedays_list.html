@@ -33,7 +33,6 @@
         <table class="table table-hover">
             <thead>
             <tr>
-                <th class="col-2" scope="col">ID</th>
                 <th class="col-2" scope="col">Datum</th>
                 <th class="col-8" scope="col">Spieltag</th>
             </tr>
@@ -41,8 +40,7 @@
             <tbody>
             {% for current_gameday in current_entry.gamedays %}
             <tr>
-                <td class="col-2">{{current_gameday.id}}</td>
-                <td class="col-2">{{current_gameday.date}}</td>
+                <td class="col-2" title="Spiel-ID: {{current_gameday.id}}">{{current_gameday.date}}</td>
                 <td class="col-80">{{current_gameday.name}}</td>
             </tr>
             {% endfor %}
