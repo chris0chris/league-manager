@@ -10,22 +10,24 @@ from passcheck.urls import PASSCHECK_PLAYER_GAMES_LIST, PASSCHECK_ROSTER_LIST, P
     PASSCHECK_ROSTER_UPDATE
 
 
-class TestGameCountOfficials(WebTest):
+class TestPasscheckPlayerGamesList(WebTest):
     def test_display_all_participated_games(self):
         user = DBSetup().create_new_user('some staff user', is_staff=True)
         self.app.set_user(user)
         DbSetupPasscheck.create_playerlist_for_team()
         playerlist = Playerlist.objects.first()
-        response: DjangoWebtestResponse = self.app.get(reverse(PASSCHECK_PLAYER_GAMES_LIST, kwargs={'pk': playerlist.pk}))
+        response: DjangoWebtestResponse = self.app.get(
+            reverse(PASSCHECK_PLAYER_GAMES_LIST, kwargs={'pk': playerlist.pk}))
         assert response.status_code == HTTPStatus.OK
 
+
+class TestRosterView(WebTest):
     def test_display_team_roster(self):
         user = DBSetup().create_new_user('some staff user', is_staff=True)
         self.app.set_user(user)
         team, _, _, _ = DbSetupPasscheck.create_playerlist_for_team()
         response: DjangoWebtestResponse = self.app.get(reverse(PASSCHECK_ROSTER_LIST, kwargs={'pk': team.pk}))
         assert response.status_code == HTTPStatus.OK
-
 
 
 class TestPlayerlistCreateView(WebTest):
@@ -48,6 +50,8 @@ class TestPlayerlistCreateView(WebTest):
         assert response.request.path == reverse(PASSCHECK_PLAYER_CREATE)
         assert Playerlist.objects.filter(team=team).count() == 1
 
+
+class TestPlayerlistUpdateView(WebTest):
     def test_update_player(self):
         user = DBSetup().create_new_user('CreatorTeam1', is_staff=False)
         team = DBSetup().create_teams('CreatorTeam', 1)[0]
