@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from dal import autocomplete
 from django import forms
 
 from gamedays.models import Team, Person
@@ -20,6 +21,11 @@ class PlayerlistCreateForm(forms.ModelForm):
             'team': 'Team',
             'jersey_number': 'Trikotnummer',
         }
+        widgets = {
+            'team': autocomplete.ModelSelect2(
+                url='/dal/team'
+            )
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -32,6 +38,7 @@ class PlayerlistCreateForm(forms.ModelForm):
 
         try:
             self.fields['team'].initial = Team.objects.get(name=user.username)
+            self.fields['team'].label_from_instance = lambda obj: obj.description
         except Team.DoesNotExist:
             pass
 
@@ -46,6 +53,7 @@ class PlayerlistCreateForm(forms.ModelForm):
             self.fields['pass_number'].initial = self.instance.player.pass_number
             self.fields['year_of_birth'].initial = self.instance.player.person.year_of_birth
             self.fields['sex'].initial = self.instance.player.person.sex
+            self.fields['team'].label_from_instance = lambda obj: obj.description
 
     def save(self, commit=True):
         first_name = self.cleaned_data.get('first_name')
