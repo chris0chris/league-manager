@@ -14,7 +14,6 @@ def migrate_player_data(apps, schema_editor):
             last_name=playerlist.last_name,
             sex=playerlist.sex,
             year_of_birth=playerlist.year_of_birth,
-            joined_on='2024-04-01'
         )
 
         player = Player.objects.create(
@@ -23,6 +22,7 @@ def migrate_player_data(apps, schema_editor):
         )
 
         playerlist.player_id = player.id
+        playerlist.joined_on = '2024-04-01'
         playerlist.save()
 
 
