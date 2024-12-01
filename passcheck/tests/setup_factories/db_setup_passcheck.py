@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from gamedays.models import Team, League, Season
+from gamedays.models import Team, League, Season, Person
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import TeamFactory, LeagueFactory, SeasonFactory, GamedayFactory, \
     SeasonLeagueTeamFactory
@@ -13,15 +13,33 @@ class DbSetupPasscheck:
     def create_playerlist_for_team(team=None, gamedays=()) -> tuple[Team, Playerlist, Playerlist, Playerlist]:
         if team is None:
             team = TeamFactory(name='Passcheck team')
+        if len(gamedays) == 0:
+            gamedays = [GamedayFactory(), GamedayFactory()]
         today = datetime.today()
-        female = PlayerlistFactory(team=team, first_name='Fia', last_name='Female', jersey_number=7,
-                                   pass_number=7777777,
-                                   sex=Playerlist.FEMALE, year_of_birth=1982, gamedays=[*gamedays])
-        young = PlayerlistFactory(team=team, first_name='Yonathan', last_name='Young', jersey_number=1, pass_number=123,
-                                  sex=Playerlist.MALE, year_of_birth=today.year - 18,
+        female = PlayerlistFactory(team=team,
+                                   jersey_number=7,
+                                   player__pass_number=7777777,
+                                   player__person__first_name='Fia',
+                                   player__person__last_name='Female',
+                                   player__person__sex=Person.FEMALE,
+                                   player__person__year_of_birth=1982,
+                                   gamedays=[*gamedays])
+        young = PlayerlistFactory(team=team,
+                                  jersey_number=1,
+                                  player__pass_number=123,
+                                  player__person__first_name='Yonathan',
+                                  player__person__last_name='Young',
+                                  player__person__sex=Person.MALE,
+                                  player__person__year_of_birth=today.year - 18,
                                   gamedays=[*gamedays])
-        old = PlayerlistFactory(team=team, first_name='Oscar', last_name='Old', jersey_number=99, pass_number=9999999,
-                                sex=Playerlist.MALE, year_of_birth=1900, gamedays=[*gamedays])
+        old = PlayerlistFactory(team=team,
+                                jersey_number=99,
+                                player__pass_number=9999999,
+                                player__person__first_name='Oscar',
+                                player__person__last_name='Old',
+                                player__person__sex=Person.MALE,
+                                player__person__year_of_birth=1900,
+                                gamedays=[*gamedays])
         return team, female, young, old
 
     @staticmethod

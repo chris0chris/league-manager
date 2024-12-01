@@ -1,9 +1,9 @@
 from django.urls import path, re_path
 
 from officials.views import OfficialsTeamListView, AllOfficialsListView, GameOfficialListView, \
-    AddInternalGameOfficialUpdateView, LicenseCheckForOfficials, MoodleReportView, \
+    AddInternalGameOfficialUpdateView, MoodleReportView, \
     OfficialProfileLicenseView, OfficialAssociationListView, OfficialProfileGamelistView, OfficialSignUpListView, \
-    MoodleLoginView, OfficialSignUpView, OfficialSignUpCancelView
+    MoodleLoginView, OfficialSignUpView, OfficialSignUpCancelView, LicenseCheckForOfficials
 
 OFFICIALS_LIST_FOR_TEAM = 'view-officials-list-for-team'
 OFFICIALS_LIST_FOR_TEAM_AND_YEAR = 'view-officials-list-for-team-and-year'
@@ -33,7 +33,7 @@ urlpatterns = [
             name=OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_TEAM_AND_YEAR),
     path('gameofficial/internal/create', AddInternalGameOfficialUpdateView.as_view(),
          name=OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE),
-    path('licensecheck/<int:year>/<int:course_id>', LicenseCheckForOfficials.as_view(), name=OFFICIALS_LICENSE_CHECK),
+    path('licensecheck/<int:course_id>', LicenseCheckForOfficials.as_view(), name=OFFICIALS_LICENSE_CHECK),
     path('moodle-report', MoodleReportView.as_view(), name=OFFICIALS_MOODLE_REPORT),
     path('profile/<int:pk>/license', OfficialProfileLicenseView.as_view(), name=OFFICIALS_PROFILE_LICENSE),
     path('profile/<int:pk>/gamelist/<int:season>', OfficialProfileGamelistView.as_view(),
@@ -42,6 +42,7 @@ urlpatterns = [
     path('gameday/sign-up/login', MoodleLoginView.as_view(), name=OFFICIALS_MOODLE_LOGIN),
     path('gameday/sign-up', OfficialSignUpListView.as_view(), name=OFFICIALS_SIGN_UP_LIST),
     path('gameday/sign-up/<int:gameday>/add', OfficialSignUpView.as_view(), name=OFFICIALS_SIGN_UP_FOR_GAMEDAY),
-    path('gameday/sign-up/<int:gameday>/cancel', OfficialSignUpCancelView.as_view(), name=OFFICIALS_SIGN_UP_CANCEL_FOR_GAMEDAY),
+    path('gameday/sign-up/<int:gameday>/cancel', OfficialSignUpCancelView.as_view(),
+         name=OFFICIALS_SIGN_UP_CANCEL_FOR_GAMEDAY),
 
 ]

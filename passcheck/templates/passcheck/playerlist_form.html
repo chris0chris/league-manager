@@ -32,5 +32,10 @@
         </div>
     </form>
 </div>
-
 {% endblock content %}
+{% block footer %}
+{% load static %}
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+{{ form.media }}
+<link href='{% static "league_manager/css/dal.css" %}' rel="stylesheet" type="text/css">
+{% endblock footer %}

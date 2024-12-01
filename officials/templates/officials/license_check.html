@@ -1,36 +1,58 @@
 {% extends "base.html" %}
 {% block content %}
 <article class="media content-section">
+    Vorraussetzungen: <pre id="req"></pre>
+    <pre>{{ license_requirements|json_script:"requirements-json" }}</pre>
+    <div class="row">
+        <div class="col-12">Kursdatum: {{ course_date | date:"d.m.Y" }}</div>
+        <div class="col-12">Saison-Zeitraum: {{ year_before_course_date | date:"d.m.Y" }} - {{ course_date | date:"d.m.Y" }}</div>
+    </div>
     <div class="media-body">
         <table class="table table-hover">
             <thead>
             <tr>
                 <th scope="col">External-ID</th>
+                <th scope="col">Lizenznr</th>
                 <th scope="col">Team</th>
                 <th scope="col">Nachname</th>
                 <th scope="col">Vorname</th>
-                <th scope="col">Lizenz</th>
-                <th scope="col">Lizenz-Jahr</th>
-                <th scope="col">#Saison {{ season }}</th>
+                <th scope="col">aktuelle Lizenz</th>
+                <th scope="col">#Saison</th>
                 <th scope="col">#Insgesamt</th>
+                {% if license_id == 1 %}
+                <th scope="col">Jahre mit F2/F1</th>
+                {% endif %}
             </tr>
             </thead>
             <tbody>
             {% for official in officials_list %}
-            <tr class="{% if official.license_year < season %}bg-danger text-white{% endif %}">
+            <tr class="{% if official.license_year < course_date.year %}bg-danger text-white{% endif %}">
                 <th scope="row"><a href="https://offd.de/offd/moodle/user/profile.php?id={{official.external_id}}"
                                    target=”_blank”>{{official.external_id}}</a></th>
+                {% if official.id %}
+                <td><a href=" {% url profile_url pk=official.id season=course_date.year}" target=”_blank”>{{official.id}}</a></td>
                 <td>{{official.team}}</td>
                 <td>{{official.last_name}}</td>
                 <td>{{official.first_name}}</td>
-                <td>{{official.last_license}}</td>
-                <td>{{official.license_year}}</td>
-                <td class="{% if official.current_season < 4 %}bg-warning{% endif %}">{{official.current_season}}</td>
-                <td>{{official.overall}}</td>
+                <td class="{% if official.validation_errors.no_license %}bg-warning{% endif %}">{{official.license_name}}</td>
+                <td class="{% if official.validation_errors.total_season_games %}bg-warning{% endif %}">{{official.total_season_games}}</td>
+                <td class="{% if official.validation_errors.total_games %}bg-warning{% endif %}">{{official.total_games}}</td>
+                {% if license_id == 1 %}
+                <td class="{% if official.validation_errors.minimum_consecutive_license_years %}bg-warning{% endif %}">{{official.license_years}}</td>
+                {% endif %}
+                {% else %}
+                <td colspan="8">{{official.team}}</td>
+                {% endif %}
             </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
 </article>
+<script>
+        const helloDataScript = document.getElementById('requirements-json');
+        const jsonData = JSON.parse(helloDataScript.textContent);
+        const formattedJson = JSON.stringify(jsonData, null, 2);
+        document.getElementById('req').textContent = formattedJson;
+    </script>
 {% endblock content %}

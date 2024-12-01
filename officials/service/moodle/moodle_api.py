@@ -80,6 +80,7 @@ class ApiCourse:
             4: 1,  # F1
             3: 3,  # F2
             2: 2,  # F3
+            8: 5,  # F4
         }
         return license_map.get(category_id)
 

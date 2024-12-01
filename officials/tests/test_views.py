@@ -117,12 +117,10 @@ class TestGameCountOfficials(WebTest):
         for current_official in Official.objects.all():
             all_official_ids += [int(current_official.external_id)]
         moodle_service_mock.return_value = all_official_ids
-        year = datetime.today().year
         response: DjangoWebtestResponse = self.app.get(
-            reverse(OFFICIALS_LICENSE_CHECK, kwargs={'year': year, 'course_id': 7})
+            reverse(OFFICIALS_LICENSE_CHECK, kwargs={'course_id': 7})
         )
         assert len(response.context['officials_list']) == Official.objects.all().count()
-        assert response.context['season'] == year
 
 
 class TestMoodleLogin(WebTest):

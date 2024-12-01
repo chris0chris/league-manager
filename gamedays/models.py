@@ -254,3 +254,21 @@ class PlayerAchievement(models.Model):
 
     def __str__(self):
         return self.achievement.name + ' ' + self.player.lastname + ' ' + self.player.firstname + ' ' + str(self.value)
+
+
+class Person(models.Model):
+    FEMALE = 1
+    MALE = 2
+
+    SEX_CHOICES = [
+        (FEMALE, 'Weiblich'),
+        (MALE, 'Männlich'),
+    ]
+
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    sex = models.IntegerField(choices=SEX_CHOICES, null=True, blank=True, default=None)
+    year_of_birth = models.PositiveIntegerField(null=True, blank=True, default=None)
+
+    objects: QuerySet = models.Manager()
+

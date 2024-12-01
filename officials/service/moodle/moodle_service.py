@@ -8,8 +8,9 @@ from django.db.models import QuerySet
 
 from gamedays.models import Association, Team
 from officials.models import OfficialLicenseHistory, Official
+from officials.service.boff_license_calculation import LicenseCalculator
 from officials.service.moodle.moodle_api import MoodleApi, ApiUserInfo, ApiCourses, ApiParticipants, ApiUpdateUser, \
-    ApiCourse
+    ApiCourse, ApiParticipant
 
 
 def measure_execution_time(func):
@@ -26,48 +27,6 @@ def measure_execution_time(func):
     return wrapper
 
 
-class LicenseCalculator:
-    NO_LICENSE = 4
-    F1_LICENSE = 1
-    F2_LICENSE = 3
-    F3_LICENSE = 2
-
-    license_mapping = {
-        F1_LICENSE: {
-            'successful': 70,
-            'min_next_license_rank': 50,
-            'next_license_rank': F2_LICENSE,
-        },
-        F3_LICENSE: {
-            'successful': 70,
-            'min_next_license_rank': 0,
-            'next_license_rank': NO_LICENSE
-        },
-        F2_LICENSE: {
-            'successful': 70,
-            'min_next_license_rank': 50,
-            'next_license_rank': F3_LICENSE
-        }
-    }.get
-
-    def calculate(self, course_license, participant_result):
-        license_check = self.license_mapping(course_license)
-        if license_check['successful'] <= participant_result:
-            return course_license
-        if license_check['min_next_license_rank'] <= participant_result:
-            return license_check['next_license_rank']
-        return self.NO_LICENSE
-
-    @staticmethod
-    def get_license_name(license_id):
-        license_name_mapping = {
-            LicenseCalculator.F1_LICENSE: 'F1',
-            LicenseCalculator.F2_LICENSE: 'F2',
-            LicenseCalculator.F3_LICENSE: 'F3'
-        }.get
-        return license_name_mapping(license_id, '')
-
-
 class MoodleService:
     def __init__(self):
         self.moodle_api = MoodleApi()
@@ -80,6 +39,9 @@ class MoodleService:
         for current_participant in participants.get_all():
             participants_ids += [current_participant.user_id]
         return participants_ids
+
+    def get_course_by_id(self, course_id) -> ApiCourse:
+        return self.moodle_api.get_courses(course_id).get_all()[0]
 
     @measure_execution_time
     def update_licenses(self, course_ids: str = None):
@@ -145,7 +107,7 @@ class MoodleService:
 
         return missing_teams_list, missed_officials_list, result_list
 
-    def get_info_of_user(self, course, participant):
+    def get_info_of_user(self, course, participant: ApiParticipant):
         if participant.has_result():
             return self.get_info_of_user_with_result(course, participant)
         return None, [], []
@@ -164,7 +126,7 @@ class MoodleService:
         self.create_new_or_update_license_history(official, course, participant)
         return None, [], [str(official)]
 
-    def create_new_or_update_license_history(self, official, course, participant):
+    def create_new_or_update_license_history(self, official, course, participant: ApiParticipant):
         license_history_to_update: OfficialLicenseHistory = self._get_first(self.license_history.filter(
             official=official,
             created_at__year=course.get_year()
@@ -219,4 +181,3 @@ class MoodleService:
         if user == -1:
             user = self.moodle_api.get_user_info_by_email(username)
         return Official.objects.get(external_id=user.get_id()).pk
-

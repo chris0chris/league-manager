@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from factory.django import DjangoModelFactory
 
 from gamedays.models import Season, League, Association, Team, SeasonLeagueTeam, Gameday, Gameinfo, Gameresult, \
-    GameOfficial, GameSetup, TeamLog
+    GameOfficial, GameSetup, TeamLog, Person
 
 
 class LeagueFactory(DjangoModelFactory):
@@ -115,3 +115,13 @@ class GameSetupFactory(DjangoModelFactory):
         model = GameSetup
 
     gameinfo = factory.SubFactory(GameinfoFactory)
+
+
+class PersonFactory(DjangoModelFactory):
+    class Meta:
+        model = Person
+
+    sex = factory.Faker('random_element', elements=[choice[0] for choice in Person.SEX_CHOICES])
+    year_of_birth = factory.Faker('random_int', min=1900, max=2200)
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')

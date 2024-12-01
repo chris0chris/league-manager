@@ -85,16 +85,24 @@ class PasscheckService:
         except Team.DoesNotExist:
             return None
 
-    def get_roster(self, team_id: int, gameday_id: int = None):
+    def get_roster(self, team_id: int, year: int, gameday_id: int = None):
         team = self._get_team(team_id)
-        all_leagues = Playerlist.objects.filter(team=team).exclude(gamedays__league__name=None).distinct().values(
-            'gamedays__league', 'gamedays__league__name')
+        years = Playerlist.objects.filter(team=team).exclude(gamedays__league__name=None).values_list(
+                'gamedays__date__year', flat=True).distinct()
+        all_leagues = (Playerlist.objects
+                       .filter(team=team, joined_on__year__lte=year)
+                       .filter(Q(left_on__isnull=True) | Q(left_on__year__gte=year))
+                       .filter(gamedays__date__year=year)
+                       .exclude(gamedays__league__name=None)
+                       .distinct()
+                       .values('gamedays__league', 'gamedays__league__name'))
         league_annotations = {
             f'{league["gamedays__league"]}': Count('gamedays__league',
-                                                   filter=Q(gamedays__league=league['gamedays__league'])) for
+                                                   filter=(Q(gamedays__league=league['gamedays__league'])
+                                                           & Q(gamedays__date__year=year))) for
             league in all_leagues
         }
-        roster = self._get_roster(team, gameday_id, league_annotations)
+        roster = self._get_roster(team, gameday_id, league_annotations, year)
         team_data = TeamData(
             name=team.description,
             roster=RosterSerializer(instance=roster, is_staff=(self.user_permission.is_user_or_staff()),
@@ -108,6 +116,7 @@ class PasscheckService:
             'team': team_data,
             'team_id': team_id,
             'related_teams': list(team.relationship_additional_teams.all().values('team__description', 'team__id')),
+            'years': sorted(years, reverse=True),
         }
 
     def get_roster_with_validation(self, team_id: int, gameday_id: int):
@@ -120,11 +129,15 @@ class PasscheckService:
                 raise PasscheckException(
                     f'Passcheck nicht erlaubt für Spieltag: {gameday_id}. Nur heutige Spieltage sind erlaubt.')
         roster = self._get_roster(team_id, gameday_id, {})
-        team = {'team': TeamData(
-            name=self._get_team(team_id).description,
-            roster=RosterSerializer(instance=roster, is_staff=self.user_permission.is_user_or_staff(), many=True).data,
-            validator=EligibilityValidator(gameday.league, gameday).get_player_strength()
-        )}
+        try:
+            team = {'team': TeamData(
+                name=self._get_team(team_id).description,
+                roster=RosterSerializer(instance=roster, is_staff=self.user_permission.is_user_or_staff(),
+                                        many=True).data,
+                validator=EligibilityValidator(gameday.league, gameday).get_player_strength()
+            )}
+        except EligibilityRule.DoesNotExist:
+            raise LookupError(f'No EligibilityRule "{gameday.league}" for gameday "{gameday.name}" found')
         try:
             passcheck_verification = PasscheckVerification.objects.get(team=team_id, gameday=gameday_id)
         except PasscheckVerification.DoesNotExist:
@@ -174,14 +187,21 @@ class PasscheckService:
             relationship = []
         return relationship
 
-    def _get_roster(self, team, gameday_id, league_annotations):
+    def _get_roster(self, team, gameday_id, league_annotations, year: int = None):
+        if year is None:
+            year = datetime.date.today().year
         is_selected_query = self._is_selected_query(gameday_id)
         gameday_jersey = self._get_gameday_jersey_query(gameday_id)
-        return Playerlist.objects.filter(team=team).annotate(
-            **league_annotations,
-            is_selected=is_selected_query,
-            gameday_jersey=gameday_jersey
-        ).values()
+        league_ids = list(league_annotations.keys())
+
+        return (Playerlist.objects
+                .filter(team=team, joined_on__year__lte=year)
+                .filter(Q(left_on__isnull=True) | Q(left_on__year__gte=year))
+                .annotate(
+                    **league_annotations,
+                    is_selected=is_selected_query,
+                    gameday_jersey=gameday_jersey,
+                ).values(*RosterSerializer.ALL_FIELD_VALUES, *league_ids))
 
     def _is_selected_query(self, gameday_id):
         if gameday_id is None:
@@ -218,7 +238,7 @@ class PasscheckService:
             })
         player_values = player.annotate(
             gameday_jersey=Value(None, output_field=IntegerField()),
-            is_selected=Value(False)).values()
+            is_selected=Value(False)).values(*RosterSerializer.ALL_FIELD_VALUES)
         team = player.first().team
         return {
             'years': all_years,

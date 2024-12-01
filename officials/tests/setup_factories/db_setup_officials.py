@@ -40,6 +40,8 @@ class DbSetupOfficials:
         official2 = OfficialFactory(first_name='Julia', last_name='Jegura', team=team, external_id=7)
         OfficialLicenseHistoryFactory(license=license_f2, official=official1,
                                       created_at='2020-07-07')
+        OfficialLicenseHistoryFactory(license=license_f1, official=official1,
+                                      created_at=str(datetime.today().year - 1) + '-01-01')
         OfficialLicenseHistoryFactory(license=license_f1, official=official1)
         OfficialLicenseHistoryFactory(license=license_f2, official=official2,
                                       created_at=str(datetime.today().year - 1) + '-01-01')
@@ -71,12 +73,12 @@ class DbSetupOfficials:
                                      reporter_name='some reporter name', comment='no comment').save()
         OfficialExternalGamesFactory(official=Official.objects.first(), number_games=6, date=current_year,
                                      position='Mix', association='association A', is_international=False,
-                                     has_clockcontrol=1, halftime_duration=15, notification_date=current_year,
+                                     has_clockcontrol=0, halftime_duration=15, notification_date=current_year,
                                      reporter_name='some reporter name',
                                      comment='no comment').save()
         OfficialExternalGamesFactory(official=Official.objects.first(), number_games=6, date=last_year,
                                      position='Mix', association='association A', is_international=False,
-                                     has_clockcontrol=1, halftime_duration=15, notification_date=current_year,
+                                     has_clockcontrol=1, halftime_duration=15, notification_date=last_year,
                                      reporter_name='some reporter name',
                                      comment='no comment').save()
         OfficialExternalGamesFactory(official=Official.objects.last(), number_games=7, date=current_year,
@@ -86,6 +88,6 @@ class DbSetupOfficials:
                                      comment='no comment').save()
         OfficialExternalGamesFactory(official=Official.objects.last(), number_games=5, date=last_year,
                                      position='Referee', association='association B', is_international=True,
-                                     has_clockcontrol=1, halftime_duration=15, notification_date=current_year,
+                                     has_clockcontrol=0, halftime_duration=15, notification_date=last_year,
                                      reporter_name='some reporter name',
                                      comment='no comment').save()

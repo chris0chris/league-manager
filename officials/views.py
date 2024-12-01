@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib import messages
@@ -19,6 +19,7 @@ from league_manager.utils.view_utils import PermissionHelper
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
 from officials.forms import AddInternalGameOfficialEntryForm, MoodleLoginForm
 from officials.models import Official, OfficialLicenseHistory
+from officials.service.boff_license_calculation import LicenseStrategy
 from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
 from officials.service.official_service import OfficialService
@@ -182,27 +183,23 @@ class LicenseCheckForOfficials(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'officials/license_check.html'
 
     def get(self, request, *args, **kwargs):
-        year = kwargs.get('year', datetime.today().year)
         course_id = kwargs.get('course_id')
         official_service = OfficialService()
+        from officials.urls import OFFICIALS_PROFILE_GAMELIST
+        officials_list, course = official_service.get_game_count_for_license(course_id)
+        license_id = course.get_license_id()
         context = {
-            'season': year,
-            'officials_list': official_service.get_game_count_for_license(year, course_id)
+            'license_requirements': LicenseStrategy.COURSE_MAPPING(license_id),
+            'license_id': license_id,
+            'course_date': course.get_date(),
+            'year_before_course_date': course.get_date() - timedelta(days=365),
+            'profile_url': OFFICIALS_PROFILE_GAMELIST,
+            'officials_list': officials_list,
         }
         return render(request, self.template_name, context)
 
     def test_func(self):
-        return self.request.user.is_staff
-
-    def get_external_ids_as_int(self, external_ids):
-        ids_as_array = external_ids.split(',')
-        all_ids_as_int = []
-        for current_id in ids_as_array:
-            try:
-                all_ids_as_int += [int(current_id)]
-            except ValueError:
-                continue
-        return all_ids_as_int
+        return self.request.user.is_staff or self.request.user.username == 'offd'
 
 
 class MoodleReportView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -219,7 +216,7 @@ class MoodleReportView(LoginRequiredMixin, UserPassesTestMixin, View):
         return render(request, self.template_name, context)
 
     def test_func(self):
-        return self.request.user.is_staff
+        return self.request.user.is_staff or self.request.user.username == 'offd'
 
 
 class OfficialProfileLicenseView(View):

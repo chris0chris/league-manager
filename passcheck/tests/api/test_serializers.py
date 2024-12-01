@@ -49,12 +49,15 @@ class TestRosterValidationSerializer(TestCase):
         ev = EligibilityValidator(season_league.league, prime_gameday)
         league_id = f'{prime_gameday.league_id}'
         second_league_team = [
-            {'id': 7, 'first_name': 'Oscarius', 'last_name': 'Oldus', 'jersey_number': 98, 'pass_number': 9898989,
-             'sex': 2, 'year_of_birth': 1909, league_id: 55, 'is_selected': True, 'gameday_jersey': None},
-            {'id': 8, 'team_id': 23, 'first_name': 'Juli', 'last_name': 'Jemale', 'jersey_number': 7,
+            {'id': 7, 'player__person__first_name': 'Oscarius', 'player__person__last_name': 'Oldus',
+             'jersey_number': 98, 'player__pass_number': 9898989,
+             'player__person__sex': 2, 'player__person__year_of_birth': 1909, league_id: 55, 'is_selected': True,
+             'gameday_jersey': None},
+            {'id': 8, 'team_id': 23, 'player__person__first_name': 'Juli', 'player__person__last_name': 'Jemale',
+             'jersey_number': 7,
              'gameday_jersey': 77,
-                 'pass_number': 7,
-                 'sex': 1, 'year_of_birth': 1982, league_id: 7, 'is_selected': False}, ]
+             'player__pass_number': 7,
+             'player__person__sex': 1, 'player__person__year_of_birth': 1982, league_id: 7, 'is_selected': False}, ]
         serializer = RosterValidationSerializer(instance=second_league_team, context={'validator': ev, 'all_leagues': [
             {'gamedays__league': prime_gameday.league_id}]}, many=True).data
         assert len(serializer) == 2
@@ -69,9 +72,9 @@ class TestRosterValidationSerializer(TestCase):
         }
 
     def test_serializer_sets_validationError_when_no_validator_is_set(self):
-        team = [{'id': 12, 'first_name': 'Marius', 'last_name': 'MissingValidator', 'jersey_number': 0,
-                 'pass_number': 0000000,
-                 'sex': 2, 'year_of_birth': 1909, '1': 0, 'is_selected': False, 'gameday_jersey': 7},
+        team = [{'id': 12, 'player__person__first_name': 'Marius', 'player__person__last_name': 'MissingValidator', 'jersey_number': 0,
+                 'player__pass_number': 0000000,
+                 'player__person__sex': 2, 'player__person__year_of_birth': 1909, '1': 0, 'is_selected': False, 'gameday_jersey': 7},
                 ]
         serializer = RosterValidationSerializer(instance=team, is_staff=True, context={'all_leagues': [
             {'gamedays__league': 1}]}, many=True).data

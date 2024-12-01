@@ -3,9 +3,10 @@ from datetime import datetime
 import pytest
 from django.test import TestCase
 
-from gamedays.models import SeasonLeagueTeam
+from gamedays.models import SeasonLeagueTeam, Person
 from gamedays.tests.setup_factories.factories import GamedayFactory
-from passcheck.models import EligibilityRule, Playerlist
+from passcheck.api.serializers import RosterSerializer
+from passcheck.models import EligibilityRule
 from passcheck.service.eligibility_validation import EligibilityValidator, MaxGameDaysValidator, \
     RelegationValidator, ValidationError
 from passcheck.tests.setup_factories.db_setup_passcheck import DbSetupPasscheck
@@ -54,15 +55,15 @@ class TestValidators(TestCase):
         today = datetime.today()
         league_id = f'{prime_gameday.league.pk}'
         youth_player = {
-            'year_of_birth': today.year - 18,
+            RosterSerializer.YEAR_OF_BIRTH_C: today.year - 18,
             league_id: 4,
         }
         ev = EligibilityValidator(season_league.league, prime_gameday)
         assert ev.validate(youth_player) is True
         senior_player = {
-            'year_of_birth': today.year - 19,
+            RosterSerializer.YEAR_OF_BIRTH_C: today.year - 19,
             league_id: 4,
-            'sex': Playerlist.MALE,
+            RosterSerializer.SEX_C: Person.MALE,
         }
         with pytest.raises(ValidationError) as exception:
             ev.validate(senior_player)
@@ -75,16 +76,16 @@ class TestValidators(TestCase):
         prime_gameday = GamedayFactory(season=season, league=prime_league)
         league_id = f'{prime_gameday.league.pk}'
         female_player = {
-            'year_of_birth': 1982,
+            RosterSerializer.YEAR_OF_BIRTH_C: 1982,
             league_id: 4,
-            'sex': Playerlist.FEMALE,
+            RosterSerializer.SEX_C: Person.FEMALE,
         }
         ev = EligibilityValidator(season_league.league, prime_gameday)
         assert ev.validate(female_player) is True
         male_player = {
-            'year_of_birth': 1982,
+            RosterSerializer.YEAR_OF_BIRTH_C: 1982,
             league_id: 4,
-            'sex': Playerlist.MALE,
+            RosterSerializer.SEX_C: Person.MALE,
         }
         with pytest.raises(ValidationError) as exception:
             ev.validate(male_player)
@@ -101,27 +102,27 @@ class TestValidators(TestCase):
                                   'weil sie nicht Mindestanzahl an Spiele erreicht hat.')
 
         female_player = {
-            'year_of_birth': 1982,
+            RosterSerializer.YEAR_OF_BIRTH_C: 1982,
             league_id: 1,
-            'sex': Playerlist.FEMALE,
+            RosterSerializer.SEX_C: Person.FEMALE,
         }
         with pytest.raises(ValidationError) as exception:
             ev.validate(female_player)
         assert str(exception.value) == expected_error_message
 
         youth_player = {
-            'year_of_birth': datetime.today().year - 18,
+            RosterSerializer.YEAR_OF_BIRTH_C: datetime.today().year - 18,
             league_id: 1,
-            'sex': Playerlist.MALE,
+            RosterSerializer.SEX_C: Person.MALE,
         }
         with pytest.raises(ValidationError) as exception:
             ev.validate(youth_player)
         assert str(exception.value) == expected_error_message
 
         male_player = {
-            'year_of_birth': 1982,
+            RosterSerializer.YEAR_OF_BIRTH_C: 1982,
             league_id: 1,
-            'sex': Playerlist.MALE,
+            RosterSerializer.SEX_C: Person.MALE,
         }
         with pytest.raises(ValidationError) as exception:
             ev.validate(male_player)

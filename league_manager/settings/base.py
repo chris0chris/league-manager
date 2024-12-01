@@ -18,6 +18,8 @@ INSTALLED_APPS = [
     'gamedays.apps.GamedaysConfig',
     'crispy_forms',
     'crispy_bootstrap5',
+    'dal',
+    'dal_select2',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

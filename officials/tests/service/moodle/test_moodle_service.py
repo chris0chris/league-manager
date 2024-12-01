@@ -1,61 +1,48 @@
 import time
 from unittest.mock import patch, MagicMock
 
+import pytest
 from django.test import TestCase
 
 from officials.models import Official, OfficialLicenseHistory, OfficialLicense
+from officials.service.boff_license_calculation import LicenseCalculator, LicenseStrategy
 from officials.service.moodle.moodle_api import MoodleApi, ApiCourse, ApiParticipants, ApiUserInfo, ApiUpdateUser
-from officials.service.moodle.moodle_service import MoodleService, LicenseCalculator
+from officials.service.moodle.moodle_service import MoodleService
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 
 
 class TestLicenseCalculator:
+    @pytest.mark.parametrize("course_type, score, expected_license", [
+        (LicenseStrategy.F1_LICENSE, 80, LicenseStrategy.F1_LICENSE),
+        (LicenseStrategy.F1_LICENSE, 70, LicenseStrategy.F1_LICENSE),
+        (LicenseStrategy.F1_LICENSE, 69, LicenseStrategy.F2_LICENSE),
+        (LicenseStrategy.F1_LICENSE, 49, LicenseStrategy.F3_LICENSE),
+        (LicenseStrategy.F1_LICENSE, 0, LicenseStrategy.NO_LICENSE),
 
-    def test_calculate_f1_license(self):
-        license_calculator = LicenseCalculator()
-        result = license_calculator.calculate(1, 70)
-        assert result == 1
+        (LicenseStrategy.F2_LICENSE, 80, LicenseStrategy.F2_LICENSE),
+        (LicenseStrategy.F2_LICENSE, 70, LicenseStrategy.F2_LICENSE),
+        (LicenseStrategy.F2_LICENSE, 69, LicenseStrategy.F3_LICENSE),
+        (LicenseStrategy.F2_LICENSE, 49, LicenseStrategy.NO_LICENSE),
 
-    def test_calculate_f1_license_next_rank(self):
-        license_calculator = LicenseCalculator()
-        result = license_calculator.calculate(1, 50)
-        assert result == 3
+        (LicenseStrategy.F3_LICENSE, 80, LicenseStrategy.F3_LICENSE),
+        (LicenseStrategy.F3_LICENSE, 70, LicenseStrategy.F3_LICENSE),
+        (LicenseStrategy.F3_LICENSE, 69, LicenseStrategy.F4_LICENSE),
+        (LicenseStrategy.F3_LICENSE, 49, LicenseStrategy.NO_LICENSE),
 
-    def test_calculate_f3_license_fail_exam(self):
+        (LicenseStrategy.F4_LICENSE, 80, LicenseStrategy.F4_LICENSE),
+        (LicenseStrategy.F4_LICENSE, 70, LicenseStrategy.F4_LICENSE),
+        (LicenseStrategy.F4_LICENSE, 69, LicenseStrategy.NO_LICENSE),
+    ])
+    def test_calculate_license(self, course_type, score, expected_license):
         license_calculator = LicenseCalculator()
-        result = license_calculator.calculate(1, 49)
-        assert result == 4
-
-    def test_calculate_f2_license(self):
-        license_calculator = LicenseCalculator()
-        result = license_calculator.calculate(3, 70)
-        assert result == 3
-
-    def test_calculate_f2_license_next_rank(self):
-        license_calculator = LicenseCalculator()
-        result = license_calculator.calculate(3, 50)
-        assert result == 2
-
-    def test_calculate_f2_license_fail_exam(self):
-        license_calculator = LicenseCalculator()
-        result = license_calculator.calculate(3, 49)
-        assert result == 4
-
-    def test_calculate_f3_license(self):
-        license_calculator = LicenseCalculator()
-        result = license_calculator.calculate(2, 70)
-        assert result == 2
-
-    def test_calculate_f3_license_next_rank(self):
-        license_calculator = LicenseCalculator()
-        result = license_calculator.calculate(2, 69)
-        assert result == 4
+        assert license_calculator.calculate(course_type, score) == expected_license
 
     def test_get_license_name(self):
-        assert LicenseCalculator.get_license_name(1) == 'F1'
-        assert LicenseCalculator.get_license_name(3) == 'F2'
-        assert LicenseCalculator.get_license_name(2) == 'F3'
-        assert LicenseCalculator.get_license_name(4) == ''
+        assert LicenseCalculator.get_license_name(LicenseStrategy.F1_LICENSE) == 'F1'
+        assert LicenseCalculator.get_license_name(LicenseStrategy.F2_LICENSE) == 'F2'
+        assert LicenseCalculator.get_license_name(LicenseStrategy.F3_LICENSE) == 'F3'
+        assert LicenseCalculator.get_license_name(LicenseStrategy.F4_LICENSE) == 'F4'
+        assert LicenseCalculator.get_license_name(LicenseStrategy.NO_LICENSE) == '-'
 
 
 class TestGameService(TestCase):

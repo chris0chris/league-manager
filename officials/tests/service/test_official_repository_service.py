@@ -2,65 +2,38 @@ from datetime import datetime
 
 from django.test import TestCase
 
-from gamedays.models import GameOfficial
-from officials.models import OfficialExternalGames, Official
-from officials.service.officials_repository_service import OfficialGameCount
+from officials.models import OfficialLicense
+from officials.service.officials_repository_service import OfficialsRepositoryService
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 
 
-class TestOfficialGameCount(TestCase):
-    def test_get_all_internal_games(self):
-        DbSetupOfficials().create_officials_full_setup()
-        official = Official.objects.first()
-        year = datetime.today().year
-        official_qs = GameOfficial.objects.filter(official=official).exclude(position='Scorecard Judge')
-        official_game_count = OfficialGameCount(year, official, official_qs, OfficialExternalGames.objects.none())
-        assert official_game_count.get_all_internal_games() == 8
-
-    def test_get_current_season_internal(self):
-        DbSetupOfficials().create_officials_full_setup()
-        official = Official.objects.last()
-        year = datetime.today().year
-        official_qs = GameOfficial.objects.filter(official=official).exclude(position='Scorecard Judge')
-        official_game_count = OfficialGameCount(year, official, official_qs, OfficialExternalGames.objects.none())
-        assert official_game_count.get_current_season_internal() == 8
-
-    def test_get_all_external_games(self):
+class TestOfficialsRepositoryService(TestCase):
+    def test_get_officials_game_count_for_license(self):
         DbSetupOfficials().create_officials_full_setup()
         DbSetupOfficials().create_external_officials_entries()
-        official = Official.objects.last()
-        year = datetime.today().year
-        external_official_qs = OfficialExternalGames.objects.filter(official=official)
-        official_game_count = OfficialGameCount(year, official, OfficialExternalGames.objects.none(),
-                                                external_official_qs)
-        assert official_game_count.get_all_external_games() == 12
+        year = datetime.today()
+        test_external_ids = ['5', '7']
+        license_ids = OfficialLicense.objects.all().values_list('pk', flat=True)
 
-    def test_get_current_season_external(self):
-        DbSetupOfficials().create_officials_full_setup()
-        DbSetupOfficials().create_external_officials_entries()
-        official = Official.objects.first()
-        year = datetime.today().year
-        external_official_qs = OfficialExternalGames.objects.filter(official=official)
-        official_game_count = OfficialGameCount(year, official, OfficialExternalGames.objects.none(),
-                                                external_official_qs)
-        assert official_game_count.get_current_season_external() == 10
+        # Call the method being tested
+        official_repository_service = OfficialsRepositoryService()
+        officials = official_repository_service.get_officials_game_count_for_license(year, test_external_ids,
+                                                                                     license_ids)
 
-    def test_official_game_count_as_json(self):
-        DbSetupOfficials().create_officials_full_setup()
-        DbSetupOfficials().create_external_officials_entries()
-        official = Official.objects.first()
-        year = datetime.today().year
-        official_qs = GameOfficial.objects.filter(official=official).exclude(position='Scorecard Judge')
-        external_official_qs = OfficialExternalGames.objects.filter(official=official)
-        official_game_count = OfficialGameCount(year, official, official_qs,
-                                                external_official_qs)
-        assert official_game_count.as_json() == {
-            'external_id': official.external_id,
-            'team': official.team.description,
-            'last_name': official.last_name,
-            'first_name': official.first_name,
-            'last_license': 'F1',
-            'license_year': year,
-            'current_season': 14,
-            'overall': 24,
-        }
+        # Check that the correct officials are returned
+        assert len(officials) == 2
+
+        # Assert values for the first official
+        official_1_data = officials[0]
+        assert official_1_data.license_name == 'F1'
+        assert official_1_data.license_years == '2020,2023,2024'
+        assert official_1_data.total_season_games == 11
+        assert official_1_data.total_games == 21
+
+        # Assert values for the second official
+        official_2_data = officials[1]
+        assert official_2_data.license_name == 'F2'
+        assert official_2_data.license_years == '2023,2024'
+        assert official_2_data.total_season_games == 15
+        # noinspection PyComparisonWithFloats result will always be sharp .0 or .5
+        assert official_2_data.total_games == 21.5
