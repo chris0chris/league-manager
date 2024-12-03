@@ -29,3 +29,4 @@ class TestMoodleApi:
         assert user_info.get_first_name() == 'Y'
         assert user_info.get_last_name() == 'Testuser'
         assert user_info.get_team() == 'Ich finde mein Team nicht.'
+        assert user_info.get_team_id() == '-99'

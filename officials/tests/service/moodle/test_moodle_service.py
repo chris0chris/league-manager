@@ -110,8 +110,12 @@ class TestGameService(TestCase):
                     'lastname': 'last moodle',
                     'id': user_id_2,
                     'customfields': [{
-                        'shortname': 'Team',
+                        'shortname': 'teamname',
                         'value': 'teamname moodle'
+                    },
+                    {
+                        'shortname': 'teamid',
+                        'value': '-1'
                     }]
                 }]),
             user_id: ApiUserInfo([
@@ -120,8 +124,12 @@ class TestGameService(TestCase):
                     'lastname': 'moodle last',
                     'id': user_id,
                     'customfields': [{
-                        'shortname': 'Team',
+                        'shortname': 'teamname',
                         'value': 'moodle teamname'
+                    },
+                    {
+                        'shortname': 'teamid',
+                        'value': '-1'
                     }]
                 }]),
         }.get
@@ -174,12 +182,18 @@ class TestGameService(TestCase):
                     'id': user_id,
                     'customfields': [
                         {
-                            'shortname': 'Team',
+                            'shortname': 'teamname',
                             'value': team.description
-                        }, {
+                        },
+                        {
+                            'shortname': 'teamid',
+                            'value': team.pk
+                        },
+                        {
                             'shortname': 'Landesverband',
                             'value': 'Ja.'
-                        }, {
+                        },
+                        {
                             'shortname': 'LandesverbandAuswahl',
                             'value': 'Association name'
                         },
@@ -243,8 +257,12 @@ class TestGameService(TestCase):
                     'id': official.external_id,
                     'customfields': [
                         {
-                            'shortname': 'Team',
+                            'shortname': 'teamname',
                             'value': team.description,
+                        },
+                        {
+                            'shortname': 'teamid',
+                            'value': team.pk,
                         },
                         {
                             'shortname': 'Landesverband',
