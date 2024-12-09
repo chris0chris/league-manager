@@ -1,9 +1,9 @@
-import {useEffect, useState} from 'react';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import {Player} from '../common/types';
-import Validator from '../utils/validation';
-import {Alert} from 'react-bootstrap';
+import { useEffect, useState } from "react";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import { Player } from "../common/types";
+import Validator from "../utils/validation";
+import { Alert } from "react-bootstrap";
 
 interface Props {
   modalVisible: boolean;
@@ -21,11 +21,13 @@ function PlayerModal({
   validator,
 }: Props) {
   const [click, setClick] = useState<number>(0);
-  const [jerseyNumber, setJerseyNumber] = useState(player.jersey_number);
+  const [jerseyNumber, setJerseyNumber] = useState<number | string>(
+    player.jersey_number
+  );
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   let timeoutTillNextPlayer = 500;
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     timeoutTillNextPlayer = 200;
   }
   useEffect(() => {
@@ -51,7 +53,7 @@ function PlayerModal({
     }
     setShowSuccessMessage(true);
     player.isSelected = !player.isSelected;
-    player.jersey_number = jerseyNumber;
+    player.jersey_number = Number(jerseyNumber);
     setTimeout(() => {
       // only move on to next player if player is checked
       if (player.isSelected === true) {
@@ -63,7 +65,7 @@ function PlayerModal({
 
   const handleDoubleClick = () => {
     const isSure = window.confirm(
-      'Wirklich 100 % sicher, dass die Person am Spieltag teilnehmen darf?!'
+      "Wirklich 100 % sicher, dass die Person am Spieltag teilnehmen darf?!"
     );
     if (isSure) {
       update();
@@ -80,8 +82,8 @@ function PlayerModal({
       setErrorMessages(errors);
       return errors.length === 0;
     } else {
-      setJerseyNumber(0);
-      setErrorMessages(['Trikotnummer muss eine Zahl sein.']);
+      setJerseyNumber("");
+      setErrorMessages(["Trikotnummer muss eine Zahl sein."]);
     }
     return false;
   };
@@ -95,7 +97,7 @@ function PlayerModal({
           setErrorMessages([]);
           nextPlayer(null);
         }}
-        backdrop='static'
+        backdrop="static"
         keyboard={false}
       >
         <Modal.Header closeButton>
@@ -104,53 +106,53 @@ function PlayerModal({
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className='row mb-2 align-items-center'>
-            <div className='col-4'>Name:</div>
-            <div className='col-8'>
+          <div className="row mb-2 align-items-center">
+            <div className="col-4">Name:</div>
+            <div className="col-8">
               <input
-                type='text'
-                className='form-control'
+                type="text"
+                className="form-control"
                 disabled
                 value={`${player.first_name} ${player.last_name}`}
               />
             </div>
           </div>
-          <div className='row mb-2 align-items-center'>
-            <div className='col-4'>Passnummer:</div>
-            <div className='col-8'>
+          <div className="row mb-2 align-items-center">
+            <div className="col-4">Passnummer:</div>
+            <div className="col-8">
               <input
                 disabled
-                type='text'
-                className='form-control'
+                type="text"
+                className="form-control"
                 value={player.pass_number}
               />
             </div>
           </div>
-          <div className='row mb-2 align-items-center'>
-            <div className='col-4'>Trikotnummer:</div>
-            <div className='col-8'>
+          <div className="row mb-2 align-items-center">
+            <div className="col-4">Trikotnummer:</div>
+            <div className="col-8">
               <input
-                type='text'
+                type="text"
                 required
                 disabled={player.isSelected || !!player.validationError}
-                className='form-control'
-                id='exampleFormControlInput1'
-                placeholder='Trikotnummer'
-                value={jerseyNumber}
+                className="form-control"
+                id="exampleFormControlInput1"
+                placeholder="Trikotnummer"
+                value={jerseyNumber ?? ""}
                 onChange={(event) => isJerseyNumberValid(event.target.value)}
               />
             </div>
           </div>
           {player.validationError && (
-            <div className='row text-bg-danger'>
-              <div className='col-4'>Achtung:</div>
-              <div className='col-8'>{player.validationError}</div>
+            <div className="row text-bg-danger">
+              <div className="col-4">Achtung:</div>
+              <div className="col-8">{player.validationError}</div>
             </div>
           )}
           {errorMessages.length > 0 && (
-            <div className='row text-bg-danger'>
-              <div className='col-4'>Fehler:</div>
-              <div className='col-8'>
+            <div className="row text-bg-danger">
+              <div className="col-4">Fehler:</div>
+              <div className="col-8">
                 {errorMessages.map((errorMessage: string, index: number) => (
                   <div key={index}>
                     {errorMessage}
@@ -160,83 +162,83 @@ function PlayerModal({
               </div>
             </div>
           )}
-          <div className='row'>
-            <div className='col'>
+          <div className="row">
+            <div className="col">
               {showSuccessMessage && (
                 <>
                   {player.isSelected && (
-                    <Alert variant='success'>Person wurde hinzugefügt.</Alert>
+                    <Alert variant="success">Person wurde hinzugefügt.</Alert>
                   )}
                   {!player.isSelected && (
-                    <Alert variant='success'>Person wurde entfernt.</Alert>
+                    <Alert variant="success">Person wurde entfernt.</Alert>
                   )}
                 </>
               )}
             </div>
           </div>
         </Modal.Body>
-        <Modal.Footer className='modal-footer'>
+        <Modal.Footer className="modal-footer">
           <Button
-            variant='secondary'
-            className='modal-button-left me-auto'
+            variant="secondary"
+            className="modal-button-left me-auto"
             disabled={showSuccessMessage}
             onClick={() => {
               nextPlayer(-1);
               setErrorMessages([]);
             }}
           >
-            <i className='bi bi-arrow-left'></i>
+            <i className="bi bi-arrow-left"></i>
           </Button>
           {player.validationError && (
             <>
               {!player.isSelected && (
                 <Button
-                  variant={'danger'}
-                  className='modal-button-middle'
-                  style={{opacity: 0.5}}
+                  variant={"danger"}
+                  className="modal-button-middle"
+                  style={{ opacity: 0.5 }}
                   disabled={showSuccessMessage}
                   onClick={() => {
                     setClick(click + 1);
                   }}
                 >
-                  <i className='bi bi-check2'></i>
+                  <i className="bi bi-check2"></i>
                 </Button>
               )}
               {player.isSelected && (
                 <Button
-                  variant={'danger'}
-                  className='modal-button-middle'
+                  variant={"danger"}
+                  className="modal-button-middle"
                   disabled={showSuccessMessage}
                   onClick={() => update()}
                 >
-                  <i className='bi bi-x-lg'></i>
+                  <i className="bi bi-x-lg"></i>
                 </Button>
               )}
             </>
           )}
           {!player.validationError && (
             <Button
-              variant={player.isSelected ? 'danger' : 'success'}
-              className='modal-button-middle'
+              variant={player.isSelected ? "danger" : "success"}
+              className="modal-button-middle"
               disabled={showSuccessMessage}
               onClick={() => {
                 update();
               }}
             >
-              {!player.isSelected && <i className='bi bi-check2'></i>}
-              {player.isSelected && <i className='bi bi-x-lg'></i>}
+              {!player.isSelected && <i className="bi bi-check2"></i>}
+              {player.isSelected && <i className="bi bi-x-lg"></i>}
             </Button>
           )}
           <Button
-            variant='secondary'
-            className='modal-button-right ms-auto'
+            variant="secondary"
+            className="modal-button-right ms-auto"
             disabled={showSuccessMessage}
             onClick={() => {
               nextPlayer(1);
               setErrorMessages([]);
             }}
           >
-            <i className='bi bi-arrow-right'></i>
+            <i className="bi bi-arrow-right"></i>
           </Button>
         </Modal.Footer>
       </Modal>
