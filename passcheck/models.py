@@ -17,7 +17,7 @@ class Player(models.Model):
 class Playerlist(models.Model):
     team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
     player = models.ForeignKey(Player, on_delete=models.DO_NOTHING)
-    jersey_number = models.IntegerField()
+    jersey_number = models.IntegerField(null=True)
     joined_on = models.DateField(default=date.today)
     left_on = models.DateField(null=True, blank=True, default=None)
     gamedays = models.ManyToManyField(Gameday, through='PlayerlistGameday')
@@ -29,7 +29,7 @@ class Playerlist(models.Model):
             models.UniqueConstraint(
                 fields=['team', 'jersey_number'],
                 name='unique_team_jersey_number',
-                condition=models.Q(left_on=None)
+                condition=models.Q(left_on=None) & ~models.Q(jersey_number=None)
             ),
             models.CheckConstraint(check=Q(jersey_number__gte=0) & Q(jersey_number__lte=99),
                                    name='jersey_number_btw_0_and_99'),
@@ -53,6 +53,30 @@ class PlayerlistGameday(models.Model):
         ]
 
     objects: QuerySet = models.Manager()
+
+
+class PlayerlistTransfer(models.Model):
+    TRANSFER_STATUS = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    current_team = models.ForeignKey(Playerlist, on_delete=models.CASCADE)
+    new_team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    approved_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+    approval_date = models.DateTimeField(default=None, null=True, blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=TRANSFER_STATUS,
+        default='pending'
+    )
+    note = models.TextField(default=None, blank=True, null=True)
+
+    objects: QuerySet = models.Manager()
+
+    def __str__(self):
+        return f"{self.current_team} -> {self.new_team} ({self.status})"
 
 
 class EmptyPasscheckVerification:

@@ -6,6 +6,7 @@
     <form method="POST">
         {% csrf_token %}
         <fieldset class="form-group">
+            {% block title_playerlist_form %}
             <legend class="border-bottom mb-4">
                 {% if object %}
                 Aktualisieren der Rosterliste von {{ user }}
@@ -13,23 +14,41 @@
                 Erstellen der Rosterliste von {{ user }}
                 {% endif %}
             </legend>
+            {% endblock title_playerlist_form %}
+            {% block pass_number_warning %}
             {% if object %}
             <div class="alert alert-warning" role="alert">
                 Die <b>Passnummer</b> ist nicht bearbeitbar. Wenn diese nicht stimmen sollte, dann schicke bitte eine
                 entsprechende Mail an deine Ligaorganisation.
             </div>
             {% endif %}
+            {% endblock pass_number_warning %}
             {{ form|crispy }}
         </fieldset>
+        {% block submit_area %}
         <div class="form-group">
-            <button class="btn btn-outline-info" type="submit">
+            <div class="row">
                 {% if object %}
-                Aktualisieren
+                <div class="col-6">
+                    <button class="btn btn-info w-100" type="submit">
+                        Aktualisieren
+                    </button>
+                </div>
+                <div class="col-6">
+                    <a href="{% url 'passcheck-player-transfer' pk=object.pk %}" class="btn btn-warning w-100">
+                        Zum Transfer
+                    </a>
+                </div>
                 {% else %}
-                Erstellen
+                <div class="col">
+                    <button class="btn btn-info w-100">
+                        Erstellen
+                    </button>
+                </div>
                 {% endif %}
-            </button>
+            </div>
         </div>
+        {% endblock submit_area %}
     </form>
 </div>
 {% endblock content %}

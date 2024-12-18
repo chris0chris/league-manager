@@ -1,9 +1,8 @@
-from rest_framework.fields import SerializerMethodField, IntegerField, TimeField, BooleanField, CharField
+from rest_framework.fields import SerializerMethodField, IntegerField, TimeField, BooleanField, CharField, DateField
 from rest_framework.serializers import Serializer
 
 from league_manager.utils.serializer_utils import ObfuscatorSerializer, ObfuscateField
 from passcheck.service.eligibility_validation import EligibilityValidator, ValidationError
-
 
 
 class RosterSerializer(ObfuscatorSerializer):
@@ -15,7 +14,7 @@ class RosterSerializer(ObfuscatorSerializer):
     YEAR_OF_BIRTH_C = 'player__person__year_of_birth'
 
     ALL_FIELD_VALUES = ['id', JERSEY_NUMBER_C, 'gameday_jersey', FIRST_NAME_C, LAST_NAME_C,
-                        PASS_NUMBER_C, SEX_C, YEAR_OF_BIRTH_C, 'is_selected']
+                        PASS_NUMBER_C, SEX_C, YEAR_OF_BIRTH_C, 'is_selected', 'joined_on', 'left_on']
     jersey_number = SerializerMethodField()
     id = IntegerField()
     first_name = ObfuscateField(field_name=FIRST_NAME_C)
@@ -24,6 +23,8 @@ class RosterSerializer(ObfuscatorSerializer):
     sex = IntegerField(source=SEX_C)
     gamedays_counter = SerializerMethodField()
     isSelected = BooleanField(source='is_selected')
+    joined_on = DateField(format='%d.%m.%Y')
+    left_on = DateField(format='%d.%m.%Y')
 
     def get_jersey_number(self, obj: dict):
         gameday_jersey = obj['gameday_jersey']

@@ -3,7 +3,7 @@ from factory import post_generation, SubFactory
 from factory.django import DjangoModelFactory
 
 from gamedays.tests.setup_factories.factories import TeamFactory, PersonFactory, GamedayFactory
-from passcheck.models import Playerlist, EligibilityRule, Player, PlayerlistGameday
+from passcheck.models import Playerlist, EligibilityRule, Player, PlayerlistGameday, PlayerlistTransfer
 
 
 class PlayerFactory(DjangoModelFactory):
@@ -41,6 +41,16 @@ class PlayerlistGamedayFactory(DjangoModelFactory):
     playerlist = SubFactory(PlayerlistFactory)
     gameday = SubFactory(GamedayFactory)
     gameday_jersey = factory.Faker('random_int', min=0, max=99)
+
+
+class PlayerlistTransferFactory(DjangoModelFactory):
+    class Meta:
+        model = PlayerlistTransfer
+
+    current_team = SubFactory(PlayerlistFactory)
+    new_team = SubFactory(TeamFactory)
+
+
 
 
 class EligibilityRuleFactory(DjangoModelFactory):

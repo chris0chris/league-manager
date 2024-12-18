@@ -88,7 +88,7 @@ class PasscheckService:
     def get_roster(self, team_id: int, year: int, gameday_id: int = None):
         team = self._get_team(team_id)
         years = Playerlist.objects.filter(team=team).exclude(gamedays__league__name=None).values_list(
-                'gamedays__date__year', flat=True).distinct()
+            'gamedays__date__year', flat=True).distinct()
         all_leagues = (Playerlist.objects
                        .filter(team=team, joined_on__year__lte=year)
                        .filter(Q(left_on__isnull=True) | Q(left_on__year__gte=year))
@@ -102,7 +102,8 @@ class PasscheckService:
                                                            & Q(gamedays__date__year=year))) for
             league in all_leagues
         }
-        roster = self._get_roster(team, gameday_id, league_annotations, year)
+        roster = self._get_roster(team, gameday_id, league_annotations, year).values(*RosterSerializer.ALL_FIELD_VALUES,
+                                                                                     *list(league_annotations.keys()))
         team_data = TeamData(
             name=team.description,
             roster=RosterSerializer(instance=roster, is_staff=(self.user_permission.is_user_or_staff()),
@@ -128,7 +129,9 @@ class PasscheckService:
             if today != gameday.date:
                 raise PasscheckException(
                     f'Passcheck nicht erlaubt für Spieltag: {gameday_id}. Nur heutige Spieltage sind erlaubt.')
-        roster = self._get_roster(team_id, gameday_id, {})
+        roster = self._get_roster(team_id, gameday_id, {}).filter(Q(joined_on__lte=gameday.date)).filter(
+            Q(left_on__isnull=True) | Q(left_on__gt=gameday.date)).values(
+            *RosterSerializer.ALL_FIELD_VALUES)
         try:
             team = {'team': TeamData(
                 name=self._get_team(team_id).description,
@@ -156,8 +159,13 @@ class PasscheckService:
                                                   filter=(Q(gamedays__league=gameday.league) &
                                                           Q(gamedays__date__year=gameday.date.year) &
                                                           ~Q(gamedays__id=gameday_id)))}
-                roster_addiational_team = self._get_roster(additional_relation.team.pk, gameday_id,
-                                                           gameday_league_annotation)
+                roster_addiational_team = self._get_roster(
+                    additional_relation.team.pk,
+                    gameday_id,
+                    gameday_league_annotation).values(
+                    *RosterSerializer.ALL_FIELD_VALUES,
+                    *list(gameday_league_annotation.keys())
+                )
                 if not roster_addiational_team.exists():
                     continue
                 ev = EligibilityValidator(additional_relation.league, gameday)
@@ -192,16 +200,15 @@ class PasscheckService:
             year = datetime.date.today().year
         is_selected_query = self._is_selected_query(gameday_id)
         gameday_jersey = self._get_gameday_jersey_query(gameday_id)
-        league_ids = list(league_annotations.keys())
 
         return (Playerlist.objects
-                .filter(team=team, joined_on__year__lte=year)
-                .filter(Q(left_on__isnull=True) | Q(left_on__year__gte=year))
-                .annotate(
-                    **league_annotations,
-                    is_selected=is_selected_query,
-                    gameday_jersey=gameday_jersey,
-                ).values(*RosterSerializer.ALL_FIELD_VALUES, *league_ids))
+        .filter(team=team, joined_on__year__lte=year)
+        .filter(Q(left_on__isnull=True) | Q(left_on__year__gte=year))
+        .annotate(
+            **league_annotations,
+            is_selected=is_selected_query,
+            gameday_jersey=gameday_jersey,
+        ))
 
     def _is_selected_query(self, gameday_id):
         if gameday_id is None:
@@ -304,5 +311,5 @@ class PasscheckServicePlayers:
 
 class TeamData(dict):
     def __init__(self, name, roster, validator):
-        roster = sorted(roster, key=lambda x: x.get('jersey_number'))
+        roster = sorted(roster, key=lambda x: (x.get('jersey_number') is None, x.get('jersey_number', 100)))
         super().__init__(name=name, roster=roster, validator=validator)

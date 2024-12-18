@@ -4,7 +4,8 @@ from dal import autocomplete
 from django import forms
 
 from gamedays.models import Team, Person
-from passcheck.models import Playerlist, Player
+from passcheck.models import Playerlist, Player, PlayerlistTransfer
+from passcheck.service.transfer_service import TransferService
 
 
 class PlayerlistCreateForm(forms.ModelForm):
@@ -30,14 +31,14 @@ class PlayerlistCreateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        user = kwargs.get('initial', {}).get('user')
+        self.user = kwargs.get('initial', {}).get('user')
         current_year = datetime.today().year
         self.fields['year_of_birth'].widget.attrs['min'] = current_year - 70
         self.fields['year_of_birth'].widget.attrs['max'] = current_year - 15
-        is_staff = user and user.is_staff
+        is_staff = self.user and self.user.is_staff
 
         try:
-            self.fields['team'].initial = Team.objects.get(name=user.username)
+            self.fields['team'].initial = Team.objects.get(name=self.user.username)
             self.fields['team'].label_from_instance = lambda obj: obj.description
         except Team.DoesNotExist:
             pass
@@ -94,3 +95,49 @@ class PlayerlistUpdateForm(PlayerlistCreateForm):
         self.fields['pass_number'].help_text = ('Die Passnummer ist nicht bearbeitbar. '
                                                 'Wenn diese nicht stimmen sollte, '
                                                 'dann schicke bitte eine entsprechende Mail an deine Ligaorganisation.')
+
+
+class PlayerlistTransferForm(PlayerlistCreateForm):
+    new_team = forms.ModelChoiceField(
+        queryset=Team.objects.all(),
+        label="Neues Team",
+        widget=autocomplete.ModelSelect2(
+            url='/dal/team'
+        ),
+        required=True
+    )
+    note = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 5}),
+        required=False,
+        label="Notiz für Grund Genehmigung/Ablehung",
+    )
+
+    def __init__(self, *args, action_type=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.action_type = action_type
+
+        fields_order = ['new_team', 'note']
+        exclude_fields_for_disabled = ['new_team', 'note']
+        for field_name in self.fields:
+            if field_name not in exclude_fields_for_disabled:
+                self.fields[field_name].disabled = True
+                self.fields[field_name].required = False
+                fields_order = fields_order + [field_name]
+        self.order_fields(fields_order)
+        player_to_transfer: PlayerlistTransfer = PlayerlistTransfer.objects.filter(current_team=self.instance,
+                                                                                   status='pending').first()
+        if player_to_transfer:
+            self.fields['new_team'].initial = player_to_transfer.new_team
+            self.fields['new_team'].label_from_instance = lambda obj: obj.description
+            if not self.user.is_staff:
+                self.fields.pop('note')
+        else:
+            self.fields.pop('note')
+
+    def save(self, commit=True):
+        new_team = self.cleaned_data.get('new_team')
+        note = self.cleaned_data.get('note')
+        transfer_service = TransferService(self.instance, new_team, self.user, note)
+        transfer_service.handle_transfer(self.action_type)
+
+        return self.instance

@@ -1,7 +1,8 @@
 from django.urls import path
 from django.views.generic import TemplateView
 
-from .views import PasscheckPlayerGamesList, PlayerlistCreateView, RosterView, PasscheckView, PlayerlistUpdateView
+from .views import PasscheckPlayerGamesList, PlayerlistCreateView, RosterView, PasscheckView, PlayerlistUpdateView, \
+    PlayerlistTransferView, TransferListView
 
 PASSCHECK_APP = 'passcheck-app-view'
 
@@ -10,15 +11,20 @@ PASSCHECK_PLAYER_CREATE = 'passcheck-player-create'
 PASSCHECK_ROSTER_LIST = 'passcheck-roster-list'
 PASSCHECK_ROSTER_LIST_FOR_YEAR = 'passcheck-roster-list-for-year'
 PASSCHECK_ROSTER_UPDATE = 'passcheck-player-update'
+PASSCHECK_ROSTER_TRANSFER = 'passcheck-player-transfer'
 PASSCHECK_TEAM_NOT_EXISTENT = 'passcheck-team-not-existent'
+PASSCHECK_TRANSFER_LIST = 'passcheck-transfer-list'
 
 urlpatterns = [
     path('', PasscheckView.as_view(), name=PASSCHECK_APP),
-    path('team/not-existent', TemplateView.as_view(template_name='passcheck/team-not-existent.html'), name=PASSCHECK_TEAM_NOT_EXISTENT),
+    path('team/not-existent', TemplateView.as_view(template_name='passcheck/team-not-existent.html'),
+         name=PASSCHECK_TEAM_NOT_EXISTENT),
     path('player/<int:pk>/games/list/<int:year>', PasscheckPlayerGamesList.as_view(), name=PASSCHECK_PLAYER_GAMES_LIST),
     path('player/<int:pk>/games/list', PasscheckPlayerGamesList.as_view(), name=PASSCHECK_PLAYER_GAMES_LIST),
     path('player/create', PlayerlistCreateView.as_view(), name=PASSCHECK_PLAYER_CREATE),
     path('player/<int:pk>/update', PlayerlistUpdateView.as_view(), name=PASSCHECK_ROSTER_UPDATE),
+    path('player/<int:pk>/transfer', PlayerlistTransferView.as_view(), name=PASSCHECK_ROSTER_TRANSFER),
+    path('transfer/list', TransferListView.as_view(), name=PASSCHECK_TRANSFER_LIST),
     path('roster/<int:pk>/list', RosterView.as_view(), name=PASSCHECK_ROSTER_LIST),
     path('roster/<int:pk>/list/<int:season>', RosterView.as_view(), name=PASSCHECK_ROSTER_LIST_FOR_YEAR),
 ]

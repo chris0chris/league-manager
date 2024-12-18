@@ -1,0 +1,44 @@
+{% extends "passcheck/forms/playerlist_form.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+{{ block.super }}
+{% endblock content %}
+
+{% block title_playerlist_form %}
+<legend class="border-bottom mb-4">
+    Transfer
+</legend>
+{% endblock title_playerlist_form %}
+
+{% block pass_number_warning %}
+{% endblock pass_number_warning %}
+
+{% block submit_area %}
+<div class="form-group">
+    {% if has_transfer_status %}
+    {% if user.is_staff %}
+    <div class="row">
+        <div class="col-6">
+            <button class="btn btn-success w-100" name="action_type" value="approved" type="submit">
+                Genehmigen
+            </button>
+        </div>
+        <div class="col-6">
+            <button class="btn btn-danger w-100" name="action_type" value="rejected" type="submit">
+                Ablehnen
+            </button>
+        </div>
+    </div>
+    {% else %}
+    <button class="btn btn-warning w-100" disabled>
+        Transfer bereits in Arbeit
+    </button>
+    {% endif %}
+    {% else %}
+    <button class="btn btn-warning w-100" name="action_type" value="pending" type="submit">
+        Transfer starten
+    </button>
+    {% endif %}
+</div>
+{% endblock submit_area %}

@@ -40,6 +40,8 @@
                 <th scope="col">Vorname</th>
                 <th scope="col">Nachname</th>
                 <th scope="col">Passnummer</th>
+                <th scope="col">Gestartet am</th>
+                <th scope="col">Gegangen am</th>
                 {% for league in all_leagues %}
                 <th scope="col">#{{league.gamedays__league__name}}</th>
                 {% endfor %}
@@ -48,15 +50,23 @@
             <tbody>
             {% for player in team.roster %}
             <tr>
-                {% if is_user_or_staff %}
-                <td><a href="{% url 'passcheck-player-update' pk=player.id %}"
-                       title="{{player.first_name}} {{player.last_name}} bearbeiten"><i
-                        class="bi bi-pencil"></i></a></td>
+                {% if is_user_or_staff  %}
+                    {% if player.left_on is None%}
+                    <td><a href="{% url 'passcheck-player-update' pk=player.id %}"
+                           title="{{player.first_name}} {{player.last_name}} bearbeiten"><i
+                            class="bi bi-pencil"></i></a></td>
+                    {% else %}
+                    <td><a href="{% url 'passcheck-player-transfer' %}" title="Person ist nicht mehr im Team">
+                        <i class="bi bi-person-up"></i></a>
+                    </td>
+                    {% endif %}
                 {% endif %}
-                <td>{{player.jersey_number}}</td>
+                <td>{% if player.jersey_number is None %}-{% else %}{{player.jersey_number}}{% endif %}</td>
                 <td>{{player.first_name}}</td>
                 <td>{{player.last_name}}</td>
                 <td>{{player.pass_number}}</td>
+                <td>{{player.joined_on}}</td>
+                <td>{% if player.left_on is not None %}{{player.left_on}}{% endif %}</td>
                 {% for league in all_leagues %}
                 {% with field_name=league.gamedays__league %}
                 <td>
