@@ -6,6 +6,8 @@ from typing import List
 import requests
 from django.conf import settings
 
+from officials.service.boff_license_calculation import LicenseStrategy
+
 
 class FieldNotFoundException(Exception):
     def __init__(self, field, current_field):
@@ -35,7 +37,10 @@ class ApiUserInfo:
         return self.email
 
     def get_team(self) -> str:
-        return self._get_custom_field_value('Team')
+        return self._get_custom_field_value('teamname')
+
+    def get_team_id(self) -> str:
+        return self._get_custom_field_value('teamid')
 
     def get_association(self) -> str:
         return self._get_custom_field_value('LandesverbandAuswahl')
@@ -44,7 +49,7 @@ class ApiUserInfo:
         value = self._get_custom_field_value('Landesverband')
         return value == 'Ja.'
 
-    def _get_custom_field_value(self,expected_field_name):
+    def _get_custom_field_value(self, expected_field_name):
         found_entry = {}
         try:
             for item in self.custom_fields:
@@ -58,7 +63,7 @@ class ApiUserInfo:
         return found_entry.get('value', '')
 
     def __str__(self):
-        return f'{self.id}: {self.last_name}, {self.first_name} -> {self.get_team()}'
+        return f'{self.id}: {self.last_name}, {self.first_name} -> {self.get_team()} ({self.get_team_id()})'
 
 
 class ApiCourse:
@@ -88,7 +93,10 @@ class ApiCourse:
         year = datetime.today().year
         if self.course_id == 15:
             return True
-        return self.end_date.year == year and self.license_id in [1, 2, 3]
+        return self.end_date.year == year and self.license_id in [LicenseStrategy.F1_LICENSE,
+                                                                  LicenseStrategy.F2_LICENSE,
+                                                                  LicenseStrategy.F3_LICENSE,
+                                                                  LicenseStrategy.F4_LICENSE]
 
     def get_id(self):
         return self.course_id
@@ -206,7 +214,6 @@ class MoodleApi:
         if ids is None:
             return ApiCourses(self._send_request('&wsfunction=core_course_get_courses_by_field'))
         return ApiCourses(self._send_request(f'&wsfunction=core_course_get_courses_by_field&field=ids&value={ids}'))
-
 
     def get_participants_for_course(self, course_id) -> ApiParticipants:
         return ApiParticipants(self._send_request(

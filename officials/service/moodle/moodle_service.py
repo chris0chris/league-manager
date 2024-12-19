@@ -115,7 +115,8 @@ class MoodleService:
     def get_info_of_user_with_result(self, course, participant):
         user_info: ApiUserInfo = self.moodle_api.get_user_info_by_id(participant.get_user_id())
         team_description = user_info.get_team()
-        team: Team = self._get_first(Team.objects.filter(description=team_description))
+        team_id = user_info.get_team_id()
+        team: Team = self._get_first(Team.objects.filter(pk=team_id))
         if team is None:
             missed_officials = [
                 f'{course.get_id()}: {user_info.id} - {user_info.get_last_name()} '
@@ -150,7 +151,7 @@ class MoodleService:
             official.external_id = user_info.get_id()
         official.first_name = user_info.get_first_name()
         official.last_name = user_info.get_last_name()
-        official.team = self._get_first(Team.objects.filter(description=user_info.get_team()))
+        official.team = self._get_first(Team.objects.filter(pk=user_info.get_team_id()))
         if user_info.whistle_for_association():
             official.association = Association.objects.get(name=user_info.get_association())
         official.save()
