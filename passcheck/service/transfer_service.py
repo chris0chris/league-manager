@@ -8,7 +8,7 @@ from passcheck.service.repositories.transfer_repository import TransferRepositor
 
 
 class TransferService:
-    def __init__(self, playerlist: Playerlist, new_team: Team, user: User, note: str|None):
+    def __init__(self, playerlist: Playerlist, new_team: Team, user: User, note: str | None = None):
         self.playerlist = playerlist
         self.new_team = new_team
         self.user = user
@@ -41,4 +41,3 @@ class TransferService:
             self.approve_transfer()
         elif status == 'rejected':
             self.reject_transfer()
-

@@ -1,6 +1,7 @@
 from django.urls import path, re_path
 
-from officials.views import OfficialsTeamListView, AllOfficialsListView, GameOfficialListView, \
+from league_manager.views import AllTeamListView
+from officials.views import OfficialsTeamListView, GameOfficialListView, \
     AddInternalGameOfficialUpdateView, MoodleReportView, \
     OfficialProfileLicenseView, OfficialAssociationListView, OfficialProfileGamelistView, OfficialSignUpListView, \
     MoodleLoginView, OfficialSignUpView, OfficialSignUpCancelView, LicenseCheckForOfficials
@@ -26,8 +27,7 @@ OFFICIALS_SIGN_UP_CANCEL_FOR_GAMEDAY = 'view-officials-sign-up-cancel-for-gameda
 urlpatterns = [
     path('team/<int:pk>/list', OfficialsTeamListView.as_view(), name=OFFICIALS_LIST_FOR_TEAM),
     path('team/<int:pk>/list/<int:season>', OfficialsTeamListView.as_view(), name=OFFICIALS_LIST_FOR_TEAM_AND_YEAR),
-    path('team/all/list', AllOfficialsListView.as_view(), name=OFFICIALS_LIST_FOR_ALL_TEAMS),
-    path('team/all/list/<int:year>', AllOfficialsListView.as_view(), name=OFFICIALS_LIST_FOR_ALL_TEAMS_AND_YEAR),
+    path('team/all/list', AllTeamListView.as_view(), name=OFFICIALS_LIST_FOR_ALL_TEAMS, kwargs={'app': 'officials'}, ),
     path('einsaetze', GameOfficialListView.as_view(), name=OFFICIALS_GAME_OFFICIALS_APPEARANCE),
     re_path('team/(?P<pk>\w+)?/gamelist/(?P<season>\d+)?', GameOfficialListView.as_view(),
             name=OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_TEAM_AND_YEAR),

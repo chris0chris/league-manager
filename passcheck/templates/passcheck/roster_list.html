@@ -56,7 +56,7 @@
                            title="{{player.first_name}} {{player.last_name}} bearbeiten"><i
                             class="bi bi-pencil"></i></a></td>
                     {% else %}
-                    <td><a href="{% url 'passcheck-player-transfer' %}" title="Person ist nicht mehr im Team">
+                    <td><a href="{% url 'passcheck-transfer-list' %}" title="Person ist nicht mehr im Team">
                         <i class="bi bi-person-up"></i></a>
                     </td>
                     {% endif %}
