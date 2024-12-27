@@ -4,9 +4,11 @@
 {% if not request.GET.isExtern %}
 <div class="d-flex justify-content-between align-items-center">
     <h1>Spieltag "{{ object.name }}"</h1>
+    {% if user.is_staff %}
     <h2><a href="{% url 'league-gameday-update' pk=object.id%}" class="btn btn-primary">
         <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Bearbeiten</span>
     </a></h2>
+    {% endif %}
 </div>
 {% endif %}
 <div class="row mb-1">
