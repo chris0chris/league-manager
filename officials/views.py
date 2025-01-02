@@ -53,16 +53,6 @@ class OfficialsTeamListView(View):
         return self.request.user.username == team.name
 
 
-class AllOfficialsListView(View):
-    template_name = 'officials/all_officials_list.html'
-
-    @method_decorator(cache_page(60 * 60 * 24))
-    def get(self, request, **kwargs):
-        all_teams = Team.objects.all().exclude(location='dummy').order_by('description')
-        context = {'object_list': all_teams}
-        return render(request, self.template_name, context)
-
-
 class GameOfficialListView(View):
     template_name = 'officials/game_officials_list.html'
 

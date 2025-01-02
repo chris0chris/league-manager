@@ -5,7 +5,8 @@ from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import TeamFactory, LeagueFactory, SeasonFactory, GamedayFactory, \
     SeasonLeagueTeamFactory
 from passcheck.models import Playerlist
-from passcheck.tests.setup_factories.factories_passcheck import PlayerlistFactory, EligibilityRuleFactory
+from passcheck.tests.setup_factories.factories_passcheck import PlayerlistFactory, EligibilityRuleFactory, \
+    PlayerlistTransferFactory
 
 
 class DbSetupPasscheck:
@@ -77,3 +78,10 @@ class DbSetupPasscheck:
             max_subs_in_other_leagues=2,
         )
         return prime_league, second_league, third_league, season, second_league_team
+
+    @staticmethod
+    def create_player_transfer(number=1):
+        playerlist_transfers = []
+        for _ in range(number):
+            playerlist_transfers.append(PlayerlistTransferFactory())
+        return playerlist_transfers

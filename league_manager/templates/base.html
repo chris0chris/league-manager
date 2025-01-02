@@ -39,21 +39,41 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarToggle">
-                <div class="navbar-nav mr-auto">
-                    <a class="nav-item nav-link" href="{% url 'league-home' %}">Home</a>
-                    <!--                    <a class="nav-item nav-link" href="{% url 'teammanager' %}">Teammanager</a>-->
-                    <a class="nav-item nav-link" href="{% url 'view-officials-list-for-all-teams' %}">Teams</a>
-                    <a class="nav-item nav-link" href="{% url 'view-officials-game-officials-appearance' %}">Alle
-                        Einsätze</a>
-                    {% if object %}
-                    <a class="nav-item nav-link" href="{% url 'league-gameday-update' object.id%}">Edit</a>
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'league-home' %}">Home</a>
+                    </li>
+                    {% for key, menu in menu_items.items %}
+                    {% if menu.items %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            {{ menu.name }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for menu_item in menu.items %}
+                            <li>
+                                {% if menu_item.is_divider %}
+                                <hr class="dropdown-divider">
+                                {% else %}
+                                <a class="dropdown-item"
+                                   href="{{ menu_item.url }}"
+                                   {% if menu_item.is_static %}target="_blank" {% endif %}>
+                                    {{ menu_item.name }}
+                                </a>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
                     {% endif %}
-                </div>
+                    {% endfor %}
+                </ul>
                 <!-- Navbar Right Side -->
                 {% if user.is_authenticated %}
                 {% if user.is_staff %}
                 <div class="navbar-nav">
-                    <a class="nav-item nav-link" href="{% url 'clear-cache' %}">
+                    <a class="nav-link" href="{% url 'clear-cache' %}">
                         <button class="btn btn-warning" type="button">Clear Cache</button>
                     </a>
                 </div>
@@ -61,10 +81,10 @@
                 <div class="navbar-nav">
                     <form id="logout-form" method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
-                        <button class="nav-item nav-link" type="submit">Logout</button>
+                        <button class="nav-link" type="submit">Logout</button>
                     </form>
                     {% else %}
-                    <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
                     {% endif %}
                 </div>
             </div>
@@ -82,17 +102,6 @@
         {% endfor %}
         {% endif %}
         {% block content %}{% endblock %}
-        <!--div class="col-md-4">
-            <div class="content-section">
-                <h3>Our Sidebar</h3>
-                <ul class="list-group">
-                    <li class="list-group-item list-group-item-light">Latest Posts</li>
-                    <li class="list-group-item list-group-item-light">Announcements</li>
-                    <li class="list-group-item list-group-item-light">Calendars</li>
-                    <li class="list-group-item list-group-item-light">etc</li>
-                </ul>
-            </div>
-        </div-->
     </div>
     {% block footer %}{% endblock %}
 </main>

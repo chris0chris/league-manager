@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2><i class="bi bi-person-up"></i> Offene Transfers</h2>
+<div class="list-group">
+    {% for transfer in object_list %}
+    {% if user.is_staff %}
+    <a href="{% url transfer_url pk=transfer.current_team.pk %}" class="list-group-item list-group-item-action">
+        {{ transfer.current_team.player.person.first_name }} {{ transfer.current_team.player.person.last_name }}:
+        {{ transfer.current_team.team.description }} nach {{transfer.new_team.description}}</a>
+    {% else %}
+    <div class="list-group-item list-group-item-action">
+        {{ transfer.current_team.player.person.first_name }} {{ transfer.current_team.player.person.last_name }}:
+        <a href="{% url 'passcheck-roster-list' pk=transfer.current_team.team.pk %}">{{ transfer.current_team.team.description }}</a>
+        nach
+        <a href="{% url 'passcheck-roster-list' pk=transfer.new_team.pk %}">{{ transfer.new_team.description }}</a>
+    </div>
+    {% endif %}
+    {% empty %}
+    Keine offenen Transfers vorhanden.
+    {% endfor %}
+</div>
+{% endblock %}
