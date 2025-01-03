@@ -45,10 +45,8 @@ jobs:
           pip install -r requirements.txt
           pip install -r test_requirements.txt
       - name: Run Tests
-        run: |
-          pytest
+        uses: dariocurr/pytest-summary@main
         env:
           MYSQL_HOST: 0.0.0.0
           SECRET_KEY: 123456-TEST
           CIRCLECI: 1
-      - uses: dariocurr/pytest-summary@main
