@@ -15,15 +15,16 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: true
     healthcheck:
       test: mysqladmin ping
+      start_period: 5s
 
   app:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     labels:
       - traefik.http.routers.${SERVICE_NAME}.tls=true
-      - traefik.http.routers.${SERVICE_NAME}.rule=Host(`lm.lehel.xyz`)
+      - traefik.http.routers.${SERVICE_NAME}.rule=Host(`${SERVICE_HOST}`)
       - traefik.http.routers.${SERVICE_NAME}.tls.certresolver=letsencryptdnsresolver
-      - traefik.http.routers.${SERVICE_NAME}_local_qualified.rule=Host(`lm.servyy-test.lxd`)
+      - traefik.http.routers.${SERVICE_NAME}_local_qualified.rule=Host(`${SERVICE_NAME}.${LOCAL_HOSTNAME}`)
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.entrypoints=web
     environment:
       MYSQL_HOST: db
