@@ -19,7 +19,7 @@ services:
 
   app:
     build: .
-    command: gunicorn league_manager.wsgi
+    command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
       - traefik.http.routers.${SERVICE_NAME}.tls=true
       - traefik.http.routers.${SERVICE_NAME}.rule=Host(`${SERVICE_HOST}`)
