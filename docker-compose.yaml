@@ -31,7 +31,7 @@ services:
       MYSQL_DB_NAME: test_test_db
       MYSQL_USER: user
       MYSQL_PASSWORD: user
-      DJANGO_SETTINGS_MODULE: settings.dev
+      DJANGO_SETTINGS_MODULE: league_manager.settings.dev
     depends_on:
       db:
         condition: service_healthy
