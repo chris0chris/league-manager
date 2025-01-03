@@ -7,7 +7,7 @@ ARG APP_DIR="/app"
 RUN apt-get -y update
 RUN apt-get -y install curl
 RUN apt-get -y install pkg-config python3-dev build-essential
-RUN apt-get -y install mysql-client
+RUN apt -y install default-mysql-client
 # add user
 RUN adduser --disabled-password --home ${APP_DIR} ${APP_USER}
 RUN chown ${APP_USER}:${APP_USER} -R ${APP_DIR}
