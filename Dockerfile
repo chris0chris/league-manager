@@ -16,6 +16,7 @@ RUN chown ${APP_USER}:${APP_USER} -R ${APP_DIR}
 
 WORKDIR ${APP_DIR}
 COPY --chown=${APP_USER} ./requirements.txt ${APP_DIR}
+RUN rm -rf .git/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN pip install gunicorn
