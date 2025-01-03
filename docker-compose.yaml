@@ -19,8 +19,12 @@ services:
   app:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
-    ports:
-      - "8000:8000"
+    labels:
+      - traefik.http.routers.${SERVICE_NAME}.tls=true
+      - traefik.http.routers.${SERVICE_NAME}.rule=Host(`lm.lehel.xyz`)
+      - traefik.http.routers.${SERVICE_NAME}.tls.certresolver=letsencryptdnsresolver
+      - traefik.http.routers.${SERVICE_NAME}_local_qualified.rule=Host(`lm.servyy-test.lxd`)
+      - traefik.http.routers.${SERVICE_NAME}_local_qualified.entrypoints=web
     environment:
       MYSQL_HOST: db
       MYSQL_DB_NAME: test_test_db
