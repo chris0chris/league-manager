@@ -22,6 +22,5 @@ RUN pip install -r requirements.txt
 USER ${APP_USER}
 
 EXPOSE 8000
-COPY --chown=${APP_USER} ./entrypoint.sh ${APP_DIR}/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN chmod 740 /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
