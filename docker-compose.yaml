@@ -1,0 +1,27 @@
+services:
+  db:
+    ## If MariaDB gets stuck in a restart loop, this points to a memory or filesystem issue:
+    ## https://docs.photoprism.app/getting-started/troubleshooting/#fatal-server-errors
+    restart: unless-stopped
+    image: mysql:lts
+    command: --default-authentication-plugin=mysql_native_password, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --default-storage-engine=InnoDB
+    ## Never store database files on an unreliable device such as a USB flash drive, an SD card, or a shared network folder:
+    volumes:
+      - "./database:/var/lib/mysql"
+    environment:
+      MYSQL_DATABASE: test_test_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+
+  app:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    environment:
+      MYSQL_DB_NAME: test_test_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    depends_on:
+      - db
