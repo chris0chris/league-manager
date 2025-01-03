@@ -25,4 +25,6 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: user
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
