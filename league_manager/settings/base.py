@@ -151,7 +151,7 @@ DATABASES = {
     },
 }
 
-MOODLE_URL = os.environ.get('MOODLE_URL')
+MOODLE_URL = os.environ.get('MOODLE_URL', 'http://localhost')
 MOODLE_WSTOKEN = os.environ.get('MOODLE_WSTOKEN')
 EQUIPMENT_APPROVAL_ENDPOINT = os.environ.get('EQUIPMENT_APPROVAL_ENDPOINT')
 EQUIPMENT_APPROVAL_TOKEN = os.environ.get('EQUIPMENT_APPROVAL_TOKEN')
