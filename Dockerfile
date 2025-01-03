@@ -20,6 +20,7 @@ RUN rm -rf .git/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN pip install gunicorn
+RUN pip install debug_toolbar
 
 USER ${APP_USER}
 
