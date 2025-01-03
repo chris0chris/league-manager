@@ -20,6 +20,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      MYSQL_HOST: db
       MYSQL_DB_NAME: test_test_db
       MYSQL_USER: user
       MYSQL_PASSWORD: user
