@@ -47,7 +47,7 @@ jobs:
       - name: Run Tests
         uses: dariocurr/pytest-summary@main
         with:
-          paths: tests/**.py
+          paths: ./**/tests/**.py
         env:
           MYSQL_HOST: 0.0.0.0
           SECRET_KEY: 123456-TEST
