@@ -32,7 +32,11 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: user
       DJANGO_SETTINGS_MODULE: league_manager.settings.dev
+    networks:
+      - proxy
     depends_on:
       db:
         condition: service_healthy
-
+  networks:
+    proxy:
+      external: true
