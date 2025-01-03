@@ -18,6 +18,7 @@ WORKDIR ${APP_DIR}
 COPY --chown=${APP_USER} ./requirements.txt ${APP_DIR}
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN pip install gunicorn
 
 USER ${APP_USER}
 
