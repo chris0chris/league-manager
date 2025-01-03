@@ -23,17 +23,20 @@ class TestOfficialsRepositoryService(TestCase):
         # Check that the correct officials are returned
         assert len(officials) == 2
 
+        current_year = datetime.now().year
+        previous_year = current_year - 1
+
         # Assert values for the first official
         official_1_data = officials[0]
         assert official_1_data.license_name == 'F1'
-        assert official_1_data.license_years == '2020,2023,2024'
+        assert official_1_data.license_years == f'2020,{previous_year},{current_year}'
         assert official_1_data.total_season_games == 11
         assert official_1_data.total_games == 21
 
         # Assert values for the second official
         official_2_data = officials[1]
         assert official_2_data.license_name == 'F2'
-        assert official_2_data.license_years == '2023,2024'
+        assert official_2_data.license_years == f'{previous_year},{current_year}'
         assert official_2_data.total_season_games == 15
         # noinspection PyComparisonWithFloats result will always be sharp .0 or .5
         assert official_2_data.total_games == 21.5
