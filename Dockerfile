@@ -4,10 +4,10 @@ ENV PYTHONUNBUFFERED=1
 ARG APP_USER="django"
 ARG APP_DIR="/app"
 # install curl for healthcheck
-RUN apt get -y update
-RUN apt get -y install curl
-RUN apt get -y install pkg-config python3-dev build-essential
-RUN apt get mysql-client
+RUN apt-get -y update
+RUN apt-get -y install curl
+RUN apt-get -y install pkg-config python3-dev build-essential
+RUN apt-get mysql-client
 # add user
 RUN adduser --disabled-password --home ${APP_DIR} ${APP_USER}
 RUN chown ${APP_USER}:${APP_USER} -R ${APP_DIR}
