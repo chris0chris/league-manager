@@ -2,7 +2,7 @@ services:
   www:
     build:
       context: .
-      dockerfile: Dockerfile.nginx
+      dockerfile: container/nginx.Dockerfile
     container_name: ${COMPOSE_PROJECT_NAME}.www
     labels:
       - traefik.http.routers.frontend_${SERVICE_NAME}.tls=true
@@ -19,8 +19,11 @@ services:
     healthcheck:
       test: curl -A healthcheck -I --fail http://localhost || exit 1
     restart: unless-stopped
+
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: container/app.Dockerfile
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     environment:

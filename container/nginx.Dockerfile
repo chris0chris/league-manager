@@ -13,11 +13,11 @@ RUN apt -y install build-essential
 RUN apt -y install default-libmysqlclient-dev
 
 # install environment
-COPY ./requirements.txt ${APP_DIR}
+COPY ../requirements.txt ${APP_DIR}
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-COPY . ${APP_DIR}
+COPY ../ ${APP_DIR}
 
 # collect static files
 RUN python manage.py collectstatic --no-input --clear
