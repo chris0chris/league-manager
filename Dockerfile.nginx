@@ -5,6 +5,12 @@ ARG APP_DIR="/app"
 
 WORKDIR ${APP_DIR}
 
+# install build requirements
+RUN apt -y install pkg-config
+RUN apt -y install python3-dev
+RUN apt -y install build-essential
+RUN apt -y install default-libmysqlclient-dev
+
 # install environment
 COPY ./requirements.txt ${APP_DIR}
 RUN pip install --upgrade pip
