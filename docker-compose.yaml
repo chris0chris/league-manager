@@ -8,6 +8,8 @@ services:
     ## Never store database files on an unreliable device such as a USB flash drive, an SD card, or a shared network folder:
     volumes:
       - "./database:/var/lib/mysql"
+    networks:
+      - backend
     environment:
       MYSQL_DATABASE: test_test_db
       MYSQL_USER: user
@@ -26,8 +28,6 @@ services:
       - traefik.http.routers.${SERVICE_NAME}.tls.certresolver=letsencryptdnsresolver
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.rule=Host(`${SERVICE_NAME}.${LOCAL_HOSTNAME}`)
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.entrypoints=web
-    links:
-      - db:db
     environment:
       MYSQL_HOST: db
       MYSQL_DB_NAME: test_test_db
@@ -35,10 +35,12 @@ services:
       MYSQL_PASSWORD: user
       DJANGO_SETTINGS_MODULE: league_manager.settings.dev
     networks:
+      - backend
       - proxy
     depends_on:
       db:
         condition: service_healthy
 networks:
+  backend:
   proxy:
     external: true
