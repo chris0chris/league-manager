@@ -25,6 +25,9 @@ USER ${APP_USER}
 COPY --chown=${APP_USER} ../ ${APP_DIR}
 RUN rm -rf .git/
 
+COPY --chown=${APP_USER} ${APP_DIR}/container/entrypoint.sh /app/entrypoint.sh
+RUN chmod 740 /app/entrypoint.sh
+
 EXPOSE 8000
-COPY --chmod=740 --chown=${APP_USER} ${APP_DIR}/container/entrypoint.sh /app/entrypoint.sh
+
 ENTRYPOINT ["/app/entrypoint.sh"]
