@@ -25,4 +25,4 @@ RUN python manage.py collectstatic --no-input --clear
 FROM nginx:stable
 
 COPY --from=builder /app/league_manager/league_manager/static /static
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./container/nginx.conf /etc/nginx/conf.d/default.conf
