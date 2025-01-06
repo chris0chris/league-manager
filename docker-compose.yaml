@@ -57,7 +57,7 @@ services:
       MYSQL_PASSWORD: user
       MYSQL_ALLOW_EMPTY_PASSWORD: true
     healthcheck:
-      test: mysqladmin ping
+      test: healthcheck.sh --connect --innodb_initialized
       start_period: 5s
 
 volumes:
