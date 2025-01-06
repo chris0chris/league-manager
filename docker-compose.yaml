@@ -10,9 +10,6 @@ services:
       - traefik.http.routers.frontend_${SERVICE_NAME}.tls.certresolver=letsencryptdnsresolver
       - traefik.http.routers.frontend_${SERVICE_NAME}_local_qualified.rule=Host(`${SERVICE_NAME}.${LOCAL_HOSTNAME}`)
       - traefik.http.routers.frontend_${SERVICE_NAME}_local_qualified.entrypoints=web
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - static:/static
     networks:
       - backend
       - proxy
