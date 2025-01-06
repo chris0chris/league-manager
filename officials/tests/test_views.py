@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from http import HTTPStatus
 from unittest.mock import patch, MagicMock
@@ -11,7 +12,7 @@ from rest_framework.reverse import reverse
 from gamedays.models import Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from officials.models import Official, OfficialGamedaySignup
-from officials.service.moodle.moodle_api import MoodleApiException
+from officials.service.moodle.moodle_api import MoodleApiException, ApiCourse
 from officials.service.moodle.moodle_service import MoodleService
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 from officials.urls import OFFICIALS_LIST_FOR_TEAM, OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE, \
@@ -108,7 +109,8 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
 
 class TestGameCountOfficials(WebTest):
     @patch.object(MoodleService, 'get_all_users_for_course')
-    def test_all_entries_will_be_checked(self, moodle_service_mock: MagicMock):
+    @patch.object(MoodleService, 'get_course_by_id')
+    def test_all_entries_will_be_checked(self, moodle_service_mock: MagicMock, moodle_course_service_mock:MagicMock):
         user = DBSetup().create_new_user('some staff user', is_staff=True)
         self.app.set_user(user)
         DbSetupOfficials().create_officials_full_setup()
@@ -117,6 +119,12 @@ class TestGameCountOfficials(WebTest):
         for current_official in Official.objects.all():
             all_official_ids += [int(current_official.external_id)]
         moodle_service_mock.return_value = all_official_ids
+        moodle_course_service_mock.return_value = ApiCourse({
+            "id": 1,
+            "categoryid": 5,
+            "enddate": time.time(),
+            "fullname": "course name 4",
+        })
         response: DjangoWebtestResponse = self.app.get(
             reverse(OFFICIALS_LICENSE_CHECK, kwargs={'course_id': 7})
         )
