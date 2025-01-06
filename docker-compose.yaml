@@ -26,6 +26,8 @@ services:
       - traefik.http.routers.${SERVICE_NAME}.tls.certresolver=letsencryptdnsresolver
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.rule=Host(`${SERVICE_NAME}.${LOCAL_HOSTNAME}`)
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.entrypoints=web
+    links:
+      - db:db
     environment:
       MYSQL_HOST: db
       MYSQL_DB_NAME: test_test_db
