@@ -32,8 +32,6 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: user
       DJANGO_SETTINGS_MODULE: league_manager.settings.dev
-    volumes:
-      - static:/app/league_manager/league_manager/static
     networks:
       - backend
     depends_on:
