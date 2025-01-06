@@ -1,6 +1,8 @@
 services:
   www:
-    image: nginx:stable
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
     container_name: ${COMPOSE_PROJECT_NAME}.www
     labels:
       - traefik.http.routers.frontend_${SERVICE_NAME}.tls=true
@@ -22,6 +24,7 @@ services:
     restart: unless-stopped
   app:
     build: .
+    container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     environment:
       MYSQL_HOST: db
@@ -40,12 +43,10 @@ services:
       test: curl -A healthcheck -I --fail http://localhost:8000 || exit 1
 
   db:
-    ## If MariaDB gets stuck in a restart loop, this points to a memory or filesystem issue:
-    ## https://docs.photoprism.app/getting-started/troubleshooting/#fatal-server-errors
     restart: unless-stopped
-    image: mysql:lts
+    image: mariadb:lts
+    container_name: ${COMPOSE_PROJECT_NAME}.db
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
-    ## Never store database files on an unreliable device such as a USB flash drive, an SD card, or a shared network folder:
     volumes:
       - "./database:/var/lib/mysql"
     networks:
