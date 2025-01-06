@@ -16,7 +16,6 @@ RUN chown ${APP_USER}:${APP_USER} -R ${APP_DIR}
 
 WORKDIR ${APP_DIR}
 COPY --chown=${APP_USER} ../requirements.txt ${APP_DIR}
-RUN rm -rf .git/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN pip install gunicorn
@@ -24,7 +23,8 @@ RUN pip install django-debug-toolbar
 
 USER ${APP_USER}
 COPY --chown=${APP_USER} ../ ${APP_DIR}
+RUN rm -rf .git/
 
 EXPOSE 8000
-RUN chmod 740 ${APP_DIR}/container/entrypoint.sh
-ENTRYPOINT ["${APP_DIR}/container/entrypoint.sh"]
+COPY --chmod=740 --chown=${APP_USER} ${APP_DIR}/container/entrypoint.sh /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
