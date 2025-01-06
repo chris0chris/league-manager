@@ -1,4 +1,38 @@
 services:
+  www:
+    image: nginx:stable
+    container_name: ${COMPOSE_PROJECT_NAME}.www
+    labels:
+      - traefik.http.routers.frontend_${SERVICE_NAME}.tls=true
+      - traefik.http.routers.frontend_${SERVICE_NAME}.rule=Host(`${SERVICE_HOST}`)
+      - traefik.http.routers.frontend_${SERVICE_NAME}.tls.certresolver=letsencryptdnsresolver
+      - traefik.http.routers.frontend_${SERVICE_NAME}_local_qualified.rule=Host(`${SERVICE_NAME}.${LOCAL_HOSTNAME}`)
+      - traefik.http.routers.frontend_${SERVICE_NAME}_local_qualified.entrypoints=web
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - static:/static
+    networks:
+      - backend
+      - proxy
+    healthcheck:
+      test: curl -A healthcheck -I --fail http://localhost || exit 1
+    restart: unless-stopped
+  app:
+    build: .
+    command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
+    environment:
+      MYSQL_HOST: db
+      MYSQL_DB_NAME: test_test_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      DJANGO_SETTINGS_MODULE: league_manager.settings.dev
+    volumes:
+      - static:/app/league_manager/league_manager/static
+    networks:
+      - backend
+    depends_on:
+      db:
+        condition: service_healthy
   db:
     ## If MariaDB gets stuck in a restart loop, this points to a memory or filesystem issue:
     ## https://docs.photoprism.app/getting-started/troubleshooting/#fatal-server-errors
@@ -19,27 +53,6 @@ services:
       test: mysqladmin ping
       start_period: 5s
 
-  app:
-    build: .
-    command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
-    labels:
-      - traefik.http.routers.${SERVICE_NAME}.tls=true
-      - traefik.http.routers.${SERVICE_NAME}.rule=Host(`${SERVICE_HOST}`)
-      - traefik.http.routers.${SERVICE_NAME}.tls.certresolver=letsencryptdnsresolver
-      - traefik.http.routers.${SERVICE_NAME}_local_qualified.rule=Host(`${SERVICE_NAME}.${LOCAL_HOSTNAME}`)
-      - traefik.http.routers.${SERVICE_NAME}_local_qualified.entrypoints=web
-    environment:
-      MYSQL_HOST: db
-      MYSQL_DB_NAME: test_test_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: user
-      DJANGO_SETTINGS_MODULE: league_manager.settings.dev
-    networks:
-      - backend
-      - proxy
-    depends_on:
-      db:
-        condition: service_healthy
 networks:
   backend:
   proxy:
