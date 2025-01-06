@@ -11,7 +11,7 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # collect static files
-python manage.py collectstatic --no-input --clear
+RUN python manage.py collectstatic --no-input --clear
 
 FROM nginx:stable
 
