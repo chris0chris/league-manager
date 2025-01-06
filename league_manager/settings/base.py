@@ -165,8 +165,6 @@ MAINTENANCE_PAGES = [
     '/officials/gameday/sign-up',
 ]
 
-# ToDo deleteMe
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -176,14 +174,18 @@ LOGGING = {
             "class": "logging.FileHandler",
             "filename": "debug.log",
         },
+        "console": {
+            "class": "logging.StreamHandler",
+        },
     },
     "loggers": {
         "django": {
-            "handlers": ["file"],
-            "level": "DEBUG",
+            "handlers": ["console"],
+            "level": "INFO",
             "propagate": True,
         },
     },
 }
 
+# ToDo deleteMe
 X_FRAME_OPTIONS = 'ALLOWALL'
