@@ -10,7 +10,7 @@ services:
       - traefik.http.routers.frontend_${SERVICE_NAME}_local_qualified.entrypoints=web
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./static:/static
+      - static:/static
     networks:
       - backend
       - proxy
@@ -30,7 +30,7 @@ services:
       MYSQL_PASSWORD: user
       DJANGO_SETTINGS_MODULE: league_manager.settings.dev
     volumes:
-      - ./static:/app/league_manager/league_manager/static
+      - static:/app/league_manager/league_manager/static
     networks:
       - backend
     depends_on:
@@ -58,6 +58,9 @@ services:
     healthcheck:
       test: mysqladmin ping
       start_period: 5s
+
+volumes:
+  static:
 
 networks:
   backend:
