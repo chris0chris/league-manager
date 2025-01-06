@@ -108,8 +108,8 @@ class TestAddInternalGameOfficialUpdateView(WebTest):
 
 
 class TestGameCountOfficials(WebTest):
-    @patch.object(MoodleService, 'get_all_users_for_course')
     @patch.object(MoodleService, 'get_course_by_id')
+    @patch.object(MoodleService, 'get_all_users_for_course')
     def test_all_entries_will_be_checked(self, moodle_service_mock: MagicMock, moodle_course_service_mock:MagicMock):
         user = DBSetup().create_new_user('some staff user', is_staff=True)
         self.app.set_user(user)
@@ -120,8 +120,8 @@ class TestGameCountOfficials(WebTest):
             all_official_ids += [int(current_official.external_id)]
         moodle_service_mock.return_value = all_official_ids
         moodle_course_service_mock.return_value = ApiCourse({
-            "id": 1,
-            "categoryid": 5,
+            "id": 7,
+            "categoryid": 4,
             "enddate": time.time(),
             "fullname": "course name 4",
         })
