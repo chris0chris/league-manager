@@ -24,7 +24,7 @@ RUN pip install django-debug-toolbar
 
 USER ${APP_USER}
 
-COPY --chown=${APP_USER} ./ ${APP_DIR}
+COPY --chown=${APP_USER} .. ${APP_DIR}
 
 EXPOSE 8000
 RUN chmod 740 /app/entrypoint.sh
