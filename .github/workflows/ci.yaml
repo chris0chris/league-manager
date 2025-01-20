@@ -1,7 +1,10 @@
 name: Build and deploy everything
 
 on:
-  workflow_call:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ master ]
 
 # Allow one concurrent deployment
 concurrency:
