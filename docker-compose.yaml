@@ -1,8 +1,6 @@
 services:
   www:
-    build:
-      context: .
-      dockerfile: container/nginx.Dockerfile
+    image: dachrisch/league-manager_frontend:latest
     container_name: ${COMPOSE_PROJECT_NAME}.www
     labels:
       - traefik.http.routers.frontend_${SERVICE_NAME}.tls=true
@@ -21,9 +19,7 @@ services:
     restart: unless-stopped
 
   app:
-    build:
-      context: .
-      dockerfile: container/app.Dockerfile
+    image: dachrisch/league-manager_frontend:backend
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     environment:
