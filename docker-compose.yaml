@@ -28,9 +28,7 @@ services:
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     environment:
       MYSQL_HOST: db
-      MYSQL_DB_NAME: test_test_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: user
+      MYSQL_DB_NAME: ${MYSQL_DATABASE}
       DJANGO_SETTINGS_MODULE: league_manager.settings.dev
     networks:
       - backend
@@ -50,9 +48,7 @@ services:
     networks:
       - backend
     environment:
-      MYSQL_DATABASE: test_test_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: user
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_ALLOW_EMPTY_PASSWORD: true
     healthcheck:
       test: healthcheck.sh --connect --innodb_initialized
