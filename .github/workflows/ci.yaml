@@ -16,6 +16,7 @@ jobs:
     uses: ./.github/workflows/part_build_test.yaml
   deploy-fe:
     needs: build-test
+    if: github.ref == 'refs/heads/master'
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
@@ -23,6 +24,7 @@ jobs:
       dockerfile: container/nginx.Dockerfile
   deploy-be:
     needs: build-test
+    if: github.ref == 'refs/heads/master'
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
