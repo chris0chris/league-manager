@@ -15,14 +15,14 @@ jobs:
   build-test:
     uses: ./.github/workflows/part_build_test.yaml
   deploy-fe:
-    needs: deploy
+    needs: build-test
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
       image_name: league-manager_frontend
       dockerfile: container/nginx.Dockerfile
   deploy-be:
-    needs: deploy
+    needs: build-test
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
