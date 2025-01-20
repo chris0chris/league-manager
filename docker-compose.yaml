@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
 
   app:
-    image: dachrisch/league-manager_frontend:backend
+    image: dachrisch/league-manager_backend:latest
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     environment:
