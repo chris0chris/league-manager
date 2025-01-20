@@ -1,0 +1,30 @@
+name: Build and deploy everything
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ master ]
+
+# Allow one concurrent deployment
+concurrency:
+  group: "live"
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    uses: ./.github/workflows/part_build_test.yaml
+  deploy-fe:
+    needs: build-test
+    secrets: inherit
+    uses: ./.github/workflows/part_docker_push.yaml
+    with:
+      image_name: league-manager_frontend
+      dockerfile: container/nginx.Dockerfile
+  deploy-be:
+    needs: build-test
+    secrets: inherit
+    uses: ./.github/workflows/part_docker_push.yaml
+    with:
+      image_name: league-manager_backend
+      dockerfile: container/app.Dockerfile
