@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='team',
             name='description',
-            field=models.CharField(max_length=1000, unique=True),
+            field=models.CharField(max_length=1000, unique=False),
         ),
         migrations.AlterField(
             model_name='team',
