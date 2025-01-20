@@ -27,8 +27,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: 'live'
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@v3
 
