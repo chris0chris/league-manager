@@ -28,5 +28,5 @@ jobs:
       - name: ${{ inputs.project }} Test report
         uses: MishaKav/jest-coverage-comment@main
         with:
-          junitxml-path: ./**/junit.xml
+          junitxml-path: ./${{ inputs.project }}/junit.xml
           junitxml-title: Test report
