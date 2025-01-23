@@ -19,6 +19,8 @@ RUN pip install -r requirements.txt
 
 COPY ../ ${APP_DIR}
 
+# TODO: run npm run build for all npm packages
+
 # collect static files
 RUN python manage.py collectstatic --no-input --clear
 
