@@ -16,11 +16,6 @@ on:
         required: true
         description: API Token for docker hub
 
-# Allow one concurrent deployment
-concurrency:
-  group: "deploy"
-  cancel-in-progress: false
-
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: docker.io
