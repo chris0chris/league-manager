@@ -32,6 +32,7 @@ ARG APP_DIR="/liveticker-app"
 WORKDIR ${APP_DIR}
 
 COPY ../liveticker ${APP_DIR}
+RUN rm -rf liveticker/static/liveticker/js
 
 RUN npm ci
 RUN npm run build
@@ -40,6 +41,7 @@ ARG APP_DIR="/scorecard-app"
 WORKDIR ${APP_DIR}
 
 COPY ../scorecard ${APP_DIR}
+RUN rm -rf scorecard/static/scorecard/js
 
 RUN npm ci
 RUN npm run build
@@ -48,6 +50,7 @@ ARG APP_DIR="/passcheck-app"
 WORKDIR ${APP_DIR}
 
 COPY ../passcheck ${APP_DIR}
+RUN rm -rf passcheck/static/passcheck/js
 
 RUN npm ci
 RUN npm run build
