@@ -6,11 +6,6 @@ on:
   pull_request:
     branches: [ master ]
 
-# Allow one concurrent deployment
-concurrency:
-  group: "live"
-  cancel-in-progress: false
-
 jobs:
   build-test:
     uses: ./.github/workflows/part_build_test.yaml
