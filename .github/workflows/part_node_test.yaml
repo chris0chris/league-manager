@@ -32,4 +32,4 @@ jobs:
         with:
           junitxml-path: ./${{ inputs.project }}/junit.xml
           junitxml-title: Test report
-          coverage-summary-path: ./coverage/coverage-final.json
+          coverage-summary-path: ./${{ inputs.project }}/coverage/coverage-final.json
