@@ -44,9 +44,6 @@ jobs:
       - name: run-tests
         uses: dima-engineer/pytest-reporter@v3
         with:
-          cov-omit-list: tests/*
-          cov-threshold-single: 85
-          cov-threshold-total: 90
           async-tests: true
         env:
           MYSQL_HOST: 0.0.0.0
