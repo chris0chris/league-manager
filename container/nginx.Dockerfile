@@ -1,4 +1,4 @@
-FROM python:3.11-slim AS builder
+FROM python:3.11-slim AS python-builder
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ARG APP_DIR="/app"
@@ -24,7 +24,17 @@ COPY ../ ${APP_DIR}
 # collect static files
 RUN python manage.py collectstatic --no-input --clear
 
+FROM node:20-slim as node-builder
+ARG APP_DIR="/liveticker-app"
+WORKDIR ${APP_DIR}
+
+COPY ../liveticker ${APP_DIR}
+
+RUN npm ci
+RUN npm run build
+
 FROM nginx:stable
 
-COPY --from=builder /app/league_manager/league_manager/static /static
+COPY --from=python-builder /app/league_manager/league_manager/static /static
+COPY --from=node-builder /liveticker-app/static /static
 COPY ./container/nginx.conf /etc/nginx/conf.d/default.conf
