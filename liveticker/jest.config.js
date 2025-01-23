@@ -12,4 +12,5 @@ module.exports = {
     '__tests__',
     'urls.js',
   ],
+  "reporters": [ "default", "jest-junit" ]
 };
