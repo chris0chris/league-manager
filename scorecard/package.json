@@ -53,7 +53,7 @@
     "dev": "webpack --mode development --config webpack.config.js",
     "dev:watch": "webpack --mode development --watch --config webpack.config.js",
     "build": "webpack --mode production --config webpack.config.js",
-    "testj": "jest --coverage --env=jsdom",
+    "testj": "jest --maxWorkers=1 --env=jsdom",
     "testj:watch": "jest --env=jsdom --watch",
     "jest": "jest --env=jsdom --ci --coverage && codecov",
     "eslint": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-scorecard.xml"
