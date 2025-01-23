@@ -9,7 +9,7 @@ on:
 # Allow one concurrent deployment
 concurrency:
   group: "live"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build-test:
@@ -18,6 +18,14 @@ jobs:
     uses: ./.github/workflows/part_node_test.yaml
     with:
       project: scorecard
+  build-test-liveticker:
+    uses: ./.github/workflows/part_node_test.yaml
+    with:
+      project: liveticker
+  build-test-passcheck:
+    uses: ./.github/workflows/part_node_test.yaml
+    with:
+      project: passcheck
   deploy-fe:
     needs: build-test
     if: github.ref == 'refs/heads/master'
