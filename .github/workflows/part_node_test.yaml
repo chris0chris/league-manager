@@ -30,4 +30,5 @@ jobs:
         with:
           working-directory: ${{ inputs.project }}
           test-script: npm run jest
+          custom-title: Report for ${{ inputs.project }}
 
