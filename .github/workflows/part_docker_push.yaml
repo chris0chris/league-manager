@@ -19,7 +19,7 @@ on:
 # Allow one concurrent deployment
 concurrency:
   group: "deploy"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   # Use docker.io for Docker Hub if empty
