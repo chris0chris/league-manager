@@ -19,7 +19,10 @@ RUN pip install -r requirements.txt
 
 COPY ../ ${APP_DIR}
 
-# TODO: run npm run build for all npm packages
+# remove existing js files (will be packed below)
+RUN rm -rf liveticker/static/liveticker/js
+RUN rm -rf scorecard/static/scorecard/js
+RUN rm -rf passcheck/static/passcheck/js
 
 # collect static files
 RUN python manage.py collectstatic --no-input --clear
@@ -29,6 +32,22 @@ ARG APP_DIR="/liveticker-app"
 WORKDIR ${APP_DIR}
 
 COPY ../liveticker ${APP_DIR}
+
+RUN npm ci
+RUN npm run build
+
+ARG APP_DIR="/scorecard-app"
+WORKDIR ${APP_DIR}
+
+COPY ../scorecard ${APP_DIR}
+
+RUN npm ci
+RUN npm run build
+
+ARG APP_DIR="/passcheck-app"
+WORKDIR ${APP_DIR}
+
+COPY ../passcheck ${APP_DIR}
 
 RUN npm ci
 RUN npm run build
