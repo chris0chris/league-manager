@@ -29,7 +29,7 @@ class TestOfficialsTeamListAPIView(WebTest):
     def test_get_empty_officials_for_non_existent_team(self):
         DbSetupOfficials().create_officials_and_team()
         Official.objects.first()
-        response = self.app.get(reverse(API_OFFICIALS_FOR_TEAM, kwargs={'pk': 999}),
+        response = self.app.get(reverse(API_OFFICIALS_FOR_TEAM, kwargs={'pk': 1999}),
                                 headers=DBSetup().get_token_header())
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 0
