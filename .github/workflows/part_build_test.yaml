@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -41,10 +41,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r test_requirements.txt
-      - name: run-tests
-        uses: dima-engineer/pytest-reporter@v3
+      - name: Run Tests
+        uses: pavelzw/pytest-action@v2
         with:
-          async-tests: true
+          verbose: true
+          emoji: true
+          job-summary: true
+          custom-arguments: '-q'
+          click-to-expand: true
+          report-title: 'Test Report'
         env:
           MYSQL_HOST: 0.0.0.0
           SECRET_KEY: 123456-TEST
