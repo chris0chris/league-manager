@@ -28,8 +28,4 @@ jobs:
       - run: ls
       - run: ls ..
       - name: ${{ inputs.project }} Test report
-        uses: MishaKav/jest-coverage-comment@main
-        with:
-          junitxml-path: ./${{ inputs.project }}/junit.xml
-          junitxml-title: Test report
-          coverage-summary-path: ./${{ inputs.project }}/coverage/coverage-final.json
+        uses: ArtiomTr/jest-coverage-report-action@v2
