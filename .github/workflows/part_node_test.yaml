@@ -23,6 +23,8 @@ jobs:
           cache-dependency-path: ${{ inputs.project }}/package.json
       - name: Install dependencies
         run: npm ci
+      - run: ls
+      - run: ls ${{ inputs.project }}
       - name: Run Tests
         run: npm run jest
       - name: ${{ inputs.project }} Test report
