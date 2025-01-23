@@ -25,7 +25,7 @@ services:
     environment:
       MYSQL_HOST: db
       MYSQL_DB_NAME: ${MYSQL_DB_NAME}
-      DJANGO_SETTINGS_MODULE: league_manager.settings.prod
+      DJANGO_SETTINGS_MODULE: league_manager.settings.dev
       SECRET_KEY: ${SECRET_KEY}
     networks:
       - backend
