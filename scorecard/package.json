@@ -32,7 +32,6 @@
     "@testing-library/user-event": "^14.5.2",
     "babel-loader": "^9.1.3",
     "babel-plugin-transform-class-properties": "^6.10.2",
-    "codecov": "^3.8.3",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react": "^7.34.1",
@@ -55,7 +54,7 @@
     "build": "webpack --mode production --config webpack.config.js",
     "testj": "jest --maxWorkers=1 --env=jsdom",
     "testj:watch": "jest --env=jsdom --watch",
-    "jest": "jest --env=jsdom --ci --coverage && codecov",
+    "jest": "jest --env=jsdom --ci --coverage",
     "eslint": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-scorecard.xml"
   },
   "eslintConfig": {
