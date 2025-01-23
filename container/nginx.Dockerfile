@@ -24,7 +24,7 @@ COPY ../ ${APP_DIR}
 # collect static files
 RUN python manage.py collectstatic --no-input --clear
 
-FROM node:20-slim as node-builder
+FROM node:20-slim AS node-builder
 ARG APP_DIR="/liveticker-app"
 WORKDIR ${APP_DIR}
 
