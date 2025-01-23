@@ -27,38 +27,7 @@ RUN rm -rf passcheck/static/passcheck/js
 # collect static files
 RUN python manage.py collectstatic --no-input --clear
 
-FROM node:20-slim AS node-builder
-ARG APP_DIR="/liveticker-app"
-WORKDIR ${APP_DIR}
-
-COPY ../liveticker ${APP_DIR}
-RUN rm -rf liveticker/static/liveticker/js
-
-RUN npm ci
-RUN npm run build
-
-ARG APP_DIR="/scorecard-app"
-WORKDIR ${APP_DIR}
-
-COPY ../scorecard ${APP_DIR}
-RUN rm -rf scorecard/static/scorecard/js
-
-RUN npm ci
-RUN npm run build
-
-ARG APP_DIR="/passcheck-app"
-WORKDIR ${APP_DIR}
-
-COPY ../passcheck ${APP_DIR}
-RUN rm -rf passcheck/static/passcheck/js
-
-RUN npm ci
-RUN npm run build
-
 FROM nginx:stable
 
 COPY --from=python-builder /app/league_manager/league_manager/static /static
-COPY --from=node-builder /liveticker-app/static /static
-COPY --from=node-builder /scorecard-app/static /static
-COPY --from=node-builder /passcheck-app/static /static
 COPY ./container/nginx.conf /etc/nginx/conf.d/default.conf
