@@ -41,5 +41,3 @@ jobs:
       - name: ✅ ${{ inputs.project }} Run Tests
         if: ${{ ! inputs.report }}
         run: npm run test
-        with:
-          working-directory: ${{ inputs.project }}
