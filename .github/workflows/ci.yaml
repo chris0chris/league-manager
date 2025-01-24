@@ -12,11 +12,13 @@ jobs:
 
   build-test-scorecard:
     uses: ./.github/workflows/part_node_test.yaml
+    secrets: inherit
     with:
       project: scorecard
 
   build-test-liveticker:
     uses: ./.github/workflows/part_node_test.yaml
+    secrets: inherit
     with:
       project: liveticker
 
