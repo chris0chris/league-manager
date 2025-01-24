@@ -1,4 +1,4 @@
-name: 🟢🏗️🧪📊 Build and run node tests
+name: 🟢🏗️🧪📊 Build & run node tests
 
 on:
   workflow_call:

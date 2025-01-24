@@ -1,4 +1,4 @@
-name: 🐳🏗️🚀 Build and Deploy docker images
+name: 🐳🏗️🚀 Build & Deploy docker image
 
 on:
   workflow_call:

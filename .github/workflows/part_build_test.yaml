@@ -1,4 +1,4 @@
-name: 🐍🏗️🧪📊 Pytest-CI
+name: 🐍🏗️🧪📊 Build & Test Python
 
 on:
   workflow_call:
