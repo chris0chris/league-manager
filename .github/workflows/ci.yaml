@@ -27,7 +27,6 @@ jobs:
       - build-test
       - build-test-scorecard
       - build-test-liveticker
-    if: github.ref == 'refs/heads/master'
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
@@ -39,7 +38,6 @@ jobs:
       - build-test
       - build-test-scorecard
       - build-test-liveticker
-    if: github.ref == 'refs/heads/master'
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
