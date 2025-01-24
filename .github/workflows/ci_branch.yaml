@@ -24,9 +24,3 @@ jobs:
     secrets: inherit
     with:
       project: liveticker
-
-  build-passcheck:
-    uses: ./.github/workflows/part_node_test.yaml
-    secrets: inherit
-    with:
-      project: passcheck
