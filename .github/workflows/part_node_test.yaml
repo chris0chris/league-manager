@@ -1,4 +1,4 @@
-name: Build and run node tests
+name: 🟢🏗️🧪📊 Build and run node tests
 
 on:
   workflow_call:
@@ -20,12 +20,13 @@ jobs:
         working-directory: ${{ inputs.project }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: 🟢⚙️ Setup node
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
           cache-dependency-path: ${{ inputs.project }}/package.json
-      - name: ${{ inputs.project }} Test report
+      - name: 📊✅ ${{ inputs.project }} Test report
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
           working-directory: ${{ inputs.project }}
