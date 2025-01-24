@@ -7,6 +7,11 @@ on:
         required: true
         description: The project to build
         type: string
+      report:
+        required: false
+        default: true
+        description: Whether to generate the report
+        type: boolean
 
 permissions:
   contents: write
@@ -27,9 +32,14 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ${{ inputs.project }}/package.json
       - name: 📊✅ ${{ inputs.project }} Test report
+        if: ${{ inputs.report }}
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
           working-directory: ${{ inputs.project }}
           test-script: npm run jest
           custom-title: Report for ${{ inputs.project }}
-
+      - name: ✅ ${{ inputs.project }} Run Tests
+        if: ${{ ! inputs.report }}
+        run: npm run test
+        with:
+          working-directory: ${{ inputs.project }}

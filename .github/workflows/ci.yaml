@@ -25,6 +25,7 @@ jobs:
     secrets: inherit
     with:
       project: passcheck
+      report: false
 
   deploy-fe:
     needs:
