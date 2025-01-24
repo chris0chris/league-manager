@@ -5,7 +5,12 @@
 
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "npm"
+    directories:
+      - "liveticker"
+      - "passcheck"
+      - "scoreboard"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    ignore:
+      - dependency-name: "react-scripts"
