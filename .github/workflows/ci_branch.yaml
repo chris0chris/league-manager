@@ -2,13 +2,13 @@ name: 🏗️🧪🍂 Build & Test branches
 # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions
 on:
   push:
-    branches: [ '*' ]
-    branches-ignore:
-      - master
+    branches:
+      - '*'
+      - '!master'
   pull_request:
-    branches: [ '*' ]
-    branches-ignore:
-      - master
+    branches:
+      - '*'
+      - '!master'
 
 jobs:
   build-test:
