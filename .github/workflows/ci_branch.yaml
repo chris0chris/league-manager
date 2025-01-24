@@ -1,0 +1,27 @@
+name: 🏗️🧪🍂 Build & Test branches
+# https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions
+on:
+  push:
+    branches: [ '*' ]
+    branches-ignore:
+      - master
+  pull_request:
+    branches: [ '*' ]
+    branches-ignore:
+      - master
+
+jobs:
+  build-test:
+    uses: ./.github/workflows/part_build_test.yaml
+
+  build-test-scorecard:
+    uses: ./.github/workflows/part_node_test.yaml
+    secrets: inherit
+    with:
+      project: scorecard
+
+  build-test-liveticker:
+    uses: ./.github/workflows/part_node_test.yaml
+    secrets: inherit
+    with:
+      project: liveticker

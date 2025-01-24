@@ -1,4 +1,4 @@
-name: Build and run node tests
+name: 🟢🏗️🧪📊 Build & run node tests
 
 on:
   workflow_call:
@@ -8,6 +8,10 @@ on:
         description: The project to build
         type: string
 
+permissions:
+  contents: write
+  checks: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,16 +20,13 @@ jobs:
         working-directory: ${{ inputs.project }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: 🟢⚙️ Setup node
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
           cache-dependency-path: ${{ inputs.project }}/package.json
-      - name: Install dependencies
-        run: npm ci
-      - name: Run Tests
-        run: npm run jest
-      - name: ${{ inputs.project }} Test report
+      - name: 📊✅ ${{ inputs.project }} Test report
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
           working-directory: ${{ inputs.project }}
