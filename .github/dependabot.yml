@@ -9,7 +9,7 @@ updates:
     directories:
       - "liveticker"
       - "passcheck"
-      - "scoreboard"
+      - "scorecard"
     schedule:
       interval: "daily"
     ignore:
