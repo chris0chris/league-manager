@@ -3,8 +3,6 @@ name: 🏗️🧪🚀 Build, Test and Deploy everything
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build-test:
@@ -21,6 +19,12 @@ jobs:
     secrets: inherit
     with:
       project: liveticker
+
+  build-passcheck:
+    uses: ./.github/workflows/part_node_build.yaml
+    secrets: inherit
+    with:
+      project: passcheck
 
   deploy-fe:
     needs:

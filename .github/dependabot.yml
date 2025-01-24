@@ -14,3 +14,7 @@ updates:
       interval: "daily"
     ignore:
       - dependency-name: "react-scripts"
+  - package-ecosystem: "pip"
+    directory: "."
+    schedule:
+      interval: "daily"
