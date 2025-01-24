@@ -9,7 +9,10 @@ DEBUG_TOOLBAR = True
 # DEBUG_TOOLBAR = False
 # PROFILING = True
 PROFILING = False
-ALLOWED_HOSTS = ['127.0.0.1', '.ngrok-free.app', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', '.ngrok-free.app', 'localhost', '172.21.0.3', 'django', 'lm.servyy-test.lxd',
+                 'lm.servyy-test', 'lm.lehel.xyz']
+
+CSRF_TRUSTED_ORIGINS = ['https://lm.lehel.xyz']
 
 if PROFILING:
     INSTALLED_APPS = [

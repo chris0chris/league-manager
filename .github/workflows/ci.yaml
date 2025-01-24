@@ -1,0 +1,41 @@
+name: Build and deploy everything
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-test:
+    uses: ./.github/workflows/part_build_test.yaml
+  build-test-scorecard:
+    uses: ./.github/workflows/part_node_test.yaml
+    with:
+      project: scorecard
+  build-test-liveticker:
+    uses: ./.github/workflows/part_node_test.yaml
+    with:
+      project: liveticker
+  deploy-fe:
+    needs:
+      - build-test
+      - build-test-scorecard
+      - build-test-liveticker
+    if: github.ref == 'refs/heads/master'
+    secrets: inherit
+    uses: ./.github/workflows/part_docker_push.yaml
+    with:
+      image_name: league-manager_frontend
+      dockerfile: container/nginx.Dockerfile
+  deploy-be:
+    needs:
+      - build-test
+      - build-test-scorecard
+      - build-test-liveticker
+    if: github.ref == 'refs/heads/master'
+    secrets: inherit
+    uses: ./.github/workflows/part_docker_push.yaml
+    with:
+      image_name: league-manager_backend
+      dockerfile: container/app.Dockerfile

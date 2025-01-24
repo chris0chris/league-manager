@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-import debug_toolbar
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -29,7 +28,8 @@ CLEAR_CACHE = 'clear-cache'
 LEAGUE_MANAGER_MAINTENANCE = 'maintenance'
 urlpatterns = [
                   path('urls', AllUrlsView.as_view(), name=ADMIN_ALL_URLS),
-                  path('maintenance/', TemplateView.as_view(template_name='league_manager/maintenance.html'), name=LEAGUE_MANAGER_MAINTENANCE),
+                  path('maintenance/', TemplateView.as_view(template_name='league_manager/maintenance.html'),
+                       name=LEAGUE_MANAGER_MAINTENANCE),
                   path('clear-cache', ClearCacheView.as_view(), name=CLEAR_CACHE),
                   path('admin/', admin.site.urls),
                   # ToDo: fix gameday urls
@@ -54,6 +54,8 @@ urlpatterns = [
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
+    import debug_toolbar
+
     urlpatterns = [
                       # path('silk/', include('silk.urls', namespace='silk')),
                       path('__debug__/', include(debug_toolbar.urls)),
