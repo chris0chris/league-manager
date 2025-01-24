@@ -31,7 +31,7 @@ jobs:
     if: |
       github.ref == 'refs/heads/master' &&
       !contains(
-        fromJSON(env.IGNORE_DIRS),
+        fromJSON(${env.IGNORE_DIRS}),
         github.event.commits.*.added + github.event.commits.*.modified
       )
     secrets: inherit
@@ -48,7 +48,7 @@ jobs:
     if: |
       github.ref == 'refs/heads/master' &&
       !contains(
-        fromJSON(env.IGNORE_DIRS),
+        fromJSON(${env.IGNORE_DIRS}),
         github.event.commits.*.added + github.event.commits.*.modified
       )
     secrets: inherit
