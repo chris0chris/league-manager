@@ -40,4 +40,6 @@ jobs:
           custom-title: Report for ${{ inputs.project }}
       - name: ✅ ${{ inputs.project }} Run Tests
         if: ${{ ! inputs.report }}
-        run: npm run jest
+        run: |
+          npm ci
+          npm run jest
