@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ master ]
 
-env:
-  IGNORE_DIRS: (".github/", ".circleci/")
-
 jobs:
   build-test:
     uses: ./.github/workflows/part_build_test.yaml
@@ -30,10 +27,8 @@ jobs:
       - build-test-liveticker
     if: |
       github.ref == 'refs/heads/master' &&
-      !contains(
-        fromJSON(env.IGNORE_DIRS),
-        github.event.commits.*.added + github.event.commits.*.modified
-      )
+      !contains(github.event.commits.*.added + github.event.commits.*.modified, '.github/') &&
+      !contains(github.event.commits.*.added + github.event.commits.*.modified, '.circleci/')
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
@@ -47,10 +42,8 @@ jobs:
       - build-test-liveticker
     if: |
       github.ref == 'refs/heads/master' &&
-      !contains(
-        fromJSON(env.IGNORE_DIRS),
-        github.event.commits.*.added + github.event.commits.*.modified
-      )
+      !contains(github.event.commits.*.added + github.event.commits.*.modified, '.github/') &&
+      !contains(github.event.commits.*.added + github.event.commits.*.modified, '.circleci/')
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
