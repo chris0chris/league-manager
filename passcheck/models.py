@@ -1,15 +1,15 @@
 from datetime import date
 
 from django.contrib.auth.models import User
+from django.core.validators import integer_validator
 from django.db import models
 from django.db.models import QuerySet, Q
 
 from gamedays.models import Gameday, Team, League, Person
 
-
 class Player(models.Model):
     person = models.ForeignKey(Person, on_delete=models.DO_NOTHING)
-    pass_number = models.IntegerField()
+    pass_number = models.CharField(max_length=20, validators=[integer_validator])
 
     objects: QuerySet = models.Manager()
 
