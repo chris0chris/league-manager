@@ -31,7 +31,7 @@ jobs:
       - build-test
       - build-test-scorecard
       - build-test-liveticker
-    if: ${{ secrets.DOCKER_SECRET != '' }}  # Only run if DOCKER_SECRET is defined
+    if: ${{ secrets.DOCKER_TOKEN != '' }}  # Only run if DOCKER_TOKEN is defined
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
@@ -43,7 +43,7 @@ jobs:
       - build-test
       - build-test-scorecard
       - build-test-liveticker
-    if: ${{ secrets.DOCKER_SECRET != '' }}  # Only run if DOCKER_SECRET is defined
+    if: ${{ secrets.DOCKER_TOKEN != '' }}  # Only run if DOCKER_TOKEN is defined
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
