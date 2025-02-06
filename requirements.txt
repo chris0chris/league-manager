@@ -11,5 +11,5 @@ django-cors-headers==4.7.0
 Pillow==11.1.0
 django-rest-knox==4.2.0
 python-dotenv==1.0.1
-mysqlclient==2.2.6
+mysqlclient==2.2.7
 requests==2.32.3
