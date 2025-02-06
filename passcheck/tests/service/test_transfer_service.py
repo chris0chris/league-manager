@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.utils import timezone
 
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from passcheck.models import Playerlist, PlayerlistTransfer
@@ -39,7 +40,7 @@ class TestTransferService(TestCase):
         assert player_to_transfer.current_team == female
         assert player_to_transfer.new_team == transferred_team
         assert player_to_transfer.status == 'approved'
-        today = datetime.today().date()
+        today = timezone.now().date()
         assert player_to_transfer.approval_date.date() == today
         assert Playerlist.objects.get(pk=female.pk).left_on == today
         transferred_team_playerlist = Playerlist.objects.filter(team=transferred_team)
@@ -63,7 +64,7 @@ class TestTransferService(TestCase):
         assert player_to_transfer.current_team == female
         assert player_to_transfer.new_team == transferred_team
         assert player_to_transfer.status == 'rejected'
-        today = datetime.today().date()
+        today = timezone.now().date()
         assert player_to_transfer.approval_date.date() == today
         assert Playerlist.objects.get(pk=female.pk).left_on is None
         transferred_team_playerlist = Playerlist.objects.filter(team=transferred_team)
