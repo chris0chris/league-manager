@@ -26,3 +26,6 @@ jobs:
           node-version: '20.x'
           cache: 'npm'
           cache-dependency-path: ${{ inputs.project }}/package.json
+      - name: ✅ ${{ inputs.project }} Run Eslint
+        run: |
+          npm run eslint
