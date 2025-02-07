@@ -28,4 +28,5 @@ jobs:
           cache-dependency-path: ${{ inputs.project }}/package.json
       - name: ✅ ${{ inputs.project }} Run Eslint
         run: |
+          npm ci
           npm run eslint

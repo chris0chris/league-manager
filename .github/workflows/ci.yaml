@@ -41,8 +41,6 @@ jobs:
   deploy-be:
     needs:
       - build-test
-      - build-test-scorecard
-      - build-test-liveticker
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
