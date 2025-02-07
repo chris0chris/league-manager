@@ -43,3 +43,7 @@ jobs:
         run: |
           npm ci
           npm run jest
+      - name: ✅ ${{ inputs.project }} Run Eslint
+        if: ${{ ! inputs.report }}
+        run: |
+          npm run eslint
