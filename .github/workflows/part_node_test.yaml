@@ -45,6 +45,10 @@ jobs:
           npm run jest
       - name: ✅ ${{ inputs.project }} Eslint
         run: npm run eslint:json
+      - uses: rahmanrafi/eslint-reporter-action@v1
+        with:
+          json: /tmp/eslint/js-lint-results-${{ inputs.project }}.json
+          title: ESLint Report
       - uses: ldiego73/eslint-report-action@v1.1
         with:
           report: /tmp/eslint/js-lint-results-${{ inputs.project }}.json
