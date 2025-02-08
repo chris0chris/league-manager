@@ -9,7 +9,7 @@ permissions:
   checks: write
 
 jobs:
-  build-test:
+  build-test-django:
     uses: ./.github/workflows/part_build_test.yaml
 
   build-test-scorecard:
