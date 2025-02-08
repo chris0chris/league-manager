@@ -4,6 +4,9 @@ on:
   push:
     branches: [ deploy ]
 
+permissions:
+  contents: read
+
 jobs:
   build-test:
     uses: ./.github/workflows/part_build_test.yaml

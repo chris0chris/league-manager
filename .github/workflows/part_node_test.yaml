@@ -13,10 +13,6 @@ on:
         description: Whether to generate the report
         type: boolean
 
-permissions:
-  contents: write
-  checks: write
-
 jobs:
   build:
     runs-on: ubuntu-latest

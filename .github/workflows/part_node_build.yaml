@@ -8,10 +8,6 @@ on:
         description: The project to build
         type: string
 
-permissions:
-  contents: write
-  checks: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
