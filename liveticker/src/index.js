@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import LivetickerApp from './components/LivetickerApp';
 
 import React, {StrictMode} from 'react';
