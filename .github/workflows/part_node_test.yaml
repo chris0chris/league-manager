@@ -44,7 +44,6 @@ jobs:
           npm ci
           npm run jest
       - name: ✅ ${{ inputs.project }} Eslint
-        if: ${{ ! inputs.report }}
         run: |
           npm run eslint
       - name: 👷 ${{ inputs.project }} Build
