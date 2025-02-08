@@ -45,6 +45,11 @@ jobs:
           npm run jest
       - name: ✅ ${{ inputs.project }} Eslint
         run: npm run eslint:json
+      - name: Annotate Code Linting Results
+        uses: ataylorme/eslint-annotate-action@1.0.4
+        if: always()
+        with:
+          report-json: /tmp/eslint/js-lint-results-${{ inputs.project }}.json
       - uses: ldiego73/eslint-report-action@v1.1
         with:
           report: /tmp/eslint/js-lint-results-${{ inputs.project }}.json
