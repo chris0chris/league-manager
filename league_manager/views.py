@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.cache import cache
 from django.shortcuts import render, redirect
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.urls import URLPattern, URLResolver
 from django.views import View
 
@@ -19,7 +20,10 @@ class ClearCacheView(View, UserPassesTestMixin):
 
     def get(self, request):
         cache.clear()
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+        referer = request.META.get('HTTP_REFERER', '/')
+        if url_has_allowed_host_and_scheme(referer, allowed_hosts=None):
+            return redirect(referer)
+        return redirect('/')
 
     def test_func(self):
         return self.request.user.is_staff
