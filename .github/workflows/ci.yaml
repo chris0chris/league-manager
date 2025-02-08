@@ -32,7 +32,7 @@ jobs:
 
   deploy-fe:
     needs:
-      - build-test
+      - build-test-django
       - build-test-scorecard
       - build-test-liveticker
       - build-passcheck
@@ -44,7 +44,7 @@ jobs:
 
   deploy-be:
     needs:
-      - build-test
+      - build-test-django
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
