@@ -38,12 +38,15 @@ jobs:
           working-directory: ${{ inputs.project }}
           test-script: npm run jest
           custom-title: Report for ${{ inputs.project }}
-      - name: ✅ ${{ inputs.project }} Run Tests
+      - name: ✅ ${{ inputs.project }} Tests
         if: ${{ ! inputs.report }}
         run: |
           npm ci
           npm run jest
-      - name: ✅ ${{ inputs.project }} Run Eslint
+      - name: ✅ ${{ inputs.project }} Eslint
         if: ${{ ! inputs.report }}
         run: |
           npm run eslint
+      - name: 👷 ${{ inputs.project }} Build
+        run: |
+          npm run build
