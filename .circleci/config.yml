@@ -59,6 +59,9 @@ jobs:
           command: npm --prefix scorecard/ run eslint
       - store_test_results:
           path: /tmp/eslint
+      - run:
+          name: "JavaScript Build"
+          command: npm --prefix scorecard/ run build
 
   liveticker_js:
     executor:
@@ -77,6 +80,9 @@ jobs:
           command: npm --prefix liveticker/ run eslint
       - store_test_results:
           path: /tmp/eslint
+      - run:
+          name: "JavaScript Build"
+          command: npm --prefix liveticker/ run build
 
   passcheck_js:
     executor:
@@ -92,6 +98,9 @@ jobs:
           command: npm --prefix passcheck/ run eslint
       - store_test_results:
           path: /tmp/eslint
+      - run:
+          name: "JavaScript Build"
+          command: npm --prefix passcheck/ run build
 
 workflows:
   version: 2
