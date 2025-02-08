@@ -22,8 +22,8 @@ class PasscheckGamesAPIView(APIView):
         passcheck = PasscheckService(user_permission=user_permission)
         try:
             return Response(passcheck.get_passcheck_games(team_id=team_id, gameday_id=gameday_id), status=HTTPStatus.OK)
-        except PasscheckException as exception:
-            raise PermissionDenied(detail=str(exception))
+        except PasscheckException:
+            raise PermissionDenied(detail=f'Permission denied for {team_id}')
 
 
 class PasscheckApprovalUrlAPIView(APIView):
@@ -62,10 +62,10 @@ class PasscheckRosterAPIView(APIView):
             passcheck = PasscheckService(user_permission)
             try:
                 return Response(passcheck.get_roster_with_validation(team, gameday_id), status=HTTPStatus.OK)
-            except PasscheckException as exception:
-                raise PermissionDenied(detail=str(exception))
+            except PasscheckException:
+                raise PermissionDenied(detail=f'Permission denied for {gameday_id}')
             except LookupError as exception:
-                raise NotFound(detail=str(exception))
+                raise NotFound(detail=f'Not found for {team} on {gameday_id}')
 
     def put(self, request, **kwargs):
         data = request.data
