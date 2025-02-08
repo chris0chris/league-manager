@@ -44,11 +44,9 @@ jobs:
           npm ci
           npm run jest
       - name: ✅ ${{ inputs.project }} Eslint
-        run: |
-          npm run eslint:json
+        run: npm run eslint:json
       - uses: ldiego73/eslint-report-action@v1.1
         with:
           report: /tmp/eslint/js-lint-results-${{ inputs.project }}.json
       - name: 👷 ${{ inputs.project }} Build
-        run: |
-          npm run build
+        run: npm run build
