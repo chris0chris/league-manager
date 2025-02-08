@@ -46,6 +46,9 @@ jobs:
       - name: ✅ ${{ inputs.project }} Eslint
         run: |
           npm run eslint
+      - uses: ldiego73/eslint-report-action@v1.1
+        with:
+          report: /tmp/eslint/js-lint-results-${{ inputs.project }}.json
       - name: 👷 ${{ inputs.project }} Build
         run: |
           npm run build
