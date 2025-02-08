@@ -16,6 +16,9 @@ on:
         required: true
         description: API Token for docker hub
 
+permissions:
+  contents: read
+
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: docker.io
