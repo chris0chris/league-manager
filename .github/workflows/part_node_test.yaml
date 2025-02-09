@@ -49,6 +49,6 @@ jobs:
       - name: Annotate Code Linting Results
         uses: DerLev/eslint-annotations@v2
         with:
-          eslint-report: js-lint-results-${{ inputs.project }}.json
+          eslint-report: ${{ inputs.project }}/js-lint-results-${{ inputs.project }}.json
       - name: 👷 ${{ inputs.project }} Build
         run: npm run build
