@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 import {GAME_LOG_COMPLETE_GAME} from '../../../__tests__/testdata/gameLogData';

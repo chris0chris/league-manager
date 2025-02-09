@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import $ from 'jquery/src/jquery';
@@ -54,13 +54,13 @@ const ScorecardTable = (props) => {
         <td>{pat1}</td>
       </>;
     } else if (entry.cop) {
-      // eslint-disable-next-line max-len
+       
       htmlSnippet = <td colSpan='3' className='text-center'>{entry.name}</td>;
     } else {
       const keyValues = Object.entries(entry);
       const event = keyValues[1][0];
       const player = keyValues[1][1] ? keyValues[1][1] : '';
-      // eslint-disable-next-line max-len
+       
       htmlSnippet = <td colSpan="3" className='text-center'>{event}{player ? ` (#${player})` : ''}</td>;
     }
     return htmlSnippet;

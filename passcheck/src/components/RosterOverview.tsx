@@ -56,6 +56,7 @@ function RosterOverview() {
       .catch((error: ApiError) => {
         setMessage({ text: error.message });
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId, gamedayId]);
 
   useEffect(() => {
@@ -69,6 +70,7 @@ function RosterOverview() {
     });
     setFilteredAdditionalRosters(additionalRostersFiltered);
     checkValidation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, team, JSON.stringify(additionalTeams)]);
   const rosterFilter = (roster: Roster) => {
     const lowercasedQuery = searchQuery.toLowerCase();
@@ -159,20 +161,20 @@ function RosterOverview() {
     validator.validateAndUpdate(setMessage);
     setUpdateFlag(!updateFlag);
   };
-  const loadApprovalUrl = () => { 
-    setApprovalUrlLoaded(true)
-    getApprovalUrl(teamId!).then((redirectedUrl) => {
-      window.open(redirectedUrl, '_blank');
-      setApprovalUrlLoaded(false);
-      setMessage({ text: "" });
-      checkValidation();
-    })
-    .catch(
-      (error: ApiError) => {
+  const loadApprovalUrl = () => {
+    setApprovalUrlLoaded(true);
+    getApprovalUrl(teamId!)
+      .then((redirectedUrl) => {
+        window.open(redirectedUrl, "_blank");
+        setApprovalUrlLoaded(false);
+        setMessage({ text: "" });
+        checkValidation();
+      })
+      .catch((error: ApiError) => {
         setMessage({ text: error.message });
         setApprovalUrlLoaded(false);
       });
-   }
+  };
 
   return (
     <>
@@ -243,10 +245,8 @@ function RosterOverview() {
       )}
       {!showStartButton && (
         <div className="row justify-content-center">
-        <div className="col-auto">
-        Zum Auswählen auf Name klicken
+          <div className="col-auto">Zum Auswählen auf Name klicken</div>
         </div>
-      </div>
       )}
       <RosterTable
         team={team}
@@ -300,7 +300,9 @@ function RosterOverview() {
           onClick={() => loadApprovalUrl()}
           disabled={isApprovalUrlLoaded}
         >
-          {isApprovalUrlLoaded ? 'Genehmigung wird geladen ...': 'Equipment-Genehmigung öffnen'}
+          {isApprovalUrlLoaded
+            ? "Genehmigung wird geladen ..."
+            : "Equipment-Genehmigung öffnen"}
         </Button>
       </div>
       {!showStartButton && (

@@ -42,6 +42,7 @@ function PlayerModal({
     }
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [click]);
   useEffect(() => {
     setJerseyNumber(player.jersey_number);

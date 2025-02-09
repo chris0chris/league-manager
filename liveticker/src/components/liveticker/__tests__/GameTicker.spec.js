@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 import {LIVETICKER_DATA} from '../../../__tests__/testdata/livetickerData';

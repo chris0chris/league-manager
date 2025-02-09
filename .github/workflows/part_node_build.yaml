@@ -25,10 +25,14 @@ jobs:
           node-version: '20.x'
           cache: 'npm'
           cache-dependency-path: ${{ inputs.project }}/package.json
-      - name: ✅ ${{ inputs.project }} Eslint
+      - name: 🔍 Run eslint ${{ inputs.project }}
         run: |
           npm ci
-          npm run eslint
-      - name: 👷 ${{ inputs.project }} Build
-        run: |
-          npm run build
+          npm run eslint:json
+      - name: 👷 Building ${{ inputs.project }}
+        run: npm run build > typescript.log
+      - name: 🔍📝 Annotate Code Linting Results
+        uses: DerLev/eslint-annotations@v2
+        with:
+          eslint-report: ${{ inputs.project }}/js-lint-results-${{ inputs.project }}.json
+          typescript-log:  ${{ inputs.project }}/typescript.log

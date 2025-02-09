@@ -38,15 +38,18 @@ jobs:
           working-directory: ${{ inputs.project }}
           test-script: npm run jest
           custom-title: Report for ${{ inputs.project }}
-      - name: ✅ ${{ inputs.project }} Tests
+      - name: 🧪 Testing ${{ inputs.project }}
         if: ${{ ! inputs.report }}
         run: |
           npm ci
           npm run jest
-      - name: ✅ ${{ inputs.project }} Eslint
-        if: ${{ ! inputs.report }}
-        run: |
-          npm run eslint
-      - name: 👷 ${{ inputs.project }} Build
-        run: |
-          npm run build
+      - name: 🔍 Run eslint ${{ inputs.project }}
+        run: npm run eslint:json
+        continue-on-error: true
+      - name: 👷 Building ${{ inputs.project }}
+        run: npm run build > typescript.log
+      - name: 🔍📝 Annotate ${{ inputs.project }} Linting Results
+        uses: DerLev/eslint-annotations@v2
+        with:
+          eslint-report: ${{ inputs.project }}/js-lint-results-${{ inputs.project }}.json
+          typescript-log:  ${{ inputs.project }}/typescript.log

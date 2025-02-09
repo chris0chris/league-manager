@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 import React from 'react';
 import {Provider} from 'react-redux';
 import {MemoryRouter as Router, Route, Routes} from 'react-router-dom';

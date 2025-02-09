@@ -1,8 +1,8 @@
-/* eslint-disable max-len */
+
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 
-// eslint-disable-next-line max-len
+ 
 const Touchdown = (props) => {
   const {resetRequested, setResetRequested, update} = props;
   const [tdInput, setTdInput] = useState('');
