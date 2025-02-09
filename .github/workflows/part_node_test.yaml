@@ -46,7 +46,7 @@ jobs:
       - name: ✅ ${{ inputs.project }} Eslint
         uses: sibiraj-s/action-eslint@v3
         with:
-          working-dir: ${{ inputs.project }}
+          working-directory: ${{ inputs.project }}
           annotations: true
       - name: 👷 ${{ inputs.project }} Build
         run: npm run build
