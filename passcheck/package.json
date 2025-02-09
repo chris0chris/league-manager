@@ -29,7 +29,7 @@
     "build": "webpack --mode production --config webpack.config.js",
     "eslint": "eslint ./src",
     "eslint:junit": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-passcheck.xml",
-    "eslint:json": "eslint ./src --format json -o /tmp/eslint/js-lint-results-passcheck.json",
+    "eslint:json": "eslint ./src --format json -o js-lint-results-passcheck.json",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "dev": "webpack --mode development --config webpack.config.js"
