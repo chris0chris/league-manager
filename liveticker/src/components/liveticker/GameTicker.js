@@ -1,13 +1,12 @@
-/* eslint-disable max-len */
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import TeamBox from './TeamBox';
 import DisplayAllTicks from './DisplayAllTicks';
 import Ticks from './Ticks';
-import {MdRefresh} from 'react-icons/md';
+import { MdRefresh } from 'react-icons/md';
 
 const GameTicker = (props) => {
-  const {home, away, status, standing, ticks, updateGamesToDisplay, gameIndex} = props;
+  const { home, away, status, standing, ticks, updateGamesToDisplay, gameIndex } = props;
   const [loadAllTicks, setLoadAllTicks] = useState(false);
   const time = new Date().toLocaleTimeString();
   useEffect(() => {
@@ -25,14 +24,15 @@ const GameTicker = (props) => {
             showPossession={home.isInPossession} />
           <div className='col-4 align-self-center text-center'>
             <span className='text-muted smaller'>{standing}</span>
-            <br/>
+            <br />
             <span className='fs-2 fw-bold'>
               {home.score} - {away.score}
             </span>
             <br />
             <span className='fs-6'>{status}</span>
             <br />
-            <span className='text-muted smaller'><MdRefresh title='Letzte Aktualisierung' style={{marginBottom: '2px'}} />{time} Uhr</span>
+            <span className='text-muted smaller'><MdRefresh title='Letzte Aktualisierung'
+              style={{ marginBottom: '2px' }} />{time} Uhr</span>
           </div>
           <TeamBox img={away.img} name={away.name}
             showPossession={away.isInPossession} />

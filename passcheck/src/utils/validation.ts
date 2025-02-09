@@ -1,5 +1,5 @@
-import {Player, Roster, TeamValidator} from '../common/types';
-import {Message, MessageColor} from '../context/MessageContext';
+import { Player, Roster, TeamValidator } from "../common/types";
+import { Message, MessageColor } from "../context/MessageContext";
 
 abstract class BaseValidator {
   check(roster: Roster, player: Player | null = null): boolean {
@@ -92,9 +92,6 @@ class JerseyNumberBetweenValidator extends BaseValidator {
 }
 
 class UniqueJerseyNumber extends BaseValidator {
-  constructor() {
-    super();
-  }
   isValid(roster: Roster, player: Player | null): boolean {
     if (!player) {
       return false;
@@ -112,7 +109,7 @@ class UniqueJerseyNumber extends BaseValidator {
     return isValid;
   }
   getValidationError(): string {
-    return 'Trikotnummer ist bereits in Verwendung und darf nur einmal vorkommen.';
+    return "Trikotnummer ist bereits in Verwendung und darf nur einmal vorkommen.";
   }
 }
 
@@ -203,12 +200,12 @@ class Validator {
       }
     });
     if (isValid && setMessage) {
-      setMessage({text: ''});
+      setMessage({ text: "" });
     }
     return isValid;
   }
   validateAndGetErrors(player: Player): string[] {
-    console.log('first');
+    console.log("first");
     let errors: string[] = [];
     this.validators.forEach((currentValidator) => {
       if (!currentValidator.check(this.roster, player)) {

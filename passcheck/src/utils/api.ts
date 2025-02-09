@@ -1,5 +1,5 @@
-import axios, {AxiosError} from 'axios';
-import {SCORECARD_URL} from '../common/routes';
+import axios, { AxiosError } from "axios";
+import { SCORECARD_URL } from "../common/routes";
 
 export type ApiError = {
   message: string;
@@ -8,7 +8,7 @@ export type ApiError = {
 type Headers = {
   headers: {
     Authorization?: string;
-    'Content-Type': string;
+    "Content-Type": string;
   };
 };
 
@@ -32,15 +32,15 @@ export const apiGet = (url: string): any => {
       }
     })
     .catch((error: AxiosError) => {
-      console.error('api ERROR', error);
+      console.error("api ERROR", error);
       if (error.response && error.response.status === 401) {
-        if (process.env.NODE_ENV === 'production') {
+        if (process.env.NODE_ENV === "production") {
           window.location.href = SCORECARD_URL;
         } else {
           alert(
-            "`localStorage.setItem('token', '${localStorage.getItem('token')}')`"
+            `localStorage.setItem('token', '${localStorage.getItem("token")}')`
           );
-          throwApiError('Bitte erst anmelden.');
+          throwApiError("Bitte erst anmelden.");
         }
       } else {
         throwApiError(error);
@@ -49,30 +49,30 @@ export const apiGet = (url: string): any => {
 };
 
 const tokenConfig = () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   const config: Headers = {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   };
 
   if (token) {
-    config.headers['Authorization'] = `Token ${token}`;
+    config.headers["Authorization"] = `Token ${token}`;
   }
 
   return config;
 };
 
 const throwApiError = (error: AxiosError<unknown, any> | string) => {
-  let message = '';
-  if (typeof error === 'string') {
+  let message = "";
+  if (typeof error === "string") {
     message = error;
   } else {
     message = error.message;
     if (
-      typeof error.response?.data === 'object' &&
-      'detail' in error.response?.data!
+      typeof error.response?.data === "object" &&
+      "detail" in error.response?.data!
     ) {
       message = error.response?.data?.detail as string;
     }
