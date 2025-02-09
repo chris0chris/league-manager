@@ -48,5 +48,6 @@ jobs:
         with:
           working-directory: ${{ inputs.project }}
           annotations: true
+          extensions: 'js,jsx,ts,tsx'
       - name: 👷 ${{ inputs.project }} Build
         run: npm run build
