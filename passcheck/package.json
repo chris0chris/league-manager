@@ -60,7 +60,7 @@
     "postcss-loader": "^7.3.4",
     "style-loader": "^3.3.3",
     "ts-loader": "^9.5.1",
-    "webpack": "^5.89.0",
+    "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"
   },
   "proxy": "http://127.0.0.1:8000"
