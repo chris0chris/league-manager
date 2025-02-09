@@ -14,6 +14,11 @@ const compat = new FlatCompat({
 });
 
 export default [...compat.extends("plugin:react/recommended"), {
+    settings: {
+    react: {
+     version: "detect",
+    },
+  },
     plugins: {
         react,
     },
