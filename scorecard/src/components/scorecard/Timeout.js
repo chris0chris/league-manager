@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {FaCheck, FaStopwatch, FaTimes} from 'react-icons/fa';

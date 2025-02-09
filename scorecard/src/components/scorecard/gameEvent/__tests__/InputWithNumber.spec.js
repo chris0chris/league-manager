@@ -1,15 +1,16 @@
-/* eslint-disable max-len */
+
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import InputWithNumber from '../InputWithNumber';
 
 const updateFunc = jest.fn();
 
 
-const setup = (isRequired=false, isOpponentAction=false) => {
+const setup = (isRequired = false, isOpponentAction = false) => {
   updateFunc.mockClear();
-  render(<InputWithNumber update={updateFunc} label="TestLabel" isRequired={isRequired} isOpponentAction={isOpponentAction}/>);
+  render(<InputWithNumber update={updateFunc} label="TestLabel"
+    isRequired={isRequired} isOpponentAction={isOpponentAction} />);
 };
 
 describe('InputWithNumber component', () => {
@@ -27,7 +28,7 @@ describe('InputWithNumber component', () => {
     setup();
     await user.type(screen.getByPlaceholderText('TestLabel - Nummer optional'), '22');
     expect(updateFunc.mock.calls[2][0]).toEqual({
-      event: [{name: 'TestLabel', player: '22'}],
+      event: [{ name: 'TestLabel', player: '22' }],
     });
     expect(updateFunc.mock.calls[2][1]).toBeFalsy();
   });

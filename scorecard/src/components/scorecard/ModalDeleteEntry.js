@@ -8,7 +8,7 @@ import $ from 'jquery/src/jquery';
 const ModalDeleteEntry = (props) => {
   const handleSubmit = (ev) => {
     ev.preventDefault();
-    // eslint-disable-next-line no-unused-vars
+     
     const {__html, ...entryToDelete} = props.deleteEntry;
     $('#modalDeleteEntry').modal('hide');
     props.deleteLogEntry(props.gameLog.gameId, entryToDelete);

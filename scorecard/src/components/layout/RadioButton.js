@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-// eslint-disable-next-line max-len
+ 
 const RadioButton = ({id, name, onChange: setValue, text, value, color = 'primary', checked=false}) => {
   return (
     <div className="col d-grid">

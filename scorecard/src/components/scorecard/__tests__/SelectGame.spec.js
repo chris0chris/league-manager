@@ -75,7 +75,7 @@ describe('SelectGame component', () => {
     })[0];
     await user.click(firstStartGameButton);
     expect(apiGet.mock.calls[1][0]).toBe(
-        // eslint-disable-next-line max-len
+         
         `/api/gameday/${TWO_GAMEDAYS.gamedays[1].id}/officials/OfficialsTeam`,
     );
     expect(apiGet.mock.calls[2][0])
