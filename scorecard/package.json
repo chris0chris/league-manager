@@ -58,7 +58,7 @@
     "jest": "jest --env=jsdom --ci --coverage",
     "eslint": "eslint ./src",
     "eslint:junit": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-scorecard.xml",
-    "eslint:json": "eslint ./src --format json -o /tmp/eslint/js-lint-results-scorecard.json"
+    "eslint:json": "eslint ./src --format json -o js-lint-results-scorecard.json"
   },
   "eslintConfig": {
     "extends": [
