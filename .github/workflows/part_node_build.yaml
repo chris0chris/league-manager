@@ -30,7 +30,7 @@ jobs:
           npm ci
           npm run eslint:json
       - name: 👷 Building ${{ inputs.project }}
-        run: npm run build > typescript
+        run: npm run build > typescript.log
       - name: 🔍📝 Annotate Code Linting Results
         uses: DerLev/eslint-annotations@v2
         with:
