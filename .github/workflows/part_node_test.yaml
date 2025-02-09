@@ -44,16 +44,9 @@ jobs:
           npm ci
           npm run jest
       - name: ✅ ${{ inputs.project }} Eslint
-        run: npm run eslint:json
-      - name: Annotate Code Linting Results
-        uses: ataylorme/eslint-annotate-action@v3
+        uses: sibiraj-s/action-eslint@v3
         with:
-          report-json: /tmp/eslint/js-lint-results-${{ inputs.project }}.json
-      - name: Upload ESLint report
-        uses: actions/upload-artifact@v4
-        with:
-          name: eslint_report-${{ inputs.project }}.json
-          path: /tmp/eslint/js-lint-results-${{ inputs.project }}.json
-          retention-days: 5
+          working-dir: ${{ inputs.project }}
+          annotations: true
       - name: 👷 ${{ inputs.project }} Build
         run: npm run build
