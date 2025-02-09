@@ -28,6 +28,10 @@ jobs:
       - name: ✅ ${{ inputs.project }} Eslint
         run: |
           npm ci
-          npm run eslint
+          npm run eslint:json
+      - name: Annotate Code Linting Results
+        uses: ataylorme/eslint-annotate-action@v3
+        with:
+          report-json: /tmp/eslint/js-lint-results-${{ inputs.project }}.json
       - name: 👷 ${{ inputs.project }} Build
         run: npm run build
