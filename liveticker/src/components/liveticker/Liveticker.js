@@ -9,7 +9,6 @@ const Liveticker = (props) => {
   const [endlessCounter, setEndlessCounter] = useState(0);
   const searchParams = new URLSearchParams(document.location.search);
   const league = searchParams.get("league") || "";
-  // eslint-disable-next-line no-unused-vars
   const [gamesToDisplayAllTicks, setGamesToDisplayAllTicks] = useState([]);
   const timer = () => setEndlessCounter(endlessCounter + 1);
   const minute = 60 * 1000;
