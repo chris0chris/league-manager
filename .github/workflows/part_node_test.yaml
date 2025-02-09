@@ -43,11 +43,7 @@ jobs:
         run: |
           npm ci
           npm run jest
-      - name: ✅ ${{ inputs.project }} Eslint
-        uses: sibiraj-s/action-eslint@v3
-        with:
-          working-directory: ${{ inputs.project }}
-          annotations: true
-          all-files: true
+      - name: Run ESLint
+        run: eslint . --ext .js,.jsx,.ts,.tsx
       - name: 👷 ${{ inputs.project }} Build
         run: npm run build
