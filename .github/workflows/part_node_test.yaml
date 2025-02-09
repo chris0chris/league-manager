@@ -52,4 +52,4 @@ jobs:
         uses: DerLev/eslint-annotations@v2
         with:
           eslint-report: ${{ inputs.project }}/js-lint-results-${{ inputs.project }}.json
-          typescript-log: typescript.log
+          typescript-log:  ${{ inputs.project }}/typescript.log
