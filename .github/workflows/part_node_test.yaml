@@ -49,5 +49,6 @@ jobs:
         uses: ataylorme/eslint-annotate-action@v3
         with:
           report-json: /tmp/eslint/js-lint-results-${{ inputs.project }}.json
+          fail-on-warning: true
       - name: 👷 ${{ inputs.project }} Build
         run: npm run build
