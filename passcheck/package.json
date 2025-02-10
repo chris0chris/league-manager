@@ -55,7 +55,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/plugin-transform-private-property-in-object": "^7.22.11",
-    "css-loader": "^6.8.1",
+    "css-loader": "^7.1.2",
     "postcss": "^8.4.32",
     "postcss-loader": "^7.3.4",
     "style-loader": "^3.3.3",
