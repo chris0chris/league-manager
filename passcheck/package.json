@@ -11,7 +11,7 @@
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
     "axios": "^1.7.9",
-    "bootstrap": "^5.3.2",
+    "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.1",
     "knox": "^0.9.2",
     "react": "^18.2.0",
