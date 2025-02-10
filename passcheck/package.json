@@ -15,7 +15,7 @@
     "bootstrap-icons": "^1.11.1",
     "knox": "^0.9.2",
     "react": "^18.2.0",
-    "react-bootstrap": "^2.8.0",
+    "react-bootstrap": "^2.10.9",
     "react-dom": "^18.2.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.5",
