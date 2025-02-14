@@ -5,7 +5,7 @@
   "dependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^16.18.52",
     "@types/react": "^19.0.8",
@@ -20,7 +20,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.5",
     "react-scripts": "^5.0.1",
-    "replace-in-file": "^7.1.0",
+    "replace-in-file": "^8.3.0",
     "typescript": "^5.7.3",
     "web-vitals": "^4.2.4"
   },
@@ -57,10 +57,10 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@babel/plugin-transform-private-property-in-object": "^7.22.11",
+    "@babel/plugin-transform-private-property-in-object": "^7.25.9",
     "css-loader": "^7.1.2",
     "postcss": "^8.4.32",
-    "postcss-loader": "^7.3.4",
+    "postcss-loader": "^8.1.1",
     "style-loader": "^3.3.3",
     "ts-loader": "^9.5.1",
     "webpack": "^5.97.1",

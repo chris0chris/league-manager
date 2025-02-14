@@ -6,7 +6,7 @@ services:
       # redirect service
       # https://jensknipper.de/blog/traefik-http-to-https-redirect/
       - traefik.http.routers.${SERVICE_NAME}-http.entrypoints=web
-      - traefik.http.routers.${SERVICE_NAME}-http.rule=Host(`leagueshepre.app`) || Host(`www.leagueshepre.app`)
+      - traefik.http.routers.${SERVICE_NAME}-http.rule=Host(`leaguesphere.app`) || Host(`www.leaguesphere.app`)
       - traefik.http.routers.${SERVICE_NAME}-http.middlewares=${SERVICE_NAME}-https
       - traefik.http.middlewares.${SERVICE_NAME}-https.redirectscheme.scheme=https
 
@@ -17,7 +17,7 @@ services:
 
       # prod resolver
       - traefik.http.routers.${SERVICE_NAME}_prod.tls=true
-      - traefik.http.routers.${SERVICE_NAME}_prod.rule=Host(`leagueshepre.app`) || Host(`www.leagueshepre.app`)
+      - traefik.http.routers.${SERVICE_NAME}_prod.rule=Host(`leaguesphere.app`) || Host(`www.leaguesphere.app`)
 
       # local service
       - traefik.http.routers.${SERVICE_NAME}_prod.tls.certresolver=letsencrypthttpresolver
