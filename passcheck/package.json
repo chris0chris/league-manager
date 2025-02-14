@@ -62,7 +62,7 @@
     "postcss": "^8.4.32",
     "postcss-loader": "^8.1.1",
     "style-loader": "^3.3.3",
-    "ts-loader": "^9.5.1",
+    "ts-loader": "^9.5.2",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"
   },
