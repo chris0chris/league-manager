@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import axios, { AxiosError } from "axios";
 import { SCORECARD_URL } from "../common/routes";
 
@@ -16,6 +17,7 @@ export const apiPut = (url: string, body: any) => {
   const header = tokenConfig();
   return axios
     .put(url, body, header)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     .then((res) => {})
     .catch((err) => {
       console.error(err);
@@ -72,7 +74,8 @@ const throwApiError = (error: AxiosError<unknown, any> | string) => {
     message = error.message;
     if (
       typeof error.response?.data === "object" &&
-      "detail" in error.response?.data!
+      error.response.data !== null &&
+      "detail" in error.response.data
     ) {
       message = error.response?.data?.detail as string;
     }

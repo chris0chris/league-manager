@@ -7,7 +7,7 @@ import { Alert } from "react-bootstrap";
 
 interface Props {
   modalVisible: boolean;
-  handleClose(): any;
+  handleClose(): void;
   nextPlayer(value: number | null): void;
   player: Player;
   validator: Validator;

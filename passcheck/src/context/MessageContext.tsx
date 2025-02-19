@@ -18,9 +18,10 @@ export type Message = {
 
 const MessageContext = createContext<{
   message: Message;
-  setMessage: (messge: Message) => void;
+  setMessage: (message: Message) => void;
 }>({
   message: {text: ''},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setMessage: (value: Message) => {},
 });
 
