@@ -18,9 +18,9 @@ services:
       # prod resolver
       - traefik.http.routers.${SERVICE_NAME}_prod.tls=true
       - traefik.http.routers.${SERVICE_NAME}_prod.rule=Host(`leaguesphere.app`) || Host(`www.leaguesphere.app`)
+      - traefik.http.routers.${SERVICE_NAME}_prod.tls.certresolver=letsencrypthttpresolver
 
       # local service
-      - traefik.http.routers.${SERVICE_NAME}_prod.tls.certresolver=letsencrypthttpresolver
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.rule=Host(`${SERVICE_NAME}.${LOCAL_HOSTNAME}`)
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.entrypoints=web
       # portainer team
@@ -40,7 +40,6 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
-      - traefik.enable=false
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
     environment:
@@ -62,7 +61,6 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.db
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
     labels:
-      - traefik.enable=false
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
     volumes:
