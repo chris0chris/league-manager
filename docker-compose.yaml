@@ -14,7 +14,7 @@ services:
       - traefik.http.routers.${SERVICE_NAME}.tls=true
       - traefik.http.routers.${SERVICE_NAME}.rule=Host(`${SERVICE_HOST}`)
       - traefik.http.routers.${SERVICE_NAME}.tls.certresolver=letsencryptdnsresolver
-      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=9000
+      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=888
 
       # prod resolver
       - traefik.http.routers.${SERVICE_NAME}_prod.tls=true
@@ -41,7 +41,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
-      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=9000
+      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=888
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
     environment:
@@ -63,7 +63,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.db
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
     labels:
-      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=9000
+      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=888
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
     volumes:
