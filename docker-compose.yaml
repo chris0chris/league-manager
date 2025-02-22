@@ -1,6 +1,6 @@
 services:
   www:
-    image: dachrisch/league-manager_frontend:latest
+    image: leaguesphere/frontend:latest
     container_name: ${COMPOSE_PROJECT_NAME}.www
     labels:
       # redirect service
@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
 
   app:
-    image: dachrisch/league-manager_backend:latest
+    image: leaguesphere/backend:latest
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     environment:

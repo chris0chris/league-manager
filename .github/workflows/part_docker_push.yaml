@@ -22,8 +22,7 @@ permissions:
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: docker.io
-  # github.repository as <account>/<repo>
-  DOCKER_IMAGE_NAME: ${{ github.actor }}/${{ inputs.image_name }}
+  DOCKER_IMAGE_NAME: ${{ inputs.image_name }}
 
 jobs:
   push:
