@@ -62,7 +62,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.db
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
     labels:
-      - traefik.http.routers.${SERVICE_NAME}_app.loadbalancer.server.port=888
+      - traefik.http.services.${SERVICE_NAME}_app.loadbalancer.server.port=888
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
     volumes:
