@@ -40,7 +40,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
-      - traefik.port=8000
+      - traefik.http.routers.${SERVICE_NAME}_app.loadbalancer.server.port=8000
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
     environment:
@@ -62,7 +62,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.db
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
     labels:
-      - traefik.port=888
+      - traefik.http.routers.${SERVICE_NAME}_app.loadbalancer.server.port=888
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
     volumes:
