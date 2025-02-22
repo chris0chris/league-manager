@@ -41,6 +41,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
+      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=9000
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
     environment:
