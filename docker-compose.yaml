@@ -23,6 +23,8 @@ services:
       - traefik.http.routers.${SERVICE_NAME}_prod.tls.certresolver=letsencrypthttpresolver
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.rule=Host(`${SERVICE_NAME}.${LOCAL_HOSTNAME}`)
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.entrypoints=web
+      # portainer team
+      - io.portainer.accesscontrol.teams=leaguesphere
     networks:
       - backend
       - proxy
