@@ -40,7 +40,7 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
-      image_name: league-manager_frontend
+      image_name: leaguesphere/frontend
       dockerfile: container/nginx.Dockerfile
 
   deploy-be:
@@ -49,5 +49,5 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/part_docker_push.yaml
     with:
-      image_name: league-manager_backend
+      image_name: leaguesphere/backend
       dockerfile: container/app.Dockerfile

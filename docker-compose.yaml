@@ -1,6 +1,6 @@
 services:
   www:
-    image: dachrisch/league-manager_frontend:latest
+    image: leaguesphere/frontend:latest
     container_name: ${COMPOSE_PROJECT_NAME}.www
     labels:
       # redirect service
@@ -23,6 +23,8 @@ services:
       - traefik.http.routers.${SERVICE_NAME}_prod.tls.certresolver=letsencrypthttpresolver
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.rule=Host(`${SERVICE_NAME}.${LOCAL_HOSTNAME}`)
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.entrypoints=web
+      # portainer team
+      - io.portainer.accesscontrol.teams=leaguesphere
     networks:
       - backend
       - proxy
@@ -34,9 +36,12 @@ services:
     restart: unless-stopped
 
   app:
-    image: dachrisch/league-manager_backend:latest
+    image: leaguesphere/backend:latest
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
+    labels:
+      # portainer team
+      - io.portainer.accesscontrol.teams=leaguesphere
     environment:
       MYSQL_HOST: db
       MYSQL_DB_NAME: ${MYSQL_DB_NAME}
@@ -55,6 +60,9 @@ services:
     image: mariadb:lts
     container_name: ${COMPOSE_PROJECT_NAME}.db
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
+    labels:
+      # portainer team
+      - io.portainer.accesscontrol.teams=leaguesphere
     volumes:
       - "./database:/var/lib/mysql"
     networks:
