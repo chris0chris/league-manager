@@ -18,9 +18,9 @@ services:
       # prod resolver
       - traefik.http.routers.${SERVICE_NAME}_prod.tls=true
       - traefik.http.routers.${SERVICE_NAME}_prod.rule=Host(`leaguesphere.app`) || Host(`www.leaguesphere.app`)
+      - traefik.http.routers.${SERVICE_NAME}_prod.tls.certresolver=letsencrypthttpresolver
 
       # local service
-      - traefik.http.routers.${SERVICE_NAME}_prod.tls.certresolver=letsencrypthttpresolver
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.rule=Host(`${SERVICE_NAME}.${LOCAL_HOSTNAME}`)
       - traefik.http.routers.${SERVICE_NAME}_local_qualified.entrypoints=web
       # portainer team
@@ -79,5 +79,6 @@ volumes:
 
 networks:
   backend:
+    internal: true
   proxy:
     external: true
