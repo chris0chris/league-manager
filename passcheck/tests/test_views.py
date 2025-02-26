@@ -31,6 +31,18 @@ class TestRosterView(WebTest):
         assert response.status_code == HTTPStatus.OK
 
 
+class TestPlayerlistDeleteView(WebTest):
+    def test_display_team_roster(self):
+        user = DBSetup().create_new_user('some staff user', is_staff=True)
+        self.app.set_user(user)
+        team, female, _, _ = DbSetupPasscheck.create_playerlist_for_team()
+        from passcheck.urls import PASSCHECK_ROSTER_DELETE
+        response: DjangoWebtestResponse = self.app.get(reverse(PASSCHECK_ROSTER_DELETE, kwargs={'pk': female.pk}))
+        assert response.status_code == HTTPStatus.FOUND
+        assert response.url == f'/passcheck/team/{team.pk}/list'
+        assert Playerlist.objects.filter(pk=female.pk).exists() is False
+
+
 class TestPlayerlistCreateView(WebTest):
 
     def test_create_player(self):
