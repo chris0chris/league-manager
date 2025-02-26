@@ -21,14 +21,13 @@ from django.contrib.auth import views as auth_view
 from django.urls import path, include
 from django.views.generic import TemplateView
 
-from league_manager.views import homeview, AllUrlsView, ClearCacheView
+from league_manager.views import homeview, ClearCacheView
 
 ADMIN_ALL_URLS = 'admin-all-urls'
 CLEAR_CACHE = 'clear-cache'
 
 LEAGUE_MANAGER_MAINTENANCE = 'maintenance'
 urlpatterns = [
-                  path('urls', AllUrlsView.as_view(), name=ADMIN_ALL_URLS),
                   path('maintenance/', TemplateView.as_view(template_name='league_manager/maintenance.html'), name=LEAGUE_MANAGER_MAINTENANCE),
                   path('clear-cache', ClearCacheView.as_view(), name=CLEAR_CACHE),
                   path('admin/', admin.site.urls),

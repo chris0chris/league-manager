@@ -8,7 +8,7 @@ from django.db.models import QuerySet, Q
 from gamedays.models import Gameday, Team, League, Person
 
 class Player(models.Model):
-    person = models.ForeignKey(Person, on_delete=models.DO_NOTHING)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
     pass_number = models.CharField(max_length=20, validators=[integer_validator])
 
     objects: QuerySet = models.Manager()
@@ -16,7 +16,7 @@ class Player(models.Model):
 
 class Playerlist(models.Model):
     team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
-    player = models.ForeignKey(Player, on_delete=models.DO_NOTHING)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
     jersey_number = models.IntegerField(null=True)
     joined_on = models.DateField(default=date.today)
     left_on = models.DateField(null=True, blank=True, default=None)
