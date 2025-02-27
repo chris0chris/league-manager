@@ -1,7 +1,7 @@
 services:
   www:
     image: leaguesphere/frontend:latest
-    container_name: ${COMPOSE_PROJECT_NAME}.www
+    container_name: ${SERVICE_NAME}.www
     labels:
       # redirect service
       # https://jensknipper.de/blog/traefik-http-to-https-redirect/
@@ -37,7 +37,7 @@ services:
 
   app:
     image: leaguesphere/backend:latest
-    container_name: ${COMPOSE_PROJECT_NAME}.app
+    container_name: ${SERVICE_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
       # portainer team
@@ -58,7 +58,7 @@ services:
   db:
     restart: unless-stopped
     image: mariadb:lts
-    container_name: ${COMPOSE_PROJECT_NAME}.db
+    container_name: ${SERVICE_NAME}.db
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
     labels:
       # portainer team
