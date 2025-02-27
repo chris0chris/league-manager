@@ -29,15 +29,19 @@
         <div class="form-group">
             <div class="row">
                 {% if object %}
-                <div class="col-6">
+                <div class="col-5">
                     <button class="btn btn-info w-100" type="submit">
                         Aktualisieren
                     </button>
                 </div>
-                <div class="col-6">
+                <div class="col-5">
                     <a href="{% url 'passcheck-player-transfer' pk=object.pk %}" class="btn btn-warning w-100">
                         Zum Transfer
                     </a>
+                </div>
+                <div class="col-2">
+                    <a id="deletePlayer" href="{% url 'passcheck-player-delete' pk=object.pk %}" class="btn btn-danger w-100" role="button"
+                           title="Löschen"><i class="bi bi-trash"></i></a>
                 </div>
                 {% else %}
                 <div class="col">
@@ -55,6 +59,17 @@
 {% block footer %}
 {% load static %}
 <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll("#deletePlayer").forEach(button => {
+        button.addEventListener("click", function(event) {
+            if (!confirm("Bist du sicher, dass du diesen Spieler löschen möchtest?")) {
+                event.preventDefault(); // Stops the link from navigating
+            }
+        });
+    });
+});
+</script>
 {{ form.media }}
 <link href='{% static "league_manager/css/dal.css" %}' rel="stylesheet" type="text/css">
 {% endblock footer %}
