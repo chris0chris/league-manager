@@ -3,6 +3,7 @@ services:
     image: leaguesphere/frontend:latest
     container_name: ${SERVICE_NAME}.www
     labels:
+      - traefik.http.services.${SERVICE_NAME}.name=${SERVICE_NAME}
       # redirect service
       # https://jensknipper.de/blog/traefik-http-to-https-redirect/
       - traefik.http.routers.${SERVICE_NAME}-http.entrypoints=web
