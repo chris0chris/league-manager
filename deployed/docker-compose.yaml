@@ -1,8 +1,9 @@
 services:
   www:
     image: leaguesphere/frontend:latest
-    container_name: ${COMPOSE_PROJECT_NAME}.www
+    container_name: ${SERVICE_NAME}.www
     labels:
+      - traefik.http.services.${SERVICE_NAME}.name=${SERVICE_NAME}
       # redirect service
       # https://jensknipper.de/blog/traefik-http-to-https-redirect/
       - traefik.http.routers.${SERVICE_NAME}-http.entrypoints=web
@@ -37,7 +38,7 @@ services:
 
   app:
     image: leaguesphere/backend:latest
-    container_name: ${COMPOSE_PROJECT_NAME}.app
+    container_name: ${SERVICE_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
       # portainer team
@@ -54,11 +55,11 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl -A healthcheck -I --fail http://localhost:8000 || exit 1
+    restart: unless-stopped
 
   db:
-    restart: unless-stopped
     image: mariadb:lts
-    container_name: ${COMPOSE_PROJECT_NAME}.db
+    container_name: ${SERVICE_NAME}.db
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
     labels:
       # portainer team
@@ -73,6 +74,7 @@ services:
     healthcheck:
       test: healthcheck.sh --connect --innodb_initialized
       start_period: 5s
+    restart: unless-stopped
 
 volumes:
   static:
