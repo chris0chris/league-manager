@@ -29,11 +29,11 @@
             {% endif %}
         </h3>
 
-        <table class="table table-hover">
+        <table class="table table-hover align-middle">
             <thead>
             <tr>
                 {% if is_user_or_staff %}
-                <th><a href="{% url 'passcheck-player-create' %}" title="Neue Person zum Roster hinzufügen"><i
+                <th><a href="{% url 'passcheck-player-create' %}" class="btn btn-primary" role="button" title="Neue Person zum Roster hinzufügen"><i
                         class="bi bi-person-plus-fill"></i></a></th>
                 {% endif %}
                 <th scope="col">Trikot</th>
@@ -52,7 +52,7 @@
             <tr>
                 {% if is_user_or_staff  %}
                     {% if player.left_on is None%}
-                    <td><a href="{% url 'passcheck-player-update' pk=player.id %}"
+                    <td><a href="{% url 'passcheck-player-update' pk=player.id %}" role="button" class="btn btn-primary"
                            title="{{player.first_name}} {{player.last_name}} bearbeiten"><i
                             class="bi bi-pencil"></i></a></td>
                     {% else %}

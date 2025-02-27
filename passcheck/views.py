@@ -2,10 +2,10 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
-from django.views.generic import CreateView, TemplateView, UpdateView, ListView
+from django.views.generic import CreateView, TemplateView, UpdateView, ListView, DeleteView
 
 from gamedays.models import Team
 from league_manager.utils.decorators import get_user_request_permission
@@ -115,6 +115,27 @@ class PlayerlistUpdateView(PlayerlistCommonMixin, UserPassesTestMixin, UpdateVie
     def test_func(self):
         player = Playerlist.objects.get(pk=self.kwargs.get('pk'))
         return PermissionHelper.has_staff_or_user_permission(self.request, player.team_id)
+
+
+class PlayerlistDeleteView(UserPassesTestMixin, View):
+    model = Playerlist
+
+    def get_object(self, pk) -> Playerlist:
+        return get_object_or_404(self.model, pk=pk)
+
+    def get(self, request, *args, **kwargs):
+        playerlist = self.get_object(kwargs.get("pk"))
+
+        msg = f"{playerlist} wurde erfolgreich gelöscht"
+        playerlist.player.person.delete()
+        messages.success(request, msg)
+
+        from passcheck.urls import PASSCHECK_ROSTER_LIST
+        return redirect(reverse(PASSCHECK_ROSTER_LIST, kwargs={'pk': playerlist.team_id}))  # Redirect to a safe URL
+
+    def test_func(self):
+        playerlist = self.get_object(pk=self.kwargs.get('pk'))
+        return PermissionHelper.has_staff_or_user_permission(self.request, playerlist.team_id)
 
 
 class PlayerlistTransferView(PlayerlistCommonMixin, UserPassesTestMixin, UpdateView):
