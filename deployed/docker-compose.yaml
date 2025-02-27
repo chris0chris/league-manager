@@ -54,9 +54,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl -A healthcheck -I --fail http://localhost:8000 || exit 1
+    restart: unless-stopped
 
   db:
-    restart: unless-stopped
     image: mariadb:lts
     container_name: ${SERVICE_NAME}.db
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
@@ -73,6 +73,7 @@ services:
     healthcheck:
       test: healthcheck.sh --connect --innodb_initialized
       start_period: 5s
+    restart: unless-stopped
 
 volumes:
   static:
