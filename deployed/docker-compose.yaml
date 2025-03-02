@@ -41,9 +41,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
-      # to remove the error in traefik log https://doc.traefik.io/traefik/providers/docker/#port-detection
-      - traefik.docker.network=${SERVICE_NAME}_backend
-      - traefik.http.services.db-{SERVICE_NAME}.loadbalancer.server.port=8000
+      - traefik.enable=false
       # portainer team
       - io.portainer.accesscontrol.teams=${SERVICE_NAME}
     environment:
@@ -65,9 +63,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.db
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
     labels:
-      # to remove the error in traefik log https://doc.traefik.io/traefik/providers/docker/#port-detection
-      - traefik.http.services.db-{SERVICE_NAME}.loadbalancer.server.port=3306
-      - traefik.docker.network=${SERVICE_NAME}_backend
+      - traefik.enable=false
       # portainer team
       - io.portainer.accesscontrol.teams=${SERVICE_NAME}
     volumes:
