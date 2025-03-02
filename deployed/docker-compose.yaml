@@ -42,6 +42,7 @@ services:
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
       # to remove the error in traefik log https://doc.traefik.io/traefik/providers/docker/#port-detection
+      - traefik.docker.network=backend
       - traefik.http.services.db-{SERVICE_NAME}.loadbalancer.server.port=8000
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
@@ -66,6 +67,7 @@ services:
     labels:
       # to remove the error in traefik log https://doc.traefik.io/traefik/providers/docker/#port-detection
       - traefik.http.services.db-{SERVICE_NAME}.loadbalancer.server.port=3306
+      - traefik.docker.network=backend
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
     volumes:
