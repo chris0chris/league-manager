@@ -4,7 +4,6 @@ services:
     image: leaguesphere/frontend:latest
     container_name: ${COMPOSE_PROJECT_NAME}.www
     labels:
-      - traefik.http.services.${SERVICE_NAME}.name=${SERVICE_NAME}
       # redirect service
       # https://jensknipper.de/blog/traefik-http-to-https-redirect/
       - traefik.http.routers.${SERVICE_NAME}-http.entrypoints=web
@@ -42,6 +41,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
+      - traefik.http.services.db-{SERVICE_NAME}.loadbalancer.server.port=8000
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
     environment:
