@@ -42,10 +42,10 @@ services:
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
       # to remove the error in traefik log https://doc.traefik.io/traefik/providers/docker/#port-detection
-      - traefik.docker.network=backend
+      - traefik.docker.network=${SERVICE_NAME}_backend
       - traefik.http.services.db-{SERVICE_NAME}.loadbalancer.server.port=8000
       # portainer team
-      - io.portainer.accesscontrol.teams=leaguesphere
+      - io.portainer.accesscontrol.teams=${SERVICE_NAME}
     environment:
       MYSQL_HOST: db
       MYSQL_DB_NAME: ${MYSQL_DB_NAME}
@@ -67,9 +67,9 @@ services:
     labels:
       # to remove the error in traefik log https://doc.traefik.io/traefik/providers/docker/#port-detection
       - traefik.http.services.db-{SERVICE_NAME}.loadbalancer.server.port=3306
-      - traefik.docker.network=backend
+      - traefik.docker.network=${SERVICE_NAME}_backend
       # portainer team
-      - io.portainer.accesscontrol.teams=leaguesphere
+      - io.portainer.accesscontrol.teams=${SERVICE_NAME}
     volumes:
       - "./database:/var/lib/mysql"
     networks:
