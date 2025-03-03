@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'accounts',
     'knox',
     'passcheck',
+    'health_check',
+    'health_check.contrib.db_heartbeat',
 ]
 
 MIDDLEWARE = [

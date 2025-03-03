@@ -1,7 +1,7 @@
 name: ${SERVICE_NAME}
 services:
   www:
-    image: leaguesphere/frontend:latest
+    image: leaguesphere/frontend:remote_db
     container_name: ${COMPOSE_PROJECT_NAME}.www
     labels:
       # redirect service
@@ -37,49 +37,23 @@ services:
     restart: unless-stopped
 
   app:
-    image: leaguesphere/backend:latest
+    image: leaguesphere/backend:remote_db
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
       - traefik.enable=false
       # portainer team
       - io.portainer.accesscontrol.teams=${SERVICE_NAME}
+    env_file: ls.env
     environment:
-      MYSQL_HOST: db
-      MYSQL_DB_NAME: ${MYSQL_DB_NAME}
       DJANGO_SETTINGS_MODULE: league_manager.settings.dev
-      SECRET_KEY: ${SECRET_KEY}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-false}  # Default to false if not set
     networks:
+      - proxy
       - backend
-    depends_on:
-      db:
-        condition: service_healthy
     healthcheck:
-      test: curl -A healthcheck -I --fail http://localhost:8000 || exit 1
+      test: curl -A healthcheck http://localhost:8000/health/?format=json | jq -e '.DatabaseHeartBeatCheck == "working"'
     restart: unless-stopped
-
-  db:
-    image: mariadb:lts
-    container_name: ${COMPOSE_PROJECT_NAME}.db
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
-    labels:
-      - traefik.enable=false
-      # portainer team
-      - io.portainer.accesscontrol.teams=${SERVICE_NAME}
-    volumes:
-      - "./database:/var/lib/mysql"
-    networks:
-      - backend
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DB_NAME}
-      MYSQL_ALLOW_EMPTY_PASSWORD: true
-    healthcheck:
-      test: healthcheck.sh --connect --innodb_initialized
-      start_period: 5s
-    restart: unless-stopped
-
-volumes:
-  static:
 
 networks:
   backend:
