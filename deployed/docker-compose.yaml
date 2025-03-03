@@ -45,7 +45,7 @@ services:
       # portainer team
       - io.portainer.accesscontrol.teams=${SERVICE_NAME}
     environment:
-      MYSQL_HOST: db
+      MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_DB_NAME: ${MYSQL_DB_NAME}
       DJANGO_SETTINGS_MODULE: league_manager.settings.dev
       SECRET_KEY: ${SECRET_KEY}
