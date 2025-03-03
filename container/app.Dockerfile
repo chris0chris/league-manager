@@ -9,7 +9,9 @@ RUN apt -y install curl
 RUN apt -y install pkg-config
 RUN apt -y install python3-dev
 RUN apt -y install build-essential
-RUN apt -y install default-libmysqlclient-dev
+RUN apt -y install default-libmysqlclient-dev   # to build the mysql client
+RUN apt -y install git                          # for development dependency in requirements.txt
+
 # add user
 RUN adduser --disabled-password --home ${APP_DIR} ${APP_USER}
 RUN chown ${APP_USER}:${APP_USER} -R ${APP_DIR}
@@ -25,6 +27,7 @@ RUN apt -y remove pkg-config
 RUN apt -y remove python3-dev
 RUN apt -y remove build-essential
 RUN apt -y remove default-libmysqlclient-dev
+RUN apt -y remove git
 
 USER ${APP_USER}
 COPY --chown=${APP_USER} ../ ${APP_DIR}
