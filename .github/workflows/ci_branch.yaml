@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - '*'
-      - '!deploy'
+      - '!deploy/**' # Excludes deploy/* branches
   pull_request:
     branches:
       - '*'
