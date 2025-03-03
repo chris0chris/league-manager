@@ -30,6 +30,8 @@ jobs:
     services:
       app:
         image: ealen/echo-server
+        ports:
+          - 8000:80
     steps:
       - uses: actions/checkout@v4
       - name: 🐳🛠️ Setup Docker buildx
