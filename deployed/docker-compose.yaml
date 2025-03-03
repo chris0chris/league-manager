@@ -49,6 +49,7 @@ services:
       MYSQL_DB_NAME: ${MYSQL_DB_NAME}
       DJANGO_SETTINGS_MODULE: league_manager.settings.dev
       SECRET_KEY: ${SECRET_KEY}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-false}  # Default to false if not set
     networks:
       - backend
     healthcheck:
