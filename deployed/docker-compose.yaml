@@ -51,35 +51,9 @@ services:
       SECRET_KEY: ${SECRET_KEY}
     networks:
       - backend
-    depends_on:
-      db:
-        condition: service_healthy
     healthcheck:
       test: curl -A healthcheck -I --fail http://localhost:8000 || exit 1
     restart: unless-stopped
-
-  db:
-    image: mariadb:lts
-    container_name: ${COMPOSE_PROJECT_NAME}.db
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-storage-engine=InnoDB
-    labels:
-      - traefik.enable=false
-      # portainer team
-      - io.portainer.accesscontrol.teams=${SERVICE_NAME}
-    volumes:
-      - "./database:/var/lib/mysql"
-    networks:
-      - backend
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DB_NAME}
-      MYSQL_ALLOW_EMPTY_PASSWORD: true
-    healthcheck:
-      test: healthcheck.sh --connect --innodb_initialized
-      start_period: 5s
-    restart: unless-stopped
-
-volumes:
-  static:
 
 networks:
   backend:
