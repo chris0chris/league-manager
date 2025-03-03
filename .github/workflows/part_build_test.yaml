@@ -24,7 +24,7 @@ jobs:
           # See: https://hub.docker.com/_/mysql
           MYSQL_DATABASE: test_test_db
           MYSQL_USER: user
-          MYSQL_PWD: user
+          MYSQL_PASSWORD: user
           MYSQL_ALLOW_EMPTY_PASSWORD: true
         ports:
           # Opens port 3306 on service container and host
