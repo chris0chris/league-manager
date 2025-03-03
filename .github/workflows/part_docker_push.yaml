@@ -54,6 +54,17 @@ jobs:
         id: extract_branch
         run: echo "TAG_NAME=${GITHUB_REF#refs/heads/deploy/}" >> $GITHUB_ENV
 
+      # Test run the container
+      - name: Build and export 'test' to Docker
+        uses: docker/build-push-action@v6
+        with:
+          load: true
+          tags: ${{ env.DOCKER_IMAGE_NAME }}:test
+
+      - name: Test
+        run: |
+          docker run --rm ${{ env.DOCKER_IMAGE_NAME }}:test
+
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: 🐳🚀 Build and push Docker image
