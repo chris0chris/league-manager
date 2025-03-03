@@ -52,7 +52,7 @@ services:
       - proxy
       - backend
     healthcheck:
-      test: curl -A healthcheck http://localhost:8000/health/?format=json | jq -e '.DatabaseHeartBeatCheck == \"working\"'
+      test: curl -A healthcheck http://localhost:8000/health/?format=json | jq -e '.DatabaseHeartBeatCheck == "working"'
     restart: unless-stopped
 
 networks:
