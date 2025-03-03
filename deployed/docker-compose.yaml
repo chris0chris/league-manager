@@ -49,6 +49,7 @@ services:
       DJANGO_SETTINGS_MODULE: league_manager.settings.dev
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-false}  # Default to false if not set
     networks:
+      - proxy
       - backend
     healthcheck:
       test: curl -A healthcheck -I --fail http://localhost:8000 || exit 1
