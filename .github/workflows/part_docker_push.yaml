@@ -27,6 +27,9 @@ env:
 jobs:
   push:
     runs-on: ubuntu-latest
+    services:
+      app:
+        image: ealen/echo-server
     steps:
       - uses: actions/checkout@v4
       - name: 🐳🛠️ Setup Docker buildx
