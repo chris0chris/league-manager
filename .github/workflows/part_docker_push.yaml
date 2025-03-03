@@ -11,6 +11,11 @@ on:
         required: true
         description: The dockerfile used to build the image
         type: string
+      test:
+        required: false
+        default: true
+        description: Whether to test the image
+        type: boolean
     secrets:
       DOCKER_TOKEN:
         required: true
@@ -50,9 +55,25 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}
 
-      - name: Extract branch name
+      - name: 🌿 Extract branch name
         id: extract_branch
         run: echo "TAG_NAME=${GITHUB_REF#refs/heads/deploy/}" >> $GITHUB_ENV
+
+      # Test run the container
+      - name: 🐳📦 Build and export 'test' to Docker
+        if: ${{ inputs.test }}
+        uses: docker/build-push-action@v6
+        with:
+          file: ${{ inputs.dockerfile }}
+          load: true
+          tags: ${{ env.DOCKER_IMAGE_NAME }}:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 🐳🧪Test
+        if: ${{ inputs.test }}
+        run: |
+          docker run --rm ${{ env.DOCKER_IMAGE_NAME }}:test
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
