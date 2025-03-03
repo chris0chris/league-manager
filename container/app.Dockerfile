@@ -1,4 +1,4 @@
-FROM python:3.11-dev AS app-builder
+FROM python:3.11-slim AS app-builder
 ARG APP_DIR="/app"
 
 RUN apt -y update
