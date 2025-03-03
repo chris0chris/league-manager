@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'knox',
     'passcheck',
     'health_check',
-    'health_check.db',
     'health_check.contrib.db_heartbeat',
 ]
 
