@@ -2,7 +2,8 @@ name: 🏗️🧪🚀 Build, Test and Deploy everything
 
 on:
   push:
-    branches: [ deploy ]
+    branches:
+      - 'deploy/**'  # Matches all branches under deploy/
 
 permissions:
   contents: write
