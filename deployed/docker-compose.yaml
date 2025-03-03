@@ -52,7 +52,7 @@ services:
       - proxy
       - backend
     healthcheck:
-      test: curl -A healthcheck -I --fail http://localhost:8000 || exit 1
+      test: curl -A healthcheck -I --fail http://localhost:8000/health || exit 1
     restart: unless-stopped
 
 networks:

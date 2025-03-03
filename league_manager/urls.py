@@ -49,7 +49,8 @@ urlpatterns = [
                   path('logout/', auth_view.LogoutView.as_view(template_name='registration/logout.html'),
                        name='logout'),
                   # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-                  path('accounts/', include('accounts.urls'))
+                  path('accounts/', include('accounts.urls')),
+                  path(r'health/', include('health_check.urls')),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
