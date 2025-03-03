@@ -1,5 +1,4 @@
 FROM python:3.11-slim AS app-builder
-ARG APP_DIR="/app"
 
 RUN apt -y update
 RUN apt -y install curl                          # install curl for healthcheck
@@ -9,8 +8,7 @@ RUN apt -y install build-essential
 RUN apt -y install default-libmysqlclient-dev   # to build the mysql client
 RUN apt -y install git                          # for development dependency in requirements.txt
 
-WORKDIR ${APP_DIR}
-COPY ../requirements.txt ${APP_DIR}
+COPY ../requirements.txt .
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
@@ -40,6 +38,8 @@ COPY --chown=${APP_USER} --from=app-builder /usr/local/lib/python3.11/site-packa
 COPY --chown=${APP_USER} ../container/entrypoint.sh /app/entrypoint.sh
 
 RUN chmod 740 /app/entrypoint.sh
+
+WORKDIR ${APP_DIR}
 
 EXPOSE 8000
 
