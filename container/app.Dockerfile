@@ -24,7 +24,7 @@ ENV PYTHONUNBUFFERED=1
 ARG APP_USER="django"
 ARG APP_DIR="/app"
 
-RUN apt -y install default-libmysqlclient-dev   # to run the mysql client
+RUN apt -y install libmysqlclient-dev   # to run the mysql client
 
 # add user
 RUN adduser --disabled-password --home ${APP_DIR} ${APP_USER}
