@@ -6,7 +6,7 @@ RUN apt -y install curl                          # install curl for healthcheck
 RUN apt -y install pkg-config
 RUN apt -y install python3-dev
 RUN apt -y install build-essential
-RUN apt -y install libmysqlclient-dev   # to build the mysql client
+RUN apt -y install default-libmysqlclient-dev   # to build the mysql client
 RUN apt -y install git                          # for development dependency in requirements.txt
 
 WORKDIR ${APP_DIR}
@@ -25,7 +25,7 @@ ARG APP_USER="django"
 ARG APP_DIR="/app"
 
 RUN apt -y update
-RUN apt -y install libmysqlclient-dev   # to run the mysql client
+RUN apt -y install default-libmysqlclient-dev   # to run the mysql client
 
 # add user
 RUN adduser --disabled-password --home ${APP_DIR} ${APP_USER}
