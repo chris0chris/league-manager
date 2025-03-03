@@ -3,9 +3,9 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ARG APP_USER="django"
 ARG APP_DIR="/app"
-# install curl for healthcheck
+
 RUN apt -y update
-RUN apt -y install curl
+RUN apt -y install curl                          # install curl for healthcheck
 RUN apt -y install pkg-config
 RUN apt -y install python3-dev
 RUN apt -y install build-essential
@@ -23,11 +23,13 @@ RUN pip install -r requirements.txt
 RUN pip install gunicorn
 RUN pip install django-debug-toolbar
 
+# remove build time dependencies
 RUN apt -y remove pkg-config
 RUN apt -y remove python3-dev
 RUN apt -y remove build-essential
 RUN apt -y remove default-libmysqlclient-dev
 RUN apt -y remove git
+RUN apt -y autoremove
 
 USER ${APP_USER}
 COPY --chown=${APP_USER} ../ ${APP_DIR}
