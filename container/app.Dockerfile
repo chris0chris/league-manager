@@ -1,7 +1,6 @@
 FROM python:3.11-slim AS app-builder
 
 RUN apt -y update
-RUN apt -y install curl                          # install curl for healthcheck
 RUN apt -y install pkg-config
 RUN apt -y install python3-dev
 RUN apt -y install build-essential
@@ -22,7 +21,8 @@ ARG APP_USER="django"
 ARG APP_DIR="/app"
 
 RUN apt -y update
-RUN apt -y install default-libmysqlclient-dev   # to run the mysql client
+RUN apt -y install curl                          # install curl for healthcheck
+RUN apt -y install default-libmysqlclient-dev    # to run the mysql client
 RUN pip install gunicorn
 
 # add user
