@@ -11,6 +11,11 @@ on:
         required: true
         description: The dockerfile used to build the image
         type: string
+      test:
+        required: false
+        default: true
+        description: Whether to test the image
+        type: boolean
     secrets:
       DOCKER_TOKEN:
         required: true
@@ -27,11 +32,6 @@ env:
 jobs:
   push:
     runs-on: ubuntu-latest
-    services:
-      app:
-        image: ealen/echo-server
-        ports:
-          - 8000:80
     steps:
       - uses: actions/checkout@v4
       - name: 🐳🛠️ Setup Docker buildx
@@ -61,6 +61,7 @@ jobs:
 
       # Test run the container
       - name: 🐳📦 Build and export 'test' to Docker
+        if: ${{ inputs.test }}
         uses: docker/build-push-action@v6
         with:
           file: ${{ inputs.dockerfile }}
@@ -70,6 +71,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: 🐳🧪Test
+        if: ${{ inputs.test }}
         run: |
           docker run --rm ${{ env.DOCKER_IMAGE_NAME }}:test
 

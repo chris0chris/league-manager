@@ -43,6 +43,7 @@ jobs:
     with:
       image_name: leaguesphere/frontend
       dockerfile: container/nginx.Dockerfile
+      test: false
 
   deploy-be:
     needs:
