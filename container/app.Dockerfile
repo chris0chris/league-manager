@@ -22,6 +22,7 @@ ARG APP_DIR="/app"
 
 RUN apt -y update
 RUN apt -y install curl                          # install curl for healthcheck
+RUN apt -y install jq                            # install jq for healthcheck
 RUN apt -y install default-libmysqlclient-dev    # to run the mysql client
 RUN pip install gunicorn
 
