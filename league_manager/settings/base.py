@@ -1,7 +1,6 @@
 import os
 
 from django.contrib import messages
-from health_check.contrib import db_heartbeat
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from dotenv import load_dotenv
 
@@ -39,6 +38,7 @@ INSTALLED_APPS = [
     'knox',
     'passcheck',
     'health_check',
+    'health_check.db',
     'health_check.contrib.db_heartbeat',
 ]
 
