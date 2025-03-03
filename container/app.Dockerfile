@@ -14,7 +14,6 @@ COPY ../requirements.txt ${APP_DIR}
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-RUN pip install gunicorn
 RUN pip install django-debug-toolbar
 
 FROM python:3.11-slim AS app
@@ -26,6 +25,7 @@ ARG APP_DIR="/app"
 
 RUN apt -y update
 RUN apt -y install default-libmysqlclient-dev   # to run the mysql client
+RUN pip install gunicorn
 
 # add user
 RUN adduser --disabled-password --home ${APP_DIR} ${APP_USER}
@@ -38,6 +38,7 @@ RUN rm -rf .git/
 COPY --chown=${APP_USER} --from=app-builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
 
 COPY --chown=${APP_USER} ../container/entrypoint.sh /app/entrypoint.sh
+
 RUN chmod 740 /app/entrypoint.sh
 
 EXPOSE 8000
