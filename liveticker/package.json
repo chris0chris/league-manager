@@ -37,7 +37,7 @@
     "@testing-library/user-event": "^14.6.1",
     "babel-loader": "^9.2.1",
     "eslint": "^9.20.1",
-    "eslint-config-prettier": "^10.0.1",
+    "eslint-config-prettier": "^10.0.2",
     "eslint-formatter-junit": "^8.40.0",
     "eslint-plugin-react": "^7.37.4",
     "globals": "^16.0.0",
