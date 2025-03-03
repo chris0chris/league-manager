@@ -50,7 +50,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}
 
-      - name: Extract branch name
+      - name: 🌿 Extract branch name
         id: extract_branch
         run: echo "TAG_NAME=${GITHUB_REF#refs/heads/deploy/}" >> $GITHUB_ENV
 
