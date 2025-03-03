@@ -22,9 +22,9 @@ RUN pip install gunicorn
 RUN pip install django-debug-toolbar
 
 RUN apt -y remove pkg-config
-RUN apt -y install python3-dev
-RUN apt -y install build-essential
-RUN apt -y install default-libmysqlclient-dev
+RUN apt -y remove python3-dev
+RUN apt -y remove build-essential
+RUN apt -y remove default-libmysqlclient-dev
 
 USER ${APP_USER}
 COPY --chown=${APP_USER} ../ ${APP_DIR}
