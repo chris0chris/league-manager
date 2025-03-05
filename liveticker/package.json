@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.0",
-    "axios": "^1.7.9",
+    "axios": "^1.8.1",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -44,7 +44,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "jest-junit": "^16.0.0",
-    "prettier": "3.5.2",
+    "prettier": "3.5.3",
     "redux-mock-store": "^1.5.5",
     "regenerator-runtime": "^0.14.1",
     "webpack": "^5.98.0",
