@@ -30,3 +30,12 @@
     color: red;
     font-size: x-large;
 }
+
+.json-container {
+    font-family: monospace;
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

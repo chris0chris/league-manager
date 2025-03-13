@@ -5,6 +5,7 @@
 <article class="media content-section">
     {% include 'team/team_navigation.html' %}
     <div class="media-body">
+        <div id="jsonOutput" class="json-container"></div>
         {% block license_status %}
         {% if official_info.is_valid %}
         <div class="row bg-success text-white mb-2">

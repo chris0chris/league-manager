@@ -1,9 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
+{% load static %}
+<link href='{% static "officials/css/main.css" %}' rel="stylesheet" type="text/css">
 <article class="media content-section">
     <div class="media-body">
         Execution Time: {{ time }}
-        <pre>{{ result }}</pre>
+        <div id="jsonOutput" class="json-container"></div>
     </div>
 </article>
+
+<script>
+    document.getElementById("jsonOutput").innerHTML = JSON.stringify({{result | safe}}, null, 2)
+            .replace(/"(.*?)": "(<a.*?<\/a>)"/g, '"$1": $2') // Removes extra quotes around anchor tags
+            .replace(/\\\"/g, '"');
+</script>
 {% endblock content %}

@@ -23,7 +23,7 @@ class Official(models.Model):
         ]
 
     def __str__(self):
-        return (f'{self.team.description}__{self.last_name}, {self.first_name} - ('
+        return (f'{self.pk} - {self.team.description}__{self.last_name}, {self.first_name} - ('
                 f'{"NONE" if self.association is None else self.association.name})')
 
 

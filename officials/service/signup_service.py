@@ -10,6 +10,7 @@ from officials.models import OfficialGamedaySignup
 from officials.serializers import OfficialGamedaySignupSerializer, GamedaySignedUpOfficialsSerializer
 
 OFFICIALS_PER_FIELD = 6
+OFFICIALS_SIGNUP_LIMIT = 2
 
 
 class DuplicateSignupError(Exception):
@@ -24,10 +25,8 @@ class OfficialSignupService:
     @staticmethod
     def create_signup(gameday_id, official_id):
         gameday = Gameday.objects.get(pk=gameday_id)
-        number_fields = int(gameday.format.split('_')[-1])
-        officials_limit = number_fields * OFFICIALS_PER_FIELD
-        if OfficialGamedaySignup.objects.filter(gameday=gameday).count() >= officials_limit:
-            raise MaxSignupError(f'{gameday.name} - Das Limit von {officials_limit} wurde erreicht.')
+        if OfficialGamedaySignup.objects.filter(gameday=gameday).count() >= OFFICIALS_SIGNUP_LIMIT:
+            raise MaxSignupError(f'{gameday.name} - Das Limit von {OFFICIALS_SIGNUP_LIMIT} wurde erreicht.')
         try:
             OfficialGamedaySignup.objects.create(gameday=gameday, official_id=official_id)
         except IntegrityError:
@@ -56,7 +55,7 @@ class OfficialSignupService:
         relevant_leagues = all_gamedays.order_by().values_list('league__name', flat=True).distinct()
         all_gamedays = all_gamedays.filter(Q(league__name=league) if league else Q(),).annotate(
             count_signup=Count('officialgamedaysignup'),
-            limit_signup=(ExtractFieldPart(F('format'), output_field=IntegerField())) * OFFICIALS_PER_FIELD,
+            limit_signup= Value(OFFICIALS_SIGNUP_LIMIT),
             has_signed_up=Case(
                 When(pk__in=Subquery(signed_up_officials), then=True),
                 default=False,
