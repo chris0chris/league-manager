@@ -54,6 +54,7 @@ class OfficialsRepositoryService:
                         FROM officials_officiallicensehistory
                         WHERE official_id = officials_official.id
                         AND license_id IN ({license_ids_str})
+                        ORDER BY created_at DESC
                     ),
                     '-'
                 )
