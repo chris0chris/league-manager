@@ -140,7 +140,7 @@ class MoodleService:
             official = self.create_new_or_update_existing_official(user_info)
         license_history = self.create_new_or_update_license_history(official, course, user_info)
         return None, [], [
-            f'{"XXX / " if license_history is None else str(license_history.result) + '% / '}{self._get_ahref_for_moodle_profile(official.external_id, str(official))} / Lizenz: {self._get_ahref_for_profile(official.pk)}']
+            f'{"XXX / " if license_history is None else str(license_history.result) + "% / "}{self._get_ahref_for_moodle_profile(official.external_id, str(official))} / Lizenz: {self._get_ahref_for_profile(official.pk)}']
 
     def create_new_or_update_license_history(self, official, course: ApiCourse,
                                              participant: ApiUserInfo) -> OfficialLicenseHistory | None:
