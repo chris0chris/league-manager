@@ -7,6 +7,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned
+from django.db import connections
 from django.db.models import QuerySet
 from django.urls import reverse
 
@@ -76,6 +77,7 @@ class MoodleService:
                 missing_team_names.update(team_name_set)
                 missed_officials_list += missed_official
                 result_list += [course_result]
+        connections.close_all()
 
         return {
             'items_result_list': len(result_list),
@@ -140,15 +142,10 @@ class MoodleService:
             official = self.create_new_or_update_existing_official(user_info)
         license_history = self.create_new_or_update_license_history(official, course, user_info)
         return None, [], [
-            f'{"XXX / " if license_history is None else str(license_history.result) + "% / "}{self._get_ahref_for_moodle_profile(official.external_id, str(official))} / Lizenz: {self._get_ahref_for_profile(official.pk)}']
+            f"{'XXX / ' if license_history is None else str(license_history.result) + '% / '}{self._get_ahref_for_moodle_profile(official.external_id, str(official))} / Lizenz: {self._get_ahref_for_profile(official.pk)}"]
 
     def create_new_or_update_license_history(self, official, course: ApiCourse,
                                              participant: ApiUserInfo) -> OfficialLicenseHistory | None:
-        license_history_to_update: OfficialLicenseHistory = self._get_first(self.license_history.filter(
-            official=official,
-            created_at__year=course.get_year(),
-            license_id__in=(course.get_license_id(), LicenseStrategy.NO_LICENSE),
-        ))
         result = None
         exams = self.get_exams()
         exam: ApiExam
@@ -159,12 +156,14 @@ class MoodleService:
                 break
         if result is None:
             return None
+        calculated_license_id = self.license_calculator.calculate(course.get_license_id(), result)
+        license_history_to_update: OfficialLicenseHistory = self._get_first(self.license_history.filter(
+            official=official,
+            created_at__year=course.get_year(),
+            license_id=calculated_license_id,
+        ))
         if license_history_to_update is not None:
             if license_history_to_update.result < result:
-                license_history_to_update.license_id = self.license_calculator.calculate(
-                    course.get_license_id(),
-                    result
-                )
                 license_history_to_update.result = result
         else:
             license_history_to_update = self.create_new_license_history(course, official, result)
