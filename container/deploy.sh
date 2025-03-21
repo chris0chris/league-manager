@@ -36,4 +36,5 @@ git push $REMOTE $DEPLOY_BRANCH || exit 1
 echo "Cleaning up local branches that no longer exist on [$REMOTE]..."
 git remote prune $REMOTE || exit 1
 
+git checkout $MASTER_BRANCH
 echo "Update process complete!"
