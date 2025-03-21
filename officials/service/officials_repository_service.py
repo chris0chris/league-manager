@@ -14,7 +14,7 @@ class OfficialsRepositoryService:
         officials = (
             Official.objects
             .filter(external_id__in=external_ids)
-            # .extra(select={"license_years": license_ids_sql})
+            # TODO: move into QuerySet
             .annotate(
                 license_years=Coalesce(
                     Subquery(
