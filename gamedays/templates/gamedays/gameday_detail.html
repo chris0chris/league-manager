@@ -36,13 +36,8 @@
 
                     Gemeldete Offizielle: {% if not info.officials %} - {% endif %}<br/>
                     {% if info.url_pattern_official_signup %}
-                    {% if request.is_secure %}
-                    <a href="https://{{ request.META.HTTP_X_FORWARDED_HOST }}{% url info.url_pattern_official_signup %}"
+                    <a href="{% url info.url_pattern_official_signup %}"
                        target="_blank" class="btn btn-secondary">Zur Anmeldung</a>
-                    {% else %}
-                    <a href="http://{{ request.META.HTTP_X_FORWARDED_HOST }}{% url info.url_pattern_official_signup %}"
-                       target="_blank" class="btn btn-secondary">Zur Anmeldung</a>
-                    {% endif %}
                     {% endif %}
                 </div>
                 <div class="col-12 col-md-9">
