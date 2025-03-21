@@ -3,5 +3,5 @@ pytest==8.3.5
 pytest-django==4.10.0
 pytest-cov==6.0.0
 factory-boy==3.3.3
-django-debug-toolbar==5.0.1
+django-debug-toolbar==5.1.0
 WebTest==3.0.4
