@@ -26,6 +26,11 @@ git pull || exit 1
 echo "Rebase [$MASTER_BRANCH] onto [$DEPLOY_BRANCH]..."
 git rebase $MASTER_BRANCH || exit 1
 
+LAST_COMMIT_MSG=$(git log -1 --pretty=%B master)
+GIT_COMMITTER_NAME="$(git show -s --format=%cn $MASTER_BRANCH)"
+
+git commit --amend -m "deploy [$LAST_COMMIT_MSG] from [$GIT_COMMITTER_NAME]" || exit 1
+
 echo "Pulling after rebase..."
 git pull || exit 1
 
