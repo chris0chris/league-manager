@@ -7,6 +7,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned
+from django.db import connections
 from django.db.models import QuerySet
 from django.urls import reverse
 
@@ -76,6 +77,7 @@ class MoodleService:
                 missing_team_names.update(team_name_set)
                 missed_officials_list += missed_official
                 result_list += [course_result]
+        connections.close_all()
 
         return {
             'items_result_list': len(result_list),
