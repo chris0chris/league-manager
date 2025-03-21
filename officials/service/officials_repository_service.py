@@ -1,23 +1,36 @@
 from datetime import datetime, timedelta
 
-from django.db.models import Sum, Count, Q, OuterRef, Subquery, Value, ExpressionWrapper, Case, When, F, IntegerField, \
-    FloatField
+from django.db.models import Sum, Count, Q, OuterRef, Subquery, Value, FloatField, CharField, F
 from django.db.models.functions import Coalesce
 
 from officials.models import Official, OfficialLicenseHistory, OfficialExternalGames
+from officials.service.funcs import GroupConcat
 
 
 class OfficialsRepositoryService:
     # noinspection PyMethodMayBeStatic
     def get_officials_game_count_for_license(self, latest_date: datetime, external_ids: list[str],
                                              license_ids: list[int] = (1, 3)):
-        license_ids_sql = self._construct_license_sql(license_ids)
-
         officials = (
             Official.objects
             .filter(external_id__in=external_ids)
-            .extra(select={"license_years": license_ids_sql})
+            # .extra(select={"license_years": license_ids_sql})
             .annotate(
+                license_years=Coalesce(
+                    Subquery(
+                        OfficialLicenseHistory.objects
+                        .filter(
+                            official=OuterRef('pk'),
+                            license_id__in=license_ids
+                        )
+                        .annotate(year=F('created_at__year'))
+                        .values('official')
+                        .annotate(years=GroupConcat(F('year'), ordering='created_at ASC'))
+                        .values('years'),
+                        output_field=CharField()
+                    ),
+                    Value('-', output_field=CharField())
+                ),
                 license_name=Coalesce(Subquery(self._license_name_subquery(latest_date.year)), Value('-')),
                 license_id=Subquery(self._license_id_subquery(latest_date.year)),
                 total_games=Subquery(self._internal_games_subquery(latest_date)) + Subquery(
@@ -43,22 +56,6 @@ class OfficialsRepositoryService:
                 Value(0), output_field=FloatField()
             )
         ).values('games')[:1]
-
-    @staticmethod
-    def _construct_license_sql(license_ids: list[int]) -> str:
-        license_ids_str = ', '.join(map(str, license_ids))
-        return f"""
-                IFNULL(
-                    (
-                        SELECT GROUP_CONCAT(YEAR(created_at) SEPARATOR ',')
-                        FROM officials_officiallicensehistory
-                        WHERE official_id = officials_official.id
-                        AND license_id IN ({license_ids_str})
-                        ORDER BY created_at ASC
-                    ),
-                    '-'
-                )
-            """
 
     @staticmethod
     def _license_subquery(year: int, field: str):
