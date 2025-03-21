@@ -144,11 +144,6 @@ class MoodleService:
 
     def create_new_or_update_license_history(self, official, course: ApiCourse,
                                              participant: ApiUserInfo) -> OfficialLicenseHistory | None:
-        license_history_to_update: OfficialLicenseHistory = self._get_first(self.license_history.filter(
-            official=official,
-            created_at__year=course.get_year(),
-            license_id__in=(course.get_license_id(), LicenseStrategy.NO_LICENSE),
-        ))
         result = None
         exams = self.get_exams()
         exam: ApiExam
@@ -159,12 +154,14 @@ class MoodleService:
                 break
         if result is None:
             return None
+        calculated_license_id = self.license_calculator.calculate(course.get_license_id(), result)
+        license_history_to_update: OfficialLicenseHistory = self._get_first(self.license_history.filter(
+            official=official,
+            created_at__year=course.get_year(),
+            license_id=calculated_license_id,
+        ))
         if license_history_to_update is not None:
             if license_history_to_update.result < result:
-                license_history_to_update.license_id = self.license_calculator.calculate(
-                    course.get_license_id(),
-                    result
-                )
                 license_history_to_update.result = result
         else:
             license_history_to_update = self.create_new_license_history(course, official, result)
