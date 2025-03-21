@@ -10,6 +10,7 @@ from officials.service.moodle.moodle_api import MoodleApi, ApiCourse, ApiPartici
     ApiExams, ApiExamResult
 from officials.service.moodle.moodle_service import MoodleService
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
+from officials.tests.setup_factories.factories_officials import OfficialLicenseHistoryFactory, OfficialLicenseFactory
 
 
 class TestLicenseCalculator:
@@ -343,6 +344,81 @@ class TestGameService(TestCase):
         assert actual_api_user_update.user_id == updated_official.external_id
         assert actual_api_user_update.license_number == updated_official.pk
         assert actual_api_user_update.license_name == 'F2'
+
+    @patch.object(MoodleApi, 'update_user')
+    @patch.object(MoodleApi, 'get_user_result_for_exam')
+    @patch.object(MoodleApi, 'get_exams_for_course')
+    @patch.object(MoodleApi, 'get_participants_for_course')
+    def test_update_licenses_and_dont_create_new_license_due_failing_exam_result(self, participants_mock: MagicMock,
+                                             exams_mock: MagicMock, result_exams_mock: MagicMock,
+                                             update_user_mock: MagicMock):
+        team = DbSetupOfficials().create_officials_and_team()
+        official: Official = Official.objects.last()
+        OfficialLicenseHistoryFactory(official=official, license=OfficialLicenseFactory(id=2, name='F3'), result=60)
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 3,
+            "enddate": time.time(),
+            "fullname": "course name 2",
+        })
+        participants_mock.return_value = ApiParticipants([
+            {
+                "id": official.external_id,
+                'firstname': 'first_name moodle insert last',
+                'lastname': 'last_name moodle insert last',
+                'customfields': [
+                    {
+                        'shortname': 'teamname',
+                        'value': team.description
+                    },
+                    {
+                        'shortname': 'teamid',
+                        'value': team.pk
+                    },
+                    {
+                        'shortname': 'Landesverband',
+                        'value': 'Nein.'
+                    },
+                ],
+                "roles": [{"roleid": 5}],
+            },
+        ])
+        exams_mock.return_value = ApiExams({
+            "quizzes": [
+                {
+                    "course": 1,
+                    "grade": 100,
+                    "id": 75,
+                    "name": "Test - Lizenzprüfung / exam",
+                }
+            ],
+            "warnings": []
+        })
+        result_exams_mock.return_value = ApiExamResult({
+            "attempts": [
+                {
+                    "sumgrades": 68.9,
+                }
+            ],
+        })
+        moodle_service = MoodleService()
+        result = moodle_service.get_participants_from_course(course)
+        updated_official: Official = Official.objects.get(pk=official.pk)
+        assert updated_official.last_name == 'last_name moodle insert last'
+        assert updated_official.association is None
+        assert OfficialLicenseHistory.objects.filter(official=updated_official, license=LicenseStrategy.F3_LICENSE).count() == 1
+        assert OfficialLicenseHistory.objects.filter(official=updated_official).last().result == 69
+        team_name_set_index, missed_official_index, course_result_index = 0, 1, 2
+        course_result = result[course_result_index]
+        assert 'course name 2' in course_result['course']
+        assert course_result['officials_count'] == 1
+        assert len(course_result['officials']) == 1
+        assert len(result[team_name_set_index]) == 0
+        assert len(result[missed_official_index]) == 0
+        actual_api_user_update: ApiUpdateUser = update_user_mock.call_args[0][0]
+        assert actual_api_user_update.user_id == updated_official.external_id
+        assert actual_api_user_update.license_number == updated_official.pk
+        assert actual_api_user_update.license_name == 'F3'
 
     @patch.object(MoodleApi, 'update_user')
     @patch.object(MoodleApi, 'get_user_result_for_exam')
