@@ -1,8 +1,8 @@
-from django.db.models import Sum
+from django.db.models import Sum, OuterRef, Subquery, IntegerField
 
 from gamedays.service.team_repository_service import TeamRepositoryService
 from officials.api.serializers import OfficialGameCountSerializer
-from officials.models import Official
+from officials.models import Official, OfficialLicenseHistory
 from officials.service.game_official_entries import InternalGameOfficialEntry, ExternalGameOfficialEntry
 from officials.service.moodle.moodle_api import ApiCourse
 from officials.service.moodle.moodle_service import MoodleService
@@ -19,7 +19,7 @@ class OfficialService:
         all_team_officials = (Official.objects.filter(
             officiallicensehistory__created_at__year=season,
             team=team_repository_service.team)
-                              .order_by('last_name', 'first_name'))
+                              .order_by('last_name', 'first_name').distinct())
         all_team_years_with_official_license = sorted(
             self.official_repository_service.get_all_years_with_team_official_licenses(
                 team_repository_service.team
