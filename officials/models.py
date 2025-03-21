@@ -8,9 +8,10 @@ from gamedays.models import Association, Team, Gameday
 
 
 class Official(models.Model):
+    OHNE_TEAM_ID = 213
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    team: Team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
+    team: Team = models.ForeignKey(Team, on_delete=models.SET(OHNE_TEAM_ID))
     external_id = models.CharField(max_length=100, null=True, default=None, unique=True)
     association = models.ForeignKey(Association, on_delete=models.SET_NULL, null=True)
 
