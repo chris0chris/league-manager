@@ -265,7 +265,7 @@ class OfficialAssociationListView(View):
         ).exclude(license__id=4)
         officials_with_valid_licenses = valid_licenses.values('official').distinct()
         official_list = (
-            Official.objects.filter(id__in=officials_with_valid_licenses, association__abbr=association_abbreviation)
+            Official.objects.filter(Q(id__in=officials_with_valid_licenses, team__association__abbr=association_abbreviation) | Q(team=Official.OHNE_TEAM_ID, association__abbr=association_abbreviation))
             .order_by('team__description', 'last_name'))
         return render(
             request,
