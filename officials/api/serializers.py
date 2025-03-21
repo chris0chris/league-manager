@@ -7,6 +7,7 @@ from rest_framework.serializers import ModelSerializer, Serializer
 from gamedays.models import GameOfficial
 from league_manager.utils.serializer_utils import Obfuscator
 from officials.models import Official, OfficialLicenseHistory, EmptyOfficialLicenseHistory, OfficialExternalGames
+from officials.service.boff_license_calculation import LicenseStrategy
 from officials.service.moodle.moodle_service import MoodleService
 
 
@@ -105,7 +106,7 @@ class OfficialSerializer(ModelSerializer):
 
     # noinspection PyMethodMayBeStatic
     def _get_license_history(self, obj):
-        newest_license: OfficialLicenseHistory = obj.officiallicensehistory_set.last()
+        newest_license: OfficialLicenseHistory = obj.officiallicensehistory_set.exclude(license=LicenseStrategy.NO_LICENSE).order_by('created_at__year', '-license__name').last()
         if newest_license is None:
             return EmptyOfficialLicenseHistory()
         return newest_license

@@ -15,8 +15,8 @@ class DbSetupOfficials:
             DBSetup().create_new_user(team_name)
             team = TeamFactory(name=team_name)
         association = DBSetup().create_new_association()
-        license_f2 = OfficialLicenseFactory(name='F2')
-        license_f1 = OfficialLicenseFactory(name='F1')
+        license_f2 = OfficialLicenseFactory(id=3, name='F2')
+        license_f1 = OfficialLicenseFactory(id=1, name='F1')
         for i in range(number):
             official = OfficialFactory(first_name='Juli' + 'i'*i, last_name='Jarula' + 'a'*i, team=team, association=association,
                                        external_id=i*10)
@@ -33,8 +33,8 @@ class DbSetupOfficials:
         DBSetup().create_new_user(team_name)
         team = TeamFactory(name=team_name)
         association = DBSetup().create_new_association()
-        license_f2 = OfficialLicenseFactory(name='F2')
-        license_f1 = OfficialLicenseFactory(name='F1')
+        license_f2 = OfficialLicenseFactory(id=3, name='F2')
+        license_f1 = OfficialLicenseFactory(id=1, name='F1')
         official1 = OfficialFactory(first_name='Franzi', last_name='Fedora', team=team, association=association,
                                     external_id=5)
         official2 = OfficialFactory(first_name='Julia', last_name='Jegura', team=team, external_id=7)

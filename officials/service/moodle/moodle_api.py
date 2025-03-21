@@ -10,19 +10,19 @@ from officials.service.boff_license_calculation import LicenseStrategy
 
 
 class FieldNotFoundException(Exception):
-    def __init__(self, field, current_field):
-        super().__init__(f'Field \'{field}\' not found. Instead got {json.dumps(current_field)}')
+    def __init__(self, user_id, field, current_field):
+        super().__init__(f'User-Id: {user_id} -> Field \'{field}\' not found. Instead got {json.dumps(current_field)}')
 
 
 class ApiUserInfo:
     def __init__(self, user_info_json):
-        if not user_info_json:
-            user_info_json = [{}]
-        self.first_name = user_info_json[0].get('firstname', '')
-        self.last_name = user_info_json[0].get('lastname', '')
-        self.custom_fields = user_info_json[0].get('customfields', [{}, {}, {}])
-        self.id = user_info_json[0].get('id', -1)
-        self.email = user_info_json[0].get('email', '')
+        if isinstance(user_info_json, list):
+            user_info_json = user_info_json[0]
+        self.first_name = user_info_json.get('firstname', '')
+        self.last_name = user_info_json.get('lastname', '')
+        self.custom_fields = user_info_json.get('customfields', [{}, {}, {}])
+        self.id = user_info_json.get('id', -1)
+        self.email = user_info_json.get('email', '')
 
     def get_first_name(self) -> str:
         return self.first_name
@@ -59,7 +59,7 @@ class ApiUserInfo:
         except IndexError:
             return ''
         if found_entry == {}:
-            raise FieldNotFoundException(expected_field_name, self.custom_fields)
+            raise FieldNotFoundException(self.id, expected_field_name, self.custom_fields)
         return found_entry.get('value', '')
 
     def __str__(self):
@@ -130,43 +130,80 @@ class ApiCourses:
         return self.courses
 
 
-class ApiParticipant:
-    def __init__(self, participant_json):
-        gradeitem = participant_json['gradeitems'][0]
-        self.grademax = gradeitem['grademax']
-        self.graderaw = gradeitem['graderaw']
-        self.user_id = participant_json['userid']
+class ApiExam:
+    def __init__(self, quiz_json):
+        self.id = quiz_json['id']
+        self.course_id = quiz_json['course']
+        self.grade = float(quiz_json['grade'])
 
-    def get_user_id(self):
-        return self.user_id
+    def get_id(self):
+        return self.id
 
-    def has_result(self):
-        if self.graderaw is not None and self.grademax is not None:
-            return True
-        return False
+    def get_course_id(self):
+        return self.course_id
 
-    def get_result(self):
-        result = self.graderaw / self.grademax * 100
-        return int(math.ceil(result))
+    def get_grade(self):
+        return self.grade
 
     def __str__(self):
-        return f'{self.user_id}: graderaw {self.graderaw} / {self.grademax} grademax'
+        return f'{self.course_id}: quiz_id={self.id} -> grade: {self.grade}'
 
     def __repr__(self):
-        return f'ApiParticipant(participant_json=' \
-               f'{{"gradeitems":[' \
-               f'{{"grademax": {self.grademax}, "graderaw": {self.graderaw}, "user_id": {self.user_id}}}' \
-               f']}})'
+        return f'ApiExam(quiz_json={{"id": {self.id}, "course": {self.course_id}, "grade": {self.grade})}})'
+
+
+class ApiExamResult:
+    def __init__(self, exam_result_json):
+        attempts = exam_result_json.get('attempts')
+        if attempts is None or len(attempts) == 0:
+            self.result = None
+        else:
+            self.result = float(exam_result_json.get('attempts')[0]['sumgrades'])
+
+    def get_result(self):
+        return self.result
+
+    def __str__(self):
+        return f'Result={self.result}'
+
+    def __repr__(self):
+        return f'ApiExamResult(exam_result_json={{"attempts: [{{"sumgrades": {self.result})}}]}})'
+
+class EmptyApiExams:
+    def get_all(self):
+        return []
+
+    def is_empty(self):
+        return True
+
+class ApiExams:
+    def __init__(self, quizzes_json):
+        quizzes = quizzes_json.get('quizzes', [])
+        exam_keywords = ['Lizenzprüfung', 'exam']
+
+        def is_exam(quiz):
+            return any(keyword in quiz['name'] for keyword in exam_keywords)
+
+        self.exams = [ApiExam(quiz) for quiz in quizzes if is_exam(quiz)]
+
+    def get_all(self) -> list[ApiExam]:
+        return self.exams
+
+    def is_empty(self):
+        return len(self.exams) == 0
 
 
 class ApiParticipants:
-    def __init__(self, participants_json):
-        all_participants = participants_json.get('usergrades', [])
-        self.participants = []
-        for current_participant in all_participants:
-            self.participants += [ApiParticipant(current_participant)]
+    STUDENT_ROLE = 5
 
-    def get_all(self) -> List[ApiParticipant]:
+    def __init__(self, participants_json):
+        all_students = [user for user in participants_json if
+                        any(role["roleid"] == self.STUDENT_ROLE for role in user["roles"])]
+        self.participants = []
+        for current_participant in all_students:
+            self.participants += [ApiUserInfo(current_participant)]
+
+    def get_all(self) -> List[ApiUserInfo]:
         return self.participants
 
 
@@ -197,14 +234,14 @@ class MoodleAuth:
 
 class MoodleApi:
     def __init__(self):
-        self.moodle_url = f'{settings.MOODLE_URL}/offd/moodle/webservice/rest/server.php' \
+        self.moodle_url = f'{settings.MOODLE_URL}/moodle/webservice/rest/server.php' \
                           f'?wstoken={settings.MOODLE_WSTOKEN}&moodlewsrestformat=json'
 
     def __str__(self):
         return f'{settings.MOODLE_URL}'
 
     def confirm_user_auth(self, username, password):
-        return MoodleAuth(requests.get(f'{settings.MOODLE_URL}/offd/moodle/login/token.php', {
+        return MoodleAuth(requests.get(f'{settings.MOODLE_URL}/moodle/login/token.php', {
             'username': username,
             'password': password,
             'service': 'moodle_mobile_app'
@@ -215,9 +252,17 @@ class MoodleApi:
             return ApiCourses(self._send_request('&wsfunction=core_course_get_courses_by_field'))
         return ApiCourses(self._send_request(f'&wsfunction=core_course_get_courses_by_field&field=ids&value={ids}'))
 
-    def get_participants_for_course(self, course_id) -> ApiParticipants:
+    def get_participants_for_course(self, course_id: int) -> ApiParticipants:
         return ApiParticipants(self._send_request(
-            f'&wsfunction=gradereport_user_get_grade_items&courseid={course_id}'))
+            f'&wsfunction=core_enrol_get_enrolled_users&courseid={course_id}'))
+
+    def get_exams_for_course(self, course_id: int) -> ApiExams:
+        return ApiExams(self._send_request(
+            f'&wsfunction=mod_quiz_get_quizzes_by_courses&courseids[0]={course_id}'))
+
+    def get_user_result_for_exam(self, user_id: int, exam_id: int) -> ApiExamResult:
+        return ApiExamResult(self._send_request(
+            f'&wsfunction=mod_quiz_get_user_attempts&quizid={exam_id}&userid={user_id}'))
 
     def get_user_info_by_id(self, user_id) -> ApiUserInfo:
         return self._get_user_info_by('id', user_id)
