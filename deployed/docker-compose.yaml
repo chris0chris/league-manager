@@ -1,7 +1,7 @@
 name: ${SERVICE_NAME}
 services:
   www:
-    image: leaguesphere/frontend:148-falscher-link
+    image: leaguesphere/frontend:latest
     container_name: ${COMPOSE_PROJECT_NAME}.www
     labels:
       # redirect service
@@ -37,7 +37,7 @@ services:
     restart: unless-stopped
 
   app:
-    image: leaguesphere/backend:148-falscher-link
+    image: leaguesphere/backend:latest
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
