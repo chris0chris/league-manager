@@ -261,11 +261,11 @@ class OfficialAssociationListView(View):
         association_abbreviation = kwargs.get('abbr')
         year = datetime.today().year
         valid_licenses = OfficialLicenseHistory.objects.filter(
-            created_at__year=year
+            created_at__gt=f'{year - 1}-04-01'
         ).exclude(license__id=4)
         officials_with_valid_licenses = valid_licenses.values('official').distinct()
         official_list = (
-            Official.objects.filter(id__in=officials_with_valid_licenses, association__abbr=association_abbreviation)
+            Official.objects.filter(Q(id__in=officials_with_valid_licenses, team__association__abbr=association_abbreviation) | Q(id__in=officials_with_valid_licenses, team=Official.OHNE_TEAM_ID, association__abbr=association_abbreviation))
             .order_by('team__description', 'last_name'))
         return render(
             request,

@@ -76,7 +76,7 @@ class OfficialLicenseHistory(models.Model):
 
     def valid_until(self):
         # noinspection PyUnresolvedReferences
-        return datetime.date(self.created_at.year + 1, 3, 31)
+        return datetime.date(self.created_at.year + 1, self.created_at.month, self.created_at.day)
 
     def __str__(self):
         return f'{self.created_at}__{self.license} - {self.official.last_name} # {self.result}'

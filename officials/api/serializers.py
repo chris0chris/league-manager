@@ -47,6 +47,7 @@ class OfficialSerializer(ModelSerializer):
     first_name = SerializerMethodField()
     is_valid = SerializerMethodField('check_license_validation')
     valid_until = SerializerMethodField()
+    wants_to_whistle = SerializerMethodField()
     license = SerializerMethodField()
     email = SerializerMethodField()
     moodle_service = None
@@ -85,7 +86,7 @@ class OfficialSerializer(ModelSerializer):
     # noinspection PyMethodMayBeStatic
     def get_association(self, obj):
         try:
-            return obj.association.abbr
+            return obj.team.association.abbr
         except AttributeError:
             return 'Kein Verband hinterlegt'
 
@@ -103,6 +104,9 @@ class OfficialSerializer(ModelSerializer):
     def get_valid_until(self, obj):
         newest_license = self._get_license_history(obj)
         return newest_license.valid_until()
+
+    def get_wants_to_whistle(self, obj):
+        return obj.association is not None
 
     # noinspection PyMethodMayBeStatic
     def _get_license_history(self, obj):

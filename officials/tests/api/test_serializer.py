@@ -73,10 +73,11 @@ class TestOfficialSerializer(TestCase):
     def test_official_serializer_with_license(self):
         DbSetupOfficials().create_officials_full_setup()
         official = Official.objects.first()
-        year = datetime.today().year + 1
+        today = datetime.today()
         assert OfficialSerializer(instance=official).data == {
-            'association': 'ABBR',
+            'association': 'Kein Verband hinterlegt',
             'email': '',
+            'wants_to_whistle': True,
             'first_name': 'F****',
             'id': official.pk,
             'is_valid': True,
@@ -84,15 +85,16 @@ class TestOfficialSerializer(TestCase):
             'license': 'F1',
             'name': 'F****F****',
             'team': official.team.description,
-            'valid_until': date(year, 3, 31)
+            'valid_until': date(today.year + 1, today.month, today.day)
         }
 
     def test_official_serializer_without_association(self):
         DbSetupOfficials().create_officials_full_setup()
         official = Official.objects.last()
-        year = datetime.today().year + 1
+        today = datetime.today()
         assert OfficialSerializer(instance=official, is_staff=True).data == {
             'association': 'Kein Verband hinterlegt',
+            'wants_to_whistle': False,
             'email': '',
             'first_name': 'Julia',
             'id': official.pk,
@@ -101,7 +103,7 @@ class TestOfficialSerializer(TestCase):
             'license': 'F2',
             'name': 'Julia Jegura',
             'team': official.team.description,
-            'valid_until': date(year, 3, 31)
+            'valid_until': date(today.year + 1, today.month, today.day)
         }
 
 
