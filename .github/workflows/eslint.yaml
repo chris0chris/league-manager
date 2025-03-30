@@ -83,6 +83,7 @@ jobs:
           npm install eslint-plugin-prettier@latest
           npm install prettier 
           npm install eslint-config-prettier
+          npm install eslint-config-google
       - name: Run ESLint
         env:
           SARIF_ESLINT_IGNORE_SUPPRESSED: "true"
