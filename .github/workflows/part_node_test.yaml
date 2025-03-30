@@ -16,6 +16,7 @@ on:
 permissions:
   contents: write
   checks: write
+  security-events: write
 
 jobs:
   build:
@@ -44,7 +45,9 @@ jobs:
           npm ci
           npm run jest
       - name: 🔍 Run eslint ${{ inputs.project }}
-        run: npm run eslint:json
+        run: |
+          npm run eslint:json
+          npm run eslint:sarif
         continue-on-error: true
       - name: 👷 Building ${{ inputs.project }}
         run: npm run build > typescript.log
@@ -52,4 +55,9 @@ jobs:
         uses: DerLev/eslint-annotations@v2
         with:
           eslint-report: ${{ inputs.project }}/js-lint-results-${{ inputs.project }}.json
-          typescript-log:  ${{ inputs.project }}/typescript.log
+          typescript-log: ${{ inputs.project }}/typescript.log
+      - name: 📦⬆️ Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ inputs.project }}/js-lint-results-${{ inputs.project }}.sarif
+          wait-for-processing: true
