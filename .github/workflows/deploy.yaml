@@ -17,11 +17,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🎉 Push to ${{ inputs.target_branch }} branch
-        uses: s0/git-publish-subdir-action@develop
+        uses: ad-m/github-push-action@v0.8.0
         with:
           branch: ${{ inputs.target_branch }}  # Use user-provided target branch
-          folder: .  # Deploy entire repo (or specify a subdirectory)
-          message: "Deploy: ({sha}) {msg}" # The commit message
-          force: true  # Optional: Force push changes
+          force: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
