@@ -1,12 +1,12 @@
-name: 🚀 Deploy to deploy/latest
+name: 🚀 Deploy to deploy branch
 
 on:
   workflow_dispatch:
     inputs:
       target_branch:
-        description: "Enter the target branch (default: deploy/latest)"
+        description: "Enter the target branch (default: latest)"
         required: true
-        default: "deploy/latest"
+        default: "latest"
 
 permissions:
   contents: write
@@ -23,7 +23,7 @@ jobs:
       - name: 🎉 Push to ${{ inputs.target_branch }} branch
         uses: ad-m/github-push-action@v0.8.0
         with:
-          branch: ${{ inputs.target_branch }}  # Use user-provided target branch
+          branch: deploy/${{ inputs.target_branch }}
           force: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
