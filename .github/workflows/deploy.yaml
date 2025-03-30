@@ -9,7 +9,7 @@ on:
         default: "deploy/latest"
 
 jobs:
-  deploy:
+  branch:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,3 +23,8 @@ jobs:
           force: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  deploy:
+    uses: ./.github/workflows/ci.yaml
+    needs:
+      - branch
+
