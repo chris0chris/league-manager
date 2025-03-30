@@ -10,7 +10,6 @@ on:
 
 permissions:
   checks: write
-  security-events: write
 
 jobs:
   build:
@@ -30,7 +29,6 @@ jobs:
         run: |
           npm ci
           npm run eslint:json
-          npm run eslint:sarif
       - name: 👷 Building ${{ inputs.project }}
         run: npm run build > typescript.log
       - name: 🔍📝 Annotate Code Linting Results
@@ -38,8 +36,3 @@ jobs:
         with:
           eslint-report: ${{ inputs.project }}/js-lint-results-${{ inputs.project }}.json
           typescript-log: ${{ inputs.project }}/typescript.log
-      - name: 📦⬆️ Upload analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: ${{ inputs.project }}/js-lint-results-${{ inputs.project }}.sarif
-          wait-for-processing: true
