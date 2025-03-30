@@ -1,7 +1,12 @@
-name: Deploy to deploy/latest
+name: 🚀 Deploy to deploy/latest
 
 on:
   workflow_dispatch:
+    inputs:
+      target_branch:
+        description: "Enter the target branch (default: deploy/latest)"
+        required: true
+        default: "deploy/latest"
 
 jobs:
   deploy:
@@ -11,10 +16,10 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🎉 Push to deploy/latest branch
+      - name: 🎉 Push to ${{ inputs.target_branch }} branch
         uses: s0/git-publish-subdir-action@develop
         with:
-          branch: deploy/latest  # Target branch
+          branch: ${{ inputs.target_branch }}  # Use user-provided target branch
           folder: .  # Deploy entire repo (or specify a subdirectory)
           message: "Deploy: ({sha}) {msg}" # The commit message
           force: true  # Optional: Force push changes
