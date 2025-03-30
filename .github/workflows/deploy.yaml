@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: write
-  checks: write
 
 jobs:
   branch:
@@ -20,15 +19,10 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🎉 Push to ${{ inputs.target_branch }} branch
+      - name: 🎉 Push to [deploy/${{ inputs.target_branch }}]
         uses: ad-m/github-push-action@v0.8.0
         with:
           branch: deploy/${{ inputs.target_branch }}
           force: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  deploy:
-    uses: ./.github/workflows/ci.yaml
-    needs:
-      - branch
-
