@@ -10,7 +10,6 @@ permissions:
   contents: write
   checks: write
 
-
 jobs:
   build-test-django:
     uses: ./.github/workflows/part_build_test.yaml
