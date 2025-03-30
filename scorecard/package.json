@@ -7,6 +7,7 @@
     "test": "__tests__"
   },
   "dependencies": {
+    "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "@redux-devtools/extension": "^3.3.0",
     "@reduxjs/toolkit": "^2.6.1",
     "axios": "^1.8.4",
@@ -61,6 +62,7 @@
     "eslint": "eslint ./src",
     "eslint:junit": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-scorecard.xml",
     "eslint:json": "eslint ./src --format json -o js-lint-results-scorecard.json",
+    "eslint:sarif": "eslint ./src --format @microsoft/eslint-formatter-sarif -o js-lint-results-scorecard.sarif",
     "jest": "jest --env=jsdom --ci --coverage",
     "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache test -- --config jest.config.js",
     "testj": "jest --maxWorkers=1 --env=jsdom",
