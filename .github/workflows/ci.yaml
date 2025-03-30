@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'deploy/**'  # Matches all branches under deploy/
-  workflow_call:
+  workflow_dispatch:
 
 permissions:
   contents: write
