@@ -26,6 +26,53 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create ESLint config
+        run: |
+          cat <<EOL > .eslintrc.js
+          module.exports = {
+            root: true,
+            parser: "@typescript-eslint/parser",
+            parserOptions: {
+              ecmaVersion: 2020,
+              sourceType: "module",
+              ecmaFeatures: {
+                jsx: true,
+              },
+            },
+            settings: {
+              react: {
+                version: "detect",
+              },
+            },
+            env: {
+              browser: true,
+              es6: true,
+              node: true,
+            },
+            plugins: ["@typescript-eslint", "react", "react-hooks", "prettier"],
+            extends: [
+              "eslint:recommended",
+              "plugin:@typescript-eslint/recommended",
+              "plugin:react/recommended",
+              "plugin:react-hooks/recommended",
+              "plugin:prettier/recommended"
+            ],
+            rules: {
+              "prettier/prettier": "warn",
+              "react/prop-types": "off",
+              "@typescript-eslint/explicit-module-boundary-types": "off",
+              "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+              "react/react-in-jsx-scope": "off",
+            },
+            overrides: [
+              {
+                files: ["*.ts", "*.tsx"],
+                extends: ["plugin:@typescript-eslint/recommended"],
+              },
+            ],
+          };
+          EOL
+
       - name: Install ESLint
         run: |
           npm install eslint@8.10.0
