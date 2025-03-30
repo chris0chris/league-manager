@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
   checks: write
+  security-events: write
 
 jobs:
   build-test-django:

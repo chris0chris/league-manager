@@ -9,8 +9,8 @@ on:
         type: string
 
 permissions:
-  contents: write
   checks: write
+  security-events: write
 
 jobs:
   build:
