@@ -79,7 +79,7 @@ jobs:
           npm install @microsoft/eslint-formatter-sarif@3.1.0
           npm install @typescript-eslint/eslint-plugin@latest
           npm install eslint-plugin-react@latest
-
+          npm install eslint-plugin-react-hooks@latest
       - name: Run ESLint
         env:
           SARIF_ESLINT_IGNORE_SUPPRESSED: "true"
