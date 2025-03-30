@@ -8,6 +8,9 @@ on:
         required: true
         default: "deploy/latest"
 
+permissions:
+  contents: write
+
 jobs:
   branch:
     runs-on: ubuntu-latest
