@@ -84,7 +84,6 @@ jobs:
           npm install prettier 
           npm install eslint-config-prettier
           npm install eslint-config-google
-          npm install eslint-config-react-app
       - name: Run ESLint
         env:
           SARIF_ESLINT_IGNORE_SUPPRESSED: "true"
