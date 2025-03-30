@@ -1,0 +1,22 @@
+name: Deploy to deploy/latest
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🎉 Push to deploy/latest branch
+        uses: s0/git-publish-subdir-action@develop
+        with:
+          branch: deploy/latest  # Target branch
+          folder: .  # Deploy entire repo (or specify a subdirectory)
+          message: "Deploy: ({sha}) {msg}" # The commit message
+          force: true  # Optional: Force push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
