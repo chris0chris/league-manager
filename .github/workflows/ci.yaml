@@ -4,11 +4,12 @@ on:
   push:
     branches:
       - 'deploy/**'  # Matches all branches under deploy/
+  workflow_dispatch:
 
 permissions:
   contents: write
   checks: write
-
+  security-events: write
 
 jobs:
   build-test-django:
