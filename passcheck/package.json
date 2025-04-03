@@ -60,7 +60,7 @@
     "@babel/plugin-transform-private-property-in-object": "^7.25.9",
     "@eslint/js": "^9.22.0",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
+    "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^29.5.14",
     "css-loader": "^7.1.2",
