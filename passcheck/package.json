@@ -7,7 +7,7 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.1",
     "axios": "^1.8.4",
-    "bootstrap": "^5.3.3",
+    "bootstrap": "^5.3.4",
     "bootstrap-icons": "^1.11.3",
     "knox": "^0.9.2",
     "react": "^19.1.0",
