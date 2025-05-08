@@ -26,7 +26,8 @@
     "eslint": "^9.20.1",
     "postcss": "^8.5.3",
     "nth-check": "^2.0.1",
-    "serialize-javascript": "^6.0.2"
+    "serialize-javascript": "^6.0.2",
+    "http-proxy-middleware": "^2.0.9"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
