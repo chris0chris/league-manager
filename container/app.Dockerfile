@@ -41,6 +41,9 @@ COPY --chown=${APP_USER} ../container/entrypoint.sh /app/entrypoint.sh
 RUN chmod 740 /app/entrypoint.sh
 
 WORKDIR ${APP_DIR}
+HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
+  CMD  -H "Accept: application/json" http://localhost:8000/health/ | \
+    grep -q '"DatabaseHeartBeatCheck": "working"'
 
 EXPOSE 8000
 
