@@ -34,7 +34,7 @@ class PlayerlistCreateForm(forms.ModelForm):
         self.user = kwargs.get('initial', {}).get('user')
         current_year = datetime.today().year
         self.fields['year_of_birth'].widget.attrs['min'] = current_year - 70
-        self.fields['year_of_birth'].widget.attrs['max'] = current_year - 15
+        self.fields['year_of_birth'].widget.attrs['max'] = current_year - 5
         is_staff = self.user and self.user.is_staff
 
         try:
