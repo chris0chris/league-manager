@@ -75,6 +75,7 @@ jobs:
         if: ${{ inputs.test }}
         run: |
           docker run --rm --detach --name test_container ${{ env.DOCKER_IMAGE_NAME }}:test
+          sleep 3
           for i in {1..10}; do
             status=$(docker inspect --format='{{.State.Health.Status}}' test_container)
             health_details=$(docker inspect --format='{{json .State.Health}}' test_container)
