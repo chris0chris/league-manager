@@ -2,8 +2,8 @@ name: 🏗️🧪🚀 Build, Test and Deploy everything
 
 on:
   push:
-    branches:
-      - 'deploy/**'  # Matches all branches under deploy/
+    tags:
+      - '*'
   workflow_dispatch:
 
 permissions:
@@ -45,6 +45,7 @@ jobs:
       image_name: leaguesphere/frontend
       dockerfile: container/nginx.Dockerfile
       test: false
+      version: "${{ github.ref_name }}"
 
   deploy-be:
     needs:
@@ -54,3 +55,4 @@ jobs:
     with:
       image_name: leaguesphere/backend
       dockerfile: container/app.Dockerfile
+      version: "${{ github.ref_name }}"

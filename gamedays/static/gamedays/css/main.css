@@ -4,6 +4,25 @@ body {
   margin-top: 5rem;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+    padding-top: 4.5rem; /* adjust based on actual navbar height */
+}
+
+footer {
+    flex-shrink: 0;
+}
+
 h1, h2, h3, h4, h5, h6 {
   color: #444444;
 }

@@ -16,6 +16,11 @@ on:
         default: true
         description: Whether to test the image
         type: boolean
+      version:
+        required: false
+        default: latest
+        description: The deploy version to use
+        type: string
     secrets:
       DOCKER_TOKEN:
         required: true
@@ -55,10 +60,6 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}
 
-      - name: 🌿 Extract branch name
-        id: extract_branch
-        run: echo "TAG_NAME=${GITHUB_REF#refs/heads/deploy/}" >> $GITHUB_ENV
-
       # Test run the container
       - name: 🐳📦 Build and export 'test' to Docker
         if: ${{ inputs.test }}
@@ -73,7 +74,22 @@ jobs:
       - name: 🐳🧪Test
         if: ${{ inputs.test }}
         run: |
-          docker run --rm ${{ env.DOCKER_IMAGE_NAME }}:test
+          docker run --rm --detach --name test_container ${{ env.DOCKER_IMAGE_NAME }}:test gunicorn -b 0.0.0.0:8000 league_manager.wsgi
+          sleep 3
+          for i in {1..10}; do
+            status=$(docker inspect --format='{{.State.Health.Status}}' test_container)
+            health_details=$(docker inspect --format='{{json .State.Health}}' test_container)
+            echo "Health status: $status"
+            echo "Health details: $health_details"
+            if [ "$status" = "healthy" ]; then break; fi
+            sleep 6
+          done
+          # Fail the step if not healthy after 10 retries
+          if [ "$status" != "healthy" ]; then
+            echo "Container did not become healthy after 10 attempts."
+            exit 1
+          fi
+          docker stop test_container
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -83,7 +99,7 @@ jobs:
         with:
           file: ${{ inputs.dockerfile }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.DOCKER_IMAGE_NAME }}:${{ env.TAG_NAME }}
+          tags: ${{ env.DOCKER_IMAGE_NAME }}:${{ inputs.version }},${{ env.DOCKER_IMAGE_NAME }}:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
