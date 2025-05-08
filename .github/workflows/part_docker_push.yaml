@@ -16,6 +16,11 @@ on:
         default: true
         description: Whether to test the image
         type: boolean
+      version:
+        required: false
+        default: latest
+        description: The deploy version to use
+        type: string
     secrets:
       DOCKER_TOKEN:
         required: true
@@ -55,10 +60,6 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}
 
-      - name: 🌿 Extract branch name
-        id: extract_branch
-        run: echo "TAG_NAME=${GITHUB_REF#refs/heads/deploy/}" >> $GITHUB_ENV
-
       # Test run the container
       - name: 🐳📦 Build and export 'test' to Docker
         if: ${{ inputs.test }}
@@ -83,7 +84,7 @@ jobs:
         with:
           file: ${{ inputs.dockerfile }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.DOCKER_IMAGE_NAME }}:${{ env.TAG_NAME }}
+          tags: ${{ env.DOCKER_IMAGE_NAME }}:${{ inputs.version }},${{ env.DOCKER_IMAGE_NAME }}:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
