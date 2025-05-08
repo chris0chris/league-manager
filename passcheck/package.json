@@ -72,7 +72,7 @@
     "ts-loader": "^9.5.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.29.1",
-    "webpack": "^5.98.0",
+    "webpack": "^5.99.8",
     "webpack-cli": "^6.0.1"
   },
   "proxy": "http://127.0.0.1:8000"
