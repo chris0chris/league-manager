@@ -74,7 +74,21 @@ jobs:
       - name: 🐳🧪Test
         if: ${{ inputs.test }}
         run: |
-          docker run --rm ${{ env.DOCKER_IMAGE_NAME }}:test
+          docker run --rm --detach --name test_container ${{ env.DOCKER_IMAGE_NAME }}:test
+          for i in {1..10}; do
+            status=$(docker inspect --format='{{.State.Health.Status}}' test_container)
+            health_details=$(docker inspect --format='{{json .State.Health}}' test_container)
+            echo "Health status: $status"
+            echo "Health details: $health_details"
+            if [ "$status" = "healthy" ]; then break; fi
+            sleep 6
+          done
+          # Fail the step if not healthy after 10 retries
+          if [ "$status" != "healthy" ]; then
+            echo "Container did not become healthy after 10 attempts."
+            exit 1
+          fi
+          docker stop test_container
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
