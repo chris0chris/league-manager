@@ -1,4 +1,4 @@
-# League Manager
+# League Manager v1.0.0
 
 Metrics:
 
