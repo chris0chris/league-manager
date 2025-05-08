@@ -68,6 +68,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
                 'league_manager.context_processors.global_menu',
+                'league_manager.context_processors.version_number',
             ],
         },
     },
