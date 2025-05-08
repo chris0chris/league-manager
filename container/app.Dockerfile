@@ -42,7 +42,7 @@ RUN chmod 740 /app/entrypoint.sh
 
 WORKDIR ${APP_DIR}
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -H "Accept: application/json" http://localhost:8000/health/
+  CMD curl -H "Accept: application/json" http://localhost:8000/health/?format=json
 
 EXPOSE 8000
 
