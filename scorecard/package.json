@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@redux-devtools/extension": "^3.3.0",
-    "@reduxjs/toolkit": "^2.6.1",
+    "@reduxjs/toolkit": "^2.8.1",
     "axios": "^1.8.4",
     "jquery": "^3.7.1",
     "prop-types": "^15.8.1",
