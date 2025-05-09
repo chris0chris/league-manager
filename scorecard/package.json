@@ -32,7 +32,7 @@
   "devDependencies": {
     "@babel/core": "^7.26.10",
     "@babel/plugin-transform-class-properties": "^7.27.1",
-    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-env": "^7.27.2",
     "@babel/preset-react": "^7.26.3",
     "@eslint/js": "^9.24.0",
     "@testing-library/jest-dom": "^6.6.3",
