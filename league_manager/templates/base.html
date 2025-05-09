@@ -111,13 +111,15 @@
 <footer class="footer mt-auto py-3 bg-light border-top">
     <div class="container text-center">
         <div class="small text-muted">
-            &copy; {% now "Y" %} bumbleflies UG &middot;
+            v{{ APP_VERSION_NUMBER }}
+            &middot;
             <a href="https://www.bumbleflies.de/impressum" target="_blank" rel="noopener" class="text-muted text-decoration-none">Impressum</a>
             &middot;
             <a href="https://www.bumbleflies.de/datenschutz" target="_blank" rel="noopener" class="text-muted text-decoration-none">Datenschutz</a>
         </div>
         <div class="small text-muted mt-1">
-            Version {{ APP_VERSION_NUMBER }}
+            &copy; {% now "Y" %} <a href="https://www.bumbleflies.de" target="_blank" rel="noopener" class="text-muted text-decoration-none">bumbleflies UG</a> &middot;
+            Made in 🥨 with ♥️
         </div>
     </div>
 </footer>
