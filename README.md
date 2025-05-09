@@ -1,4 +1,4 @@
-# League Manager v2.3.5
+# League Manager v2.3.7
 
 Metrics:
 
@@ -8,6 +8,13 @@ Metrics:
 [![codecov](https://codecov.io/gh/chris0chris/league-manager/branch/master/graph/badge.svg)](https://codecov.io/gh/chris0chris/league-manager)
 
 ## Dev Documentation
+
+### Deploy
+run 
+```bash
+cd container
+deploy.sh major|minor|patch
+``` 
 
 ### Django
 
