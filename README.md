@@ -9,6 +9,13 @@ Metrics:
 
 ## Dev Documentation
 
+### Deploy
+run 
+```bash
+cd container
+deploy.sh major|minor|patch
+``` 
+
 ### Django
 
 #### Run server
