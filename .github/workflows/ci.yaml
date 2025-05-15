@@ -44,7 +44,6 @@ jobs:
     with:
       image_name: leaguesphere/frontend
       dockerfile: container/nginx.Dockerfile
-      test: false
       version: "${{ github.ref_name }}"
 
   deploy-be:
