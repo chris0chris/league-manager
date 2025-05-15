@@ -63,3 +63,6 @@ COPY --from=node-builder /liveticker-app/static /static
 COPY --from=node-builder /scorecard-app/static /static
 COPY --from=node-builder /passcheck-app/static /static
 COPY ./container/nginx.conf /etc/nginx/conf.d/default.conf
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl http://localhost:80

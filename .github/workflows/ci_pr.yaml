@@ -33,3 +33,26 @@ jobs:
     with:
       project: passcheck
 
+  deploy-fe:
+    needs:
+      - build-test-django
+      - build-test-scorecard
+      - build-test-liveticker
+      - build-passcheck
+    secrets: inherit
+    uses: ./.github/workflows/part_docker_push.yaml
+    with:
+      image_name: leaguesphere/frontend
+      dockerfile: container/nginx.Dockerfile
+      test: false
+      version: "${{ github.ref_name }}"
+
+  deploy-be:
+    needs:
+      - build-test-django
+    secrets: inherit
+    uses: ./.github/workflows/part_docker_push.yaml
+    with:
+      image_name: leaguesphere/backend
+      dockerfile: container/app.Dockerfile
+      version: "${{ github.ref_name }}"
