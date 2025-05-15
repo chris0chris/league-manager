@@ -10,7 +10,12 @@
   "packageRules": [
     {
       "matchDepTypes": [
-        "devDependencies",
+        "devDependencies"
+      ],
+      "automerge": true
+    },
+    {
+      "matchDepTypes": [
         "patch"
       ],
       "matchCurrentVersion": "!/^0/",
