@@ -16,7 +16,12 @@ on:
         default: true
         description: Whether to test the image
         type: boolean
-      no_publish:
+      test_command:
+        required: false
+        default: ""
+        description: The command used to test the container
+        type: string
+      publish:
         required: false
         default: false
         description: Whether the publish step should be skipped
@@ -79,7 +84,7 @@ jobs:
       - name: 🐳🧪Test
         if: ${{ inputs.test }}
         run: |
-          docker run --rm --detach --name test_container ${{ env.DOCKER_IMAGE_NAME }}:test gunicorn -b 0.0.0.0:8000 league_manager.wsgi
+          docker run --rm --detach --name test_container ${{ env.DOCKER_IMAGE_NAME }}:test ${{ !inputs.test_command }}
           sleep 3
           for i in {1..10}; do
             status=$(docker inspect --format='{{.State.Health.Status}}' test_container)
@@ -100,7 +105,7 @@ jobs:
       # https://github.com/docker/build-push-action
       - name: 🐳🚀 Build and push Docker image
         id: build-and-push
-        if: ${{ !inputs.no_publish }}
+        if: ${{ inputs.publish }}
         uses: docker/build-push-action@v6
         with:
           file: ${{ inputs.dockerfile }}

@@ -54,5 +54,7 @@ jobs:
     uses: ./.github/workflows/part_docker_push.yaml
     with:
       image_name: leaguesphere/backend
+      test_command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
+      publish: true
       dockerfile: container/app.Dockerfile
       version: "${{ github.ref_name }}"
