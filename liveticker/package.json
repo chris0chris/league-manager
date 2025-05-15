@@ -7,7 +7,7 @@
     "test": "__tests__"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "^2.8.1",
+    "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.9.0",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",
