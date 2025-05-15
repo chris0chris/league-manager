@@ -1,0 +1,33 @@
+name: 🏗️🧪🍂 Build & Test branches
+# https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions
+on:
+  merge_group:
+
+permissions:
+  contents: write
+  checks: write
+  security-events: write
+
+jobs:
+  build-test-django:
+    uses: ./.github/workflows/part_build_test.yaml
+
+  build-test-scorecard:
+    uses: ./.github/workflows/part_node_test.yaml
+    secrets: inherit
+    with:
+      project: scorecard
+      report: false
+
+  build-test-liveticker:
+    uses: ./.github/workflows/part_node_test.yaml
+    secrets: inherit
+    with:
+      project: liveticker
+      report: false
+
+  build-passcheck:
+    uses: ./.github/workflows/part_node_build.yaml
+    secrets: inherit
+    with:
+      project: passcheck

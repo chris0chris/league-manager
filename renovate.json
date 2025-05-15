@@ -9,7 +9,10 @@
   },
   "packageRules": [
     {
-      "matchDepTypes": ["devDependencies", "patch"],
+      "matchDepTypes": [
+        "devDependencies",
+        "patch"
+      ],
       "matchCurrentVersion": "!/^0/",
       "automerge": true
     }
