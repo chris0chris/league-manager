@@ -28,7 +28,7 @@ RUN rm -rf passcheck/static/passcheck/js
 # collect static files
 RUN python manage.py collectstatic --no-input --clear
 
-FROM node:20-slim AS node-builder
+FROM node:22-slim AS node-builder
 ARG APP_DIR="/liveticker-app"
 WORKDIR ${APP_DIR}
 
