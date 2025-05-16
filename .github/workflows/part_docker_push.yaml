@@ -33,7 +33,7 @@ on:
         type: string
     secrets:
       DOCKER_TOKEN:
-        required: true
+        required: false
         description: API Token for docker hub
 
 permissions:
