@@ -1,6 +1,6 @@
 {
   "name": "passcheck",
-  "version": "2.3.12",
+  "version": "2.3.13",
   "private": true,
   "dependencies": {
     "@types/node": "^22.15.17",
