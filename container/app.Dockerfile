@@ -34,7 +34,7 @@ USER ${APP_USER}
 COPY --chown=${APP_USER} ../ ${APP_DIR}
 RUN rm -rf .git/
 
-COPY --chown=${APP_USER} --from=app-builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
+COPY --chown=${APP_USER} --from=app-builder /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
 
 COPY --chown=${APP_USER} ../container/entrypoint.sh /app/entrypoint.sh
 
