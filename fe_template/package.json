@@ -48,7 +48,7 @@
     "react-dom": "^19.0.0",
     "react-icons": "^4.1.0",
     "react-redux": "^9.0.0",
-    "react-router-dom": "^5.2.0",
+    "react-router-dom": "^7.0.0",
     "redux": "^5.0.0",
     "@redux-devtools/extension": "^3.0.0",
     "redux-thunk": "^3.0.0"
