@@ -1,4 +1,4 @@
-FROM python:3.11-slim AS python-builder
+FROM python:3.13-slim AS python-builder
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ARG APP_DIR="/app"
@@ -28,7 +28,7 @@ RUN rm -rf passcheck/static/passcheck/js
 # collect static files
 RUN python manage.py collectstatic --no-input --clear
 
-FROM node:20-slim AS node-builder
+FROM node:22-slim AS node-builder
 ARG APP_DIR="/liveticker-app"
 WORKDIR ${APP_DIR}
 
@@ -63,3 +63,6 @@ COPY --from=node-builder /liveticker-app/static /static
 COPY --from=node-builder /scorecard-app/static /static
 COPY --from=node-builder /passcheck-app/static /static
 COPY ./container/nginx.conf /etc/nginx/conf.d/default.conf
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -A healthcheck http://localhost:80

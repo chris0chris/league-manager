@@ -1,10 +1,8 @@
-name: 🏗️🧪🚀 Build, Test and Deploy everything
-
+name: 🏗️🧪🍂 Build, Test Code & Test Docker
+# https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions
 on:
-  push:
-    tags:
-      - '*'
-  workflow_dispatch:
+  pull_request:
+  merge_group:
 
 permissions:
   contents: write
@@ -20,12 +18,14 @@ jobs:
     secrets: inherit
     with:
       project: scorecard
+      report: false
 
   build-test-liveticker:
     uses: ./.github/workflows/part_node_test.yaml
     secrets: inherit
     with:
       project: liveticker
+      report: false
 
   build-passcheck:
     uses: ./.github/workflows/part_node_build.yaml
@@ -44,7 +44,6 @@ jobs:
     with:
       image_name: leaguesphere/frontend
       dockerfile: container/nginx.Dockerfile
-      publish: true
       version: "${{ github.ref_name }}"
 
   deploy-be:
@@ -55,6 +54,5 @@ jobs:
     with:
       image_name: leaguesphere/backend
       test_command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
-      publish: true
       dockerfile: container/app.Dockerfile
       version: "${{ github.ref_name }}"
