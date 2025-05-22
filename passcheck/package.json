@@ -1,6 +1,6 @@
 {
   "name": "passcheck",
-  "version": "2.3.14",
+  "version": "2.3.16",
   "private": true,
   "dependencies": {
     "@types/node": "^22.15.17",
@@ -57,7 +57,6 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/plugin-transform-private-property-in-object": "^7.25.9",
     "@eslint/js": "^9.26.0",
     "@testing-library/jest-dom": "^6.6.3",
