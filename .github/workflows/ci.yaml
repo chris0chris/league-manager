@@ -14,6 +14,7 @@ permissions:
 jobs:
   build-test-django:
     uses: ./.github/workflows/part_build_test.yaml
+    secrets: inherit
 
   build-test-scorecard:
     uses: ./.github/workflows/part_node_test.yaml
