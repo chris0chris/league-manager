@@ -44,7 +44,7 @@ jobs:
           npm ci
           npm run jest
       - name: 📊 Upload Coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           directory: ${{ inputs.project }}/coverage
           fail_ci_if_error: true
