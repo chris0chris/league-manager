@@ -55,3 +55,8 @@ jobs:
         if: success() || failure() # always run even if the previous step fails
         with:
           summary: Test report python ${{ matrix.python-version }}
+      - name: 📊 Upload Coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage-reports/coverage.xml
+          fail_ci_if_error: true
