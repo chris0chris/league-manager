@@ -45,7 +45,7 @@ jobs:
           pip install -r requirements.txt
           pip install -r test_requirements.txt
       - name: 🚀🧪 Run Tests
-        run: pytest --junitxml=junit-reports/TEST-all.xml
+        run: pytest --junitxml=junit-reports/TEST-all.xml --cov=. --cov-report=xml:coverage-reports/coverage.xml --cov-report=term
         env:
           MYSQL_HOST: 0.0.0.0
           SECRET_KEY: 123456-TEST
