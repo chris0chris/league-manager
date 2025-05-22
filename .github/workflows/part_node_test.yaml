@@ -48,6 +48,7 @@ jobs:
         with:
           directory: ${{ inputs.project }}/coverage
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
       - name: 🔍 Run eslint ${{ inputs.project }}
         run: npm run eslint:json
         continue-on-error: true
