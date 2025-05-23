@@ -1,10 +1,4 @@
-# League Manager ![GitHub Tag](https://img.shields.io/github/v/tag/dachrisch/leaguesphere)
-
-Metrics:
-
-# LeagueSphere
-
-# LeagueSphere
+# LeagueSphere ![GitHub Tag](https://img.shields.io/github/v/tag/dachrisch/leaguesphere)
 
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fleaguesphere.app&style=for-the-badge)](https://leaguesphere.app)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/dachrisch/leaguesphere/ci_pr.yaml?style=for-the-badge)
