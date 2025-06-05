@@ -2,7 +2,7 @@ Django==5.2.1
 django-crispy-forms==2.4
 crispy-bootstrap5==2025.4
 numpy==2.2.6
-pandas==2.2.3
+pandas==2.3.0
 django-pandas==0.6.7
 djangorestframework==3.16.0
 django-autocomplete-light==3.12.1
