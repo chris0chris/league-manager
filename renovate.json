@@ -15,7 +15,7 @@
       "automerge": true
     },
     {
-      "matchDepTypes": [
+      "matchUpdateTypes": [
         "patch"
       ],
       "matchCurrentVersion": "!/^0/",
