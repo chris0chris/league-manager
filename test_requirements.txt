@@ -1,8 +1,8 @@
 django-webtest==1.9.13
-pytest==8.3.5
+pytest==8.4.0
 pytest-django==4.11.1
-pytest-cov==6.1.1
+pytest-cov==6.2.1
 factory-boy==3.3.3
 django-debug-toolbar==5.2.0
-WebTest==3.0.4
+WebTest==3.0.6
 bump2version==1.0.1

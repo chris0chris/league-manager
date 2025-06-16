@@ -1,14 +1,8 @@
-# League Manager v2.3.16
-
-Metrics:
-
-# LeagueSphere
-
-# LeagueSphere
+# LeagueSphere ![GitHub Tag](https://img.shields.io/github/v/tag/dachrisch/leaguesphere)
 
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fleaguesphere.app&style=for-the-badge)](https://leaguesphere.app)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dachrisch/leaguesphere/ci.yml?branch=main&style=for-the-badge)](https://github.com/dachrisch/leaguesphere/actions)
-[![Last Commit](https://img.shields.io/github/last-commit/dachrisch/leaguesphere?style=for-the-badge)](https://github.com/dachrisch/leaguesphere/commits/main)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/dachrisch/leaguesphere/ci_pr.yaml?style=for-the-badge)
+![Last Commit](https://img.shields.io/github/last-commit/dachrisch/leaguesphere?style=for-the-badge)
 [![codecov](https://img.shields.io/codecov/c/github/dachrisch/leaguesphere?style=for-the-badge)](https://codecov.io/gh/dachrisch/leaguesphere)
 
 ## Dev Documentation
