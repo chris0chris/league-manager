@@ -6,7 +6,7 @@ pandas==2.3.0
 django-pandas==0.6.7
 djangorestframework==3.16.0
 django-autocomplete-light==3.12.1
-Markdown==3.8
+Markdown==3.8.2
 django-cors-headers==4.7.0
 Pillow==11.2.1
 django-rest-knox==5.0.2
