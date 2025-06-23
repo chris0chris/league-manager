@@ -1,6 +1,6 @@
 {
   "name": "liveticker",
-  "version": "2.3.16",
+  "version": "2.4.0",
   "private": true,
   "main": "index.js",
   "directories": {
@@ -45,7 +45,7 @@
     "jest": "^30.0.0",
     "jest-environment-jsdom": "^30.0.0",
     "jest-junit": "^16.0.0",
-    "prettier": "3.5.3",
+    "prettier": "3.6.0",
     "redux-mock-store": "^1.5.5",
     "regenerator-runtime": "^0.14.1",
     "webpack": "^5.99.8",
