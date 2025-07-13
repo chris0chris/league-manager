@@ -44,7 +44,6 @@ jobs:
           npm ci
           npm run jest
       - name: 📊 Upload Coverage to Codecov
-        if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v5
         with:
           directory: ${{ inputs.project }}/coverage
