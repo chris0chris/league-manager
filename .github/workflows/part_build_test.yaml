@@ -56,6 +56,7 @@ jobs:
         with:
           summary: Test report python ${{ matrix.python-version }}
       - name: 📊 Upload Coverage to Codecov
+        if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v5
         with:
           files: coverage-reports/coverage.xml
