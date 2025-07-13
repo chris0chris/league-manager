@@ -44,6 +44,10 @@ jobs:
           npm ci
           npm run jest
       - name: 📊 Upload Coverage to Codecov
+        # secrets not directly accessible https://stackoverflow.com/questions/72925899/github-actions-detect-if-secret-exists
+        env:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+        if: ${{ env.codecov_token != '' }}
         uses: codecov/codecov-action@v5
         with:
           directory: ${{ inputs.project }}/coverage
