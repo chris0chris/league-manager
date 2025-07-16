@@ -1,0 +1,96 @@
+[
+  {
+    "field": "1",
+    "games": [
+      {
+        "stage": "Vorrunde",
+        "standing": "VF 1",
+        "home": "0_0",
+        "away": "0_1",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "VF 3",
+        "home": "0_2",
+        "away": "0_3",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "PD",
+        "home": "Verlierer VF 1",
+        "away": "Verlierer VF 3",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "HF",
+        "home": "Gewinner VF 1",
+        "away": "Gewinner VF 3",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P7",
+        "home": "Verlierer PD 1",
+        "away": "Verlierer PD 2",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P1",
+        "home": "Gewinner HF 1",
+        "away": "Gewinner HF 2",
+        "official": "Team Officials"
+      }
+    ]
+  },
+  {
+    "field": "2",
+    "games": [
+      {
+        "stage": "Vorrunde",
+        "standing": "VF 2",
+        "home": "0_4",
+        "away": "0_5",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "VF 4",
+        "home": "0_6",
+        "away": "0_7",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "PD",
+        "home": "Verlierer VF 2",
+        "away": "Verlierer VF 4",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "HF",
+        "home": "Gewinner VF 2",
+        "away": "Gewinner VF 4",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P5",
+        "home": "Gewinner PD 1",
+        "away": "Gewinner PD 2",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P3",
+        "home": "Verlierer HF 1",
+        "away": "Verlierer HF 2",
+        "official": "Team Officials"
+      }
+    ]
+  }
+]

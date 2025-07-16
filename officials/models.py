@@ -36,7 +36,7 @@ class OfficialGamedaySignup(models.Model):
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.gameday.name} - {self.official.name}'
+        return f'{self.gameday.name} - {self.official.first_name} {self.official.last_name}'
 
     class Meta:
         constraints = [

@@ -118,7 +118,9 @@ class ScheduleUpdate:
                     self._update_gameresult(gi, home, True)
                     self._update_gameresult(gi, away, False)
                     if gmw.is_finished(game.officials.pre_finished):
-                        if game.officials.stage:
+                        if game.officials.team_name:
+                            officialsTeamName = game.officials.team_name
+                        elif game.officials.stage:
                             officialsTeamName = gmw.get_team_by_qualify_for(
                                 game.officials.place, game.officials.index)
                         else:
