@@ -1,0 +1,166 @@
+[
+  {
+    "name": "PD",
+    "pre_finished": "Vorrunde",
+    "games": [
+      {
+        "home": {
+          "standing": "VF 1",
+          "place": 1,
+          "points": 0
+        },
+        "away": {
+          "standing": "VF 3",
+          "place": 1,
+          "points": 0
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "team_name": "Team Officials"
+        }
+      },
+      {
+        "home": {
+          "standing": "VF 2",
+          "place": 1,
+          "points": 0
+        },
+        "away": {
+          "standing": "VF 4",
+          "place": 1,
+          "points": 0
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "team_name": "Team Officials"
+        }
+      }
+    ]
+  },
+  {
+    "name": "HF",
+    "pre_finished": "Vorrunde",
+    "games": [
+      {
+        "home": {
+          "standing": "VF 1",
+          "place": 1,
+          "points": 2
+        },
+        "away": {
+          "standing": "VF 3",
+          "place": 1,
+          "points": 2
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "team_name": "Team Officials"
+        }
+      },
+      {
+        "home": {
+          "standing": "VF 2",
+          "place": 1,
+          "points": 2
+        },
+        "away": {
+          "standing": "VF 4",
+          "place": 1,
+          "points": 2
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "team_name": "Team Officials"
+        }
+      }
+    ]
+  },
+  {
+    "name": "P7",
+    "pre_finished": "PD",
+    "games": [
+      {
+        "home": {
+          "standing": "PD",
+          "place": 2,
+          "points": 0
+        },
+        "away": {
+          "standing": "PD",
+          "place": 1,
+          "points": 0
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "team_name": "Team Officials"
+        }
+      }
+    ]
+  },
+  {
+    "name": "P5",
+    "pre_finished": "PD",
+    "games": [
+      {
+        "home": {
+          "standing": "PD",
+          "place": 2,
+          "points": 2
+        },
+        "away": {
+          "standing": "PD",
+          "place": 1,
+          "points": 2
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "team_name": "Team Officials"
+        }
+      }
+    ]
+  },
+  {
+    "name": "P3",
+    "pre_finished": "HF",
+    "games": [
+      {
+        "home": {
+          "standing": "HF",
+          "place": 2,
+          "points": 0
+        },
+        "away": {
+          "standing": "HF",
+          "place": 1,
+          "points": 0
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "team_name": "Team Officials"
+        }
+      }
+    ]
+  },
+  {
+    "name": "P1",
+    "pre_finished": "HF",
+    "games": [
+      {
+        "home": {
+          "standing": "HF",
+          "place": 2,
+          "points": 2
+        },
+        "away": {
+          "standing": "HF",
+          "place": 1,
+          "points": 2
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "team_name": "Team Officials"
+        }
+      }
+    ]
+  }
+]
