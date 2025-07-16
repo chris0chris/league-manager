@@ -13,6 +13,7 @@ SCHEDULE_CHOICES = (
     ("6_2", "6 Teams 2 Felder"),
     ("7_2", "7 Teams 2 Felder"),
     ("8_2", "8 Teams 2 Felder"),
+    ("8_vfpd_2", "8 Teams 2 Felder nur Viertelfinale und Playdown"),
     ("8_3", "8 Teams 3 Felder"),
     ("9_2", "9 Teams 2 Felder"),
     ("9_3", "9 Teams 3 Felder"),
@@ -65,12 +66,12 @@ class GamedayUpdateForm(forms.ModelForm):
     ))
     start = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}))
     format = forms.ChoiceField(choices=SCHEDULE_CHOICES)
-    group1 = forms.CharField(max_length=100, label='Gruppe 1', help_text='Bitte Teams mit Komma separieren')
-    group2 = forms.CharField(max_length=100, label='Gruppe 2', required=False,
+    group1 = forms.CharField(max_length=1000, label='Gruppe 1', help_text='Bitte Teams mit Komma separieren')
+    group2 = forms.CharField(max_length=1000, label='Gruppe 2', required=False,
                              help_text='Bitte Teams mit Komma separieren')
-    group3 = forms.CharField(max_length=100, label='Gruppe 3', required=False,
+    group3 = forms.CharField(max_length=1000, label='Gruppe 3', required=False,
                              help_text='Bitte Teams mit Komma separieren')
-    group4 = forms.CharField(max_length=100, label='Gruppe 4', required=False,
+    group4 = forms.CharField(max_length=1000, label='Gruppe 4', required=False,
                              help_text='Bitte Teams mit Komma separieren')
     address = forms.CharField(label='Adresse')
 
