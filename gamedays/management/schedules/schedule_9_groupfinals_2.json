@@ -1,0 +1,138 @@
+[
+  {
+    "field": 1,
+    "games": [
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 1",
+        "home": "0_0",
+        "away": "0_1",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 1",
+        "home": "0_1",
+        "away": "0_2",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 3",
+        "home": "2_1",
+        "away": "2_2",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 1",
+        "home": "0_2",
+        "away": "0_0",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 3",
+        "home": "2_2",
+        "away": "2_0",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P4-P6",
+        "home": "P2 Gruppe 1",
+        "away": "P2 Gruppe 2",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P7-P9",
+        "home": "P3 Gruppe 2",
+        "away": "P3 Gruppe 3",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P1-P3",
+        "home": "P1 Gruppe 2",
+        "away": "P1 Gruppe 3",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P4-P6",
+        "home": "P2 Gruppe 3",
+        "away": "P2 Gruppe 1",
+        "official": "Team Officials"
+      }
+    ]
+  },
+  {
+    "field": "2",
+    "games": [
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 2",
+        "home": "1_0",
+        "away": "1_1",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 3",
+        "home": "2_0",
+        "away": "2_1",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 2",
+        "home": "1_1",
+        "away": "1_2",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Gruppe 2",
+        "home": "1_2",
+        "away": "1_0",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P7-P9",
+        "home": "P3 Gruppe 1",
+        "away": "P3 Gruppe 2",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P1-P3",
+        "home": "P1 Gruppe 1",
+        "away": "P1 Gruppe 2",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P4-P6",
+        "home": "P2 Gruppe 2",
+        "away": "P2 Gruppe 3",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P7-P9",
+        "home": "P3 Gruppe 3",
+        "away": "P3 Gruppe 1",
+        "official": "Team Officials"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "P1-P3",
+        "home": "P1 Gruppe 3",
+        "away": "P1 Gruppe 1",
+        "official": "Team Officials"
+      }
+    ]
+  }
+]
