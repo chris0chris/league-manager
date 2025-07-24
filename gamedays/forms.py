@@ -16,6 +16,7 @@ SCHEDULE_CHOICES = (
     ("8_vfpd_2", "8 Teams 2 Felder nur Viertelfinale und Playdown"),
     ("8_3", "8 Teams 3 Felder"),
     ("9_2", "9 Teams 2 Felder"),
+    ("9_groupfinals_2", "9 Teams 2 Felder mit Gruppen Finale"),
     ("9_3", "9 Teams 3 Felder"),
     ("11_3", "11 Teams 3 Felder"),
     ("5_dfflf_2", "DFFL Frauen 5 Teams 2 Felder"),
