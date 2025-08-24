@@ -9,8 +9,19 @@ class DataFrameWrapper:
         self.dataframe = dataframe
 
     def to_equal_json(self, filename):
-        print(json.dumps(json.loads(self.dataframe.to_json(orient='table')), indent=2))
-        assert JsonHelper.loads(self.dataframe.to_json(orient='table')) == JsonHelper.read_file(filename)
+        actual = JsonHelper.loads(self.dataframe.to_json(orient="table"))
+        expected = JsonHelper.read_file(filename)
+
+        # Normalize schema "type" mismatches (Pandas 1.x vs 2.x)
+        for field in actual.get("schema", {}).get("fields", []):
+            if field.get("type") == "any":
+                field["type"] = "string"
+
+        for field in expected.get("schema", {}).get("fields", []):
+            if field.get("type") == "any":
+                field["type"] = "string"
+
+        assert actual == expected, f"\nExpected:\n{expected}\n\nGot:\n{actual}"
 
 
 class DataFrameAssertion(object):
