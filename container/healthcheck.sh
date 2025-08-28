@@ -13,7 +13,7 @@ fi
 
 # 1. Cookie + CSRF-Token von Login-Form holen
 COOKIE_JAR=$(mktemp)
-curl -s -c "$COOKIE_JAR" "$URL"
+HTML=$(curl -s -c "$COOKIE_JAR" "$URL")
 
 # CSRF Cookie extrahieren
 CSRFTOKEN=$(grep csrftoken "$COOKIE_JAR" | awk '{print $7}')
