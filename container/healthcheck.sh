@@ -24,7 +24,7 @@ if [ -z "$CSRFTOKEN" ]; then
 fi
 
 # 2. POST mit Cookie + Token
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR" -c "$COOKIE_JAR" \
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
   -X POST "$URL" \
   -H "Origin: $ORIGIN" \
   -H "Referer: $ORIGIN/login/" \
