@@ -67,7 +67,7 @@ jobs:
         if: ${{ inputs.test }}
         run: |
           docker network create test_network
-          docker run --network test_network -d --name app -p 8000:1080 mockserver/mockserver
+          docker run --network test_network -d --name app mockserver/mockserver -serverPort 8000
           sleep 5
           curl -X PUT --data '{"httpRequest": {"method": "GET", "path": "/"}, "httpResponse": {"statusCode": 200}}' http://localhost:8000/mockserver/expectation
           curl -X PUT --data '{"httpRequest": {"method": "GET", "path": "/login/"}, "httpResponse": {"statusCode": 200, "headers": {"Set-Cookie": "csrftoken=mocktoken123"}}}' http://localhost:8000/mockserver/expectation
