@@ -67,7 +67,7 @@ jobs:
         if: ${{ inputs.test }}
         run: |
           docker network create test_network
-          docker run -d --name app --network test_network hashicorp/http-echo -listen=:8000 -text="hello"
+          docker run -d --name app --network test_network hashicorp/http-echo -listen=:8000 -text="Set-Cookie: csrftoken=l1QOp8XHUJnJM1eqzmytZKElr45ghale"
           docker run --rm --detach --network test_network --name test_container ${{ env.DOCKER_IMAGE_NAME }}:test ${{ inputs.test_command }}
           sleep 3
           for i in {1..10}; do
