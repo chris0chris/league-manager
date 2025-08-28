@@ -71,6 +71,7 @@ jobs:
           sleep 5
           curl -X PUT --data '{"httpRequest": {"method": "GET", "path": "/"}, "httpResponse": {"statusCode": 200}}' http://localhost:8000/mockserver/expectation
           curl -X PUT --data '{"httpRequest": {"method": "GET", "path": "/login/"}, "httpResponse": {"statusCode": 200, "headers": {"Set-Cookie": "csrftoken=mocktoken123"}}}' http://localhost:8000/mockserver/expectation
+          curl -X PUT --data '{"httpRequest": {"method": "POST", "path": "/login/"}, "httpResponse": {"statusCode": 200}}' http://localhost:8000/mockserver/expectation
           docker run --rm --detach --network test_network --name test_container ${{ env.DOCKER_IMAGE_NAME }}:test ${{ inputs.test_command }}
           sleep 3
           for i in {1..10}; do
