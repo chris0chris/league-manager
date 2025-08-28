@@ -32,8 +32,6 @@ services:
     depends_on:
       app:
         condition: service_healthy
-    healthcheck:
-      test: curl -A healthcheck -I --fail http://localhost || exit 1
     restart: unless-stopped
 
   app:
