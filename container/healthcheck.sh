@@ -29,7 +29,7 @@ STATUS=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR" -c "$COOKIE_JAR
   -H "Origin: $ORIGIN" \
   -H "Referer: $ORIGIN/login/" \
   -H "Cookie: csrftoken=$CSRFTOKEN" \
-  -d "username=health&password=check")
+  -d "csrfmiddlewaretoken=$CSRFTOKEN&username=health&password=check")
 
 # 3. Auswerten – akzeptiere 200
 if [ "$STATUS" -eq 200 ]; then
