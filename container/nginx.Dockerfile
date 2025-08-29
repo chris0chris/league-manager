@@ -63,6 +63,8 @@ COPY --from=node-builder /liveticker-app/static /static
 COPY --from=node-builder /scorecard-app/static /static
 COPY --from=node-builder /passcheck-app/static /static
 COPY ./container/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./container/healthcheck.sh /healthcheck.sh
+RUN chmod +x /healthcheck.sh
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -A healthcheck http://localhost:80
+  CMD /healthcheck.sh
