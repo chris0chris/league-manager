@@ -1,0 +1,146 @@
+[
+  {
+    "name": "Spiel 5",
+    "pre_finished": "Vorrunde",
+    "games": [
+      {
+        "home": {
+          "standing": "Spiel 1",
+          "place": 1,
+          "points": 2
+        },
+        "away": {
+          "standing": "Spiel 2",
+          "place": 1,
+          "points": 2
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "standing": "Spiel 3",
+          "place": 1,
+          "points": 2
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spiel 6",
+    "pre_finished": "Vorrunde",
+    "games": [
+      {
+        "home": {
+          "standing": "Spiel 1",
+          "place": 1,
+          "points": 0
+        },
+        "away": {
+          "standing": "Spiel 2",
+          "place": 1,
+          "points": 0
+        },
+        "officials": {
+          "pre_finished": "Vorrunde",
+          "standing": "Spiel 4",
+          "place": 1,
+          "points": 2
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spiel 7",
+    "pre_finished": "Vorrunde",
+    "games": [
+      {
+        "home": {
+          "standing": "Spiel 3",
+          "place": 1,
+          "points": 2
+        },
+        "away": {
+          "standing": "Spiel 4",
+          "place": 1,
+          "points": 2
+        },
+        "officials": {
+          "pre_finished": "Spiel ",
+          "standing": "Spiel 5",
+          "place": 1,
+          "points": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spiel 8",
+    "pre_finished": "Vorrunde",
+    "games": [
+      {
+        "home": {
+          "standing": "Spiel 3",
+          "place": 1,
+          "points": 0
+        },
+        "away": {
+          "standing": "Spiel 4",
+          "place": 1,
+          "points": 0
+        },
+        "officials": {
+          "pre_finished": "Spiel 6",
+          "standing": "Spiel 6",
+          "place": 1,
+          "points": 2
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spiel 9",
+    "pre_finished": "Zwischenrunde",
+    "games": [
+      {
+        "home": {
+          "standing": "Spiel 5",
+          "place": 1,
+          "points": 0
+        },
+        "away": {
+          "standing": "Spiel 6",
+          "place": 1,
+          "points": 2
+        },
+        "officials": {
+          "pre_finished": "Spiel 8",
+          "standing": "Spiel 8",
+          "place": 1,
+          "points": 0
+        }
+      }
+    ]
+  },
+  {
+    "name": "Spiel 10",
+    "pre_finished": "Zwischenrunde",
+    "games": [
+      {
+        "home": {
+          "standing": "Spiel 7",
+          "place": 1,
+          "points": 0
+        },
+        "away": {
+          "standing": "Spiel 8",
+          "place": 1,
+          "points": 2
+        },
+        "officials": {
+          "pre_finished": "Spiel 7",
+          "standing": "Spiel 7",
+          "place": 1,
+          "points": 2
+        }
+      }
+    ]
+  }
+]
