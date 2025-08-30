@@ -113,7 +113,7 @@ class FinalsValidator(BaseValidator):
         self.league_id = league_id
 
     def is_valid(self, player):
-        if 'final4' in self.gameday_name or 'final8' in self.gameday_name:
+        if 'final4' in self.gameday_name or 'final8' in self.gameday_name or 'final6' in self.gameday_name:
             if player[f'{self.league_id}'] >= self.min_gamedays_for_final:
                 return True
             raise ValidationError(

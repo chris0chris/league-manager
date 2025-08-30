@@ -1,0 +1,82 @@
+[
+  {
+    "field": "1",
+    "games": [
+      {
+        "stage": "Vorrunde",
+        "standing": "Spiel 1",
+        "home": "0_0",
+        "away": "0_1",
+        "official": "0_4"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Spiel 3",
+        "home": "0_4",
+        "away": "0_5",
+        "official": "0_0"
+      },
+      {
+        "stage": "Zwischenrunde",
+        "standing": "Spiel 5",
+        "home": "Gewinner Spiel 1",
+        "away": "Gewinner Spiel 2",
+        "official": "Gewinner Spiel 3"
+      },
+      {
+        "stage": "Zwischenrunde",
+        "standing": "Spiel 7",
+        "home": "Gewinner Spiel 3",
+        "away": "Gewinner Spiel 4",
+        "official": "Verlierer Spiel 5"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "Spiel 9",
+        "home": "Verlierer Spiel 5",
+        "away": "Gewinner Spiel 6",
+        "official": "Verlierer Spiel 8"
+      }
+    ]
+  },
+  {
+    "field": "2",
+    "games": [
+      {
+        "stage": "Vorrunde",
+        "standing": "Spiel 2",
+        "home": "0_2",
+        "away": "0_3",
+        "official": "0_5"
+      },
+      {
+        "stage": "Vorrunde",
+        "standing": "Spiel 4",
+        "home": "0_6",
+        "away": "0_7",
+        "official": "0_2"
+      },
+      {
+        "stage": "Zwischenrunde",
+        "standing": "Spiel 6",
+        "home": "Verlierer Spiel 1",
+        "away": "Verlierer Spiel 2",
+        "official": "Gewinner Spiel 4"
+      },
+      {
+        "stage": "Zwischenrunde",
+        "standing": "Spiel 8",
+        "home": "Verlierer Spiel 3",
+        "away": "Verlierer Spiel 4",
+        "official": "Gewinner Spiel 6"
+      },
+      {
+        "stage": "Finalrunde",
+        "standing": "Spiel 10",
+        "home": "Verlierer Spiel 7",
+        "away": "Gewinner Spiel 8",
+        "official": "Gewinner Spiel 7"
+      }
+    ]
+  }
+]
