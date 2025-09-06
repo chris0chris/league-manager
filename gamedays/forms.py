@@ -14,6 +14,7 @@ SCHEDULE_CHOICES = (
     ("7_2", "7 Teams 2 Felder"),
     ("8_2", "8 Teams 2 Felder"),
     ("8_vfpd_2", "8 Teams 2 Felder nur Viertelfinale und Playdown"),
+    ("8_doublevictory_2", "8 Teams 2 Felder Double Victory"),
     ("8_3", "8 Teams 3 Felder"),
     ("9_2", "9 Teams 2 Felder"),
     ("9_groupfinals_2", "9 Teams 2 Felder mit Gruppen Finale"),
