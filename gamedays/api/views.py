@@ -76,7 +76,6 @@ class GamedayScheduleView(APIView):
             response = gs.get_qualify_table().to_json(orient='split')
         elif get == 'final':
             response = gs.get_final_table().to_json(orient='split')
-        print(json.dumps(json.loads(response), indent=2))
         return Response(json.loads(response, object_pairs_hook=OrderedDict))
 
 
