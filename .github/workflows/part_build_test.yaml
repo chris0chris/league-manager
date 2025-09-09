@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: 🐍⚙️ Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -45,7 +45,7 @@ jobs:
           pip install -r requirements.txt
           pip install -r test_requirements.txt
       - name: 🚀🧪 Run Tests
-        run: pytest --junitxml=junit-reports/TEST-all.xml --cov=. --cov-report=xml:coverage-reports/coverage.xml --cov-report=term
+        run: pytest --cov --junitxml=junit.xml -o junit_family=legacy
         env:
           MYSQL_HOST: 0.0.0.0
           SECRET_KEY: 123456-TEST
@@ -56,12 +56,12 @@ jobs:
         with:
           summary: Test report python ${{ matrix.python-version }}
       - name: 📊 Upload Coverage to Codecov
-        # secrets not directly accessible https://stackoverflow.com/questions/72925899/github-actions-detect-if-secret-exists
-        env:
-          codecov_token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ env.codecov_token != '' }}
         uses: codecov/codecov-action@v5
         with:
-          files: coverage-reports/coverage.xml
-          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: 🧪 Upload test results to Codecov
+        if: success() || failure() && ${{ env.codecov_token != '' }} # always run even if the previous step fails
+        uses: codecov/test-results-action@v1
+        with:
           token: ${{ secrets.CODECOV_TOKEN }}

@@ -1,4 +1,4 @@
-Django==5.2.5
+Django==5.2.6
 django-crispy-forms==2.4
 crispy-bootstrap5==2025.6
 numpy==2.3.2
@@ -6,11 +6,11 @@ pandas==2.3.2
 django-pandas==0.6.7
 djangorestframework==3.16.1
 django-autocomplete-light==3.12.1
-Markdown==3.8.2
+Markdown==3.9
 django-cors-headers==4.7.0
 Pillow==11.3.0
 django-rest-knox==5.0.2
 python-dotenv==1.1.1
 mysqlclient==2.2.7
 requests==2.32.5
-git+https://github.com/revsys/django-health-check@master # simple db checks are only available in 3.18.4.dev, whhich isn't released by now
+django-health-check==3.20.0

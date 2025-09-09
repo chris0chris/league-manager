@@ -11,7 +11,6 @@ RUN apt -y install pkg-config
 RUN apt -y install python3-dev
 RUN apt -y install build-essential
 RUN apt -y install default-libmysqlclient-dev
-RUN apt -y install git                          # for development dependency in requirements.txt
 
 # install environment
 COPY ../requirements.txt ${APP_DIR}
@@ -28,7 +27,7 @@ RUN rm -rf passcheck/static/passcheck/js
 # collect static files
 RUN python manage.py collectstatic --no-input --clear
 
-FROM node:22-slim AS node-builder
+FROM node:24-slim AS node-builder
 ARG APP_DIR="/liveticker-app"
 WORKDIR ${APP_DIR}
 
