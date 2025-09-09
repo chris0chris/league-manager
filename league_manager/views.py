@@ -11,12 +11,12 @@ def homeview(request):
     return render(request, 'homeview.html')
 
 
-class ClearCacheView(View, UserPassesTestMixin):
+class ClearCacheView(UserPassesTestMixin, View):
 
     def get(self, request):
         cache.clear()
         referer = request.META.get('HTTP_REFERER', '/')
-        if url_has_allowed_host_and_scheme(referer, allowed_hosts=None):
+        if url_has_allowed_host_and_scheme(referer, allowed_hosts={request.get_host()}):
             return redirect(referer)
         return redirect('/')
 
