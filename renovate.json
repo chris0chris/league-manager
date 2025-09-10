@@ -9,23 +9,21 @@
   },
   "packageRules": [
     {
-      "matchDepTypes": [
-        "devDependencies"
-      ],
+      "matchDepTypes": ["devDependencies"],
       "automerge": true
     },
     {
-      "matchUpdateTypes": [
-        "patch"
-      ],
+      "matchUpdateTypes": ["patch"],
       "matchCurrentVersion": "!/^0/",
       "automerge": true
     },
     {
-      "matchUpdateTypes": [
-        "minor"
-      ],
+      "matchUpdateTypes": ["minor"],
       "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    },
+    {
+      "matchPaths": ["test_requirements.txt"],
       "automerge": true
     }
   ]
