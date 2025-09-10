@@ -1,7 +1,7 @@
 Django==5.2.6
 django-crispy-forms==2.4
 crispy-bootstrap5==2025.6
-numpy==2.3.2
+numpy==2.3.3
 pandas==2.3.2
 django-pandas==0.6.7
 djangorestframework==3.16.1
