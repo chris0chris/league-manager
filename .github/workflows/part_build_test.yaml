@@ -63,7 +63,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: 🧪 Upload test results to Codecov
-        if: (success() || failure()) && ${{ secrets.CODECOV_TOKEN != '' }} # always run even if the previous step fails
+        if: success() || failure() && ${{ secrets.CODECOV_TOKEN != '' }} # always run even if the previous step fails
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
