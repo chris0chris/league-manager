@@ -55,12 +55,20 @@ jobs:
         if: success() || failure() # always run even if the previous step fails
         with:
           summary: Test report python ${{ matrix.python-version }}
+          require_tests: true
+          report_paths: '**/junit.xml'
       - name: 📊 Upload Coverage to Codecov
+        # secrets not directly accessible https://stackoverflow.com/questions/72925899/github-actions-detect-if-secret-exists
+        env:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ env.codecov_token != '' }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: 🧪 Upload test results to Codecov
+        # secrets not directly accessible https://stackoverflow.com/questions/72925899/github-actions-detect-if-secret-exists
+        env:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
         if: success() || failure() && ${{ env.codecov_token != '' }} # always run even if the previous step fails
         uses: codecov/test-results-action@v1
         with:
