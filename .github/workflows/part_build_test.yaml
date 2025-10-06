@@ -55,6 +55,8 @@ jobs:
         if: success() || failure() # always run even if the previous step fails
         with:
           summary: Test report python ${{ matrix.python-version }}
+          require_tests: true
+          report_paths: '**/junit.xml'
       - name: 📊 Upload Coverage to Codecov
         if: ${{ env.codecov_token != '' }}
         uses: codecov/codecov-action@v5
