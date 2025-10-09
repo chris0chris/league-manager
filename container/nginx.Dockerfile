@@ -1,4 +1,4 @@
-FROM python:3.13-slim AS python-builder
+FROM python:3.14-slim AS python-builder
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ARG APP_DIR="/app"
