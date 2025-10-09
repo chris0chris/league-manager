@@ -1,4 +1,4 @@
-FROM python:3.13-slim AS app-builder
+FROM python:3.14-slim AS app-builder
 
 RUN apt -y update
 RUN apt -y install pkg-config
@@ -13,7 +13,7 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN pip install django-debug-toolbar
 
-FROM python:3.13-slim AS app
+FROM python:3.14-slim AS app
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
