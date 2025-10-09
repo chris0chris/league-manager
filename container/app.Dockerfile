@@ -10,8 +10,8 @@ RUN apt -y install git                          # for development dependency in 
 COPY ../requirements.txt .
 
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-RUN pip install django-debug-toolbar
+RUN pip install --target=/py-install -r requirements.txt
+RUN pip install --target=/py-install django-debug-toolbar
 
 FROM python:3.14-slim AS app
 
@@ -34,7 +34,9 @@ USER ${APP_USER}
 COPY --chown=${APP_USER} ../ ${APP_DIR}
 RUN rm -rf .git/
 
-COPY --chown=${APP_USER} --from=app-builder /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
+COPY --chown=${APP_USER} --from=app-builder /py-install ${APP_DIR}/python-packages/
+
+ENV PYTHONPATH="${APP_DIR}/python-packages:${PYTHONPATH}"
 
 COPY --chown=${APP_USER} ../container/entrypoint.sh /app/entrypoint.sh
 
