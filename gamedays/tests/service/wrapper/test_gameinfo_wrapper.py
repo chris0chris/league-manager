@@ -11,7 +11,7 @@ class TestGameinfoWrapper(TestCase):
     def test_halftime_value_is_set(self):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
-        gameinfo_wrapper = GameinfoWrapper(firstGame.pk)
+        gameinfo_wrapper = GameinfoWrapper.from_id(firstGame.pk)
         gameinfo_wrapper.set_halftime_to_now()
         firstGame = Gameinfo.objects.first()
         assert firstGame.status == '2. Halbzeit'
@@ -20,7 +20,7 @@ class TestGameinfoWrapper(TestCase):
     def test_gamestarted_value_is_set(self):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
-        gameinfo_wrapper = GameinfoWrapper(firstGame.pk)
+        gameinfo_wrapper = GameinfoWrapper.from_id(firstGame.pk)
         gameinfo_wrapper.set_gamestarted_to_now()
         firstGame: Gameinfo = Gameinfo.objects.first()
         assert firstGame.status == '1. Halbzeit'
@@ -29,7 +29,7 @@ class TestGameinfoWrapper(TestCase):
     def test_game_finished_value_is_set(self):
         DBSetup().g62_status_empty()
         firstGame = Gameinfo.objects.first()
-        gameinfo_wrapper = GameinfoWrapper(firstGame.pk)
+        gameinfo_wrapper = GameinfoWrapper.from_instance(firstGame)
         gameinfo_wrapper.set_game_finished_to_now()
         firstGame: Gameinfo = Gameinfo.objects.first()
         assert firstGame.status == 'beendet'
@@ -38,7 +38,7 @@ class TestGameinfoWrapper(TestCase):
     def test_team_in_possesion_is_updated(self):
         DBSetup().g62_status_empty()
         lastGame: Gameinfo = Gameinfo.objects.last()
-        gameinfo_wrapper = GameinfoWrapper(lastGame.pk)
+        gameinfo_wrapper = GameinfoWrapper.from_instance(lastGame)
         assert lastGame.in_possession == 'A1'
         gameinfo_wrapper.update_team_in_possession('a team')
         assert Gameinfo.objects.last().in_possession == 'a team'
