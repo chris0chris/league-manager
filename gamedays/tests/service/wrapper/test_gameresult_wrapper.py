@@ -44,3 +44,15 @@ class TestGameresultWrapper(TestCase):
         gameresult_wrapper = GameresultWrapper(lastGame)
         assert gameresult_wrapper.get_home_score() == 5
         assert gameresult_wrapper.get_away_score() == 0
+
+    def test_create_gameresult(self):
+        expected_team = DBSetup().create_teams('new_team', 1)[0]
+        expected_gameinfo = DBSetup.create_gameinfo()
+        gameresult_wrapper = GameresultWrapper(expected_gameinfo)
+        gameresult = gameresult_wrapper.create(team=expected_team, is_home=True)
+        assert gameresult.gameinfo == expected_gameinfo
+        assert gameresult.team == expected_team
+        assert gameresult.isHome == True
+        assert gameresult.pa is None
+        assert gameresult.fh is None
+        assert gameresult.sh is None

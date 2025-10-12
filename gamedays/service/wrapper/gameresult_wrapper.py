@@ -1,4 +1,4 @@
-from gamedays.models import Gameresult
+from gamedays.models import Gameresult, Team, Gameinfo
 
 
 class GameresultWrapper(object):
@@ -64,3 +64,10 @@ class GameresultWrapper(object):
 
     def get_away_fullname(self):
         return self._get_team_fullname(is_home=False)
+
+    def create(self, team: Team, is_home=False) -> Gameresult:
+        return Gameresult.objects.create(
+            gameinfo=self.gameinfo,
+            team=team,
+            isHome=is_home
+        )
