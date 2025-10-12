@@ -3,13 +3,13 @@
 {% block content %}
 
 <div class="content-section">
-    <form method="post" id="games-form" novalidate>
+    <form method="post" id="games-form">
         {% csrf_token %}
         {{ wizard.management_form }}
         {{ form.management_form }}
 
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Spiele</legend>
+            <legend class="border-bottom mb-4">Spielplan erstellen - Spiele</legend>
 
             <table class="table table-sm" id="games-table">
                 <thead>
@@ -44,7 +44,7 @@
                         {{ subform.away.errors }}
                     </td>
                     <td>
-                        {{ subform.stage_display }}
+                        {{ subform.stage }}
                     </td>
                     <td>
                         {{ subform.standing }}
@@ -89,7 +89,7 @@
         <td>{{ form.empty_form.field }}</td>
         <td>{{ form.empty_form.home }}</td>
         <td>{{ form.empty_form.away }}</td>
-        <td>{{ form.empty_form.stage_display }}</td>
+        <td>{{ form.empty_form.stage }}</td>
         <td>{{ form.empty_form.standing }}</td>
         <td>{{ form.empty_form.officials }}</td>
         <td>

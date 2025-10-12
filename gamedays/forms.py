@@ -109,11 +109,18 @@ class GamedayGameinfoCreateForm(forms.ModelForm):
     field = forms.ChoiceField(choices=(), label='Field', required=True, initial='',
                               widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: auto'}))
     standing = forms.ChoiceField(choices=(), required=True, initial='',
-                              widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: auto'}))
+                                 widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: auto'}))
+    stage = forms.ChoiceField(
+        choices=[('Hauptrunde', 'Hauptrunde')],
+        label='Stage',
+        required=True,
+        initial='Hauptrunde',
+        widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: 110px'})
+    )
 
     class Meta:
         model = Gameinfo
-        fields = ['scheduled', 'field', 'officials', 'standing']
+        fields = ['scheduled', 'field', 'officials', 'standing', 'stage']
         widgets = {
             'scheduled': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'officials': autocomplete.ModelSelect2(
@@ -125,9 +132,11 @@ class GamedayGameinfoCreateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         placeholder = [('', 'Bitte auswählen')]
         if group_choices is not None:
-            self.fields['standing'].choices = placeholder + list(group_choices) if len(group_choices) > 1 else list(group_choices)
+            self.fields['standing'].choices = placeholder + list(group_choices) if len(group_choices) > 1 else list(
+                group_choices)
         if field_choices is not None:
-            self.fields['field'].choices = placeholder + list(field_choices) if len(field_choices) > 1 else list(field_choices)
+            self.fields['field'].choices = placeholder + list(field_choices) if len(field_choices) > 1 else list(
+                field_choices)
 
 
 GameinfoFormSet = modelformset_factory(
