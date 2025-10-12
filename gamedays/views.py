@@ -11,7 +11,7 @@ from django.views.generic import DetailView, UpdateView, CreateView
 from formtools.wizard.views import SessionWizardView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
-from .forms import GamedayCreateForm, GamedayUpdateForm, GamedayGaminfoBasicForm, GameinfoFormSet, \
+from .forms import GamedayCreateForm, GamedayUpdateForm, GamedayGaminfoFieldsAndGroupsForm, GameinfoFormSet, \
     GamedayGameinfoCreateForm
 from .models import Gameday, Gameinfo
 from .service.gameday_form_service import GamedayFormService
@@ -153,13 +153,13 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 FORMS = [
-    ('basic', GamedayGaminfoBasicForm),
+    ('basic', GamedayGaminfoFieldsAndGroupsForm),
     ('gameinfos', GamedayGameinfoCreateForm),
 ]
 
 TEMPLATES = {
-    'basic': 'gamedays/wizard_basic.html',
-    'gameinfos': 'gamedays/wizard_gameinfos.html',
+    'basic': 'gamedays/wizard_form/fields_groups.html',
+    'gameinfos': 'gamedays/wizard_form/gameinfos.html',
 }
 
 
@@ -169,13 +169,11 @@ class GamedayWizard(SessionWizardView):
     def get_template_names(self):
         return [TEMPLATES[self.steps.current]]
 
-    # helper for storage.extra_data
     def _extra(self):
         if not hasattr(self.storage, 'extra_data'):
             self.storage.extra_data = {}
         return self.storage.extra_data
 
-    # special handling to return a formset instance for the 'gameinfos' step
     def get_form(self, step=None, data=None, files=None):
         step = step or self.steps.current
         if step == 'gameinfos':
@@ -185,24 +183,18 @@ class GamedayWizard(SessionWizardView):
             number_groups = int(basic.get('number_groups', 2))
             number_fields = int(basic.get('number_fields', 2))
 
-            # Build choices: tuples (value, label)
             group_choices = [(f'Gruppe {n}', f'Gruppe {n}') for n in range(1, number_groups + 1)]
             field_choices = [(f'{n}', f'Feld {n}') for n in range(1, number_fields + 1)]
 
             form_kwargs = {'group_choices': group_choices, 'field_choices': field_choices}
-            # instantiate formset (bound on POST)
             qs = Gameinfo.objects.none()
             if data is not None:
                 formset = GameinfoFormSet(data, queryset=qs, prefix='games', form_kwargs=form_kwargs)
             else:
                 formset = GameinfoFormSet(queryset=qs, prefix='games', form_kwargs=form_kwargs)
 
-            # Now set dynamic choices and widgets on each concrete form in the set
             for form in formset.forms:
-                # pass the choices via the form's __init__ signature if available,
-                # otherwise set the fields directly
                 try:
-                    # try to re-initialize form with choices (only works if using custom __init__)
                     form.__init__(data=form.data or None,
                                   files=form.files or None,
                                   instance=form.instance,
@@ -213,23 +205,17 @@ class GamedayWizard(SessionWizardView):
                     form.fields['group'].choices = group_choices
                     form.fields['field'].choices = field_choices
 
-            # attach metadata for later saving
             formset._gameday_instance = self._extra().get('gameday_id') and Gameday.objects.filter(
                 pk=self._extra()['gameday_id']).first()
-            # store choices too if needed later
             formset._group_choices = group_choices
             formset._field_choices = field_choices
-            # formset.empty_form.fields['group'].choices = group_choices
-            # formset.empty_form.fields['field'].choices = field_choices
             return formset
 
         return super().get_form(step, data, files)
 
-    # initial values for later steps
     def get_form_initial(self, step):
         extra = self._extra()
         if step == 'basic':
-            # optionally use data from the created gameday to set defaults
             gameday_id = extra.get('gameday_id')
             if gameday_id:
                 gameday = Gameday.objects.filter(pk=gameday_id).first()
@@ -238,7 +224,6 @@ class GamedayWizard(SessionWizardView):
                             'number_fields': getattr(gameday, 'number_fields', 0)}
         return super().get_form_initial(step)
 
-    # called after each step validates
     def process_step(self, form):
         step = self.steps.current
 

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="content-section">
+    <form method="POST">
+        {% csrf_token %}
+        {{ wizard.management_form }}
+        {{ form.non_field_errors }}
+
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Felder und Gruppen</legend>
+            {{ form|crispy }}
+
+            <div class="wizard-controls">
+                <div class="form-group">
+                    <button class="btn btn-primary w-100" type="submit">Weiter</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+{% endblock %}

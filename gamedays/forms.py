@@ -90,7 +90,7 @@ class GamedayUpdateForm(forms.ModelForm):
             self.fields['date'].initial = kwargs['instance'].date.strftime('%Y-%m-%d')
 
 
-class GamedayGaminfoBasicForm(forms.Form):
+class GamedayGaminfoFieldsAndGroupsForm(forms.Form):
     number_groups = forms.IntegerField(label="Anzahl der Gruppen")
     number_fields = forms.IntegerField(label="Anzahl der Felder")
 
