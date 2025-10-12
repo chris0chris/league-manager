@@ -3,15 +3,18 @@ from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models.functions import ExtractYear
-from django.forms import Form
-from django.shortcuts import render
+from django.forms import Form, forms
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, UpdateView, CreateView
+from formtools.wizard.views import SessionWizardView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
-from .forms import GamedayCreateForm, GamedayUpdateForm
-from .models import Gameday
+from .forms import GamedayCreateForm, GamedayUpdateForm, GamedayGaminfoBasicForm, GameinfoFormSet, \
+    GamedayGameinfoCreateForm
+from .models import Gameday, Gameinfo
+from .service.gameday_form_service import GamedayFormService
 from .service.gameday_service import GamedayService
 
 
@@ -147,3 +150,129 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     # noinspection PyMethodMayBeStatic
     def _format_array(self, data):
         return [value.strip() for value in data.split(',')]
+
+
+FORMS = [
+    ('basic', GamedayGaminfoBasicForm),
+    ('gameinfos', GamedayGameinfoCreateForm),
+]
+
+TEMPLATES = {
+    'basic': 'gamedays/wizard_basic.html',
+    'gameinfos': 'gamedays/wizard_gameinfos.html',
+}
+
+
+class GamedayWizard(SessionWizardView):
+    form_list = FORMS
+
+    def get_template_names(self):
+        return [TEMPLATES[self.steps.current]]
+
+    # helper for storage.extra_data
+    def _extra(self):
+        if not hasattr(self.storage, 'extra_data'):
+            self.storage.extra_data = {}
+        return self.storage.extra_data
+
+    # special handling to return a formset instance for the 'gameinfos' step
+    def get_form(self, step=None, data=None, files=None):
+        step = step or self.steps.current
+        if step == 'gameinfos':
+            extra = self._extra()
+            extra.update({'gameday_id': 630})
+            basic = extra.get('basic') or {}
+            number_groups = int(basic.get('number_groups', 2))
+            number_fields = int(basic.get('number_fields', 2))
+
+            # Build choices: tuples (value, label)
+            group_choices = [(f'Gruppe {n}', f'Gruppe {n}') for n in range(1, number_groups + 1)]
+            field_choices = [(f'{n}', f'Feld {n}') for n in range(1, number_fields + 1)]
+
+            form_kwargs = {'group_choices': group_choices, 'field_choices': field_choices}
+            # instantiate formset (bound on POST)
+            qs = Gameinfo.objects.none()
+            if data is not None:
+                formset = GameinfoFormSet(data, queryset=qs, prefix='games', form_kwargs=form_kwargs)
+            else:
+                formset = GameinfoFormSet(queryset=qs, prefix='games', form_kwargs=form_kwargs)
+
+            # Now set dynamic choices and widgets on each concrete form in the set
+            for form in formset.forms:
+                # pass the choices via the form's __init__ signature if available,
+                # otherwise set the fields directly
+                try:
+                    # try to re-initialize form with choices (only works if using custom __init__)
+                    form.__init__(data=form.data or None,
+                                  files=form.files or None,
+                                  instance=form.instance,
+                                  group_choices=group_choices,
+                                  field_choices=field_choices)
+                except TypeError:
+                    # fallback: set choices directly
+                    form.fields['group'].choices = group_choices
+                    form.fields['field'].choices = field_choices
+
+            # attach metadata for later saving
+            formset._gameday_instance = self._extra().get('gameday_id') and Gameday.objects.filter(
+                pk=self._extra()['gameday_id']).first()
+            # store choices too if needed later
+            formset._group_choices = group_choices
+            formset._field_choices = field_choices
+            # formset.empty_form.fields['group'].choices = group_choices
+            # formset.empty_form.fields['field'].choices = field_choices
+            return formset
+
+        return super().get_form(step, data, files)
+
+    # initial values for later steps
+    def get_form_initial(self, step):
+        extra = self._extra()
+        if step == 'basic':
+            # optionally use data from the created gameday to set defaults
+            gameday_id = extra.get('gameday_id')
+            if gameday_id:
+                gameday = Gameday.objects.filter(pk=gameday_id).first()
+                if gameday:
+                    return {'number_groups': getattr(gameday, 'number_groups', 0),
+                            'number_fields': getattr(gameday, 'number_fields', 0)}
+        return super().get_form_initial(step)
+
+    # called after each step validates
+    def process_step(self, form):
+        step = self.steps.current
+
+        if step == 'create':
+            gameday = form.save()
+            gameday.format = getattr(gameday, 'format', '') or ''
+            gameday.save()
+            self._extra()['gameday_id'] = gameday.pk
+            return super().process_step(form)
+
+        if step == 'basic':
+            self._extra()['basic'] = form.cleaned_data
+            gameday_id = self._extra().get('gameday_id')
+            if gameday_id:
+                gameday = Gameday.objects.get(pk=gameday_id)
+                data = self._extra().get('basic')
+                gameday.format = f'{gameday.league.name}_Gruppen{data.get('number_groups')}_Felder{data.get('number_fields')}'
+                gameday.save()
+            return super().process_step(form)
+
+        if step == 'gameinfos':
+            formset = form
+            if formset.is_valid():
+                gameday_form_service = GamedayFormService(formset._gameday_instance)
+                gameday_form_service.delete_all_gameinfos_for_gameday()
+                for current_form in formset:
+                    gameday_form_service.handle_gameinfo_and_gameresult(current_form.cleaned_data,
+                                                                        current_form.instance)
+                self._extra()['gameinfo_saved'] = True
+            return super().process_step(formset)
+
+        return super().process_step(form)
+
+    def done(self, form_list, **kwargs):
+        gameday_id = self._extra().get('gameday_id')
+        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
+        return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday_id}))

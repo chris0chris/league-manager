@@ -52,5 +52,9 @@ class GameinfoWrapper(object):
 
     def update_gameday(self, gameday) -> Gameinfo:
         self.gameinfo.gameday = gameday
-        self._save(update_fields=["gameday"])
+        self.gameinfo.save()
         return self.gameinfo
+
+    @classmethod
+    def delete_by_gameday(cls, gameday):
+        Gameinfo.objects.filter(gameday=gameday).delete()

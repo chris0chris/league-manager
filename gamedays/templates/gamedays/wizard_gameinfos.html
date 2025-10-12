@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<div class="content-section">
+    <form method="post" id="games-form" novalidate>
+        {% csrf_token %}
+        {{ wizard.management_form }}
+        {{ form.management_form }}
+
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Spiele</legend>
+
+            <table class="table table-sm" id="games-table">
+                <thead>
+                <tr>
+                    <th>Zeit</th>
+                    <th>Feld</th>
+                    <th>Heim</th>
+                    <th>Gast</th>
+                    <th>Runde</th>
+                    <th>Gruppe</th>
+                    <th>Schiri-Team</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="formset-rows">
+                {% for subform in form %}
+                <tr class="form-row" data-form-index="{{ forloop.counter0 }}">
+                    <td>
+                        {{ subform.scheduled }}
+                        {{ subform.scheduled.errors }}
+                    </td>
+                    <td>
+                        {{ subform.field }}
+                        {{ subform.field.errors }}
+                    </td>
+                    <td>
+                        {{ subform.home }}
+                        {{ subform.home.errors }}
+                    </td>
+                    <td>
+                        {{ subform.away }}
+                        {{ subform.away.errors }}
+                    </td>
+                    <td>
+                        {{ subform.stage_display }}
+                    </td>
+                    <td>
+                        {{ subform.standing }}
+                        {{ subform.standing.errors }}
+                    </td>
+                    <td>
+                        {{ subform.officials }}
+                        {{ subform.officials.errors }}
+                    </td>
+
+                    {# hidden inputs like id and DELETE (if any) #}
+                    <td>
+                        {% for hidden in subform.hidden_fields %}
+                        {{ hidden }}
+                        {% endfor %}
+                        <button type="button" class="btn btn-sm btn-danger remove-btn"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr id="no-rows">
+                    <td colspan="4" class="text-muted">Noch keine Spiele.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="mb-3">
+                <button type="button" id="add-row" class="btn btn-outline-primary">+ Add game</button>
+            </div>
+
+        </fieldset>
+
+        <div class="form-group mt-3">
+            <button class="btn btn-outline-info" type="submit">Save games and continue</button>
+        </div>
+    </form>
+</div>
+
+<template id="empty-form-template">
+    <tr class="form-row" data-form-index="__prefix__">
+        <td>{{ form.empty_form.scheduled }}</td>
+        <td>{{ form.empty_form.field }}</td>
+        <td>{{ form.empty_form.home }}</td>
+        <td>{{ form.empty_form.away }}</td>
+        <td>{{ form.empty_form.stage_display }}</td>
+        <td>{{ form.empty_form.standing }}</td>
+        <td>{{ form.empty_form.officials }}</td>
+        <td>
+            {% for hidden in form.empty_form.hidden_fields %}
+            {{ hidden }}
+            {% endfor %}
+            <button type="button" class="btn btn-sm btn-danger remove-btn"><i class="bi bi-trash"></i></button>
+        </td>
+    </tr>
+</template>
+
+<style>
+    /* optional small adjustments */
+    .form-row td { vertical-align: middle; }
+</style>
+{% endblock content %}
+{% block footer %}
+{% load static %}
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script>
+    (function(){
+      const prefix = "{{ form.prefix }}";
+      const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
+      const formsetRows = document.getElementById('formset-rows');
+      const emptyTpl = document.getElementById('empty-form-template').innerHTML;
+
+      function updateIndices() {
+        const rows = formsetRows.querySelectorAll('.form-row');
+        if (rows.length === 0) {
+          const noRows = document.getElementById('no-rows');
+          if (!noRows) {
+            const tr = document.createElement('tr');
+            tr.id = 'no-rows';
+            tr.innerHTML = '<td colspan="7" class="text-muted">Noch keine Spiele.</td>';
+            formsetRows.appendChild(tr);
+          }
+        } else {
+          const nr = document.getElementById('no-rows');
+          if (nr) nr.remove();
+        }
+
+        rows.forEach((row, idx) => {
+          row.dataset.formIndex = idx;
+          // update names/ids/htmlFor in inputs/labels
+          row.querySelectorAll('input, select, textarea, label').forEach(el => {
+            if (el.name) el.name = el.name.replace(/-__prefix__|-\d+-/g, `-${idx}-`);
+            if (el.id) el.id = el.id.replace(/-__prefix__|-\d+-/g, `-${idx}-`);
+            if (el.htmlFor) el.htmlFor = el.htmlFor.replace(/-__prefix__|-\d+-/g, `-${idx}-`);
+          });
+        });
+        totalForms.value = formsetRows.querySelectorAll('.form-row').length;
+      }
+
+      function bindRemove(btn) {
+        btn.addEventListener('click', function(e) {
+          const row = e.target.closest('.form-row');
+          const deleteInput = row.querySelector(`input[name$="-DELETE"]`);
+          if (deleteInput) {
+            deleteInput.checked = true;
+            row.style.display = 'none';
+          } else {
+            row.remove();
+            updateIndices();
+          }
+        });
+      }
+
+      document.querySelectorAll('.remove-btn').forEach(bindRemove);
+
+      document.getElementById('add-row').addEventListener('click', function(){
+        // clone template and replace __prefix__ placeholder
+        const newHtml = emptyTpl.replace(/__prefix__/g, totalForms.value);
+        const wrapper = document.createElement('tbody');
+        wrapper.innerHTML = newHtml;
+        const newRow = wrapper.querySelector('.form-row');
+        formsetRows.appendChild(newRow);
+        updateIndices();
+        bindRemove(newRow.querySelector('.remove-btn'));
+      });
+
+      updateIndices();
+
+    })();
+</script>
+{{ form.media }}
+<link href='{% static "league_manager/css/dal.css" %}' rel="stylesheet" type="text/css">
+{% endblock footer %}

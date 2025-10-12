@@ -1,7 +1,9 @@
+from dal import autocomplete
 from django import forms
+from django.forms import modelformset_factory
 from django.utils import timezone
 
-from gamedays.models import Season, League, Gameday
+from gamedays.models import Season, League, Gameday, Gameinfo, Team
 
 SCHEDULE_CHOICES = (
     ("2_1", "2 Teams 1 Feld"),
@@ -33,12 +35,11 @@ SCHEDULE_CHOICES = (
 class GamedayCreateForm(forms.ModelForm):
     name = forms.CharField(max_length=100)
     season = forms.ModelChoiceField(queryset=Season.objects.all())
-    league = forms.ModelChoiceField(queryset=League.objects.all(), initial=1)
-    format = forms.ChoiceField(choices=SCHEDULE_CHOICES)
+    league = forms.ModelChoiceField(queryset=League.objects.all(), empty_label='Bitte auswählen')
 
     class Meta:
         model = Gameday
-        fields = ['name', 'season', 'league', 'format', 'date', 'start']
+        fields = ['name', 'season', 'league', 'date', 'start']
         widgets = {
             'date': forms.DateInput(format='%d.%m.%Y',
                                     attrs={'type': 'date'}
@@ -54,8 +55,10 @@ class GamedayCreateForm(forms.ModelForm):
 
     def save(self, user=None):
         gameday = super(GamedayCreateForm, self).save(commit=False)
-        if self.author:
-            gameday.author = self.author
+        # if self.author:
+        #     gameday.author = self.author
+        if self.data.get('format') is None:
+            gameday.format = 'INITIAL_EMPTY'
         gameday.save()
         return gameday
 
@@ -85,3 +88,51 @@ class GamedayUpdateForm(forms.ModelForm):
         super(GamedayUpdateForm, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
             self.fields['date'].initial = kwargs['instance'].date.strftime('%Y-%m-%d')
+
+
+class GamedayGaminfoBasicForm(forms.Form):
+    number_groups = forms.IntegerField(label="Anzahl der Gruppen")
+    number_fields = forms.IntegerField(label="Anzahl der Felder")
+
+
+class GamedayGameinfoCreateForm(forms.ModelForm):
+    home = forms.ModelChoiceField(
+        queryset=Team.objects.all(),
+        widget=autocomplete.ModelSelect2(url='/dal/team'),
+        required=True
+    )
+    away = forms.ModelChoiceField(
+        queryset=Team.objects.all(),
+        widget=autocomplete.ModelSelect2(url='/dal/team'),
+        required=True
+    )
+    field = forms.ChoiceField(choices=(), label='Field', required=True, initial='',
+                              widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: auto'}))
+    standing = forms.ChoiceField(choices=(), required=True, initial='',
+                              widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: auto'}))
+
+    class Meta:
+        model = Gameinfo
+        fields = ['scheduled', 'field', 'officials', 'standing']
+        widgets = {
+            'scheduled': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'officials': autocomplete.ModelSelect2(
+                url='/dal/team'
+            ),
+        }
+
+    def __init__(self, *args, group_choices=None, field_choices=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        placeholder = [('', 'Bitte auswählen')]
+        if group_choices is not None:
+            self.fields['standing'].choices = placeholder + list(group_choices) if len(group_choices) > 1 else list(group_choices)
+        if field_choices is not None:
+            self.fields['field'].choices = placeholder + list(field_choices) if len(field_choices) > 1 else list(field_choices)
+
+
+GameinfoFormSet = modelformset_factory(
+    Gameinfo,
+    form=GamedayGameinfoCreateForm,
+    extra=1,
+    can_delete=True
+)

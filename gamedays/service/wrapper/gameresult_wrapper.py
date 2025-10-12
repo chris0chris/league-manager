@@ -65,9 +65,13 @@ class GameresultWrapper(object):
     def get_away_fullname(self):
         return self._get_team_fullname(is_home=False)
 
-    def create(self, team: Team, is_home=False) -> Gameresult:
-        return Gameresult.objects.create(
+    def create(self, team: Team, is_home=False) -> tuple[Gameresult, bool]:
+        return Gameresult.objects.update_or_create(
             gameinfo=self.gameinfo,
-            team=team,
-            isHome=is_home
+            isHome=is_home,
+            defaults={
+                'gameinfo': self.gameinfo,
+                'team': team,
+                'isHome': is_home,
+            }
         )
