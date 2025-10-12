@@ -15,7 +15,7 @@ class TestGameinfoWrapper(TestCase):
         gameinfo_wrapper.set_halftime_to_now()
         first_game = Gameinfo.objects.first()
         assert first_game.status == '2. Halbzeit'
-        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(first_game.gameHalftime))
+        assert re.match('^(0\d|1\d|2[0-3]):[0-5]\d', str(first_game.gameHalftime))
 
     def test_gamestarted_value_is_set(self):
         DBSetup().g62_status_empty()
@@ -24,7 +24,7 @@ class TestGameinfoWrapper(TestCase):
         gameinfo_wrapper.set_gamestarted_to_now()
         first_game: Gameinfo = Gameinfo.objects.first()
         assert first_game.status == '1. Halbzeit'
-        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(first_game.gameStarted))
+        assert re.match('^(0\d|1\d|2[0-3]):[0-5]\d', str(first_game.gameStarted))
 
     def test_game_finished_value_is_set(self):
         DBSetup().g62_status_empty()
@@ -33,7 +33,7 @@ class TestGameinfoWrapper(TestCase):
         gameinfo_wrapper.set_game_finished_to_now()
         first_game: Gameinfo = Gameinfo.objects.first()
         assert first_game.status == 'beendet'
-        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(first_game.gameFinished))
+        assert re.match('^(0\d|1\d|2[0-3]):[0-5]\d', str(first_game.gameFinished))
 
     def test_team_in_possesion_is_updated(self):
         DBSetup().g62_status_empty()
