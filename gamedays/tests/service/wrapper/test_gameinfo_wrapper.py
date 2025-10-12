@@ -42,3 +42,13 @@ class TestGameinfoWrapper(TestCase):
         assert last_game.in_possession == 'A1'
         gameinfo_wrapper.update_team_in_possession('a team')
         assert Gameinfo.objects.last().in_possession == 'a team'
+
+    def test_update_gameday(self):
+        DBSetup().g62_status_empty()
+        expected_gameday = DBSetup().create_empty_gameday()
+        last_game: Gameinfo = Gameinfo.objects.last()
+        assert last_game.gameday != expected_gameday
+        gameinfo_wrapper = GameinfoWrapper.from_instance(last_game)
+        gameinfo_wrapper.update_gameday(expected_gameday)
+        last_game_updated: Gameinfo = Gameinfo.objects.last()
+        assert last_game_updated.gameday == expected_gameday

@@ -11,7 +11,7 @@ STATUS_FINISHED = "beendet"
 
 
 class GameinfoWrapper(object):
-    def __init__(self, gameinfo):
+    def __init__(self, gameinfo: Gameinfo):
         self.gameinfo = gameinfo
 
     @classmethod
@@ -49,3 +49,8 @@ class GameinfoWrapper(object):
             return
         self.gameinfo.in_possession = team_name
         self._save(update_fields=["in_possession"])
+
+    def update_gameday(self, gameday) -> Gameinfo:
+        self.gameinfo.gameday = gameday
+        self._save(update_fields=["gameday"])
+        return self.gameinfo
