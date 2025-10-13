@@ -110,12 +110,11 @@ class GamedayGameinfoCreateForm(forms.ModelForm):
                               widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: auto'}))
     standing = forms.ChoiceField(choices=(), required=True, initial='',
                                  widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: auto'}))
-    stage = forms.ChoiceField(
-        choices=[('Hauptrunde', 'Hauptrunde')],
+    stage = forms.CharField(
         label='Stage',
         required=True,
         initial='Hauptrunde',
-        widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: 110px'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 110px'})
     )
 
     class Meta:
@@ -124,7 +123,7 @@ class GamedayGameinfoCreateForm(forms.ModelForm):
         widgets = {
             'scheduled': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'officials': autocomplete.ModelSelect2(
-                url='/dal/team'
+                url='/dal/team',
             ),
         }
 
@@ -138,10 +137,19 @@ class GamedayGameinfoCreateForm(forms.ModelForm):
             self.fields['field'].choices = placeholder + list(field_choices) if len(field_choices) > 1 else list(
                 field_choices)
 
+        if self.instance.pk:
+            home_result = self.instance.gameresult_set.filter(isHome=True).first()
+            away_result = self.instance.gameresult_set.filter(isHome=False).first()
+            if home_result:
+                self.fields['home'].initial = home_result.team
+            if away_result:
+                self.fields['away'].initial = away_result.team
 
-GameinfoFormSet = modelformset_factory(
-    Gameinfo,
-    form=GamedayGameinfoCreateForm,
-    extra=1,
-    can_delete=True
-)
+
+def get_gameinfo_formset(extra=1):
+    return modelformset_factory(
+        Gameinfo,
+        form=GamedayGameinfoCreateForm,
+        extra=extra,
+        can_delete=True
+    )

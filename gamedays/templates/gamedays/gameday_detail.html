@@ -5,9 +5,14 @@
 <div class="d-flex justify-content-between align-items-center">
     <h1>Spieltag "{{ object.name }}"</h1>
     {% if user.is_staff %}
-    <a href="{% url 'league-gameday-update' pk=object.id%}" class="btn btn-primary">
-        <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Bearbeiten</span>
-    </a>
+    <span>
+        <a href="{% url 'league-gameday-update-details' pk=object.id%}" class="btn btn-primary me-2">
+            <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Spieltag bearbeiten</span>
+        </a>
+        <a href="{% url 'league-gameday-update-games' pk=object.id%}" class="btn btn-primary">
+            <i class="bi bi-table"></i> <span class="d-none d-md-inline">Spiele bearbeiten</span>
+        </a>
+    </span>
     {% endif %}
 </div>
 {% endif %}
