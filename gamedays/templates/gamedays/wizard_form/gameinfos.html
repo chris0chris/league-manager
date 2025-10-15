@@ -45,6 +45,7 @@
                     </td>
                     <td>
                         {{ subform.stage }}
+                        {{ subform.stage.errors }}
                     </td>
                     <td>
                         {{ subform.standing }}
@@ -60,6 +61,7 @@
                         {% for hidden in subform.hidden_fields %}
                         {{ hidden }}
                         {% endfor %}
+                        {{ subform.DELETE.as_hidden }}
                         <button type="button" class="btn btn-sm btn-danger remove-btn"><i class="bi bi-trash"></i></button>
                     </td>
                 </tr>
@@ -96,6 +98,7 @@
             {% for hidden in form.empty_form.hidden_fields %}
             {{ hidden }}
             {% endfor %}
+            {{ form.empty_form.DELETE.as_hidden }}
             <button type="button" class="btn btn-sm btn-danger remove-btn"><i class="bi bi-trash"></i></button>
         </td>
     </tr>
@@ -149,6 +152,7 @@
           const deleteInput = row.querySelector(`input[name$="-DELETE"]`);
           if (deleteInput) {
             deleteInput.checked = true;
+            deleteInput.value = 'on';
             row.style.display = 'none';
           } else {
             row.remove();

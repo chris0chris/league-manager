@@ -198,18 +198,6 @@ class GamedayWizard(SessionWizardView):
             else:
                 formset = GameinfoFormSet(queryset=qs, prefix='games', form_kwargs=form_kwargs)
 
-            for form in formset.forms:
-                try:
-                    form.__init__(data=form.data or None,
-                                  files=form.files or None,
-                                  instance=form.instance,
-                                  group_choices=group_choices,
-                                  field_choices=field_choices)
-                except TypeError:
-                    # fallback: set choices directly
-                    form.fields['group'].choices = group_choices
-                    form.fields['field'].choices = field_choices
-
             formset._gameday_instance = gameday
             formset._group_choices = group_choices
             formset._field_choices = field_choices
@@ -269,7 +257,6 @@ class GamedayWizard(SessionWizardView):
             formset = form
             if formset.is_valid():
                 gameday_form_service = GamedayFormService(formset._gameday_instance)
-                gameday_form_service.delete_all_gameinfos_for_gameday()
                 for current_form in formset:
                     gameday_form_service.handle_gameinfo_and_gameresult(current_form.cleaned_data,
                                                                         current_form.instance)

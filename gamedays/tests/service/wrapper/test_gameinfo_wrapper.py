@@ -52,3 +52,10 @@ class TestGameinfoWrapper(TestCase):
         gameinfo_wrapper.update_gameday(expected_gameday)
         last_game_updated: Gameinfo = Gameinfo.objects.last()
         assert last_game_updated.gameday == expected_gameday
+
+    def test_delete_by_gameday(self):
+        DBSetup().g62_status_empty()
+        last_game: Gameinfo = Gameinfo.objects.last()
+        assert Gameinfo.objects.all().count() > 0
+        GameinfoWrapper.delete_by_gameday(last_game.gameday)
+        assert Gameinfo.objects.all().count() == 0

@@ -15,6 +15,7 @@ class GameinfoForm:
     officials: Team
     scheduled: datetime.time
     standing: str
+    delete: bool
 
     @classmethod
     def from_mapping(cls, data: Mapping[str, Any]) -> "GameinfoForm":
@@ -25,6 +26,7 @@ class GameinfoForm:
             officials=cast(Team, data["officials"]),
             scheduled=cast(datetime.time, data["scheduled"]),
             standing=str(data["standing"]),
+            delete=bool(data["DELETE"]),
         )
 
 
@@ -33,11 +35,14 @@ class GamedayFormService:
         self.gameday = gameday
 
     def handle_gameinfo_and_gameresult(self, gameinfo_form_dict: dict, gameinfo: Gameinfo):
-        gameinfo_form = self._update_gameinfo(gameinfo, gameinfo_form_dict)
+        gameinfo_form = GameinfoForm.from_mapping(gameinfo_form_dict)
+        if gameinfo_form.delete:
+            gameinfo.delete()
+            return
+        self._update_gameinfo(gameinfo, gameinfo_form)
         self._create_gameresult_entries(gameinfo, gameinfo_form)
 
-    def _update_gameinfo(self, gameinfo: Gameinfo, gameinfo_form_dict: dict) -> GameinfoForm:
-        gameinfo_form = GameinfoForm.from_mapping(gameinfo_form_dict)
+    def _update_gameinfo(self, gameinfo: Gameinfo, gameinfo_form: GameinfoForm) -> GameinfoForm:
         gameinfo_wrapper = GameinfoWrapper.from_instance(gameinfo)
         gameinfo_wrapper.update_gameday(self.gameday)
         return gameinfo_form

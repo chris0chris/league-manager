@@ -17,7 +17,7 @@ urlpatterns = [
     path('gamedays/<int:season>/<str:league>', GamedayListView.as_view(), name=LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE),
     path('gameday/<int:pk>', GamedayDetailView.as_view(), name=LEAGUE_GAMEDAY_DETAIL),
     path('gameday/new/', GamedayWizard.as_view(), name='gameday_wizard'),
-    path('gameday/update/<int:pk>/games', GamedayWizard.as_view(), name=LEAGUE_GAMEDAY_UPDATE_GAMES),
     path('gameday/new2/', GamedayCreateView.as_view(), name=LEAGUE_GAMEDAY_CREATE),
+    path('gameday/<int:pk>/update/games', GamedayWizard.as_view(), name=LEAGUE_GAMEDAY_UPDATE_GAMES),
     path('gameday/<int:pk>/update/details', GamedayUpdateView.as_view(), name=LEAGUE_GAMEDAY_UPDATE_DETAILS),
 ]
