@@ -3,7 +3,7 @@ from django import forms
 from django.forms import modelformset_factory
 from django.utils import timezone
 
-from gamedays.models import Season, League, Gameday, Gameinfo, Team
+from gamedays.models import Season, League, Gameday, Gameinfo, Team, Gameresult
 
 SCHEDULE_CHOICES = (
     ("2_1", "2 Teams 1 Feld"),
@@ -101,10 +101,22 @@ class GamedayGameinfoCreateForm(forms.ModelForm):
         widget=autocomplete.ModelSelect2(url='/dal/team'),
         required=True
     )
+    fh_home = forms.IntegerField(required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'aria-label': 'Punkte 1. HZ Heim'})
+    )
+    sh_home = forms.IntegerField(required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'aria-label': 'Punkte 2. HZ Heim'})
+    )
     away = forms.ModelChoiceField(
         queryset=Team.objects.all(),
         widget=autocomplete.ModelSelect2(url='/dal/team'),
         required=True
+    )
+    fh_away = forms.IntegerField(required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'aria-label': 'Punkte 1. HZ Gast'})
+    )
+    sh_away = forms.IntegerField(required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'aria-label': 'Punkte 2. HZ Gast'})
     )
     field = forms.ChoiceField(choices=(), label='Field', required=True, initial='',
                               widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: auto'}))
@@ -119,12 +131,19 @@ class GamedayGameinfoCreateForm(forms.ModelForm):
 
     class Meta:
         model = Gameinfo
-        fields = ['scheduled', 'field', 'officials', 'standing', 'stage']
+        fields = ['scheduled', 'field', 'officials', 'standing', 'stage', 'status', 'gameStarted', 'gameHalftime',
+                  'gameFinished']
         widgets = {
             'scheduled': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'officials': autocomplete.ModelSelect2(
                 url='/dal/team',
             ),
+            'status': forms.Select(
+                choices=(('Geplant', 'Geplant'), ('1. Halbzeit', '1. Halbzeit'), ('2. Halbzeit', '2. Halbzeit'),
+                         ('beendet', 'Beendet')), attrs={'class': 'form-control', 'style': 'width: auto'}),
+            'gameStarted': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: auto', 'type': 'time'}),
+            'gameHalftime': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: auto', 'type': 'time'}),
+            'gameFinished': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: auto', 'type': 'time'}),
         }
 
     def __init__(self, *args, group_choices=None, field_choices=None, **kwargs):
@@ -134,16 +153,22 @@ class GamedayGameinfoCreateForm(forms.ModelForm):
             self.fields['standing'].choices = placeholder + list(group_choices) if len(group_choices) > 1 else list(
                 group_choices)
         if field_choices is not None:
+            self.fields['field'].initial = str(self.fields['field'].initial)
             self.fields['field'].choices = placeholder + list(field_choices) if len(field_choices) > 1 else list(
                 field_choices)
 
         if self.instance.pk:
-            home_result = self.instance.gameresult_set.filter(isHome=True).first()
-            away_result = self.instance.gameresult_set.filter(isHome=False).first()
+            home_result: Gameresult = self.instance.gameresult_set.filter(isHome=True).first()
+            away_result: Gameresult = self.instance.gameresult_set.filter(isHome=False).first()
+            self.fields['field'].initial = str(self.instance.field)
             if home_result:
                 self.fields['home'].initial = home_result.team
+                self.fields['fh_home'].initial = home_result.fh
+                self.fields['sh_home'].initial = home_result.sh
             if away_result:
                 self.fields['away'].initial = away_result.team
+                self.fields['fh_away'].initial = away_result.fh
+                self.fields['sh_away'].initial = away_result.sh
 
 
 def get_gameinfo_formset(extra=1):

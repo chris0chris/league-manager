@@ -14,8 +14,15 @@ class GameinfoForm:
     field: str
     officials: Team
     scheduled: datetime.time
+    game_started: datetime.time | None
+    game_halftime: datetime.time | None
+    game_finished: datetime.time | None
     standing: str
     delete: bool
+    fh_home: int | None
+    sh_home: int | None
+    fh_away: int | None
+    sh_away: int | None
 
     @classmethod
     def from_mapping(cls, data: Mapping[str, Any]) -> "GameinfoForm":
@@ -25,9 +32,23 @@ class GameinfoForm:
             field=str(data["field"]),
             officials=cast(Team, data["officials"]),
             scheduled=cast(datetime.time, data["scheduled"]),
+            game_started=cast(datetime.time, data["gameStarted"]),
+            game_halftime=cast(datetime.time, data["gameHalftime"]),
+            game_finished=cast(datetime.time, data["gameFinished"]),
             standing=str(data["standing"]),
             delete=bool(data["DELETE"]),
+            fh_home=cls._to_int_or_none(data["fh_home"]),
+            sh_home=cls._to_int_or_none(data["sh_home"]),
+            fh_away=cls._to_int_or_none(data["fh_away"]),
+            sh_away=cls._to_int_or_none(data["sh_away"]),
         )
+
+    @classmethod
+    def _to_int_or_none(cls, value):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
 
 
 class GamedayFormService:
@@ -50,8 +71,15 @@ class GamedayFormService:
     # noinspection PyMethodMayBeStatic
     def _create_gameresult_entries(self, gameinfo: Gameinfo, gameinfo_form: GameinfoForm) -> None:
         gameresult_wrapper = GameresultWrapper(gameinfo)
-        gameresult_wrapper.create(team=gameinfo_form.home, is_home=True)
-        gameresult_wrapper.create(team=gameinfo_form.away, is_home=False)
+        gameresult_wrapper.create(team=gameinfo_form.home, fh=gameinfo_form.fh_home, sh=gameinfo_form.sh_home, pa=self._calc_points_against(gameinfo_form.fh_away, gameinfo_form.sh_away), is_home=True)
+        gameresult_wrapper.create(team=gameinfo_form.away, fh=gameinfo_form.fh_away, sh=gameinfo_form.sh_away, pa=self._calc_points_against(gameinfo_form.fh_home, gameinfo_form.sh_home), is_home=False)
+
+    # noinspection PyMethodMayBeStatic
+    @staticmethod
+    def _calc_points_against(value1: int | None, value2: int | None) -> int | None:
+        if value1 is None or value2 is None:
+            return None
+        return value1 + value2
 
     def delete_all_gameinfos_for_gameday(self):
         GameinfoWrapper.delete_by_gameday(self.gameday)

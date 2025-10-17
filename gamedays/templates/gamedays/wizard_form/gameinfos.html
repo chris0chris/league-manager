@@ -21,48 +21,95 @@
                     <th>Runde</th>
                     <th>Gruppe</th>
                     <th>Schiri-Team</th>
+                    <th>Status</th>
+                    <th>Start</th>
+                    <th>Halbzeit</th>
+                    <th>Ende</th>
                     <th></th>
                 </tr>
                 </thead>
                 <tbody id="formset-rows">
                 {% for subform in form %}
                 <tr class="form-row" data-form-index="{{ forloop.counter0 }}">
-                    <td>
+                    <td class="align-top">
                         {{ subform.scheduled }}
                         {{ subform.scheduled.errors }}
                     </td>
-                    <td>
+                    <td class="align-top">
                         {{ subform.field }}
                         {{ subform.field.errors }}
                     </td>
-                    <td>
-                        {{ subform.home }}
-                        {{ subform.home.errors }}
+                    <td class="align-top">
+                        <div class="row">
+                            {{ subform.home }}
+                            {{ subform.home.errors }}
+                        </div>
+                        <div class="row">
+                            <div class="input-group mb-1 mt-1">
+                                <span class="input-group-text">1. HZ</span>
+                                {{ subform.fh_home }}
+                                {{ subform.fh_home.errors }}
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">2. HZ</span>
+                                {{ subform.sh_home }}
+                                {{ subform.sh_home.errors }}
+                            </div>
+                        </div>
                     </td>
-                    <td>
-                        {{ subform.away }}
-                        {{ subform.away.errors }}
+                    <td class="align-top">
+                        <div class="row">
+                            {{ subform.away }}
+                            {{ subform.away.errors }}
+                        </div>
+                        <div class="row">
+                            <div class="input-group mb-1 mt-1">
+                                <span class="input-group-text">1. HZ</span>
+                                {{ subform.fh_away }}
+                                {{ subform.fh_away.errors }}
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">2. HZ</span>
+                                {{ subform.sh_away }}
+                                {{ subform.sh_away.errors }}
+                            </div>
+                        </div>
                     </td>
-                    <td>
+                    <td class="align-top">
                         {{ subform.stage }}
                         {{ subform.stage.errors }}
                     </td>
-                    <td>
+                    <td class="align-top">
                         {{ subform.standing }}
                         {{ subform.standing.errors }}
                     </td>
-                    <td>
+                    <td class="align-top">
                         {{ subform.officials }}
                         {{ subform.officials.errors }}
                     </td>
-
-                    {# hidden inputs like id and DELETE (if any) #}
-                    <td>
+                    <td class="align-top">
+                        {{ subform.status }}
+                        {{ subform.status.errors }}
+                    </td>
+                    <td class="align-top">
+                        {{ subform.gameStarted }}
+                        {{ subform.gameStarted.errors }}
+                    </td>
+                    <td class="align-top">
+                        {{ subform.gameHalftime }}
+                        {{ subform.gameHalftime.errors }}
+                    </td>
+                    <td class="align-top">
+                        {{ subform.gameFinished }}
+                        {{ subform.gameFinished.errors }}
+                    </td>
+                    <td class="align-top">
                         {% for hidden in subform.hidden_fields %}
                         {{ hidden }}
                         {% endfor %}
                         {{ subform.DELETE.as_hidden }}
-                        <button type="button" class="btn btn-sm btn-danger remove-btn"><i class="bi bi-trash"></i></button>
+                        <button type="button" class="btn btn-sm btn-danger remove-btn"><i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
                 {% empty %}
@@ -87,14 +134,46 @@
 
 <template id="empty-form-template">
     <tr class="form-row" data-form-index="__prefix__">
-        <td>{{ form.empty_form.scheduled }}</td>
-        <td>{{ form.empty_form.field }}</td>
-        <td>{{ form.empty_form.home }}</td>
-        <td>{{ form.empty_form.away }}</td>
-        <td>{{ form.empty_form.stage }}</td>
-        <td>{{ form.empty_form.standing }}</td>
-        <td>{{ form.empty_form.officials }}</td>
-        <td>
+        <td class="align-top">{{ form.empty_form.scheduled }}</td>
+        <td class="align-top">{{ form.empty_form.field }}</td>
+        <td class="align-top">
+            <div class="row">
+                {{ form.empty_form.home }}
+            </div>
+            <div class="row">
+                <div class="input-group mb-1 mt-1">
+                    <span class="input-group-text">1. HZ</span>
+                    {{ form.empty_form.fh_home }}
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text">2. HZ</span>
+                    {{ form.empty_form.sh_home }}
+                </div>
+            </div>
+        </td>
+        <td class="align-top">
+            <div class="row">
+                {{ form.empty_form.away }}
+            </div>
+            <div class="row">
+                <div class="input-group mb-1 mt-1">
+                    <span class="input-group-text">1. HZ</span>
+                    {{ form.empty_form.fh_away }}
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text">2. HZ</span>
+                    {{ form.empty_form.sh_away }}
+                </div>
+            </div>
+        </td>
+        <td class="align-top">{{ form.empty_form.stage }}</td>
+        <td class="align-top">{{ form.empty_form.standing }}</td>
+        <td class="align-top">{{ form.empty_form.officials }}</td>
+        <td class="align-top">{{ form.empty_form.status }}</td>
+        <td class="align-top">{{ form.empty_form.gameStarted }}</td>
+        <td class="align-top">{{ form.empty_form.gameHalftime }}</td>
+        <td class="align-top">{{ form.empty_form.gameFinished }}</td>
+        <td class="align-top">
             {% for hidden in form.empty_form.hidden_fields %}
             {{ hidden }}
             {% endfor %}

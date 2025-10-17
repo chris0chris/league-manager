@@ -258,7 +258,8 @@ class GamedayWizard(SessionWizardView):
             if formset.is_valid():
                 gameday_form_service = GamedayFormService(formset._gameday_instance)
                 for current_form in formset:
-                    gameday_form_service.handle_gameinfo_and_gameresult(current_form.cleaned_data,
+                    if current_form.has_changed():
+                        gameday_form_service.handle_gameinfo_and_gameresult(current_form.cleaned_data,
                                                                         current_form.instance)
                 self._extra()['gameinfo_saved'] = True
             return super().process_step(formset)
