@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import QuerySet, CASCADE
 from django.utils import timezone
 
 
@@ -146,6 +146,7 @@ class Gameinfo(models.Model):
     gameFinished = models.TimeField(null=True, blank=True)
     stage = models.CharField(max_length=100)
     standing = models.CharField(max_length=100)
+    league_group = models.ForeignKey('league_table.LeagueGroup', on_delete=CASCADE, null=True, default=None)
     in_possession = models.CharField(max_length=100, blank=True, null=True, default=None)
 
     objects: QuerySet["Gameinfo"] = models.Manager()

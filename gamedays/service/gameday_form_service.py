@@ -66,6 +66,7 @@ class GamedayFormService:
     def _update_gameinfo(self, gameinfo: Gameinfo, gameinfo_form: GameinfoForm) -> GameinfoForm:
         gameinfo_wrapper = GameinfoWrapper.from_instance(gameinfo)
         gameinfo_wrapper.update_gameday(self.gameday)
+        gameinfo_wrapper.update_standing(gameinfo_form.standing)
         return gameinfo_form
 
     # noinspection PyMethodMayBeStatic

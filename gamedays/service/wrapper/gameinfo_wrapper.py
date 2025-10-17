@@ -4,6 +4,7 @@ from typing import Optional
 from django.utils import timezone
 
 from gamedays.models import Gameinfo
+from league_table.models import LeagueGroup
 
 STATUS_HALFTIME = "2. Halbzeit"
 STATUS_FIRST_HALF = "1. Halbzeit"
@@ -58,3 +59,13 @@ class GameinfoWrapper(object):
     @classmethod
     def delete_by_gameday(cls, gameday):
         Gameinfo.objects.filter(gameday=gameday).delete()
+
+    def update_standing(self, standing: str):
+        try:
+            group_id = int(standing)
+            group = LeagueGroup.objects.get(pk=group_id)
+            self.gameinfo.standing = group.name
+            self.gameinfo.league_group = group
+            self.gameinfo.save()
+        except (TypeError, ValueError, LeagueGroup.DoesNotExist):
+            return

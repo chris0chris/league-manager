@@ -5,6 +5,7 @@ from django.test import TestCase
 from gamedays.models import Gameinfo
 from gamedays.service.wrapper.gameinfo_wrapper import GameinfoWrapper
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from gamedays.tests.setup_factories.factories import GameinfoFactory
 
 
 class TestGameinfoWrapper(TestCase):
@@ -59,3 +60,23 @@ class TestGameinfoWrapper(TestCase):
         assert Gameinfo.objects.all().count() > 0
         GameinfoWrapper.delete_by_gameday(last_game.gameday)
         assert Gameinfo.objects.all().count() == 0
+
+    def test_update_standing_with_group_string(self):
+        gameinfo = GameinfoFactory.create()
+        assert gameinfo.league_group is None
+        assert gameinfo.standing == ''
+        gameinfo_wrapper = GameinfoWrapper(gameinfo)
+        gameinfo_wrapper.update_standing('Gruppe 1')
+        gameinfo.refresh_from_db()
+        assert gameinfo.standing == ''
+        assert gameinfo.league_group is None
+
+    def test_update_standing_with_not_existent_group_id(self):
+        gameinfo = GameinfoFactory.create()
+        assert gameinfo.league_group is None
+        assert gameinfo.standing == ''
+        gameinfo_wrapper = GameinfoWrapper(gameinfo)
+        gameinfo_wrapper.update_standing('0')
+        gameinfo.refresh_from_db()
+        assert gameinfo.standing == ''
+        assert gameinfo.league_group is None
