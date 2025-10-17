@@ -11,6 +11,7 @@ from django.views.generic import DetailView, UpdateView, CreateView
 from formtools.wizard.views import SessionWizardView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
+from league_table.models import LeagueGroup
 from .forms import GamedayCreateForm, GamedayUpdateForm, GamedayGaminfoFieldsAndGroupsForm, \
     GamedayGameinfoCreateForm, get_gameinfo_formset
 from .models import Gameday, Gameinfo
@@ -176,17 +177,30 @@ class GamedayWizard(SessionWizardView):
         return self.storage.extra_data
 
     def get_form(self, step=None, data=None, files=None):
+        form = super().get_form(step, data, files)
         step = step or self.steps.current
-        if step == 'gameinfos':
-            extra = self._extra()
+        extra = self._extra()
+        gameday_id = extra.get('gameday_id')
+        if gameday_id is None:
             gameday_id = self.kwargs.get('pk')
             extra.update({'gameday_id': gameday_id})
-            gameday = Gameday.objects.get(pk=gameday_id)
+        gameday = Gameday.objects.get(pk=gameday_id)
+        if step == FIELD_GROUP_STEP:
+            groups = gameday.season.groups_season.filter(season=gameday.season, league=gameday.league)
+            form.fields['group_names'].choices = [(g.id, g.name) for g in groups]
+        if step == 'gameinfos':
+            extra = self._extra()
             field_group_step = extra.get(FIELD_GROUP_STEP) or {}
-            number_groups = int(field_group_step.get('number_groups', 2))
-            number_fields = int(field_group_step.get('number_fields', 2))
+            number_fields = int(field_group_step.get('number_fields', 1))
+            number_groups = field_group_step.get('number_groups')
+            group_names = field_group_step.get('group_names')
+            if number_groups:
+                number_groups = int(number_groups)
+                group_choices = [(f'Gruppe {n}', f'Gruppe {n}') for n in range(1, number_groups + 1)]
+            else:
+                groups = LeagueGroup.objects.filter(id__in=group_names)
+                group_choices = [(f'{currentGroup.pk}', f'{currentGroup.name}') for currentGroup in groups]
 
-            group_choices = [(f'Gruppe {n}', f'Gruppe {n}') for n in range(1, number_groups + 1)]
             field_choices = [(f'{n}', f'Feld {n}') for n in range(1, number_fields + 1)]
 
             form_kwargs = {'group_choices': group_choices, 'field_choices': field_choices}
@@ -203,18 +217,7 @@ class GamedayWizard(SessionWizardView):
             formset._field_choices = field_choices
             return formset
 
-        return super().get_form(step, data, files)
-
-    def get_form_initial(self, step):
-        extra = self._extra()
-        if step == FIELD_GROUP_STEP:
-            gameday_id = extra.get('gameday_id')
-            if gameday_id:
-                gameday = Gameday.objects.filter(pk=gameday_id).first()
-                if gameday:
-                    return {'number_groups': getattr(gameday, 'number_groups', 0),
-                            'number_fields': getattr(gameday, 'number_fields', 0)}
-        return super().get_form_initial(step)
+        return form
 
     def get_form_instance(self, step):
         if not hasattr(self, '_gameday_instance'):

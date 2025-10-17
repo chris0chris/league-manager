@@ -91,8 +91,11 @@ class GamedayUpdateForm(forms.ModelForm):
 
 
 class GamedayGaminfoFieldsAndGroupsForm(forms.Form):
-    number_groups = forms.IntegerField(label="Anzahl der Gruppen")
-    number_fields = forms.IntegerField(label="Anzahl der Felder")
+    number_groups = forms.IntegerField(label="Anzahl der Gruppen", required=False, widget=forms.NumberInput(attrs={'class': 'form-control', 'required': True}))
+    group_names = forms.MultipleChoiceField(choices=(), label="Gruppenauswahl", required=False,
+                                            widget=forms.SelectMultiple(
+                                                attrs={'class': 'form-control', 'required': True}))
+    number_fields = forms.IntegerField(label="Anzahl der Felder", required=True, widget=forms.NumberInput(attrs={'class': 'form-control', 'required': True}))
 
 
 class GamedayGameinfoCreateForm(forms.ModelForm):
@@ -102,22 +105,26 @@ class GamedayGameinfoCreateForm(forms.ModelForm):
         required=True
     )
     fh_home = forms.IntegerField(required=False,
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'aria-label': 'Punkte 1. HZ Heim'})
-    )
+                                 widget=forms.NumberInput(
+                                     attrs={'class': 'form-control', 'aria-label': 'Punkte 1. HZ Heim'})
+                                 )
     sh_home = forms.IntegerField(required=False,
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'aria-label': 'Punkte 2. HZ Heim'})
-    )
+                                 widget=forms.NumberInput(
+                                     attrs={'class': 'form-control', 'aria-label': 'Punkte 2. HZ Heim'})
+                                 )
     away = forms.ModelChoiceField(
         queryset=Team.objects.all(),
         widget=autocomplete.ModelSelect2(url='/dal/team'),
         required=True
     )
     fh_away = forms.IntegerField(required=False,
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'aria-label': 'Punkte 1. HZ Gast'})
-    )
+                                 widget=forms.NumberInput(
+                                     attrs={'class': 'form-control', 'aria-label': 'Punkte 1. HZ Gast'})
+                                 )
     sh_away = forms.IntegerField(required=False,
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'aria-label': 'Punkte 2. HZ Gast'})
-    )
+                                 widget=forms.NumberInput(
+                                     attrs={'class': 'form-control', 'aria-label': 'Punkte 2. HZ Gast'})
+                                 )
     field = forms.ChoiceField(choices=(), label='Field', required=True, initial='',
                               widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: auto'}))
     standing = forms.ChoiceField(choices=(), required=True, initial='',
