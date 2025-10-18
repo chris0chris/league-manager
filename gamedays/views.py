@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Max
 from django.db.models.functions import ExtractYear
-from django.forms import Form
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View
@@ -13,7 +12,7 @@ from formtools.wizard.views import SessionWizardView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
 from league_table.models import LeagueGroup
-from .forms import GamedayCreateForm, GamedayUpdateForm, GamedayGaminfoFieldsAndGroupsForm, \
+from .forms import GamedayForm, GamedayGaminfoFieldsAndGroupsForm, \
     GameinfoForm, get_gameinfo_formset, get_gameday_format_formset, GamedayFormatForm
 from .models import Gameday, Gameinfo
 from .service.gameday_form_service import GamedayFormService
@@ -93,7 +92,7 @@ class GamedayDetailView(DetailView):
 
 
 class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    form_class = GamedayCreateForm
+    form_class = GamedayForm
     template_name = 'gamedays/gameday_form.html'
     model = Gameday
     pk = None
@@ -110,37 +109,12 @@ class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 
 class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    form_class = GamedayUpdateForm
+    form_class = GamedayForm
     template_name = 'gamedays/gameday_form.html'
     model = Gameday
 
-    def form_valid(self, form: Form):
-        groups = [group_list for group_list in [
-            self._format_array(form.cleaned_data['group1']),
-            self._format_array(form.cleaned_data['group2']),
-            self._format_array(form.cleaned_data['group3']),
-            self._format_array(form.cleaned_data['group4'])] if group_list != ['']]
-
-        try:
-            sc = ScheduleCreator(
-                schedule=Schedule(gameday_format=self.object.format, groups=groups),
-                gameday=self.object)
-            sc.create()
-        except FileNotFoundError:
-            form.add_error(None,
-                           'Spielplan konnte nicht erstellt werden, '
-                           'da es das Format als Spielplan nicht gibt: "{0}"'.format(self.object.format))
-            return super(GamedayUpdateView, self).form_invalid(form)
-        except ScheduleTeamMismatchError:
-            form.add_error(None,
-                           'Spielplan konnte nicht erstellt werden, '
-                           'da die Kombination #Teams und #Format nicht zum Spielplan passen')
-            return super(GamedayUpdateView, self).form_invalid(form)
-        except TeamNotExistent as err:
-            form.add_error(None,
-                           f'Spielplan konnte nicht erstellt werden, da das Team "{err}" nicht gefunden wurde.')
-            return super(GamedayUpdateView, self).form_invalid(form)
-
+    def form_valid(self, form):
+        form.author = self.request.user
         return super(GamedayUpdateView, self).form_valid(form)
 
     def get_success_url(self):
@@ -148,10 +122,6 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         return self.request.user.is_staff
-
-    # noinspection PyMethodMayBeStatic
-    def _format_array(self, data):
-        return [value.strip() for value in data.split(',')]
 
 FIELD_GROUP_STEP = 'field-group-step'
 GAMEDAY_FORMAT_STEP = 'gameday-format'

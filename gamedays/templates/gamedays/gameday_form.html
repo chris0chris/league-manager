@@ -5,11 +5,19 @@
     <form method="POST">
         {% csrf_token %}
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Neuer Spieltag</legend>
+            {% if object %}
+            <legend class="border-bottom mb-3">Spieltag aktualisieren</legend>
+            {% else %}
+            <legend class="border-bottom mb-3">Spieltag erstellen</legend>
+            {% endif %}
             {{ form|crispy }}
         </fieldset>
         <div class="form-group">
-            <button class="btn btn-outline-info" type="submit">Erstellen</button>
+            {% if object %}
+            <button class="btn btn-primary w-100" type="submit">Aktualisieren</button>
+            {% else %}
+            <button class="btn btn-primary w-100" type="submit">Erstellen</button>
+            {% endif %}
         </div>
     </form>
 </div>

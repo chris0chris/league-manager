@@ -34,62 +34,37 @@ SCHEDULE_CHOICES = (
 )
 
 
-class GamedayCreateForm(forms.ModelForm):
+class GamedayForm(forms.ModelForm):
     name = forms.CharField(max_length=100)
     season = forms.ModelChoiceField(queryset=Season.objects.all())
     league = forms.ModelChoiceField(queryset=League.objects.all(), empty_label='Bitte auswählen')
+    address = forms.CharField(
+        label='Adresse',
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
 
     class Meta:
         model = Gameday
-        fields = ['name', 'season', 'league', 'date', 'start']
+        fields = ['name', 'season', 'league', 'date', 'start', 'address']
         widgets = {
-            'date': forms.DateInput(format='%d.%m.%Y',
+            'date': forms.DateInput(format='%Y-%m-%d',
                                     attrs={'type': 'date'}
                                     ),
-            'start': forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'value': '10:00'})
+            'start': forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'value': '10:00'}),
         }
 
     def __init__(self, *args, **kwargs):
-        super(GamedayCreateForm, self).__init__(*args, **kwargs)
+        super(GamedayForm, self).__init__(*args, **kwargs)
         last_season = Season.objects.last()
         if last_season:
             self.fields['season'].initial = last_season.id
 
     def save(self, user=None):
-        gameday = super(GamedayCreateForm, self).save(commit=False)
-        # if self.author:
-        #     gameday.author = self.author
+        gameday = super(GamedayForm, self).save(commit=False)
         if self.data.get('format') is None:
             gameday.format = 'INITIAL_EMPTY'
         gameday.save()
         return gameday
-
-
-class GamedayUpdateForm(forms.ModelForm):
-    name = forms.CharField(max_length=100, initial=f'test {timezone.now()}')
-    date = forms.DateField(widget=forms.DateInput(
-        format='%Y-%m-%d',
-        attrs={'type': 'date'},
-    ))
-    start = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}))
-    format = forms.ChoiceField(choices=SCHEDULE_CHOICES)
-    group1 = forms.CharField(max_length=1000, label='Gruppe 1', help_text='Bitte Teams mit Komma separieren')
-    group2 = forms.CharField(max_length=1000, label='Gruppe 2', required=False,
-                             help_text='Bitte Teams mit Komma separieren')
-    group3 = forms.CharField(max_length=1000, label='Gruppe 3', required=False,
-                             help_text='Bitte Teams mit Komma separieren')
-    group4 = forms.CharField(max_length=1000, label='Gruppe 4', required=False,
-                             help_text='Bitte Teams mit Komma separieren')
-    address = forms.CharField(label='Adresse')
-
-    class Meta:
-        model = Gameday
-        fields = ['name', 'date', 'start', 'format', 'address', 'group1', 'group2', 'group3', 'group4']
-
-    def __init__(self, *args, **kwargs):
-        super(GamedayUpdateForm, self).__init__(*args, **kwargs)
-        if 'instance' in kwargs:
-            self.fields['date'].initial = kwargs['instance'].date.strftime('%Y-%m-%d')
 
 
 class GamedayGaminfoFieldsAndGroupsForm(forms.Form):
@@ -108,8 +83,10 @@ class GamedayFormatForm(forms.Form):
     group = forms.ModelMultipleChoiceField(
         label='Gruppe',
         queryset=Team.objects.all(),
-        widget=autocomplete.ModelSelect2Multiple(url='/dal/team', attrs={'class': 'form-control', 'required': True, 'style': 'width:auto'}),
-        required=False
+        required=False,
+        widget=autocomplete.ModelSelect2Multiple(url='/dal/team',
+                                                 attrs={'class': 'form-control', 'required': True,
+                                                        'style': 'width:auto'}),
     )
 
 
@@ -189,7 +166,8 @@ class GameinfoForm(forms.ModelForm):
         if self.instance.pk:
             home_result: Gameresult = self.instance.gameresult_set.filter(isHome=True).first()
             away_result: Gameresult = self.instance.gameresult_set.filter(isHome=False).first()
-            self.fields['standing'].initial = self.instance.league_group_id if self.instance.league_group_id else self.instance.standing
+            self.fields[
+                'standing'].initial = self.instance.league_group_id if self.instance.league_group_id else self.instance.standing
             self.fields['field'].initial = str(self.instance.field)
             if home_result:
                 self.fields['home'].initial = home_result.team
