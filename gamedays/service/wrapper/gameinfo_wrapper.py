@@ -66,6 +66,7 @@ class GameinfoWrapper(object):
             group = LeagueGroup.objects.get(pk=group_id)
             self.gameinfo.standing = group.name
             self.gameinfo.league_group = group
-            self.gameinfo.save()
         except (TypeError, ValueError, LeagueGroup.DoesNotExist):
-            return
+            self.gameinfo.standing = standing
+            self.gameinfo.league_group = None
+        self.gameinfo.save()

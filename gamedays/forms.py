@@ -160,7 +160,7 @@ class GameinfoForm(forms.ModelForm):
 
     class Meta:
         model = Gameinfo
-        fields = ['scheduled', 'field', 'officials', 'standing', 'stage', 'status', 'gameStarted', 'gameHalftime',
+        fields = ['scheduled', 'field', 'officials', 'stage', 'status', 'gameStarted', 'gameHalftime',
                   'gameFinished']
         widgets = {
             'scheduled': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
@@ -189,6 +189,7 @@ class GameinfoForm(forms.ModelForm):
         if self.instance.pk:
             home_result: Gameresult = self.instance.gameresult_set.filter(isHome=True).first()
             away_result: Gameresult = self.instance.gameresult_set.filter(isHome=False).first()
+            self.fields['standing'].initial = self.instance.league_group_id if self.instance.league_group_id else self.instance.standing
             self.fields['field'].initial = str(self.instance.field)
             if home_result:
                 self.fields['home'].initial = home_result.team
