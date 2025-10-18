@@ -1,11 +1,13 @@
 from dal import autocomplete
 from django import forms
-from django.forms import modelformset_factory
+from django.forms import modelformset_factory, formset_factory
 from django.utils import timezone
 
 from gamedays.models import Season, League, Gameday, Gameinfo, Team, Gameresult
 
 SCHEDULE_CHOICES = (
+    ("", "Bitte auswählen"),
+    ("CUSTOM", "Selber anlegen"),
     ("2_1", "2 Teams 1 Feld"),
     ("3_1", "3 Teams 1 Feld"),
     ("3_hinrunde_1", "3 Teams 1 Feld (nur Hinrunde)"),
@@ -91,11 +93,31 @@ class GamedayUpdateForm(forms.ModelForm):
 
 
 class GamedayGaminfoFieldsAndGroupsForm(forms.Form):
-    number_groups = forms.IntegerField(label="Anzahl der Gruppen", required=False, widget=forms.NumberInput(attrs={'class': 'form-control', 'required': True}))
+    number_groups = forms.IntegerField(label="Anzahl der Gruppen", required=False,
+                                       widget=forms.NumberInput(attrs={'class': 'form-control', 'required': True}))
     group_names = forms.MultipleChoiceField(choices=(), label="Gruppenauswahl", required=False,
                                             widget=forms.SelectMultiple(
                                                 attrs={'class': 'form-control', 'required': True}))
-    number_fields = forms.IntegerField(label="Anzahl der Felder", required=True, widget=forms.NumberInput(attrs={'class': 'form-control', 'required': True}))
+    number_fields = forms.IntegerField(label="Anzahl der Felder", required=True,
+                                       widget=forms.NumberInput(attrs={'class': 'form-control', 'required': True}))
+    format = forms.ChoiceField(choices=SCHEDULE_CHOICES, label='Spieltagsformat',
+                               widget=forms.Select(attrs={'class': 'form-control', 'required': True}))
+
+
+class GamedayFormatForm(forms.Form):
+    group = forms.ModelMultipleChoiceField(
+        label='Gruppe',
+        queryset=Team.objects.all(),
+        widget=autocomplete.ModelSelect2Multiple(url='/dal/team', attrs={'class': 'form-control', 'required': True, 'style': 'width:auto'}),
+        required=False
+    )
+
+
+def get_gameday_format_formset(extra=1):
+    return formset_factory(
+        form=GamedayFormatForm,
+        extra=extra,
+    )
 
 
 class GamedayGameinfoCreateForm(forms.ModelForm):

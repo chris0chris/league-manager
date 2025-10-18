@@ -13,7 +13,7 @@ from formtools.wizard.views import SessionWizardView
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
 from league_table.models import LeagueGroup
 from .forms import GamedayCreateForm, GamedayUpdateForm, GamedayGaminfoFieldsAndGroupsForm, \
-    GamedayGameinfoCreateForm, get_gameinfo_formset
+    GamedayGameinfoCreateForm, get_gameinfo_formset, get_gameday_format_formset, GamedayFormatForm
 from .models import Gameday, Gameinfo
 from .service.gameday_form_service import GamedayFormService
 from .service.gameday_service import GamedayService
@@ -153,15 +153,19 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return [value.strip() for value in data.split(',')]
 
 FIELD_GROUP_STEP = 'field-group-step'
+GAMEDAY_FORMAT_STEP = 'gameday-format'
+GAMEINFO_STEP = 'gameinfo-step'
 
 FORMS = [
     (FIELD_GROUP_STEP, GamedayGaminfoFieldsAndGroupsForm),
-    ('gameinfos', GamedayGameinfoCreateForm),
+    (GAMEDAY_FORMAT_STEP, GamedayFormatForm),
+    (GAMEINFO_STEP, GamedayGameinfoCreateForm),
 ]
 
 TEMPLATES = {
+    GAMEDAY_FORMAT_STEP: 'gamedays/wizard_form/gamedays_format.html',
     FIELD_GROUP_STEP: 'gamedays/wizard_form/fields_groups.html',
-    'gameinfos': 'gamedays/wizard_form/gameinfos.html',
+    GAMEINFO_STEP: 'gamedays/wizard_form/gameinfos.html',
 }
 
 
@@ -176,9 +180,23 @@ class GamedayWizard(SessionWizardView):
             self.storage.extra_data = {}
         return self.storage.extra_data
 
-    def get_form(self, step=None, data=None, files=None):
-        form = super().get_form(step, data, files)
+    def get_next_step(self, step=None):
         step = step or self.steps.current
+        next_step = super().get_next_step(step)
+
+        if step == FIELD_GROUP_STEP:
+            extra = self._extra()
+            field_group_step = extra.get(FIELD_GROUP_STEP) or {}
+            format_value = field_group_step.get('format')
+
+            if format_value == "CUSTOM":
+                return GAMEINFO_STEP
+
+        return next_step
+
+    def get_form(self, step=None, data=None, files=None):
+        step = step or self.steps.current
+        form = super().get_form(step, data, files)
         extra = self._extra()
         gameday_id = extra.get('gameday_id')
         if gameday_id is None:
@@ -188,7 +206,14 @@ class GamedayWizard(SessionWizardView):
         if step == FIELD_GROUP_STEP:
             groups = gameday.season.groups_season.filter(season=gameday.season, league=gameday.league)
             form.fields['group_names'].choices = [(g.id, g.name) for g in groups]
-        if step == 'gameinfos':
+        if step == GAMEDAY_FORMAT_STEP:
+            extra_forms = int(extra.get(FIELD_GROUP_STEP).get('number_groups'))
+            GamedayFormatFormSet = get_gameday_format_formset(extra=extra_forms)
+            if data is not None:
+                form = GamedayFormatFormSet(data, prefix='gameday_format')
+            else:
+                form = GamedayFormatFormSet(prefix='gameday_format')
+        if step == GAMEINFO_STEP:
             extra = self._extra()
             field_group_step = extra.get(FIELD_GROUP_STEP) or {}
             number_fields = int(field_group_step.get('number_fields', 1))
@@ -208,15 +233,11 @@ class GamedayWizard(SessionWizardView):
             extra_forms = 1 if not qs.exists() else 0
             GameinfoFormSet = get_gameinfo_formset(extra=extra_forms)
             if data is not None:
-                formset = GameinfoFormSet(data, queryset=qs, prefix='games', form_kwargs=form_kwargs)
+                form = GameinfoFormSet(data, queryset=qs, prefix='games', form_kwargs=form_kwargs)
             else:
-                formset = GameinfoFormSet(queryset=qs, prefix='games', form_kwargs=form_kwargs)
+                form = GameinfoFormSet(queryset=qs, prefix='games', form_kwargs=form_kwargs)
 
-            formset._gameday_instance = gameday
-            formset._group_choices = group_choices
-            formset._field_choices = field_choices
-            return formset
-
+        form._gameday_instance = gameday
         return form
 
     def get_form_instance(self, step):
@@ -256,7 +277,32 @@ class GamedayWizard(SessionWizardView):
                 gameday.save()
             return super().process_step(form)
 
-        if step == 'gameinfos':
+        if step == GAMEDAY_FORMAT_STEP and form.is_valid():
+            # TODO die Entität übergeben und nicht den Namen
+            grouped_teams = [
+                [team.name for team in f.cleaned_data['group']]
+                for f in form
+                if f.cleaned_data.get('group')
+            ]
+            field_group_step = self._extra().get(FIELD_GROUP_STEP) or {}
+            format = field_group_step.get('format', '6_2')
+            try:
+                sc = ScheduleCreator(
+                    schedule=Schedule(gameday_format=format, groups=grouped_teams),
+                    gameday=form._gameday_instance
+                )
+                sc.create()
+            except FileNotFoundError:
+                form.add_error(None, 'Spielplan konnte nicht erstellt werden, '
+                                     f'da es das Format "{form.cleaned_data["format"]}" nicht gibt.')
+            except ScheduleTeamMismatchError:
+                form.add_error(None, 'Spielplan konnte nicht erstellt werden, '
+                                     'da die Kombination aus #Teams und #Format nicht passt.')
+            except TeamNotExistent as err:
+                form.add_error(None, f'Spielplan konnte nicht erstellt werden, '
+                                     f'da das Team "{err}" nicht gefunden wurde.')
+
+        if step == GAMEINFO_STEP:
             formset = form
             if formset.is_valid():
                 gameday_form_service = GamedayFormService(formset._gameday_instance)

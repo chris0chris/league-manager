@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="content-section">
+    <form method="POST">
+        {% csrf_token %}
+        {{ wizard.management_form }}
+        {{ form.non_field_errors }}
+        {{ form.management_form }}
+
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Spielplan erstellen - Teams für Gruppen auswählen</legend>
+            <div class="alert alert-info" role="alert">
+                Bitte Teams in der jeweiligen Gruppe auswählen, wie auf den <a
+                    href="https://docs.google.com/spreadsheets/d/1YRZk1Gt4OzBVzUamRIktJOFrMhmvGMk0ziGxmeih-ZY/edit?usp=sharing"
+                    target="_blank">Spielplan</a> angegeben.
+            </div>
+            {% for subform in form %}
+            <div class="mb-3">
+                <label for="{{ subform.group.id_for_label }}">{{ subform.group.label }} {{ forloop.counter }}*</label>
+                {{ subform.group }}
+            </div>
+            {% for hidden in subform.hidden_fields %}
+            {{ hidden }}
+            {% endfor %}
+            {% endfor %}
+            <div class="wizard-controls">
+                <div class="form-group">
+                    <button class="btn btn-primary w-100" type="submit">Weiter</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+{% endblock %}
+{% block footer %}
+{% load static %}
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+{{ form.media }}
+<link href='{% static "league_manager/css/dal.css" %}' rel="stylesheet" type="text/css">
+{% endblock footer %}
