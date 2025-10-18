@@ -120,7 +120,7 @@ def get_gameday_format_formset(extra=1):
     )
 
 
-class GamedayGameinfoCreateForm(forms.ModelForm):
+class GameinfoForm(forms.ModelForm):
     home = forms.ModelChoiceField(
         queryset=Team.objects.all(),
         widget=autocomplete.ModelSelect2(url='/dal/team'),
@@ -203,7 +203,7 @@ class GamedayGameinfoCreateForm(forms.ModelForm):
 def get_gameinfo_formset(extra=1):
     return modelformset_factory(
         Gameinfo,
-        form=GamedayGameinfoCreateForm,
+        form=GameinfoForm,
         extra=extra,
         can_delete=True
     )

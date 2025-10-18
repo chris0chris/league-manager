@@ -2,18 +2,19 @@ from datetime import datetime
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Max
 from django.db.models.functions import ExtractYear
-from django.forms import Form, forms
+from django.forms import Form
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View
-from django.views.generic import DetailView, UpdateView, CreateView
+from django.views.generic import DetailView, UpdateView, CreateView, FormView
 from formtools.wizard.views import SessionWizardView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
 from league_table.models import LeagueGroup
 from .forms import GamedayCreateForm, GamedayUpdateForm, GamedayGaminfoFieldsAndGroupsForm, \
-    GamedayGameinfoCreateForm, get_gameinfo_formset, get_gameday_format_formset, GamedayFormatForm
+    GameinfoForm, get_gameinfo_formset, get_gameday_format_formset, GamedayFormatForm
 from .models import Gameday, Gameinfo
 from .service.gameday_form_service import GamedayFormService
 from .service.gameday_service import GamedayService
@@ -159,7 +160,7 @@ GAMEINFO_STEP = 'gameinfo-step'
 FORMS = [
     (FIELD_GROUP_STEP, GamedayGaminfoFieldsAndGroupsForm),
     (GAMEDAY_FORMAT_STEP, GamedayFormatForm),
-    (GAMEINFO_STEP, GamedayGameinfoCreateForm),
+    (GAMEINFO_STEP, GameinfoForm),
 ]
 
 TEMPLATES = {
@@ -169,7 +170,7 @@ TEMPLATES = {
 }
 
 
-class GamedayWizard(SessionWizardView):
+class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView):
     form_list = FORMS
 
     def get_template_names(self):
@@ -180,19 +181,17 @@ class GamedayWizard(SessionWizardView):
             self.storage.extra_data = {}
         return self.storage.extra_data
 
-    def get_next_step(self, step=None):
-        step = step or self.steps.current
-        next_step = super().get_next_step(step)
+    def get_form_list(self):
+        form_list = super().get_form_list()
 
-        if step == FIELD_GROUP_STEP:
-            extra = self._extra()
-            field_group_step = extra.get(FIELD_GROUP_STEP) or {}
-            format_value = field_group_step.get('format')
+        extra = self._extra()
+        field_group_step = extra.get(FIELD_GROUP_STEP, {})
+        format_value = field_group_step.get("format")
 
-            if format_value == "CUSTOM":
-                return GAMEINFO_STEP
+        if format_value == "CUSTOM":
+            form_list = {key: val for key, val in form_list.items() if key != GAMEDAY_FORMAT_STEP}
 
-        return next_step
+        return form_list
 
     def get_form(self, step=None, data=None, files=None):
         step = step or self.steps.current
@@ -328,3 +327,63 @@ class GamedayWizard(SessionWizardView):
         gameday_id = self._extra().get('gameday_id')
         from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
         return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday_id}))
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+    form_class = None
+    template_name = 'gamedays/wizard_form/gameinfos.html'
+
+    def get_form_class(self):
+        return get_gameinfo_formset(extra=0)
+
+    def get(self, request, *args, **kwargs):
+        gameday = get_object_or_404(Gameday, pk=self.kwargs['pk'])
+        qs = Gameinfo.objects.filter(gameday=gameday)
+
+        if not qs.exists():
+            from gamedays.urls import LEAGUE_GAMEDAY_GAMEINFO_WIZARD
+            return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFO_WIZARD, kwargs={'pk': gameday.pk}))
+
+        return super().get(request, *args, **kwargs)
+
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        gameday = get_object_or_404(Gameday, pk=self.kwargs['pk'])
+        qs = Gameinfo.objects.filter(gameday=gameday)
+
+        group_choices = {
+            (g.league_group.id, g.league_group.name) if g.league_group else (g.standing, g.standing)
+            for g in qs if g.league_group or g.standing
+        }
+        number_fields = qs.aggregate(Max('field'))['field__max'] or 1
+
+        field_choices = [(f'{n}', f'Feld {n}') for n in range(1, number_fields + 1)]
+
+        kwargs.update({
+            'queryset': qs,
+            'prefix': 'games',
+            'form_kwargs': {
+                'group_choices': group_choices,
+                'field_choices': field_choices
+            }
+        })
+        return kwargs
+
+    def form_valid(self, formset):
+        gameday = get_object_or_404(Gameday, pk=self.kwargs['pk'])
+        gameday_form_service = GamedayFormService(gameday)
+
+        for current_form in formset:
+            if current_form.has_changed():
+                gameday_form_service.handle_gameinfo_and_gameresult(
+                    current_form.cleaned_data, current_form.instance
+                )
+
+        return redirect(reverse('league-gameday-detail', kwargs={'pk': gameday.pk}))
+
+    def test_func(self):
+        return self.request.user.is_staff
