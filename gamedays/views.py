@@ -207,12 +207,21 @@ class GamedayWizard(SessionWizardView):
             groups = gameday.season.groups_season.filter(season=gameday.season, league=gameday.league)
             form.fields['group_names'].choices = [(g.id, g.name) for g in groups]
         if step == GAMEDAY_FORMAT_STEP:
-            extra_forms = int(extra.get(FIELD_GROUP_STEP).get('number_groups'))
+            field_group_step = extra.get(FIELD_GROUP_STEP, {})
+            number_groups = field_group_step.get('number_groups')
+            group_array = field_group_step.get('group_names') or []
+
+            extra_forms = int(number_groups) if number_groups else len(group_array)
+
             GamedayFormatFormSet = get_gameday_format_formset(extra=extra_forms)
-            if data is not None:
-                form = GamedayFormatFormSet(data, prefix='gameday_format')
+            form = GamedayFormatFormSet(data, prefix='gameday_format')
+            if number_groups:
+                group_names = [f'Gruppe {n}' for n in range(1, number_groups + 1)]
             else:
-                form = GamedayFormatFormSet(prefix='gameday_format')
+                group_names = LeagueGroup.objects.filter(id__in=group_array).values_list('name', flat=True)
+            for index, current_form in enumerate(form):
+                current_form.fields['group'].label = group_names[index]
+
         if step == GAMEINFO_STEP:
             extra = self._extra()
             field_group_step = extra.get(FIELD_GROUP_STEP) or {}
