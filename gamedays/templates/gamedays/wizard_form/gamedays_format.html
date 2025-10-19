@@ -9,7 +9,7 @@
         {{ form.management_form }}
 
         <fieldset class="form-group">
-            {% include "partials/legend_with_cancel.html" with title="Spielplan - Teams für Gruppen" cancel_url=cancel_url %}
+            {% include "partials/legend_with_cancel.html" with title="Spielplan erstellen - Teams für Gruppen" cancel_url=cancel_url %}
             <div class="alert alert-info" role="alert">
                 Bitte Teams in der jeweiligen Gruppe auswählen, wie auf den <a
                     href="https://docs.google.com/spreadsheets/d/1YRZk1Gt4OzBVzUamRIktJOFrMhmvGMk0ziGxmeih-ZY/edit?usp=sharing"
@@ -25,8 +25,13 @@
             {% endfor %}
             {% endfor %}
             <div class="wizard-controls">
-                <div class="form-group">
-                    <button class="btn btn-primary w-100" type="submit">Weiter</button>
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-primary flex-grow-1" type="submit">
+                        Spielplan erstellen
+                    </button>
+                    <a href="?wizard_goto_step={{ wizard.steps.prev }}" class="btn btn-outline-info">
+                        Zurück
+                    </a>
                 </div>
             </div>
         </fieldset>

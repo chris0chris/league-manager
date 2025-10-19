@@ -8,8 +8,8 @@
         {{ wizard.management_form }}
         {{ form.management_form }}
 
-        <fieldset class="form-group">
-            {% include "partials/legend_with_cancel.html" with title="Spielplan - Spiele" cancel_url=cancel_url %}
+        <fieldset>
+            {% include "partials/legend_with_cancel.html" with title=action_label|add:" - Spiele" cancel_url=cancel_url %}
 
             <table class="table table-sm" id="games-table">
                 <thead>
@@ -120,14 +120,15 @@
                 </tbody>
             </table>
 
-            <div class="mb-3">
-                <button type="button" id="add-row" class="btn btn-outline-info">+ Spiel hinzufügen</button>
-            </div>
-
+            <button type="button" id="add-row" class="btn btn-outline-info mb-3">+ Spiel hinzufügen</button>
         </fieldset>
-
-        <div class="form-group mt-3">
-            <button class="btn btn-primary w-100" type="submit">Spielplan erstellen</button>
+        <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-primary flex-grow-1" type="submit">
+                {{ action_label }}
+            </button>
+            <button id="reset-button" class="btn btn-outline-danger" type="submit" name="wizard_goto_step" value="{{ wizard.steps.first | default:'reset_gameinfos' }}">
+                Reset Spielplan
+            </button>
         </div>
     </form>
 </div>
@@ -192,6 +193,15 @@
 {% load static %}
 <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const resetButton = document.getElementById('reset-button');
+    resetButton.addEventListener('click', function(e) {
+        const confirmed = confirm("Achtung: Dadurch werden alle aktuellen Eingaben INKLUSIVE vorhandener Spielergebnisse zurückgesetzt! Wirklich fortfahren?");
+        if (!confirmed) {
+            e.preventDefault();
+        }
+    });
+});
     (function(){
       const prefix = "{{ form.prefix }}";
       const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
