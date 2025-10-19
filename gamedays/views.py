@@ -102,7 +102,17 @@ class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return super(GamedayCreateView, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse('league-gameday-detail', kwargs={'pk': self.object.pk})
+        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL, LEAGUE_GAMEDAY_GAMEINFO_WIZARD, LEAGUE_GAMEDAY_GAMEINFOS_UPDATE
+        action_map = {
+            "gameinfos_create": LEAGUE_GAMEDAY_GAMEINFO_WIZARD,
+            "gameinfos_update": LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
+        }
+
+        post_action = self.request.POST.get("action")
+        kwargs = {"pk": self.object.pk}
+
+        url_name = action_map.get(post_action, LEAGUE_GAMEDAY_DETAIL)
+        return reverse(url_name, kwargs=kwargs)
 
     def test_func(self):
         return self.request.user.is_staff
