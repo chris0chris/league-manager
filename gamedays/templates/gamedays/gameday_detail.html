@@ -42,22 +42,23 @@
         {% if user.is_staff %}
         <span>
             <a href="{% url 'league-gameday-gameinfos-update' pk=object.id%}" class="btn btn-primary">
-                <i class="bi bi-table"></i> <span class="d-none d-md-inline">Spielplan bearbeiten</span>
+                <i class="bi bi-table"></i> <span class="d-none d-md-inline">Spielplan {% if info.schedule == None %}erstellen{% else %}bearbeiten{% endif %}</span>
             </a>
-            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-message="Bist du dir wirklich sicher, dass der Spielplan und alle dazugehörigen Einträge <strong>dauerhaft gelöscht</strong> werden sollen?" data-url="{% url 'league-gameday-gameinfos-delete' pk=object.pk %}" title="Spielplan löschen">
-                    <i class="bi bi-trash"></i>
+            {% if info.schedule == None %}
+            {% else %}
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                    data-message="Bist du dir wirklich sicher, dass der Spielplan und alle dazugehörigen Einträge <strong>dauerhaft gelöscht</strong> werden sollen?"
+                    data-url="{% url 'league-gameday-gameinfos-delete' pk=object.pk %}" title="Spielplan löschen">
+                <i class="bi bi-trash"></i>
             </button>
+            {% endif %}
         </span>
         {% endif %}
     </div>
     <div aria-labelledby="headingSchedule" class="collapse show" id="collapseSchedule">
         <div class="card-body">
-            {% if info.schedule == None %}
-            Spielplan wurde noch nicht erstellt.
-            {% else %}
-            <div class="row">
+            <div class="row mb-3">
                 <div class="col-12 col-md-3">
-
                     Gemeldete Offizielle: {% if not info.officials %} - {% endif %}<br/>
                     {% if info.url_pattern_official_signup %}
                     {% if request.is_secure %}
@@ -76,7 +77,9 @@
                     {% endfor %}
                 </div>
             </div>
-            <br>
+            {% if info.schedule == None %}
+                Spielplan wurde noch nicht erstellt.
+            {% else %}
             <input class="mb-1" id="search" placeholder="Suche nach Teamname" type="text"><br/>
             {{ info.schedule | safe }}
             {% endif %}

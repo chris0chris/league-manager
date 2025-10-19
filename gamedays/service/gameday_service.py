@@ -35,7 +35,7 @@ SCHEDULE_TABLE_HEADERS = {
 class EmptySchedule:
     @staticmethod
     def to_html(*args, **kwargs):
-        return 'Spielplan wurde noch nicht erstellt'
+        return None
 
     @staticmethod
     def to_json(*args, **kwargs):
