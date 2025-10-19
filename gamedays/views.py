@@ -102,9 +102,9 @@ class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return super(GamedayCreateView, self).form_valid(form)
 
     def get_success_url(self):
-        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL, LEAGUE_GAMEDAY_GAMEINFO_WIZARD, LEAGUE_GAMEDAY_GAMEINFOS_UPDATE
+        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL, LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, LEAGUE_GAMEDAY_GAMEINFOS_UPDATE
         action_map = {
-            "gameinfos_create": LEAGUE_GAMEDAY_GAMEINFO_WIZARD,
+            "gameinfos_create": LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
             "gameinfos_update": LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
         }
 
@@ -349,15 +349,15 @@ class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         qs = Gameinfo.objects.filter(gameday=gameday)
 
         if not qs.exists():
-            from gamedays.urls import LEAGUE_GAMEDAY_GAMEINFO_WIZARD
-            return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFO_WIZARD, kwargs={'pk': gameday.pk}))
+            from gamedays.urls import LEAGUE_GAMEDAY_GAMEINFOS_WIZARD
+            return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={'pk': gameday.pk}))
 
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         if request.POST.get('wizard_goto_step') == "reset_gameinfos":
-            from gamedays.urls import LEAGUE_GAMEDAY_GAMEINFO_WIZARD
-            return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFO_WIZARD, kwargs={'pk': self.kwargs['pk']}))
+            from gamedays.urls import LEAGUE_GAMEDAY_GAMEINFOS_WIZARD
+            return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={'pk': self.kwargs['pk']}))
         return super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
