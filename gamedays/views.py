@@ -7,7 +7,7 @@ from django.db.models.functions import ExtractYear
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View
-from django.views.generic import DetailView, UpdateView, CreateView, FormView
+from django.views.generic import DetailView, UpdateView, CreateView, FormView, DeleteView
 from formtools.wizard.views import SessionWizardView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
@@ -181,7 +181,6 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
             form_list = {key: val for key, val in form_list.items() if key != GAMEDAY_FORMAT_STEP}
         else:
             form_list = {key: val for key, val in form_list.items() if key != GAMEINFO_STEP}
-
 
         return form_list
 
@@ -361,7 +360,6 @@ class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFO_WIZARD, kwargs={'pk': self.kwargs['pk']}))
         return super().post(request, *args, **kwargs)
 
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         gameday = get_object_or_404(Gameday, pk=self.kwargs['pk'])
@@ -400,3 +398,41 @@ class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+class StaffDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """
+    Generic delete view for staff users without a template.
+    Subclasses must define:
+        - model
+    """
+    template_name = None
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class GamedayDeleteView(StaffDeleteView):
+    model = Gameday
+
+    def get_success_url(self):
+        from django.contrib import messages
+        messages.success(self.request, "Der Spieltag wurde erfolgreich gelöscht.")
+
+        from gamedays.urls import LEAGUE_GAMEDAY_LIST
+        return reverse(LEAGUE_GAMEDAY_LIST)
+
+
+class GameinfoDeleteView(StaffDeleteView):
+    model = Gameday
+
+    def form_valid(self, form):
+        gameday: Gameday = self.get_object()
+
+        Gameinfo.objects.filter(gameday=gameday).delete()
+
+        from django.contrib import messages
+        messages.success(self.request, "Der Spielplan für diesen Spieltag wurde erfolgreich gelöscht.")
+
+        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
+        return redirect(LEAGUE_GAMEDAY_DETAIL, pk=gameday.pk)
