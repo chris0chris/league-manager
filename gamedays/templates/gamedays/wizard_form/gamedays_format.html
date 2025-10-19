@@ -9,7 +9,7 @@
         {{ form.management_form }}
 
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Spielplan erstellen - Teams für Gruppen auswählen</legend>
+            {% include "partials/legend_with_cancel.html" with title="Spielplan - Teams für Gruppen" cancel_url=cancel_url %}
             <div class="alert alert-info" role="alert">
                 Bitte Teams in der jeweiligen Gruppe auswählen, wie auf den <a
                     href="https://docs.google.com/spreadsheets/d/1YRZk1Gt4OzBVzUamRIktJOFrMhmvGMk0ziGxmeih-ZY/edit?usp=sharing"

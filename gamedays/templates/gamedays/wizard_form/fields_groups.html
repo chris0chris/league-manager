@@ -8,7 +8,7 @@
         {{ form.non_field_errors }}
 
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Spielplan erstellen - Felder und Gruppen</legend>
+            {% include "partials/legend_with_cancel.html" with title="Spielplan - Format" cancel_url=cancel_url %}
             <div class="mb-3">
                 {% if form.group_names.field.widget.choices|length == 0 %}
                 <label for="{{ form.number_groups.id_for_label }}">{{ form.number_groups.label }}*</label>

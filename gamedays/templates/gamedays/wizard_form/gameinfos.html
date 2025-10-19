@@ -9,7 +9,7 @@
         {{ form.management_form }}
 
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Spielplan erstellen - Spiele</legend>
+            {% include "partials/legend_with_cancel.html" with title="Spielplan - Spiele" cancel_url=cancel_url %}
 
             <table class="table table-sm" id="games-table">
                 <thead>
