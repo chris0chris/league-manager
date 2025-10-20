@@ -51,6 +51,10 @@ MIDDLEWARE = [
     'league_manager.middleware.maintenance.MaintenanceModeMiddleware',
 ]
 
+PAGES_LINKS = {
+    "GENERIC_GAME_SCHEDULE_GOOGLE_SHEETS": "https://docs.google.com/spreadsheets/d/1YRZk1Gt4OzBVzUamRIktJOFrMhmvGMk0ziGxmeih-ZY/edit?usp=sharing",
+}
+
 ROOT_URLCONF = 'league_manager.urls'
 
 TEMPLATES = [
@@ -66,6 +70,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
                 'league_manager.context_processors.global_menu',
+                'league_manager.context_processors.pages_links',
             ],
         },
     },

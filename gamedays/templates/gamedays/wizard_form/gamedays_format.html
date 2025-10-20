@@ -11,9 +11,9 @@
         <fieldset class="form-group">
             {% include "partials/legend_with_cancel.html" with title="Spielplan erstellen - Teams für Gruppen" cancel_url=cancel_url %}
             <div class="alert alert-info" role="alert">
-                Bitte Teams in der jeweiligen Gruppe auswählen, wie auf den <a
-                    href="https://docs.google.com/spreadsheets/d/1YRZk1Gt4OzBVzUamRIktJOFrMhmvGMk0ziGxmeih-ZY/edit?usp=sharing"
-                    target="_blank">Spielplan</a> angegeben.
+                Bitte Teams in der jeweiligen Gruppe auswählen, wie auf dem <a
+                    href="{{ PAGES_LINKS.GENERIC_GAME_SCHEDULE_GOOGLE_SHEETS }}"
+                    target="_blank">Spielplan</a> angegeben ist.
             </div>
             {% for subform in form %}
             <div class="mb-3">

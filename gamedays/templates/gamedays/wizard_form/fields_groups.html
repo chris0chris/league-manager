@@ -8,7 +8,7 @@
         {{ form.non_field_errors }}
 
         <fieldset class="form-group">
-            {% include "partials/legend_with_cancel.html" with title="Spielplan - Format" cancel_url=cancel_url %}
+            {% include "partials/legend_with_cancel.html" with title="Spielplan - Format, Feld und Gruppen" cancel_url=cancel_url %}
             <div class="mb-3">
                 {% if form.group_names.field.widget.choices|length == 0 %}
                 <label for="{{ form.number_groups.id_for_label }}">{{ form.number_groups.label }}*</label>
@@ -23,7 +23,7 @@
                 {{ form.number_fields }}
             </div>
             <div class="mb-3">
-                <label for="{{ form.format.id_for_label }}">{{ form.format.label }} <a href="#" target="_blank">https://docs.google.com/spreadsheets/d/1YRZk1Gt4OzBVzUamRIktJOFrMhmvGMk0ziGxmeih-ZY/edit?usp=sharing</a>*</label>
+                <label for="{{ form.format.id_for_label }}">{{ form.format.label }} <a href="{{ PAGES_LINKS.GENERIC_GAME_SCHEDULE_GOOGLE_SHEETS }}" target="_blank">auswählen</a>*</label>
                 {{ form.format }}
             </div>
 
