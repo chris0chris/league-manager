@@ -40,10 +40,3 @@ class TestGamedayFormService(TestCase):
         gameresult_away = Gameresult.objects.get(gameinfo=last_gameinfo, isHome=False)
         assert gameresult_home.team == teams[0]
         assert gameresult_away.team == teams[1]
-
-    def test_delete_all_gameinfos_for_gameday(self):
-        gameday = DBSetup().g62_status_empty()
-        assert Gameinfo.objects.filter(gameday=gameday).count() == 11
-        gameday_form_service = GamedayFormService(gameday)
-        gameday_form_service.delete_all_gameinfos_for_gameday()
-        assert Gameinfo.objects.filter(gameday=gameday).count() == 0

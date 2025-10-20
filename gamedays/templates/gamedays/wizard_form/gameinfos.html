@@ -42,13 +42,15 @@
                             {{ subform.home|as_crispy_field }}
                         </div>
                         <div class="row">
-                            <div class="input-group mb-1 mt-1">
+                            <div class="input-group mb-1">
                                 <span class="input-group-text">1. HZ</span>
-                                {{ subform.fh_home|as_crispy_field }}
+                                {{ subform.fh_home }}
+                                {{ subform.fh_home.error }}
                             </div>
                             <div class="input-group">
                                 <span class="input-group-text">2. HZ</span>
-                                {{ subform.sh_home|as_crispy_field }}
+                                {{ subform.sh_home }}
+                                {{ subform.sh_home.error }}
                             </div>
                         </div>
                     </td>
@@ -57,13 +59,15 @@
                             {{ subform.away|as_crispy_field }}
                         </div>
                         <div class="row">
-                            <div class="input-group mb-1 mt-1">
+                            <div class="input-group mb-1">
                                 <span class="input-group-text">1. HZ</span>
-                                {{ subform.fh_away|as_crispy_field }}
+                                {{ subform.fh_away }}
+                                {{ subform.fh_away.error }}
                             </div>
                             <div class="input-group">
                                 <span class="input-group-text">2. HZ</span>
-                                {{ subform.sh_away|as_crispy_field }}
+                                {{ subform.sh_away }}
+                                {{ subform.sh_away.error }}
                             </div>
                         </div>
                     </td>

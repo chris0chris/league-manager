@@ -81,6 +81,3 @@ class GamedayFormService:
         if value1 is None or value2 is None:
             return None
         return value1 + value2
-
-    def delete_all_gameinfos_for_gameday(self):
-        GameinfoWrapper.delete_by_gameday(self.gameday)
