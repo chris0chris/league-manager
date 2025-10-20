@@ -1,7 +1,6 @@
 from dal import autocomplete
 from django import forms
 from django.forms import modelformset_factory, formset_factory
-from django.utils import timezone
 
 from gamedays.models import Season, League, Gameday, Gameinfo, Team, Gameresult
 
@@ -100,40 +99,52 @@ def get_gameday_format_formset(extra=1):
 
 class GameinfoForm(forms.ModelForm):
     home = forms.ModelChoiceField(
+        label='',
         queryset=Team.objects.all(),
         widget=autocomplete.ModelSelect2(url='/dal/team'),
         required=True
     )
     fh_home = forms.IntegerField(required=False,
+                                 label='',
                                  widget=forms.NumberInput(
                                      attrs={'class': 'form-control', 'aria-label': 'Punkte 1. HZ Heim'})
                                  )
     sh_home = forms.IntegerField(required=False,
+                                 label='',
                                  widget=forms.NumberInput(
                                      attrs={'class': 'form-control', 'aria-label': 'Punkte 2. HZ Heim'})
                                  )
     away = forms.ModelChoiceField(
+        label='',
         queryset=Team.objects.all(),
         widget=autocomplete.ModelSelect2(url='/dal/team'),
         required=True
     )
     fh_away = forms.IntegerField(required=False,
+                                 label='',
                                  widget=forms.NumberInput(
                                      attrs={'class': 'form-control', 'aria-label': 'Punkte 1. HZ Gast'})
                                  )
     sh_away = forms.IntegerField(required=False,
+                                 label='',
                                  widget=forms.NumberInput(
                                      attrs={'class': 'form-control', 'aria-label': 'Punkte 2. HZ Gast'})
                                  )
-    field = forms.ChoiceField(choices=(), label='Field', required=True, initial='',
+    field = forms.ChoiceField(choices=(), label='', required=True, initial='',
                               widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: auto'}))
-    standing = forms.ChoiceField(choices=(), required=True, initial='',
+    standing = forms.ChoiceField(choices=(), required=True, initial='', label='',
                                  widget=forms.Select(attrs={'class': 'form-control', 'style': 'width: auto'}))
     stage = forms.CharField(
-        label='Stage',
+        label='',
         required=True,
         initial='Hauptrunde',
         widget=forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 110px'})
+    )
+    officials = forms.ModelChoiceField(
+        label='',
+        queryset=Team.objects.all(),
+        widget=autocomplete.ModelSelect2(url='/dal/team'),
+        required=True
     )
 
     class Meta:
@@ -142,9 +153,9 @@ class GameinfoForm(forms.ModelForm):
                   'gameFinished']
         widgets = {
             'scheduled': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
-            'officials': autocomplete.ModelSelect2(
-                url='/dal/team',
-            ),
+            # 'officials': autocomplete.ModelSelect2(
+            #     url='/dal/team',
+            # ),
             'status': forms.Select(
                 choices=(('Geplant', 'Geplant'), ('1. Halbzeit', '1. Halbzeit'), ('2. Halbzeit', '2. Halbzeit'),
                          ('beendet', 'Beendet')), attrs={'class': 'form-control', 'style': 'width: auto'}),
@@ -155,6 +166,8 @@ class GameinfoForm(forms.ModelForm):
 
     def __init__(self, *args, group_choices=None, field_choices=None, **kwargs):
         super().__init__(*args, **kwargs)
+        for name in self.Meta.fields:
+            self.fields[name].label = ''
         placeholder = [('', 'Bitte auswählen')]
         if group_choices is not None:
             self.fields['standing'].choices = placeholder + list(group_choices) if len(group_choices) > 1 else list(

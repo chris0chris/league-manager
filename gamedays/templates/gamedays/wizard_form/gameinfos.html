@@ -32,76 +32,61 @@
                 {% for subform in form %}
                 <tr class="form-row" data-form-index="{{ forloop.counter0 }}">
                     <td class="align-top">
-                        {{ subform.scheduled }}
-                        {{ subform.scheduled.errors }}
+                        {{ subform.scheduled|as_crispy_field }}
                     </td>
                     <td class="align-top">
-                        {{ subform.field }}
-                        {{ subform.field.errors }}
+                        {{ subform.field|as_crispy_field }}
                     </td>
                     <td class="align-top">
                         <div class="row">
-                            {{ subform.home }}
-                            {{ subform.home.errors }}
+                            {{ subform.home|as_crispy_field }}
                         </div>
                         <div class="row">
                             <div class="input-group mb-1 mt-1">
                                 <span class="input-group-text">1. HZ</span>
-                                {{ subform.fh_home }}
-                                {{ subform.fh_home.errors }}
+                                {{ subform.fh_home|as_crispy_field }}
                             </div>
                             <div class="input-group">
                                 <span class="input-group-text">2. HZ</span>
-                                {{ subform.sh_home }}
-                                {{ subform.sh_home.errors }}
+                                {{ subform.sh_home|as_crispy_field }}
                             </div>
                         </div>
                     </td>
                     <td class="align-top">
                         <div class="row">
-                            {{ subform.away }}
-                            {{ subform.away.errors }}
+                            {{ subform.away|as_crispy_field }}
                         </div>
                         <div class="row">
                             <div class="input-group mb-1 mt-1">
                                 <span class="input-group-text">1. HZ</span>
-                                {{ subform.fh_away }}
-                                {{ subform.fh_away.errors }}
+                                {{ subform.fh_away|as_crispy_field }}
                             </div>
                             <div class="input-group">
                                 <span class="input-group-text">2. HZ</span>
-                                {{ subform.sh_away }}
-                                {{ subform.sh_away.errors }}
+                                {{ subform.sh_away|as_crispy_field }}
                             </div>
                         </div>
                     </td>
                     <td class="align-top">
-                        {{ subform.stage }}
-                        {{ subform.stage.errors }}
+                        {{ subform.stage|as_crispy_field }}
                     </td>
                     <td class="align-top">
-                        {{ subform.standing }}
-                        {{ subform.standing.errors }}
+                        {{ subform.standing|as_crispy_field }}
                     </td>
                     <td class="align-top">
-                        {{ subform.officials }}
-                        {{ subform.officials.errors }}
+                        {{ subform.officials|as_crispy_field }}
                     </td>
                     <td class="align-top">
-                        {{ subform.status }}
-                        {{ subform.status.errors }}
+                        {{ subform.status|as_crispy_field }}
                     </td>
                     <td class="align-top">
-                        {{ subform.gameStarted }}
-                        {{ subform.gameStarted.errors }}
+                        {{ subform.gameStarted|as_crispy_field }}
                     </td>
                     <td class="align-top">
-                        {{ subform.gameHalftime }}
-                        {{ subform.gameHalftime.errors }}
+                        {{ subform.gameHalftime|as_crispy_field }}
                     </td>
                     <td class="align-top">
-                        {{ subform.gameFinished }}
-                        {{ subform.gameFinished.errors }}
+                        {{ subform.gameFinished|as_crispy_field }}
                     </td>
                     <td class="align-top">
                         {% for hidden in subform.hidden_fields %}
