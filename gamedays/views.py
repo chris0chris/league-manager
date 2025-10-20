@@ -272,7 +272,10 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
             if gameday_id:
                 gameday = Gameday.objects.get(pk=gameday_id)
                 data = self._extra().get(FIELD_GROUP_STEP)
-                gameday.format = f'{gameday.league.name}_Gruppen{data.get('number_groups')}_Felder{data.get('number_fields')}'
+                if data.get('format') == 'CUSTOM':
+                    gameday.format = f'{gameday.league.name}_Gruppen{data.get('number_groups')}_Felder{data.get('number_fields')}'
+                else:
+                    gameday.format = data.get('format')
                 gameday.save()
             return super().process_step(form)
 
