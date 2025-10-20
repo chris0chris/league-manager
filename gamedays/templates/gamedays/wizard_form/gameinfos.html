@@ -119,7 +119,7 @@
 </div>
 
 <template id="empty-form-template">
-    <tr class="form-row" data-form-index="__prefix__">
+    <tr class="form-row" data-form-index="__prefix__" data-insert-by-client="true">
         <td class="align-top">{{ form.empty_form.scheduled }}</td>
         <td class="align-top">{{ form.empty_form.field }}</td>
         <td class="align-top">
@@ -223,12 +223,15 @@
       function bindRemove(btn) {
         btn.addEventListener('click', function(e) {
           const row = e.target.closest('.form-row');
+          const insertedByClient = row.dataset.insertByClient;
           const deleteInput = row.querySelector(`input[name$="-DELETE"]`);
-          if (deleteInput) {
+          if (deleteInput && !insertedByClient) {
+            // Mark existing form for deletion (so Django deletes it)
             deleteInput.checked = true;
             deleteInput.value = 'on';
             row.style.display = 'none';
           } else {
+            // It's a newly added empty row — just remove it from the DOM entirely
             row.remove();
             updateIndices();
           }
