@@ -1,5 +1,8 @@
+from dataclasses import dataclass
+
 from dal import autocomplete
 from django import forms
+from django.contrib.auth.models import User
 from django.forms import modelformset_factory, formset_factory
 
 from gamedays.models import Season, League, Gameday, Gameinfo, Team, Gameresult
@@ -38,6 +41,12 @@ FORM_CONTROL_AUTO = {**FORM_CONTROL, 'style': 'width: auto'}
 FORM_CONTROL_REQUIRED_TRUE = {**FORM_CONTROL, 'required': True}
 
 
+@dataclass
+class GamedayFormContext:
+    author: User | None = None
+    init_format: bool = False
+
+
 class GamedayForm(forms.ModelForm):
     name = forms.CharField(max_length=100)
     season = forms.ModelChoiceField(queryset=Season.objects.all())
@@ -57,15 +66,17 @@ class GamedayForm(forms.ModelForm):
             'start': forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'value': '10:00'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super(GamedayForm, self).__init__(*args, **kwargs)
+    def __init__(self, *args, context: GamedayFormContext | None = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.context = context or GamedayFormContext(init_format=False, author=None)
         last_season = Season.objects.last()
         if last_season:
             self.fields['season'].initial = last_season.id
 
     def save(self, user=None):
         gameday = super(GamedayForm, self).save(commit=False)
-        if self.data.get('format') is None:
+        gameday.author = self.context.author
+        if self.context.init_format:
             gameday.format = 'INITIAL_EMPTY'
         gameday.save()
         return gameday

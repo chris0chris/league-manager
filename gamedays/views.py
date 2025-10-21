@@ -13,7 +13,7 @@ from formtools.wizard.views import SessionWizardView
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
 from league_table.models import LeagueGroup
 from .forms import GamedayForm, GamedayGaminfoFieldsAndGroupsForm, \
-    GameinfoForm, get_gameinfo_formset, get_gameday_format_formset, GamedayFormatForm
+    GameinfoForm, get_gameinfo_formset, get_gameday_format_formset, GamedayFormatForm, GamedayFormContext
 from .models import Gameday, Gameinfo
 from .service.gameday_form_service import GamedayFormService
 from .service.gameday_service import GamedayService
@@ -97,8 +97,15 @@ class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Gameday
     pk = None
 
-    def form_valid(self, form):
-        form.author = self.request.user
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["context"] = GamedayFormContext(
+            author=self.request.user,
+            init_format=True
+        )
+        return kwargs
+
+    def form_valid(self, form: GamedayForm):
         return super(GamedayCreateView, self).form_valid(form)
 
     def get_success_url(self):
@@ -123,8 +130,14 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'gamedays/gameday_form.html'
     model = Gameday
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["context"] = GamedayFormContext(
+            author=self.request.user,
+        )
+        return kwargs
+
     def form_valid(self, form):
-        form.author = self.request.user
         return super(GamedayUpdateView, self).form_valid(form)
 
     def get_success_url(self):

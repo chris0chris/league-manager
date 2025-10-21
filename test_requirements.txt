@@ -5,3 +5,4 @@ pytest-cov==6.0.0
 factory-boy==3.3.3
 django-debug-toolbar==5.0.1
 WebTest==3.0.4
+black==25.9.0
