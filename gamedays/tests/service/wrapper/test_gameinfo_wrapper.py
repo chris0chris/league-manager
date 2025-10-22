@@ -6,6 +6,7 @@ from gamedays.models import Gameinfo
 from gamedays.service.wrapper.gameinfo_wrapper import GameinfoWrapper
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import GameinfoFactory
+from league_table.tests.setup_factories.factories_leaguetable import LeagueGroupFactory
 
 
 class TestGameinfoWrapper(TestCase):
@@ -66,9 +67,9 @@ class TestGameinfoWrapper(TestCase):
         assert gameinfo.league_group is None
         assert gameinfo.standing == ''
         gameinfo_wrapper = GameinfoWrapper(gameinfo)
-        gameinfo_wrapper.update_standing('Gruppe 1')
+        gameinfo_wrapper.update_standing('Group 1')
         gameinfo.refresh_from_db()
-        assert gameinfo.standing == ''
+        assert gameinfo.standing == 'Group 1'
         assert gameinfo.league_group is None
 
     def test_update_standing_with_not_existent_group_id(self):
@@ -80,3 +81,14 @@ class TestGameinfoWrapper(TestCase):
         gameinfo.refresh_from_db()
         assert gameinfo.standing == ''
         assert gameinfo.league_group is None
+
+    def test_update_standing_with_group(self):
+        league_group = LeagueGroupFactory()
+        gameinfo = GameinfoFactory()
+        assert gameinfo.league_group is None
+        assert gameinfo.standing == ''
+        gameinfo_wrapper = GameinfoWrapper(gameinfo)
+        gameinfo_wrapper.update_standing(f'{league_group.pk}')
+        gameinfo.refresh_from_db()
+        assert gameinfo.standing == league_group.name
+        assert gameinfo.league_group == league_group

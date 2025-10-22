@@ -1,5 +1,3 @@
-from unittest.mock import patch, MagicMock
-
 from django.test import TestCase
 
 from gamedays.models import Gameinfo, Gameresult
@@ -28,7 +26,7 @@ class TestGamedayFormService(TestCase):
                 'field': 1,
                 'officials': teams[2],
                 'scheduled': '10:00',
-                'standing': 'Gruppe 1',
+                'standing': 'Group 1',
             },
             last_gameinfo
         )
