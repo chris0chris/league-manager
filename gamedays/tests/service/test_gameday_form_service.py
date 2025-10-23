@@ -1,11 +1,80 @@
+import datetime
 from unittest.mock import MagicMock, patch
 
+import pytest
 from django.test import TestCase
 
-from gamedays.models import Gameresult, Gameday
-from gamedays.service.gameday_form_service import GamedayFormService
+from gamedays.models import Gameresult, Gameday, Team
+from gamedays.service.gameday_form_service import GamedayFormService, GameinfoFormData
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import GameinfoFactory
+
+
+class DummyTeam:
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return f"Team({self.name})"
+
+
+@pytest.fixture
+def teams():
+    return Team(name="HomeTeam"), Team(name="AwayTeam"), Team(name="OfficialsTeam")
+
+
+class TestGameinfoFormData:
+
+    @pytest.mark.parametrize(
+        "field_name", ["game_started", "game_halftime", "game_finished", "fh_home", "sh_home", "fh_away", "sh_away"]
+    )
+    def test_time_fields_can_be_none(self, teams, field_name):
+        """Allow optional time fields to be None."""
+        home, away, officials = teams
+        data = {
+            "home": home,
+            "away": away,
+            "field": "B",
+            "officials": officials,
+            "scheduled": datetime.time(9, 0),
+            "game_started": None,
+            "game_halftime": None,
+            "game_finished": None,
+            "standing": "",
+            "delete": False,
+            "fh_home": None,
+            "sh_home": None,
+            "fh_away": None,
+            "sh_away": None,
+        }
+        form_data = GameinfoFormData(**data)
+        assert getattr(form_data, field_name) is None
+
+    def test_create_instance(self, teams):
+        home, away, officials = teams
+        form_data = GameinfoFormData(
+            home=home,
+            away=away,
+            field="Field A",
+            officials=officials,
+            scheduled=datetime.time(10, 30),
+            game_started=datetime.time(10, 35),
+            game_halftime=datetime.time(11, 15),
+            game_finished=datetime.time(12, 5),
+            standing="Final",
+            delete=False,
+            fh_home=12,
+            sh_home=18,
+            fh_away=6,
+            sh_away=14,
+        )
+        assert form_data.home.name == "HomeTeam"
+        assert form_data.away.name == "AwayTeam"
+        assert form_data.field == "Field A"
+        assert form_data.scheduled == datetime.time(10, 30)
+        assert form_data.delete is False
+        assert form_data.fh_home == 12
+        assert form_data.sh_away == 14
 
 
 class TestGamedayFormService(TestCase):
