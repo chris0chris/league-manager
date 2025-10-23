@@ -5,40 +5,54 @@ from django.test import TestCase
 from django.urls import reverse
 from django_webtest import WebTest
 from django_webtest.response import DjangoWebtestResponse
-from webtest.forms import Form
 
-from gamedays.models import Gameday, Gameinfo, Gameresult
+from gamedays.forms import GamedayForm
+from gamedays.models import Gameday, League
 from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
+from gamedays.urls import (
+    LEAGUE_GAMEDAY_CREATE,
+    LEAGUE_GAMEDAY_DETAIL,
+    LEAGUE_GAMEDAY_UPDATE,
+)
 
 
 class TestGamedayCreateView(WebTest):
 
     def test_create_gameday(self):
         DBSetup().create_empty_gameday()
+        league = League.objects.first()
         non_existent_gameday = Gameday.objects.last().pk + 1
         self.app.set_user(User.objects.all().first())
-        response: DjangoWebtestResponse = self.app.get(reverse('league-gameday-create'))
+        response: DjangoWebtestResponse = self.app.get(reverse(LEAGUE_GAMEDAY_CREATE))
         assert response.status_code == HTTPStatus.OK
-        form = response.forms[1]
+        form = response.forms['gameday-form']
         form['name'] = 'New Test Gameday'
         form['date'] = '2021-07-22'
+        form['league'] = league.pk
+        form['address'] = 'some address'
         response: DjangoWebtestResponse = form.submit().follow()
         assert response.status_code == HTTPStatus.OK
         Gameday.objects.get(pk=non_existent_gameday)
-        assert response.request.path == reverse('league-gameday-detail', args=[non_existent_gameday])
+        assert response.request.path == reverse(LEAGUE_GAMEDAY_DETAIL, args=[non_existent_gameday])
 
-    def test_only_authenticated_user_can_create_gameday(self):
-        response = self.app.get(reverse('league-gameday-create'))
+    def test_only_staff_user_can_create_gameday(self):
+        response = self.app.get(reverse(LEAGUE_GAMEDAY_CREATE))
         assert response.status_code == HTTPStatus.FOUND
         assert response.url.index('login/?next=')
+
+        some_user = UserFactory(is_staff=False)
+        self.app.set_user(some_user)
+        response = self.app.get(reverse(LEAGUE_GAMEDAY_CREATE), status=403)
+        assert response.status_code == HTTPStatus.FORBIDDEN
 
 
 class TestGamedayDetailView(TestCase):
 
     def test_detail_view_with_finished_gameday(self):
         gameday = DBSetup().g62_finished()
-        resp = self.client.get(reverse('league-gameday-detail', args=[gameday.pk]))
+        resp = self.client.get(reverse(LEAGUE_GAMEDAY_DETAIL, args=[gameday.pk]))
         assert resp.status_code == HTTPStatus.OK
         context = resp.context_data
         assert context['object'].pk == gameday.pk
@@ -48,7 +62,7 @@ class TestGamedayDetailView(TestCase):
 
     def test_detail_view_with_empty_gameday(self):
         gameday = DBSetup().create_empty_gameday()
-        resp = self.client.get(reverse('league-gameday-detail', args=[gameday.pk]))
+        resp = self.client.get(reverse(LEAGUE_GAMEDAY_DETAIL, args=[gameday.pk]))
         assert resp.status_code == HTTPStatus.OK
         context = resp.context_data
         assert context['object'].pk == gameday.pk
@@ -57,54 +71,44 @@ class TestGamedayDetailView(TestCase):
         assert context['info']['final_table'] == EmptyFinalTable.to_html()
 
     def test_detail_view_gameday_not_available(self):
-        resp = self.client.get(reverse('league-gameday-detail', args=[00]))
+        resp = self.client.get(reverse(LEAGUE_GAMEDAY_DETAIL, args=[00]))
         assert resp.status_code == HTTPStatus.NOT_FOUND
 
 
 class TestGamedayUpdateView(WebTest):
+    def test_staff_user_can_access_update_view(self):
+        staff_user = UserFactory(is_staff=True)
+        self.app.set_user(staff_user)
+        gameday = GamedayFactory(address='some gameday address')
 
-    def setUp(self) -> None:
-        gameday = DBSetup().create_empty_gameday()
-        self.gameday = gameday
-        self.gameday_id = gameday.pk
-        self.app.set_user(User.objects.all().first())
-        self.form: Form = self.app.get(reverse('league-gameday-update', args=[self.gameday_id])).forms[1]
-        self.form['address'] = 'some address'
+        url = reverse(LEAGUE_GAMEDAY_UPDATE, kwargs={"pk": gameday.pk})
+        response = self.app.get(url)
 
-    def test_creates_schedule(self):
-        assert not Gameinfo.objects.filter(gameday_id=self.gameday_id).exists()
-        DBSetup().create_playoff_placeholder_teams()
-        DBSetup().create_teams('A', 3)
-        DBSetup().create_teams('B', 3)
-        form = self.form
-        form['group1'] = 'A1, A2, A3'
-        form['group2'] = 'B1, B2, B3'
-        resp = form.submit().follow()
-        assert resp.status_code == HTTPStatus.OK
-        assert resp.request.path == reverse('league-gameday-detail', args=[self.gameday_id])
-        gameinfo_set = Gameinfo.objects.filter(gameday_id=self.gameday_id)
-        assert gameinfo_set.count() == 11
-        gameresult_set = Gameresult.objects.filter(gameinfo_id=gameinfo_set.first().pk)
-        assert gameresult_set.count() == 2
-        assert gameresult_set[1].team.name == 'A2'
+        assert response.status_int == 200
+        assert isinstance(response.context["form"], GamedayForm)
 
-    def test_handle_non_existent_schedule_creation(self):
-        form = self.form
-        form['group1'] = 'too few teams'
-        resp = form.submit()
-        self.assertFormError(resp.context['form'], None, [
-            'Spielplan konnte nicht erstellt werden, da die Kombination #Teams und #Format nicht zum Spielplan passen'])
-        assert not Gameinfo.objects.filter(gameday_id=self.gameday_id).exists()
+        form = response.forms["gameday-form"]
+        form["name"] = "Updated Gameday"
+        submitted = form.submit().follow()
+        assert submitted.status_code == HTTPStatus.OK
+        assert submitted.request.path == reverse(LEAGUE_GAMEDAY_DETAIL, args=[gameday.pk])
 
-    def test_team_not_found_while_creating_schedule(self):
-        DBSetup().create_playoff_placeholder_teams()
-        DBSetup().create_teams('A', 3)
-        DBSetup().create_teams('B', 3)
-        form = self.form
-        form['group1'] = 'unknown team, A2, A3'
-        form['group2'] = 'B1, B2, B3'
-        resp = form.submit()
-        assert resp.status_code == HTTPStatus.OK
-        self.assertFormError(resp.context['form'], None, [
-            'Spielplan konnte nicht erstellt werden, da das Team "unknown team" nicht gefunden wurde.'])
-        assert Gameinfo.objects.all().count() == 0
+        gameday.refresh_from_db()
+        assert gameday.name == "Updated Gameday"
+        assert gameday.author == staff_user
+
+    def test_non_staff_user_forbidden(self):
+        user = UserFactory(is_staff=False)
+        self.app.set_user(user)
+        gameday = GamedayFactory()
+
+        url = reverse(LEAGUE_GAMEDAY_UPDATE, kwargs={"pk": gameday.pk})
+        self.app.get(url, status=403)
+
+    def test_anonymous_user_redirects_to_login(self):
+        gameday = GamedayFactory()
+        url = reverse(LEAGUE_GAMEDAY_UPDATE, kwargs={"pk": gameday.pk})
+
+        response = self.app.get(url, expect_errors=True)
+        assert response.status_code == HTTPStatus.FOUND
+        assert response.url.index("login/?next=")
