@@ -97,6 +97,13 @@ class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Gameday
     pk = None
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from gamedays.urls import LEAGUE_GAMEDAY_LIST
+        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_LIST)
+        context['action_label'] = 'Spieltag erstellen'
+        return context
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["context"] = GamedayFormContext(
@@ -129,6 +136,14 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = GamedayForm
     template_name = 'gamedays/gameday_form.html'
     model = Gameday
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        gameday = Gameday.objects.get(pk=self.kwargs['pk'])
+        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
+        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk})
+        context['action_label'] = 'Spieltag aktualisieren'
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

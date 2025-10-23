@@ -5,7 +5,7 @@
     <form method="POST" id="gameday-form">
         {% csrf_token %}
         <fieldset class="form-group">
-            {% include "partials/legend_with_cancel.html" with title=object|yesno:"Spieltag aktualisieren,Spieltag erstellen" cancel_url="league-gameday-list" %}
+            {% include "partials/legend_with_cancel.html" with title=action_label cancel_url=cancel_url %}
             {{ form|crispy }}
         </fieldset>
         <div class="form-group">
