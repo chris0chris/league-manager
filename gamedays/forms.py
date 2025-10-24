@@ -216,10 +216,12 @@ class GameinfoForm(forms.ModelForm):
         return [('', placeholder)] + list(choices) if len(choices) > 1 else list(choices)
 
 
-def get_gameinfo_formset(extra=1):
+def get_gameinfo_formset(extra=0):
     return modelformset_factory(
         Gameinfo,
         form=GameinfoForm,
         extra=extra,
-        can_delete=True
+        can_delete=True,
+        validate_min=True,
+        min_num=1,
     )

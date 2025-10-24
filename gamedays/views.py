@@ -232,7 +232,7 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
             extra_forms = int(number_groups) if number_groups else len(group_array)
 
             GamedayFormatFormSet = get_gameday_format_formset(extra=extra_forms)
-            form = GamedayFormatFormSet(data, prefix='gameday_format')
+            form = GamedayFormatFormSet(data, prefix=GAMEDAY_FORMAT_STEP)
             if number_groups:
                 group_names = [f'Gruppe {n}' for n in range(1, number_groups + 1)]
             else:
@@ -257,12 +257,11 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
 
             form_kwargs = {'group_choices': group_choices, 'field_choices': field_choices}
             qs = Gameinfo.objects.filter(gameday=gameday)
-            extra_forms = 1 if not qs.exists() else 0
-            GameinfoFormSet = get_gameinfo_formset(extra=extra_forms)
+            GameinfoFormSet = get_gameinfo_formset()
             if data is not None:
-                form = GameinfoFormSet(data, queryset=qs, prefix='games', form_kwargs=form_kwargs)
+                form = GameinfoFormSet(data, queryset=qs, prefix=GAMEINFO_STEP, form_kwargs=form_kwargs)
             else:
-                form = GameinfoFormSet(queryset=qs, prefix='games', form_kwargs=form_kwargs)
+                form = GameinfoFormSet(queryset=qs, prefix=GAMEINFO_STEP, form_kwargs=form_kwargs)
 
         form._gameday_instance = gameday
         return form

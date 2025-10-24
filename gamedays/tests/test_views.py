@@ -6,8 +6,13 @@ from django.urls import reverse
 from django_webtest import WebTest
 from django_webtest.response import DjangoWebtestResponse
 
-from gamedays.forms import GamedayForm
-from gamedays.models import Gameday, League
+from gamedays.forms import (
+    GamedayForm,
+    GamedayGaminfoFieldsAndGroupsForm,
+    GamedayFormatForm,
+    GameinfoForm,
+)
+from gamedays.models import Gameday, League, Gameinfo
 from gamedays.service.gameday_service import (
     EmptySchedule,
     EmptyFinalTable,
@@ -19,7 +24,10 @@ from gamedays.urls import (
     LEAGUE_GAMEDAY_CREATE,
     LEAGUE_GAMEDAY_DETAIL,
     LEAGUE_GAMEDAY_UPDATE,
+    LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
+    LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
 )
+from gamedays.views import FIELD_GROUP_STEP, GAMEDAY_FORMAT_STEP, GAMEINFO_STEP
 
 
 class TestGamedayCreateView(WebTest):
@@ -90,7 +98,7 @@ class TestGamedayUpdateView(WebTest):
         url = reverse(LEAGUE_GAMEDAY_UPDATE, kwargs={"pk": gameday.pk})
         response = self.app.get(url)
 
-        assert response.status_int == 200
+        assert response.status_code == HTTPStatus.OK
         assert isinstance(response.context["form"], GamedayForm)
 
         form = response.forms["gameday-form"]
@@ -120,3 +128,103 @@ class TestGamedayUpdateView(WebTest):
         response = self.app.get(url, expect_errors=True)
         assert response.status_code == HTTPStatus.FOUND
         assert response.url.index("login/?next=")
+
+
+class TestGameinfoWizard(WebTest):
+    def test_staff_user_can_access_first_step(self):
+        user = UserFactory(is_staff=True)
+        self.app.set_user(user)
+        gameday = GamedayFactory()
+
+        url = reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
+        response = self.app.get(url)
+
+        assert response.status_code == HTTPStatus.OK
+        assert isinstance(response.context["form"], GamedayGaminfoFieldsAndGroupsForm)
+
+    def test_non_staff_user_forbidden(self):
+        user = UserFactory(is_staff=False)
+        self.app.set_user(user)
+        gameday = GamedayFactory()
+
+        url = reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
+        self.app.get(url, status=403)
+
+    def test_anonymous_redirects_to_login(self):
+        gameday = GamedayFactory()
+        url = reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
+
+        response = self.app.get(url, expect_errors=True)
+        assert response.status_code == HTTPStatus.FOUND
+        assert response.url.index("login/?next=")
+
+    def test_wizard_renders_all_steps_with_gameday_format_step(self):
+        teams = DBSetup().create_teams(name='GroupTeam', number_teams=3)
+        user = UserFactory(is_staff=True)
+        self.app.set_user(user)
+        gameday = GamedayFactory()
+
+        field_group_step = self.app.get(
+            reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
+        )
+        assert isinstance(field_group_step.context["form"], GamedayGaminfoFieldsAndGroupsForm)
+
+        field_group_step_form = field_group_step.forms["fields-groups-form"]
+        field_group_step_form[f"{FIELD_GROUP_STEP}-format"] = "3_1"
+        field_group_step_form[f"{FIELD_GROUP_STEP}-number_fields"] = 1
+        field_group_step_form[f"{FIELD_GROUP_STEP}-number_groups"] = 1
+
+        gameday_format_step = field_group_step_form.submit()
+        assert gameday_format_step.status_code == HTTPStatus.OK
+        assert isinstance(gameday_format_step.context["form"][0], GamedayFormatForm)
+
+        gameday_format_step_form = gameday_format_step.forms["gamedays-format-form"]
+        gameday_format_step_form[f"{GAMEDAY_FORMAT_STEP}-0-group"]._forced_values  = [team.pk for team in teams]
+
+        gameinfo_update_page = gameday_format_step_form.submit().follow()
+        assert gameinfo_update_page.status_code == HTTPStatus.OK
+        assert gameinfo_update_page.request.path == reverse(
+            LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, args=[gameday.pk]
+        )
+        assert isinstance(gameinfo_update_page.context["form"][0], GameinfoForm)
+
+    def test_wizard_renders_all_steps_with_custom_gameday_format(self):
+        teams = DBSetup().create_teams(name='GroupTeam', number_teams=3)
+        user = UserFactory(is_staff=True)
+        self.app.set_user(user)
+        gameday = GamedayFactory()
+
+        field_group_step = self.app.get(
+            reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
+        )
+        assert field_group_step.status_code == HTTPStatus.OK
+        assert isinstance(field_group_step.context["form"], GamedayGaminfoFieldsAndGroupsForm)
+
+        field_group_step_form = field_group_step.forms["fields-groups-form"]
+        field_group_step_form[f"{FIELD_GROUP_STEP}-format"] = "CUSTOM"
+        field_group_step_form[f"{FIELD_GROUP_STEP}-number_fields"] = 1
+        field_group_step_form[f"{FIELD_GROUP_STEP}-number_groups"] = 1
+
+        gameinfo_step = field_group_step_form.submit()
+        assert gameinfo_step.status_code == HTTPStatus.OK
+        assert isinstance(gameinfo_step.context["form"][0], GameinfoForm)
+
+        gameinfo_step_form = gameinfo_step.forms["gameinfos-form"]
+        gameinfo_step_form[f"{GAMEINFO_STEP}-0-home"]._forced_value = teams[0].pk
+        gameinfo_step_form[f"{GAMEINFO_STEP}-0-away"]._forced_value = teams[1].pk
+        gameinfo_step_form[f"{GAMEINFO_STEP}-0-officials"]._forced_value = teams[2].pk
+        gameinfo_step_form[f"{GAMEINFO_STEP}-0-scheduled"] = '05:07'
+
+        gameday_detail_page = gameinfo_step_form.submit().follow()
+        assert gameday_detail_page.status_code == HTTPStatus.OK
+        assert gameday_detail_page.request.path == reverse(
+            LEAGUE_GAMEDAY_DETAIL, args=[gameday.pk]
+        )
+
+        gameinfo = Gameinfo.objects.first()
+
+        assert gameinfo.officials == teams[2]
+        assert f"{gameinfo.scheduled}" == '05:07:00'
+        assert gameinfo.gameresult_set.get(isHome=True).team == teams[0]
+        assert gameinfo.gameresult_set.get(isHome=False).team == teams[1]
+

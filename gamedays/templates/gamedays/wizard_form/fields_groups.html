@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="content-section">
-    <form method="POST">
+    <form method="POST" id="fields-groups-form">
         {% csrf_token %}
         {{ wizard.management_form }}
         {{ form.non_field_errors }}

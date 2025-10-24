@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="content-section">
-    <form method="post" id="games-form">
+    <form method="post" id="gameinfos-form">
         {% csrf_token %}
         {{ wizard.management_form }}
         {{ form.management_form }}
