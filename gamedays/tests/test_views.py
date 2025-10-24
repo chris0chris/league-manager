@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+import pytest
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
@@ -26,6 +27,9 @@ from gamedays.urls import (
     LEAGUE_GAMEDAY_UPDATE,
     LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
     LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
+    LEAGUE_GAMEDAY_DELETE,
+    LEAGUE_GAMEDAY_GAMEINFOS_DELETE,
+    LEAGUE_GAMEDAY_LIST,
 )
 from gamedays.views import FIELD_GROUP_STEP, GAMEDAY_FORMAT_STEP, GAMEINFO_STEP
 
@@ -130,6 +134,60 @@ class TestGamedayUpdateView(WebTest):
         assert response.url.index("login/?next=")
 
 
+class TestStaffDeleteView(WebTest):
+    def test_non_staff_user_forbidden(self):
+        user = UserFactory(is_staff=False)
+        self.app.set_user(user)
+        gameday = GamedayFactory()
+
+        url = reverse(LEAGUE_GAMEDAY_DELETE, kwargs={"pk": gameday.pk})
+        self.app.get(url, status=403)
+
+    def test_anonymous_user_redirects_to_login(self):
+        gameday = GamedayFactory()
+        url = reverse(LEAGUE_GAMEDAY_GAMEINFOS_DELETE, kwargs={"pk": gameday.pk})
+
+        response = self.app.get(url, expect_errors=True)
+        assert response.status_code == HTTPStatus.FOUND
+        assert response.url.index("login/?next=")
+
+
+class TestGamedayDeleteView(WebTest):
+    csrf_checks = False
+    def test_staff_user_can_access_update_view(self):
+        staff_user = UserFactory(is_staff=True)
+        self.app.set_user(staff_user)
+        gameday = GamedayFactory(address="some gameday address")
+
+        url = reverse(LEAGUE_GAMEDAY_DELETE, kwargs={"pk": gameday.pk})
+        response = self.app.post(url).follow()
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.request.path == reverse(LEAGUE_GAMEDAY_LIST)
+
+        with pytest.raises(Gameday.DoesNotExist):
+            gameday.refresh_from_db()
+
+
+class TestGameinfoDeleteView(WebTest):
+    csrf_checks = False
+    def test_staff_user_can_access_update_view(self):
+        staff_user = UserFactory(is_staff=True)
+        self.app.set_user(staff_user)
+        gameday = DBSetup().g62_finished()
+
+        assert gameday.gameinfo_set.count() == 11
+        url = reverse(LEAGUE_GAMEDAY_GAMEINFOS_DELETE, kwargs={"pk": gameday.pk})
+        response = self.app.post(url).follow()
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.request.path == reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk})
+
+        gameday.refresh_from_db()
+        assert gameday.gameinfo_set.count() == 0
+
+
+
 class TestGameinfoWizard(WebTest):
     def test_staff_user_can_access_first_step(self):
         user = UserFactory(is_staff=True)
@@ -227,4 +285,3 @@ class TestGameinfoWizard(WebTest):
         assert f"{gameinfo.scheduled}" == '05:07:00'
         assert gameinfo.gameresult_set.get(isHome=True).team == teams[0]
         assert gameinfo.gameresult_set.get(isHome=False).team == teams[1]
-
