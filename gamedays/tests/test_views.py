@@ -154,6 +154,7 @@ class TestStaffDeleteView(WebTest):
 
 class TestGamedayDeleteView(WebTest):
     csrf_checks = False
+
     def test_staff_user_can_access_update_view(self):
         staff_user = UserFactory(is_staff=True)
         self.app.set_user(staff_user)
@@ -171,6 +172,7 @@ class TestGamedayDeleteView(WebTest):
 
 class TestGameinfoDeleteView(WebTest):
     csrf_checks = False
+
     def test_staff_user_can_access_update_view(self):
         staff_user = UserFactory(is_staff=True)
         self.app.set_user(staff_user)
@@ -181,11 +183,12 @@ class TestGameinfoDeleteView(WebTest):
         response = self.app.post(url).follow()
 
         assert response.status_code == HTTPStatus.OK
-        assert response.request.path == reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk})
+        assert response.request.path == reverse(
+            LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk}
+        )
 
         gameday.refresh_from_db()
         assert gameday.gameinfo_set.count() == 0
-
 
 
 class TestGameinfoWizard(WebTest):
@@ -217,7 +220,7 @@ class TestGameinfoWizard(WebTest):
         assert response.url.index("login/?next=")
 
     def test_wizard_renders_all_steps_with_gameday_format_step(self):
-        teams = DBSetup().create_teams(name='GroupTeam', number_teams=3)
+        teams = DBSetup().create_teams(name="GroupTeam", number_teams=3)
         user = UserFactory(is_staff=True)
         self.app.set_user(user)
         gameday = GamedayFactory()
@@ -225,7 +228,9 @@ class TestGameinfoWizard(WebTest):
         field_group_step = self.app.get(
             reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
         )
-        assert isinstance(field_group_step.context["form"], GamedayGaminfoFieldsAndGroupsForm)
+        assert isinstance(
+            field_group_step.context["form"], GamedayGaminfoFieldsAndGroupsForm
+        )
 
         field_group_step_form = field_group_step.forms["fields-groups-form"]
         field_group_step_form[f"{FIELD_GROUP_STEP}-format"] = "3_1"
@@ -237,7 +242,9 @@ class TestGameinfoWizard(WebTest):
         assert isinstance(gameday_format_step.context["form"][0], GamedayFormatForm)
 
         gameday_format_step_form = gameday_format_step.forms["gamedays-format-form"]
-        gameday_format_step_form[f"{GAMEDAY_FORMAT_STEP}-0-group"]._forced_values  = [team.pk for team in teams]
+        gameday_format_step_form[f"{GAMEDAY_FORMAT_STEP}-0-group"]._forced_values = [
+            team.pk for team in teams
+        ]
 
         gameinfo_update_page = gameday_format_step_form.submit().follow()
         assert gameinfo_update_page.status_code == HTTPStatus.OK
@@ -247,7 +254,7 @@ class TestGameinfoWizard(WebTest):
         assert isinstance(gameinfo_update_page.context["form"][0], GameinfoForm)
 
     def test_wizard_renders_all_steps_with_custom_gameday_format(self):
-        teams = DBSetup().create_teams(name='GroupTeam', number_teams=3)
+        teams = DBSetup().create_teams(name="GroupTeam", number_teams=3)
         user = UserFactory(is_staff=True)
         self.app.set_user(user)
         gameday = GamedayFactory()
@@ -256,7 +263,9 @@ class TestGameinfoWizard(WebTest):
             reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
         )
         assert field_group_step.status_code == HTTPStatus.OK
-        assert isinstance(field_group_step.context["form"], GamedayGaminfoFieldsAndGroupsForm)
+        assert isinstance(
+            field_group_step.context["form"], GamedayGaminfoFieldsAndGroupsForm
+        )
 
         field_group_step_form = field_group_step.forms["fields-groups-form"]
         field_group_step_form[f"{FIELD_GROUP_STEP}-format"] = "CUSTOM"
@@ -271,7 +280,7 @@ class TestGameinfoWizard(WebTest):
         gameinfo_step_form[f"{GAMEINFO_STEP}-0-home"]._forced_value = teams[0].pk
         gameinfo_step_form[f"{GAMEINFO_STEP}-0-away"]._forced_value = teams[1].pk
         gameinfo_step_form[f"{GAMEINFO_STEP}-0-officials"]._forced_value = teams[2].pk
-        gameinfo_step_form[f"{GAMEINFO_STEP}-0-scheduled"] = '05:07'
+        gameinfo_step_form[f"{GAMEINFO_STEP}-0-scheduled"] = "05:07"
 
         gameday_detail_page = gameinfo_step_form.submit().follow()
         assert gameday_detail_page.status_code == HTTPStatus.OK
@@ -282,6 +291,6 @@ class TestGameinfoWizard(WebTest):
         gameinfo = Gameinfo.objects.first()
 
         assert gameinfo.officials == teams[2]
-        assert f"{gameinfo.scheduled}" == '05:07:00'
+        assert f"{gameinfo.scheduled}" == "05:07:00"
         assert gameinfo.gameresult_set.get(isHome=True).team == teams[0]
         assert gameinfo.gameresult_set.get(isHome=False).team == teams[1]
