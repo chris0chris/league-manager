@@ -70,7 +70,9 @@ class TestGamedayDetailView(TestCase):
 
     def test_detail_view_with_finished_gameday(self):
         gameday = DBSetup().g62_finished()
-        resp = self.client.get(reverse(LEAGUE_GAMEDAY_DETAIL, args=[gameday.pk]))
+        resp = self.client.get(
+            reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk})
+        )
         assert resp.status_code == HTTPStatus.OK
         context = resp.context_data
         assert context["object"].pk == gameday.pk
@@ -80,7 +82,9 @@ class TestGamedayDetailView(TestCase):
 
     def test_detail_view_with_empty_gameday(self):
         gameday = DBSetup().create_empty_gameday()
-        resp = self.client.get(reverse(LEAGUE_GAMEDAY_DETAIL, args=[gameday.pk]))
+        resp = self.client.get(
+            reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk})
+        )
         assert resp.status_code == HTTPStatus.OK
         context = resp.context_data
         assert context["object"].pk == gameday.pk
@@ -110,7 +114,7 @@ class TestGamedayUpdateView(WebTest):
         submitted = form.submit().follow()
         assert submitted.status_code == HTTPStatus.OK
         assert submitted.request.path == reverse(
-            LEAGUE_GAMEDAY_DETAIL, args=[gameday.pk]
+            LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk}
         )
 
         gameday.refresh_from_db()
@@ -249,7 +253,7 @@ class TestGameinfoWizard(WebTest):
         gameinfo_update_page = gameday_format_step_form.submit().follow()
         assert gameinfo_update_page.status_code == HTTPStatus.OK
         assert gameinfo_update_page.request.path == reverse(
-            LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, args=[gameday.pk]
+            LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={"pk": gameday.pk}
         )
         assert isinstance(gameinfo_update_page.context["form"][0], GameinfoForm)
 
@@ -285,7 +289,7 @@ class TestGameinfoWizard(WebTest):
         gameday_detail_page = gameinfo_step_form.submit().follow()
         assert gameday_detail_page.status_code == HTTPStatus.OK
         assert gameday_detail_page.request.path == reverse(
-            LEAGUE_GAMEDAY_DETAIL, args=[gameday.pk]
+            LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk}
         )
 
         gameinfo = Gameinfo.objects.first()
@@ -294,3 +298,83 @@ class TestGameinfoWizard(WebTest):
         assert f"{gameinfo.scheduled}" == "05:07:00"
         assert gameinfo.gameresult_set.get(isHome=True).team == teams[0]
         assert gameinfo.gameresult_set.get(isHome=False).team == teams[1]
+
+
+
+class TestGameinfoUpdateView(WebTest):
+    csrf_checks = False
+
+    def test_non_staff_user_forbidden(self):
+        user = UserFactory(is_staff=False)
+        self.app.set_user(user)
+        gameday = GamedayFactory()
+
+        url = reverse(LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={"pk": gameday.pk})
+        self.app.get(url, status=403)
+
+    def test_anonymous_user_redirects_to_login(self):
+        gameday = GamedayFactory()
+        url = reverse(LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={"pk": gameday.pk})
+
+        response = self.app.get(url, expect_errors=True)
+        assert response.status_code == HTTPStatus.FOUND
+        assert response.url.index("login/?next=")
+
+    def test_redirect_to_wizard_if_gameday_has_no_gameinfos(self):
+        staff_user = UserFactory(is_staff=True)
+        self.app.set_user(staff_user)
+        gameday = GamedayFactory(address="some redirect gameday address")
+
+        url = reverse(LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={"pk": gameday.pk})
+        response = self.app.get(url).follow()
+        assert response.status_code == HTTPStatus.OK
+        assert response.request.path == reverse(
+            LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk}
+        )
+
+    def test_can_access_update_view_and_submit_form(self):
+        staff_user = UserFactory(is_staff=True)
+        self.app.set_user(staff_user)
+        teams = DBSetup().create_teams(name="GiUpdateTeam", number_teams=3)
+        gameday = DBSetup().g62_status_empty()
+
+        url = reverse(LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={"pk": gameday.pk})
+        gameinfo_update_page = self.app.get(url)
+
+        assert gameinfo_update_page.status_code == HTTPStatus.OK
+        assert isinstance(gameinfo_update_page.context["form"][0], GameinfoForm)
+
+        gameinfo_step_form = gameinfo_update_page.forms["gameinfos-form"]
+        gameinfo_step_form[f"{GAMEINFO_STEP}-0-home"]._forced_value = teams[0].pk
+        gameinfo_step_form[f"{GAMEINFO_STEP}-0-away"]._forced_value = teams[1].pk
+        gameinfo_step_form[f"{GAMEINFO_STEP}-0-officials"]._forced_value = teams[2].pk
+        gameinfo_step_form[f"{GAMEINFO_STEP}-0-scheduled"] = "05:07"
+
+        gameday_detail_page = gameinfo_step_form.submit().follow()
+        assert gameday_detail_page.status_code == HTTPStatus.OK
+        assert gameday_detail_page.request.path == reverse(
+            LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk}
+        )
+
+        gameinfo = Gameinfo.objects.first()
+
+        assert gameinfo.officials == teams[2]
+        assert f"{gameinfo.scheduled}" == "05:07:00"
+        assert gameinfo.gameresult_set.get(isHome=True).team == teams[0]
+        assert gameinfo.gameresult_set.get(isHome=False).team == teams[1]
+
+    def test_go_to_gameinfo_wizard_via_reset_button(self):
+        staff_user = UserFactory(is_staff=True)
+        self.app.set_user(staff_user)
+
+        gameday = DBSetup().g62_status_empty()
+
+        url = reverse(LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={"pk": gameday.pk})
+        post_data = {"wizard_goto_step": "reset_gameinfos"}
+
+        gameinfo_wizard_page = self.app.post(url, post_data).follow()
+
+        assert gameinfo_wizard_page.status_code == HTTPStatus.OK
+        assert gameinfo_wizard_page.request.path == reverse(
+            LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk}
+        )

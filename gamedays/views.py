@@ -405,7 +405,7 @@ class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
 
         kwargs.update({
             'queryset': qs,
-            'prefix': 'games',
+            'prefix': GAMEINFO_STEP,
             'form_kwargs': {
                 'group_choices': group_choices,
                 'field_choices': field_choices
