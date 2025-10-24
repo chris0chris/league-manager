@@ -120,12 +120,18 @@ class TestGameinfoForm(TestCase):
         assert form.fields["away"].required is True
         assert form.fields["officials"].required is True
 
-    def test_gameinfo_form_sets_placeholder_choices(self):
+    def test_gameinfo_form_sets_placeholder_choices_for_multiple_entries(self):
         form = GameinfoForm(
-            group_choices=[("A", "Gruppe A")], field_choices=[("1", "Feld 1")]
+            group_choices=[("A", "Group A")], field_choices=[("1", "Field 1"), ("2", "Field 2")]
         )
-        assert form.fields["standing"].choices[0] == ("", "Bitte auswählen")
-        assert ("A", "Gruppe A") in form.fields["standing"].choices
+        assert form.fields["field"].choices[0] == ("", "Bitte auswählen")
+        assert ("2", "Field 2") in form.fields["field"].choices
+
+    def test_gameinfo_form_sets_placeholder_choices_for_one_entry(self):
+        form = GameinfoForm(
+            group_choices=[("A", "Group A")], field_choices=[("1", "Field 1")]
+        )
+        assert form.fields["standing"].choices[0] == ("A", "Group A")
 
     def test_gameinfo_form_initializes_from_instance(self):
         home_team = TeamFactory(name="Team A")
@@ -161,8 +167,8 @@ class TestGameinfoForm(TestCase):
         }
         form = GameinfoForm(
             data=data,
-            group_choices=[("A", "Gruppe A")],
-            field_choices=[("1", "Feld 1")],
+            group_choices=[("A", "Group A")],
+            field_choices=[("1", "Field 1")],
         )
         assert form.is_valid(), form.errors
 

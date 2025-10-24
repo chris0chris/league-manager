@@ -5,7 +5,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.forms import modelformset_factory, formset_factory
 
-from gamedays.models import Season, League, Gameday, Gameinfo, Team, Gameresult
+from gamedays.models import Season, League, Gameday, Gameinfo, Team
 
 SCHEDULE_CHOICES = (
     ("", "Bitte auswählen"),
@@ -213,7 +213,7 @@ class GameinfoForm(forms.ModelForm):
     def _add_placeholder(self, choices, placeholder='Bitte auswählen'):
         if not choices:
             return [('', placeholder)]
-        return [('', placeholder)] + list(choices)
+        return [('', placeholder)] + list(choices) if len(choices) > 1 else list(choices)
 
 
 def get_gameinfo_formset(extra=1):
