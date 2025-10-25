@@ -127,3 +127,9 @@ class GamedayService:
         games_to_whistle = games_to_whistle[columns]
         games_to_whistle = games_to_whistle.rename(columns={OFFICIALS: 'officialsId', OFFICIALS_NAME: OFFICIALS})
         return games_to_whistle
+
+    def get_offense_player_statistics_table(self):
+        return self.gmw.get_offense_player_statistics_table()
+
+    def get_defense_player_statistic_table(self):
+        return self.gmw.get_defense_statistic_table()

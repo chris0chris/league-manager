@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+from django.utils.termcolors import color_names
 from pandas import DataFrame
 
-from gamedays.models import Gameinfo, Gameresult
+from gamedays.models import Gameinfo, Gameresult, TeamLog
 from gamedays.service.gameday_settings import STANDING, TEAM_NAME, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, GROUP1, \
     GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
     STATUS, SH, FH, FINISHED, GAME_FINISHED, DFFL, IN_POSSESSION, IS_HOME
@@ -109,6 +110,88 @@ class GamedayModelWrapper:
             final_table = final_table.reindex(final_standing).reset_index()
         final_table[DFFL] = DfflPoints.for_number_teams(final_table.shape[0])
         return final_table
+
+    def get_offense_player_statistics_table(self):
+        scoring_events = [
+            "Touchdown",
+            "1-Extra-Punkt",
+            "2-Extra-Punkte"
+        ]
+
+        output_columns = ["Platz", "Spieler"] + scoring_events + ["Punkte"]
+
+        events = pd.DataFrame(TeamLog.objects \
+            .filter(gameinfo__in=self._gameinfo['id'], isDeleted=False, event__in=scoring_events) \
+            .exclude(team=None) \
+            .exclude(player=None) \
+            .values(TEAM_NAME, "event", "player", "value"))
+
+        if events.empty:
+            return pd.DataFrame(columns=output_columns)
+
+        events["player"] = events.apply(lambda x: f"{x.team__name} #{x.player}", axis=1)
+
+        table = pd.crosstab(events['player'], events['event'], values=events.event, aggfunc='count').fillna(0).astype(int)
+
+        for missing_event in set(scoring_events) - set(table.columns):
+            table[missing_event] = 0
+
+        points = events \
+            .groupby("player") \
+            .value.sum()
+
+        table = table \
+            .merge(left_index=True, right=points, right_index=True) \
+            .reset_index() \
+            .sort_values(by="value", ascending=False)
+
+        table["Platz"] = table.value.rank(method="min", ascending=False).astype(int)
+
+        table = table.rename(columns={
+            "player": "Spieler",
+            "value": "Punkte"
+        })[output_columns]
+
+        return table.head(10)
+
+    def get_defense_statistic_table(self):
+        ints = self._get_player_events_table(event_name="Interception", event_plural_name="Interceptions") \
+            .reset_index(drop=True) \
+            .astype(str)
+        safeties = self._get_player_events_table(event_name="Safety (+2)", event_plural_name="Safety (+2)", ) \
+            .reset_index(drop=True) \
+            .astype(str)
+
+        result = ints.merge(safeties, how="outer", left_index=True, right_index=True) \
+            .fillna('') \
+            .rename(columns={
+                "Platz_x": "Platz",
+                "Platz_y": "Platz",
+                "Spieler_x": "Spieler",
+                "Spieler_y": "Spieler"
+            })
+
+        return result
+
+    def _get_player_events_table(self, event_name: str, event_plural_name: str):
+        output_columns = ["Platz", "Spieler", event_plural_name]
+        events = pd.DataFrame(TeamLog.objects \
+                              .filter(gameinfo__in=self._gameinfo['id'], isDeleted=False, event=event_name) \
+                              .exclude(team=None) \
+                              .exclude(player=None) \
+                              .values(TEAM_NAME, "event", "player"))
+
+        if events.empty:
+            return pd.DataFrame(columns=output_columns)
+
+        events["player"] = events.apply(lambda x: f"{x.team__name} #{x.player}", axis=1)
+        events = events.groupby("player", as_index=False) \
+            .event.count() \
+            .sort_values(by="event", ascending=False)
+
+        events["Platz"] = events.event.rank(method="min", ascending=False).astype(int)
+        return events[["Platz", "player", "event"]].rename(
+            columns={"player": "Spieler", "event": event_plural_name}).head()
 
     def _get_standing_list(self, standings):
         final_standing = self._games_with_result.groupby([STANDING, TEAM_NAME], as_index=False)
