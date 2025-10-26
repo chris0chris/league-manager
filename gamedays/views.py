@@ -204,6 +204,14 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
         from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
         context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk})
         context['action_label'] = 'Spielplan erstellen'
+        if self.steps.current == GAMEDAY_FORMAT_STEP:
+            field_group_step = self._extra().get(FIELD_GROUP_STEP) or {}
+            schedule_format = field_group_step.get("format")
+            schedule_name = SCHEDULE_MAP.get(schedule_format, {}).get(
+                "name", "ERROR - Name nicht gefunden für Format!"
+            )
+            context["action_label"] = f"Spielplan erstellen - {schedule_name}"
+            context["schedule_name"] = schedule_name
         return context
 
     def get_form_list(self):

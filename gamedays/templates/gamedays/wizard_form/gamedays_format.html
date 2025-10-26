@@ -9,11 +9,11 @@
         {{ form.management_form }}
 
         <fieldset class="form-group">
-            {% include "partials/legend_with_cancel.html" with title="Spielplan erstellen - Teams für Gruppen" cancel_url=cancel_url %}
+            {% include "partials/legend_with_cancel.html" with title=action_label cancel_url=cancel_url %}
             <div class="alert alert-info" role="alert">
                 Bitte Teams in der jeweiligen Gruppe auswählen, wie auf dem <a
                     href="{{ PAGES_LINKS.GENERIC_GAME_SCHEDULE_GOOGLE_SHEETS }}"
-                    target="_blank">Spielplan</a> angegeben ist.
+                    target="_blank">Spielplan</a> angegeben ist - siehe: {{ schedule_name }}
             </div>
             {% for subform in form %}
             <div class="mb-3">

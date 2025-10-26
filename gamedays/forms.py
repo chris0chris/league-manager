@@ -38,70 +38,87 @@ SCHEDULE_CHOICES = (
 
 SCHEDULE_MAP = {
     "3_1": {
+        "name": "3 Teams 1 Gruppe 1 Feld",
         "fields": 1,
         "groups": [{"teams": 3}],
     },
     "3_hinrunde_1": {
+        "name": "3 Teams 1 Gruppe 1 Feld (nur Hinrunde)",
         "fields": 1,
         "groups": [{"teams": 3}],
     },
     "4_1": {
+        "name": "4 Teams 1 Gruppe 1 Feld",
         "fields": 1,
         "groups": [{"teams": 4}],
     },
     "4_final4_1": {
+        "name": "4 Teams 1 Gruppe 1 Feld - 2 Niederlagen KO (Final 4)",
         "fields": 1,
         "groups": [{"teams": 4}],
     },
     "5_dffl1_2": {
+        "name": "5 Teams 1 Gruppe 2 Felder - 30 Min Pause",
         "fields": 2,
         "groups": [{"teams": 5}],
     },
     "5_2": {
+        "name": "5 Teams 1 Gruppe 2 Felder",
         "fields": 2,
         "groups": [{"teams": 5}],
     },
     "6_2": {
+        "name": "6 Teams 2 Gruppen 2 Feldern",
         "fields": 2,
         "groups": [{"teams": 3}, {"teams": 3}],
     },
     "7_2": {
+        "name": "7 Teams 2 Gruppen 2 Feldern",
         "fields": 2,
         "groups": [{"teams": 4}, {"teams": 3}],
     },
     "8_2": {
+        "name": "8 Teams 2 Gruppen 2 Felder",
         "fields": 2,
         "groups": [{"teams": 4}, {"teams": 4}],
     },
     "8_vfpd_2": {
+        "name": "8 Teams 1 Gruppe 2 Felder nur Viertelfinale und Playdown",
         "fields": 2,
         "groups": [{"teams": 4}, {"teams": 4}],
     },
     "8_doublevictory_2": {
+        "name": "8 Teams 1 Gruppe 2 Felder - Double Victory",
         "fields": 2,
         "groups": [{"teams": 8}],
     },
     "8_3": {
+        "name": "8 Teams 2 Gruppen 3 Felder",
         "fields": 3,
         "groups": [{"teams": 4}, {"teams": 4}],
     },
     "9_2": {
+        "name": "9 Teams 3 Gruppen 2 Felder",
         "fields": 2,
         "groups": [{"teams": 3}, {"teams": 3}, {"teams": 3}],
     },
     "9_groupfinals_2": {
+        "name": "9 Teams 3 Gruppen 2 Felder mit Gruppen Finale",
         "fields": 2,
         "groups": [{"teams": 3}, {"teams": 3}, {"teams": 3}],
     },
     "9_3": {
+        "name": "9 Teams 3 Gruppen 3 Felder",
         "fields": 3,
         "groups": [{"teams": 3}, {"teams": 3}, {"teams": 3}],
     },
     "5_dfflf_2": {
+        "name": "5 Teams 1 Grupppe 2 Felder - 20 Min Pause (DFFL Frauen)",
         "fields": 2,
         "groups": [{"teams": 5}],
     },
     "8_final8_3": {
+        "name": "8 Teams 2 Gruppen 3 Felder - PD direkt - PO ab HF (Final8)",
         "fields": 3,
         "groups": [{"teams": 4}, {"teams": 4}],
     },
