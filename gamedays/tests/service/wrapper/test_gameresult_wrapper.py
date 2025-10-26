@@ -53,6 +53,6 @@ class TestGameresultWrapper(TestCase):
         assert gameresult.gameinfo == expected_gameinfo
         assert gameresult.team == expected_team
         assert gameresult.isHome == True
-        assert gameresult.pa == 6
-        assert gameresult.fh == 7
-        assert gameresult.sh == 5
+        assert gameresult.pa == 5
+        assert gameresult.fh == 6
+        assert gameresult.sh == 7

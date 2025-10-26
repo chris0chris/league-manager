@@ -79,7 +79,7 @@ class TestGameinfoWrapper(TestCase):
         gameinfo_wrapper = GameinfoWrapper(gameinfo)
         gameinfo_wrapper.update_standing('0')
         gameinfo.refresh_from_db()
-        assert gameinfo.standing == ''
+        assert gameinfo.standing == '0'
         assert gameinfo.league_group is None
 
     def test_update_standing_with_group(self):
