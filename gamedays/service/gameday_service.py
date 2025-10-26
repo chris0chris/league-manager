@@ -1,9 +1,10 @@
 import pandas as pd
 
-from gamedays.models import Gameinfo
+from gamedays.models import Gameinfo, TeamLog, Gameresult
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     POINTS_HOME, \
     POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL
+from gamedays.service.gamelog import GameLog
 from gamedays.service.model_wrapper import GamedayModelWrapper
 
 EMPTY_DATA = '[]'
@@ -133,3 +134,93 @@ class GamedayService:
 
     def get_defense_player_statistic_table(self):
         return self.gmw.get_defense_statistic_table()
+
+
+class EmptyGamedayGameService:
+    pass
+
+class GamedayGameService:
+    @classmethod
+    def create(cls, game_pk):
+        try:
+            return cls(game_pk)
+        except Gameinfo.DoesNotExist:
+            return EmptyGamedayGameService
+
+    def __init__(self, pk):
+        self.game = Gameinfo.objects.get(pk=pk)
+        self.gameresult = pd.DataFrame(Gameresult.objects \
+                                  .filter(gameinfo=pk) \
+                                  .order_by("isHome") \
+                                  .values("team__description", "team", "isHome"))
+
+        self.home_team_name = self.gameresult.iloc[1]['team__description']
+        self.home_team_id = self.gameresult.iloc[1]['team']
+        self.away_team_name = self.gameresult.iloc[0]['team__description']
+        self.away_team_id = self.gameresult.iloc[0]['team']
+
+        self._column_mapping = {
+            # "created_time": "Zeit",
+            self.home_team_name: self.home_team_name,
+            "input": "Spielstand",
+            self.away_team_name: self.away_team_name,
+        }
+        self.output_columns = self._column_mapping.values()
+
+    def _prepare_team_logs(self):
+        events = pd.DataFrame(TeamLog.objects \
+            .filter(gameinfo=self.game.pk) \
+            .exclude(isDeleted=True) \
+            .order_by("created_time") \
+            .values(*[x.name for x in TeamLog._meta.local_fields], "team__description")
+        )
+
+        events.player = events.player.apply(lambda x: '' if pd.isna(x) else f"#{str(int(x))}")
+        events.input = events["input"].apply(lambda x: '' if pd.isna(x) else f": {x}")
+        events["is_scoring_play"] = events.value > 0
+        events["event_with_player"] = events.apply(lambda x: x.player + ' ' + x.event + x.input, axis=1)
+        return events
+
+    def get_events_table(self):
+        events = self._prepare_team_logs()
+
+        static_events = events[pd.isna(events.team)].copy()
+        team_events = events[~pd.isna(events.team)].copy()
+
+        event_ct = pd.crosstab(
+            index=team_events.id,
+            columns=team_events.team__description,
+            values=team_events.event_with_player,
+            aggfunc='first'
+        ).fillna('')
+
+        event_ct = event_ct.merge(
+            right=team_events[["id", "created_time", "player"]],
+            left_index=True,
+            right_on='id'
+        )
+
+        scores_ct = pd.crosstab(team_events.id, team_events.team__description, values=team_events.value, aggfunc='sum')
+        scores_ct = scores_ct.fillna(0).astype(int).cumsum().ffill()
+        scores_ct["score"] = scores_ct.apply(lambda x: f"{x[self.home_team_name]}:{x[self.away_team_name]}", axis=1)
+        scores_ct["previous_score"] = scores_ct.score != scores_ct.score.shift(1)
+        scores_ct.score = scores_ct.apply(lambda x: x.score if x.previous_score else '', axis=1)
+
+        event_ct = event_ct.merge(
+            right=scores_ct[["score"]],
+            left_on='id',
+            right_index=True,
+            suffixes=('', '')
+        )
+
+        event_ct = pd.concat(
+            objs=[
+                event_ct,
+                static_events[["id", "created_time", "event"]].rename(columns={'event': 'input'})
+            ]
+        ).fillna('').sort_values("id")
+
+        event_ct.input = event_ct.apply(lambda x: x.input if len(x.input) > 0 else x.score, axis=1)
+        event_ct.created_time = event_ct.created_time.apply(lambda x: x.strftime("%H:%M"))
+
+        return event_ct.rename(columns=self._column_mapping)[self.output_columns]

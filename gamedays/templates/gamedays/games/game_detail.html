@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+{% if not request.GET.isExtern %}
+<style>
+td {
+    width: 33%;
+}
+</style>
+<a href="{% url 'league-gameday-detail' pk=object.gameday.pk%}" class="btn btn-primary">
+    <span class="d-none d-md-inline">Zurück zum Spieltag</span>
+</a>
+<div class="d-flex justify-content-between align-items-center">
+    <h1>Spiel Übersicht: <b>{{ info.home_team }}</b> vs. <b>{{ info.away_team }}</b></h1>
+
+    {% endif %}
+</div>
+<div class="row mb-1">
+    <div class="col"><b>Spielbeginn:</b> {{ object.scheduled|time:"H:i" }} Uhr</div>
+</div>
+<div class="row mb-1">
+    <div class="col"><b>Feld:</b> {{ object.field }}</div>
+</div>
+<div class="row mb-1">
+    <div class="col"><b>Status:</b> {{ object.status }}</div>
+</div>
+<div class="row mb-1">
+    <div class="col"><b>Officials:</b> {{ object.officials.description }}</div>
+</div>
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapseFinal" aria-expanded="false" class="card-header" data-bs-target="#collapseFinal"
+         data-bs-toggle="collapse" id="headingFinal" role="button">
+        <h2>Spielverlauf</h2>
+    </div>
+
+    <div class="card-body">
+        {{ info.events_table | safe }}
+    </div>
+</div>
+
+
+
+{% endblock content %}

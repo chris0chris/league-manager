@@ -11,8 +11,8 @@ from django.views.generic import DetailView, UpdateView, CreateView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
 from .forms import GamedayCreateForm, GamedayUpdateForm
-from .models import Gameday
-from .service.gameday_service import GamedayService
+from .models import Gameday, Gameinfo, Gameresult
+from .service.gameday_service import GamedayService, GamedayGameService
 
 
 class GamedayListView(View):
@@ -149,3 +149,28 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     # noinspection PyMethodMayBeStatic
     def _format_array(self, data):
         return [value.strip() for value in data.split(',')]
+
+
+class GamedayGameDetailView(DetailView):
+    model = Gameinfo
+    template_name = 'gamedays/games/game_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(GamedayGameDetailView, self).get_context_data()
+        gameinfo = context['gameinfo']
+        ggs = GamedayGameService(gameinfo.pk)
+        render_configs = {
+            'index': False,
+            'classes': ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center', 'table-style'],
+            'border': 0,
+            'justify': 'right',
+            'escape': False,
+            'table_id': 'team_log_events',
+        }
+
+        context['info'] = {
+            'away_team': ggs.away_team_name,
+            'home_team': ggs.home_team_name,
+            'events_table': ggs.get_events_table().to_html(**render_configs)
+        }
+        return context
