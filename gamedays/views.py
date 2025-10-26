@@ -232,11 +232,7 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
         step = step or self.steps.current
         form = super().get_form(step, data, files)
         extra = self._extra()
-        gameday_id = extra.get('gameday_id')
-        if gameday_id is None:
-            gameday_id = self.kwargs.get('pk')
-            extra.update({'gameday_id': gameday_id})
-        gameday = Gameday.objects.get(pk=gameday_id)
+        gameday = self._get_gameday_instance()
         if step == FIELD_GROUP_STEP:
             groups = gameday.season.groups_season.filter(season=gameday.season, league=gameday.league)
             form.fields['group_names'].choices = [(g.id, g.name) for g in groups]
@@ -290,35 +286,21 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
             else:
                 form = GameinfoFormSet(queryset=qs, prefix=GAMEINFO_STEP, form_kwargs=form_kwargs)
 
-        form._gameday_instance = gameday
         return form
 
-    def get_form_instance(self, step):
+    def _get_gameday_instance(self):
         if not hasattr(self, '_gameday_instance'):
             pk = self.kwargs.get('pk')
-            if pk:
-                try:
-                    self._gameday_instance = Gameday.objects.get(pk=pk)
-                except Gameday.DoesNotExist:
-                    self._gameday_instance = None
-            else:
+            self._extra().update({"gameday_id": pk})
+            try:
+                self._gameday_instance = get_object_or_404(Gameday, pk=self.kwargs['pk'])
+            except Gameday.DoesNotExist:
                 self._gameday_instance = None
 
-        # Attach the same instance to all forms that are based on Gameday
-        if step in [FIELD_GROUP_STEP, 'edit', 'type']:
-            return self._gameday_instance
-
-        return None
+        return self._gameday_instance
 
     def process_step(self, form):
         step = self.steps.current
-
-        if step == 'create':
-            gameday = form.save()
-            gameday.format = getattr(gameday, 'format', '') or ''
-            gameday.save()
-            self._extra()['gameday_id'] = gameday.pk
-            return super().process_step(form)
 
         if step == FIELD_GROUP_STEP:
             self._extra()[FIELD_GROUP_STEP] = form.cleaned_data
@@ -344,19 +326,18 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
             schedule_format = field_group_step.get('format', 'FORMAT_NOT_FOUND')
             sc = ScheduleCreator(
                 schedule=Schedule(gameday_format=schedule_format, groups=grouped_teams),
-                gameday=form._gameday_instance
+                gameday=self._get_gameday_instance()
             )
             sc.create()
 
         if step == GAMEINFO_STEP:
             formset = form
             if formset.is_valid():
-                gameday_form_service = GamedayFormService(formset._gameday_instance)
+                gameday_form_service = GamedayFormService(self._get_gameday_instance())
                 for current_form in formset:
                     if current_form.has_changed():
                         gameday_form_service.handle_gameinfo_and_gameresult(current_form.cleaned_data,
                                                                             current_form.instance)
-                self._extra()['gameinfo_saved'] = True
             return super().process_step(formset)
 
         return super().process_step(form)
