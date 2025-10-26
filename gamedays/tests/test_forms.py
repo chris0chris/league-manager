@@ -96,20 +96,16 @@ class TestGamedayFormatForm(TestCase):
 
         assert "group" in form.fields
         field = form.fields["group"]
-        assert not field.required
+        assert field.required
         assert "required" in field.widget.attrs
         assert field.widget.attrs["required"] is True
 
     def test_gameday_format_form_accepts_valid_group(self):
         team = TeamFactory(name="Team A")
         data = {"group": [team.pk]}
-        form = GamedayFormatForm(data=data)
+        form = GamedayFormatForm(data=data, needed_teams=1)
 
         assert form.is_valid(), form.errors
-
-    def test_gameday_format_form_allows_empty_group(self):
-        form = GamedayFormatForm(data={"group": []})
-        assert form.is_valid()
 
 
 class TestGameinfoForm(TestCase):
@@ -174,6 +170,8 @@ class TestGameinfoForm(TestCase):
 
 
 def test_get_formset_creates_correct_number_of_forms():
-    Formset = get_gameday_format_formset(extra=2)
-    formset = Formset()
+    formset = get_gameday_format_formset(
+                extra=2,
+                needed_teams_list=[0, 0],
+            )
     assert len(formset.forms) == 2

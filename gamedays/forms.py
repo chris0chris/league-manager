@@ -205,7 +205,7 @@ class GamedayFormatForm(forms.Form):
         ),
     )
 
-    def __init__(self, *args, needed_teams=None, **kwargs):
+    def __init__(self, *args, needed_teams=0, **kwargs):
         super().__init__(*args, **kwargs)
         if needed_teams is not None:
             self.needed_teams = needed_teams
