@@ -8,10 +8,15 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.functional import cached_property
 from django.views import View
-from django.views.generic import DetailView, UpdateView, CreateView, FormView, DeleteView
+from django.views.generic import (
+    DetailView,
+    UpdateView,
+    CreateView,
+    FormView,
+    DeleteView,
+)
 from formtools.wizard.views import SessionWizardView
 
-from gamedays.management.schedule_manager import ScheduleCreator, Schedule
 from league_table.models import LeagueGroup
 from .forms import (
     GamedayForm,
@@ -26,6 +31,13 @@ from .forms import (
 from .models import Gameday, Gameinfo
 from .service.gameday_form_service import GamedayFormService
 from .service.gameday_service import GamedayService
+from .wizard import (
+    FIELD_GROUP_STEP,
+    GAMEDAY_FORMAT_STEP,
+    GAMEINFO_STEP,
+    WizardStepHandler,
+    WIZARD_STEP_HANDLER_MAP,
+)
 
 
 class GamedayListView(View):
@@ -171,10 +183,6 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return self.request.user.is_staff
 
 
-FIELD_GROUP_STEP = 'field-group-step'
-GAMEDAY_FORMAT_STEP = 'gameday-format'
-GAMEINFO_STEP = 'gameinfo-step'
-
 FORMS = [
     (FIELD_GROUP_STEP, GamedayGaminfoFieldsAndGroupsForm),
     (GAMEDAY_FORMAT_STEP, GamedayFormatForm),
@@ -194,7 +202,9 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
     def get_template_names(self):
         return [TEMPLATES[self.steps.current]]
 
-    def _extra(self):
+    @property
+    def extra(self):
+        """Lazily create and return persistent extra data in wizard storage."""
         self.storage.extra_data = getattr(self.storage, "extra_data", {})
         return self.storage.extra_data
 
@@ -205,7 +215,7 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
         context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk})
         context['action_label'] = 'Spielplan erstellen'
         if self.steps.current == GAMEDAY_FORMAT_STEP:
-            field_group_step = self._extra().get(FIELD_GROUP_STEP) or {}
+            field_group_step = self.extra.get(FIELD_GROUP_STEP) or {}
             schedule_format = field_group_step.get("format")
             schedule_name = SCHEDULE_MAP.get(schedule_format, {}).get(
                 "name", "ERROR - Name nicht gefunden für Format!"
@@ -217,8 +227,7 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
     def get_form_list(self):
         form_list = super().get_form_list()
 
-        extra = self._extra()
-        field_group_step = extra.get(FIELD_GROUP_STEP, {})
+        field_group_step = self.extra.get(FIELD_GROUP_STEP, {})
         format_value = field_group_step.get("format")
 
         if format_value == "CUSTOM":
@@ -231,7 +240,6 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
     def get_form(self, step=None, data=None, files=None):
         step = step or self.steps.current
         form = super().get_form(step, data, files)
-        extra = self._extra()
         gameday = self.gameday
         if step == FIELD_GROUP_STEP:
             groups = gameday.season.groups_season.filter(season=gameday.season, league=gameday.league)
@@ -264,8 +272,7 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
                 current_form.fields['group'].label = group_names[index]
 
         if step == GAMEINFO_STEP:
-            extra = self._extra()
-            field_group_step = extra.get(FIELD_GROUP_STEP) or {}
+            field_group_step = self.extra.get(FIELD_GROUP_STEP) or {}
             number_fields = int(field_group_step.get('number_fields', 1))
             number_groups = field_group_step.get('number_groups')
             group_names = field_group_step.get('group_names')
@@ -293,47 +300,15 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
         return get_object_or_404(Gameday, pk=self.kwargs["pk"])
 
     def process_step(self, form):
-        step = self.steps.current
-        gameday = self.gameday
-
-        if step == FIELD_GROUP_STEP:
-            self._extra()[FIELD_GROUP_STEP] = form.cleaned_data
-            data = self._extra().get(FIELD_GROUP_STEP)
-            if data.get('format') == 'CUSTOM':
-                gameday.format = f'{gameday.league.name}_Gruppen{data.get('number_groups')}_Felder{data.get('number_fields')}'
-            else:
-                gameday.format = data.get('format')
-            gameday.save()
-            return super().process_step(form)
-
-        if step == GAMEDAY_FORMAT_STEP and form.is_valid():
-            # TODO die Entität übergeben und nicht den Namen
-            grouped_teams = [
-                [team.name for team in f.cleaned_data['group']]
-                for f in form
-                if f.cleaned_data.get('group')
-            ]
-            field_group_step = self._extra().get(FIELD_GROUP_STEP) or {}
-            schedule_format = field_group_step.get('format', 'FORMAT_NOT_FOUND')
-            sc = ScheduleCreator(
-                schedule=Schedule(gameday_format=schedule_format, groups=grouped_teams),
-                gameday=gameday
-            )
-            sc.create()
-
-        if step == GAMEINFO_STEP and form.is_valid():
-            gameday_form_service = GamedayFormService(gameday)
-            for current_form in form:
-                if current_form.has_changed():
-                    gameday_form_service.handle_gameinfo_and_gameresult(current_form.cleaned_data,
-                                                                        current_form.instance)
+        handler: WizardStepHandler = WIZARD_STEP_HANDLER_MAP.get(self.steps.current)
+        if handler:
+            handler.handle(self, form)
 
         return super().process_step(form)
 
     def done(self, form_list, **kwargs):
-        extra = self._extra()
         gameday_id = self.gameday.pk
-        field_group_step = extra.get(FIELD_GROUP_STEP, {})
+        field_group_step = self.extra.get(FIELD_GROUP_STEP, {})
         format_value = field_group_step.get("format")
 
         from gamedays.urls import LEAGUE_GAMEDAY_DETAIL, LEAGUE_GAMEDAY_GAMEINFOS_UPDATE

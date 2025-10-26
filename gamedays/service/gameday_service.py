@@ -127,3 +127,11 @@ class GamedayService:
         games_to_whistle = games_to_whistle[columns]
         games_to_whistle = games_to_whistle.rename(columns={OFFICIALS: 'officialsId', OFFICIALS_NAME: OFFICIALS})
         return games_to_whistle
+
+    @staticmethod
+    def update_format(gameday, data):
+        if data.get("format") == "CUSTOM":
+            gameday.format = f"{gameday.league.name}_Gruppen{data['number_groups']}_Felder{data['number_fields']}"
+        else:
+            gameday.format = data.get("format")
+        gameday.save()

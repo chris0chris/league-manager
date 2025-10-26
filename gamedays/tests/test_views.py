@@ -31,7 +31,7 @@ from gamedays.urls import (
     LEAGUE_GAMEDAY_GAMEINFOS_DELETE,
     LEAGUE_GAMEDAY_LIST,
 )
-from gamedays.views import FIELD_GROUP_STEP, GAMEDAY_FORMAT_STEP, GAMEINFO_STEP
+from gamedays.wizard import FIELD_GROUP_STEP, GAMEDAY_FORMAT_STEP, GAMEINFO_STEP
 
 
 class TestGamedayCreateView(WebTest):

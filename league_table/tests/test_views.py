@@ -13,7 +13,7 @@ from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
 from gamedays.urls import (
     LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
 )
-from gamedays.views import FIELD_GROUP_STEP
+from gamedays.wizard import FIELD_GROUP_STEP
 from league_table.tests.setup_factories.factories_leaguetable import LeagueGroupFactory
 
 
