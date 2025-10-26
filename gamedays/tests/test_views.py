@@ -299,6 +299,36 @@ class TestGameinfoWizard(WebTest):
         assert gameinfo.gameresult_set.get(isHome=True).team == teams[0]
         assert gameinfo.gameresult_set.get(isHome=False).team == teams[1]
 
+    def test_format_steps_warns_for_incorrect_number_of_teams(self):
+        teams = DBSetup().create_teams(name="TooManyTeams", number_teams=4)
+        user = UserFactory(is_staff=True)
+        self.app.set_user(user)
+        gameday = GamedayFactory()
+
+        field_group_step = self.app.get(
+            reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
+        )
+        assert isinstance(
+            field_group_step.context["form"], GamedayGaminfoFieldsAndGroupsForm
+        )
+
+        field_group_step_form = field_group_step.forms["fields-groups-form"]
+        field_group_step_form[f"{FIELD_GROUP_STEP}-format"] = "3_1"
+        field_group_step_form[f"{FIELD_GROUP_STEP}-number_fields"] = 1
+        field_group_step_form[f"{FIELD_GROUP_STEP}-number_groups"] = 1
+
+        gameday_format_step = field_group_step_form.submit()
+        assert gameday_format_step.status_code == HTTPStatus.OK
+        assert isinstance(gameday_format_step.context["form"][0], GamedayFormatForm)
+
+        gameday_format_step_form = gameday_format_step.forms["gamedays-format-form"]
+        gameday_format_step_form[f"{GAMEDAY_FORMAT_STEP}-0-group"]._forced_values = [team.pk for team in teams]
+        gameday_format_step_with_error = gameday_format_step_form.submit()
+        self.assertFormError(
+            gameday_format_step_with_error.context["form"][0],
+            "group",
+            ["Bitte genau 3 Teams auswählen."],
+        )
 
 
 class TestGameinfoUpdateView(WebTest):
