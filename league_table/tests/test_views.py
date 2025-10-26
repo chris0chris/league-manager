@@ -6,7 +6,9 @@ from django_webtest import WebTest
 from gamedays.forms import (
     GamedayGaminfoFieldsAndGroupsForm,
     GamedayFormatForm,
+    GameinfoForm,
 )
+from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
 from gamedays.urls import (
     LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
@@ -40,9 +42,11 @@ from league_table.tests.setup_factories.factories_leaguetable import LeagueGroup
 
 class TestGameinfoWizardWithLeagueGroup(WebTest):
 
-    def test_wizard_renders_gameday_format_with_league_group_name(self):
+    # TODO generischer Spielplan erzeugt Gruppen-Select mit den ausgewählten Gruppen und nicht wie in der JSON Datei hinterlegt ist
+    def test_wizard_renders_gameinfo_with_league_group_while_generic_format_selected(self):
         group1 = LeagueGroupFactory(name="Group 1")
         group2 = LeagueGroupFactory(name="Group 2", season=group1.season, league=group1.league)
+        teams = DBSetup().create_teams(name="LeagueGroupTeam", number_teams=3)
         user = UserFactory(is_staff=True)
         self.app.set_user(user)
         gameday = GamedayFactory(season=group1.season, league=group1.league)
@@ -65,3 +69,43 @@ class TestGameinfoWizardWithLeagueGroup(WebTest):
         gameday_format_form = gameday_format_step.context["form"][0]
         assert isinstance(gameday_format_form, GamedayFormatForm)
         assert gameday_format_form.fields["group"].label == group2.name
+
+        # gameday_format_step_form = gameday_format_step.forms["gamedays-format-form"]
+        # gameday_format_step_form[f"{GAMEDAY_FORMAT_STEP}-0-group"]._forced_values = [
+        #     team.pk for team in teams
+        # ]
+        #
+        # gameinfo_update_page = gameday_format_step_form.submit().follow()
+        # assert gameinfo_update_page.status_code == HTTPStatus.OK
+        # assert gameinfo_update_page.request.path == reverse(
+        #     LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={"pk": gameday.pk}
+        # )
+        # assert isinstance(gameinfo_update_page.context["form"][0], GameinfoForm)
+
+    def test_wizard_renders_gameinfo_with_league_group_while_custom_format_selected(self):
+        group1 = LeagueGroupFactory(name="Group 1")
+        group2 = LeagueGroupFactory(name="Group 2", season=group1.season, league=group1.league)
+        user = UserFactory(is_staff=True)
+        self.app.set_user(user)
+        gameday = GamedayFactory(season=group1.season, league=group1.league)
+
+        field_group_step = self.app.get(
+            reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
+        )
+        assert isinstance(
+            field_group_step.context["form"], GamedayGaminfoFieldsAndGroupsForm
+        )
+
+        field_group_step_form = field_group_step.forms["fields-groups-form"]
+        field_group_step_form[f"{FIELD_GROUP_STEP}-format"] = "CUSTOM"
+        field_group_step_form[f"{FIELD_GROUP_STEP}-number_fields"] = 1
+        field_group_step_form[f"{FIELD_GROUP_STEP}-group_names"] = [group2.pk]
+
+        gameinfo_create_page = field_group_step_form.submit()
+        assert gameinfo_create_page.status_code == HTTPStatus.OK
+        assert gameinfo_create_page.request.path == reverse(
+            LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk}
+        )
+        gameinfo_form = gameinfo_create_page.context["form"][0]
+        assert isinstance(gameinfo_form, GameinfoForm)
+        assert gameinfo_form.fields['standing'].choices == [(str(group2.pk), group2.name)]
