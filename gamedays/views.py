@@ -12,8 +12,16 @@ from formtools.wizard.views import SessionWizardView
 
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
 from league_table.models import LeagueGroup
-from .forms import GamedayForm, GamedayGaminfoFieldsAndGroupsForm, \
-    GameinfoForm, get_gameinfo_formset, get_gameday_format_formset, GamedayFormatForm, GamedayFormContext
+from .forms import (
+    GamedayForm,
+    GamedayGaminfoFieldsAndGroupsForm,
+    GameinfoForm,
+    get_gameinfo_formset,
+    get_gameday_format_formset,
+    GamedayFormatForm,
+    GamedayFormContext,
+    SCHEDULE_MAP,
+)
 from .models import Gameday, Gameinfo
 from .service.gameday_form_service import GamedayFormService
 from .service.gameday_service import GamedayService
@@ -226,17 +234,28 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
             form.fields['group_names'].choices = [(g.id, g.name) for g in groups]
         if step == GAMEDAY_FORMAT_STEP:
             field_group_step = extra.get(FIELD_GROUP_STEP, {})
-            number_groups = field_group_step.get('number_groups')
             group_array = field_group_step.get('group_names') or []
-
-            extra_forms = int(number_groups) if number_groups else len(group_array)
-
-            GamedayFormatFormSet = get_gameday_format_formset(extra=extra_forms)
-            form = GamedayFormatFormSet(data, prefix=GAMEDAY_FORMAT_STEP)
-            if number_groups:
-                group_names = [f'Gruppe {n}' for n in range(1, number_groups + 1)]
+            schedule_format = field_group_step.get('format')
+            groups = SCHEDULE_MAP.get(schedule_format, {}).get("groups", [])
+            needed_teams = [
+                group["teams"]
+                for group in groups
+            ]
+            number_groups = len(groups)
+            if len(group_array) > 0 and len(group_array) != len(groups):
+                raise ValueError("ungleiche Anzahl an Gruppen!")
+            form = get_gameday_format_formset(
+                extra=len(groups),
+                needed_teams_list=needed_teams,
+                data=data,
+                prefix=GAMEDAY_FORMAT_STEP,
+            )
+            if len(group_array):
+                group_names = LeagueGroup.objects.filter(
+                    id__in=group_array
+                ).values_list("name", flat=True)
             else:
-                group_names = LeagueGroup.objects.filter(id__in=group_array).values_list('name', flat=True)
+                group_names = [f'Gruppe {n}' for n in range(1, number_groups + 1)]
             for index, current_form in enumerate(form):
                 current_form.fields['group'].label = group_names[index]
 

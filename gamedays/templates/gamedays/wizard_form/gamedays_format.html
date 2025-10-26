@@ -17,8 +17,7 @@
             </div>
             {% for subform in form %}
             <div class="mb-3">
-                <label for="{{ subform.group.id_for_label }}">{{ subform.group.label }}*</label>
-                {{ subform.group }}
+                {{ subform.group|as_crispy_field }}
             </div>
             {% for hidden in subform.hidden_fields %}
             {{ hidden }}

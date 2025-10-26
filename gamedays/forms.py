@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from dal import autocomplete
 from django import forms
 from django.contrib.auth.models import User
-from django.forms import modelformset_factory, formset_factory
+from django.forms import modelformset_factory, BaseFormSet, formset_factory
 
 from gamedays.models import Season, League, Gameday, Gameinfo, Team
 
@@ -35,6 +35,78 @@ SCHEDULE_CHOICES = (
     # ("6_sfl_2", "SFL - 3x3 Conference"),
     # ("7_sfl_2", "7 Teams 1 Gruppe 2 Felder - 3x4 Conference"),
 )
+
+SCHEDULE_MAP = {
+    "3_1": {
+        "fields": 1,
+        "groups": [{"teams": 3}],
+    },
+    "3_hinrunde_1": {
+        "fields": 1,
+        "groups": [{"teams": 3}],
+    },
+    "4_1": {
+        "fields": 1,
+        "groups": [{"teams": 4}],
+    },
+    "4_final4_1": {
+        "fields": 1,
+        "groups": [{"teams": 4}],
+    },
+    "5_dffl1_2": {
+        "fields": 2,
+        "groups": [{"teams": 5}],
+    },
+    "5_2": {
+        "fields": 2,
+        "groups": [{"teams": 5}],
+    },
+    "6_2": {
+        "fields": 2,
+        "groups": [{"teams": 3}, {"teams": 3}],
+    },
+    "7_2": {
+        "fields": 2,
+        "groups": [{"teams": 4}, {"teams": 3}],
+    },
+    "8_2": {
+        "fields": 2,
+        "groups": [{"teams": 4}, {"teams": 4}],
+    },
+    "8_vfpd_2": {
+        "fields": 2,
+        "groups": [{"teams": 4}, {"teams": 4}],
+    },
+    "8_doublevictory_2": {
+        "fields": 2,
+        "groups": [{"teams": 8}],
+    },
+    "8_3": {
+        "fields": 3,
+        "groups": [{"teams": 4}, {"teams": 4}],
+    },
+    "9_2": {
+        "fields": 2,
+        "groups": [{"teams": 3}, {"teams": 3}, {"teams": 3}],
+    },
+    "9_groupfinals_2": {
+        "fields": 2,
+        "groups": [{"teams": 3}, {"teams": 3}, {"teams": 3}],
+    },
+    "9_3": {
+        "fields": 3,
+        "groups": [{"teams": 3}, {"teams": 3}, {"teams": 3}],
+    },
+    "5_dfflf_2": {
+        "fields": 2,
+        "groups": [{"teams": 5}],
+    },
+    "8_final8_3": {
+        "fields": 3,
+        "groups": [{"teams": 4}, {"teams": 4}],
+    },
+}
+
 
 FORM_CONTROL = {'class': 'form-control'}
 FORM_CONTROL_AUTO = {**FORM_CONTROL, 'style': 'width: auto'}
@@ -94,21 +166,47 @@ class GamedayGaminfoFieldsAndGroupsForm(forms.Form):
                                widget=forms.Select(attrs=FORM_CONTROL_REQUIRED_TRUE))
 
 
+class GamedayFormatBaseFormSet(BaseFormSet):
+    def __init__(self, *args, needed_teams_list=None, **kwargs):
+        self.needed_teams_list = needed_teams_list or []
+        super().__init__(*args, **kwargs)
+
+    def get_form_kwargs(self, index):
+        kwargs = super().get_form_kwargs(index)
+        if index < len(self.needed_teams_list):
+            kwargs["needed_teams"] = self.needed_teams_list[index]
+        return kwargs
+
+
 class GamedayFormatForm(forms.Form):
     group = forms.ModelMultipleChoiceField(
-        label='Gruppe',
+        label="Gruppe",
         queryset=Team.objects.all(),
-        required=False,
-        widget=autocomplete.ModelSelect2Multiple(url='/dal/team',
-                                                 attrs={'required': True, **FORM_CONTROL_AUTO}),
+        required=True,
+        widget=autocomplete.ModelSelect2Multiple(
+            url="/dal/team", attrs={"required": True, **FORM_CONTROL_AUTO}
+        ),
     )
 
+    def __init__(self, *args, needed_teams=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if needed_teams is not None:
+            self.needed_teams = needed_teams
 
-def get_gameday_format_formset(extra=1):
-    return formset_factory(
-        form=GamedayFormatForm,
-        extra=extra,
+    def clean(self):
+        cleaned = super().clean()
+        group = cleaned.get("group")
+
+        if group and len(group) != self.needed_teams:
+            self.add_error("group", f"Bitte genau {self.needed_teams} Teams auswählen.")
+        return cleaned
+
+
+def get_gameday_format_formset(extra, needed_teams_list, data=None, prefix=None):
+    FormSetClass = formset_factory(
+        form=GamedayFormatForm, formset=GamedayFormatBaseFormSet, extra=extra
     )
+    return FormSetClass(data=data, prefix=prefix, needed_teams_list=needed_teams_list)
 
 
 class GameinfoForm(forms.ModelForm):
