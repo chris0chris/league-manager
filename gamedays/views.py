@@ -10,7 +10,7 @@ from django.views import View
 from django.views.generic import DetailView, UpdateView, CreateView, FormView, DeleteView
 from formtools.wizard.views import SessionWizardView
 
-from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
+from gamedays.management.schedule_manager import ScheduleCreator, Schedule
 from league_table.models import LeagueGroup
 from .forms import (
     GamedayForm,
@@ -341,22 +341,12 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
                 if f.cleaned_data.get('group')
             ]
             field_group_step = self._extra().get(FIELD_GROUP_STEP) or {}
-            format = field_group_step.get('format', '6_2')
-            try:
-                sc = ScheduleCreator(
-                    schedule=Schedule(gameday_format=format, groups=grouped_teams),
-                    gameday=form._gameday_instance
-                )
-                sc.create()
-            except FileNotFoundError:
-                form.add_error(None, 'Spielplan konnte nicht erstellt werden, '
-                                     f'da es das Format "{form.cleaned_data["format"]}" nicht gibt.')
-            except ScheduleTeamMismatchError:
-                form.add_error(None, 'Spielplan konnte nicht erstellt werden, '
-                                     'da die Kombination aus #Teams und #Format nicht passt.')
-            except TeamNotExistent as err:
-                form.add_error(None, f'Spielplan konnte nicht erstellt werden, '
-                                     f'da das Team "{err}" nicht gefunden wurde.')
+            schedule_format = field_group_step.get('format', 'FORMAT_NOT_FOUND')
+            sc = ScheduleCreator(
+                schedule=Schedule(gameday_format=schedule_format, groups=grouped_teams),
+                gameday=form._gameday_instance
+            )
+            sc.create()
 
         if step == GAMEINFO_STEP:
             formset = form
