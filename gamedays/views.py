@@ -17,13 +17,11 @@ from django.views.generic import (
 )
 from formtools.wizard.views import SessionWizardView
 
-from league_table.models import LeagueGroup
 from .forms import (
     GamedayForm,
     GamedayGaminfoFieldsAndGroupsForm,
     GameinfoForm,
     get_gameinfo_formset,
-    get_gameday_format_formset,
     GamedayFormatForm,
     GamedayFormContext,
     SCHEDULE_MAP,
@@ -240,58 +238,9 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
     def get_form(self, step=None, data=None, files=None):
         step = step or self.steps.current
         form = super().get_form(step, data, files)
-        gameday = self.gameday
-        if step == FIELD_GROUP_STEP:
-            groups = gameday.season.groups_season.filter(season=gameday.season, league=gameday.league)
-            form.fields['group_names'].choices = [(g.id, g.name) for g in groups]
-        if step == GAMEDAY_FORMAT_STEP:
-            field_group_step = extra.get(FIELD_GROUP_STEP, {})
-            group_array = field_group_step.get('group_names') or []
-            schedule_format = field_group_step.get('format')
-            groups = SCHEDULE_MAP.get(schedule_format, {}).get("groups", [])
-            needed_teams = [
-                group["teams"]
-                for group in groups
-            ]
-            number_groups = len(groups)
-            if len(group_array) > 0 and len(group_array) != len(groups):
-                raise ValueError("ungleiche Anzahl an Gruppen!")
-            form = get_gameday_format_formset(
-                extra=len(groups),
-                needed_teams_list=needed_teams,
-                data=data,
-                prefix=GAMEDAY_FORMAT_STEP,
-            )
-            if len(group_array):
-                group_names = LeagueGroup.objects.filter(
-                    id__in=group_array
-                ).values_list("name", flat=True)
-            else:
-                group_names = [f'Gruppe {n}' for n in range(1, number_groups + 1)]
-            for index, current_form in enumerate(form):
-                current_form.fields['group'].label = group_names[index]
-
-        if step == GAMEINFO_STEP:
-            field_group_step = self.extra.get(FIELD_GROUP_STEP) or {}
-            number_fields = int(field_group_step.get('number_fields', 1))
-            number_groups = field_group_step.get('number_groups')
-            group_names = field_group_step.get('group_names')
-            if number_groups:
-                number_groups = int(number_groups)
-                group_choices = [(f'Gruppe {n}', f'Gruppe {n}') for n in range(1, number_groups + 1)]
-            else:
-                groups = LeagueGroup.objects.filter(id__in=group_names)
-                group_choices = [(f'{currentGroup.pk}', f'{currentGroup.name}') for currentGroup in groups]
-
-            field_choices = [(f'{n}', f'Feld {n}') for n in range(1, number_fields + 1)]
-
-            form_kwargs = {'group_choices': group_choices, 'field_choices': field_choices}
-            qs = Gameinfo.objects.filter(gameday=gameday)
-            GameinfoFormSet = get_gameinfo_formset()
-            if data is not None:
-                form = GameinfoFormSet(data, queryset=qs, prefix=GAMEINFO_STEP, form_kwargs=form_kwargs)
-            else:
-                form = GameinfoFormSet(queryset=qs, prefix=GAMEINFO_STEP, form_kwargs=form_kwargs)
+        handler: WizardStepHandler = WIZARD_STEP_HANDLER_MAP.get(step)
+        if handler:
+            form = handler.handle_form(self, form, data)
 
         return form
 
@@ -302,7 +251,7 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
     def process_step(self, form):
         handler: WizardStepHandler = WIZARD_STEP_HANDLER_MAP.get(self.steps.current)
         if handler:
-            handler.handle(self, form)
+            handler.handle_process_step(self, form)
 
         return super().process_step(form)
 
