@@ -78,9 +78,11 @@ class GamedayDetailView(DetailView):
             url_pattern_official_signup = ''
         context['info'] = {
             'schedule': gs.get_schedule().to_html(**render_configs),
-            'qualify_table': qualify_table,
+            'qualify_table': None if qualify_table == '' else qualify_table,
             'final_table': gs.get_final_table().to_html(**render_configs),
             'officials': officials,
+            'offense_table': gs.get_offense_player_statistics_table().to_html(**render_configs),
+            'defense_table': gs.get_defense_player_statistic_table().to_html(**render_configs),
             'url_pattern_official': url_pattern_official,
             'url_pattern_official_signup': url_pattern_official_signup,
         }
