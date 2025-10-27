@@ -7,6 +7,7 @@ from gamedays.forms import (
     GamedayGaminfoFieldsAndGroupsForm,
     GamedayFormatForm,
     GameinfoForm,
+    SCHEDULE_CUSTOM_CHOICE_C,
 )
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
@@ -97,7 +98,7 @@ class TestGameinfoWizardWithLeagueGroup(WebTest):
         )
 
         field_group_step_form = field_group_step.forms["fields-groups-form"]
-        field_group_step_form[f"{FIELD_GROUP_STEP}-format"] = "CUSTOM"
+        field_group_step_form[f"{FIELD_GROUP_STEP}-format"] = SCHEDULE_CUSTOM_CHOICE_C
         field_group_step_form[f"{FIELD_GROUP_STEP}-number_fields"] = 1
         field_group_step_form[f"{FIELD_GROUP_STEP}-group_names"] = [group2.pk]
 

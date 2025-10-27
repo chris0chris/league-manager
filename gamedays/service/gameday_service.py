@@ -1,5 +1,6 @@
 import pandas as pd
 
+from gamedays.forms import SCHEDULE_CUSTOM_CHOICE_C, GamedayGaminfoFieldsAndGroupsForm
 from gamedays.models import Gameinfo
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     POINTS_HOME, \
@@ -130,8 +131,8 @@ class GamedayService:
 
     @staticmethod
     def update_format(gameday, data):
-        if data.get("format") == "CUSTOM":
-            gameday.format = f"{gameday.league.name}_Gruppen{data['number_groups']}_Felder{data['number_fields']}"
+        if data.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C) == SCHEDULE_CUSTOM_CHOICE_C:
+            gameday.format = f"{gameday.league.name}_Gruppen{data[GamedayGaminfoFieldsAndGroupsForm.NUMBER_GROUPS_C]}_Felder{data[GamedayGaminfoFieldsAndGroupsForm.NUMBER_FIELDS_C]}"
         else:
-            gameday.format = data.get("format")
+            gameday.format = data.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
         gameday.save()

@@ -1,6 +1,6 @@
 from django.forms import BaseFormSet
 
-from gamedays.forms import get_gameinfo_formset
+from gamedays.forms import get_gameinfo_formset, GamedayGaminfoFieldsAndGroupsForm
 from gamedays.models import Gameinfo
 from gamedays.service.gameday_form_service import GamedayFormService
 from gamedays.wizard import WizardStepHandler, FIELD_GROUP_STEP
@@ -11,10 +11,10 @@ GAMEINFO_STEP = "gameinfo-step"
 
 class GameinfoStepHandler(WizardStepHandler):
     def handle_form(self, wizard, form: BaseFormSet, data):
-        field_group_step = wizard.extra.get(FIELD_GROUP_STEP) or {}
-        number_fields = int(field_group_step.get("number_fields", 1))
-        number_groups = field_group_step.get("number_groups")
-        group_names = field_group_step.get("group_names")
+        field_group_step = wizard.wizard_state.get(FIELD_GROUP_STEP) or {}
+        number_fields = int(field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.NUMBER_FIELDS_C, 1))
+        number_groups = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.NUMBER_GROUPS_C)
+        group_names = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.GROUP_NAMES_C)
         if number_groups:
             number_groups = int(number_groups)
             group_choices = [

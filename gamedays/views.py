@@ -25,6 +25,7 @@ from .forms import (
     GamedayFormatForm,
     GamedayFormContext,
     SCHEDULE_MAP,
+    SCHEDULE_CUSTOM_CHOICE_C,
 )
 from .models import Gameday, Gameinfo
 from .service.gameday_form_service import GamedayFormService
@@ -181,40 +182,36 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return self.request.user.is_staff
 
 
-FORMS = [
-    (FIELD_GROUP_STEP, GamedayGaminfoFieldsAndGroupsForm),
-    (GAMEDAY_FORMAT_STEP, GamedayFormatForm),
-    (GAMEINFO_STEP, GameinfoForm),
-]
-
-TEMPLATES = {
-    GAMEDAY_FORMAT_STEP: 'gamedays/wizard_form/gamedays_format.html',
-    FIELD_GROUP_STEP: 'gamedays/wizard_form/fields_groups.html',
-    GAMEINFO_STEP: 'gamedays/wizard_form/gameinfos.html',
-}
-
-
 class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView):
-    form_list = FORMS
+    form_list = [
+        (FIELD_GROUP_STEP, GamedayGaminfoFieldsAndGroupsForm),
+        (GAMEDAY_FORMAT_STEP, GamedayFormatForm),
+        (GAMEINFO_STEP, GameinfoForm),
+    ]
+
+    TEMPLATES = {
+        GAMEDAY_FORMAT_STEP: "gamedays/wizard_form/gamedays_format.html",
+        FIELD_GROUP_STEP: "gamedays/wizard_form/fields_groups.html",
+        GAMEINFO_STEP: "gamedays/wizard_form/gameinfos.html",
+    }
 
     def get_template_names(self):
-        return [TEMPLATES[self.steps.current]]
+        return [self.TEMPLATES[self.steps.current]]
 
     @property
-    def extra(self):
+    def wizard_state(self):
         """Lazily create and return persistent extra data in wizard storage."""
         self.storage.extra_data = getattr(self.storage, "extra_data", {})
         return self.storage.extra_data
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        gameday = Gameday.objects.get(pk=self.kwargs['pk'])
         from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
-        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk})
+        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': self.gameday.pk})
         context['action_label'] = 'Spielplan erstellen'
         if self.steps.current == GAMEDAY_FORMAT_STEP:
-            field_group_step = self.extra.get(FIELD_GROUP_STEP) or {}
-            schedule_format = field_group_step.get("format")
+            field_group_step = self.wizard_state.get(FIELD_GROUP_STEP) or {}
+            schedule_format = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
             schedule_name = SCHEDULE_MAP.get(schedule_format, {}).get(
                 "name", "ERROR - Name nicht gefunden für Format!"
             )
@@ -225,10 +222,10 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
     def get_form_list(self):
         form_list = super().get_form_list()
 
-        field_group_step = self.extra.get(FIELD_GROUP_STEP, {})
-        format_value = field_group_step.get("format")
+        field_group_step = self.wizard_state.get(FIELD_GROUP_STEP, {})
+        format_value = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
 
-        if format_value == "CUSTOM":
+        if format_value == SCHEDULE_CUSTOM_CHOICE_C:
             form_list = {key: val for key, val in form_list.items() if key != GAMEDAY_FORMAT_STEP}
         else:
             form_list = {key: val for key, val in form_list.items() if key != GAMEINFO_STEP}
@@ -257,11 +254,11 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
 
     def done(self, form_list, **kwargs):
         gameday_id = self.gameday.pk
-        field_group_step = self.extra.get(FIELD_GROUP_STEP, {})
-        format_value = field_group_step.get("format")
+        field_group_step = self.wizard_state.get(FIELD_GROUP_STEP, {})
+        format_value = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
 
         from gamedays.urls import LEAGUE_GAMEDAY_DETAIL, LEAGUE_GAMEDAY_GAMEINFOS_UPDATE
-        if format_value != "CUSTOM":
+        if format_value != SCHEDULE_CUSTOM_CHOICE_C:
             return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={'pk': gameday_id}))
         return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday_id}))
 

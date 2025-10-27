@@ -7,9 +7,11 @@ from django.forms import modelformset_factory, BaseFormSet, formset_factory
 
 from gamedays.models import Season, League, Gameday, Gameinfo, Team
 
+SCHEDULE_CUSTOM_CHOICE_C = "CUSTOM"
+
 SCHEDULE_CHOICES = (
     ("", "Bitte auswählen"),
-    ("CUSTOM", "Selber anlegen"),
+    (SCHEDULE_CUSTOM_CHOICE_C, "Selber anlegen"),
     ("3_1", "3 Teams 1 Gruppe 1 Feld"),
     ("3_hinrunde_1", "3 Teams 1 Gruppe 1 Feld (nur Hinrunde)"),
     ("4_1", "4 Teams 1 Gruppe 1 Feld"),
@@ -172,6 +174,11 @@ class GamedayForm(forms.ModelForm):
 
 
 class GamedayGaminfoFieldsAndGroupsForm(forms.Form):
+    FORMAT_C = "format"
+    NUMBER_FIELDS_C = "number_fields"
+    GROUP_NAMES_C = "group_names"
+    NUMBER_GROUPS_C = "number_groups"
+
     number_groups = forms.IntegerField(label="Anzahl der Gruppen", required=False,
                                        widget=forms.NumberInput(attrs=FORM_CONTROL_REQUIRED_TRUE))
     group_names = forms.MultipleChoiceField(choices=(), label="Gruppenauswahl", required=False,
@@ -196,6 +203,7 @@ class GamedayFormatBaseFormSet(BaseFormSet):
 
 
 class GamedayFormatForm(forms.Form):
+    GROUP_C = "group"
     group = forms.ModelMultipleChoiceField(
         label="Gruppe",
         queryset=Team.objects.all(),
@@ -212,10 +220,12 @@ class GamedayFormatForm(forms.Form):
 
     def clean(self):
         cleaned = super().clean()
-        group = cleaned.get("group")
+        group = cleaned.get(self.GROUP_C)
 
         if group and len(group) != self.needed_teams:
-            self.add_error("group", f"Bitte genau {self.needed_teams} Teams auswählen.")
+            self.add_error(
+                f"{self.GROUP_C}", f"Bitte genau {self.needed_teams} Teams auswählen."
+            )
         return cleaned
 
 

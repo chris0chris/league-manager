@@ -2,6 +2,7 @@ from gamedays.forms import (
     GamedayFormatBaseFormSet,
     SCHEDULE_MAP,
     get_gameday_format_formset,
+    GamedayGaminfoFieldsAndGroupsForm,
 )
 from gamedays.management.schedule_manager import ScheduleCreator, Schedule
 from gamedays.wizard import WizardStepHandler, FIELD_GROUP_STEP
@@ -13,9 +14,9 @@ GAMEDAY_FORMAT_STEP = "gameday-format"
 class GamedayFormatStepHandler(WizardStepHandler):
 
     def handle_form(self, wizard, form: GamedayFormatBaseFormSet, data):
-        field_group_step = wizard.extra.get(FIELD_GROUP_STEP, {})
+        field_group_step = wizard.wizard_state.get(FIELD_GROUP_STEP, {})
         group_array = field_group_step.get("group_names") or []
-        schedule_format = field_group_step.get("format")
+        schedule_format = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
         groups = SCHEDULE_MAP.get(schedule_format, {}).get("groups", [])
         needed_teams = [group["teams"] for group in groups]
         number_groups = len(groups)
@@ -44,8 +45,8 @@ class GamedayFormatStepHandler(WizardStepHandler):
             for f in form
             if f.cleaned_data.get("group")
         ]
-        field_group_step = wizard.extra[FIELD_GROUP_STEP] or {}
-        schedule_format = field_group_step.get("format", "FORMAT_NOT_FOUND")
+        field_group_step = wizard.wizard_state[FIELD_GROUP_STEP] or {}
+        schedule_format = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C, "FORMAT_NOT_FOUND")
         sc = ScheduleCreator(
             schedule=Schedule(gameday_format=schedule_format, groups=grouped_teams),
             gameday=wizard.gameday,
