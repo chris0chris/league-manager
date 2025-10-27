@@ -17,6 +17,14 @@ from django.views.generic import (
 )
 from formtools.wizard.views import SessionWizardView
 
+from .constants import (
+    LEAGUE_GAMEDAY_DETAIL,
+    LEAGUE_GAMEDAY_LIST_AND_YEAR,
+    LEAGUE_GAMEDAY_LIST,
+    LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
+    LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
+    LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
+)
 from .forms import (
     GamedayForm,
     GamedayGaminfoFieldsAndGroupsForm,
@@ -48,7 +56,6 @@ class GamedayListView(View):
         league = kwargs.get('league')
         gamedays = Gameday.objects.filter(date__year=year).order_by('-date')
         gamedays_filtered_by_league = gamedays.filter(league__name=league) if league else gamedays
-        from gamedays.urls import LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE, LEAGUE_GAMEDAY_LIST_AND_YEAR
         return render(
             request,
             self.template_name,
@@ -119,7 +126,6 @@ class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from gamedays.urls import LEAGUE_GAMEDAY_LIST
         context['cancel_url'] = reverse(LEAGUE_GAMEDAY_LIST)
         context['action_label'] = 'Spieltag erstellen'
         return context
@@ -136,7 +142,6 @@ class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return super(GamedayCreateView, self).form_valid(form)
 
     def get_success_url(self):
-        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL, LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, LEAGUE_GAMEDAY_GAMEINFOS_UPDATE
         action_map = {
             "gameinfos_create": LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
             "gameinfos_update": LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
@@ -160,7 +165,6 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         gameday = Gameday.objects.get(pk=self.kwargs['pk'])
-        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
         context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk})
         context['action_label'] = 'Spieltag aktualisieren'
         return context
@@ -206,7 +210,6 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
         context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': self.gameday.pk})
         context['action_label'] = 'Spielplan erstellen'
         if self.steps.current == GAMEDAY_FORMAT_STEP:
@@ -257,7 +260,6 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
         field_group_step = self.wizard_state.get(FIELD_GROUP_STEP, {})
         format_value = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
 
-        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL, LEAGUE_GAMEDAY_GAMEINFOS_UPDATE
         if format_value != SCHEDULE_CUSTOM_CHOICE_C:
             return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={'pk': gameday_id}))
         return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday_id}))
@@ -276,7 +278,6 @@ class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         gameday = Gameday.objects.get(pk=self.kwargs['pk'])
-        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
         context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk})
         context['action_label'] = 'Spielplan aktualisieren'
         return context
@@ -286,14 +287,12 @@ class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         qs = Gameinfo.objects.filter(gameday=gameday)
 
         if not qs.exists():
-            from gamedays.urls import LEAGUE_GAMEDAY_GAMEINFOS_WIZARD
             return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={'pk': gameday.pk}))
 
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         if request.POST.get('wizard_goto_step') == "reset_gameinfos":
-            from gamedays.urls import LEAGUE_GAMEDAY_GAMEINFOS_WIZARD
             return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={'pk': self.kwargs['pk']}))
         return super().post(request, *args, **kwargs)
 
@@ -330,7 +329,6 @@ class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
                     current_form.cleaned_data, current_form.instance
                 )
 
-        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
         return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk}))
 
     def test_func(self):
@@ -356,7 +354,6 @@ class GamedayDeleteView(StaffDeleteView):
         from django.contrib import messages
         messages.success(self.request, "Der Spieltag wurde erfolgreich gelöscht.")
 
-        from gamedays.urls import LEAGUE_GAMEDAY_LIST
         return reverse(LEAGUE_GAMEDAY_LIST)
 
 
@@ -371,5 +368,4 @@ class GameinfoDeleteView(StaffDeleteView):
         from django.contrib import messages
         messages.success(self.request, "Der Spielplan für diesen Spieltag wurde erfolgreich gelöscht.")
 
-        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
         return redirect(LEAGUE_GAMEDAY_DETAIL, pk=gameday.pk)

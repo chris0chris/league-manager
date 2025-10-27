@@ -1,18 +1,10 @@
 from django.urls import path
 
+from .constants import LEAGUE_GAMEDAY_DETAIL, LEAGUE_GAMEDAY_LIST, LEAGUE_GAMEDAY_LIST_AND_YEAR, \
+    LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE, LEAGUE_GAMEDAY_CREATE, LEAGUE_GAMEDAY_DELETE, LEAGUE_GAMEDAY_UPDATE, \
+    LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, LEAGUE_GAMEDAY_GAMEINFOS_DELETE, LEAGUE_GAMEDAY_GAMEINFOS_WIZARD
 from .views import GamedayDetailView, GamedayListView, GamedayCreateView, GamedayUpdateView, GameinfoWizard, \
     GameinfoUpdateView, GamedayDeleteView, GameinfoDeleteView
-
-LEAGUE_GAMEDAY_DETAIL = 'league-gameday-detail'
-LEAGUE_GAMEDAY_LIST = 'league-gameday-list'
-LEAGUE_GAMEDAY_LIST_AND_YEAR = 'league-gameday-list-and-year'
-LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE = 'league-gameday-list-and-year-and-league'
-LEAGUE_GAMEDAY_CREATE = 'league-gameday-create'
-LEAGUE_GAMEDAY_DELETE = 'league-gameday-delete'
-LEAGUE_GAMEDAY_UPDATE = 'league-gameday-update'
-LEAGUE_GAMEDAY_GAMEINFOS_UPDATE = 'league-gameday-gameinfos-update'
-LEAGUE_GAMEDAY_GAMEINFOS_DELETE = 'league-gameday-gameinfos-delete'
-LEAGUE_GAMEDAY_GAMEINFOS_WIZARD = 'league-gameday-gameinfos-wizard'
 
 urlpatterns = [
     path('', GamedayListView.as_view(), name='league-home'),

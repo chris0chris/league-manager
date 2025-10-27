@@ -7,6 +7,9 @@ from django.urls import reverse
 from django_webtest import WebTest
 from django_webtest.response import DjangoWebtestResponse
 
+from gamedays.constants import LEAGUE_GAMEDAY_DETAIL, LEAGUE_GAMEDAY_LIST, LEAGUE_GAMEDAY_CREATE, LEAGUE_GAMEDAY_DELETE, \
+    LEAGUE_GAMEDAY_UPDATE, LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, LEAGUE_GAMEDAY_GAMEINFOS_DELETE, \
+    LEAGUE_GAMEDAY_GAMEINFOS_WIZARD
 from gamedays.forms import (
     GamedayForm,
     GamedayGaminfoFieldsAndGroupsForm,
@@ -21,16 +24,6 @@ from gamedays.service.gameday_service import (
 )
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
-from gamedays.urls import (
-    LEAGUE_GAMEDAY_CREATE,
-    LEAGUE_GAMEDAY_DETAIL,
-    LEAGUE_GAMEDAY_UPDATE,
-    LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
-    LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
-    LEAGUE_GAMEDAY_DELETE,
-    LEAGUE_GAMEDAY_GAMEINFOS_DELETE,
-    LEAGUE_GAMEDAY_LIST,
-)
 from gamedays.wizard import FIELD_GROUP_STEP, GAMEDAY_FORMAT_STEP, GAMEINFO_STEP
 
 

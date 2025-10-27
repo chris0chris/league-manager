@@ -3,6 +3,7 @@ from http import HTTPStatus
 from django.urls import reverse
 from django_webtest import WebTest
 
+from gamedays.constants import LEAGUE_GAMEDAY_GAMEINFOS_WIZARD
 from gamedays.forms import (
     GamedayGaminfoFieldsAndGroupsForm,
     GamedayFormatForm,
@@ -11,9 +12,6 @@ from gamedays.forms import (
 )
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
-from gamedays.urls import (
-    LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
-)
 from gamedays.wizard import FIELD_GROUP_STEP
 from league_table.tests.setup_factories.factories_leaguetable import LeagueGroupFactory
 
