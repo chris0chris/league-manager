@@ -212,6 +212,8 @@ class GamedayFormatForm(forms.Form):
             url="/dal/team", attrs={"required": True, **FORM_CONTROL_AUTO}
         ),
     )
+    league_group = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+    group_name = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, needed_teams=0, **kwargs):
         super().__init__(*args, **kwargs)

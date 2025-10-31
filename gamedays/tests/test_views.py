@@ -7,9 +7,16 @@ from django.urls import reverse
 from django_webtest import WebTest
 from django_webtest.response import DjangoWebtestResponse
 
-from gamedays.constants import LEAGUE_GAMEDAY_DETAIL, LEAGUE_GAMEDAY_LIST, LEAGUE_GAMEDAY_CREATE, LEAGUE_GAMEDAY_DELETE, \
-    LEAGUE_GAMEDAY_UPDATE, LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, LEAGUE_GAMEDAY_GAMEINFOS_DELETE, \
-    LEAGUE_GAMEDAY_GAMEINFOS_WIZARD
+from gamedays.constants import (
+    LEAGUE_GAMEDAY_DETAIL,
+    LEAGUE_GAMEDAY_LIST,
+    LEAGUE_GAMEDAY_CREATE,
+    LEAGUE_GAMEDAY_DELETE,
+    LEAGUE_GAMEDAY_UPDATE,
+    LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
+    LEAGUE_GAMEDAY_GAMEINFOS_DELETE,
+    LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
+)
 from gamedays.forms import (
     GamedayForm,
     GamedayGaminfoFieldsAndGroupsForm,
@@ -25,6 +32,7 @@ from gamedays.service.gameday_service import (
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
 from gamedays.wizard import FIELD_GROUP_STEP, GAMEDAY_FORMAT_STEP, GAMEINFO_STEP
+from league_table.tests.setup_factories.factories_leaguetable import LeagueGroupFactory
 
 
 class TestGamedayCreateView(WebTest):
@@ -250,6 +258,59 @@ class TestGameinfoWizard(WebTest):
         )
         assert isinstance(gameinfo_update_page.context["form"][0], GameinfoForm)
 
+        gameday.refresh_from_db()
+        gameinfo = gameday.gameinfo_set.first()
+
+        assert gameinfo.standing == 'Gruppe 1'
+        assert gameinfo.league_group is None
+
+    def test_wizard_with_league_group(self):
+        teams = DBSetup().create_teams(name="GroupTeam", number_teams=3)
+        user = UserFactory(is_staff=True)
+        self.app.set_user(user)
+        gameday = GamedayFactory()
+        LeagueGroupFactory(
+                name="Gruppe 1", season=gameday.season, league=gameday.league
+            )
+        group_2 = LeagueGroupFactory(
+                name="Gruppe 2", season=gameday.season, league=gameday.league
+            )
+
+        field_group_step = self.app.get(
+            reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
+        )
+        assert isinstance(
+            field_group_step.context["form"], GamedayGaminfoFieldsAndGroupsForm
+        )
+
+        field_group_step_form = field_group_step.forms["fields-groups-form"]
+        field_group_step_form[f"{FIELD_GROUP_STEP}-format"] = "3_1"
+        field_group_step_form[f"{FIELD_GROUP_STEP}-number_fields"] = 1
+        field_group_step_form[f"{FIELD_GROUP_STEP}-group_names"] = [group_2.pk]
+
+        gameday_format_step = field_group_step_form.submit()
+        assert gameday_format_step.status_code == HTTPStatus.OK
+        assert isinstance(gameday_format_step.context["form"][0], GamedayFormatForm)
+
+        gameday_format_step_form = gameday_format_step.forms["gamedays-format-form"]
+        gameday_format_step_form[f"{GAMEDAY_FORMAT_STEP}-0-group"]._forced_values = [
+            team.pk for team in teams
+        ]
+
+        gameinfo_update_page = gameday_format_step_form.submit().follow()
+        assert gameinfo_update_page.status_code == HTTPStatus.OK
+        assert gameinfo_update_page.request.path == reverse(
+            LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={"pk": gameday.pk}
+        )
+        assert isinstance(gameinfo_update_page.context["form"][0], GameinfoForm)
+
+
+        gameday.refresh_from_db()
+        gameinfo = gameday.gameinfo_set.first()
+
+        assert gameinfo.standing == group_2.name
+        assert gameinfo.league_group == group_2
+
     def test_wizard_renders_all_steps_with_custom_gameday_format(self):
         teams = DBSetup().create_teams(name="GroupTeam", number_teams=3)
         user = UserFactory(is_staff=True)
@@ -315,7 +376,9 @@ class TestGameinfoWizard(WebTest):
         assert isinstance(gameday_format_step.context["form"][0], GamedayFormatForm)
 
         gameday_format_step_form = gameday_format_step.forms["gamedays-format-form"]
-        gameday_format_step_form[f"{GAMEDAY_FORMAT_STEP}-0-group"]._forced_values = [team.pk for team in teams]
+        gameday_format_step_form[f"{GAMEDAY_FORMAT_STEP}-0-group"]._forced_values = [
+            team.pk for team in teams
+        ]
         gameday_format_step_with_error = gameday_format_step_form.submit()
         self.assertFormError(
             gameday_format_step_with_error.context["form"][0],

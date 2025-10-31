@@ -1,9 +1,12 @@
 import datetime
 import json
 import pathlib
-from typing import Union, List
+import re
+from dataclasses import dataclass
+from typing import Union, List, Optional
 
 from gamedays.models import Team, Gameday, Gameinfo, Gameresult
+from league_table.models import LeagueGroup
 
 
 class TeamNotExistent(BaseException):
@@ -14,18 +17,35 @@ class ScheduleTeamMismatchError(BaseException):
     pass
 
 
+@dataclass
 class ScheduleEntry:
-    def __init__(self, schedule_entry: dict):
-        self.stage = schedule_entry['stage']
-        self.standing = schedule_entry['standing']
-        self.home = schedule_entry['home']
-        self.away = schedule_entry['away']
-        self.officials = schedule_entry['official']
-        self.break_after = schedule_entry.get('break_after', 0)
+    stage: str
+    standing: str
+    league_group: Optional["LeagueGroup"]
+    home: str
+    away: str
+    officials: str
+    break_after: int = 0
 
     def __repr__(self):
-        return f'ScheduleEntry({{break_before: {self.break_after}, stage: "{self.stage}", ' \
-               f'standing: "{self.standing}", home: "{self.home}", away: "{self.away}", official: "{self.officials}"}}'
+        return (
+            f'ScheduleEntry({{break_before: {self.break_after}, '
+            f'stage: "{self.stage}", standing: "{self.standing}", league_group: None,'
+            f'home: "{self.home}", away: "{self.away}", official: "{self.officials}"}})'
+        )
+
+    @classmethod
+    def from_dict(cls, schedule_entry: dict) -> "ScheduleEntry":
+        """Factory method to create ScheduleEntry from a dict safely."""
+        return cls(
+            stage=schedule_entry["stage"],
+            standing=schedule_entry["standing"],
+            league_group=None,
+            home=schedule_entry["home"],
+            away=schedule_entry["away"],
+            officials=schedule_entry["official"],
+            break_after=schedule_entry.get("break_after", 0),
+        )
 
 
 class EmptyScheduleEntry:
@@ -45,15 +65,21 @@ class FieldSchedule:
             if len(game) == 0:
                 entries = entries + [EmptyScheduleEntry()]
             else:
-                entries = entries + [ScheduleEntry(game)]
+                entries = entries + [ScheduleEntry.from_dict(game)]
         return entries
 
     def __repr__(self):
         return f'FieldSchedule(field={self.field}, games={str([schedule_entry for schedule_entry in self.games])})'
 
 
+@dataclass
+class GroupSchedule:
+    name: str
+    league_group: Optional["LeagueGroup"]
+    teams: list[Team]
+
 class Schedule:
-    def __init__(self, gameday_format: str, groups: []):
+    def __init__(self, gameday_format: str, groups: list[GroupSchedule]):
         self.format = gameday_format
         self.groups = groups
         if not self._format_match_number_of_teams():
@@ -61,8 +87,7 @@ class Schedule:
         self.entries = self._get_entries()
 
     def _get_entries(self):
-        with open(pathlib.Path(__file__).parent / 'schedules/schedule_{0}.json'.format(self.format)) as f:
-            data = json.load(f)
+        data = self._replace_group_name()
         entries = []
         for field_entry in data:
             field = field_entry['field']
@@ -71,6 +96,40 @@ class Schedule:
         entries = self._replace_placeholders(entries)
         return entries
 
+    def _replace_group_name(self):
+        mapping = self._init_mapping()
+
+        with open(pathlib.Path(__file__).parent / 'schedules/schedule_{0}.json'.format(self.format),
+                  encoding="utf-8") as f:
+            text = f.read()
+
+        # Build regex that matches *any* key in mapping — longest first to handle overlaps
+        pattern = re.compile(
+            "|".join(
+                re.escape(k) for k in sorted(mapping.keys(), key=len, reverse=True)
+            )
+        )
+
+        # Replace all matches in one pass
+        new_text = pattern.sub(lambda m: mapping[m.group(0)], text)
+
+        return json.loads(new_text)
+
+    def _init_mapping(self) -> dict[str, str]:
+        mapping = {
+            "Gruppe 1": "INIT_VALUE",
+            "Gruppe 2": "INIT_VALUE",
+            "Gruppe 3": "INIT_VALUE",
+        }
+
+        # Update mapping from self.group
+        for i, group in enumerate(self.groups, start=1):
+            if i <= len(mapping):
+                key = f"Gruppe {i}"
+                # i - 1 -> use the index of the group to replace the standing so later the standing knows which league group to replace
+                mapping[key] = str(i - 1) if group.league_group else group.name
+        return mapping
+
     def _replace_placeholders(self, entries):
         for field_entry in entries:
             for game in field_entry.games:
@@ -78,6 +137,13 @@ class Schedule:
                     game.home = self._replace_placeholder_by_group_entry(game.home)
                     game.away = self._replace_placeholder_by_group_entry(game.away)
                     game.officials = self._replace_placeholder_by_group_entry(game.officials)
+                    try:
+                        league_group_index = int(game.standing)
+                        league_group = self.groups[league_group_index].league_group
+                        game.standing = league_group.name
+                        game.league_group = league_group
+                    except ValueError:
+                        pass
         return entries
 
     def _replace_placeholder_by_group_entry(self, home_placeholder: str):
@@ -88,13 +154,13 @@ class Schedule:
             return home_placeholder
         group_index = int(tmp[0])
         team_index = int(tmp[1])
-        return self.groups[group_index][team_index]
+        return self.groups[group_index].teams[team_index]
 
     def _format_match_number_of_teams(self):
         number_of_teams = int(self.format.split('_')[0])
         sum_of_teams = 0
         for group in self.groups:
-            sum_of_teams += len(group)
+            sum_of_teams += len(group.teams)
         return number_of_teams == sum_of_teams
 
 
@@ -125,6 +191,7 @@ class ScheduleCreator:
         gameinfo.stage = game.stage
         gameinfo.field = field
         gameinfo.standing = game.standing
+        gameinfo.league_group = game.league_group
         gameinfo.officials = self._get_team(game.officials)
         gameinfo.save()
         self._create_gameresult(game, gameinfo)

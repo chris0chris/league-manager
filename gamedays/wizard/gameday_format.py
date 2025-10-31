@@ -4,7 +4,7 @@ from gamedays.forms import (
     get_gameday_format_formset,
     GamedayGaminfoFieldsAndGroupsForm,
 )
-from gamedays.management.schedule_manager import ScheduleCreator, Schedule
+from gamedays.management.schedule_manager import ScheduleCreator, Schedule, GroupSchedule
 from gamedays.wizard import WizardStepHandler, FIELD_GROUP_STEP
 from league_table.models import LeagueGroup
 
@@ -29,24 +29,39 @@ class GamedayFormatStepHandler(WizardStepHandler):
             prefix=GAMEDAY_FORMAT_STEP,
         )
         if len(group_array):
-            group_names = LeagueGroup.objects.filter(id__in=group_array).values_list(
-                "name", flat=True
-            )
+            league_groups = LeagueGroup.objects.filter(id__in=group_array)
         else:
-            group_names = [f"Gruppe {n}" for n in range(1, number_groups + 1)]
+            league_groups = [f"Gruppe {n}" for n in range(1, number_groups + 1)]
         for index, current_form in enumerate(formset):
-            current_form.fields["group"].label = group_names[index]
+            if len(group_array):
+                group_name = league_groups[index].name
+                current_form.fields["group"].label = group_name
+                current_form.fields["group_name"].initial = group_name
+                current_form.fields["league_group"].initial = league_groups[index].pk
+            else:
+                current_form.fields["group"].label = league_groups[index]
+                current_form.fields["group_name"].initial = league_groups[index]
         return formset
 
     def handle_process_step(self, wizard, form: GamedayFormatBaseFormSet):
-        # TODO die Entität übergeben und nicht den Namen
-        grouped_teams = [
-            [team.name for team in f.cleaned_data["group"]]
-            for f in form
-            if f.cleaned_data.get("group")
-        ]
+        grouped_teams = []
+        for current_form in form:
+            cleaned_data = current_form.cleaned_data
+            league_group = cleaned_data.get("league_group")
+            if league_group:
+                league_group = LeagueGroup.objects.get(pk=league_group)
+
+            grouped_teams += [
+                GroupSchedule(
+                    name=cleaned_data["group_name"],
+                    league_group=league_group,
+                    teams=[current_team.name for current_team in cleaned_data["group"]],
+                )
+            ]
         field_group_step = wizard.wizard_state[FIELD_GROUP_STEP] or {}
-        schedule_format = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C, "FORMAT_NOT_FOUND")
+        schedule_format = field_group_step.get(
+            GamedayGaminfoFieldsAndGroupsForm.FORMAT_C, "FORMAT_NOT_FOUND"
+        )
         sc = ScheduleCreator(
             schedule=Schedule(gameday_format=schedule_format, groups=grouped_teams),
             gameday=wizard.gameday,
