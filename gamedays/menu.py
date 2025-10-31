@@ -1,4 +1,4 @@
-from gamedays.urls import LEAGUE_GAMEDAY_CREATE
+from gamedays.constants import LEAGUE_GAMEDAY_CREATE
 from league_manager.base_menu import BaseMenu, MenuItem
 
 

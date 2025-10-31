@@ -1,13 +1,13 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import QuerySet, CASCADE
 from django.utils import timezone
 
 
 class Season(models.Model):
     name = models.CharField(max_length=20)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["Season"] = models.Manager()
 
     def __str__(self):
         return self.name
@@ -16,7 +16,7 @@ class Season(models.Model):
 class League(models.Model):
     name = models.CharField(max_length=20)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["League"] = models.Manager()
 
     def __str__(self):
         return self.name
@@ -26,7 +26,7 @@ class Association(models.Model):
     abbr = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=100)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["Association"] = models.Manager()
 
     def __str__(self):
         return f'{self.pk}: {self.abbr} - {self.name}'
@@ -39,7 +39,7 @@ class Team(models.Model):
     logo = models.ImageField('Logo', upload_to="teammanager/logos", blank=True, null=True)
     association = models.ForeignKey(Association, on_delete=models.DO_NOTHING, null=True)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["Team"] = models.Manager()
 
     def __str__(self):
         return self.name
@@ -50,7 +50,7 @@ class SeasonLeagueTeam(models.Model):
     league = models.ForeignKey(League, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["SeasonLeagueTeam"] = models.Manager()
 
     def __str__(self):
         return f'{self.season.name} {self.league} {self.team}'
@@ -123,7 +123,7 @@ class Gameday(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
     address = models.TextField(default='', blank=True)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["Gameday"] = models.Manager()
 
     class Meta:
         ordering = ['date']
@@ -146,9 +146,10 @@ class Gameinfo(models.Model):
     gameFinished = models.TimeField(null=True, blank=True)
     stage = models.CharField(max_length=100)
     standing = models.CharField(max_length=100)
+    league_group = models.ForeignKey('league_table.LeagueGroup', on_delete=CASCADE, null=True, default=None)
     in_possession = models.CharField(max_length=100, blank=True, null=True, default=None)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["Gameinfo"] = models.Manager()
 
     class Meta:
         indexes = [
@@ -169,7 +170,7 @@ class Gameresult(models.Model):
     pa = models.PositiveSmallIntegerField(null=True)
     isHome = models.BooleanField(default=False)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["Gameresult"] = models.Manager()
 
     class Meta:
         indexes = [
@@ -193,7 +194,7 @@ class GameOfficial(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     position = models.CharField(max_length=100)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["GameOfficial"] = models.Manager()
 
     class Meta:
         indexes = [
@@ -216,7 +217,7 @@ class GameSetup(models.Model):
     hasFinalScoreChanged = models.BooleanField(default=False)
     note = models.TextField(default=None, blank=True, null=True)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["GameSetup"] = models.Manager()
 
     def __str__(self):
         return f'{self.gameinfo.pk}'
@@ -236,7 +237,7 @@ class TeamLog(models.Model):
     created_time = models.TimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["TeamLog"] = models.Manager()
 
     def __str__(self):
         if self.cop:
@@ -270,5 +271,5 @@ class Person(models.Model):
     sex = models.IntegerField(choices=SEX_CHOICES, null=True, blank=True, default=None)
     year_of_birth = models.PositiveIntegerField(null=True, blank=True, default=None)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet["Person"] = models.Manager()
 

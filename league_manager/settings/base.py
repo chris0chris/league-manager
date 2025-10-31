@@ -53,22 +53,27 @@ MIDDLEWARE = [
     'league_manager.middleware.maintenance.MaintenanceModeMiddleware',
 ]
 
+PAGES_LINKS = {
+    "GENERIC_GAME_SCHEDULE_GOOGLE_SHEETS": "https://docs.google.com/spreadsheets/d/1YRZk1Gt4OzBVzUamRIktJOFrMhmvGMk0ziGxmeih-ZY/edit?usp=sharing",
+}
+
 ROOT_URLCONF = 'league_manager.urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'django.template.context_processors.request',
-                'league_manager.context_processors.global_menu',
-                'league_manager.context_processors.version_number',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.request",
+                "league_manager.context_processors.global_menu",
+                "league_manager.context_processors.version_number",
+                "league_manager.context_processors.pages_links",
             ],
         },
     },

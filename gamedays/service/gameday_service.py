@@ -1,5 +1,6 @@
 import pandas as pd
 
+from gamedays.forms import SCHEDULE_CUSTOM_CHOICE_C, GamedayGaminfoFieldsAndGroupsForm
 from gamedays.models import Gameinfo
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     POINTS_HOME, \
@@ -35,7 +36,7 @@ SCHEDULE_TABLE_HEADERS = {
 class EmptySchedule:
     @staticmethod
     def to_html(*args, **kwargs):
-        return 'Spielplan wurde noch nicht erstellt'
+        return None
 
     @staticmethod
     def to_json(*args, **kwargs):
@@ -127,3 +128,11 @@ class GamedayService:
         games_to_whistle = games_to_whistle[columns]
         games_to_whistle = games_to_whistle.rename(columns={OFFICIALS: 'officialsId', OFFICIALS_NAME: OFFICIALS})
         return games_to_whistle
+
+    @staticmethod
+    def update_format(gameday, data):
+        if data.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C) == SCHEDULE_CUSTOM_CHOICE_C:
+            gameday.format = f"{gameday.league.name}_Gruppen{data[GamedayGaminfoFieldsAndGroupsForm.NUMBER_GROUPS_C]}_Felder{data[GamedayGaminfoFieldsAndGroupsForm.NUMBER_FIELDS_C]}"
+        else:
+            gameday.format = data.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
+        gameday.save()

@@ -14,6 +14,7 @@ from django.utils.safestring import mark_safe
 from django.views import View
 from django.views.decorators.cache import cache_page
 
+from gamedays.constants import LEAGUE_GAMEDAY_DETAIL
 from gamedays.models import Team, Gameinfo, GameOfficial, Gameresult
 from league_manager.utils.view_utils import PermissionHelper
 from officials.api.serializers import GameOfficialAllInfoSerializer, OfficialSerializer, OfficialGamelistSerializer
@@ -327,7 +328,6 @@ class OfficialSignUpListView(View):
                 return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
         request.session.set_expiry(600)
         league = request.GET.get('league')
-        from gamedays.urls import LEAGUE_GAMEDAY_DETAIL
         from officials.urls import OFFICIALS_SIGN_UP_FOR_GAMEDAY, OFFICIALS_PROFILE_LICENSE, OFFICIALS_SIGN_UP_LIST, \
             OFFICIALS_SIGN_UP_CANCEL_FOR_GAMEDAY
         context = {

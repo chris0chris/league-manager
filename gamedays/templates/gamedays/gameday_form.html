@@ -2,14 +2,32 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="content-section">
-    <form method="POST">
+    <form method="POST" id="gameday-form">
         {% csrf_token %}
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Neuer Spieltag</legend>
+            {% include "partials/legend_with_cancel.html" with title=action_label cancel_url=cancel_url %}
             {{ form|crispy }}
         </fieldset>
         <div class="form-group">
-            <button class="btn btn-outline-info" type="submit">Erstellen</button>
+            {% if object %}
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary flex-grow-1" type="submit" name="action" value="update">
+                    Spieltag aktualisieren
+                </button>
+                <button class="btn btn-outline-primary" type="submit" name="action" value="gameinfos_update">
+                    Spiele anpassen
+                </button>
+            </div>
+            {% else %}
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary flex-grow-1" type="submit" name="action" value="create">
+                    Spieltag erstellen
+                </button>
+                <button class="btn btn-outline-primary" type="submit" name="action" value="gameinfos_create">
+                    Spiele erstellen
+                </button>
+            </div>
+            {% endif %}
         </div>
     </form>
 </div>
