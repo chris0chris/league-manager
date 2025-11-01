@@ -6,8 +6,8 @@ from http import HTTPStatus
 from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
-from gamedays.api.urls import (API_GAME_POSSESSION, API_CONFIG_SCORECARD_PENALTIES, API_GAME_FINALIZE,
-                               API_GAME_HALFTIME, API_GAMELOG, API_GAME_SETUP, API_GAME_OFFICIALS)
+from gamedays.constants import API_GAMELOG, API_CONFIG_SCORECARD_PENALTIES, API_GAME_POSSESSION, API_GAME_FINALIZE, \
+    API_GAME_HALFTIME, API_GAME_OFFICIALS, API_GAME_SETUP
 from gamedays.models import Gameinfo, Gameresult, GameOfficial, GameSetup, TeamLog
 from gamedays.tests.setup_factories.db_setup import DBSetup
 

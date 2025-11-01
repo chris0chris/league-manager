@@ -20,16 +20,19 @@
         "type": "integer"
       },
       {
+        "extDtype": "Int64",
         "name": "pf",
-        "type": "string"
+        "type": "integer"
       },
       {
+        "extDtype": "Int64",
         "name": "pa",
-        "type": "string"
+        "type": "integer"
       },
       {
+        "extDtype": "Int64",
         "name": "+/-",
-        "type": "string"
+        "type": "integer"
       }
     ],
     "primaryKey": [

@@ -39,7 +39,7 @@ class TestPlayerlistDeleteView(WebTest):
         from passcheck.urls import PASSCHECK_ROSTER_DELETE
         response: DjangoWebtestResponse = self.app.get(reverse(PASSCHECK_ROSTER_DELETE, kwargs={'pk': female.pk}))
         assert response.status_code == HTTPStatus.FOUND
-        assert response.url == f'/passcheck/team/{team.pk}/list'
+        assert response.url == f'/passcheck/team/{team.pk}/list/'
         assert Playerlist.objects.filter(pk=female.pk).exists() is False
 
 
