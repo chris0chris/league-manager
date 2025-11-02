@@ -76,6 +76,7 @@ jobs:
   # Deploy to registry (after all checks pass)
   deploy-backend:
     needs:
+      - build-backend-image
       - test-backend-image
       - check-migrations
     secrets: inherit
