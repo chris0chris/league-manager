@@ -22,7 +22,7 @@ jobs:
       - name: 🟢⚙️ Setup node
         uses: actions/setup-node@v6
         with:
-          node-version: '22.x'
+          node-version: '24.x'
           cache: 'npm'
           cache-dependency-path: ${{ inputs.project }}/package.json
       - name: 🔍 Run eslint ${{ inputs.project }}
