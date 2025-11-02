@@ -3,9 +3,14 @@ name: 🧪🐳 Check Django migrations
 on:
   workflow_call:
     inputs:
-      dockerfile:
+      artifact_name:
         required: true
-        description: The Dockerfile used to build the image
+        description: The name of the artifact containing the Docker image
+        type: string
+      image_name:
+        required: false
+        default: backend
+        description: The name of the Docker image
         type: string
     secrets:
       MYSQL_HOST:
@@ -20,44 +25,35 @@ on:
       MYSQL_PWD:
         required: true
         description: Remote MySQL password
-      DOCKER_TOKEN:
-        required: false
-        description: Docker Hub token for authentication
 
 permissions:
   contents: read
-
-env:
-  REGISTRY: docker.io
-  DOCKER_IMAGE_NAME: migrations_check
 
 jobs:
   check-migrations:
     runs-on: ubuntu-latest
     environment: prod
     steps:
-      - uses: actions/checkout@v5
-
-      - name: 🐳 Setup Docker buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: 🐳 Build image (test tag)
-        uses: docker/build-push-action@v6
+      - name: 📥 Download Docker image artifact
+        uses: actions/download-artifact@v4
         with:
-          file: ${{ inputs.dockerfile }}
-          load: true
-          tags: ${{ env.DOCKER_IMAGE_NAME }}:test
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          name: ${{ inputs.artifact_name }}
+          path: /tmp
+
+      - name: 🐳 Load Docker image
+        run: |
+          docker load --input /tmp/${{ inputs.image_name }}.tar
+          docker image ls -a
+
       - name: 🐳 Run migration check inside container
         run: |
-          echo "🔍 Checking Django migrations in image: ${{ env.DOCKER_IMAGE_NAME }}:test"
+          echo "🔍 Checking Django migrations in image: ${{ inputs.image_name }}:latest"
           docker_out=$(docker run --rm \
             -e MYSQL_HOST="${{ secrets.MYSQL_HOST }}" \
             -e MYSQL_DB_NAME="${{ secrets.MYSQL_DB_NAME }}" \
             -e MYSQL_USER="${{ secrets.MYSQL_USER }}" \
             -e MYSQL_PWD="${{ secrets.MYSQL_PWD }}" \
-            ${{ env.DOCKER_IMAGE_NAME }}:test \
+            ${{ inputs.image_name }}:latest \
             bash -c "
               set -e
               echo '⚙️ Running Django system check...'

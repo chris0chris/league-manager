@@ -12,6 +12,7 @@ permissions:
   security-events: write
 
 jobs:
+  # Run all tests first
   build-test-django:
     uses: ./.github/workflows/part_build_test.yaml
     secrets: inherit
@@ -34,28 +35,64 @@ jobs:
     with:
       project: passcheck
 
-  deploy-fe:
+  # Build Docker images once (after tests pass)
+  build-backend-image:
     needs:
       - build-test-django
+    uses: ./.github/workflows/part_docker_build.yaml
+    with:
+      dockerfile: container/app.Dockerfile
+      image_name: backend
+
+  build-frontend-image:
+    needs:
       - build-test-scorecard
       - build-test-liveticker
       - build-passcheck
-    secrets: inherit
-    uses: ./.github/workflows/part_docker_push.yaml
+    uses: ./.github/workflows/part_docker_build.yaml
     with:
-      image_name: leaguesphere/frontend
       dockerfile: container/nginx.Dockerfile
-      publish: true
+      image_name: frontend
+
+  # Test and check Docker images
+  test-backend-image:
+    needs:
+      - build-backend-image
+    uses: ./.github/workflows/part_docker_test.yaml
+    with:
+      artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
+      image_name: backend
+      test_command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
+
+  check-migrations:
+    needs:
+      - build-backend-image
+    secrets: inherit
+    uses: ./.github/workflows/part_check_migrations.yaml
+    with:
+      artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
+      image_name: backend
+
+  # Deploy to registry (after all checks pass)
+  deploy-backend:
+    needs:
+      - test-backend-image
+      - check-migrations
+    secrets: inherit
+    uses: ./.github/workflows/part_docker_push_artifact.yaml
+    with:
+      artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
+      image_name: leaguesphere/backend
+      local_image_name: backend
       version: "${{ github.ref_name }}"
 
-  deploy-be:
+  deploy-frontend:
     needs:
-      - build-test-django
+      - build-frontend-image
     secrets: inherit
-    uses: ./.github/workflows/part_docker_push.yaml
+    uses: ./.github/workflows/part_docker_push_artifact.yaml
     with:
-      image_name: leaguesphere/backend
-      test_command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
-      publish: true
-      dockerfile: container/app.Dockerfile
+      artifact_name: ${{ needs.build-frontend-image.outputs.artifact_name }}
+      image_name: leaguesphere/frontend
+      local_image_name: frontend
       version: "${{ github.ref_name }}"

@@ -1,0 +1,61 @@
+name: 🐳🧪 Test Docker Image
+
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        required: true
+        description: The name of the artifact containing the Docker image
+        type: string
+      image_name:
+        required: true
+        description: The name of the Docker image
+        type: string
+      test_command:
+        required: false
+        default: ""
+        description: The command used to test the container
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: /tmp
+
+      - name: 🐳 Load Docker image
+        run: |
+          docker load --input /tmp/${{ inputs.image_name }}.tar
+          docker image ls -a
+
+      - name: 🐳🧪 Test Docker image
+        run: |
+          docker network create test_network
+          docker run --network test_network -d -p 8000:8000 --name app mockserver/mockserver -serverPort 8000
+          sleep 5
+          curl -X PUT --data '{"httpRequest": {"method": "GET", "path": "/"}, "httpResponse": {"statusCode": 200}}' http://localhost:8000/mockserver/expectation
+          curl -X PUT --data '{"httpRequest": {"method": "GET", "path": "/login/"}, "httpResponse": {"statusCode": 200, "headers": {"Set-Cookie": "csrftoken=mocktoken123"}}}' http://localhost:8000/mockserver/expectation
+          curl -X PUT --data '{"httpRequest": {"method": "POST", "path": "/login/"}, "httpResponse": {"statusCode": 200}}' http://localhost:8000/mockserver/expectation
+          docker run --rm --detach --network test_network --name test_container ${{ inputs.image_name }}:latest ${{ inputs.test_command }}
+          sleep 3
+          for i in {1..10}; do
+            status=$(docker inspect --format='{{.State.Health.Status}}' test_container)
+            health_details=$(docker inspect --format='{{json .State.Health}}' test_container)
+            echo "Health status: $status"
+            echo "Health details: $health_details"
+            if [ "$status" = "healthy" ]; then break; fi
+            sleep 6
+          done
+          # Fail the step if not healthy after 10 retries
+          if [ "$status" != "healthy" ]; then
+            echo "Container did not become healthy after 10 attempts."
+            exit 1
+          fi
+          docker stop test_container
