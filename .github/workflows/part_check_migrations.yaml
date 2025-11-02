@@ -1,0 +1,82 @@
+name: 🧪🐳 Check Django migrations
+
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        required: true
+        description: The name of the artifact containing the Docker image
+        type: string
+      image_name:
+        required: false
+        default: backend
+        description: The name of the Docker image
+        type: string
+    secrets:
+      MYSQL_HOST:
+        required: true
+        description: Remote MySQL host
+      MYSQL_DB_NAME:
+        required: true
+        description: Remote MySQL database name
+      MYSQL_USER:
+        required: true
+        description: Remote MySQL user
+      MYSQL_PWD:
+        required: true
+        description: Remote MySQL password
+
+permissions:
+  contents: read
+
+jobs:
+  check-migrations:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: 📥 Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: /tmp
+
+      - name: 🐳 Load Docker image
+        run: |
+          docker load --input /tmp/${{ inputs.image_name }}.tar
+          docker image ls -a
+
+      - name: 🐳 Run migration check inside container
+        run: |
+          echo "🔍 Checking Django migrations in image: ${{ inputs.image_name }}:latest"
+          docker_out=$(docker run --rm \
+            -e MYSQL_HOST="${{ secrets.MYSQL_HOST }}" \
+            -e MYSQL_DB_NAME="${{ secrets.MYSQL_DB_NAME }}" \
+            -e MYSQL_USER="${{ secrets.MYSQL_USER }}" \
+            -e MYSQL_PWD="${{ secrets.MYSQL_PWD }}" \
+            ${{ inputs.image_name }}:latest \
+            bash -c "
+              set -e
+              echo '⚙️ Running Django system check...'
+              python manage.py check
+              echo
+              echo '🧱 Checking for missing migrations...'
+              python manage.py makemigrations --check --dry-run
+              echo
+              echo '🗺️ Simulating migration plan...'
+              python manage.py migrate --plan
+              echo
+              echo '✅ Django migrations look good!'
+            ")
+          # Print the output
+          echo "$docker_out"
+          
+          # Extract planned migration lines for annotation
+          echo "$docker_out" | while read -r line; do
+            if [[ "$line" == *"Create model"* ]] || [[ "$line" == *"Add field"* ]] || [[ "$line" == *"Alter field"* ]]; then
+              # Escape % for GitHub Actions annotation format
+              safe_line=$(echo "$line" | sed 's/%/%25/g; s/\r//g; s/\n/%0A/g')
+              echo "::notice file=migrations.txt::${safe_line}"
+            fi
+          done
+          
+          echo "✅ Django migrations check completed"

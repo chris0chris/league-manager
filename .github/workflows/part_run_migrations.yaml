@@ -1,0 +1,63 @@
+name: 🗄️🚀 Run Django Migrations
+
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        required: true
+        description: The name of the artifact containing the Docker image
+        type: string
+      image_name:
+        required: false
+        default: backend
+        description: The name of the Docker image
+        type: string
+    secrets:
+      MYSQL_HOST:
+        required: true
+        description: Remote MySQL host
+      MYSQL_DB_NAME:
+        required: true
+        description: Remote MySQL database name
+      MYSQL_USER:
+        required: true
+        description: Remote MySQL user
+      MYSQL_PWD:
+        required: true
+        description: Remote MySQL password
+
+permissions:
+  contents: read
+
+jobs:
+  run-migrations:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: 📥 Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: /tmp
+
+      - name: 🐳 Load Docker image
+        run: |
+          docker load --input /tmp/${{ inputs.image_name }}.tar
+          docker image ls -a
+
+      - name: 🗄️🚀 Run migrations inside container
+        run: |
+          echo "🗄️ Running Django migrations in image: ${{ inputs.image_name }}:latest"
+          docker run --rm \
+            -e MYSQL_HOST="${{ secrets.MYSQL_HOST }}" \
+            -e MYSQL_DB_NAME="${{ secrets.MYSQL_DB_NAME }}" \
+            -e MYSQL_USER="${{ secrets.MYSQL_USER }}" \
+            -e MYSQL_PWD="${{ secrets.MYSQL_PWD }}" \
+            ${{ inputs.image_name }}:latest \
+            bash -c "
+              set -e
+              echo '🗄️ Running Django migrations...'
+              python manage.py migrate --noinput
+              echo
+              echo '✅ Migrations completed successfully!'
+            "
