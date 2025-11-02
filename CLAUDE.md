@@ -2,6 +2,40 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ CRITICAL RULES - READ FIRST ⚠️
+
+### NEVER Fix Your Own Errors Without Permission
+
+**❌ ABSOLUTELY FORBIDDEN:**
+- If you make a mistake (wrong command, wrong branch, wrong file, etc.), **STOP IMMEDIATELY**
+- **DO NOT** attempt to fix, undo, or correct your error on your own
+- **DO NOT** delete branches, revert commits, or modify git history without explicit permission
+- **DO NOT** assume you know the right way to fix your mistake
+
+**✅ REQUIRED BEHAVIOR:**
+- Immediately acknowledge the error to the user
+- Explain what went wrong clearly
+- **ASK THE USER** what to do next
+- Wait for explicit instructions before taking any corrective action
+- The user may want to keep the error, fix it differently, or handle it manually
+
+**Examples:**
+- ❌ WRONG: "I created the wrong branch, let me delete it..."
+- ✅ CORRECT: "I accidentally created branch X instead of Y. Should I delete branch X, or would you like to handle this?"
+
+- ❌ WRONG: "I committed to the wrong branch, reverting..."
+- ✅ CORRECT: "I committed to the wrong branch. What would you like me to do? Options: 1) Leave it 2) Create new branch 3) Other?"
+
+**Why This Matters:**
+- Git operations can affect remote repositories and other developers
+- The user may have a specific workflow or preference
+- What seems like an error to Claude might be intentional
+- Undoing actions can cause more problems than the original error
+
+**REMEMBER: When in doubt, ASK. Never assume you should fix your own mistakes.**
+
+---
+
 ## Project Overview
 
 LeagueSphere is a Django-based web application for managing American football leagues, including game scheduling, live scoring, player pass checking, and league standings. The project combines a Django backend with multiple React/TypeScript frontends.
