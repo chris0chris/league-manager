@@ -48,8 +48,6 @@ jobs:
       version: "${{ github.ref_name }}"
 
   check-migrations:
-    needs:
-      - build-test-django
     secrets: inherit
     uses: ./.github/workflows/part_check_migrations.yaml
     with:
