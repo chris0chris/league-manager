@@ -88,13 +88,50 @@ python manage.py collectstatic
 ```
 
 **Run Python tests:**
+
+Tests require a MySQL/MariaDB database running in an LXC container. The test infrastructure uses LXC container `servyy-test` which runs a Docker MariaDB instance.
+
 ```bash
-# All tests
+# 1. Check if LXC container is running
+lxc list
+
+# 2. Start LXC container if stopped
+lxc start servyy-test
+
+# 3. Setup test database (starts MySQL in Docker on LXC container)
+cd container && ./spinup_test_db.sh
+
+# 4. Run tests with proper environment variables
+MYSQL_HOST=10.185.182.207 \
+MYSQL_DB_NAME=test_db \
+MYSQL_USER=user \
+MYSQL_PWD=user \
+SECRET_KEY=test-secret-key \
+pytest
+
+# Run with coverage
+MYSQL_HOST=10.185.182.207 \
+MYSQL_DB_NAME=test_db \
+MYSQL_USER=user \
+MYSQL_PWD=user \
+SECRET_KEY=test-secret-key \
 pytest --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
 # Quick tests (no coverage, reuse DB)
+MYSQL_HOST=10.185.182.207 \
+MYSQL_DB_NAME=test_db \
+MYSQL_USER=user \
+MYSQL_PWD=user \
+SECRET_KEY=test-secret-key \
 pytest --nomigrations --reuse-db
 ```
+
+**Note:** If LXC server is not reachable (cannot resolve `servyy-test.lxd`), run the setup script:
+```bash
+cd /home/cda/dev/infrastructure/container/scripts && ./setup_test_container.sh
+```
+
+**Expected test results:** ~302 tests should pass. 7 Moodle API tests will fail without `MOODLE_URL` and `MOODLE_WSTOKEN` environment variables - this is expected for local development.
 
 **Code formatting:**
 ```bash
@@ -237,6 +274,32 @@ CircleCI configuration exists in `.circleci/config.yml` but GitHub Actions is th
 - `leaguesphere/frontend:latest` and `leaguesphere/frontend:<version>`
 
 **Health Checks:** Backend container includes health check endpoint at `/health/`
+
+### Test Infrastructure
+
+The project uses LXC containers for isolated test database environments.
+
+**LXC Container Setup:**
+- Container name: `servyy-test`
+- IP address: `10.185.182.207`
+- Runs Docker MariaDB instance for tests
+- Accessible via SSH as `servyy-test.lxd`
+
+**Test Database Configuration:**
+- MariaDB container inside LXC container
+- Port: 3306 (exposed on LXC container)
+- Database: `test_db`
+- Credentials: `user/user` (root password: `user`)
+- Test user created with full privileges
+
+**Setup Scripts:**
+- `container/spinup_test_db.sh` - Creates/restarts MySQL container in LXC
+- `/home/cda/dev/infrastructure/container/scripts/setup_test_container.sh` - Configures LXC container and SSH access
+
+**pytest Configuration** (`pytest.ini`):
+- Django settings: `league_manager.settings`
+- Options: `--nomigrations --reuse-db --capture=no`
+- Test discovery: `test_*.py` and `*_test.py`
 
 ## Key Technical Details
 
