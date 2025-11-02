@@ -32,9 +32,9 @@ env:
   DOCKER_IMAGE_NAME: migrations_check
 
 jobs:
+  environment: prod
   build:
     runs-on: ubuntu-latest
-    environment: prod
     steps:
       - uses: actions/checkout@v5
 
