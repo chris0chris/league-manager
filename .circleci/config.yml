@@ -1,13 +1,13 @@
 version: 2.1
 orbs:
-  node: circleci/node@7.2.0
+  node: circleci/node@7.2.1
 
 jobs:
   python:
     docker:
-      - image: cimg/python:3.13.8
-      - image: cimg/mysql:9.4
-        command: [ --default-authentication-plugin=mysql_native_password, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --default-storage-engine=InnoDB ]
+      - image: cimg/python:3.14.0
+      - image: cimg/mysql:9.5
+        command: [ --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --default-storage-engine=InnoDB ]
         environment:
           MYSQL_DATABASE: test_test_db
           MYSQL_USER: user

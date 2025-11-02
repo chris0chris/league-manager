@@ -4,19 +4,8 @@ from gamedays.api.game_views import GameLogAPIView, GameHalftimeAPIView, GameFin
     GameSetupCreateOrUpdateView, GamesToWhistleAPIView, ConfigPenalties, GamePossessionAPIView
 from gamedays.api.views import GamedayListAPIView, GameinfoUpdateAPIView, GamedayRetrieveUpdate, \
     GamedayScheduleView, GameOfficialCreateOrUpdateView
-
-API_GAMEDAY_WHISTLEGAMES = 'api-gameday-whistlegames'
-
-API_GAMEDAY_LIST = 'api-gameday-list'
-
-API_GAMELOG = 'api-gamelog'
-
-API_CONFIG_SCORECARD_PENALTIES = 'api-config-scorecard-penalties'
-API_GAME_POSSESSION = 'api-game-possession'
-API_GAME_FINALIZE = 'api-game-finalize'
-API_GAME_HALFTIME = 'api-game-halftime'
-API_GAME_OFFICIALS = 'api-game-officials'
-API_GAME_SETUP = 'api-game-setup'
+from gamedays.constants import API_GAMEDAY_WHISTLEGAMES, API_GAMEDAY_LIST, API_GAMELOG, API_CONFIG_SCORECARD_PENALTIES, \
+    API_GAME_POSSESSION, API_GAME_FINALIZE, API_GAME_HALFTIME, API_GAME_OFFICIALS, API_GAME_SETUP
 
 urlpatterns = [
     path('gameday/list/', GamedayListAPIView.as_view(), name=API_GAMEDAY_LIST),

@@ -9,7 +9,7 @@ from django_webtest import WebTest
 from rest_framework.reverse import reverse
 
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
-from gamedays.api.urls import API_GAMEDAY_LIST, API_GAMEDAY_WHISTLEGAMES
+from gamedays.constants import API_GAMEDAY_WHISTLEGAMES, API_GAMEDAY_LIST
 from gamedays.models import Team, Gameday, Gameinfo
 from gamedays.service.gameday_service import EmptySchedule, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup

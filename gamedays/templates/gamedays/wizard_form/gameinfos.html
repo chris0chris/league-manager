@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<div class="content-section">
+    <form method="post" id="gameinfos-form">
+        {% csrf_token %}
+        {{ wizard.management_form }}
+        {{ form.management_form }}
+
+        <fieldset>
+            {% include "partials/legend_with_cancel.html" with title=action_label|add:" - Spiele" cancel_url=cancel_url %}
+
+            <table class="table table-sm" id="games-table">
+                <thead>
+                <tr>
+                    <th>Zeit</th>
+                    <th>Feld</th>
+                    <th>Heim</th>
+                    <th>Gast</th>
+                    <th>Runde</th>
+                    <th>Gruppe</th>
+                    <th>Schiri-Team</th>
+                    <th>Status</th>
+                    <th>Start</th>
+                    <th>Halbzeit</th>
+                    <th>Ende</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="formset-rows">
+                {% for subform in form %}
+                <tr class="form-row" data-form-index="{{ forloop.counter0 }}">
+                    <td class="align-top">
+                        {{ subform.scheduled|as_crispy_field }}
+                    </td>
+                    <td class="align-top">
+                        {{ subform.field|as_crispy_field }}
+                    </td>
+                    <td class="align-top">
+                        <div class="row">
+                            {{ subform.home|as_crispy_field }}
+                        </div>
+                        <div class="row">
+                            <div class="input-group mb-1">
+                                <span class="input-group-text">1. HZ</span>
+                                {{ subform.fh_home }}
+                                {{ subform.fh_home.error }}
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">2. HZ</span>
+                                {{ subform.sh_home }}
+                                {{ subform.sh_home.error }}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="align-top">
+                        <div class="row">
+                            {{ subform.away|as_crispy_field }}
+                        </div>
+                        <div class="row">
+                            <div class="input-group mb-1">
+                                <span class="input-group-text">1. HZ</span>
+                                {{ subform.fh_away }}
+                                {{ subform.fh_away.error }}
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">2. HZ</span>
+                                {{ subform.sh_away }}
+                                {{ subform.sh_away.error }}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="align-top">
+                        {{ subform.stage|as_crispy_field }}
+                    </td>
+                    <td class="align-top">
+                        {{ subform.standing|as_crispy_field }}
+                    </td>
+                    <td class="align-top">
+                        {{ subform.officials|as_crispy_field }}
+                    </td>
+                    <td class="align-top">
+                        {{ subform.status|as_crispy_field }}
+                    </td>
+                    <td class="align-top">
+                        {{ subform.gameStarted|as_crispy_field }}
+                    </td>
+                    <td class="align-top">
+                        {{ subform.gameHalftime|as_crispy_field }}
+                    </td>
+                    <td class="align-top">
+                        {{ subform.gameFinished|as_crispy_field }}
+                    </td>
+                    <td class="align-top">
+                        {% for hidden in subform.hidden_fields %}
+                        {{ hidden }}
+                        {% endfor %}
+                        {{ subform.DELETE.as_hidden }}
+                        <button type="button" class="btn btn-sm btn-danger remove-btn"><i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr id="no-rows">
+                    <td colspan="4" class="text-muted">Noch keine Spiele.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <button type="button" id="add-row" class="btn btn-outline-info mb-3">+ Spiel hinzufügen</button>
+        </fieldset>
+        <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-primary flex-grow-1" type="submit">
+                {{ action_label }}
+            </button>
+            <button id="reset-button" class="btn btn-outline-danger" type="submit" name="wizard_goto_step" value="{{ wizard.steps.first | default:'reset_gameinfos' }}">
+                Reset Spielplan
+            </button>
+        </div>
+    </form>
+</div>
+
+<template id="empty-form-template">
+    <tr class="form-row" data-form-index="__prefix__" data-insert-by-client="true">
+        <td class="align-top">{{ form.empty_form.scheduled }}</td>
+        <td class="align-top">{{ form.empty_form.field }}</td>
+        <td class="align-top">
+            <div class="row">
+                {{ form.empty_form.home }}
+            </div>
+            <div class="row">
+                <div class="input-group mb-1 mt-1">
+                    <span class="input-group-text">1. HZ</span>
+                    {{ form.empty_form.fh_home }}
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text">2. HZ</span>
+                    {{ form.empty_form.sh_home }}
+                </div>
+            </div>
+        </td>
+        <td class="align-top">
+            <div class="row">
+                {{ form.empty_form.away }}
+            </div>
+            <div class="row">
+                <div class="input-group mb-1 mt-1">
+                    <span class="input-group-text">1. HZ</span>
+                    {{ form.empty_form.fh_away }}
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text">2. HZ</span>
+                    {{ form.empty_form.sh_away }}
+                </div>
+            </div>
+        </td>
+        <td class="align-top">{{ form.empty_form.stage }}</td>
+        <td class="align-top">{{ form.empty_form.standing }}</td>
+        <td class="align-top">{{ form.empty_form.officials }}</td>
+        <td class="align-top">{{ form.empty_form.status }}</td>
+        <td class="align-top">{{ form.empty_form.gameStarted }}</td>
+        <td class="align-top">{{ form.empty_form.gameHalftime }}</td>
+        <td class="align-top">{{ form.empty_form.gameFinished }}</td>
+        <td class="align-top">
+            {% for hidden in form.empty_form.hidden_fields %}
+            {{ hidden }}
+            {% endfor %}
+            {{ form.empty_form.DELETE.as_hidden }}
+            <button type="button" class="btn btn-sm btn-danger remove-btn"><i class="bi bi-trash"></i></button>
+        </td>
+    </tr>
+</template>
+
+<style>
+    /* optional small adjustments */
+    .form-row td { vertical-align: middle; }
+</style>
+{% endblock content %}
+{% block footer %}
+{% load static %}
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const resetButton = document.getElementById('reset-button');
+    resetButton.addEventListener('click', function(e) {
+        const confirmed = confirm("Achtung: Dadurch werden alle aktuellen Eingaben INKLUSIVE vorhandener Spielergebnisse zurückgesetzt! Wirklich fortfahren?");
+        if (!confirmed) {
+            e.preventDefault();
+        }
+    });
+});
+    (function(){
+      const prefix = "{{ form.prefix }}";
+      const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
+      const formsetRows = document.getElementById('formset-rows');
+      const emptyTpl = document.getElementById('empty-form-template').innerHTML;
+
+      function updateIndices() {
+        const rows = formsetRows.querySelectorAll('.form-row');
+        if (rows.length === 0) {
+          const noRows = document.getElementById('no-rows');
+          if (!noRows) {
+            const tr = document.createElement('tr');
+            tr.id = 'no-rows';
+            tr.innerHTML = '<td colspan="7" class="text-muted">Noch keine Spiele.</td>';
+            formsetRows.appendChild(tr);
+          }
+        } else {
+          const nr = document.getElementById('no-rows');
+          if (nr) nr.remove();
+        }
+
+        rows.forEach((row, idx) => {
+          row.dataset.formIndex = idx;
+          // update names/ids/htmlFor in inputs/labels
+          row.querySelectorAll('input, select, textarea, label').forEach(el => {
+            if (el.name) el.name = el.name.replace(/-__prefix__|-\d+-/g, `-${idx}-`);
+            if (el.id) el.id = el.id.replace(/-__prefix__|-\d+-/g, `-${idx}-`);
+            if (el.htmlFor) el.htmlFor = el.htmlFor.replace(/-__prefix__|-\d+-/g, `-${idx}-`);
+          });
+        });
+        totalForms.value = formsetRows.querySelectorAll('.form-row').length;
+      }
+
+      function bindRemove(btn) {
+        btn.addEventListener('click', function(e) {
+          const row = e.target.closest('.form-row');
+          const insertedByClient = row.dataset.insertByClient;
+          const deleteInput = row.querySelector(`input[name$="-DELETE"]`);
+          if (deleteInput && !insertedByClient) {
+            // Mark existing form for deletion (so Django deletes it)
+            deleteInput.checked = true;
+            deleteInput.value = 'on';
+            row.style.display = 'none';
+          } else {
+            // It's a newly added empty row — just remove it from the DOM entirely
+            row.remove();
+            updateIndices();
+          }
+        });
+      }
+
+      document.querySelectorAll('.remove-btn').forEach(bindRemove);
+
+      document.getElementById('add-row').addEventListener('click', function(){
+        // clone template and replace __prefix__ placeholder
+        const newHtml = emptyTpl.replace(/__prefix__/g, totalForms.value);
+        const wrapper = document.createElement('tbody');
+        wrapper.innerHTML = newHtml;
+        const newRow = wrapper.querySelector('.form-row');
+        formsetRows.appendChild(newRow);
+        updateIndices();
+        bindRemove(newRow.querySelector('.remove-btn'));
+      });
+
+      updateIndices();
+
+    })();
+</script>
+{{ form.media }}
+<link href='{% static "league_manager/css/dal.css" %}' rel="stylesheet" type="text/css">
+{% endblock footer %}

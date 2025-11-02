@@ -3,11 +3,16 @@
 {% block content %}
 {% if not request.GET.isExtern %}
 <div class="d-flex justify-content-between align-items-center">
-    <h1>Spieltag "{{ object.name }}"</h1>
+    <h1>{{ object.name }}</h1>
     {% if user.is_staff %}
-    <a href="{% url 'league-gameday-update' pk=object.id%}" class="btn btn-primary">
-        <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Bearbeiten</span>
-    </a>
+    <span>
+        <a href="{% url 'league-gameday-update' pk=object.id%}" class="btn btn-primary me-2">
+            <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Spieltag bearbeiten</span>
+        </a>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-message="Bist du dir wirklich sicher, dass der Spieltag <strong>{{ object.name }}</strong> und alle dazugehörigen Spiele und Einträge <strong>dauerhaft gelöscht</strong> werden sollen?" data-url="{% url 'league-gameday-delete' pk=object.pk %}" title="Spieltag löschen">
+            <i class="bi bi-trash"></i>
+        </button>
+    </span>
     {% endif %}
 </div>
 {% endif %}
@@ -22,18 +27,38 @@
                                  target="_blank">{{ object.address }}</a></div>
 </div>
 <div class="card" style="overflow: auto">
-    <div aria-controls="collapseSchedule" aria-expanded="false" class="card-header" data-bs-target="#collapseSchedule"
-         data-bs-toggle="collapse" role="button">
-        <h2>Spielplan</h2>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2
+        id="collapseTrigger"
+        role="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseSchedule"
+        aria-expanded="false"
+        aria-controls="collapseSchedule"
+        class="mb-0"
+    >
+        Spielplan
+    </h2>
+        {% if user.is_staff %}
+        <span>
+            <a href="{% url 'league-gameday-gameinfos-update' pk=object.id%}" class="btn btn-primary">
+                <i class="bi bi-table"></i> <span class="d-none d-md-inline">Spielplan {% if info.schedule == None %}erstellen{% else %}bearbeiten{% endif %}</span>
+            </a>
+            {% if info.schedule == None %}
+            {% else %}
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                    data-message="Bist du dir wirklich sicher, dass der Spielplan und alle dazugehörigen Einträge <strong>dauerhaft gelöscht</strong> werden sollen?"
+                    data-url="{% url 'league-gameday-gameinfos-delete' pk=object.pk %}" title="Spielplan löschen">
+                <i class="bi bi-trash"></i>
+            </button>
+            {% endif %}
+        </span>
+        {% endif %}
     </div>
     <div aria-labelledby="headingSchedule" class="collapse show" id="collapseSchedule">
         <div class="card-body">
-            {% if info.schedule == None %}
-            Spielplan wurde noch nicht erstellt.
-            {% else %}
-            <div class="row">
+            <div class="row mb-3">
                 <div class="col-12 col-md-3">
-
                     Gemeldete Offizielle: {% if not info.officials %} - {% endif %}<br/>
                     {% if info.url_pattern_official_signup %}
                     <a href="{% url info.url_pattern_official_signup %}"
@@ -47,7 +72,9 @@
                     {% endfor %}
                 </div>
             </div>
-            <br>
+            {% if info.schedule == None %}
+                Spielplan wurde noch nicht erstellt.
+            {% else %}
             <input class="mb-1" id="search" placeholder="Suche nach Teamname" type="text"><br/>
             {{ info.schedule | safe }}
             {% endif %}
@@ -112,6 +139,7 @@
 
 <div id="playoff-bracket"></div>
 
+{% include "partials/delete_modal.html" %}
 
 <script>
     $(function() {

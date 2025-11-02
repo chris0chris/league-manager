@@ -7,7 +7,7 @@ from gamedays.service.wrapper.gameresult_wrapper import GameresultWrapper
 class GameService(object):
     def __init__(self, game_id):
         self.game_id = game_id
-        self.gameinfo: GameinfoWrapper = GameinfoWrapper(game_id)
+        self.gameinfo: GameinfoWrapper = GameinfoWrapper.from_id(game_id)
         self.gameresult: GameresultWrapper = GameresultWrapper(self.gameinfo.gameinfo)
 
     def update_halftime(self, user):

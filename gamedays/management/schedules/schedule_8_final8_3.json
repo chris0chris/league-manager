@@ -90,12 +90,12 @@
         "standing": "P3",
         "home": "Verlierer HF2",
         "away": "Verlierer HF1",
-        "official": "Verlierer P7"
+        "official": "Gewinner P7"
       }
     ]
   },
   {
-    "field": "4",
+    "field": "3",
     "games": [
       {
         "stage": "Vorrunde",
@@ -137,7 +137,7 @@
         "standing": "P5",
         "home": "P3 Gruppe 1",
         "away": "P3 Gruppe 2",
-        "official": "Gewinner P7"
+        "official": "Verlierer P7"
       }
     ]
   }

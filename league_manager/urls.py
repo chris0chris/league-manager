@@ -29,7 +29,7 @@ LEAGUE_MANAGER_MAINTENANCE = 'maintenance'
 urlpatterns = [
                   path('maintenance/', TemplateView.as_view(template_name='league_manager/maintenance.html'),
                        name=LEAGUE_MANAGER_MAINTENANCE),
-                  path('clear-cache', ClearCacheView.as_view(), name=CLEAR_CACHE),
+                  path('clear-cache/', ClearCacheView.as_view(), name=CLEAR_CACHE),
                   path('admin/', admin.site.urls),
                   # ToDo: fix gameday urls
                   path('api/', include('gamedays.api.urls')),

@@ -3,7 +3,11 @@ from unittest.mock import patch, MagicMock
 
 from django.test import TransactionTestCase
 
-from gamedays.management.schedule_manager import ScheduleCreator, Schedule
+from gamedays.management.schedule_manager import (
+    ScheduleCreator,
+    Schedule,
+    GroupSchedule,
+)
 from gamedays.management.schedule_update import ScheduleUpdate, UpdateGameEntry, UpdateEntry
 from gamedays.models import Gameday, Gameinfo, Gameresult
 from gamedays.service.model_wrapper import GamedayModelWrapper
@@ -64,7 +68,7 @@ class TestScheduleUpdate(TransactionTestCase):
         gameday.format = "5_2"
         gameday.save()
         group_A = DBSetup().create_teams('A', 5)
-        groups = [group_A]
+        groups = [GroupSchedule(name='', league_group=None, teams=group_A)]
         DBSetup().create_playoff_placeholder_teams()
         sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
         sc.create()
@@ -82,7 +86,7 @@ class TestScheduleUpdate(TransactionTestCase):
         gameday.save()
         # group_B = DBSetup().create_teams('B', 3)
         group_A = DBSetup().create_teams('A', 6)
-        groups = [group_A]
+        groups = [GroupSchedule(name='Gruppe 1', league_group=None, teams=group_A)]
         DBSetup().create_playoff_placeholder_teams()
         sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
         sc.create()
@@ -115,7 +119,7 @@ class TestScheduleUpdate(TransactionTestCase):
         group_A = DBSetup().create_teams('A', 3)
         group_B = DBSetup().create_teams('B', 3)
         group_C = DBSetup().create_teams('C', 3)
-        groups = [group_A, group_B, group_C]
+        groups = [GroupSchedule(name='Gruppe 1', league_group=None, teams=group_A), GroupSchedule(name='Gruppe 2', league_group=None, teams=group_B), GroupSchedule(name='Gruppe 3', league_group=None, teams=group_C)]
         DBSetup().create_playoff_placeholder_teams()
         sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
         sc.create()
@@ -160,7 +164,7 @@ class TestScheduleUpdate(TransactionTestCase):
         group_A = DBSetup().create_teams('A', 4)
         group_B = DBSetup().create_teams('B', 4)
         group_C = DBSetup().create_teams('C', 3)
-        groups = [group_A, group_B, group_C]
+        groups = [GroupSchedule(name='Gruppe 1', league_group=None, teams=group_A), GroupSchedule(name='Gruppe 2', league_group=None, teams=group_B), GroupSchedule(name='Gruppe 3', league_group=None, teams=group_C)]
         DBSetup().create_playoff_placeholder_teams()
         sc = ScheduleCreator(gameday=Gameday.objects.get(pk=gameday.pk), schedule=Schedule(gameday.format, groups))
         sc.create()

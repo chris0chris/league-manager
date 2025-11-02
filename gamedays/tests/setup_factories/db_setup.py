@@ -275,3 +275,7 @@ class DBSetup:
 
     def create_new_user(self, username='another_user', is_staff=False):
         return UserFactory(username=username, is_staff=is_staff)
+
+    @classmethod
+    def create_gameinfo(cls):
+        return GameinfoFactory(gameday=GamedayFactory(), officials=TeamFactory())

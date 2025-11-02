@@ -45,10 +45,10 @@ class GamedayModelWrapper:
         games_with_result = pd.merge(self._gameinfo, gameresult, left_on='id', right_on=GAMEINFO_ID)
         games_with_result[IN_POSSESSION] = games_with_result[IN_POSSESSION].astype(str)
         games_with_result = games_with_result.convert_dtypes()
-        games_with_result = games_with_result.astype({FH: 'object', SH: 'object', PA: 'object'})
+        games_with_result = games_with_result.astype({FH: 'Int64', SH: 'Int64', PA: 'Int64'})
         games_with_result[PF] = games_with_result[FH] + games_with_result[SH]
         games_with_result[DIFF] = games_with_result[PF] - games_with_result[PA]
-        tmp = games_with_result.fillna(0)
+        tmp = games_with_result.fillna({PF: 0, PA: 0, FH: 0, SH: 0})
         tmp[POINTS] = np.where(tmp[PF] == tmp[PA], 1,
                                np.where(tmp[PF] > tmp[PA], 2, 0))
         games_with_result[POINTS] = tmp[POINTS]
@@ -220,7 +220,7 @@ class GamedayModelWrapper:
         qualify_round = qualify_round[[GAMEINFO_ID, ID_HOME, HOME, POINTS_HOME, POINTS_AWAY, AWAY, ID_AWAY]]
 
         schedule = self._gameinfo.merge(qualify_round, how='left', right_on=GAMEINFO_ID, left_on='id')
-        schedule = schedule.astype({ID_HOME: 'object', ID_AWAY: 'object'}).fillna('')
+        schedule = schedule.fillna({ID_HOME: '', ID_AWAY: ''}).astype({ID_HOME: 'string', ID_AWAY: 'string'})
         return schedule
 
     def _get_table(self):
@@ -259,8 +259,10 @@ class GamedayModelWrapper:
     def get_games_to_whistle(self, team):
         games_to_whistle = self._get_schedule()
         games_to_whistle = games_to_whistle.sort_values(by=[SCHEDULED, FIELD])
+        if not team:
+            return games_to_whistle[games_to_whistle[GAME_FINISHED].isna()]
         return games_to_whistle[
-            (games_to_whistle[OFFICIALS_NAME].str.contains(team)) & (games_to_whistle[GAME_FINISHED] == '')]
+            (games_to_whistle[OFFICIALS_NAME].str.contains(team)) & (games_to_whistle[GAME_FINISHED].isna())]
 
     def get_team_by_qualify_for(self, place, index):
         qualify_standing_by_place = self._get_table().groupby(STANDING).nth(place - 1).sort_values(
@@ -279,5 +281,5 @@ class GamedayModelWrapper:
 
     def _get_teams_by(self, standing, points):
         results_with_standing = self._games_with_result[self._games_with_result[STANDING] == standing]
-        results_with_standing_and_according_points = results_with_standing[self._games_with_result[POINTS] == points]
+        results_with_standing_and_according_points = results_with_standing[results_with_standing[POINTS] == points]
         return results_with_standing_and_according_points
