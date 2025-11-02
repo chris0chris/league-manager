@@ -2,10 +2,6 @@ name: 🏗️🧪🍂 Build & Test branches
 # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions
 on:
   push:
-    branches:
-      - '*'
-      - '*/**'
-      - '!deploy/**' # Excludes deploy/* branches
 
 permissions:
   contents: write

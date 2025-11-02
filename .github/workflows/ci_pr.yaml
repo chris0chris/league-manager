@@ -10,6 +10,7 @@ permissions:
   security-events: write
 
 jobs:
+  # Run all tests first
   build-test-django:
     uses: ./.github/workflows/part_build_test.yaml
     secrets: inherit
@@ -34,26 +35,49 @@ jobs:
     with:
       project: passcheck
 
-  deploy-fe:
+  # Build Docker images once (after tests pass)
+  build-backend-image:
     needs:
       - build-test-django
+    uses: ./.github/workflows/part_docker_build.yaml
+    with:
+      dockerfile: container/app.Dockerfile
+      image_name: backend
+
+  build-frontend-image:
+    needs:
       - build-test-scorecard
       - build-test-liveticker
       - build-passcheck
-    secrets: inherit
-    uses: ./.github/workflows/part_docker_push.yaml
+    uses: ./.github/workflows/part_docker_build.yaml
     with:
-      image_name: leaguesphere/frontend
       dockerfile: container/nginx.Dockerfile
-      version: "${{ github.ref_name }}"
+      image_name: frontend
 
-  deploy-be:
+  # Test and check Docker images
+  test-backend-image:
     needs:
-      - build-test-django
-    secrets: inherit
-    uses: ./.github/workflows/part_docker_push.yaml
+      - build-backend-image
+    uses: ./.github/workflows/part_docker_test.yaml
     with:
-      image_name: leaguesphere/backend
+      artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
+      image_name: backend
       test_command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
-      dockerfile: container/app.Dockerfile
-      version: "${{ github.ref_name }}"
+
+  test-frontend-image:
+    needs:
+      - build-frontend-image
+    uses: ./.github/workflows/part_docker_test.yaml
+    with:
+      artifact_name: ${{ needs.build-frontend-image.outputs.artifact_name }}
+      image_name: frontend
+      test_command: ""
+
+  check-migrations:
+    needs:
+      - build-backend-image
+    secrets: inherit
+    uses: ./.github/workflows/part_check_migrations.yaml
+    with:
+      artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
+      image_name: backend
