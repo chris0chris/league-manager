@@ -8,7 +8,8 @@ from django_webtest.response import DjangoWebtestResponse
 from webtest.forms import Form
 
 from gamedays.models import Gameday, Gameinfo, Gameresult
-from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable
+from gamedays.service.gameday_service import EmptySchedule, EmptyFinalTable, EmptyQualifyTable, \
+    EmptyOffenseStatisticTable, EmptyDefenseStatisticTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
 
@@ -45,6 +46,8 @@ class TestGamedayDetailView(TestCase):
         assert context['info']['schedule'] != ''
         assert context['info']['qualify_table'] != ''
         assert context['info']['final_table'] != ''
+        assert context['info']['offense_table'] != EmptyOffenseStatisticTable.to_html()
+        assert context['info']['defense_table'] != EmptyDefenseStatisticTable.to_html()
 
     def test_detail_view_with_empty_gameday(self):
         gameday = DBSetup().create_empty_gameday()
@@ -55,6 +58,8 @@ class TestGamedayDetailView(TestCase):
         assert context['info']['schedule'] == EmptySchedule.to_html()
         assert context['info']['qualify_table'] == EmptyQualifyTable.to_html()
         assert context['info']['final_table'] == EmptyFinalTable.to_html()
+        assert context['info']['offense_table'] == EmptyOffenseStatisticTable.to_html()
+        assert context['info']['defense_table'] == EmptyDefenseStatisticTable.to_html()
 
     def test_detail_view_gameday_not_available(self):
         resp = self.client.get(reverse('league-gameday-detail', args=[00]))
