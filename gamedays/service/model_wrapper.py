@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from django.utils.termcolors import color_names
 from pandas import DataFrame
 
 from gamedays.models import Gameinfo, Gameresult, TeamLog
