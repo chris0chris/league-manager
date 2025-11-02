@@ -89,6 +89,8 @@ jobs:
   deploy-frontend:
     needs:
       - build-frontend-image
+      - test-backend-image
+      - check-migrations
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_artifact.yaml
     with:
@@ -96,3 +98,14 @@ jobs:
       image_name: leaguesphere/frontend
       local_image_name: frontend
       version: "${{ github.ref_name }}"
+
+  # Run database migrations (after backend deployment)
+  run-migrations:
+    needs:
+      - deploy-backend
+      - build-backend-image
+    secrets: inherit
+    uses: ./.github/workflows/part_run_migrations.yaml
+    with:
+      artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
+      image_name: backend
