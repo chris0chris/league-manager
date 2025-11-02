@@ -3,7 +3,7 @@ import pandas as pd
 from gamedays.models import Gameinfo, TeamLog, Gameresult
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     POINTS_HOME, \
-    POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL
+    POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL, GAMEINFO_ID
 from gamedays.service.gamelog import GameLog
 from gamedays.service.model_wrapper import GamedayModelWrapper
 
@@ -95,7 +95,7 @@ class GamedayService:
 
     def get_schedule(self):
         schedule = self.gmw.get_schedule()
-        columns = [SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, STANDING, STAGE, STATUS]
+        columns = [SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, STANDING, STAGE, STATUS, GAMEINFO_ID]
         schedule = schedule[columns]
         schedule[OFFICIALS_NAME] = schedule[OFFICIALS_NAME].apply('<i>{}</i>'.format)
         schedule[SCHEDULED] = pd.to_datetime(schedule[SCHEDULED], format='%H:%M:%S').dt.strftime('%H:%M')

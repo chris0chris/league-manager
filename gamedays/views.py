@@ -76,8 +76,12 @@ class GamedayDetailView(DetailView):
             officials = []
             url_pattern_official = ''
             url_pattern_official_signup = ''
+
+        schedule = gs.get_schedule()
+        schedule.gameinfo = schedule.apply(lambda x: self._get_game_detail_button(pk, x.gameinfo) if x.Status == "beendet" else '', axis=1)
+
         context['info'] = {
-            'schedule': gs.get_schedule().to_html(**render_configs),
+            'schedule': schedule.to_html(**render_configs),
             'qualify_table': None if qualify_table == '' else qualify_table,
             'final_table': gs.get_final_table().to_html(**render_configs),
             'officials': officials,
@@ -86,8 +90,12 @@ class GamedayDetailView(DetailView):
             'url_pattern_official': url_pattern_official,
             'url_pattern_official_signup': url_pattern_official_signup,
         }
+
+
         return context
 
+    def _get_game_detail_button(self, gameday_pk: int, gameinfo_id: int):
+        return f"""<a href="{gameday_pk}/game/{gameinfo_id}" class="btn btn-primary">Zum Spiel</a>"""
 
 class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = GamedayCreateForm
@@ -161,9 +169,9 @@ class GamedayGameDetailView(DetailView):
         ggs = GamedayGameService(gameinfo.pk)
         render_configs = {
             'index': False,
-            'classes': ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center', 'table-style'],
+            'classes': ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center'],
             'border': 0,
-            'justify': 'right',
+            'justify': 'center',
             'escape': False,
             'table_id': 'team_log_events',
         }
