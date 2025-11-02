@@ -17,6 +17,8 @@ from django.views.generic import (
 )
 from formtools.wizard.views import SessionWizardView
 
+from league_manager.utils.mixins import GamedayManagerRequiredMixin
+
 from .constants import (
     LEAGUE_GAMEDAY_DETAIL,
     LEAGUE_GAMEDAY_LIST_AND_YEAR,
@@ -157,7 +159,11 @@ class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return self.request.user.is_staff
 
 
-class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class GamedayUpdateView(LoginRequiredMixin, GamedayManagerRequiredMixin, UpdateView):
+    """
+    Update an existing gameday
+    Requires gameday manager permission (staff, league manager, or assigned gameday manager)
+    """
     form_class = GamedayForm
     template_name = 'gamedays/gameday_form.html'
     model = Gameday
@@ -181,9 +187,6 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('league-gameday-detail', kwargs={'pk': self.object.pk})
-
-    def test_func(self):
-        return self.request.user.is_staff
 
 
 class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView):
@@ -369,3 +372,32 @@ class GameinfoDeleteView(StaffDeleteView):
         messages.success(self.request, "Der Spielplan für diesen Spieltag wurde erfolgreich gelöscht.")
 
         return redirect(LEAGUE_GAMEDAY_DETAIL, pk=gameday.pk)
+
+
+class ManagerDashboardView(LoginRequiredMixin, View):
+    """
+    Dashboard view for managers to see their permissions and managed entities
+    """
+    template_name = 'gamedays/manager_dashboard.html'
+
+    def get(self, request):
+        from gamedays.models import LeagueManager, GamedayManager, TeamManager
+
+        context = {
+            'is_staff': request.user.is_staff,
+        }
+
+        if not request.user.is_staff:
+            context['league_permissions'] = LeagueManager.objects.filter(
+                user=request.user
+            ).select_related('league', 'season').order_by('league__name', 'season__name')
+
+            context['gameday_permissions'] = GamedayManager.objects.filter(
+                user=request.user
+            ).select_related('gameday', 'gameday__league', 'gameday__season').order_by('-gameday__date')
+
+            context['team_permissions'] = TeamManager.objects.filter(
+                user=request.user
+            ).select_related('team').order_by('team__name')
+
+        return render(request, self.template_name, context)

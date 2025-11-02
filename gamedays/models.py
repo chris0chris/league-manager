@@ -273,3 +273,74 @@ class Person(models.Model):
 
     objects: QuerySet["Person"] = models.Manager()
 
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
+
+
+class LeagueManager(models.Model):
+    """Associates users with leagues they can manage"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='league_manager_roles')
+    league = models.ForeignKey(League, on_delete=models.CASCADE, related_name='managers')
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, null=True, blank=True, related_name='league_managers')
+    # If season is NULL, manages league across all seasons
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='league_managers_created')
+
+    objects: QuerySet["LeagueManager"] = models.Manager()
+
+    class Meta:
+        unique_together = ['user', 'league', 'season']
+        indexes = [
+            models.Index(fields=['user', 'league']),
+            models.Index(fields=['league', 'season']),
+        ]
+
+    def __str__(self):
+        season_str = f' ({self.season.name})' if self.season else ' (All Seasons)'
+        return f'{self.user.username} -> {self.league.name}{season_str}'
+
+
+class GamedayManager(models.Model):
+    """Associates users with specific gamedays they can manage"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='gameday_manager_roles')
+    gameday = models.ForeignKey(Gameday, on_delete=models.CASCADE, related_name='managers')
+    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='gameday_assignments')
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    can_edit_details = models.BooleanField(default=True)  # Can change time, location, etc.
+    can_assign_officials = models.BooleanField(default=True)
+    can_manage_scores = models.BooleanField(default=True)
+
+    objects: QuerySet["GamedayManager"] = models.Manager()
+
+    class Meta:
+        unique_together = ['user', 'gameday']
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['gameday']),
+        ]
+
+    def __str__(self):
+        return f'{self.user.username} -> {self.gameday.name}'
+
+
+class TeamManager(models.Model):
+    """Associates users with teams they can manage"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='team_manager_roles')
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='managers')
+    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='team_managers_assigned')
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    can_edit_roster = models.BooleanField(default=True)
+    can_submit_passcheck = models.BooleanField(default=True)
+
+    objects: QuerySet["TeamManager"] = models.Manager()
+
+    class Meta:
+        unique_together = ['user', 'team']
+        indexes = [
+            models.Index(fields=['user', 'team']),
+            models.Index(fields=['team']),
+        ]
+
+    def __str__(self):
+        return f'{self.user.username} -> {self.team.name}'
+

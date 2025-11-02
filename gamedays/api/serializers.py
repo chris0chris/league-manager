@@ -1,7 +1,8 @@
+from django.contrib.auth.models import User
 from rest_framework.fields import SerializerMethodField, IntegerField
 from rest_framework.serializers import ModelSerializer, Serializer
 
-from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
+from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup, LeagueManager, GamedayManager, TeamManager
 
 
 class GamedaySerializer(ModelSerializer):
@@ -141,3 +142,97 @@ class GameLogSerializer(Serializer):
             if entry['isDeleted']:
                 result[entry['sequence']].update({'isDeleted': True})
         return list(result.values())
+
+
+class LeagueManagerSerializer(ModelSerializer):
+    """Serializer for LeagueManager model"""
+    user_username = SerializerMethodField()
+    user_id = IntegerField(write_only=True)
+    league_name = SerializerMethodField()
+    season_name = SerializerMethodField()
+    created_by_username = SerializerMethodField()
+
+    class Meta:
+        model = LeagueManager
+        fields = ['id', 'user_id', 'user_username', 'league', 'league_name',
+                  'season', 'season_name', 'created_at', 'created_by', 'created_by_username']
+        read_only_fields = ['id', 'created_at', 'created_by']
+
+    def get_user_username(self, obj):
+        return obj.user.username if obj.user else None
+
+    def get_league_name(self, obj):
+        return obj.league.name if obj.league else None
+
+    def get_season_name(self, obj):
+        return obj.season.name if obj.season else 'All Seasons'
+
+    def get_created_by_username(self, obj):
+        return obj.created_by.username if obj.created_by else None
+
+    def create(self, validated_data):
+        user_id = validated_data.pop('user_id')
+        validated_data['user'] = User.objects.get(pk=user_id)
+        return super().create(validated_data)
+
+
+class GamedayManagerSerializer(ModelSerializer):
+    """Serializer for GamedayManager model"""
+    user_username = SerializerMethodField()
+    user_id = IntegerField(write_only=True)
+    gameday_name = SerializerMethodField()
+    gameday_date = SerializerMethodField()
+    assigned_by_username = SerializerMethodField()
+
+    class Meta:
+        model = GamedayManager
+        fields = ['id', 'user_id', 'user_username', 'gameday', 'gameday_name', 'gameday_date',
+                  'can_edit_details', 'can_assign_officials', 'can_manage_scores',
+                  'assigned_at', 'assigned_by', 'assigned_by_username']
+        read_only_fields = ['id', 'assigned_at', 'assigned_by']
+
+    def get_user_username(self, obj):
+        return obj.user.username if obj.user else None
+
+    def get_gameday_name(self, obj):
+        return obj.gameday.name if obj.gameday else None
+
+    def get_gameday_date(self, obj):
+        return obj.gameday.date.isoformat() if obj.gameday else None
+
+    def get_assigned_by_username(self, obj):
+        return obj.assigned_by.username if obj.assigned_by else None
+
+    def create(self, validated_data):
+        user_id = validated_data.pop('user_id')
+        validated_data['user'] = User.objects.get(pk=user_id)
+        return super().create(validated_data)
+
+
+class TeamManagerSerializer(ModelSerializer):
+    """Serializer for TeamManager model"""
+    user_username = SerializerMethodField()
+    user_id = IntegerField(write_only=True)
+    team_name = SerializerMethodField()
+    assigned_by_username = SerializerMethodField()
+
+    class Meta:
+        model = TeamManager
+        fields = ['id', 'user_id', 'user_username', 'team', 'team_name',
+                  'can_edit_roster', 'can_submit_passcheck',
+                  'assigned_at', 'assigned_by', 'assigned_by_username']
+        read_only_fields = ['id', 'assigned_at', 'assigned_by']
+
+    def get_user_username(self, obj):
+        return obj.user.username if obj.user else None
+
+    def get_team_name(self, obj):
+        return obj.team.name if obj.team else None
+
+    def get_assigned_by_username(self, obj):
+        return obj.assigned_by.username if obj.assigned_by else None
+
+    def create(self, validated_data):
+        user_id = validated_data.pop('user_id')
+        validated_data['user'] = User.objects.get(pk=user_id)
+        return super().create(validated_data)
