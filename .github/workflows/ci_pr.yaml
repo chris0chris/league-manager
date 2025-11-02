@@ -34,7 +34,7 @@ jobs:
     with:
       project: passcheck
 
-  deploy-fe:
+  test-deploy-fe:
     needs:
       - build-test-django
       - build-test-scorecard
@@ -47,7 +47,15 @@ jobs:
       dockerfile: container/nginx.Dockerfile
       version: "${{ github.ref_name }}"
 
-  deploy-be:
+  check-migrations:
+    needs:
+      - build-test-django
+    secrets: inherit
+    uses: ./.github/workflows/part_check_migrations.yaml
+    with:
+      dockerfile: container/app.Dockerfile
+
+  test-deploy-be:
     needs:
       - build-test-django
     secrets: inherit
