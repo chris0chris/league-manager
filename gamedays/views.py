@@ -108,9 +108,6 @@ class GamedayDetailView(DetailView):
             url_pattern_official = ''
             url_pattern_official_signup = ''
 
-        schedule = gs.get_schedule()
-        schedule.gameinfo = schedule.apply(lambda x: self._get_game_detail_button(pk, x.gameinfo) if x.Status == "beendet" else '', axis=1)
-
         context['info'] = {
             'schedule': gs.get_schedule().to_html(**render_configs),
             'qualify_table': qualify_table,
@@ -125,8 +122,6 @@ class GamedayDetailView(DetailView):
 
         return context
 
-    def _get_game_detail_button(self, gameday_pk: int, gameinfo_id: int):
-        return f"""<a href="{gameday_pk}/game/{gameinfo_id}" class="btn btn-primary">Zum Spiel</a>"""
 
 class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = GamedayForm
@@ -220,7 +215,8 @@ class GamedayGameDetailView(DetailView):
         context['info'] = {
             'away_team': ggs.away_team_name,
             'home_team': ggs.home_team_name,
-            'events_table': ggs.get_events_table().to_html(**render_configs)
+            'events_table': ggs.get_events_table().to_html(**render_configs),
+            'split_score_table': ggs.get_halftime_split_score_table().to_html(**render_configs)
         }
         return context
 

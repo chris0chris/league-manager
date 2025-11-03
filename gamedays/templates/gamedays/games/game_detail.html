@@ -12,20 +12,35 @@ td {
 </a>
 <div class="d-flex justify-content-between align-items-center">
     <h1>Spiel Übersicht: <b>{{ info.home_team }}</b> vs. <b>{{ info.away_team }}</b></h1>
-
     {% endif %}
 </div>
-<div class="row mb-1">
-    <div class="col"><b>Spielbeginn:</b> {{ object.scheduled|time:"H:i" }} Uhr</div>
-</div>
-<div class="row mb-1">
-    <div class="col"><b>Feld:</b> {{ object.field }}</div>
-</div>
-<div class="row mb-1">
-    <div class="col"><b>Status:</b> {{ object.status }}</div>
-</div>
-<div class="row mb-1">
-    <div class="col"><b>Officials:</b> {{ object.officials.description }}</div>
+
+
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapseDetails" aria-expanded="true" class="card-header" data-bs-target="#collapseDetails"
+         data-bs-toggle="collapse" id="headingDetails" role="button">
+        <h2>Details</h2>
+    </div>
+
+    <div aria-labelledby="headingDetails" class="collapse show" id="collapseDetails">
+        <div class="card-body">
+            <div class="row mb-1">
+                <div class="col"><b>Spielbeginn:</b> {{ object.scheduled|time:"H:i" }} Uhr</div>
+            </div>
+            <div class="row mb-1">
+                <div class="col"><b>Feld:</b> {{ object.field }}</div>
+            </div>
+            <div class="row mb-1">
+                <div class="col"><b>Status:</b> {{ object.status }}</div>
+            </div>
+            <div class="row mb-1">
+                <div class="col"><b>Officials:</b> {{ object.officials.description }}</div>
+            </div>
+        </div>
+        <div class="card-body">
+            {{ info.split_score_table | safe }}
+        </div>
+    </div>
 </div>
 <div class="card" style="overflow: auto">
     <div aria-controls="collapseFinal" aria-expanded="false" class="card-header" data-bs-target="#collapseFinal"
@@ -33,8 +48,10 @@ td {
         <h2>Spielverlauf</h2>
     </div>
 
-    <div class="card-body">
-        {{ info.events_table | safe }}
+    <div aria-labelledby="headingFinal" class="collapse" id="collapseFinal">
+        <div class="card-body">
+            {{ info.events_table | safe }}
+        </div>
     </div>
 </div>
 

@@ -1,11 +1,12 @@
 import pandas as pd
+from django.db.models.fields import return_None
 
 from gamedays.forms import SCHEDULE_CUSTOM_CHOICE_C, GamedayGaminfoFieldsAndGroupsForm
 from gamedays.models import Gameinfo
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     POINTS_HOME, \
-    POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL, GAMEINFO_ID
-from gamedays.service.gamelog import GameLog
+    POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL, GAMEINFO_ID, FINISHED
+from gamedays.service.gamelog import TeamLog, Gameresult
 from gamedays.service.model_wrapper import GamedayModelWrapper
 
 EMPTY_DATA = '[]'
@@ -37,7 +38,7 @@ SCHEDULE_TABLE_HEADERS = {
 class EmptySchedule:
     @staticmethod
     def to_html(*args, **kwargs):
-        return None
+        return 'None'
 
     @staticmethod
     def to_json(*args, **kwargs):
@@ -124,6 +125,7 @@ class GamedayService:
 
     def __init__(self, pk):
         self.gmw = GamedayModelWrapper(pk)
+        self.gameday_pk = pk
 
     def get_schedule(self):
         schedule = self.gmw.get_schedule()
@@ -131,7 +133,8 @@ class GamedayService:
         schedule = schedule[columns]
         schedule[OFFICIALS_NAME] = schedule[OFFICIALS_NAME].apply('<i>{}</i>'.format)
         schedule[SCHEDULED] = pd.to_datetime(schedule[SCHEDULED], format='%H:%M:%S').dt.strftime('%H:%M')
-
+        schedule[GAMEINFO_ID] = schedule.apply(
+            lambda x: self._get_game_detail_button(self.gameday_pk, x.gameinfo) if x[STATUS] == FINISHED else '', axis=1)
         schedule = schedule.rename(columns=SCHEDULE_TABLE_HEADERS)
         return schedule
 
@@ -175,6 +178,10 @@ class GamedayService:
             gameday.format = data.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
         gameday.save()
 
+    @staticmethod
+    def _get_game_detail_button(gameday_pk: int, gameinfo_id: int):
+        return f"""<a href="game/{gameinfo_id}" class="btn btn-primary">Zum Spiel</a>"""
+
 
 class EmptyGamedayGameService:
     pass
@@ -199,13 +206,22 @@ class GamedayGameService:
         self.away_team_name = self.gameresult.iloc[0]['team__description']
         self.away_team_id = self.gameresult.iloc[0]['team']
 
-        self._column_mapping = {
+        self._score_column_mapping = {
             # "created_time": "Zeit",
             self.home_team_name: self.home_team_name,
             "input": "Spielstand",
             self.away_team_name: self.away_team_name,
         }
-        self.output_columns = self._column_mapping.values()
+
+        self._split_score_column_mapping = {
+            'team__description': 'Team',
+            1: '1. Halbzeit',
+            2: '2. Halbzeit',
+            'final': 'Endstand'
+        }
+
+        self.score_output_columns = self._score_column_mapping.values()
+        self.split_score_output_columns = self._split_score_column_mapping.values()
 
     def _prepare_team_logs(self):
         events = pd.DataFrame(TeamLog.objects \
@@ -220,6 +236,15 @@ class GamedayGameService:
         events["is_scoring_play"] = events.value > 0
         events["event_with_player"] = events.apply(lambda x: x.player + ' ' + x.event + x.input, axis=1)
         return events
+
+    def get_halftime_split_score_table(self):
+        events = self._prepare_team_logs()
+
+        ct = pd.crosstab(events.team__description, events.half, events.value, aggfunc='sum')
+        ct["final"] = ct.sum(axis=1)
+        ct = ct.rename_axis(None, axis=1).reset_index()
+
+        return ct.rename(columns=self._split_score_column_mapping)[self.split_score_output_columns]
 
     def get_events_table(self):
         events = self._prepare_team_logs()
@@ -263,4 +288,4 @@ class GamedayGameService:
         event_ct.input = event_ct.apply(lambda x: x.input if len(x.input) > 0 else x.score, axis=1)
         event_ct.created_time = event_ct.created_time.apply(lambda x: x.strftime("%H:%M"))
 
-        return event_ct.rename(columns=self._column_mapping)[self.output_columns]
+        return event_ct.rename(columns=self._score_column_mapping)[self.score_output_columns]
