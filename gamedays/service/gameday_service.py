@@ -63,6 +63,29 @@ class EmptyFinalTable:
         return EMPTY_DATA
 
 
+class EmptyOffenseStatisticTable:
+
+    @staticmethod
+    def to_html(*args, **kwargs):
+        return 'Offense Statistiken sind nach dem 1. Spiel verfügbar.'
+
+    @staticmethod
+    def to_json(*args, **kwargs):
+        return EMPTY_DATA
+
+
+class EmptyDefenseStatisticTable:
+
+    @staticmethod
+    def to_html(*args, **kwargs):
+        return 'Defense Statistiken sind nach dem 1. Spiel verfügbar.'
+
+    @staticmethod
+    def to_json(*args, **kwargs):
+        return EMPTY_DATA
+
+
+
 class EmptyGamedayService:
 
     @staticmethod
@@ -80,6 +103,14 @@ class EmptyGamedayService:
     @staticmethod
     def get_final_table():
         return EmptyFinalTable
+
+    @staticmethod
+    def get_offense_player_statistics_table():
+        return EmptyOffenseStatisticTable
+
+    @staticmethod
+    def get_defense_player_statistic_table():
+        return EmptyDefenseStatisticTable
 
 
 class GamedayService:
@@ -128,6 +159,12 @@ class GamedayService:
         games_to_whistle = games_to_whistle[columns]
         games_to_whistle = games_to_whistle.rename(columns={OFFICIALS: 'officialsId', OFFICIALS_NAME: OFFICIALS})
         return games_to_whistle
+
+    def get_offense_player_statistics_table(self):
+        return self.gmw.get_offense_player_statistics_table()
+
+    def get_defense_player_statistic_table(self):
+        return self.gmw.get_defense_statistic_table()
 
     @staticmethod
     def update_format(gameday, data):

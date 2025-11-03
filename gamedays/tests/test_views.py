@@ -28,7 +28,10 @@ from gamedays.service.gameday_service import (
     EmptySchedule,
     EmptyFinalTable,
     EmptyQualifyTable,
+    EmptyDefenseStatisticTable,
+    EmptyOffenseStatisticTable
 )
+
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
 from gamedays.wizard import FIELD_GROUP_STEP, GAMEDAY_FORMAT_STEP, GAMEINFO_STEP
@@ -76,10 +79,12 @@ class TestGamedayDetailView(TestCase):
         )
         assert resp.status_code == HTTPStatus.OK
         context = resp.context_data
-        assert context["object"].pk == gameday.pk
-        assert context["info"]["schedule"] != ""
-        assert context["info"]["qualify_table"] != ""
-        assert context["info"]["final_table"] != ""
+        assert context['object'].pk == gameday.pk
+        assert context['info']['schedule'] != ''
+        assert context['info']['qualify_table'] != ''
+        assert context['info']['final_table'] != ''
+        assert context['info']['offense_table'] != EmptyOffenseStatisticTable.to_html()
+        assert context['info']['defense_table'] != EmptyDefenseStatisticTable.to_html()
 
     def test_detail_view_with_empty_gameday(self):
         gameday = DBSetup().create_empty_gameday()
@@ -88,10 +93,12 @@ class TestGamedayDetailView(TestCase):
         )
         assert resp.status_code == HTTPStatus.OK
         context = resp.context_data
-        assert context["object"].pk == gameday.pk
-        assert context["info"]["schedule"] == EmptySchedule.to_html()
-        assert context["info"]["qualify_table"] == EmptyQualifyTable.to_html()
-        assert context["info"]["final_table"] == EmptyFinalTable.to_html()
+        assert context['object'].pk == gameday.pk
+        assert context['info']['schedule'] == EmptySchedule.to_html()
+        assert context['info']['qualify_table'] == EmptyQualifyTable.to_html()
+        assert context['info']['final_table'] == EmptyFinalTable.to_html()
+        assert context['info']['offense_table'] == EmptyOffenseStatisticTable.to_html()
+        assert context['info']['defense_table'] == EmptyDefenseStatisticTable.to_html()
 
     def test_detail_view_gameday_not_available(self):
         resp = self.client.get(reverse(LEAGUE_GAMEDAY_DETAIL, args=[00]))
