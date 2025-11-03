@@ -43,7 +43,7 @@ class TestLeagueManagerRequiredMixin:
             username='regular', password='test123'
         )
 
-        self.league = DBSetup().create_league()
+        self.league = League.objects.create(name='Test League')
         self.season = Season.objects.create(name='2024')
 
         LeagueManager.objects.create(
@@ -235,7 +235,7 @@ class TestTeamManagerRequiredMixin:
             username='regular', password='test123'
         )
 
-        self.team = Team.objects.create(name='Test Team', description='Test')
+        self.team = Team.objects.create(name='Test Team', description='Test Team Desc')
 
         TeamManager.objects.create(
             user=self.team_manager,

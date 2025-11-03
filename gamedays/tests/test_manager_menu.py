@@ -28,7 +28,7 @@ class TestGamedaysMenuAdmin:
         items = menu.get_menu_items(request)
 
         assert len(items) == 3
-        item_names = [item.name for item in items]
+        item_names = [item['name'] for item in items]
         assert "Spieltag erstellen" in item_names
         assert "Manager Dashboard" in item_names
         assert "Backend" in item_names
@@ -69,7 +69,7 @@ class TestGamedaysMenuManager:
     def test_league_manager_sees_dashboard(self):
         """League managers see manager dashboard"""
         user = User.objects.create_user(username='league_mgr', password='test123')
-        league = DBSetup().create_league()
+        league = League.objects.create(name='Test League')
         season = Season.objects.create(name='2024')
 
         LeagueManager.objects.create(
@@ -83,8 +83,8 @@ class TestGamedaysMenuManager:
         items = menu.get_menu_items(request)
 
         assert len(items) == 1
-        assert items[0].name == "Manager Dashboard"
-        assert items[0].url == "manager-dashboard"
+        assert items[0]['name'] == "Manager Dashboard"
+        assert items[0]['url'] == "/gamedays/managers/dashboard/"
 
     def test_gameday_manager_sees_dashboard(self):
         """Gameday managers see manager dashboard"""
@@ -101,7 +101,7 @@ class TestGamedaysMenuManager:
         items = menu.get_menu_items(request)
 
         assert len(items) == 1
-        assert items[0].name == "Manager Dashboard"
+        assert items[0]['name'] == "Manager Dashboard"
 
     def test_team_manager_sees_dashboard(self):
         """Team managers see manager dashboard"""
@@ -118,7 +118,7 @@ class TestGamedaysMenuManager:
         items = menu.get_menu_items(request)
 
         assert len(items) == 1
-        assert items[0].name == "Manager Dashboard"
+        assert items[0]['name'] == "Manager Dashboard"
 
     def test_regular_user_sees_no_items(self):
         """Regular users with no permissions see no menu items"""

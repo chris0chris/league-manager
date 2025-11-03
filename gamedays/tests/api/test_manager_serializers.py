@@ -26,7 +26,7 @@ class TestLeagueManagerSerializer:
 
     def setup_method(self):
         self.user = User.objects.create_user(username='test', password='test123')
-        self.league = DBSetup().create_league()
+        self.league = League.objects.create(name='Test League')
         self.season = Season.objects.create(name='2024')
 
     def test_serialize_league_manager(self):
@@ -41,7 +41,7 @@ class TestLeagueManagerSerializer:
         serializer = LeagueManagerSerializer(lm)
         data = serializer.data
 
-        assert data['user_id'] == self.user.pk
+        # user_id is write_only, so not in serialized output
         assert data['user_username'] == 'test'
         assert data['league'] == self.league.pk
         assert data['league_name'] == self.league.name
@@ -68,7 +68,7 @@ class TestLeagueManagerSerializer:
         data = {
             'user_id': self.user.pk,
             'league': self.league.pk,
-            'season_id': self.season.pk,
+            'season': self.season.pk,
         }
 
         serializer = LeagueManagerSerializer(data=data)
@@ -107,18 +107,17 @@ class TestLeagueManagerSerializer:
         assert lm.season is None
 
     def test_create_league_manager_invalid_season(self):
-        """Test creating league manager with invalid season_id"""
+        """Test creating league manager with invalid season"""
         data = {
             'user_id': self.user.pk,
             'league': self.league.pk,
-            'season_id': 99999,
+            'season': 99999,
         }
 
         serializer = LeagueManagerSerializer(data=data)
-        assert serializer.is_valid()
-
-        with pytest.raises(ValidationError, match="Season with id 99999 does not exist"):
-            serializer.save()
+        # Invalid FK should fail validation
+        assert not serializer.is_valid()
+        assert 'season' in serializer.errors
 
 
 @pytest.mark.django_db
@@ -143,7 +142,7 @@ class TestGamedayManagerSerializer:
         serializer = GamedayManagerSerializer(gm)
         data = serializer.data
 
-        assert data['user_id'] == self.user.pk
+        # user_id is write_only, so not in serialized output
         assert data['user_username'] == 'test'
         assert data['gameday'] == self.gameday.pk
         assert data['gameday_name'] == self.gameday.name
@@ -245,7 +244,7 @@ class TestTeamManagerSerializer:
         serializer = TeamManagerSerializer(tm)
         data = serializer.data
 
-        assert data['user_id'] == self.user.pk
+        # user_id is write_only, so not in serialized output
         assert data['user_username'] == 'test'
         assert data['team'] == self.team.pk
         assert data['team_name'] == 'Test Team'

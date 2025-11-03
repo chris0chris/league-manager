@@ -239,7 +239,11 @@ class GamedayManagerSerializer(ModelSerializer):
         return obj.gameday.name if obj.gameday else None
 
     def get_gameday_date(self, obj):
-        return obj.gameday.date.isoformat() if obj.gameday else None
+        if not obj.gameday:
+            return None
+        date = obj.gameday.date
+        # Handle both date objects and string dates
+        return date.isoformat() if hasattr(date, 'isoformat') else date
 
     def get_assigned_by_username(self, obj):
         return obj.assigned_by.username if obj.assigned_by else None

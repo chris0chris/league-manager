@@ -31,7 +31,7 @@ class TestIsLeagueManager:
             username='regular', password='test123'
         )
 
-        self.league = DBSetup().create_league()
+        self.league = League.objects.create(name='Test League')
         self.season1 = Season.objects.create(name='2024')
         self.season2 = Season.objects.create(name='2025')
 
@@ -157,7 +157,7 @@ class TestIsTeamManager:
             username='regular', password='test123'
         )
 
-        self.team = Team.objects.create(name='Test Team', description='Test')
+        self.team = Team.objects.create(name='Test Team', description='Test Team Desc 1')
 
         TeamManager.objects.create(
             user=self.team_manager,
@@ -195,8 +195,8 @@ class TestGetManagedLeagues:
             username='manager', password='test123'
         )
 
-        self.league1 = DBSetup().create_league()
-        self.league2 = League.objects.create(name='League 2', description='Test')
+        self.league1 = League.objects.create(name='Test League 1')
+        self.league2 = League.objects.create(name='Test League 2')
         self.season = Season.objects.create(name='2024')
 
         LeagueManager.objects.create(
@@ -284,8 +284,8 @@ class TestGetManagedTeams:
             username='team_mgr', password='test123'
         )
 
-        self.team1 = Team.objects.create(name='Team 1', description='Test')
-        self.team2 = Team.objects.create(name='Team 2', description='Test')
+        self.team1 = Team.objects.create(name='Team 1', description='Test Team 1 Desc')
+        self.team2 = Team.objects.create(name='Team 2', description='Test Team 2 Desc')
 
         TeamManager.objects.create(
             user=self.team_manager,
@@ -319,9 +319,9 @@ class TestCanAssignTeamManager:
             username='regular', password='test123'
         )
 
-        self.league = DBSetup().create_league()
+        self.league = League.objects.create(name='Test League')
         self.season = Season.objects.create(name='2024')
-        self.team = Team.objects.create(name='Test Team', description='Test')
+        self.team = Team.objects.create(name='Test Team', description='Test Team Desc')
 
         # Link team to league
         SeasonLeagueTeam.objects.create(
@@ -439,7 +439,7 @@ class TestGetTeamManagerPermissions:
             username='regular', password='test123'
         )
 
-        self.team = Team.objects.create(name='Test Team', description='Test')
+        self.team = Team.objects.create(name='Test Team', description='Test Team Desc 2')
 
         TeamManager.objects.create(
             user=self.team_manager,

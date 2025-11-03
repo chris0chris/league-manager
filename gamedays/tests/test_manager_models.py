@@ -13,7 +13,7 @@ class TestLeagueManagerModel:
     def test_str_representation_with_season(self):
         """Test __str__ with season"""
         user = User.objects.create_user(username='test', password='test123')
-        league = DBSetup().create_league()
+        league = League.objects.create(name='Test League')
         season = Season.objects.create(name='2024')
 
         lm = LeagueManager.objects.create(
@@ -27,7 +27,7 @@ class TestLeagueManagerModel:
     def test_str_representation_without_season(self):
         """Test __str__ without season (all seasons)"""
         user = User.objects.create_user(username='test', password='test123')
-        league = DBSetup().create_league()
+        league = League.objects.create(name='Test League')
 
         lm = LeagueManager.objects.create(
             user=user,
@@ -40,7 +40,7 @@ class TestLeagueManagerModel:
     def test_unique_together_constraint(self):
         """Test unique_together constraint"""
         user = User.objects.create_user(username='test', password='test123')
-        league = DBSetup().create_league()
+        league = League.objects.create(name='Test League')
         season = Season.objects.create(name='2024')
 
         LeagueManager.objects.create(

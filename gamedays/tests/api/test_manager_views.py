@@ -29,7 +29,7 @@ class TestLeagueManagerAPI(WebTest):
         self.regular_user = User.objects.create_user(
             username='regular', password='test123'
         )
-        self.league = DBSetup().create_league()
+        self.league = League.objects.create(name='Test League')
         self.season = Season.objects.create(name='2024')
 
     def test_list_league_managers_as_staff(self):
@@ -42,7 +42,7 @@ class TestLeagueManagerAPI(WebTest):
         )
 
         response = self.app.get(
-            reverse('api-league-manager-list-create', kwargs={'league_id': self.league.pk}),
+            reverse('api-league-managers', kwargs={'league_id': self.league.pk}),
             headers=DBSetup().get_token_header(self.staff_user)
         )
 
@@ -52,7 +52,7 @@ class TestLeagueManagerAPI(WebTest):
     def test_list_league_managers_as_non_staff_forbidden(self):
         """Non-staff users cannot list league managers"""
         response = self.app.get(
-            reverse('api-league-manager-list-create', kwargs={'league_id': self.league.pk}),
+            reverse('api-league-managers', kwargs={'league_id': self.league.pk}),
             headers=DBSetup().get_token_header(self.regular_user),
             expect_errors=True
         )
@@ -62,7 +62,7 @@ class TestLeagueManagerAPI(WebTest):
     def test_create_league_manager_as_staff(self):
         """Staff can create league manager assignments"""
         response = self.app.post_json(
-            reverse('api-league-manager-list-create', kwargs={'league_id': self.league.pk}),
+            reverse('api-league-managers', kwargs={'league_id': self.league.pk}),
             {
                 'user_id': self.regular_user.pk,
                 'season_id': self.season.pk,
@@ -76,7 +76,7 @@ class TestLeagueManagerAPI(WebTest):
     def test_create_league_manager_as_non_staff_forbidden(self):
         """Non-staff cannot create league manager assignments"""
         response = self.app.post_json(
-            reverse('api-league-manager-list-create', kwargs={'league_id': self.league.pk}),
+            reverse('api-league-managers', kwargs={'league_id': self.league.pk}),
             {
                 'user_id': self.regular_user.pk,
                 'season_id': self.season.pk,
@@ -147,7 +147,7 @@ class TestGamedayManagerAPI(WebTest):
         )
 
         response = self.app.get(
-            reverse('api-gameday-manager-list-create', kwargs={'gameday_id': self.gameday.pk}),
+            reverse('api-gameday-managers', kwargs={'gameday_id': self.gameday.pk}),
             headers=DBSetup().get_token_header(self.league_manager)
         )
 
@@ -157,7 +157,7 @@ class TestGamedayManagerAPI(WebTest):
     def test_create_gameday_manager_as_league_manager(self):
         """League managers can create gameday manager assignments"""
         response = self.app.post_json(
-            reverse('api-gameday-manager-list-create', kwargs={'gameday_id': self.gameday.pk}),
+            reverse('api-gameday-managers', kwargs={'gameday_id': self.gameday.pk}),
             {
                 'user_id': self.regular_user.pk,
                 'can_edit_details': True,
@@ -176,7 +176,7 @@ class TestGamedayManagerAPI(WebTest):
     def test_create_gameday_manager_as_regular_user_forbidden(self):
         """Regular users cannot create gameday manager assignments"""
         response = self.app.post_json(
-            reverse('api-gameday-manager-list-create', kwargs={'gameday_id': self.gameday.pk}),
+            reverse('api-gameday-managers', kwargs={'gameday_id': self.gameday.pk}),
             {
                 'user_id': self.regular_user.pk,
             },
@@ -198,7 +198,7 @@ class TestGamedayManagerAPI(WebTest):
         )
 
         response = self.app.patch_json(
-            reverse('api-gameday-manager-update-delete', kwargs={'pk': gm.pk}),
+            reverse('api-gameday-manager-update', kwargs={'pk': gm.pk}),
             {
                 'can_assign_officials': True,
                 'can_manage_scores': True,
@@ -214,7 +214,7 @@ class TestGamedayManagerAPI(WebTest):
     def test_update_gameday_manager_not_found(self):
         """Updating non-existent gameday manager returns 404"""
         response = self.app.patch_json(
-            reverse('api-gameday-manager-update-delete', kwargs={'pk': 99999}),
+            reverse('api-gameday-manager-update', kwargs={'pk': 99999}),
             {'can_edit_details': False},
             headers=DBSetup().get_token_header(self.staff_user),
             expect_errors=True
@@ -231,7 +231,7 @@ class TestGamedayManagerAPI(WebTest):
         )
 
         response = self.app.delete(
-            reverse('api-gameday-manager-update-delete', kwargs={'pk': gm.pk}),
+            reverse('api-gameday-manager-update', kwargs={'pk': gm.pk}),
             headers=DBSetup().get_token_header(self.league_manager)
         )
 
@@ -256,9 +256,9 @@ class TestTeamManagerAPI(WebTest):
             username='regular', password='test123'
         )
 
-        self.league = DBSetup().create_league()
+        self.league = League.objects.create(name='Test League')
         self.season = Season.objects.create(name='2024')
-        self.team = Team.objects.create(name='Test Team', description='Test')
+        self.team = Team.objects.create(name='Test Team', description='Test Team Desc')
 
         # Link team to league
         SeasonLeagueTeam.objects.create(
@@ -285,7 +285,7 @@ class TestTeamManagerAPI(WebTest):
     def test_list_team_managers_as_league_manager(self):
         """League managers can list team managers"""
         response = self.app.get(
-            reverse('api-team-manager-list-create', kwargs={'team_id': self.team.pk}),
+            reverse('api-team-managers', kwargs={'team_id': self.team.pk}),
             headers=DBSetup().get_token_header(self.league_manager)
         )
 
@@ -295,7 +295,7 @@ class TestTeamManagerAPI(WebTest):
     def test_list_team_managers_as_team_manager(self):
         """Team managers can list team managers"""
         response = self.app.get(
-            reverse('api-team-manager-list-create', kwargs={'team_id': self.team.pk}),
+            reverse('api-team-managers', kwargs={'team_id': self.team.pk}),
             headers=DBSetup().get_token_header(self.team_manager)
         )
 
@@ -304,7 +304,7 @@ class TestTeamManagerAPI(WebTest):
     def test_list_team_managers_as_regular_user_forbidden(self):
         """Regular users cannot list team managers"""
         response = self.app.get(
-            reverse('api-team-manager-list-create', kwargs={'team_id': self.team.pk}),
+            reverse('api-team-managers', kwargs={'team_id': self.team.pk}),
             headers=DBSetup().get_token_header(self.regular_user),
             expect_errors=True
         )
@@ -314,7 +314,7 @@ class TestTeamManagerAPI(WebTest):
     def test_list_team_managers_team_not_found(self):
         """Listing team managers for non-existent team returns 404"""
         response = self.app.get(
-            reverse('api-team-manager-list-create', kwargs={'team_id': 99999}),
+            reverse('api-team-managers', kwargs={'team_id': 99999}),
             headers=DBSetup().get_token_header(self.staff_user),
             expect_errors=True
         )
@@ -324,7 +324,7 @@ class TestTeamManagerAPI(WebTest):
     def test_create_team_manager_as_league_manager(self):
         """League managers can create team manager assignments"""
         response = self.app.post_json(
-            reverse('api-team-manager-list-create', kwargs={'team_id': self.team.pk}),
+            reverse('api-team-managers', kwargs={'team_id': self.team.pk}),
             {
                 'user_id': self.regular_user.pk,
                 'can_edit_roster': True,
@@ -341,7 +341,7 @@ class TestTeamManagerAPI(WebTest):
     def test_create_team_manager_team_not_found(self):
         """Creating team manager for non-existent team returns 404"""
         response = self.app.post_json(
-            reverse('api-team-manager-list-create', kwargs={'team_id': 99999}),
+            reverse('api-team-managers', kwargs={'team_id': 99999}),
             {'user_id': self.regular_user.pk},
             headers=DBSetup().get_token_header(self.staff_user),
             expect_errors=True
@@ -381,15 +381,15 @@ class TestUserManagerPermissionsAPI(WebTest):
 
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test123')
-        self.league = DBSetup().create_league()
+        self.league = League.objects.create(name='Test League')
         self.season = Season.objects.create(name='2024')
         self.gameday = DBSetup().g62_status_empty()
-        self.team = Team.objects.create(name='Test Team', description='Test')
+        self.team = Team.objects.create(name='Test Team', description='Test Team Desc')
 
     def test_get_permissions_for_user_with_no_permissions(self):
         """Regular user with no permissions gets empty lists"""
         response = self.app.get(
-            reverse('api-user-manager-permissions'),
+            reverse('api-my-manager-permissions'),
             headers=DBSetup().get_token_header(self.user)
         )
 
@@ -407,7 +407,7 @@ class TestUserManagerPermissionsAPI(WebTest):
         )
 
         response = self.app.get(
-            reverse('api-user-manager-permissions'),
+            reverse('api-my-manager-permissions'),
             headers=DBSetup().get_token_header(staff_user)
         )
 
@@ -424,7 +424,7 @@ class TestUserManagerPermissionsAPI(WebTest):
         )
 
         response = self.app.get(
-            reverse('api-user-manager-permissions'),
+            reverse('api-my-manager-permissions'),
             headers=DBSetup().get_token_header(self.user)
         )
 
@@ -444,7 +444,7 @@ class TestUserManagerPermissionsAPI(WebTest):
         )
 
         response = self.app.get(
-            reverse('api-user-manager-permissions'),
+            reverse('api-my-manager-permissions'),
             headers=DBSetup().get_token_header(self.user)
         )
 
@@ -466,7 +466,7 @@ class TestUserManagerPermissionsAPI(WebTest):
         )
 
         response = self.app.get(
-            reverse('api-user-manager-permissions'),
+            reverse('api-my-manager-permissions'),
             headers=DBSetup().get_token_header(self.user)
         )
 

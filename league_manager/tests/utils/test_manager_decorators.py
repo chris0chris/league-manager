@@ -38,7 +38,7 @@ class TestLeagueManagerRequiredDecorator:
             username='regular', password='test123'
         )
 
-        self.league = DBSetup().create_league()
+        self.league = League.objects.create(name='Test League')
         self.season = Season.objects.create(name='2024')
         self.gameday = DBSetup().g62_status_empty()
         self.gameday.league = self.league

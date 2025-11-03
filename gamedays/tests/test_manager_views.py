@@ -32,7 +32,7 @@ class TestManagerDashboardView(WebTest):
     def test_league_manager_sees_permissions(self):
         """League managers see their permissions"""
         user = User.objects.create_user(username='league_mgr', password='test123')
-        league = DBSetup().create_league()
+        league = League.objects.create(name='Test League')
         season = Season.objects.create(name='2024')
 
         LeagueManager.objects.create(
