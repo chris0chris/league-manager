@@ -1,4 +1,105 @@
 {
+  "data": [
+    {
+      "+/-": 38,
+      "dffl": 0,
+      "index": 0,
+      "pa": 72,
+      "pf": 110,
+      "points": 10,
+      "team__name": "C3"
+    },
+    {
+      "+/-": 8,
+      "dffl": 0,
+      "index": 1,
+      "pa": 92,
+      "pf": 100,
+      "points": 6,
+      "team__name": "C2"
+    },
+    {
+      "+/-": 16,
+      "dffl": 0,
+      "index": 2,
+      "pa": 64,
+      "pf": 80,
+      "points": 8,
+      "team__name": "B4"
+    },
+    {
+      "+/-": -10,
+      "dffl": 0,
+      "index": 3,
+      "pa": 50,
+      "pf": 40,
+      "points": 6,
+      "team__name": "A4"
+    },
+    {
+      "+/-": 6,
+      "dffl": 0,
+      "index": 4,
+      "pa": 64,
+      "pf": 70,
+      "points": 6,
+      "team__name": "B3"
+    },
+    {
+      "+/-": -20,
+      "dffl": 0,
+      "index": 5,
+      "pa": 50,
+      "pf": 30,
+      "points": 4,
+      "team__name": "A3"
+    },
+    {
+      "+/-": 14,
+      "dffl": 0,
+      "index": 6,
+      "pa": 58,
+      "pf": 72,
+      "points": 4,
+      "team__name": "C1"
+    },
+    {
+      "+/-": -2,
+      "dffl": 0,
+      "index": 7,
+      "pa": 62,
+      "pf": 60,
+      "points": 4,
+      "team__name": "B2"
+    },
+    {
+      "+/-": -26,
+      "dffl": 0,
+      "index": 8,
+      "pa": 46,
+      "pf": 20,
+      "points": 2,
+      "team__name": "A2"
+    },
+    {
+      "+/-": -4,
+      "dffl": 0,
+      "index": 9,
+      "pa": 44,
+      "pf": 40,
+      "points": 2,
+      "team__name": "B1"
+    },
+    {
+      "+/-": -20,
+      "dffl": 0,
+      "index": 10,
+      "pa": 28,
+      "pf": 8,
+      "points": 0,
+      "team__name": "A1"
+    }
+  ],
   "schema": {
     "fields": [
       {
@@ -14,126 +115,28 @@
         "type": "integer"
       },
       {
+        "extDtype": "Int64",
         "name": "pf",
-        "type": "string"
+        "type": "integer"
       },
       {
+        "extDtype": "Int64",
         "name": "pa",
-        "type": "string"
+        "type": "integer"
       },
       {
+        "extDtype": "Int64",
         "name": "+/-",
-        "type": "string"
+        "type": "integer"
       },
       {
         "name": "dffl",
         "type": "integer"
       }
     ],
+    "pandas_version": "1.4.0",
     "primaryKey": [
       "index"
-    ],
-    "pandas_version": "1.4.0"
-  },
-  "data": [
-    {
-      "index": 0,
-      "team__name": "C3",
-      "points": 10,
-      "pf": 110,
-      "pa": 72,
-      "+/-": 38,
-      "dffl": 0
-    },
-    {
-      "index": 1,
-      "team__name": "C2",
-      "points": 6,
-      "pf": 100,
-      "pa": 92,
-      "+/-": 8,
-      "dffl": 0
-    },
-    {
-      "index": 2,
-      "team__name": "B4",
-      "points": 8,
-      "pf": 80,
-      "pa": 64,
-      "+/-": 16,
-      "dffl": 0
-    },
-    {
-      "index": 3,
-      "team__name": "A4",
-      "points": 6,
-      "pf": 40,
-      "pa": 50,
-      "+/-": -10,
-      "dffl": 0
-    },
-    {
-      "index": 4,
-      "team__name": "B3",
-      "points": 6,
-      "pf": 70,
-      "pa": 64,
-      "+/-": 6,
-      "dffl": 0
-    },
-    {
-      "index": 5,
-      "team__name": "A3",
-      "points": 4,
-      "pf": 30,
-      "pa": 50,
-      "+/-": -20,
-      "dffl": 0
-    },
-    {
-      "index": 6,
-      "team__name": "C1",
-      "points": 4,
-      "pf": 72,
-      "pa": 58,
-      "+/-": 14,
-      "dffl": 0
-    },
-    {
-      "index": 7,
-      "team__name": "B2",
-      "points": 4,
-      "pf": 60,
-      "pa": 62,
-      "+/-": -2,
-      "dffl": 0
-    },
-    {
-      "index": 8,
-      "team__name": "A2",
-      "points": 2,
-      "pf": 20,
-      "pa": 46,
-      "+/-": -26,
-      "dffl": 0
-    },
-    {
-      "index": 9,
-      "team__name": "B1",
-      "points": 2,
-      "pf": 40,
-      "pa": 44,
-      "+/-": -4,
-      "dffl": 0
-    },
-    {
-      "index": 10,
-      "team__name": "A1",
-      "points": 0,
-      "pf": 8,
-      "pa": 28,
-      "+/-": -20,
-      "dffl": 0
-    }
-  ]
+    ]
+  }
 }

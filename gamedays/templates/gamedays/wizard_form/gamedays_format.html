@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="content-section">
+    <form method="POST" id="gamedays-format-form">
+        {% csrf_token %}
+        {{ wizard.management_form }}
+        {{ form.non_field_errors }}
+        {{ form.management_form }}
+
+        <fieldset class="form-group">
+            {% include "partials/legend_with_cancel.html" with title=action_label cancel_url=cancel_url %}
+            <div class="alert alert-info" role="alert">
+                Bitte Teams in der jeweiligen Gruppe auswählen, wie auf dem <a
+                    href="{{ PAGES_LINKS.GENERIC_GAME_SCHEDULE_GOOGLE_SHEETS }}"
+                    target="_blank">Spielplan</a> angegeben ist - siehe: {{ schedule_name }}
+            </div>
+            {% for subform in form %}
+            <div class="mb-3">
+                {{ subform.group|as_crispy_field }}
+            </div>
+            {% for hidden in subform.hidden_fields %}
+            {{ hidden }}
+            {% endfor %}
+            {% endfor %}
+            <div class="wizard-controls">
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-primary flex-grow-1" type="submit">
+                        Spielplan erstellen
+                    </button>
+                    <a href="?wizard_goto_step={{ wizard.steps.prev }}" class="btn btn-outline-info">
+                        Zurück
+                    </a>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+{% endblock %}
+{% block footer %}
+{% load static %}
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+{{ form.media }}
+<link href='{% static "league_manager/css/dal.css" %}' rel="stylesheet" type="text/css">
+{% endblock footer %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="content-section">
+    <h2>
+        {% if wizard.steps.current == 'create' %} Gameday anlegen
+        {% elif wizard.steps.current == 'edit' %} Details bearbeiten
+        {% elif wizard.steps.current == 'type' %} Typ auswählen
+        {% endif %}
+    </h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ wizard.management_form }}
+        {{ wizard.form.as_p }}
+        <div class="form-group">
+            <button class="btn btn-outline-info" type="submit">Weiter</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

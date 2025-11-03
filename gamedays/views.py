@@ -2,17 +2,49 @@ from datetime import datetime
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Max
 from django.db.models.functions import ExtractYear
-from django.forms import Form
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.views import View
-from django.views.generic import DetailView, UpdateView, CreateView
+from django.views.generic import (
+    DetailView,
+    UpdateView,
+    CreateView,
+    FormView,
+    DeleteView,
+)
+from formtools.wizard.views import SessionWizardView
 
-from gamedays.management.schedule_manager import ScheduleCreator, Schedule, TeamNotExistent, ScheduleTeamMismatchError
-from .forms import GamedayCreateForm, GamedayUpdateForm
-from .models import Gameday, Gameinfo, Gameresult
+from .constants import (
+    LEAGUE_GAMEDAY_DETAIL,
+    LEAGUE_GAMEDAY_LIST_AND_YEAR,
+    LEAGUE_GAMEDAY_LIST,
+    LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
+    LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
+    LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
+)
+from .forms import (
+    GamedayForm,
+    GamedayGaminfoFieldsAndGroupsForm,
+    GameinfoForm,
+    get_gameinfo_formset,
+    GamedayFormatForm,
+    GamedayFormContext,
+    SCHEDULE_MAP,
+    SCHEDULE_CUSTOM_CHOICE_C,
+)
+from .models import Gameday, Gameinfo
+from .service.gameday_form_service import GamedayFormService
 from .service.gameday_service import GamedayService, GamedayGameService
+from .wizard import (
+    FIELD_GROUP_STEP,
+    GAMEDAY_FORMAT_STEP,
+    GAMEINFO_STEP,
+    WizardStepHandler,
+    WIZARD_STEP_HANDLER_MAP,
+)
 
 
 class GamedayListView(View):
@@ -24,7 +56,6 @@ class GamedayListView(View):
         league = kwargs.get('league')
         gamedays = Gameday.objects.filter(date__year=year).order_by('-date')
         gamedays_filtered_by_league = gamedays.filter(league__name=league) if league else gamedays
-        from gamedays.urls import LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE, LEAGUE_GAMEDAY_LIST_AND_YEAR
         return render(
             request,
             self.template_name,
@@ -81,8 +112,8 @@ class GamedayDetailView(DetailView):
         schedule.gameinfo = schedule.apply(lambda x: self._get_game_detail_button(pk, x.gameinfo) if x.Status == "beendet" else '', axis=1)
 
         context['info'] = {
-            'schedule': schedule.to_html(**render_configs),
-            'qualify_table': None if qualify_table == '' else qualify_table,
+            'schedule': gs.get_schedule().to_html(**render_configs),
+            'qualify_table': qualify_table,
             'final_table': gs.get_final_table().to_html(**render_configs),
             'officials': officials,
             'offense_table': gs.get_offense_player_statistics_table().to_html(**render_configs),
@@ -98,54 +129,64 @@ class GamedayDetailView(DetailView):
         return f"""<a href="{gameday_pk}/game/{gameinfo_id}" class="btn btn-primary">Zum Spiel</a>"""
 
 class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    form_class = GamedayCreateForm
+    form_class = GamedayForm
     template_name = 'gamedays/gameday_form.html'
     model = Gameday
     pk = None
 
-    def form_valid(self, form):
-        form.author = self.request.user
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_LIST)
+        context['action_label'] = 'Spieltag erstellen'
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["context"] = GamedayFormContext(
+            author=self.request.user,
+            init_format=True
+        )
+        return kwargs
+
+    def form_valid(self, form: GamedayForm):
         return super(GamedayCreateView, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse('league-gameday-detail', kwargs={'pk': self.object.pk})
+        action_map = {
+            "gameinfos_create": LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
+            "gameinfos_update": LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
+        }
+
+        post_action = self.request.POST.get("action")
+        kwargs = {"pk": self.object.pk}
+
+        url_name = action_map.get(post_action, LEAGUE_GAMEDAY_DETAIL)
+        return reverse(url_name, kwargs=kwargs)
 
     def test_func(self):
         return self.request.user.is_staff
 
 
 class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    form_class = GamedayUpdateForm
+    form_class = GamedayForm
     template_name = 'gamedays/gameday_form.html'
     model = Gameday
 
-    def form_valid(self, form: Form):
-        groups = [group_list for group_list in [
-            self._format_array(form.cleaned_data['group1']),
-            self._format_array(form.cleaned_data['group2']),
-            self._format_array(form.cleaned_data['group3']),
-            self._format_array(form.cleaned_data['group4'])] if group_list != ['']]
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        gameday = Gameday.objects.get(pk=self.kwargs['pk'])
+        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk})
+        context['action_label'] = 'Spieltag aktualisieren'
+        return context
 
-        try:
-            sc = ScheduleCreator(
-                schedule=Schedule(gameday_format=self.object.format, groups=groups),
-                gameday=self.object)
-            sc.create()
-        except FileNotFoundError:
-            form.add_error(None,
-                           'Spielplan konnte nicht erstellt werden, '
-                           'da es das Format als Spielplan nicht gibt: "{0}"'.format(self.object.format))
-            return super(GamedayUpdateView, self).form_invalid(form)
-        except ScheduleTeamMismatchError:
-            form.add_error(None,
-                           'Spielplan konnte nicht erstellt werden, '
-                           'da die Kombination #Teams und #Format nicht zum Spielplan passen')
-            return super(GamedayUpdateView, self).form_invalid(form)
-        except TeamNotExistent as err:
-            form.add_error(None,
-                           f'Spielplan konnte nicht erstellt werden, da das Team "{err}" nicht gefunden wurde.')
-            return super(GamedayUpdateView, self).form_invalid(form)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["context"] = GamedayFormContext(
+            author=self.request.user,
+        )
+        return kwargs
 
+    def form_valid(self, form):
         return super(GamedayUpdateView, self).form_valid(form)
 
     def get_success_url(self):
@@ -182,3 +223,187 @@ class GamedayGameDetailView(DetailView):
             'events_table': ggs.get_events_table().to_html(**render_configs)
         }
         return context
+
+class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView):
+    form_list = [
+        (FIELD_GROUP_STEP, GamedayGaminfoFieldsAndGroupsForm),
+        (GAMEDAY_FORMAT_STEP, GamedayFormatForm),
+        (GAMEINFO_STEP, GameinfoForm),
+    ]
+
+    TEMPLATES = {
+        GAMEDAY_FORMAT_STEP: "gamedays/wizard_form/gamedays_format.html",
+        FIELD_GROUP_STEP: "gamedays/wizard_form/fields_groups.html",
+        GAMEINFO_STEP: "gamedays/wizard_form/gameinfos.html",
+    }
+
+    def get_template_names(self):
+        return [self.TEMPLATES[self.steps.current]]
+
+    @property
+    def wizard_state(self):
+        """Lazily create and return persistent extra data in wizard storage."""
+        self.storage.extra_data = getattr(self.storage, "extra_data", {})
+        return self.storage.extra_data
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': self.gameday.pk})
+        context['action_label'] = 'Spielplan erstellen'
+        if self.steps.current == GAMEDAY_FORMAT_STEP:
+            field_group_step = self.wizard_state.get(FIELD_GROUP_STEP) or {}
+            schedule_format = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
+            schedule_name = SCHEDULE_MAP.get(schedule_format, {}).get(
+                "name", "ERROR - Name nicht gefunden für Format!"
+            )
+            context["action_label"] = f"Spielplan erstellen - {schedule_name}"
+            context["schedule_name"] = schedule_name
+        return context
+
+    def get_form_list(self):
+        form_list = super().get_form_list()
+
+        field_group_step = self.wizard_state.get(FIELD_GROUP_STEP, {})
+        format_value = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
+
+        if format_value == SCHEDULE_CUSTOM_CHOICE_C:
+            form_list = {key: val for key, val in form_list.items() if key != GAMEDAY_FORMAT_STEP}
+        else:
+            form_list = {key: val for key, val in form_list.items() if key != GAMEINFO_STEP}
+
+        return form_list
+
+    def get_form(self, step=None, data=None, files=None):
+        step = step or self.steps.current
+        form = super().get_form(step, data, files)
+        handler: WizardStepHandler = WIZARD_STEP_HANDLER_MAP.get(step)
+        if handler:
+            form = handler.handle_form(self, form, data)
+
+        return form
+
+    @cached_property
+    def gameday(self):
+        return get_object_or_404(Gameday, pk=self.kwargs["pk"])
+
+    def process_step(self, form):
+        handler: WizardStepHandler = WIZARD_STEP_HANDLER_MAP.get(self.steps.current)
+        if handler:
+            handler.handle_process_step(self, form)
+
+        return super().process_step(form)
+
+    def done(self, form_list, **kwargs):
+        gameday_id = self.gameday.pk
+        field_group_step = self.wizard_state.get(FIELD_GROUP_STEP, {})
+        format_value = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
+
+        if format_value != SCHEDULE_CUSTOM_CHOICE_C:
+            return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={'pk': gameday_id}))
+        return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday_id}))
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+    form_class = None
+    template_name = 'gamedays/wizard_form/gameinfos.html'
+
+    def get_form_class(self):
+        return get_gameinfo_formset(extra=0)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        gameday = Gameday.objects.get(pk=self.kwargs['pk'])
+        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk})
+        context['action_label'] = 'Spielplan aktualisieren'
+        return context
+
+    def get(self, request, *args, **kwargs):
+        gameday = get_object_or_404(Gameday, pk=self.kwargs['pk'])
+        qs = Gameinfo.objects.filter(gameday=gameday)
+
+        if not qs.exists():
+            return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={'pk': gameday.pk}))
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('wizard_goto_step') == "reset_gameinfos":
+            return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={'pk': self.kwargs['pk']}))
+        return super().post(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        gameday = get_object_or_404(Gameday, pk=self.kwargs['pk'])
+        qs = Gameinfo.objects.filter(gameday=gameday)
+
+        group_choices = {
+            (g.league_group.id, g.league_group.name) if g.league_group else (g.standing, g.standing)
+            for g in qs if g.league_group or g.standing
+        }
+        number_fields = qs.aggregate(Max('field'))['field__max'] or 1
+
+        field_choices = [(f'{n}', f'Feld {n}') for n in range(1, number_fields + 1)]
+
+        kwargs.update({
+            'queryset': qs,
+            'prefix': GAMEINFO_STEP,
+            'form_kwargs': {
+                'group_choices': group_choices,
+                'field_choices': field_choices
+            }
+        })
+        return kwargs
+
+    def form_valid(self, formset):
+        gameday = get_object_or_404(Gameday, pk=self.kwargs['pk'])
+        gameday_form_service = GamedayFormService(gameday)
+
+        for current_form in formset:
+            if current_form.has_changed():
+                gameday_form_service.handle_gameinfo_and_gameresult(
+                    current_form.cleaned_data, current_form.instance
+                )
+
+        return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk}))
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class StaffDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """
+    Generic delete view for staff users without a template.
+    Subclasses must define:
+        - model
+    """
+    template_name = None
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class GamedayDeleteView(StaffDeleteView):
+    model = Gameday
+
+    def get_success_url(self):
+        from django.contrib import messages
+        messages.success(self.request, "Der Spieltag wurde erfolgreich gelöscht.")
+
+        return reverse(LEAGUE_GAMEDAY_LIST)
+
+
+class GameinfoDeleteView(StaffDeleteView):
+    model = Gameday
+
+    def form_valid(self, form):
+        gameday: Gameday = self.get_object()
+
+        Gameinfo.objects.filter(gameday=gameday).delete()
+
+        from django.contrib import messages
+        messages.success(self.request, "Der Spielplan für diesen Spieltag wurde erfolgreich gelöscht.")
+
+        return redirect(LEAGUE_GAMEDAY_DETAIL, pk=gameday.pk)

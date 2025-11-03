@@ -1,0 +1,55 @@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Löschen bestätigen</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+      </div>
+      <div class="modal-body">
+        <p id="deleteModalMessage">Bist du sicher, dass du dieses Element löschen möchtest?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelDelete" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+        <form method="post" id="deleteModalForm" action="">
+          {% csrf_token %}
+          <button id="confirmDelete" type="submit" class="btn btn-danger">
+            Ja, löschen
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const deleteModal = document.getElementById('deleteModal');
+    const confirmButton = document.getElementById('confirmDelete');
+    const cancelButton = document.getElementById('cancelDelete');
+    const form = document.getElementById('deleteModalForm');
+
+    // Set message + URL when modal opens
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const message = button.getAttribute('data-message');
+        const url = button.getAttribute('data-url');
+
+        deleteModal.querySelector('#deleteModalMessage').innerHTML = message;
+        form.action = url;
+
+        confirmButton.disabled = false;
+        cancelButton.disabled = false;
+        confirmButton.innerHTML = 'Ja, löschen';
+    });
+
+    form.addEventListener('submit', function() {
+        confirmButton.disabled = true;
+        cancelButton.disabled = true;
+
+        confirmButton.innerHTML = `
+          <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          Wird gelöscht ...
+        `;
+    });
+});
+</script>

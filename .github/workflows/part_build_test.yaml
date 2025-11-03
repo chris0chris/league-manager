@@ -17,7 +17,7 @@ jobs:
         python-version: [ '3.12', '3.13', '3.14' ]
     services:
       mysql:
-        image: mysql:9.4
+        image: mysql:9.5
         env:
           # The MySQL docker container requires these environment variables to be set
           # so we can create and migrate the test database.
@@ -51,7 +51,7 @@ jobs:
           SECRET_KEY: 123456-TEST
           CIRCLECI: 1
       - name: 📊✅ Publish Test Report
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v6
         if: success() || failure() # always run even if the previous step fails
         with:
           summary: Test report python ${{ matrix.python-version }}
