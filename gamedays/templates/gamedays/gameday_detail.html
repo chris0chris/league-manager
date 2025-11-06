@@ -81,7 +81,7 @@
         </div>
     </div>
 </div>
-{% if info.qualify_table != None %}
+{% if info.qualify_table != '' %}
 <div class="card" style="overflow: auto">
     <div aria-controls="collapseQualify" aria-expanded="false" class="card-header" data-bs-target="#collapseQualify"
          data-bs-toggle="collapse" id="headingQualify" role="button">
@@ -110,6 +110,34 @@
         </div>
     </div>
 </div>
+
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapseStats" aria-expanded="false" class="card-header" data-bs-target="#collapseStats"
+         data-bs-toggle="collapse" id="headingStats" role="button">
+        <h2>Spieltags Statistiken</h2>
+    </div>
+
+    <div aria-labelledby="headingStats" class="collapse" id="collapseStats">
+        <div class="card-body">
+            <h4>Scoring Plays</h4>
+            {% if info.offense_table == None %}
+            Statistiken sind nach den ersten Spielen verfügbar.
+            {% else %}
+            {{ info.offense_table | safe }}
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <h4>Defense Plays</h4>
+            {% if info.defense_table == None %}
+            Statistiken sind nach den ersten Spielen verfügbar.
+            {% else %}
+            {{ info.defense_table | safe }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div id="playoff-bracket"></div>
 
 {% include "partials/delete_modal.html" %}
 
