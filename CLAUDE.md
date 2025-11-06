@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-LeagueSphere is a Django-based web application for managing American football leagues, including game scheduling, live scoring, player pass checking, and league standings. The project combines a Django backend with multiple React/TypeScript frontends.
+LeagueSphere is a Django-based web application for managing flag football leagues, including game scheduling, live scoring, player pass checking, and league standings. The project combines a Django backend with multiple React/TypeScript frontends.
 
 **Main branch**: `master`
 
