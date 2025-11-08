@@ -2,10 +2,11 @@ import pandas as pd
 from django.db.models.fields import return_None
 
 from gamedays.forms import SCHEDULE_CUSTOM_CHOICE_C, GamedayGaminfoFieldsAndGroupsForm
-from gamedays.models import Gameinfo
+from gamedays.models import Gameinfo, Gameday
 from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     POINTS_HOME, \
-    POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL, GAMEINFO_ID, FINISHED
+    POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL, GAMEINFO_ID, FINISHED, CLOCK, \
+    TIMEOUT, GAME_START, SECOND_HALF_START, OVERTIME, GAME_END
 from gamedays.service.gamelog import TeamLog, Gameresult
 from gamedays.service.model_wrapper import GamedayModelWrapper
 
@@ -231,11 +232,48 @@ class GamedayGameService:
             .values(*[x.name for x in TeamLog._meta.local_fields], "team__description")
         )
 
+        misc_events = [CLOCK, GAME_START, SECOND_HALF_START, OVERTIME, GAME_END]
+
+        # events.input = events.apply(lambda x: )
+        events.team = events.apply(lambda x: None if x.event in misc_events else x.event, axis=1)
+        events.event = events.apply(self._format_event, axis=1)
+
         events.player = events.player.apply(lambda x: '' if pd.isna(x) else f"#{str(int(x))}")
-        events.input = events["input"].apply(lambda x: '' if pd.isna(x) else f": {x}")
+        # events.input = events.input.apply(lambda x: '' if pd.isna(x) else f": {x}")
         events["is_scoring_play"] = events.value > 0
-        events["event_with_player"] = events.apply(lambda x: x.player + ' ' + x.event + x.input, axis=1)
+        events["event_with_player"] = events.apply(self._format_event_with_player, axis=1)
         return events
+
+    @staticmethod
+    def _format_event_with_player(row: pd.Series) -> str:
+        if row.event in ['1-Extra-Punkt', '2-Extra-Punkte'] and row.value == 0:
+            return f'<s>{row.event}</s>'
+
+        row_input = '' if pd.isna(row.input) else row.input
+
+        if row.event == TIMEOUT:
+            return f'{row.event.strip()} @ {GamedayGameService._format_time_string(row.input)}'
+
+
+        return f'{row.event} {row.player} {row_input}'
+
+    @staticmethod
+    def _format_event(row: pd.Series) -> str:
+        if row.event == CLOCK:
+            return f'{row.event}: {GamedayGameService._format_time_string(row.input)}'
+
+        if row.event in [GAME_START, SECOND_HALF_START, OVERTIME, GAME_END]:
+            return f'<b>{row.event}</b>'
+
+        return row.event
+
+    @staticmethod
+    def _format_time_string(time_string: str) -> str:
+        if ':' not in time_string:
+            return time_string
+
+        parts = time_string.split(':')
+        return ':'.join([parts[0], f'{parts[-1]:0>2}'])
 
     def get_halftime_split_score_table(self):
         events = self._prepare_team_logs()
