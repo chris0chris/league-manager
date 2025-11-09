@@ -91,6 +91,7 @@ class GamedayDetailView(DetailView):
             'table_id': 'schedule',
         }
         qualify_table = gs.get_qualify_table().to_html(**render_configs)
+        qualify_table2= gs.get_qualify_table2().to_html(**render_configs)
         if 'officials' in settings.INSTALLED_APPS:
             show_official_names = False
             if self.request.user.is_staff:
@@ -110,6 +111,7 @@ class GamedayDetailView(DetailView):
         context['info'] = {
             'schedule': gs.get_schedule().to_html(**render_configs),
             'qualify_table': qualify_table,
+            'qualify_table2': qualify_table2,
             'final_table': gs.get_final_table().to_html(**render_configs),
             'officials': officials,
             'offense_table': gs.get_offense_player_statistics_table().to_html(**render_configs),

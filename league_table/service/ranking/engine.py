@@ -1,0 +1,186 @@
+# gamedays/services/ranking/engine.py
+from dataclasses import dataclass
+
+import pandas as pd
+
+from .tiebreakers import (
+    DirectComparisonTieBreaker,
+    PointDiffDirectTieBreaker,
+    PointsScoredDirectTieBreaker,
+    OverallPointDiffTieBreaker,
+    OverallPointsScoredTieBreaker,
+    NameAscendingTieBreaker,
+)
+
+# Map keys from ruleset.tie_break_order() to tie-breaker objects
+TIEBREAKER_REGISTRY = {
+    "direct_wins": DirectComparisonTieBreaker(),
+    "direct_point_diff": PointDiffDirectTieBreaker(),
+    "direct_points_scored": PointsScoredDirectTieBreaker(),
+    "overall_point_diff": OverallPointDiffTieBreaker(),
+    "overall_points_scored": OverallPointsScoredTieBreaker(),
+    "name_ascending": NameAscendingTieBreaker(),
+}
+
+
+@dataclass
+class RankingEngine:
+    ruleset: object  # your LeagueRuleset instance
+    games_df: (
+        pd.DataFrame
+    )  # raw games per-team rows (self._games_with_result in your wrapper)
+    team_table_df: (
+        pd.DataFrame
+    )  # aggregated table (one row per team) with required columns: team_name, points, pf, pa, diff
+
+    def rank(self) -> pd.DataFrame:
+        """
+        Return ranked table (DataFrame) according to ruleset.
+        Approach:
+          1. start with team_table_df sorted by primary keys (points, diff, pf, pa) descending
+          2. find tie groups (teams with equal primary sort key)
+          3. for each tie group, apply tie-breakers in configured order, generating sort keys
+          4. replace the tie group with newly-sorted order
+        """
+        df = self.team_table_df.copy()
+        # Ensure team_name exists
+        assert (
+            "team_name" in df.columns
+        ), "team_table_df must contain 'team_name' column"
+
+        # base sort (fallback)
+        base_sort_cols = ["points", "diff", "pf", "pa"]
+        present_base = [c for c in base_sort_cols if c in df.columns]
+        if not present_base:
+            raise ValueError(
+                "team_table_df must contain at least one of points/diff/pf/pa"
+            )
+
+        # initial sort descending
+        df = df.sort_values(
+            by=present_base, ascending=[False] * len(present_base), ignore_index=True
+        )
+
+        # Find tie groups where all present_base columns are equal
+        # Build a key that concatenates the present base columns to find ties.
+        df["_tie_key"] = df[present_base].astype(str).agg("_".join, axis=1)
+
+        result_rows = []
+        i = 0
+        while i < len(df):
+            # gather contiguous group with same _tie_key
+            key = df.at[i, "_tie_key"]
+            group = df[df["_tie_key"] == key].copy()
+            idxs = group.index.tolist()
+            if len(group) == 1:
+                result_rows.append(group.iloc[0])
+                i = idxs[-1] + 1
+                continue
+
+            # we have a tie group -> apply the rules
+            resolved = self._resolve_tie_group(group)
+            # resolved is DataFrame sorted according to rule application
+            for _, row in resolved.iterrows():
+                result_rows.append(row)
+            i = idxs[-1] + 1
+
+        final = pd.DataFrame(result_rows).reset_index(drop=True)
+        # remove helper column if present
+        final.drop(
+            columns=[c for c in ["_tie_key"] if c in final.columns], inplace=True
+        )
+        return final
+
+    def _resolve_tie_group(self, group_df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Apply tiebreakers to group_df (subset of teams). Return sorted group_df.
+        """
+        group = group_df.copy().reset_index(drop=True)
+        # Start by making a working_df that we will add columns to for sorting
+        working = group.copy()
+
+        # For direct comparison tie-breakers we need games among tied teams; prepare games_df with opponent_name
+        # Expect the self.games_df to contain one row per team per match, with team_name column and pf/pa/points
+        games = self.games_df.copy()
+        # construct opponent_name by merging game rows: assume games have game_id and each game has two rows (home/away)
+        if "game_id" in games.columns:
+            # pivot to get opponent_name next to each row
+            left = games.copy()
+            right = games.copy()
+            right = right.rename(
+                columns={
+                    "team_name": "opponent_name",
+                    "pf": "opp_pf",
+                    "pa": "opp_pa",
+                    "points": "opp_points",
+                }
+            )
+            merged = left.merge(
+                right[["game_id", "opponent_name", "opp_pf", "opp_pa", "opp_points"]],
+                on="game_id",
+                how="left",
+                suffixes=("", "_opp"),
+            )
+            # Now merged has team_name and opponent_name columns per-row
+            games = merged
+        else:
+            # If games_df already has opponent_name column, keep as is
+            if "opponent_name" not in games.columns:
+                # if it's not possible to construct opponent_name, direct comparison tie-breakers may not work
+                # but we'll still call tie-breakers which should handle missing data gracefully
+                pass
+
+        # Apply tie-breakers in ruleset order; create a list of (col_name, ascending)
+        tie_order = self.ruleset.tie_break_order()
+        # Ensure final fallback name_ascending is present (if use_name_ascending true, ruleset already included)
+        sort_keys = []
+        ascending_flags = []
+        for key in tie_order:
+            tb = TIEBREAKER_REGISTRY.get(key)
+            if not tb:
+                # unknown key: skip
+                continue
+            res = tb.apply(working, games, self.ruleset)
+            # merge back result columns for sorting
+            # the tie-breaker returns a DataFrame with team_name and new columns
+            # Safe merge on team_name
+            working = working.merge(
+                res.df[[col for col in res.df.columns if col != "team_name"]],
+                left_on="team_name",
+                right_index=False,
+                right_on=None,
+                how="left",
+                copy=False,
+            )
+            # pick what to sort by:
+            if hasattr(tb, "key_name"):
+                # Record sort column; name_ascending should be ascending True
+                col = tb.key_name
+                if col not in working.columns:
+                    continue
+                sort_keys.append(col)
+                if col == "name_ascending":
+                    ascending_flags.append(True)
+                else:
+                    ascending_flags.append(False)
+
+        # Always ensure stable fallback: team_name ascending
+        if "team_name" not in sort_keys:
+            sort_keys.append("team_name")
+            ascending_flags.append(True)
+
+        # Now sort the working group by the computed keys:
+        # Fill NaNs for sorting
+        working.fillna(
+            {
+                k: ("" if isinstance(k, str) and k == "team_name" else 0)
+                for k in working.columns
+            },
+            inplace=True,
+        )
+        working = working.sort_values(
+            by=sort_keys, ascending=ascending_flags, ignore_index=True
+        )
+
+        # Only return columns present in original group, plus useful metrics (keep everything for debug)
+        return working

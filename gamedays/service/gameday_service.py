@@ -101,6 +101,10 @@ class EmptyGamedayService:
         return EmptyQualifyTable
 
     @staticmethod
+    def get_qualify_table2():
+        return EmptyQualifyTable
+
+    @staticmethod
     def get_final_table():
         return EmptyFinalTable
 
@@ -126,7 +130,7 @@ class GamedayService:
 
     def get_schedule(self):
         schedule = self.gmw.get_schedule()
-        columns = [SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, STANDING, STAGE, STATUS]
+        columns = ['id', SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, STANDING, STAGE, STATUS]
         schedule = schedule[columns]
         schedule[OFFICIALS_NAME] = schedule[OFFICIALS_NAME].apply('<i>{}</i>'.format)
         schedule[SCHEDULED] = pd.to_datetime(schedule[SCHEDULED], format='%H:%M:%S').dt.strftime('%H:%M')
@@ -139,6 +143,14 @@ class GamedayService:
         if qualify_table is '':
             return EmptyQualifyTable
         qualify_table = qualify_table[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
+        qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
+        return qualify_table
+
+    def get_qualify_table2(self):
+        qualify_table = self.gmw.get_qualify_table2()
+        if qualify_table is '':
+            return EmptyQualifyTable
+        # qualify_table = qualify_table[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
         qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
         return qualify_table
 

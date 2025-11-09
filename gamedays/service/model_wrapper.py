@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from django.apps import apps
 from pandas import DataFrame
 
 from gamedays.models import Gameinfo, Gameresult, TeamLog
@@ -33,7 +34,11 @@ class DfflPoints(object):
 class GamedayModelWrapper:
 
     def __init__(self, pk, additional_columns=[]):
-        self._gameinfo: DataFrame = pd.DataFrame(Gameinfo.objects.filter(gameday_id=pk).values(
+        gameinfo = Gameinfo.objects.filter(gameday_id=pk)
+        if not gameinfo.exists():
+            raise Gameinfo.DoesNotExist
+        self.gameday = gameinfo.first().gameday
+        self._gameinfo: DataFrame = pd.DataFrame(gameinfo.values(
             # select the fields which should be in the dataframe
             *([f.name for f in Gameinfo._meta.local_fields] + ['officials__name'] + additional_columns)))
         if self._gameinfo.empty:
@@ -67,6 +72,26 @@ class GamedayModelWrapper:
             return ''
         qualify_round = self._get_table()
         return qualify_round
+
+    def get_qualify_table2(self):
+        if not self.has_finalround():
+            return ''
+        qualify_round = self._get_table()
+        if not apps.is_installed("league_table"):
+            return qualify_round
+
+        from league_table.models import LeagueSeasonConfig
+        from league_table.service.ranking.tiebreakers import TieBreakerEngine
+
+        try:
+            league_ruleset = LeagueSeasonConfig.objects.get(
+                league=self.gameday.league, season=self.gameday.season
+            ).ruleset
+            engine = TieBreakerEngine(league_ruleset)
+            table = engine.rank(qualify_round, self.get_schedule())
+            return table.sort_values(by=STANDING)
+        except LeagueSeasonConfig.DoesNotExist:
+            return qualify_round
 
     def get_final_table(self):
         if self._gameinfo[self._gameinfo[STATUS] != FINISHED].empty is False:

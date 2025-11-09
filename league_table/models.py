@@ -17,8 +17,8 @@ class LeagueRuleset(models.Model):
     win_points = models.PositiveSmallIntegerField(default=2)
     draw_points = models.PositiveSmallIntegerField(default=1)
     loss_points = models.PositiveSmallIntegerField(default=0)
-    allow_draws = models.BooleanField(default=True)
 
+    allow_draws = models.BooleanField(default=True)
     use_direct_comparison = models.BooleanField(default=True)
     use_point_diff_direct = models.BooleanField(default=True)
     use_points_scored_direct = models.BooleanField(default=True)
@@ -53,3 +53,6 @@ class LeagueSeasonConfig(models.Model):
     league = models.ForeignKey(League, on_delete=models.CASCADE, related_name="config_league")
     season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="config_season")
     ruleset = models.ForeignKey(LeagueRuleset, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"{self.pk}: {self.league.name} - {self.season.name} -> {self.ruleset.name if self.ruleset else 'Keine Konfiguration'}"

@@ -94,6 +94,20 @@
     </div>
 </div>
 {% endif %}
+
+{% if info.qualify_table2 != '' %}
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapseQualify2" aria-expanded="false" class="card-header" data-bs-target="#collapseQualify2"
+         data-bs-toggle="collapse" id="headingQualify2" role="button">
+        <h2>Vorrunden-Tabelle TIE-BREAK</h2>
+    </div>
+    <div aria-labelledby="headingQualify2" class="collapse" id="collapseQualify2">
+        <div class="card-body">
+            {{ info.qualify_table2 | safe }}
+        </div>
+    </div>
+</div>
+{% endif %}
 <div class="card" style="overflow: auto">
     <div aria-controls="collapseFinal" aria-expanded="false" class="card-header" data-bs-target="#collapseFinal"
          data-bs-toggle="collapse" id="headingFinal" role="button">
