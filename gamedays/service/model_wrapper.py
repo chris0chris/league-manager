@@ -4,9 +4,10 @@ from django.apps import apps
 from pandas import DataFrame
 
 from gamedays.models import Gameinfo, Gameresult, TeamLog
-from gamedays.service.gameday_settings import STANDING, TEAM_NAME, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, GROUP1, \
+from gamedays.service.gameday_settings import STANDING, TEAM_NAME, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, \
     GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
-    STATUS, SH, FH, FINISHED, GAME_FINISHED, DFFL, IN_POSSESSION, IS_HOME
+    STATUS, SH, FH, FINISHED, GAME_FINISHED, IN_POSSESSION, IS_HOME
+from league_table.service.ranking.engine import FinalRankingEngine
 
 
 class DfflPoints(object):
@@ -96,44 +97,11 @@ class GamedayModelWrapper:
     def get_final_table(self):
         if self._gameinfo[self._gameinfo[STATUS] != FINISHED].empty is False:
             return pd.DataFrame()
-        final_table = self._games_with_result.groupby([TEAM_NAME], as_index=False)
-        final_table = final_table.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'})
-        final_table = final_table.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
-
         if self.has_finalround():
-            if self._games_with_result.nunique()[TEAM_NAME] == 7:
-                standing = ['P1', 'P3']
-                qualify_table = self._get_table()
-                schedule = self._get_schedule()
-                group1 = qualify_table[qualify_table[STANDING] == GROUP1]
-                third = group1.iloc[2][TEAM_NAME]
-                fourth = group1.iloc[3][TEAM_NAME]
-                third_vs_fourth_group1 = schedule[
-                    (schedule[HOME] == third) & (schedule[AWAY] == fourth)]
-                if third_vs_fourth_group1.empty is True:
-                    third_vs_fourth_group1 = schedule[
-                        (schedule[AWAY] == third) & (schedule[HOME] == fourth)]
-                p5 = schedule[(schedule[STANDING] == 'P5-1') | (schedule[STANDING] == 'P5-2')]
-                games_for_fith_place = pd.concat([third_vs_fourth_group1, p5])
-                table_fith_place = self._games_with_result[
-                    self._games_with_result[GAMEINFO_ID].isin(games_for_fith_place[GAMEINFO_ID].values)]
-                table_fith_place = table_fith_place.groupby([TEAM_NAME], as_index=False)
-                table_fith_place = table_fith_place.agg({PF: 'sum', POINTS: 'sum', PA: 'sum', DIFF: 'sum'})
-                table_fith_place = table_fith_place.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
-                final_standing = self._get_standing_list(standing) + table_fith_place[TEAM_NAME].to_list()
-            elif self._games_with_result.nunique()[TEAM_NAME] == 11:
-                standing = ['P1', 'P3', 'P5']
-                p7 = self.get_team_aggregate_by(aggregate_standings=['P7'], aggregate_place=1, place=1)
-                p8 = self.get_team_aggregate_by(aggregate_standings=['P7'], aggregate_place=2, place=1)
-                p9 = self.get_team_aggregate_by(aggregate_standings=['P7'], aggregate_place=3, place=1)
-                final_standing = self._get_standing_list(standing) + [p7, p8, p9] + self._get_standing_list(['P10'])
-            else:
-                standing = ['P1', 'P3', 'P5', 'P7']
-                final_standing = self._get_standing_list(standing)
-            final_table.set_index(TEAM_NAME, inplace=True)
-            final_table = final_table.reindex(final_standing).reset_index()
-        final_table[DFFL] = DfflPoints.for_number_teams(final_table.shape[0])
-        return final_table
+            engine = FinalRankingEngine(self._games_with_result, self._get_schedule())
+            return engine.compute_final_table()
+        else:
+            return self.get_qualify_table2()
 
     def get_offense_player_statistics_table(self):
         scoring_events = [

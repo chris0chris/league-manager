@@ -22,7 +22,7 @@ SCHEDULE_CHOICES = (
     ("5_dfflf_2", "5 Teams 1 Grupppe 2 Felder - 20 Min Pause (DFFL Frauen)"),
     ("5_dffl1_2", "5 Teams 1 Gruppe 2 Felder - 30 Min Pause"),
     ("6_2", "6 Teams 2 Gruppen 2 Feldern"),
-    ("7_2", "7 Teams 2 Gruppen 2 Feldern"),
+    # ("7_2", "7 Teams 2 Gruppen 2 Feldern"), -> kein Ranking für diesen Spielplan
     ("8_2", "8 Teams 2 Gruppen 2 Felder"),
     ("8_vfpd_2", "8 Teams 1 Gruppe 2 Felder nur Viertelfinale und Playdown"),
     ("8_doublevictory_2", "8 Teams 1 Gruppe 2 Felder - Double Victory"),
@@ -30,15 +30,15 @@ SCHEDULE_CHOICES = (
     ("8_doublevictory_2", "8 Teams 2 Felder Double Victory"),
     ("8_3", "8 Teams 2 Gruppen 3 Felder"),
     ("9_2", "9 Teams 3 Gruppen 2 Felder"),
-    ("9_groupfinals_2", "9 Teams 3 Gruppen 2 Felder mit Gruppen Finale"),
     ("9_3", "9 Teams 3 Gruppen 3 Felder"),
     # Spielpläne deaktiviert, weil erst einmal nicht mehr gebraucht werden
     # ("2_1", "2 Teams 1 Feld"),
-    # ("11_3", "11 Teams 3 Felder"),
     # ("6_oneDivision_2", "DFFL 7er Division"),
     # ("7_oneDivision_2", "DFFL 8er Division"),
     # ("6_sfl_2", "SFL - 3x3 Conference"),
     # ("7_sfl_2", "7 Teams 1 Gruppe 2 Felder - 3x4 Conference"),
+    # ("9_groupfinals_2", "9 Teams 3 Gruppen 2 Felder mit Gruppen Finale"),
+    # ("11_3", "11 Teams 3 Felder"), -> kein Ranking
 )
 
 SCHEDULE_MAP = {
