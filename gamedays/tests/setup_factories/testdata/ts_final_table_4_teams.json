@@ -1,4 +1,42 @@
 {
+  "data": [
+    {
+      "+/-": 6,
+      "index": 0,
+      "pa": 3,
+      "pf": 9,
+      "points": 6,
+      "standing": "Gruppe 1",
+      "team__name": "A1"
+    },
+    {
+      "+/-": 2,
+      "index": 1,
+      "pa": 4,
+      "pf": 6,
+      "points": 4,
+      "standing": "Gruppe 1",
+      "team__name": "A2"
+    },
+    {
+      "+/-": -2,
+      "index": 2,
+      "pa": 5,
+      "pf": 3,
+      "points": 2,
+      "standing": "Gruppe 1",
+      "team__name": "A3"
+    },
+    {
+      "+/-": -6,
+      "index": 3,
+      "pa": 6,
+      "pf": 0,
+      "points": 0,
+      "standing": "Gruppe 1",
+      "team__name": "A4"
+    }
+  ],
   "schema": {
     "fields": [
       {
@@ -6,9 +44,14 @@
         "type": "integer"
       },
       {
+        "extDtype": "string",
+        "name": "standing",
+        "type": "string"
+      },
+      {
+        "extDtype": "string",
         "name": "team__name",
-        "type": "any",
-        "extDtype": "string"
+        "type": "string"
       },
       {
         "name": "points",
@@ -28,53 +71,11 @@
         "extDtype": "Int64",
         "name": "+/-",
         "type": "integer"
-      },
-      {
-        "name": "dffl",
-        "type": "integer"
       }
     ],
+    "pandas_version": "1.4.0",
     "primaryKey": [
       "index"
-    ],
-    "pandas_version": "1.4.0"
-  },
-  "data": [
-    {
-      "index": 0,
-      "team__name": "A1",
-      "points": 6,
-      "pf": 9,
-      "pa": 3,
-      "+/-": 6,
-      "dffl": 8
-    },
-    {
-      "index": 1,
-      "team__name": "A2",
-      "points": 4,
-      "pf": 6,
-      "pa": 4,
-      "+/-": 2,
-      "dffl": 6
-    },
-    {
-      "index": 2,
-      "team__name": "A3",
-      "points": 2,
-      "pf": 3,
-      "pa": 5,
-      "+/-": -2,
-      "dffl": 4
-    },
-    {
-      "index": 3,
-      "team__name": "A4",
-      "points": 0,
-      "pf": 0,
-      "pa": 6,
-      "+/-": -6,
-      "dffl": 2
-    }
-  ]
+    ]
+  }
 }

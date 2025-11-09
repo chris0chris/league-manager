@@ -143,8 +143,9 @@ class TestGamedayModelWrapper(TestCase):
                                          place=2) == 'B2'
 
     def test_get_mulitple_teams_by_standing_and_points(self):
-        gameday = DBSetup().g72_qualify_finished();
+        gameday = DBSetup().g72_qualify_finished()
         all_games = Gameinfo.objects.filter(gameday=gameday)
+        all_games.update(status='beendet')
         for game in all_games:
             update_gameresults(game)
         gmw = GamedayModelWrapper(gameday.pk)

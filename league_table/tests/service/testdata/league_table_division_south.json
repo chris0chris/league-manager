@@ -10,10 +10,6 @@
         "type": "string"
       },
       {
-        "name": "dffl",
-        "type": "integer"
-      },
-      {
         "name": "points",
         "type": "integer"
       },
@@ -39,7 +35,6 @@
     {
       "index": 0,
       "team__name": "A1",
-      "dffl": 19,
       "points": 14,
       "pf": 25,
       "pa": 16,
@@ -48,7 +43,6 @@
     {
       "index": 1,
       "team__name": "A2",
-      "dffl": 15,
       "points": 10,
       "pf": 20,
       "pa": 18,
@@ -57,7 +51,6 @@
     {
       "index": 2,
       "team__name": "A3",
-      "dffl": 6,
       "points": 4,
       "pf": 12,
       "pa": 18,
@@ -66,7 +59,6 @@
     {
       "index": 3,
       "team__name": "A4",
-      "dffl": 2,
       "points": 0,
       "pf": 2,
       "pa": 9,

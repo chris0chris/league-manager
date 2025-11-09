@@ -13,6 +13,7 @@ from gamedays.models import Gameday, Gameinfo, Gameresult
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.tests.setup_factories.dataframe_setup import DataFrameAssertion
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from league_table.tests.setup_factories.factories_leaguetable import LeagueRulesetFactory
 
 
 def update_gameresults(game):
@@ -113,6 +114,7 @@ class TestScheduleUpdate(TransactionTestCase):
         p5_first.update(status='beendet')
 
     def test_update_9_teams_3_fields(self):
+        LeagueRulesetFactory()
         gameday = DBSetup().create_empty_gameday()
         gameday.format = "9_3"
         gameday.save()

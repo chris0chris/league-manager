@@ -4,7 +4,7 @@ import pandas as pd
 
 from gamedays.models import Season, SeasonLeagueTeam, Gameday, Gameinfo
 from gamedays.service.gameday_settings import SCHEDULED, OFFICIALS_NAME, STAGE, STANDING, HOME, \
-    AWAY, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL, GAMEDAY_NAME, GAMEDAY_ID, \
+    AWAY, TEAM_NAME, POINTS, PF, PA, DIFF, GAMEDAY_NAME, GAMEDAY_ID, \
     GAMEINFO_ID
 from gamedays.service.model_wrapper import GamedayModelWrapper
 
@@ -41,9 +41,9 @@ class LeagueTable:
 
     def _calculate_standings(self, all_standings):
         all_standings = all_standings.groupby([TEAM_NAME], as_index=False)
-        all_standings = all_standings.agg({DFFL: 'sum', POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum',
+        all_standings = all_standings.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum',
                                            })
-        all_standings = all_standings.sort_values(by=[DFFL, POINTS, DIFF, PF, PA], ascending=False)
+        all_standings = all_standings.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
         return all_standings
 
     def get_all_schedules(self):

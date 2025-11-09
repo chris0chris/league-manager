@@ -4,9 +4,35 @@ from django.apps import apps
 from pandas import DataFrame
 
 from gamedays.models import Gameinfo, Gameresult, TeamLog
-from gamedays.service.gameday_settings import STANDING, TEAM_NAME, POINTS, POINTS_HOME, POINTS_AWAY, PA, PF, \
-    GAMEINFO_ID, DIFF, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, HOME, AWAY, ID_AWAY, ID_HOME, ID_Y, QUALIIFY_ROUND, \
-    STATUS, SH, FH, FINISHED, GAME_FINISHED, IN_POSSESSION, IS_HOME
+from gamedays.service.gameday_settings import (
+    STANDING,
+    TEAM_NAME,
+    POINTS,
+    POINTS_HOME,
+    POINTS_AWAY,
+    PA,
+    PF,
+    GAMEINFO_ID,
+    DIFF,
+    SCHEDULED,
+    FIELD,
+    OFFICIALS_NAME,
+    STAGE,
+    HOME,
+    AWAY,
+    ID_AWAY,
+    ID_HOME,
+    ID_Y,
+    QUALIIFY_ROUND,
+    STATUS,
+    SH,
+    FH,
+    FINISHED,
+    GAME_FINISHED,
+    IN_POSSESSION,
+    IS_HOME,
+    MAIN_ROUND,
+)
 from league_table.service.ranking.engine import FinalRankingEngine
 
 
@@ -78,8 +104,6 @@ class GamedayModelWrapper:
         return qualify_round
 
     def get_qualify_table2(self):
-        if not self.has_finalround():
-            return ''
         qualify_round = self._get_table()
         if not apps.is_installed("league_table"):
             return qualify_round
@@ -220,7 +244,7 @@ class GamedayModelWrapper:
         return schedule
 
     def _get_table(self):
-        qualify_round = self._games_with_result[self._games_with_result[STAGE] == QUALIIFY_ROUND]
+        qualify_round = self._games_with_result[self._games_with_result[STAGE].isin([QUALIIFY_ROUND, MAIN_ROUND])]
         qualify_round = qualify_round.groupby([STANDING, TEAM_NAME], as_index=False)
         qualify_round = qualify_round.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'})
         qualify_round = qualify_round.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
