@@ -2,8 +2,14 @@
 
 import pandas as pd
 
-from gamedays.service.gameday_settings import POINTS, PF, PA, DIFF
-from league_table.models import LeagueRuleset
+from gamedays.models import Season, League, Gameresult, SeasonLeagueTeam
+from gamedays.service.gameday_settings import (
+    POINTS,
+    PF,
+    PA,
+    DIFF,
+)
+from league_table.models import LeagueRuleset, LeagueSeasonConfig
 from league_table.service.ranking.tiebreakers import TieBreakerEngine
 
 
@@ -270,4 +276,212 @@ class FinalRankingEngine:
         table.set_index("team__name", inplace=True)
         table = table.reindex(final_standing).reset_index()
 
+        return table
+
+
+class LeagueRankingEngine:
+    def __init__(self, season: Season, league: League):
+        self.season = season
+        self.league = league
+
+    def _get_games_with_results2(self) -> pd.DataFrame:
+        """Return all finished games for the season+league."""
+        games = (
+            Gameresult.objects.filter(
+                gameinfo__gameday__season=self.season,
+                gameinfo__gameday__league=self.league,
+                gameinfo__status="beendet",
+                gameinfo__gameday__lt=603,
+            )
+            .select_related("gameinfo", "team")
+            .values(
+                "gameinfo",
+                "team__description",
+                "fh",
+                "sh",
+                "pa",
+                "isHome",
+                "gameinfo__stage",
+                "gameinfo__standing",
+            )
+        )
+
+        df = pd.DataFrame(list(games))
+        if df.empty:
+            return df
+
+        df["pf"] = df["fh"].fillna(0) + df["sh"].fillna(0)
+        df["points"] = df.apply(lambda r: 2 if r["pf"] > r["pa"] else (1 if r["pf"] == r["pa"] else 0), axis=1)
+        df["wins"] = df.apply(lambda r: 1 if r["pf"] > r["pa"] else 0, axis=1)
+        df["draws"] = df.apply(lambda r: 1 if r["pf"] == r["pa"] else 0, axis=1)
+        df["losses"] = df.apply(lambda r: 1 if r["pf"] < r["pa"] else 0, axis=1)
+        df["diff"] = df["pf"] - df["pa"]
+        return df
+
+    def _get_games_with_results(self) -> pd.DataFrame:
+        """Return all finished games for the season+league with league-aware scoring."""
+        # gameinfo = pd.DataFrame(Gameinfo.objects.filter(
+        #     gameday__season=self.season,
+        #     gameday__league=self.league,
+        #     status="beendet",
+        #     gameday__lt=603,
+        # ).values(*([f.name for f in Gameinfo._meta.local_fields] + ['officials__name'])))
+        # gameresults = pd.DataFrame(Gameresult.objects.filter(gameinfo_id__in=gameinfo['id']).order_by('-isHome').values(*([f.name for f in Gameresult._meta.local_fields] + [TEAM_NAME])))
+        # games_with_result = pd.merge(gameinfo, gameresults, left_on='id', right_on=GAMEINFO_ID)
+
+        results = (
+            Gameresult.objects.filter(
+                gameinfo__gameday__season=self.season,
+                gameinfo__gameday__league=self.league,
+                gameinfo__status="beendet",
+                gameinfo__gameday__lt=603,
+            )
+            .select_related("gameinfo", "team")
+            .values(
+                "gameinfo",
+                "team_id",
+                "team__description",
+                "fh",
+                "sh",
+                "pa",
+                "isHome",
+                "gameinfo__standing",
+            )
+        )
+
+        df = pd.DataFrame(list(results))
+        if df.empty:
+            return df
+
+        # Compute pf
+        df["pf"] = df["fh"].fillna(0) + df["sh"].fillna(0)
+
+        # Merge league info
+        team_assoc = pd.DataFrame(
+            SeasonLeagueTeam.objects.filter(
+                season=self.season, team__in=df["team_id"].unique()
+            ).exclude(league=7).values("team_id", "league_id")
+        )
+        df = df.merge(
+            team_assoc,
+            left_on="team_id",
+            right_on="team_id",
+            how="left",
+            suffixes=("", "_team"),
+        )
+
+        # Get opponent league
+        # First pivot to get opponent for same gameinfo
+        df_opponent = df[["gameinfo", "team_id", "league_id"]].copy()
+        df_opponent = df_opponent.rename(
+            columns={
+                "team_id": "opponent_team_id",
+                "league_id": "opponent_league_id",
+            }
+        )
+
+        df = df.merge(df_opponent, on="gameinfo", how="left")
+        df = df[df["team_id"] != df["opponent_team_id"]]  # drop self-merge
+
+        # Compute Pts
+        def compute_pts(row):
+            if row["pf"] > row["pa"]:
+                return 1 if row["league_id"] == row["opponent_league_id"] else 2
+            elif row["pf"] == row["pa"]:
+                return 0.5 if row["league_id"] == row["opponent_league_id"] else 1
+            else:
+                return 0
+
+        df["points"] = df.apply(compute_pts, axis=1)
+
+        # Compute p (1 if fh >= 0)
+        df["games_played"] = df["fh"].fillna(0).apply(lambda x: 1 if x >= 0 else 0)
+
+        # MaxPts column
+        df["MaxPts"] = (df["league_id"] != df["opponent_league_id"]).apply(
+            lambda x: 2 if x else 1
+        )
+
+        # diff column
+        df["pf"] = df["fh"].fillna(0) + df["sh"].fillna(0)
+        df["wins"] = df.apply(lambda r: 1 if r["pf"] > r["pa"] else 0, axis=1)
+        df["draws"] = df.apply(lambda r: 1 if r["pf"] == r["pa"] else 0, axis=1)
+        df["losses"] = df.apply(lambda r: 1 if r["pf"] < r["pa"] else 0, axis=1)
+        df["diff"] = df["pf"] - df["pa"]
+
+        return df
+
+    def compute_league_table(self) -> pd.DataFrame:
+        """Aggregate all game results into one final league table."""
+        df = self._get_games_with_results()
+        if df.empty:
+            return pd.DataFrame()
+
+        df = df.rename(columns={"team__description": "team__name"})
+
+        table = (
+            df.groupby("team__name", as_index=False)
+            .agg(
+                {
+                    "points": "sum",
+                    "MaxPts": "first",
+                    "wins": "sum",
+                    "draws": "sum",
+                    "losses": "sum",
+                    "pf": "sum",
+                    "pa": "sum",
+                    "diff": "sum",
+                    "games_played": "count",
+                }
+            )
+        )
+        table["siegquotient"] = table["points"] / table["MaxPts"]
+        table["standing"] = "Hauptrunde"
+
+        # sort by points, point diff, points for, points against
+        table = table.sort_values(
+            by=["points", "diff", "pf", "pa"], ascending=[False, False, False, True]
+        ).reset_index(drop=True)
+
+        tb_engine = TieBreakerEngine(
+            LeagueSeasonConfig.objects.get(
+                league=self.league, season=self.season
+            ).ruleset
+        )
+        table = tb_engine.rank(table, df)
+
+        table["rank"] = range(1, len(table) + 1)
+        return table
+
+    def compute_league_table2(self) -> pd.DataFrame:
+        """Aggregate all game results into one final league table."""
+        df = self._get_games_with_results()
+        if df.empty:
+            return pd.DataFrame()
+
+        table = (
+            df.groupby("team__description", as_index=False)
+            .agg(
+                {
+                    "points": "sum",
+                    "MaxPts": "first",
+                    "wins": "sum",
+                    "draws": "sum",
+                    "losses": "sum",
+                    "pf": "sum",
+                    "pa": "sum",
+                    "diff": "sum",
+                    "games_played": "count",
+                }
+            )
+            .rename(columns={"gameinfo": "games_played"})
+        )
+        table["siegquotient"] = table["Pts"] / table["MaxPts"]
+
+        # sort by points, point diff, points for, points against
+        table = table.sort_values(
+            by=["points", "diff", "pf", "pa"], ascending=[False, False, False, True]
+        ).reset_index(drop=True)
+
+        table["rank"] = range(1, len(table) + 1)
         return table

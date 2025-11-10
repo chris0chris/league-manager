@@ -2,11 +2,12 @@ import json
 
 import pandas as pd
 
-from gamedays.models import Season, SeasonLeagueTeam, Gameday, Gameinfo
+from gamedays.models import Season, SeasonLeagueTeam, Gameday, Gameinfo, League
 from gamedays.service.gameday_settings import SCHEDULED, OFFICIALS_NAME, STAGE, STANDING, HOME, \
     AWAY, TEAM_NAME, POINTS, PF, PA, DIFF, GAMEDAY_NAME, GAMEDAY_ID, \
     GAMEINFO_ID
 from gamedays.service.model_wrapper import GamedayModelWrapper
+from league_table.service.ranking.engine import LeagueRankingEngine
 
 
 class LeagueTable:
@@ -47,14 +48,21 @@ class LeagueTable:
         return all_standings
 
     def get_all_schedules(self):
-        season = Season.objects.last()
-        all_gamedays = Gameday.objects.filter(season__name=season)
-        all_schedules = pd.DataFrame()
-        for gameday in all_gamedays:
-            try:
-                gmw = GamedayModelWrapper(gameday.pk, ['gameday__name', 'gameday__date'])
-                all_schedules = all_schedules.append(gmw.get_schedule(), ignore_index=True)
-            except Gameinfo.DoesNotExist:
-                pass
-        columns = [GAMEDAY_NAME, GAMEDAY_ID, SCHEDULED, OFFICIALS_NAME, GAMEINFO_ID, HOME, AWAY, STANDING, STAGE]
-        return all_schedules[columns]
+        # TODO config für LeasgueSeasonConfig
+        engine = LeagueRankingEngine(
+            season=Season.objects.get(pk=5),
+            league=League.objects.get(pk=7),
+        )
+        final_league_table = engine.compute_league_table()
+        columns = [
+            GAMEDAY_NAME,
+            GAMEDAY_ID,
+            SCHEDULED,
+            OFFICIALS_NAME,
+            GAMEINFO_ID,
+            HOME,
+            AWAY,
+            STANDING,
+            STAGE,
+        ]
+        return final_league_table

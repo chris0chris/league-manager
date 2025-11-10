@@ -116,7 +116,7 @@ class GamedayModelWrapper:
                 league=self.gameday.league, season=self.gameday.season
             ).ruleset
             engine = TieBreakerEngine(league_ruleset)
-            table = engine.rank(qualify_round, self.get_schedule())
+            table = engine.rank(qualify_round, self._games_with_result)
             return table.sort_values(by=STANDING)
         except LeagueSeasonConfig.DoesNotExist:
             return qualify_round
