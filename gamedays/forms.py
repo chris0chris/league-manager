@@ -17,6 +17,7 @@ SCHEDULE_CHOICES = (
     ("3_1", "3 Teams 1 Gruppe 1 Feld"),
     ("3_hinrunde_1", "3 Teams 1 Gruppe 1 Feld (nur Hinrunde)"),
     ("4_1", "4 Teams 1 Gruppe 1 Feld"),
+    ("4_4spiele_1", "4 Teams 1 Gruppe 1 Feld - 4 Spiele 30 Min Mittagspause"),
     ("4_final4_1", "4 Teams 1 Gruppe 1 Feld - 2 Niederlagen KO (Final 4)"),
     ("5_2", "5 Teams 1 Gruppe 2 Felder"),
     ("5_dfflf_2", "5 Teams 1 Grupppe 2 Felder - 20 Min Pause (DFFL Frauen)"),
@@ -54,6 +55,11 @@ SCHEDULE_MAP = {
     },
     "4_1": {
         "name": "4 Teams 1 Gruppe 1 Feld",
+        "fields": 1,
+        SCHEDULE_MAP_GROUPS_C: [{SCHEDULE_MAP_TEAMS_C: 4}],
+    },
+    "4_4spiele_1": {
+        "name": "4 Teams 1 Gruppe 1 Feld - 4 Spiele 30 Min Mittagspause",
         "fields": 1,
         SCHEDULE_MAP_GROUPS_C: [{SCHEDULE_MAP_TEAMS_C: 4}],
     },
