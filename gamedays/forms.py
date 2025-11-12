@@ -235,6 +235,13 @@ class GamedayFormatForm(forms.Form):
         cleaned = super().clean()
         group = cleaned.get(self.GROUP_C)
 
+        # Preserve selection order
+        raw_order = self.data.getlist(self.add_prefix(self.GROUP_C))
+        if raw_order:
+            id_to_team = {str(team.id): team for team in cleaned[self.GROUP_C]}
+            ordered_teams = [id_to_team[pk] for pk in raw_order if pk in id_to_team]
+            cleaned[self.GROUP_C] = ordered_teams
+
         if group and len(group) != self.needed_teams:
             self.add_error(
                 f"{self.GROUP_C}", f"Bitte genau {self.needed_teams} Teams auswählen."

@@ -1,5 +1,6 @@
 from datetime import date, time
 
+from django.http import QueryDict
 from django.test import TestCase
 
 from gamedays.forms import (
@@ -91,7 +92,6 @@ class TestGamedayForm(TestCase):
 
 class TestGamedayFormatForm(TestCase):
     def test_gameday_format_form_renders_correctly(self):
-        TeamFactory(name="Team A")
         form = GamedayFormatForm()
 
         assert "group" in form.fields
@@ -102,10 +102,24 @@ class TestGamedayFormatForm(TestCase):
 
     def test_gameday_format_form_accepts_valid_group(self):
         team = TeamFactory(name="Team A")
-        data = {"group": [team.pk]}
+        data = QueryDict(mutable=True)
+        data.setlist("group", [str(team.pk)])
         form = GamedayFormatForm(data=data, needed_teams=1)
 
         assert form.is_valid(), form.errors
+
+    def test_gameday_keeps_input_order(self):
+        team_a = TeamFactory(name="Team A")
+        team_b = TeamFactory(name="Team B")
+        team_c = TeamFactory(name="Team C")
+        data = QueryDict(mutable=True)
+        data.setlist("group", [str(team_b.pk), str(team_c.pk), str(team_a.pk)])
+
+        form = GamedayFormatForm(data=data, needed_teams=3)
+
+        assert form.is_valid(), form.errors
+        ordered_ids = [t.id for t in form.cleaned_data["group"]]
+        assert ordered_ids == [team_b.id, team_c.id, team_a.id]
 
 
 class TestGameinfoForm(TestCase):

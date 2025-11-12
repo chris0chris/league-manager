@@ -65,6 +65,7 @@ class TieBreakerEngine:
         standings_df = standings_df.sort_values(
             by="points", ascending=False
         ).reset_index(drop=True)
+        games_df = games_df.fillna({"fh": 0, "sh": 0, "pa": 0})
 
         # Step 2: Prepare placeholders for tie-breaker columns
         for tb in self.tie_breakers:

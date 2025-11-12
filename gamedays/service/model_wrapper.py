@@ -74,6 +74,9 @@ class GamedayModelWrapper:
         gameresult = pd.DataFrame(
             Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id']).order_by('-' + IS_HOME).values(
                 *([f.name for f in Gameresult._meta.local_fields] + [TEAM_NAME])))
+        if gameresult.empty:
+            self._games_with_result: DataFrame = pd.DataFrame()
+            return
         games_with_result = pd.merge(self._gameinfo, gameresult, left_on='id', right_on=GAMEINFO_ID)
         games_with_result[IN_POSSESSION] = games_with_result[IN_POSSESSION].astype(str)
         games_with_result = games_with_result.convert_dtypes()

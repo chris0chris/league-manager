@@ -291,6 +291,7 @@ class LeagueRankingEngine:
                 gameinfo__gameday__season=self.season,
                 gameinfo__gameday__league=self.league,
                 gameinfo__status="beendet",
+                # TODO make this dynamic
                 gameinfo__gameday__lt=603,
             )
             .select_related("gameinfo", "team")
@@ -311,6 +312,7 @@ class LeagueRankingEngine:
             return df
 
         df["pf"] = df["fh"].fillna(0) + df["sh"].fillna(0)
+        # TODO make this dynamic
         df["points"] = df.apply(lambda r: 2 if r["pf"] > r["pa"] else (1 if r["pf"] == r["pa"] else 0), axis=1)
         df["wins"] = df.apply(lambda r: 1 if r["pf"] > r["pa"] else 0, axis=1)
         df["draws"] = df.apply(lambda r: 1 if r["pf"] == r["pa"] else 0, axis=1)
@@ -334,6 +336,7 @@ class LeagueRankingEngine:
                 gameinfo__gameday__season=self.season,
                 gameinfo__gameday__league=self.league,
                 gameinfo__status="beendet",
+                # TODO make this dynamic
                 gameinfo__gameday__lt=603,
             )
             .select_related("gameinfo", "team")
@@ -356,6 +359,7 @@ class LeagueRankingEngine:
         # Compute pf
         df["pf"] = df["fh"].fillna(0) + df["sh"].fillna(0)
 
+        # TODO make this dynamic
         # Merge league info
         team_assoc = pd.DataFrame(
             SeasonLeagueTeam.objects.filter(
@@ -384,6 +388,7 @@ class LeagueRankingEngine:
         df = df[df["team_id"] != df["opponent_team_id"]]  # drop self-merge
 
         # Compute Pts
+        # TODO make this dynamic
         def compute_pts(row):
             if row["pf"] > row["pa"]:
                 return 1 if row["league_id"] == row["opponent_league_id"] else 2
