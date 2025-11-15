@@ -284,53 +284,9 @@ class LeagueRankingEngine:
         self.season = season
         self.league = league
 
-    def _get_games_with_results2(self) -> pd.DataFrame:
-        """Return all finished games for the season+league."""
-        games = (
-            Gameresult.objects.filter(
-                gameinfo__gameday__season=self.season,
-                gameinfo__gameday__league=self.league,
-                gameinfo__status="beendet",
-                # TODO make this dynamic
-                gameinfo__gameday__lt=603,
-            )
-            .select_related("gameinfo", "team")
-            .values(
-                "gameinfo",
-                "team__description",
-                "fh",
-                "sh",
-                "pa",
-                "isHome",
-                "gameinfo__stage",
-                "gameinfo__standing",
-            )
-        )
-
-        df = pd.DataFrame(list(games))
-        if df.empty:
-            return df
-
-        df["pf"] = df["fh"].fillna(0) + df["sh"].fillna(0)
-        # TODO make this dynamic
-        df["points"] = df.apply(lambda r: 2 if r["pf"] > r["pa"] else (1 if r["pf"] == r["pa"] else 0), axis=1)
-        df["wins"] = df.apply(lambda r: 1 if r["pf"] > r["pa"] else 0, axis=1)
-        df["draws"] = df.apply(lambda r: 1 if r["pf"] == r["pa"] else 0, axis=1)
-        df["losses"] = df.apply(lambda r: 1 if r["pf"] < r["pa"] else 0, axis=1)
-        df["diff"] = df["pf"] - df["pa"]
-        return df
 
     def _get_games_with_results(self) -> pd.DataFrame:
         """Return all finished games for the season+league with league-aware scoring."""
-        # gameinfo = pd.DataFrame(Gameinfo.objects.filter(
-        #     gameday__season=self.season,
-        #     gameday__league=self.league,
-        #     status="beendet",
-        #     gameday__lt=603,
-        # ).values(*([f.name for f in Gameinfo._meta.local_fields] + ['officials__name'])))
-        # gameresults = pd.DataFrame(Gameresult.objects.filter(gameinfo_id__in=gameinfo['id']).order_by('-isHome').values(*([f.name for f in Gameresult._meta.local_fields] + [TEAM_NAME])))
-        # games_with_result = pd.merge(gameinfo, gameresults, left_on='id', right_on=GAMEINFO_ID)
-
         results = (
             Gameresult.objects.filter(
                 gameinfo__gameday__season=self.season,
@@ -338,6 +294,7 @@ class LeagueRankingEngine:
                 gameinfo__status="beendet",
                 # TODO make this dynamic
                 gameinfo__gameday__lt=603,
+                # gameinfo__gameday__gt=608,
             )
             .select_related("gameinfo", "team")
             .values(
@@ -422,7 +379,7 @@ class LeagueRankingEngine:
         if df.empty:
             return pd.DataFrame()
 
-        df = df.rename(columns={"team__description": "team__name"})
+        df = df.rename(columns={"team__description": "team__name", "gameinfo__standing": "standing"})
 
         table = (
             df.groupby("team__name", as_index=False)
@@ -437,10 +394,12 @@ class LeagueRankingEngine:
                     "pa": "sum",
                     "diff": "sum",
                     "games_played": "count",
+                    "standing": "first",
                 }
             )
         )
         table["siegquotient"] = table["points"] / table["MaxPts"]
+        # TODO config ob Gruppen- oder Hauptrundentabelle
         table["standing"] = "Hauptrunde"
 
         # sort by points, point diff, points for, points against

@@ -2,21 +2,30 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import QuerySet, CASCADE
 from django.utils import timezone
+from django.utils.text import slugify
 
 
 class Season(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
 
-    objects: QuerySet["Season"] = models.Manager()
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
 
 class League(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
 
-    objects: QuerySet["League"] = models.Manager()
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -190,7 +199,6 @@ class TeamLog(models.Model):
                f'Value: {self.value} - Half: {self.half}{" [DELETED]" if self.isDeleted else ""}'
 
 
-
 class UserProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     avatar = models.ImageField('Avatar', upload_to="media/teammanager/avatars", blank=True, null=True)
@@ -273,4 +281,3 @@ class Person(models.Model):
     year_of_birth = models.PositiveIntegerField(null=True, blank=True, default=None)
 
     objects: QuerySet["Person"] = models.Manager()
-

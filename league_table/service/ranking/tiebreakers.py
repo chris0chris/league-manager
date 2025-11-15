@@ -124,8 +124,8 @@ class TieBreakerEngine:
         # Step 4: Merge all groups back together and re-sort globally by points (and tiebreakers)
         sorted_df = pd.concat(updated_rows, ignore_index=True)
 
-        sort_keys = ["points"] + [tb.key for tb in self.tie_breakers]
-        ascending_list = [False] + [tb.ascending for tb in self.tie_breakers]
+        sort_keys = ["standing", "points"] + [tb.key for tb in self.tie_breakers]
+        ascending_list = [True, False] + [tb.ascending for tb in self.tie_breakers]
         sorted_df = sorted_df.sort_values(
             by=sort_keys, ascending=ascending_list, ignore_index=True
         )
