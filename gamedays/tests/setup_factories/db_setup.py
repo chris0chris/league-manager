@@ -213,48 +213,71 @@ class DBSetup:
         self.create_teamlog_away(gameinfo, away)
         return gameinfo
 
-    def create_teamlog_home(self, gameinfo, home):
+    def create_broken_teamlog_home_and_away(self, home=None, away=None, gameinfo=None) -> Gameinfo:
+        if home is None:
+            home = TeamFactory(name='Home')
+        if away is None:
+            away = TeamFactory(name='Away')
+        # score home: 21 + 20
+        # score away: 3 and 2 cop
+        if gameinfo is None:
+            gameday = GamedayFactory()
+            gameinfo = GameinfoFactory(gameday=gameday, stage='Hauptrunde', standing='Gruppe 1')
+            GameresultFactory(gameinfo=gameinfo, team=home, fh=2, sh=1, pa=2, isHome=True)
+            GameresultFactory(gameinfo=gameinfo, team=away, fh=1, sh=1, pa=3)
+        self.create_teamlog_home(gameinfo, home, half_1=False)
+        self.create_teamlog_away(gameinfo, away, half_1=False)
+        return gameinfo
+
+    def create_teamlog_home(self, gameinfo, home, half_1: bool = True, half_2: bool = True):
         author = gameinfo.gameday.author
         TeamLogFactory(gameinfo=gameinfo, team=None, sequence=0, event='Spiel gestartet', value=6, half=0,
                        author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=1, player=19, event='Touchdown', value=6, half=1,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=2, player=19, event='Touchdown', value=6, half=1,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=2, player=7, event='2-Extra-Punkte', value=2, half=1,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=3, player=19, event='Touchdown', value=6, half=1,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=3, player=7, event='1-Extra-Punkt', value=1, half=1,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=5, player=19, event='Touchdown', value=6, half=2,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=8, player=19, event='Touchdown', value=6, half=2,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=8, player=7, event='2-Extra-Punkte', value=2, half=2,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=9, player=19, event='Touchdown', value=6, half=2,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=home, sequence=9, event='1-Extra-Punkt', value=1, half=2, author=author)
+        if half_1:
+            TeamLogFactory(gameinfo=gameinfo, team=home, sequence=1, player=19, event='Touchdown', value=6, half=1,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=home, sequence=2, player=19, event='Touchdown', value=6, half=1,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=home, sequence=2, player=7, event='2-Extra-Punkte', value=2, half=1,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=home, sequence=3, player=19, event='Touchdown', value=6, half=1,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=home, sequence=3, player=7, event='1-Extra-Punkt', value=1, half=1,
+                           author=author)
+        if half_2:
+            TeamLogFactory(gameinfo=gameinfo, team=home, sequence=5, player=19, event='Touchdown', value=6, half=2,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=home, sequence=8, player=19, event='Touchdown', value=6, half=2,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=home, sequence=8, player=7, event='2-Extra-Punkte', value=2, half=2,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=home, sequence=9, player=19, event='Touchdown', value=6, half=2,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=home, sequence=9, event='1-Extra-Punkt', value=1, half=2,
+                           author=author)
 
-    def create_teamlog_away(self, gameinfo, away):
+    def create_teamlog_away(self, gameinfo, away, half_1: bool = False, half_2: bool = True):
         author = gameinfo.gameday.author
+        if half_1:
+            TeamLogFactory(gameinfo=gameinfo, team=None, sequence=0, event='Safety', value=2, half=1,
+                           author=author)
         TeamLogFactory(gameinfo=gameinfo, team=None, sequence=0, event='2. Halbzeit gestartet', value=2, half=2,
                        author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=4, player=7, event='Safety', value=2, half=2,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=6, event='Turnover', cop=True, half=2, author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=7, player=7, event='Safety', value=1, half=2,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=10, event='Interception', cop=True, half=2, author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=0, event='Spielzeit', input='12:10', value=0, half=2,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=10, event='Auszeit', input='00:01', value=0, half=2,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=away, sequence=11, player=7, event='Safety', value=1, half=2,
-                       isDeleted=True,
-                       author=author)
-        TeamLogFactory(gameinfo=gameinfo, team=None, sequence=0, event='Spiel beendet', half=2, author=author)
+        if half_2:
+            TeamLogFactory(gameinfo=gameinfo, team=away, sequence=4, player=7, event='Safety', value=2, half=2,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=away, sequence=6, event='Turnover', cop=True, half=2, author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=away, sequence=7, player=7, event='Safety', value=1, half=2,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=away, sequence=10, event='Interception', cop=True, half=2, author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=away, sequence=0, event='Spielzeit', input='12:10', value=0, half=2,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=away, sequence=10, event='Auszeit', input='00:01', value=0, half=2,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=away, sequence=11, player=7, event='Safety', value=1, half=2,
+                           isDeleted=True,
+                           author=author)
+            TeamLogFactory(gameinfo=gameinfo, team=None, sequence=0, event='Spiel beendet', half=2, author=author)
 
     def create_gamesetup(self, gameinfo):
         return GameSetupFactory(gameinfo=gameinfo, ctResult='won', direction='arrow_forward', fhPossession='AWAY')

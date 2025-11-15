@@ -32,7 +32,8 @@ SCHEDULE_TABLE_HEADERS = {
     OFFICIALS_NAME: 'Officials',
     STANDING: 'Platz',
     STAGE: 'Runde',
-    STATUS: 'Status'
+    STATUS: 'Status',
+    GAMEINFO_ID: 'Rückblick',
 }
 
 
@@ -181,11 +182,40 @@ class GamedayService:
 
     @staticmethod
     def _get_game_detail_button(gameday_pk: int, gameinfo_id: int):
-        return f"""<a href="game/{gameinfo_id}" class="btn btn-primary">Zum Spiel</a>"""
+        return f"""<a href="game/{gameinfo_id}" class="btn btn-primary">Zum Spiel<i class="bi bi-chevron-right"></i></a>"""
 
+
+class EmptySplitScoreTable:
+
+    @staticmethod
+    def to_html(*args, **kwargs):
+        return 'Leider gibt es keine Daten.'
+
+    @staticmethod
+    def to_json(*args, **kwargs):
+        return EMPTY_DATA
+
+class EmptyEventsTable:
+
+    @staticmethod
+    def to_html(*args, **kwargs):
+        return 'Leider gibt es keine Daten.'
+
+    @staticmethod
+    def to_json(*args, **kwargs):
+        return EMPTY_DATA
 
 class EmptyGamedayGameService:
-    pass
+
+
+    @staticmethod
+    def get_split_score_table() -> (pd.DataFrame, bool):
+        return EmptySplitScoreTable, True
+
+    @staticmethod
+    def get_events_table() -> pd.DataFrame:
+        return EmptyEventsTable
+
 
 class GamedayGameService:
     @classmethod
@@ -202,10 +232,29 @@ class GamedayGameService:
                                   .order_by("isHome") \
                                   .values("team__description", "team", "isHome"))
 
-        self.home_team_name = self.gameresult.iloc[1]['team__description']
-        self.home_team_id = self.gameresult.iloc[1]['team']
-        self.away_team_name = self.gameresult.iloc[0]['team__description']
-        self.away_team_id = self.gameresult.iloc[0]['team']
+        self.events = pd.DataFrame(TeamLog.objects \
+           .filter(gameinfo=self.game.pk) \
+           .exclude(isDeleted=True) \
+           .order_by("created_time") \
+           .values(*[x.name for x in TeamLog._meta.local_fields], "team__description")
+        )
+
+        self.events_ready = False
+
+        if len(self.events) > 0:
+            self.events_ready = True
+            self.events = self._prepare_team_logs()
+
+        self.home_team_name = "Home Team"
+        self.home_team_id = 0
+        self.away_team_name = "Away Team"
+        self.away_team_id = 0
+
+        if len(self.gameresult) > 0:
+            self.home_team_name = self.gameresult.iloc[1]['team__description']
+            self.home_team_id = self.gameresult.iloc[1]['team']
+            self.away_team_name = self.gameresult.iloc[0]['team__description']
+            self.away_team_id = self.gameresult.iloc[0]['team']
 
         self._score_column_mapping = {
             # "created_time": "Zeit",
@@ -225,12 +274,7 @@ class GamedayGameService:
         self.split_score_output_columns = self._split_score_column_mapping.values()
 
     def _prepare_team_logs(self):
-        events = pd.DataFrame(TeamLog.objects \
-            .filter(gameinfo=self.game.pk) \
-            .exclude(isDeleted=True) \
-            .order_by("created_time") \
-            .values(*[x.name for x in TeamLog._meta.local_fields], "team__description")
-        )
+        events = self.events
 
         misc_events = [CLOCK, GAME_START, SECOND_HALF_START, OVERTIME, GAME_END]
 
@@ -275,17 +319,36 @@ class GamedayGameService:
         parts = time_string.split(':')
         return ':'.join([parts[0], f'{parts[-1]:0>2}'])
 
-    def get_halftime_split_score_table(self):
-        events = self._prepare_team_logs()
+    def get_split_score_table(self) -> (pd.DataFrame, bool):
+        if not self.events_ready:
+            return EmptySplitScoreTable, True
+
+        events = self.events.copy()
+        split_score_repaired = False
 
         ct = pd.crosstab(events.team__description, events.half, events.value, aggfunc='sum')
         ct["final"] = ct.sum(axis=1)
         ct = ct.rename_axis(None, axis=1).reset_index()
 
-        return ct.rename(columns=self._split_score_column_mapping)[self.split_score_output_columns]
+        if len(ct.columns) != 4:
+            ct = self._repair_broken_split_score(ct)
+            split_score_repaired = True
+
+        return ct.rename(columns=self._split_score_column_mapping)[self.split_score_output_columns], split_score_repaired
+
+    def _repair_broken_split_score(self, split_score_ct: pd.DataFrame) -> pd.DataFrame:
+        split_score_columns = set(split_score_ct.columns)
+        missing_columns = set(self._split_score_column_mapping.keys()) - split_score_columns
+
+        for col_name in missing_columns:
+            split_score_ct[col_name] = 0
+
+        return split_score_ct
 
     def get_events_table(self):
-        events = self._prepare_team_logs()
+        if not self.events_ready:
+            return EmptyEventsTable
+        events = self.events.copy()
 
         static_events = events[pd.isna(events.team)].copy()
         team_events = events[~pd.isna(events.team)].copy()

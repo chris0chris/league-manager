@@ -205,18 +205,32 @@ class GamedayGameDetailView(DetailView):
         ggs = GamedayGameService(gameinfo.pk)
         render_configs = {
             'index': False,
-            'classes': ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center'],
             'border': 0,
             'justify': 'center',
             'escape': False,
             'table_id': 'team_log_events',
         }
+        classes = ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center']
+
+        split_score_table, split_score_repaired = ggs.get_split_score_table()
+
+        split_score_table_html = split_score_table.to_html(**{
+            **render_configs,
+            "classes": classes + ["game-split-score-table"]
+        })
+
+        if split_score_repaired:
+            split_score_table_html = f"""{split_score_table_html}</ br>
+<small>Die Aufteilung der Punkte je Halbzeit kann eventuell inkorrekt sein.</small>"""
 
         context['info'] = {
             'away_team': ggs.away_team_name,
             'home_team': ggs.home_team_name,
-            'events_table': ggs.get_events_table().to_html(**render_configs),
-            'split_score_table': ggs.get_halftime_split_score_table().to_html(**render_configs)
+            'events_table': ggs.get_events_table().to_html(**{
+                **render_configs,
+                "classes": classes + ["game-log-table"],
+            }),
+            'split_score_table': split_score_table_html,
         }
         return context
 
