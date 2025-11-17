@@ -1,2 +1,2 @@
-import 'regenerator-runtime/runtime';
+// Vitest setup file
 import '@testing-library/jest-dom';

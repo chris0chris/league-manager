@@ -1,7 +1,6 @@
 import React from 'react';
 import {Provider} from 'react-redux';
 import {store} from '../store';
-import 'regenerator-runtime/runtime';
 
 import Liveticker from './liveticker/Liveticker';
 

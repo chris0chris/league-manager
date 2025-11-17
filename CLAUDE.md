@@ -32,15 +32,16 @@ Set `DJANGO_SETTINGS_MODULE=league_manager.settings` (defaults to base) or use `
 
 ### Frontend Architecture
 
-Three React applications are bundled via webpack and served by Django:
+Three React applications are bundled and served by Django:
 
 1. **passcheck** (`passcheck/src/`) - TypeScript/React app
    - Built with webpack → `passcheck/static/passcheck/js/passcheck.js`
    - Uses TypeScript, React hooks, Context API for state management
 
 2. **liveticker** (`liveticker/src/`) - JavaScript/React app
-   - Built with webpack → `liveticker/static/liveticker/js/liveticker.js`
+   - Built with Vite → `liveticker/static/liveticker/js/liveticker.js`
    - Uses Redux for state management
+   - Tests use Vitest
 
 3. **scorecard** (`scorecard/src/`) - JavaScript/React app
    - Built with webpack → `scorecard/static/scorecard/js/scorecard.js`
@@ -71,10 +72,22 @@ pip install -r test_requirements.txt
 
 **Run development server:**
 ```bash
-python manage.py runserver
+# Use --insecure to serve static files during development
+python manage.py runserver --insecure
+
 # With dev environment
-league_manager=dev python manage.py runserver
+league_manager=dev python manage.py runserver --insecure
+
+# With test database
+MYSQL_HOST=10.185.182.207 \
+MYSQL_DB_NAME=test_db \
+MYSQL_USER=user \
+MYSQL_PWD=user \
+SECRET_KEY=test-secret-key \
+python manage.py runserver --insecure
 ```
+
+**Note:** The `--insecure` flag forces Django to serve static files even with `DEBUG=False`. This is necessary for development when testing production-like settings but should never be used in actual production.
 
 **Database migrations:**
 ```bash
@@ -152,28 +165,31 @@ npm --prefix scorecard/ install
 **Build for production:**
 ```bash
 npm --prefix passcheck/ run build
-npm --prefix liveticker/ run build
+npm --prefix liveticker/ run build   # Uses Vite
 npm --prefix scorecard/ run build
 ```
 
-**Build for development (with watch mode for liveticker/scorecard):**
+**Development server:**
 ```bash
 npm --prefix passcheck/ run dev
-npm --prefix liveticker/ run dev:watch
+npm --prefix liveticker/ run start   # Vite dev server on port 3000
 npm --prefix scorecard/ run dev:watch
 ```
 
-**Run Jest tests:**
+**Run tests:**
 ```bash
 # passcheck uses React Testing Library (no jest script in package.json - tests via react-scripts)
 npm --prefix passcheck/ test
 
-# liveticker and scorecard
-npm --prefix liveticker/ run jest
+# liveticker uses Vitest
+npm --prefix liveticker/ run test        # Watch mode
+npm --prefix liveticker/ run test:run    # Single run
+npm --prefix liveticker/ run test:coverage  # With coverage
+
+# scorecard uses Jest
 npm --prefix scorecard/ run jest
 
 # Watch mode
-npm --prefix liveticker/ run testj:watch
 npm --prefix scorecard/ run testj:watch
 ```
 
@@ -198,12 +214,17 @@ pytest gamedays/tests/test_views.py::TestClassName::test_method_name
 
 **JavaScript tests:**
 ```bash
-# Jest with watch mode (interactive)
-npm --prefix liveticker/ run testj:watch
+# liveticker uses Vitest (interactive watch mode)
+npm --prefix liveticker/ run test
 # Then press 'p' to filter by filename pattern or 't' to filter by test name
 
+# Run specific test file with Vitest
+npm --prefix liveticker/ -- vitest run src/components/__tests__/LivetickerApp.spec.js
+
+# scorecard uses Jest with watch mode
+npm --prefix scorecard/ run testj:watch
 # Run specific test file directly
-npm --prefix liveticker/ -- jest src/components/__tests__/LivetickerApp.spec.js
+npm --prefix scorecard/ -- jest src/components/__tests__/ScorecardApp.spec.js
 ```
 
 ## Versioning
