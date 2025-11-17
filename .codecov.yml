@@ -1,0 +1,45 @@
+# Codecov configuration
+# https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: auto
+        threshold: 1%
+
+ignore:
+  # Build tool configuration files (not application code)
+  - "**/*.config.js"
+  - "**/*.config.mjs"
+  - "**/*.config.ts"
+  - "**/*.config.mts"
+  - "**/vite.config.*"
+  - "**/vitest.config.*"
+  - "**/webpack.config.*"
+  - "**/jest.config.*"
+  - "**/babel.config.*"
+
+  # TypeScript config files
+  - "**/tsconfig*.json"
+
+  # Setup and test utility files
+  - "**/setupTests.*"
+  - "**/*.test.*"
+  - "**/*.spec.*"
+  - "**/__tests__/**"
+
+  # Static and build output directories
+  - "**/static/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/coverage/**"
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
