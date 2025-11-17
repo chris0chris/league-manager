@@ -1,13 +1,13 @@
-Django==5.2.7
-django-crispy-forms==2.4
+Django==5.2.8
+django-crispy-forms==2.5
 crispy-bootstrap5==2025.6
-numpy==2.3.4
+numpy==2.3.5
 pandas==2.3.3
 django-pandas==0.6.7
 djangorestframework==3.16.1
 django-autocomplete-light==3.12.1
 django-formtools==2.5.1
-Markdown==3.9
+Markdown==3.10
 django-cors-headers==4.9.0
 Pillow==12.0.0
 django-rest-knox==5.0.2
