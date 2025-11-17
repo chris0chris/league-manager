@@ -55,7 +55,7 @@
     "eslint:json": "eslint ./src --format json -o js-lint-results-liveticker.json",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run",
+    "test:run": "vitest run --coverage",
     "test:coverage": "vitest run --coverage"
   },
   "browserslist": {
