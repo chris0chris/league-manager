@@ -35,8 +35,9 @@ Set `DJANGO_SETTINGS_MODULE=league_manager.settings` (defaults to base) or use `
 Three React applications are bundled and served by Django:
 
 1. **passcheck** (`passcheck/src/`) - TypeScript/React app
-   - Built with webpack → `passcheck/static/passcheck/js/passcheck.js`
+   - Built with Vite → `passcheck/static/passcheck/js/passcheck.js`
    - Uses TypeScript, React hooks, Context API for state management
+   - Tests use Vitest
 
 2. **liveticker** (`liveticker/src/`) - JavaScript/React app
    - Built with Vite → `liveticker/static/liveticker/js/liveticker.js`
@@ -165,29 +166,29 @@ npm --prefix scorecard/ install
 
 **Build for production:**
 ```bash
-npm --prefix passcheck/ run build
+npm --prefix passcheck/ run build    # Uses Vite
 npm --prefix liveticker/ run build   # Uses Vite
 npm --prefix scorecard/ run build    # Uses Vite
 ```
 
 **Development server:**
 ```bash
-npm --prefix passcheck/ run dev
+npm --prefix passcheck/ run start    # Vite dev server on port 3000
 npm --prefix liveticker/ run start   # Vite dev server on port 3000
 npm --prefix scorecard/ run start    # Vite dev server
 ```
 
 **Run tests:**
 ```bash
-# passcheck uses React Testing Library (no jest script in package.json - tests via react-scripts)
-npm --prefix passcheck/ test
+# All frontend apps use Vitest
+npm --prefix passcheck/ run test         # Watch mode
+npm --prefix passcheck/ run test:run     # Single run
+npm --prefix passcheck/ run test:coverage  # With coverage
 
-# liveticker uses Vitest
 npm --prefix liveticker/ run test        # Watch mode
 npm --prefix liveticker/ run test:run    # Single run
 npm --prefix liveticker/ run test:coverage  # With coverage
 
-# scorecard uses Vitest
 npm --prefix scorecard/ run test         # Watch mode
 npm --prefix scorecard/ run test:run     # Single run
 npm --prefix scorecard/ run test:coverage  # With coverage
@@ -214,12 +215,14 @@ pytest gamedays/tests/test_views.py::TestClassName::test_method_name
 
 **JavaScript tests:**
 ```bash
-# liveticker and scorecard use Vitest (interactive watch mode)
+# All frontend apps use Vitest (interactive watch mode)
+npm --prefix passcheck/ run test
 npm --prefix liveticker/ run test
 npm --prefix scorecard/ run test
 # Then press 'p' to filter by filename pattern or 't' to filter by test name
 
 # Run specific test file with Vitest
+npm --prefix passcheck/ -- vitest run src/components/__tests__/GameCard.test.tsx
 npm --prefix liveticker/ -- vitest run src/components/__tests__/LivetickerApp.spec.js
 npm --prefix scorecard/ -- vitest run src/components/scorecard/__tests__/Details.spec.js
 ```
