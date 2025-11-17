@@ -4,8 +4,9 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Penalty from '../Penalty';
 import {testStore} from '../../../../__tests__/Utils';
+import { vi } from 'vitest';
 
-const updateMock = jest.fn();
+const updateMock = vi.fn();
 
 
 const setup = () => {

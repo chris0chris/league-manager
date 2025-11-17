@@ -3,8 +3,9 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import AddPoints from '../AddPoints';
 import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
 
-const mockFunc = jest.fn();
+const mockFunc = vi.fn();
 const setup = () => {
   mockFunc.mockClear();
   render(<AddPoints onSubmit={mockFunc} />);

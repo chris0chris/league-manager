@@ -2,11 +2,14 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import {testStore} from '../../__tests__/Utils';
 import LivetickerApp from '../LivetickerApp';
+import { vi } from 'vitest';
 
 // Mock the Liveticker component to avoid complex setup
-jest.mock('../liveticker/Liveticker', () => {
-  return function MockLiveticker() {
-    return <div data-testid="mock-liveticker">Mock Liveticker Component</div>;
+vi.mock('../liveticker/Liveticker', () => {
+  return {
+    default: function MockLiveticker() {
+      return <div data-testid="mock-liveticker">Mock Liveticker Component</div>;
+    }
   };
 });
 

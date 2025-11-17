@@ -3,9 +3,10 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Games from '../Games';
 import {THREE_GAMES} from '../../../__tests__/testdata/gamesData';
+import { vi } from 'vitest';
 
-const onClickMock = jest.fn();
-const loadAllGamesMock = jest.fn();
+const onClickMock = vi.fn();
+const loadAllGamesMock = vi.fn();
 
 const setup = () => {
   const initialState = {

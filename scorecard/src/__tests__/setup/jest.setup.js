@@ -1,5 +1,6 @@
-import 'regenerator-runtime/runtime';
+// Vitest setup file
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 // fix error for jquery - ReferenceError: define is not defined
 import $ from 'jquery/src/jquery';
 
@@ -8,9 +9,9 @@ import { TextEncoder } from 'util';
 
 global.TextEncoder = TextEncoder;
 
-const modalMock = jest.fn();
+const modalMock = vi.fn();
 
-jest.mock('jquery/src/jquery', () => jest.fn());
+vi.mock('jquery/src/jquery', () => ({ default: vi.fn() }));
 $.mockImplementation(() => {
   return { modal: modalMock };
 });

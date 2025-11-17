@@ -10,14 +10,15 @@ import Details from '../Details';
 import {GAME_LOG_COMPLETE_GAME, GAME_LOG_ONLY_FIRSTHALF} from '../../../__tests__/testdata/gameLogData';
 import $ from 'jquery/src/jquery';
 import {DETAILS_URL, FINALIZE_URL} from '../../common/urls';
+import { vi } from 'vitest';
 
-const modalMock = jest.fn();
-jest.mock('jquery/src/jquery', () => jest.fn());
+const modalMock = vi.fn();
+vi.mock('jquery/src/jquery', () => ({ default: vi.fn() }));
 $.mockImplementation(() => {
   return {modal: modalMock};
 });
 
-jest.mock('../../../actions/utils/api');
+vi.mock('../../../actions/utils/api');
 apiPost.mockImplementation(() => {
   return () => {};
 });

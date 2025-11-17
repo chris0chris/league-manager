@@ -2,8 +2,9 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RadioButton from '../RadioButton';
+import { vi } from 'vitest';
 
-const mockFunk = jest.fn();
+const mockFunk = vi.fn();
 
 const setup = (value = undefined) => {
   mockFunk.mockClear();

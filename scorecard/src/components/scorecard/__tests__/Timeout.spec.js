@@ -4,14 +4,15 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Timeout from '../Timeout';
 import $ from 'jquery/src/jquery';
+import { vi } from 'vitest';
 
-const modalMock = jest.fn();
-jest.mock('jquery/src/jquery', () => jest.fn());
+const modalMock = vi.fn();
+vi.mock('jquery/src/jquery', () => ({ default: vi.fn() }));
 $.mockImplementation(() => {
   return {modal: modalMock};
 });
 
-const onSubmitMock = jest.fn();
+const onSubmitMock = vi.fn();
 
 
 const setup = () => {

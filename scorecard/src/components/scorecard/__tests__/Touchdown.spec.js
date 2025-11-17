@@ -3,8 +3,9 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Touchdown from '../Touchdown';
+import { vi } from 'vitest';
 
-const mockFunc = jest.fn();
+const mockFunc = vi.fn();
 
 const setup = () => {
   render(<Touchdown resetRequested={false} setResetRequested={()=>{}} update={mockFunc} />);

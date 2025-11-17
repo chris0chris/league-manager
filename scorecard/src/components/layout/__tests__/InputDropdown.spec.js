@@ -2,8 +2,9 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import InputDropdown from '../InputDropdown';
+import { vi } from 'vitest';
 
-const updateMock = jest.fn();
+const updateMock = vi.fn();
 
 
 const setup = (initText = {}) => {
