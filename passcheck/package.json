@@ -35,6 +35,7 @@
     "eslint:junit": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-passcheck.xml",
     "eslint:json": "eslint ./src --format json -o js-lint-results-passcheck.json",
     "test": "react-scripts test",
+    "test:run": "react-scripts test --watchAll=false --ci --coverage",
     "eject": "react-scripts eject",
     "dev": "webpack --mode development --config webpack.config.js"
   },

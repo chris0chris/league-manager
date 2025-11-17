@@ -63,6 +63,8 @@
     "eslint:junit": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-scorecard.xml",
     "eslint:json": "eslint ./src --format json -o js-lint-results-scorecard.json",
     "jest": "jest --env=jsdom --ci --coverage",
+    "test": "jest --env=jsdom --watch",
+    "test:run": "jest --env=jsdom --ci --coverage",
     "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache test -- --config jest.config.js",
     "testj": "jest --maxWorkers=1 --env=jsdom",
     "testj:watch": "jest --env=jsdom --watch"
