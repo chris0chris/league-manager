@@ -3,8 +3,9 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Safety from '../Safety';
+import { vi } from 'vitest';
 
-const mockFunc = jest.fn();
+const mockFunc = vi.fn();
 
 const setup = () => {
   render(<Safety resetRequested={false} setResetRequested={()=>{}} update={mockFunc} />);

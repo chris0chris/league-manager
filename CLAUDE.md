@@ -44,8 +44,9 @@ Three React applications are bundled and served by Django:
    - Tests use Vitest
 
 3. **scorecard** (`scorecard/src/`) - JavaScript/React app
-   - Built with webpack → `scorecard/static/scorecard/js/scorecard.js`
+   - Built with Vite → `scorecard/static/scorecard/js/scorecard.js`
    - Uses Redux for state management
+   - Tests use Vitest
 
 All React apps proxy to Django backend (`http://localhost:8000` or `http://127.0.0.1:8000`) for API calls.
 
@@ -166,14 +167,14 @@ npm --prefix scorecard/ install
 ```bash
 npm --prefix passcheck/ run build
 npm --prefix liveticker/ run build   # Uses Vite
-npm --prefix scorecard/ run build
+npm --prefix scorecard/ run build    # Uses Vite
 ```
 
 **Development server:**
 ```bash
 npm --prefix passcheck/ run dev
 npm --prefix liveticker/ run start   # Vite dev server on port 3000
-npm --prefix scorecard/ run dev:watch
+npm --prefix scorecard/ run start    # Vite dev server
 ```
 
 **Run tests:**
@@ -186,11 +187,10 @@ npm --prefix liveticker/ run test        # Watch mode
 npm --prefix liveticker/ run test:run    # Single run
 npm --prefix liveticker/ run test:coverage  # With coverage
 
-# scorecard uses Jest
-npm --prefix scorecard/ run jest
-
-# Watch mode
-npm --prefix scorecard/ run testj:watch
+# scorecard uses Vitest
+npm --prefix scorecard/ run test         # Watch mode
+npm --prefix scorecard/ run test:run     # Single run
+npm --prefix scorecard/ run test:coverage  # With coverage
 ```
 
 **Linting:**
@@ -214,17 +214,14 @@ pytest gamedays/tests/test_views.py::TestClassName::test_method_name
 
 **JavaScript tests:**
 ```bash
-# liveticker uses Vitest (interactive watch mode)
+# liveticker and scorecard use Vitest (interactive watch mode)
 npm --prefix liveticker/ run test
+npm --prefix scorecard/ run test
 # Then press 'p' to filter by filename pattern or 't' to filter by test name
 
 # Run specific test file with Vitest
 npm --prefix liveticker/ -- vitest run src/components/__tests__/LivetickerApp.spec.js
-
-# scorecard uses Jest with watch mode
-npm --prefix scorecard/ run testj:watch
-# Run specific test file directly
-npm --prefix scorecard/ -- jest src/components/__tests__/ScorecardApp.spec.js
+npm --prefix scorecard/ -- vitest run src/components/scorecard/__tests__/Details.spec.js
 ```
 
 ## Versioning

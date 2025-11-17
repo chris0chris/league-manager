@@ -2,8 +2,9 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 import Series from '../gameEvent/Series';
+import { vi } from 'vitest';
 
-const mockFunc = jest.fn();
+const mockFunc = vi.fn();
 
 const setup = () => {
   mockFunc.mockClear();

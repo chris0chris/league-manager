@@ -2,6 +2,7 @@ import React, {act} from 'react';
 
 import {render, screen} from '@testing-library/react';
 import Timer from '../Timer';
+import { vi } from 'vitest';
 
 const setup = () => {
   render(<Timer isOn={true} durationInSeconds={10} />);
@@ -9,12 +10,12 @@ const setup = () => {
 
 describe('FloatingInput component', () => {
   it('should render component', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     setup();
     expect(screen.getByText('10')).toBeInTheDocument();
-    act(() => jest.advanceTimersByTime(1000));
-    act(() => jest.advanceTimersByTime(1000));
-    act(() => jest.advanceTimersByTime(1000));
+    act(() => vi.advanceTimersByTime(1000));
+    act(() => vi.advanceTimersByTime(1000));
+    act(() => vi.advanceTimersByTime(1000));
     expect(screen.getByText('7')).toBeInTheDocument();
   });
 });

@@ -8,15 +8,16 @@ import $ from 'jquery/src/jquery';
 import {testStore} from '../../../__tests__/Utils';
 import {apiGet} from '../../../actions/utils/api';
 import {GET_GAME_SETUP} from '../../../actions/types';
+import { vi } from 'vitest';
 
-const submitMock = jest.fn();
-const modalMock = jest.fn();
-jest.mock('jquery/src/jquery', () => jest.fn());
+const submitMock = vi.fn();
+const modalMock = vi.fn();
+vi.mock('jquery/src/jquery', () => ({ default: vi.fn() }));
 $.mockImplementation(() => {
   return {modal: modalMock};
 });
 
-jest.mock('../../../actions/utils/api');
+vi.mock('../../../actions/utils/api');
 apiGet.mockImplementation(() => (dispatch) => {
   dispatch({
     type: GET_GAME_SETUP,
