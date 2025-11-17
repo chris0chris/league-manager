@@ -2,7 +2,7 @@ import React, { act } from 'react';
 import { render, screen } from '@testing-library/react';
 import MessageProvider from '../MessageProvider';
 import useMessage from '../../hooks/useMessage';
-import MessageContext, { MessageColor } from '../../context/MessageContext';
+import { MessageColor } from '../../context/MessageContext';
 
 // Mock child component to test the context
 const TestComponent: React.FC = () => {

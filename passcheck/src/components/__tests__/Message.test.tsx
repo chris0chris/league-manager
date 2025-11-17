@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import Message from '../Message';
 import MessageProvider from '../MessageProvider';
-import { MessageColor } from '../../context/MessageContext';
 
 describe('Message', () => {
   it('renders message when text is present', () => {

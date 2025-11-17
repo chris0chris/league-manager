@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import PlayerModal from '../PlayerModal';
 import { Player } from '../../common/types';
 
@@ -16,6 +16,11 @@ vi.mock('../../utils/validation', () => {
   }));
 });
 
+interface MockValidator {
+  validateAndGetErrors: typeof mockValidateAndGetErrors;
+  validateAndUpdate: typeof mockValidateAndUpdate;
+}
+
 describe('PlayerModal', () => {
   const mockPlayer: Player = {
     id: 1,
@@ -26,7 +31,7 @@ describe('PlayerModal', () => {
     isSelected: false
   };
 
-  let mockValidator: any;
+  let mockValidator: MockValidator;
   
   beforeEach(() => {
     mockValidator = {

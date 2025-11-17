@@ -5,16 +5,18 @@ import GameOverview from '../GameOverview';
 import { Game, GameOverviewInfo, Gameday } from '../../common/types';
 
 import { vi } from 'vitest';
+import * as games from '../../common/games';
 
 // Mock the dependencies
 vi.mock('../../common/games', () => ({
   getPasscheckData: vi.fn()
 }));
 
+const mockSetMessage = vi.fn();
 vi.mock('../../hooks/useMessage', () => ({
   __esModule: true,
   default: vi.fn(() => ({
-    setMessage: vi.fn()
+    setMessage: mockSetMessage
   }))
 }));
 
@@ -60,8 +62,7 @@ describe('GameOverview', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    const { getPasscheckData } = require('../../common/games');
-    getPasscheckData.mockResolvedValue(mockGameOverviewInfo);
+    vi.mocked(games.getPasscheckData).mockResolvedValue(mockGameOverviewInfo);
   });
 
   const renderWithRouter = (initialPath = '/') => {
@@ -129,39 +130,34 @@ describe('GameOverview', () => {
   });
 
   it('handles API errors', async () => {
-    const { getPasscheckData } = require('../../common/games');
     const error = new Error('API Error');
-    getPasscheckData.mockRejectedValue(error);
-    
-    const { setMessage } = require('../../hooks/useMessage').default();
-    
+    vi.mocked(games.getPasscheckData).mockRejectedValue(error);
+
     renderWithRouter();
-    
+
     await waitFor(() => {
-      expect(setMessage).toHaveBeenCalledWith({ text: 'API Error' });
+      expect(mockSetMessage).toHaveBeenCalledWith({ text: 'API Error' });
     });
   });
 
   it('renders without gamedayId parameter', async () => {
     renderWithRouter();
-    
+
     await waitFor(() => {
       expect(screen.getByText('Bitte ein Spiel auswählen:')).toBeInTheDocument();
     });
-    
-    const { getPasscheckData } = require('../../common/games');
-    expect(getPasscheckData).toHaveBeenCalledWith(undefined);
+
+    expect(games.getPasscheckData).toHaveBeenCalledWith(undefined);
   });
 
   it('renders with gamedayId parameter', async () => {
     renderWithRouter('/gameday/1');
-    
+
     await waitFor(() => {
       expect(screen.getByText('Bitte ein Spiel auswählen:')).toBeInTheDocument();
     });
-    
-    const { getPasscheckData } = require('../../common/games');
-    expect(getPasscheckData).toHaveBeenCalledWith('1');
+
+    expect(games.getPasscheckData).toHaveBeenCalledWith('1');
   });
 
   it('toggles gameday selection checkbox', async () => {

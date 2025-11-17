@@ -1,13 +1,17 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import RosterTable from '../RosterTable';
 import { Team, Player } from '../../common/types';
 
 import { vi } from 'vitest';
 
+interface MockPlayerModalProps {
+  modalVisible: boolean;
+}
+
 // Mock the PlayerModal component
 vi.mock('../PlayerModal', () => {
-  return function MockPlayerModal(props: any) {
+  return function MockPlayerModal(props: MockPlayerModalProps) {
     return (
       <div data-testid="player-modal" data-visible={props.modalVisible}>
         Mock Player Modal

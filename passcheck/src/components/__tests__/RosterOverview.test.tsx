@@ -5,6 +5,7 @@ import RosterOverview from '../RosterOverview';
 import { Team, TeamData, Player } from '../../common/types';
 
 import { vi } from 'vitest';
+import * as games from '../../common/games';
 
 // Mock dependencies
 vi.mock('../../common/games', () => ({
@@ -13,15 +14,20 @@ vi.mock('../../common/games', () => ({
   getApprovalUrl: vi.fn()
 }));
 
+const mockSetMessage = vi.fn();
 vi.mock('../../hooks/useMessage', () => ({
   __esModule: true,
   default: () => ({
-    setMessage: vi.fn()
+    setMessage: mockSetMessage
   })
 }));
 
+interface MockRosterTableProps {
+  team: Team;
+}
+
 vi.mock('../RosterTable', () => {
-  return function MockRosterTable(props: any) {
+  return function MockRosterTable(props: MockRosterTableProps) {
     return (
       <div data-testid="roster-table">
         Roster Table for {props.team.name}
@@ -64,10 +70,9 @@ describe('RosterOverview', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    const { getRosterList, submitRoster, getApprovalUrl } = require('../../common/games');
-    getRosterList.mockResolvedValue(mockTeamData);
-    submitRoster.mockResolvedValue({});
-    getApprovalUrl.mockResolvedValue('https://approval.url');
+    vi.mocked(games.getRosterList).mockResolvedValue(mockTeamData);
+    vi.mocked(games.submitRoster).mockResolvedValue({});
+    vi.mocked(games.getApprovalUrl).mockResolvedValue('https://approval.url');
   });
 
   const renderWithRouter = () => {
@@ -93,10 +98,9 @@ describe('RosterOverview', () => {
 
   it('loads roster data on mount', async () => {
     renderWithRouter();
-    
+
     await waitFor(() => {
-      const { getRosterList } = require('../../common/games');
-      expect(getRosterList).toHaveBeenCalledWith('123', '1');
+      expect(games.getRosterList).toHaveBeenCalledWith('123', '1');
     });
   });
 
@@ -136,56 +140,51 @@ describe('RosterOverview', () => {
 
   it('handles form submission', async () => {
     renderWithRouter();
-    
+
     await waitFor(() => {
       expect(screen.getByText('Passcheck starten')).toBeInTheDocument();
     });
-    
+
     // Start passcheck
     const startButton = screen.getByText('Passcheck starten');
     fireEvent.click(startButton);
-    
+
     // Fill official name
     const officialInput = screen.getByPlaceholderText('Vor- und Nachname Official');
     fireEvent.change(officialInput, { target: { value: 'New Official' } });
-    
+
     // Submit form
     const submitButton = screen.getByText('Passliste abschicken');
     fireEvent.click(submitButton);
-    
+
     await waitFor(() => {
-      const { submitRoster } = require('../../common/games');
-      expect(submitRoster).toHaveBeenCalled();
+      expect(games.submitRoster).toHaveBeenCalled();
     });
   });
 
   it('handles approval URL loading', async () => {
     renderWithRouter();
-    
+
     await waitFor(() => {
       expect(screen.getByText('Equipment-Genehmigung öffnen')).toBeInTheDocument();
     });
-    
+
     const approvalButton = screen.getByText('Equipment-Genehmigung öffnen');
     fireEvent.click(approvalButton);
-    
+
     await waitFor(() => {
-      const { getApprovalUrl } = require('../../common/games');
-      expect(getApprovalUrl).toHaveBeenCalledWith('123');
+      expect(games.getApprovalUrl).toHaveBeenCalledWith('123');
     });
   });
 
   it('handles API errors', async () => {
-    const { getRosterList } = require('../../common/games');
     const error = new Error('API Error');
-    getRosterList.mockRejectedValue(error);
-    
-    const { setMessage } = require('../hooks/useMessage').default();
-    
+    vi.mocked(games.getRosterList).mockRejectedValue(error);
+
     renderWithRouter();
-    
+
     await waitFor(() => {
-      expect(setMessage).toHaveBeenCalledWith({ text: 'API Error' });
+      expect(mockSetMessage).toHaveBeenCalledWith({ text: 'API Error' });
     });
   });
 
@@ -200,12 +199,11 @@ describe('RosterOverview', () => {
         }
       ]
     };
-    
-    const { getRosterList } = require('../../common/games');
-    getRosterList.mockResolvedValue(teamDataWithAdditional);
-    
+
+    vi.mocked(games.getRosterList).mockResolvedValue(teamDataWithAdditional);
+
     renderWithRouter();
-    
+
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Listen durchsuchen ...')).toBeInTheDocument();
     });
