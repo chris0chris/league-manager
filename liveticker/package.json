@@ -40,7 +40,7 @@
     "eslint-formatter-junit": "^9.0.1",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.5.0",
-    "jsdom": "^25.0.1",
+    "jsdom": "^27.0.0",
     "prettier": "3.6.2",
     "redux-mock-store": "^1.5.5",
     "vite": "^6.0.7",
