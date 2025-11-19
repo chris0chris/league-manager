@@ -2,6 +2,12 @@ from django.urls import path
 
 from gamedays.api.game_views import GameLogAPIView, GameHalftimeAPIView, GameFinalizeUpdateView, \
     GameSetupCreateOrUpdateView, GamesToWhistleAPIView, ConfigPenalties, GamePossessionAPIView
+from gamedays.api.manager_views import (
+    LeagueManagerListCreateAPIView, LeagueManagerDeleteAPIView,
+    GamedayManagerListCreateAPIView, GamedayManagerUpdateDeleteAPIView,
+    TeamManagerListCreateAPIView, TeamManagerDeleteAPIView,
+    UserManagerPermissionsAPIView
+)
 from gamedays.api.views import GamedayListAPIView, GameinfoUpdateAPIView, GamedayRetrieveUpdate, \
     GamedayScheduleView, GameOfficialCreateOrUpdateView
 from gamedays.constants import API_GAMEDAY_WHISTLEGAMES, API_GAMEDAY_LIST, API_GAMELOG, API_CONFIG_SCORECARD_PENALTIES, \
@@ -19,5 +25,15 @@ urlpatterns = [
     path('game/<int:pk>/halftime', GameHalftimeAPIView.as_view(), name=API_GAME_HALFTIME),
     path('game/<int:pk>/finalize', GameFinalizeUpdateView.as_view(), name=API_GAME_FINALIZE),
     path('game/<int:pk>/possession', GamePossessionAPIView.as_view(), name=API_GAME_POSSESSION),
-    path('config/scorecard/penalties', ConfigPenalties.as_view(), name=API_CONFIG_SCORECARD_PENALTIES)
+    path('config/scorecard/penalties', ConfigPenalties.as_view(), name=API_CONFIG_SCORECARD_PENALTIES),
+
+    # Manager assignment endpoints
+    path('managers/league/', LeagueManagerListCreateAPIView.as_view(), name='api-league-managers-list'),
+    path('managers/league/<int:league_id>/', LeagueManagerListCreateAPIView.as_view(), name='api-league-managers'),
+    path('managers/league/delete/<int:pk>/', LeagueManagerDeleteAPIView.as_view(), name='api-league-manager-delete'),
+    path('managers/gameday/<int:gameday_id>/', GamedayManagerListCreateAPIView.as_view(), name='api-gameday-managers'),
+    path('managers/gameday/update/<int:pk>/', GamedayManagerUpdateDeleteAPIView.as_view(), name='api-gameday-manager-update'),
+    path('managers/team/<int:team_id>/', TeamManagerListCreateAPIView.as_view(), name='api-team-managers'),
+    path('managers/team/delete/<int:pk>/', TeamManagerDeleteAPIView.as_view(), name='api-team-manager-delete'),
+    path('managers/me/', UserManagerPermissionsAPIView.as_view(), name='api-my-manager-permissions'),
 ]

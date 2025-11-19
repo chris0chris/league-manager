@@ -4,10 +4,11 @@ from .constants import LEAGUE_GAMEDAY_DETAIL, LEAGUE_GAMEDAY_LIST, LEAGUE_GAMEDA
     LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE, LEAGUE_GAMEDAY_CREATE, LEAGUE_GAMEDAY_DELETE, LEAGUE_GAMEDAY_UPDATE, \
     LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, LEAGUE_GAMEDAY_GAMEINFOS_DELETE, LEAGUE_GAMEDAY_GAMEINFOS_WIZARD
 from .views import GamedayDetailView, GamedayListView, GamedayCreateView, GamedayUpdateView, GameinfoWizard, \
-    GameinfoUpdateView, GamedayDeleteView, GameinfoDeleteView
+    GameinfoUpdateView, GamedayDeleteView, GameinfoDeleteView, ManagerDashboardView
 
 urlpatterns = [
     path('', GamedayListView.as_view(), name='league-home'),
+    path('managers/dashboard/', ManagerDashboardView.as_view(), name='manager-dashboard'),
     path('gamedays/', GamedayListView.as_view(), name=LEAGUE_GAMEDAY_LIST),
     path('gamedays/<int:season>/', GamedayListView.as_view(), name=LEAGUE_GAMEDAY_LIST_AND_YEAR),
     path('gamedays/<int:season>/<str:league>/', GamedayListView.as_view(), name=LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE),

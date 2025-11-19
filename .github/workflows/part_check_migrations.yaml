@@ -45,38 +45,43 @@ jobs:
           docker load --input /tmp/${{ inputs.image_name }}.tar
           docker image ls -a
 
-      - name: 🐳 Run migration check inside container
+      - name: 🧪 Run Django system check
         run: |
-          echo "🔍 Checking Django migrations in image: ${{ inputs.image_name }}:latest"
-          docker_out=$(docker run --rm \
+          echo "🔍 Running Django system check in image: ${{ inputs.image_name }}:latest"
+          docker run --rm \
             -e MYSQL_HOST="${{ secrets.MYSQL_HOST }}" \
             -e MYSQL_DB_NAME="${{ secrets.MYSQL_DB_NAME }}" \
             -e MYSQL_USER="${{ secrets.MYSQL_USER }}" \
             -e MYSQL_PWD="${{ secrets.MYSQL_PWD }}" \
             ${{ inputs.image_name }}:latest \
-            bash -c "
-              set -e
-              echo '⚙️ Running Django system check...'
-              python manage.py check
-              echo
-              echo '🧱 Checking for missing migrations...'
-              python manage.py makemigrations --check --dry-run
-              echo
-              echo '🗺️ Simulating migration plan...'
-              python manage.py migrate --plan
-              echo
-              echo '✅ Django migrations look good!'
-            ")
-          # Print the output
-          echo "$docker_out"
-          
-          # Extract planned migration lines for annotation
-          echo "$docker_out" | while read -r line; do
-            if [[ "$line" == *"Create model"* ]] || [[ "$line" == *"Add field"* ]] || [[ "$line" == *"Alter field"* ]]; then
-              # Escape % for GitHub Actions annotation format
-              safe_line=$(echo "$line" | sed 's/%/%25/g; s/\r//g; s/\n/%0A/g')
-              echo "::notice file=migrations.txt::${safe_line}"
-            fi
-          done
-          
-          echo "✅ Django migrations check completed"
+            python manage.py check
+
+      - name: 🧱 Check for missing migrations
+        id: check_migrations
+        continue-on-error: true
+        run: |
+          echo "🔍 Checking for missing migrations in image: ${{ inputs.image_name }}:latest"
+          docker run --rm \
+            -e MYSQL_HOST="${{ secrets.MYSQL_HOST }}" \
+            -e MYSQL_DB_NAME="${{ secrets.MYSQL_DB_NAME }}" \
+            -e MYSQL_USER="${{ secrets.MYSQL_USER }}" \
+            -e MYSQL_PWD="${{ secrets.MYSQL_PWD }}" \
+            ${{ inputs.image_name }}:latest \
+            python manage.py makemigrations --check --dry-run
+
+      - name: 🗺️ Show migration plan
+        run: |
+          echo "🔍 Showing migration plan for image: ${{ inputs.image_name }}:latest"
+          docker run --rm \
+            -e MYSQL_HOST="${{ secrets.MYSQL_HOST }}" \
+            -e MYSQL_DB_NAME="${{ secrets.MYSQL_DB_NAME }}" \
+            -e MYSQL_USER="${{ secrets.MYSQL_USER }}" \
+            -e MYSQL_PWD="${{ secrets.MYSQL_PWD }}" \
+            ${{ inputs.image_name }}:latest \
+            python manage.py migrate --plan
+
+      - name: ✅ Validate migration check results
+        if: steps.check_migrations.outcome == 'failure'
+        run: |
+          echo "::error::❌ Missing migrations detected! Please run 'python manage.py makemigrations' and commit the generated migration files."
+          exit 1
