@@ -1,11 +1,16 @@
 from django.db import models
+from django.db.models import CASCADE
 
 from gamedays.models import League, Season, Gameday, Team
 
 
 class LeagueGroup(models.Model):
-    league = models.ForeignKey(League, on_delete=models.CASCADE, related_name="groups_league")
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="groups_season")
+    league = models.ForeignKey(
+        League, on_delete=models.CASCADE, related_name="groups_league"
+    )
+    season = models.ForeignKey(
+        Season, on_delete=models.CASCADE, related_name="groups_season"
+    )
     name = models.CharField(max_length=50)
 
     def __str__(self):
@@ -13,17 +18,53 @@ class LeagueGroup(models.Model):
 
 
 class LeagueRuleset(models.Model):
+    LEAGUE_POINT_FIELDS = [
+        "points_win_same_league",
+        "points_win_other_league",
+        "points_draw_same_league",
+        "points_draw_other_league",
+        "max_points_same_league",
+        "max_points_other_league",
+    ]
+
+    GAME_POINT_FIELDS = [
+        "win_points",
+        "draw_points",
+        "loss_points",
+    ]
+
     name = models.CharField(max_length=50, unique=True)
     win_points = models.DecimalField(max_digits=4, decimal_places=2, default=2)
     draw_points = models.DecimalField(max_digits=4, decimal_places=2, default=1)
     loss_points = models.DecimalField(max_digits=4, decimal_places=2, default=0)
 
-    points_win_same_league = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    points_win_other_league = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    points_draw_same_league = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    points_draw_other_league = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    max_points_same_league = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    max_points_other_league = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    points_win_same_league = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    points_win_other_league = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    points_draw_same_league = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    points_draw_other_league = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    max_points_same_league = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    max_points_other_league = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+
+    exclude_main_league_for_league_points = models.ForeignKey(
+        League,
+        on_delete=CASCADE,
+        related_name="excluded_league",
+        null=True,
+        blank=True,
+        default=None,
+    )
 
     tie_break_steps = models.ManyToManyField(
         "TieBreakStep",
@@ -31,11 +72,29 @@ class LeagueRuleset(models.Model):
         related_name="rulesets",
     )
 
+    def league_points_map(self):
+        return self._get_points_map(self.LEAGUE_POINT_FIELDS)
+
+    def game_points_map(self):
+        return self._get_points_map(self.GAME_POINT_FIELDS)
+
+    def _get_points_map(self, point_fields: list):
+        return {
+            field: float(getattr(self, field))
+            for field in point_fields
+            if getattr(self, field) is not None
+        }
+
     def tie_break_order(self):
         """Return the tie-break order as a list of keys (used by the engine)."""
         return [
-            rel.step.key
-            for rel in self.leaguerulesettiebreak_set.all().order_by("order")
+            {
+                "key": league_ruleset_tiebreak.step.key,
+                "is_ascending": league_ruleset_tiebreak.sort_order == "ascending",
+            }
+            for league_ruleset_tiebreak in self.leaguerulesettiebreak_set.all().order_by(
+                "order"
+            )
         ]
 
     def __str__(self):
@@ -43,7 +102,7 @@ class LeagueRuleset(models.Model):
 
 
 TIE_BREAK_CHOICES = [
-    ("points", "Siegpunkte"),
+    ("win_points", "Siegpunkte"),
     ("league_points", "Ligapunkte"),
     ("direct_wins", "Direkte Siegpunkte"),
     ("direct_point_diff", "Direkte Punktedifferenz"),
@@ -70,13 +129,18 @@ class LeagueRulesetTieBreak(models.Model):
     ruleset = models.ForeignKey(LeagueRuleset, on_delete=models.CASCADE)
     step = models.ForeignKey(TieBreakStep, on_delete=models.CASCADE)
     order = models.PositiveIntegerField()
+    sort_order = models.CharField(
+        max_length=50,
+        choices=[("ascending", "Aufsteigend"), ("descending", "Absteigend")],
+        default="descending",
+    )
 
     class Meta:
         unique_together = ("ruleset", "step")
         ordering = ["order"]
 
     def __str__(self):
-        return f'{self.ruleset.name}: {self.order} - {self.step}'
+        return f"{self.ruleset.name}: {self.order} - {self.step.label} ({self.get_sort_order_display()})"
 
 
 class LeagueSeasonConfig(models.Model):
@@ -92,14 +156,36 @@ class LeagueSeasonConfig(models.Model):
         related_name="excluded_in_configs",
         blank=True,
     )
-    addition_team_points = models.ManyToManyField(Team, through='AdditionalTeamLeaguePoints')
+    team_point_adjustments = models.ManyToManyField(
+        Team, through="TeamPointAdjustments"
+    )
+
+    def get_team_point_adjustment_map(self):
+        adjustments = TeamPointAdjustments.objects.filter(
+            league_season_config=self
+        ).select_related("team", "tie_step_for_sum_points")
+
+        return [
+            {
+                "id": current_adjustment.team.pk,
+                "name": current_adjustment.team.description,
+                "points": current_adjustment.sum_points,
+                "field": current_adjustment.tie_step_for_sum_points.key,
+            }
+            for current_adjustment in adjustments
+        ]
+
+    def get_excluded_gameday_ids(self):
+        return list(self.exclude_gamedays.values_list("id", flat=True))
 
     def __str__(self):
         return f"{self.league.name} - {self.season.name} -> {self.ruleset.name if self.ruleset else 'Keine Konfiguration'}"
 
 
-class AdditionalTeamLeaguePoints(models.Model):
-    league_season_config = models.ForeignKey(LeagueSeasonConfig, on_delete=models.CASCADE)
+class TeamPointAdjustments(models.Model):
+    league_season_config = models.ForeignKey(
+        LeagueSeasonConfig, on_delete=models.CASCADE
+    )
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     sum_points = models.DecimalField(max_digits=5, decimal_places=2)
     tie_step_for_sum_points = models.ForeignKey(TieBreakStep, on_delete=models.CASCADE)

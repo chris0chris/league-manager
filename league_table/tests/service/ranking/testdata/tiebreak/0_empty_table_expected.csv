@@ -1,0 +1,5 @@
+team_id,team__name,pf,pa,diff,win_points,standing,direct_wins,direct_point_diff,direct_points_scored,overall_point_diff,overall_points_scored,name_ascending
+1,Team A,0,0,0,0,Group 1,0,0,0,0,0,team a
+2,Team B,0,0,0,0,Group 1,0,0,0,0,0,team b
+3,Team C,0,0,0,0,Group 1,0,0,0,0,0,team c
+4,Team D,0,0,0,0,Group 1,0,0,0,0,0,team d

@@ -5,13 +5,13 @@ from league_table.models import (
     LeagueGroup,
     LeagueRuleset,
     LeagueSeasonConfig,
-    AdditionalTeamLeaguePoints,
+    TeamPointAdjustments,
     LeagueRulesetTieBreak,
     TieBreakStep,
 )
 
 admin.site.register(LeagueGroup)
-admin.site.register(AdditionalTeamLeaguePoints)
+admin.site.register(TeamPointAdjustments)
 admin.site.register(TieBreakStep)
 admin.site.register(LeagueRulesetTieBreak)
 

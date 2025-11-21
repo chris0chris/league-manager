@@ -9,7 +9,7 @@ def create_tiebreak_steps_and_defaults(apps, schema_editor):
 
     # Define the steps
     tiebreak_steps = [
-        ("points", "Siegpunkte"),
+        ("win_points", "Siegpunkte"),
         ("direct_wins", "Direkte Siege"),
         ("direct_point_diff", "Direkte Punktedifferenz"),
         ("direct_points_scored", "Direkt erzielte Punkte"),
@@ -38,37 +38,37 @@ def create_tiebreak_steps_and_defaults(apps, schema_editor):
 
     # Default order for Standard Flag Tie Break Regeln
     standard_orders = [
-        ("points", 1),
-        ("direct_wins", 5),
-        ("direct_point_diff", 10),
-        ("direct_points_scored", 15),
-        ("overall_point_diff", 20),
-        ("overall_points_scored", 25),
-        ("name_ascending", 30),
+        ("win_points", 1, "descending"),
+        ("direct_wins", 5, "descending"),
+        ("direct_point_diff", 10, "descending"),
+        ("direct_points_scored", 15, "descending"),
+        ("overall_point_diff", 20, "descending"),
+        ("overall_points_scored", 25, "descending"),
+        ("name_ascending", 30, "ascending"),
     ]
 
-    for key, order in standard_orders:
+    for key, order, sort_order in standard_orders:
         step = TieBreakStep.objects.get(key=key)
         LeagueRulesetTieBreak.objects.get_or_create(
-            ruleset=standard_ruleset, step=step, defaults={"order": order}
+            ruleset=standard_ruleset, step=step, defaults={"order": order, "sort_order": sort_order}
         )
 
     # Default order for DFFL Liga Regeln
     # Same as standard, but adjust Siegpunkte order to 5, then others incremented
     dffl_orders = [
-        ("points", 5),
-        ("direct_wins", 10),
-        ("direct_point_diff", 15),
-        ("direct_points_scored", 20),
-        ("overall_point_diff", 25),
-        ("overall_points_scored", 30),
-        ("name_ascending", 35),
+        ("win_points", 5, "descending"),
+        ("direct_wins", 10, "descending"),
+        ("direct_point_diff", 15, "descending"),
+        ("direct_points_scored", 20, "descending"),
+        ("overall_point_diff", 25, "descending"),
+        ("overall_points_scored", 30, "descending"),
+        ("name_ascending", 35, "ascending"),
     ]
 
-    for key, order in dffl_orders:
+    for key, order, sort_order in dffl_orders:
         step = TieBreakStep.objects.get(key=key)
         LeagueRulesetTieBreak.objects.get_or_create(
-            ruleset=dffl_ruleset, step=step, defaults={"order": order}
+            ruleset=dffl_ruleset, step=step, defaults={"order": order, "sort_order": sort_order}
         )
 
 

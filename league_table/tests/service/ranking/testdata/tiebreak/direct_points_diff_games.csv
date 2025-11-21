@@ -1,0 +1,13 @@
+gameinfo,team_id,team__description,fh,sh,pa,isHome,gameinfo__standing,pf,league_id,opponent_team_id,opponent_league_id
+1001,1,Team A,20,20,20,TRUE,Group 1,40,5,2,5
+1001,2,Team B,12,8,40,FALSE,Group 1,20,5,1,5
+1002,3,Team C,8,2,26,TRUE,Group 1,10,5,2,5
+1002,2,Team B,12,14,10,FALSE,Group 1,26,5,3,5
+1003,1,Team A,8,2,14,TRUE,Group 1,10,5,3,5
+1003,3,Team C,8,6,10,FALSE,Group 1,14,5,1,5
+1004,4,Team D,12,8,40,TRUE,Group 1,20,5,1,5
+1004,1,Team A,20,20,20,FALSE,Group 1,40,5,4,5
+1005,4,Team D,12,8,30,TRUE,Group 1,20,5,2,5
+1005,2,Team B,24,6,20,FALSE,Group 1,30,5,4,5
+1006,4,Team D,12,8,25,TRUE,Group 1,20,5,3,5
+1006,3,Team C,12,13,20,FALSE,Group 1,25,5,4,5
