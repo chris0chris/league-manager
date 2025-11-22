@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ),
                 ("name", models.CharField(max_length=50, unique=True)),
                 (
-                    "win_points",
+                    "league_points",
                     models.DecimalField(decimal_places=2, default=2, max_digits=4),
                 ),
                 (

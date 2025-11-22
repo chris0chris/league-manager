@@ -1,0 +1,3 @@
+team_id,team__name,league_points,max_league_points,wins,draws,losses,pf,pa,diff,games_played,standing,league_quotient
+1,Team A,12.0,14.0,6,0,1,260,160,100,7,Main Round,0.857
+2,Team B,2.0,14.0,1,0,6,160,260,-100,7,Main Round,0.143

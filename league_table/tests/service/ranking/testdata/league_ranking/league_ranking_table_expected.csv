@@ -1,5 +1,5 @@
-team_id,team__name,win_points,MaxPts,wins,draws,losses,pf,pa,diff,games_played,standing,league_points
-1,Team A,3,5,2,0,1,90,54,36,3,Main Round,0.6
-2,Team B,3,5,2,0,1,76,70,6,3,Main Round,0.6
-3,Team C,4,5,2,0,1,49,56,-7,3,Main Round,0.8
-4,Team D,0,5,0,0,3,60,95,-35,3,Main Round,0.0
+team_id,team__name,league_points,max_league_points,wins,draws,losses,pf,pa,diff,games_played,standing,league_quotient
+1,Team A,6.0,10.0,2,0,1,90,54,36,3,Main Round,0.6
+2,Team B,6.0,10.0,2,0,1,76,70,6,3,Main Round,0.6
+3,Team C,8.0,10.0,2,0,1,49,56,-7,3,Main Round,0.8
+4,Team D,0.0,10.0,0,0,3,60,95,-35,3,Main Round,0.0

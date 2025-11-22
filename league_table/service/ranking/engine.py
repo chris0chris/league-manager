@@ -121,37 +121,15 @@ class LeagueRankingEngine:
     def __init__(self, league_config: LeagueConfig):
         self.league_config = league_config
 
-    def _get_games_with_results(self, df) -> pd.DataFrame:
+    def compute_initial_stats(self, df) -> pd.DataFrame:
         """Return all finished games for the season+league with league-aware scoring."""
 
-        # Compute pf
+        df["league_points"] = df.apply(self._compute_league_points, axis=1)
 
-        # TODO make this dynamic
-        # Merge league info
-
-        # Get opponent league
-        # First pivot to get opponent for same gameinfo
-        # drop self-merge
-
-        # Compute Pts
-        # TODO make this dynamic
-        def compute_pts(row):
-            if row["pf"] > row["pa"]:
-                return 1 if row["league_id"] == row["opponent_league_id"] else 2
-            elif row["pf"] == row["pa"]:
-                return 0.5 if row["league_id"] == row["opponent_league_id"] else 1
-            else:
-                return 0
-
-        df["win_points"] = df.apply(compute_pts, axis=1)
-
-        # Compute p (1 if fh >= 0)
         df["games_played"] = df["fh"].fillna(0).apply(lambda x: 1 if x >= 0 else 0)
 
-        # MaxPts column
-        df["MaxPts"] = (df["league_id"] != df["opponent_league_id"]).apply(
-            lambda x: 2 if x else 1
-        )
+        # max_league_points column
+        df["max_league_points"] = self._compute_max_points(df)
 
         # diff column
         df["pf"] = df["fh"].fillna(0) + df["sh"].fillna(0)
@@ -162,24 +140,44 @@ class LeagueRankingEngine:
 
         return df
 
+    def apply_team_point_adjustments(self, df: pd.DataFrame) -> pd.DataFrame:
+        adjustments = self.league_config.team_point_adjustments_map
+
+        if not adjustments:
+            return df
+
+        for adj in adjustments:
+            team_id = adj["id"]
+            points_delta = int(adj["points"])
+            field = adj["field"]  # usually "points"
+
+            # Safety checks
+            if field not in df.columns:
+                raise ValueError(f"Invalid adjustment field '{field}'")
+
+            # Apply adjustment
+            df.loc[df["team_id"] == team_id, field] += points_delta
+
+        return df
+
     def compute_league_table(self, games_with_results: pd.DataFrame) -> pd.DataFrame:
         """Aggregate all game results into one final league table."""
-        df = self._get_games_with_results(games_with_results)
-        if df.empty:
+        df_games = self.compute_initial_stats(games_with_results)
+        if df_games.empty:
             return pd.DataFrame()
 
-        df = df.rename(
+        df_games = df_games.rename(
             columns={
                 "team__description": "team__name",
                 "gameinfo__standing": "standing",
             }
         )
 
-        table = df.groupby("team_id", as_index=False).agg(
+        table = df_games.groupby("team_id", as_index=False).agg(
             {
                 "team__name": "first",
-                "win_points": "sum",
-                "MaxPts": "sum",
+                "league_points": "sum",
+                "max_league_points": "sum",
                 "wins": "sum",
                 "draws": "sum",
                 "losses": "sum",
@@ -190,6 +188,36 @@ class LeagueRankingEngine:
                 "standing": "first",
             }
         )
-        table["league_points"] = table["win_points"] / table["MaxPts"]
+        table = self.apply_team_point_adjustments(table)
+
+        table["league_quotient"] = (table["league_points"] / table["max_league_points"]).round(
+            self.league_config.ruleset.league_quotient_precision
+        )
 
         return table
+
+    def _compute_league_points(self, row):
+        league_points = self.league_config.ruleset.league_points
+        if row["pf"] > row["pa"]:
+            return (
+                league_points.points_win_same_league
+                if row["league_id"] == row["opponent_league_id"]
+                else league_points.points_win_other_league
+            )
+        elif row["pf"] == row["pa"]:
+            return (
+                league_points.points_draw_same_league
+                if row["league_id"] == row["opponent_league_id"]
+                else league_points.points_draw_other_league
+            )
+        else:
+            return 0
+
+    def _compute_max_points(self, df):
+        league_points = self.league_config.ruleset.league_points
+        return (df["league_id"] == df["opponent_league_id"]).map(
+            {
+                True: league_points.max_points_same_league,
+                False: league_points.max_points_other_league,
+            }
+        )

@@ -1,4 +1,4 @@
-team_id,team__name,pf,pa,diff,win_points,standing
+team_id,team__name,pf,pa,diff,league_points,standing
 2,Team B,100,90,10,4,Group 1
 4,Team D,60,95,-35,0,Group 1
 1,Team A,130,110,20,4,Group 1

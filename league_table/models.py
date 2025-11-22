@@ -27,34 +27,32 @@ class LeagueRuleset(models.Model):
         "max_points_other_league",
     ]
 
-    GAME_POINT_FIELDS = [
-        "win_points",
-        "draw_points",
-        "loss_points",
-    ]
-
     name = models.CharField(max_length=50, unique=True)
-    win_points = models.DecimalField(max_digits=4, decimal_places=2, default=2)
-    draw_points = models.DecimalField(max_digits=4, decimal_places=2, default=1)
-    loss_points = models.DecimalField(max_digits=4, decimal_places=2, default=0)
+    league_quotient_precision = models.PositiveSmallIntegerField(default=3)
 
     points_win_same_league = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
+        max_digits=4, decimal_places=2, default=1
     )
     points_win_other_league = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
+        max_digits=4, decimal_places=2, default=1
+    )
+    points_loss_same_league = models.DecimalField(
+        max_digits=4, decimal_places=2, default=0
+    )
+    points_loss_other_league = models.DecimalField(
+        max_digits=4, decimal_places=2, default=0
     )
     points_draw_same_league = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
+        max_digits=4, decimal_places=2, default=0.5
     )
     points_draw_other_league = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
+        max_digits=4, decimal_places=2, default=0.5
     )
     max_points_same_league = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
+        max_digits=4, decimal_places=2, default=1
     )
     max_points_other_league = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
+        max_digits=4, decimal_places=2, default=1
     )
 
     exclude_main_league_for_league_points = models.ForeignKey(
@@ -73,15 +71,9 @@ class LeagueRuleset(models.Model):
     )
 
     def league_points_map(self):
-        return self._get_points_map(self.LEAGUE_POINT_FIELDS)
-
-    def game_points_map(self):
-        return self._get_points_map(self.GAME_POINT_FIELDS)
-
-    def _get_points_map(self, point_fields: list):
         return {
             field: float(getattr(self, field))
-            for field in point_fields
+            for field in self.LEAGUE_POINT_FIELDS
             if getattr(self, field) is not None
         }
 
@@ -102,8 +94,7 @@ class LeagueRuleset(models.Model):
 
 
 TIE_BREAK_CHOICES = [
-    ("win_points", "Siegpunkte"),
-    ("league_points", "Ligapunkte"),
+    ("league_points", "Siegpunkte"),
     ("direct_wins", "Direkte Siegpunkte"),
     ("direct_point_diff", "Direkte Punktedifferenz"),
     ("direct_points_scored", "Direkt erzielte Punkte"),

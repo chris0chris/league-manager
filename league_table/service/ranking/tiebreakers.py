@@ -56,7 +56,7 @@ class TieBreakerEngine:
 
         # Step 1: sort by points descending initially
         # standings_df = standings_df.sort_values(
-        #     by="win_points", ascending=False
+        #     by="league_points", ascending=False
         # ).reset_index(drop=True)
         games_df = games_df.fillna({"fh": 0, "sh": 0, "pa": 0})
 
@@ -70,7 +70,7 @@ class TieBreakerEngine:
 
         for group_name, group_df in standings_df.groupby("standing"):
             # For each points value that occurs more than once
-            for points_value, tied_df in group_df.groupby("win_points"):
+            for points_value, tied_df in group_df.groupby("league_points"):
                 if len(tied_df) <= 1:
                     # no tie → skip
                     updated_rows.append(tied_df)
@@ -154,10 +154,6 @@ def compute_overall_point_diff(df: pd.DataFrame, games_df: pd.DataFrame, tied_te
 @register_tiebreak("overall_points_scored")
 def compute_overall_points_scored(df: pd.DataFrame, games_df: pd.DataFrame, tied_teams: list[int]) -> pd.Series:
     return df["pf"]
-
-@register_tiebreak("win_points")
-def compute_win_points(df: pd.DataFrame, games_df: pd.DataFrame, tied_teams: list[int]) -> pd.Series:
-    return df["win_points"]
 
 @register_tiebreak("league_points")
 def compute_league_points(df: pd.DataFrame, games_df: pd.DataFrame, tied_teams: list[int]) -> pd.Series:

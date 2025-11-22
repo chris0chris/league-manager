@@ -3,7 +3,11 @@ import pathlib
 import pandas as pd
 import pytest
 
-from league_table.service.datatypes import LeagueConfigRuleset, LeagueConfig
+from league_table.service.datatypes import (
+    LeagueConfigRuleset,
+    LeagueConfig,
+    LeaguePoints,
+)
 from league_table.service.ranking.engine import LeagueRankingEngine
 from league_table.service.ranking.tiebreakers import TieBreakerEngine
 
@@ -11,9 +15,16 @@ BASE = pathlib.Path(__file__).parent / "testdata/tiebreak"
 
 
 RULESET = LeagueConfigRuleset(
-    league_points_map={},
+    league_points=LeaguePoints(
+        max_points_other_league=2.0,
+        max_points_same_league=1.0,
+        points_draw_other_league=1.0,
+        points_draw_same_league=0.5,
+        points_win_other_league=2.0,
+        points_win_same_league=1.0,
+    ),
     tie_break_order=[
-        {"is_ascending": False, "key": "win_points"},
+        {"is_ascending": False, "key": "league_points"},
         {"is_ascending": False, "key": "direct_wins"},
         {"is_ascending": False, "key": "direct_point_diff"},
         {"is_ascending": False, "key": "direct_points_scored"},
@@ -21,8 +32,8 @@ RULESET = LeagueConfigRuleset(
         {"is_ascending": False, "key": "overall_points_scored"},
         {"is_ascending": True, "key": "name_ascending"},
     ],
-    game_points_map={"draw_points": 1.0, "loss_points": 0.0, "win_points": 2.0},
     excluded_league_id=0,
+    league_quotient_precision=3
 )
 
 LEAGUE_CONFIG = LeagueConfig(
@@ -89,18 +100,18 @@ class TestTieBreakEngine:
 
 
 class TestLeagueRankingEngine:
-    def test(self):
+    def test_league_ranking_engine_with_league_points(self):
         custom_ruleset = LeagueConfigRuleset(
-            league_points_map={
-                "max_points_other_league": 2.0,
-                "max_points_same_league": 1.0,
-                "points_draw_other_league": 1.0,
-                "points_draw_same_league": 0.5,
-                "points_win_other_league": 2.0,
-                "points_win_same_league": 1.0,
-            },
+            league_points=LeaguePoints(
+                max_points_other_league=4.0,
+                max_points_same_league=2.0,
+                points_draw_other_league=1.0,
+                points_draw_same_league=0.5,
+                points_win_other_league=4.0,
+                points_win_same_league=2.0,
+            ),
+            league_quotient_precision=RULESET.league_quotient_precision,
             tie_break_order=RULESET.tie_break_order,
-            game_points_map=RULESET.game_points_map,
             excluded_league_id=RULESET.excluded_league_id,
         )
 
@@ -111,8 +122,59 @@ class TestLeagueRankingEngine:
         )
 
         games = pd.read_csv(BASE / "../league_ranking/league_ranking_games.csv")
-        expected_result = pd.read_csv(BASE / "../league_ranking/league_ranking_table_expected.csv")
+        expected_result = pd.read_csv(
+            BASE / "../league_ranking/league_ranking_table_expected.csv"
+        )
 
         engine = LeagueRankingEngine(league_config)
         result = engine.compute_league_table(games)
         assert result.to_csv() == expected_result.to_csv()
+
+    def test_league_ranking_engine_with_team_point_adjustments(self):
+        custom_ruleset = LeagueConfigRuleset(
+            league_points=RULESET.league_points,
+            tie_break_order=RULESET.tie_break_order,
+            excluded_league_id=RULESET.excluded_league_id,
+            league_quotient_precision=1
+        )
+
+        league_config = LeagueConfig(
+            ruleset=custom_ruleset,
+            team_point_adjustments_map=[
+                {
+                    "id": 1,
+                    "name": "Team A",
+                    "points": "7",
+                    "field": "league_points",
+                },
+                {
+                    "id": 4,
+                    "name": "Team D",
+                    "points": "-5",
+                    "field": "league_points",
+                },
+            ],
+            excluded_gameday_ids=[],
+        )
+
+        games = pd.read_csv(BASE / "../league_ranking/league_ranking_games.csv")
+        expected_result = pd.read_csv(
+            BASE
+            / "../league_ranking/league_ranking_table_expected_with_point_adjustments.csv"
+        )
+
+        engine = LeagueRankingEngine(league_config)
+        result = engine.compute_league_table(games)
+        assert result.to_csv() == expected_result.to_csv()
+
+    def test_league_quotient_precision(self):
+        games = pd.read_csv(BASE / "../league_ranking/league_ranking_games_for_quotient_precision.csv")
+        expected_result = pd.read_csv(
+            BASE
+            / "../league_ranking/league_ranking_games_for_quotient_precision_table_expected.csv"
+        )
+
+        engine = LeagueRankingEngine(LEAGUE_CONFIG)
+        result = engine.compute_league_table(games)
+        assert result.to_csv() == expected_result.to_csv()
+
