@@ -32,6 +32,9 @@ ignore:
   - "**/*.test.*"
   - "**/*.spec.*"
   - "**/__tests__/**"
+  - "**/tests.py"
+  - "**/test_*.py"
+  - "**/*_test.py"
 
   # Static and build output directories
   - "**/static/**"

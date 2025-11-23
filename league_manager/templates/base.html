@@ -9,14 +9,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
           integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" rel="stylesheet">
-    <link rel="shortcut icon" href="{%  static 'favicon.ico' %}">
+    <link rel="shortcut icon" href="{% static 'league_manager/favicon.ico' %}">
     {% if not request.GET.isExtern %}
     <link href='{% static "gamedays/css/main.css" %}' rel="stylesheet" type="text/css">
     {% endif %}
     {% if title %}
-    <title>5er DFFL - {{ title }}</title>
+    <title>LeagueSphere - {{ title }}</title>
     {% else %}
-    <title>5er DFFL</title>
+    <title>LeagueSphere</title>
     {% endif %}
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
