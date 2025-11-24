@@ -9,8 +9,9 @@ import {testStore} from '../../../__tests__/Utils';
 import ScorecardTable from '../ScorecardTable';
 import {Provider} from 'react-redux';
 import {apiDelete} from '../../../actions/utils/api';
+import { vi } from 'vitest';
 
-jest.mock('../../../actions/utils/api');
+vi.mock('../../../actions/utils/api');
 apiDelete.mockImplementation(() => {
   return () => {};
 });

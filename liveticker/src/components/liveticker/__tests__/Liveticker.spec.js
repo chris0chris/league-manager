@@ -4,12 +4,12 @@ import {LIVETICKER_DATA} from '../../../__tests__/testdata/livetickerData';
 import {testStore} from '../../../__tests__/Utils';
 import Liveticker from '../Liveticker';
 import {apiGet} from '../../../actions/utils/api';
+import { vi } from 'vitest';
 
 
-jest.mock('../../../actions/utils/api');
-apiGet.mockImplementation(() => {
-  return () => {};
-});
+vi.mock('../../../actions/utils/api', () => ({
+  apiGet: vi.fn(() => () => {})
+}));
 
 const setup = () => {
   const initialState = {

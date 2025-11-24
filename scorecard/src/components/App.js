@@ -2,8 +2,6 @@ import React, {useEffect} from 'react';
 import {Provider} from 'react-redux';
 import {HashRouter as Router, Route, Routes} from 'react-router-dom';
 
-import 'regenerator-runtime/runtime';
-
 import {store} from '../store';
 import Navbar from './layout/Navbar';
 import Login from './accounts/Login';

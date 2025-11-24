@@ -3,10 +3,11 @@ import {render, screen} from '@testing-library/react';
 import {LIVETICKER_DATA} from '../../../__tests__/testdata/livetickerData';
 import GameTicker from '../GameTicker';
 import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
 
 
 const GAME_TICKER_DATA = LIVETICKER_DATA[0];
-const mockFunc = jest.fn();
+const mockFunc = vi.fn();
 const setup = () => {
   render(<GameTicker {...GAME_TICKER_DATA} gameIndex={0} updateGamesToDisplay={mockFunc} />);
 };

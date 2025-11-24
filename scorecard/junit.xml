@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="78" failures="0" errors="0" time="5.016">
+  <testsuite name="InputDropdown component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:25" time="1.463" tests="5">
+    <testcase classname="InputDropdown component should render component" name="InputDropdown component should render component" time="0.124">
+    </testcase>
+    <testcase classname="InputDropdown component should write text in input with delete button" name="InputDropdown component should write text in input with delete button" time="0.145">
+    </testcase>
+    <testcase classname="InputDropdown component should write text in input without delete button" name="InputDropdown component should write text in input without delete button" time="0.027">
+    </testcase>
+    <testcase classname="InputDropdown component should select item and show delete button" name="InputDropdown component should select item and show delete button" time="0.173">
+    </testcase>
+    <testcase classname="InputDropdown component should call parent method when item selected" name="InputDropdown component should call parent method when item selected" time="0.093">
+    </testcase>
+  </testsuite>
+  <testsuite name="SelectGame component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:25" time="1.842" tests="2">
+    <testcase classname="SelectGame component it should render correct with empty games" name="SelectGame component it should render correct with empty games" time="0.244">
+    </testcase>
+    <testcase classname="SelectGame component should redirect to officials page" name="SelectGame component should redirect to officials page" time="0.338">
+    </testcase>
+  </testsuite>
+  <testsuite name="Penalty component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:25" time="1.93" tests="2">
+    <testcase classname="Penalty component should render correct" name="Penalty component should render correct" time="0.274">
+    </testcase>
+    <testcase classname="Penalty component should update event, when time is inserted" name="Penalty component should update event, when time is inserted" time="0.474">
+    </testcase>
+  </testsuite>
+  <testsuite name="Timeout component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:26" time="0.805" tests="3">
+    <testcase classname="Timeout component should render correct" name="Timeout component should render correct" time="0.116">
+    </testcase>
+    <testcase classname="Timeout component should disable timeout button and set correct time, when clicked on done" name="Timeout component should disable timeout button and set correct time, when clicked on done" time="0.285">
+    </testcase>
+    <testcase classname="Timeout component should do nothing, when clicked on done" name="Timeout component should do nothing, when clicked on done" time="0.069">
+    </testcase>
+  </testsuite>
+  <testsuite name="Halftime component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:25" time="2.322" tests="5">
+    <testcase classname="Halftime component should render correct halftime" name="Halftime component should render correct halftime" time="0.317">
+    </testcase>
+    <testcase classname="Halftime component should render correct final" name="Halftime component should render correct final" time="0.166">
+    </testcase>
+    <testcase classname="Halftime component should set half, when halftime button and done is clicked" name="Halftime component should set half, when halftime button and done is clicked" time="0.539">
+    </testcase>
+    <testcase classname="Halftime component should send false, when final button is clicked" name="Halftime component should send false, when final button is clicked" time="0.18">
+    </testcase>
+    <testcase classname="Halftime component should do nothing, when halftime button and cancel is clicked" name="Halftime component should do nothing, when halftime button and cancel is clicked" time="0.226">
+    </testcase>
+  </testsuite>
+  <testsuite name="Touchdown component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:27" time="0.554" tests="3">
+    <testcase classname="Touchdown component should render correct" name="Touchdown component should render correct" time="0.103">
+    </testcase>
+    <testcase classname="Touchdown component should call update function with pat1" name="Touchdown component should call update function with pat1" time="0.116">
+    </testcase>
+    <testcase classname="Touchdown component should call update function with pat2" name="Touchdown component should call update function with pat2" time="0.154">
+    </testcase>
+  </testsuite>
+  <testsuite name="RadioButtons component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:27" time="0.295" tests="3">
+    <testcase classname="RadioButtons component should render component" name="RadioButtons component should render component" time="0.044">
+    </testcase>
+    <testcase classname="RadioButtons component should propagate the correct implicit value" name="RadioButtons component should propagate the correct implicit value" time="0.063">
+    </testcase>
+    <testcase classname="RadioButtons component should propagate the correct explicit value" name="RadioButtons component should propagate the correct explicit value" time="0.033">
+    </testcase>
+  </testsuite>
+  <testsuite name="AddPoints component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:27" time="0.737" tests="3">
+    <testcase classname="AddPoints component should render correct" name="AddPoints component should render correct" time="0.132">
+    </testcase>
+    <testcase classname="AddPoints component should display different input field, when selecting another button" name="AddPoints component should display different input field, when selecting another button" time="0.195">
+    </testcase>
+    <testcase classname="AddPoints component should call callback, when input is submitted" name="AddPoints component should call callback, when input is submitted" time="0.14">
+    </testcase>
+  </testsuite>
+  <testsuite name="Games component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:27" time="0.332" tests="4">
+    <testcase classname="Games component should render component" name="Games component should render component" time="0.068">
+    </testcase>
+    <testcase classname="Games component should display no games to whistlye" name="Games component should display no games to whistlye" time="0.009">
+    </testcase>
+    <testcase classname="Games component should emit callback on click event" name="Games component should emit callback on click event" time="0.052">
+    </testcase>
+    <testcase classname="Games component should emit load all games, when clicked on checkbox" name="Games component should emit load all games, when clicked on checkbox" time="0.044">
+    </testcase>
+  </testsuite>
+  <testsuite name="InputWithNumber component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:28" time="0.241" tests="3">
+    <testcase classname="InputWithNumber component should render correct" name="InputWithNumber component should render correct" time="0.02">
+    </testcase>
+    <testcase classname="InputWithNumber component input should be required" name="InputWithNumber component input should be required" time="0.007">
+    </testcase>
+    <testcase classname="InputWithNumber component should send correct update" name="InputWithNumber component should send correct update" time="0.06">
+    </testcase>
+  </testsuite>
+  <testsuite name="ScorecardTable component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:27" time="0.4" tests="3">
+    <testcase classname="ScorecardTable component should render correct one team" name="ScorecardTable component should render correct one team" time="0.082">
+    </testcase>
+    <testcase classname="ScorecardTable component should render correct both teams with displayHome true" name="ScorecardTable component should render correct both teams with displayHome true" time="0.087">
+    </testcase>
+    <testcase classname="ScorecardTable component should render correct both teams with displayHome false" name="ScorecardTable component should render correct both teams with displayHome false" time="0.057">
+    </testcase>
+  </testsuite>
+  <testsuite name="Touchdown component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:27" time="0.366" tests="3">
+    <testcase classname="Touchdown component should render correct" name="Touchdown component should render correct" time="0.046">
+    </testcase>
+    <testcase classname="Touchdown component should call update function with +1" name="Touchdown component should call update function with +1" time="0.11">
+    </testcase>
+    <testcase classname="Touchdown component should call update function with +2" name="Touchdown component should call update function with +2" time="0.067">
+    </testcase>
+  </testsuite>
+  <testsuite name="Finalize component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:25" time="3.098" tests="7">
+    <testcase classname="Finalize component should render correct" name="Finalize component should render correct" time="0.435">
+    </testcase>
+    <testcase classname="Finalize component should disable edit score button, when home confirm button is clicked" name="Finalize component should disable edit score button, when home confirm button is clicked" time="0.53">
+    </testcase>
+    <testcase classname="Finalize component should disable edit score button, when away confirm button is clicked" name="Finalize component should disable edit score button, when away confirm button is clicked" time="0.281">
+    </testcase>
+    <testcase classname="Finalize component should do nothing, when away captain is empty and confirm button is clicked" name="Finalize component should do nothing, when away captain is empty and confirm button is clicked" time="0.065">
+    </testcase>
+    <testcase classname="Finalize component should display game log, when checkbox is activated" name="Finalize component should display game log, when checkbox is activated" time="0.127">
+    </testcase>
+    <testcase classname="Finalize component should call apiPut, when submit final score button is clicked" name="Finalize component should call apiPut, when submit final score button is clicked" time="0.392">
+    </testcase>
+    <testcase classname="Finalize component should redirect to details page, when clicked on edit score button" name="Finalize component should redirect to details page, when clicked on edit score button" time="0.08">
+    </testcase>
+  </testsuite>
+  <testsuite name="ModalDeleteEntry component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:28" time="0.43" tests="2">
+    <testcase classname="ModalDeleteEntry component should render correct" name="ModalDeleteEntry component should render correct" time="0.061">
+    </testcase>
+    <testcase classname="ModalDeleteEntry component should delete entry via api, when row is double clicked and delete button is clicked" name="ModalDeleteEntry component should delete entry via api, when row is double clicked and delete button is clicked" time="0.176">
+    </testcase>
+  </testsuite>
+  <testsuite name="MessageToaster component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:28" time="0.216" tests="2">
+    <testcase classname="MessageToaster component should render correct" name="MessageToaster component should render correct" time="0.024">
+    </testcase>
+    <testcase classname="MessageToaster component should render for error status" name="MessageToaster component should render for error status" time="0.011">
+    </testcase>
+  </testsuite>
+  <testsuite name="GameTime component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:28" time="0.26" tests="2">
+    <testcase classname="GameTime component should render correct" name="GameTime component should render correct" time="0.013">
+    </testcase>
+    <testcase classname="GameTime component should update event, when time is typed" name="GameTime component should update event, when time is typed" time="0.101">
+    </testcase>
+  </testsuite>
+  <testsuite name="FloatingInput component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:28" time="0.294" tests="2">
+    <testcase classname="FloatingInput component should render component" name="FloatingInput component should render component" time="0.022">
+    </testcase>
+    <testcase classname="FloatingInput component should validate correct" name="FloatingInput component should validate correct" time="0.121">
+    </testcase>
+  </testsuite>
+  <testsuite name="ScorecardTable component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:28" time="0.245" tests="1">
+    <testcase classname="ScorecardTable component should render correct" name="ScorecardTable component should render correct" time="0.101">
+    </testcase>
+  </testsuite>
+  <testsuite name="Games Reducer" errors="0" failures="0" skipped="1" timestamp="2025-11-17T21:32:28" time="0.12" tests="2">
+    <testcase classname="Games Reducer Should return initial state" name="Games Reducer Should return initial state" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="Games Reducer Should return new state if receiving type" name="Games Reducer Should return new state if receiving type" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="Gamedays component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:28" time="0.283" tests="2">
+    <testcase classname="Gamedays component should render component" name="Gamedays component should render component" time="0.071">
+    </testcase>
+    <testcase classname="Gamedays component should emit callback on click event" name="Gamedays component should emit callback on click event" time="0.051">
+    </testcase>
+  </testsuite>
+  <testsuite name="getGames action" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:28" time="0.246" tests="1">
+    <testcase classname="getGames action Store is updated correctly" name="getGames action Store is updated correctly" time="0.105">
+    </testcase>
+  </testsuite>
+  <testsuite name="Series component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:28" time="0.212" tests="2">
+    <testcase classname="Series component should render correct" name="Series component should render correct" time="0.066">
+    </testcase>
+    <testcase classname="Series component should call update function" name="Series component should call update function" time="0.007">
+    </testcase>
+  </testsuite>
+  <testsuite name="FloatingInput component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:28" time="0.117" tests="1">
+    <testcase classname="FloatingInput component should render component" name="FloatingInput component should render component" time="0.013">
+    </testcase>
+  </testsuite>
+  <testsuite name="Officials component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:25" time="4.044" tests="7">
+    <testcase classname="Officials component should render component" name="Officials component should render component" time="0.529">
+    </testcase>
+    <testcase classname="Officials component should render team officials" name="Officials component should render team officials" time="0.288">
+    </testcase>
+    <testcase classname="Officials component submit form and redirects" name="Officials component submit form and redirects" time="1.779">
+    </testcase>
+    <testcase classname="Officials component checks if buttons are checked when clicked" name="Officials component checks if buttons are checked when clicked" time="0.099">
+    </testcase>
+    <testcase classname="Officials component should call getApi to init the page, display the officials name and game setup infos" name="Officials component should call getApi to init the page, display the officials name and game setup infos" time="0.083">
+    </testcase>
+    <testcase classname="Officials component should call getApi to init the page and display empty officials" name="Officials component should call getApi to init the page and display empty officials" time="0.069">
+    </testcase>
+    <testcase classname="Officials component should reduce officials when one is selected" name="Officials component should reduce officials when one is selected" time="0.126">
+    </testcase>
+  </testsuite>
+  <testsuite name="Details component" errors="0" failures="0" skipped="0" timestamp="2025-11-17T21:32:25" time="4.386" tests="8">
+    <testcase classname="Details component should render correct" name="Details component should render correct" time="0.936">
+    </testcase>
+    <testcase classname="Details component should render both teams entries correct" name="Details component should render both teams entries correct" time="0.325">
+    </testcase>
+    <testcase classname="Details component should set the opposite team to be checked, when input was submitted" name="Details component should set the opposite team to be checked, when input was submitted" time="0.651">
+    </testcase>
+    <testcase classname="Details component should set points for opposite team, when safety was submitted" name="Details component should set points for opposite team, when safety was submitted" time="0.499">
+    </testcase>
+    <testcase classname="Details component should send a post api call with correct half, when points input was submitted" name="Details component should send a post api call with correct half, when points input was submitted" time="0.267">
+    </testcase>
+    <testcase classname="Details component should send a put api call, when halftime button was clicked" name="Details component should send a put api call, when halftime button was clicked" time="0.169">
+    </testcase>
+    <testcase classname="Details component should redirect ton finalize page, when final button is clicked" name="Details component should redirect ton finalize page, when final button is clicked" time="0.09">
+    </testcase>
+    <testcase classname="Details component should enable taken timeouts, when second half starts" name="Details component should enable taken timeouts, when second half starts" time="0.244">
+    </testcase>
+  </testsuite>
+</testsuites>

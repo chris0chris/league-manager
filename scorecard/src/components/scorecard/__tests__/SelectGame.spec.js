@@ -11,8 +11,9 @@ import {OFFICIALS_URL} from '../../common/urls';
 
 import {apiGet} from '../../../actions/utils/api';
 import {GET_GAMEDAYS, GET_GAMES} from '../../../actions/types';
+import { vi } from 'vitest';
 
-jest.mock('../../../actions/utils/api');
+vi.mock('../../../actions/utils/api');
 apiGet.mockImplementation((...params) => (dispatch) => {
   const actionType = params[1];
   if (actionType == GET_GAMEDAYS) {

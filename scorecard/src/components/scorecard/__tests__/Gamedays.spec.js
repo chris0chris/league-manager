@@ -3,8 +3,9 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Gamedays from '../Gamedays';
 import {ONE_GAMEDAY} from '../../../__tests__/testdata/gamedaysData';
+import { vi } from 'vitest';
 
-const mockFunc = jest.fn();
+const mockFunc = vi.fn();
 
 const setup = () => {
   const initialState = {

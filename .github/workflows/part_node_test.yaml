@@ -24,7 +24,7 @@ jobs:
       run:
         working-directory: ${{ inputs.project }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: 🟢⚙️ Setup node
         uses: actions/setup-node@v6
         with:
@@ -36,13 +36,13 @@ jobs:
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
           working-directory: ${{ inputs.project }}
-          test-script: npm run jest
+          test-script: npm run test:run
           custom-title: Report for ${{ inputs.project }}
       - name: 🧪 Testing ${{ inputs.project }}
         if: ${{ ! inputs.report }}
         run: |
           npm ci
-          npm run jest
+          npm run test:run
       - name: 📊 Upload Coverage to Codecov
         # secrets not directly accessible https://stackoverflow.com/questions/72925899/github-actions-detect-if-secret-exists
         env:

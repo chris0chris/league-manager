@@ -2,8 +2,9 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DisplayAllTicks from '../DisplayAllTicks';
+import { vi } from 'vitest';
 
-const mockSetLoadAllTicks = jest.fn();
+const mockSetLoadAllTicks = vi.fn();
 
 const setup = (loadAllTicks = false) => {
   render(

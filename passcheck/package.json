@@ -1,7 +1,8 @@
 {
   "name": "passcheck",
-  "version": "2.11.4",
+  "version": "2.11.5",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
@@ -15,7 +16,6 @@
     "react-dom": "^19.2.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.5",
-    "react-scripts": "^5.0.1",
     "replace-in-file": "^8.3.0",
     "web-vitals": "^5.1.0"
   },
@@ -25,18 +25,20 @@
     "serialize-javascript": "^7.0.0",
     "debug": "^4.4.0",
     "xml2js": "^0.6.2",
-    "typescript": "^5.9.3",
-    "http-proxy-middleware": "^3.0.0"
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "webpack --mode production --config webpack.config.js",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage",
     "eslint": "eslint ./src",
     "eslint:junit": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-passcheck.xml",
     "eslint:json": "eslint ./src --format json -o js-lint-results-passcheck.json",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "dev": "webpack --mode development --config webpack.config.js"
+    "dev": "vite build"
   },
   "eslintConfig": {
     "extends": [
@@ -62,18 +64,16 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
-    "@types/jest": "^30.0.0",
-    "css-loader": "^7.1.2",
+    "@vitejs/plugin-react": "^5.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "@vitest/ui": "^4.0.0",
     "eslint": "^9.39.1",
     "eslint-formatter-junit": "^9.0.1",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "postcss-loader": "^8.2.0",
-    "style-loader": "^4.0.0",
-    "ts-loader": "^9.5.4",
+    "jsdom": "^27.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3",
-    "webpack": "^5.102.1",
-    "webpack-cli": "^6.0.1"
-  },
-  "proxy": "http://127.0.0.1:8000"
+    "vite": "^7.0.0",
+    "vitest": "^4.0.0"
+  }
 }

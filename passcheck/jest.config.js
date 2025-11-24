@@ -1,7 +1,5 @@
 module.exports = {
-  setupFilesAfterEnv: [
-    '<rootDir>/src/__tests__/setup/jest.setup.js',
-  ],
+
   testPathIgnorePatterns: [
     '<rootDir>/src/__tests__/setup/',
     '<rootDir>/src/__tests__/testdata/',
