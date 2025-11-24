@@ -9,28 +9,8 @@ from gamedays.service.gameday_settings import (
     DIFF,
 )
 from league_table.models import LeagueRuleset
-from league_table.service.datatypes import LeagueConfig
-from league_table.service.ranking.tiebreakers import TieBreakerEngine
-
-
-# from .tiebreakers import (
-#     DirectComparisonTieBreaker,
-#     PointDiffDirectTieBreaker,
-#     PointsScoredDirectTieBreaker,
-#     OverallPointDiffTieBreaker,
-#     OverallPointsScoredTieBreaker,
-#     NameAscendingTieBreaker,
-# )
-#
-# # Map keys from ruleset.tie_break_order() to tie-breaker objects
-# TIEBREAKER_REGISTRY = {
-#     "direct_wins": DirectComparisonTieBreaker(),
-#     "direct_point_diff": PointDiffDirectTieBreaker(),
-#     "direct_points_scored": PointsScoredDirectTieBreaker(),
-#     "overall_point_diff": OverallPointDiffTieBreaker(),
-#     "overall_points_scored": OverallPointsScoredTieBreaker(),
-#     "name_ascending": NameAscendingTieBreaker(),
-# }
+from league_table.service.datatypes import LeagueConfig, LeagueConfigRuleset
+from league_table.service.ranking.tiebreakers import TieBreaker, TIEBREAK_REGISTRY
 
 
 class FinalRankingEngine:
@@ -190,9 +170,9 @@ class LeagueRankingEngine:
         )
         table = self.apply_team_point_adjustments(table)
 
-        table["league_quotient"] = (table["league_points"] / table["max_league_points"]).round(
-            self.league_config.ruleset.league_quotient_precision
-        )
+        table["league_quotient"] = (
+            table["league_points"] / table["max_league_points"]
+        ).round(self.league_config.ruleset.league_quotient_precision)
 
         return table
 
@@ -211,7 +191,11 @@ class LeagueRankingEngine:
                 else league_points.points_draw_other_league
             )
         else:
-            return 0
+            return (
+                league_points.points_loss_same_league
+                if row["league_id"] == row["opponent_league_id"]
+                else league_points.points_loss_other_league
+            )
 
     def _compute_max_points(self, df):
         league_points = self.league_config.ruleset.league_points
@@ -221,3 +205,318 @@ class LeagueRankingEngine:
                 False: league_points.max_points_other_league,
             }
         )
+
+
+class TieBreakerEngine:
+    """Executes a chain of tie-breakers based on a LeagueRuleset."""
+
+    def __init__(self, ruleset: LeagueConfigRuleset):
+        self.ruleset = ruleset
+        self.tie_breakers = self._build_from_ruleset()
+
+    def _build_from_ruleset(self):
+        return [
+            TieBreaker(
+                key=step["key"],
+                func=TIEBREAK_REGISTRY[step["key"]],
+                ascending=step["is_ascending"],
+            )
+            for step in self.ruleset.tie_break_order
+        ]
+
+    def rank(self, standings_df: pd.DataFrame, games_df: pd.DataFrame) -> pd.DataFrame:
+        games_df = games_df.fillna({"fh": 0, "sh": 0, "pa": 0})
+
+        # Compute tiebreakers inside each standing group
+        ranked_groups = []
+        for standing, group_df in standings_df.groupby("standing"):
+            ranked_groups.append(self._rank_group(group_df.copy(), games_df))
+
+        result = pd.concat(ranked_groups, ignore_index=True)
+
+        # Sort again by standing + rank to ensure global order
+        result = result.sort_values(by=["standing", "rank"], ignore_index=True)
+
+        return result
+
+    # -------------------------------------------------------------------------
+    # INTERNALS
+    # -------------------------------------------------------------------------
+    def _rank_group(self, df: pd.DataFrame, games_df: pd.DataFrame) -> pd.DataFrame:
+        updated = []
+
+        for points, tied_df in df.groupby("league_points"):
+            tied_df = tied_df.copy()
+            for tb in self.tie_breakers:
+                if tb.key not in tied_df.columns:
+                    tied_df[tb.key] = pd.NA
+
+            # If only one team → no tie → no tiebreak needed
+            if len(tied_df) == 1:
+                tied_df["rank"] = None  # temp, set later
+                updated.append(tied_df)
+                continue
+
+            # Apply tiebreakers to tied teams
+            tied_df = self._apply_tiebreakers(tied_df, games_df)
+
+            updated.append(tied_df)
+
+        # Merge all subsets back into one group again
+        merged = pd.concat(updated, ignore_index=True)
+
+        # Sort inside the tied group
+        sort_keys = [tb.key for tb in self.tie_breakers]
+        asc_list = [tb.ascending for tb in self.tie_breakers]
+
+        merged = merged.sort_values(by=sort_keys, ascending=asc_list, ignore_index=True)
+
+        # Assign final ranks inside this standing group
+        merged["rank"] = self._assign_ranks_in_group(merged)
+
+        return merged
+
+    def _apply_tiebreakers(
+        self, df: pd.DataFrame, games_df: pd.DataFrame
+    ) -> pd.DataFrame:
+        tied_ids = df["team_id"].tolist()
+
+        for tb in self.tie_breakers:
+            # Compute only the tiebreakers that are actually in use
+            df[tb.key] = tb.apply(df, games_df, tied_ids)
+
+        return df
+
+    def _assign_ranks_in_group(self, df: pd.DataFrame) -> pd.Series:
+        """
+        Assign ranks within a group:
+        - Teams fully tied except for 'name_ascending' share a rank.
+        - name_ascending orders them but does NOT break the tie.
+        - Next rank skips exactly by number of teams above.
+        """
+
+        tiebreak_cols = [tb.key for tb in self.tie_breakers]
+
+        # If last tiebreaker is name_ascending, it does NOT define unique ranking
+        if tiebreak_cols and tiebreak_cols[-1] == "name_ascending":
+            # Collapse: remove name_ascending from tuple
+            collapse_cols = tiebreak_cols[:-1]
+        else:
+            collapse_cols = tiebreak_cols
+
+        # Create a tuple defining "tie groups"
+        df["_tb_tuple"] = df[collapse_cols].apply(lambda r: tuple(r.values), axis=1)
+
+        # Assign collapsed-rank group numbers (1,2,3,...)
+        # preserve ordering in df
+        unique_tuples = list(dict.fromkeys(df["_tb_tuple"]))  # preserves order
+        group_rank_map = {tpl: idx + 1 for idx, tpl in enumerate(unique_tuples)}
+
+        df["_group_rank"] = df["_tb_tuple"].map(group_rank_map)
+
+        # Now compute final rank = size-aware ranking (1,1,1,4 style)
+        ranks = []
+        current_rank = 1
+        prev_group_rank = None
+
+        for _, row in df.iterrows():
+            group_rank = row["_group_rank"]
+
+            if prev_group_rank is None:
+                # first row always rank 1
+                ranks.append(current_rank)
+            elif group_rank != prev_group_rank:
+                # new group → increase rank by number of teams in previous group
+                current_rank = len([r for r in ranks if r == ranks[-1]]) + ranks[-1]
+                ranks.append(current_rank)
+            else:
+                # same collapsed tiebreak group → same rank
+                ranks.append(current_rank)
+
+            prev_group_rank = group_rank
+
+        df.drop(columns=["_tb_tuple", "_group_rank"], inplace=True)
+
+        return pd.Series(ranks, index=df.index)
+
+    def _assign_ranks2(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df.copy()
+
+        # Columns used for checking if teams are fully tied
+        tiebreak_keys = [tb.key for tb in self.tie_breakers]
+
+        # Always include points as primary
+        comparison_cols = ["league_points"] + tiebreak_keys
+
+        # Create a "is_tied_group" identifier
+        df["_tiebreak_group"] = df[comparison_cols].apply(tuple, axis=1)
+
+        # If the last tie-breaker is name-based → grouped ranks
+        last_tb_is_name = (
+            len(self.tie_breakers) > 0 and self.tie_breakers[-1].key == "name_ascending"
+        )
+
+        df["rank"] = 0
+
+        if last_tb_is_name:
+            # Teams with same criteria → same rank
+            current_rank = 1
+            for _, group in df.groupby("_tiebreak_group", sort=False):
+                df.loc[group.index, "rank"] = current_rank
+                current_rank += len(group)  # next rank jumps by group size
+        else:
+            # Normal ranking: unique and sequential
+            df["rank"] = range(1, len(df) + 1)
+
+        return df.drop(columns=["_tiebreak_group"])
+
+    def rank3(self, standings_df: pd.DataFrame, games_df: pd.DataFrame) -> pd.DataFrame:
+        games_df = games_df.fillna({"fh": 0, "sh": 0, "pa": 0})
+
+        # Ensure tie-breaker columns exist as placeholders (optional)
+        for tb in self.tie_breakers:
+            if tb.key not in standings_df.columns:
+                standings_df[tb.key] = pd.NA
+
+        def _resolve_tied_group(tied_df: pd.DataFrame) -> pd.DataFrame:
+            tied = tied_df.copy().reset_index(drop=True)
+
+            # If no tie, return directly
+            if tied.shape[0] <= 1:
+                return tied
+
+            remaining = tied.copy()
+            resolved = []
+
+            for tb in self.tie_breakers:
+                if remaining.shape[0] <= 1:
+                    break
+
+                # Compute current TB only for remaining group
+                remaining[tb.key] = tb.apply(
+                    remaining,
+                    games_df,
+                    remaining["team_id"].tolist(),
+                )
+
+                # Sort remaining for this TB
+                remaining = remaining.sort_values(
+                    by=tb.key, ascending=tb.ascending, ignore_index=True
+                )
+
+                # Split by this TB value
+                groups = []
+                vals = remaining[tb.key].tolist()
+                block = [0]
+
+                for i in range(1, len(vals)):
+                    if vals[i] == vals[i - 1]:
+                        block.append(i)
+                    else:
+                        groups.append(block)
+                        block = [i]
+                groups.append(block)
+
+                new_remaining = []
+                for g in groups:
+                    sub = remaining.iloc[g].copy().reset_index(drop=True)
+                    if len(sub) == 1:
+                        resolved.append(sub)
+                    else:
+                        new_remaining.append(sub)
+
+                if not new_remaining:
+                    # all resolved
+                    break
+
+                remaining = pd.concat(new_remaining, ignore_index=True)
+
+            # Add leftover unresolved teams (final order preserved)
+            if not remaining.empty:
+                resolved.append(remaining)
+
+            # IMPORTANT: return single frame (no duplicates possible)
+            return pd.concat(resolved, ignore_index=True)
+
+        updated_rows = []
+
+        # --- iterate per standing and per points (league_points) group, but resolve ties iteratively ---
+        for group_name, group_df in standings_df.groupby("standing"):
+            for points_value, tied_df in group_df.groupby("league_points"):
+                tied_df = tied_df.reset_index(drop=True)
+
+                # Only resolve ties if necessary
+                if len(tied_df) > 1:
+                    ordered_tied = _resolve_tied_group(tied_df)
+                    updated_rows.append(ordered_tied)
+                else:
+                    updated_rows.append(tied_df)
+
+        # Merge back and final global sort (standing + tie-break order)
+        sorted_df = pd.concat(updated_rows, ignore_index=True)
+
+        sort_keys = [tb.key for tb in self.tie_breakers]
+        ascending_list = [tb.ascending for tb in self.tie_breakers]
+
+        # Always include standing + primary league_points as base sort
+        sorted_df = sorted_df.sort_values(
+            by=["standing", "league_points"] + sort_keys,
+            ascending=[True, False] + ascending_list,
+            ignore_index=True,
+        )
+
+        # Assign ranks (your _assign_ranks can be used here)
+        sorted_df = self._assign_ranks(sorted_df)
+
+        return sorted_df
+
+    def rank2(self, standings_df: pd.DataFrame, games_df: pd.DataFrame) -> pd.DataFrame:
+        """Sort standings by points first, then apply tie-breakers only within tied groups."""
+
+        games_df = games_df.fillna({"fh": 0, "sh": 0, "pa": 0})
+
+        # Step 2: Prepare placeholders for tie-breaker columns
+        for tb in self.tie_breakers:
+            if tb.key not in standings_df.columns:
+                standings_df[tb.key] = pd.NA  # placeholder, will fill later
+
+        # Step 3: Go through each group (e.g. group/standing) and tied points subset
+        updated_rows = []
+
+        for group_name, group_df in standings_df.groupby("standing"):
+            # For each points value that occurs more than once
+            for points_value, tied_df in group_df.groupby("league_points"):
+                if len(tied_df) <= 1:
+                    # no tie → skip
+                    updated_rows.append(tied_df)
+                    continue
+
+                # Compute tie-breaker columns only for tied teams
+                tied_teams = tied_df["team_id"].tolist()
+
+                for tb in self.tie_breakers:
+                    tied_df[tb.key] = tb.apply(tied_df, games_df, tied_teams)
+
+                # Now sort the tied group using configured tiebreakers
+                sort_keys = [tb.key for tb in self.tie_breakers]
+                ascending_list = [tb.ascending for tb in self.tie_breakers]
+
+                tied_df = tied_df.sort_values(
+                    by=sort_keys, ascending=ascending_list, ignore_index=True
+                )
+                updated_rows.append(tied_df)
+
+        # Step 4: Merge all groups back together and re-sort globally by points (and tiebreakers)
+        sorted_df = pd.concat(updated_rows, ignore_index=True)
+
+        sort_keys = [tb.key for tb in self.tie_breakers]
+        ascending_list = [tb.ascending for tb in self.tie_breakers]
+        sorted_df = sorted_df.sort_values(
+            by=["standing"] + sort_keys,
+            ascending=[True] + ascending_list,
+            ignore_index=True,
+        )
+
+        # sorted_df = self._assign_ranks(sorted_df)
+
+        return sorted_df

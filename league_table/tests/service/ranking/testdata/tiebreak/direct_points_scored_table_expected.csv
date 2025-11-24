@@ -1,5 +1,5 @@
-team_id,team__name,pf,pa,diff,league_points,standing,direct_wins,direct_point_diff,direct_points_scored,overall_point_diff,overall_points_scored,name_ascending
-1,Team A,130,110,20,4,Group 1,1,0,90,20,130,team a
-2,Team B,100,90,10,4,Group 1,1,0,70,10,100,team b
-3,Team C,75,70,5,4,Group 1,1,0,50,5,75,team c
-4,Team D,60,95,-35,0,Group 1,0,0,0,0,0,0
+team_id,team__name,pf,pa,diff,league_points,standing,direct_wins,direct_point_diff,direct_points_scored,overall_point_diff,overall_points_scored,name_ascending,rank
+1,Team A,130,110,20,4,Group 1,1,0,90,20,130,team a,1
+2,Team B,100,90,10,4,Group 1,1,0,70,10,100,team b,2
+3,Team C,75,70,5,4,Group 1,1,0,50,5,75,team c,3
+4,Team D,60,95,-35,0,Group 1,0,0,0,0,0,,4

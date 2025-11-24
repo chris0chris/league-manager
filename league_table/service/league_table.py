@@ -17,8 +17,20 @@ from gamedays.service.gameday_settings import (
 )
 from league_table.service.datatypes import LeagueConfig
 from league_table.service.leaguetable_repository import LeagueTableRepository
-from league_table.service.ranking.engine import LeagueRankingEngine
-from league_table.service.ranking.tiebreakers import TieBreakerEngine
+from league_table.service.ranking.engine import LeagueRankingEngine, TieBreakerEngine
+
+LEAGUE_TABLE_GAME_COLUMNS = [
+    "gameinfo",
+    "team_id",
+    "team__description",
+    "fh",
+    "sh",
+    "pa",
+    "isHome",
+    "gameinfo__standing",
+]
+
+LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS = ["team_id", "league_id"]
 
 
 class LeagueTable:
@@ -39,18 +51,10 @@ class LeagueTable:
                 gameinfo__gameday__league=league_season_config.league,
                 gameinfo__status="beendet",
             )
+            # .exclude(gameinfo__gameday__gte=421)
             .exclude(gameinfo__gameday__in=league_config.excluded_gameday_ids)
             .select_related("gameinfo", "team")
-            .values(
-                "gameinfo",
-                "team_id",
-                "team__description",
-                "fh",
-                "sh",
-                "pa",
-                "isHome",
-                "gameinfo__standing",
-            )
+            .values(*LEAGUE_TABLE_GAME_COLUMNS)
         )
         unique_team_ids = results.values_list("team_id", flat=True).distinct()
         team_and_league_ids = (
@@ -58,7 +62,7 @@ class LeagueTable:
                 season=current_season, team__in=unique_team_ids
             )
             .exclude(league=league_config.ruleset.excluded_league_id)
-            .values("team_id", "league_id")
+            .values(*LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS)
         )
         games_with_results = self._get_games_with_results_as_dataframe(
             results, team_and_league_ids
@@ -69,7 +73,6 @@ class LeagueTable:
         tb_engine = TieBreakerEngine(league_config.ruleset)
         final_league_table = tb_engine.rank(league_table, games_with_results)
 
-        final_league_table["rank"] = range(1, len(final_league_table) + 1)
         columns = [
             GAMEDAY_NAME,
             GAMEDAY_ID,
@@ -90,11 +93,13 @@ class LeagueTable:
     ) -> pd.DataFrame:
         df = pd.DataFrame(list(results))
         if df.empty:
-            return df
+            df = pd.DataFrame(columns=LEAGUE_TABLE_GAME_COLUMNS)
 
         df["pf"] = df["fh"].fillna(0) + df["sh"].fillna(0)
 
         team_assoc = pd.DataFrame(team_and_league_ids)
+        if team_assoc.empty:
+            team_assoc = pd.DataFrame(columns=LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS)
         df = df.merge(
             team_assoc,
             left_on="team_id",

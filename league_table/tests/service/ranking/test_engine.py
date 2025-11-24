@@ -8,8 +8,7 @@ from league_table.service.datatypes import (
     LeagueConfig,
     LeaguePoints,
 )
-from league_table.service.ranking.engine import LeagueRankingEngine
-from league_table.service.ranking.tiebreakers import TieBreakerEngine
+from league_table.service.ranking.engine import LeagueRankingEngine, TieBreakerEngine
 
 BASE = pathlib.Path(__file__).parent / "testdata/tiebreak"
 
@@ -22,6 +21,8 @@ RULESET = LeagueConfigRuleset(
         points_draw_same_league=0.5,
         points_win_other_league=2.0,
         points_win_same_league=1.0,
+        points_loss_other_league=0,
+        points_loss_same_league=0,
     ),
     tie_break_order=[
         {"is_ascending": False, "key": "league_points"},
@@ -33,7 +34,7 @@ RULESET = LeagueConfigRuleset(
         {"is_ascending": True, "key": "name_ascending"},
     ],
     excluded_league_id=0,
-    league_quotient_precision=3
+    league_quotient_precision=3,
 )
 
 LEAGUE_CONFIG = LeagueConfig(
@@ -94,7 +95,17 @@ class TestTieBreakEngine:
         expected_result = pd.read_csv(BASE / expected_result_file)
 
         engine = TieBreakerEngine(RULESET)
+
         result = engine.rank(table, games)
+        result = result.fillna(
+            {
+                "direct_wins": 0,
+                "direct_point_diff": 0,
+                "direct_points_scored": 0,
+                "overall_point_diff": 0,
+                "overall_points_scored": 0,
+            }
+        )
 
         assert result.to_csv() == expected_result.to_csv()
 
@@ -109,6 +120,8 @@ class TestLeagueRankingEngine:
                 points_draw_same_league=0.5,
                 points_win_other_league=4.0,
                 points_win_same_league=2.0,
+                points_loss_same_league=-1.0,
+                points_loss_other_league=0,
             ),
             league_quotient_precision=RULESET.league_quotient_precision,
             tie_break_order=RULESET.tie_break_order,
@@ -135,7 +148,7 @@ class TestLeagueRankingEngine:
             league_points=RULESET.league_points,
             tie_break_order=RULESET.tie_break_order,
             excluded_league_id=RULESET.excluded_league_id,
-            league_quotient_precision=1
+            league_quotient_precision=1,
         )
 
         league_config = LeagueConfig(
@@ -168,7 +181,9 @@ class TestLeagueRankingEngine:
         assert result.to_csv() == expected_result.to_csv()
 
     def test_league_quotient_precision(self):
-        games = pd.read_csv(BASE / "../league_ranking/league_ranking_games_for_quotient_precision.csv")
+        games = pd.read_csv(
+            BASE / "../league_ranking/league_ranking_games_for_quotient_precision.csv"
+        )
         expected_result = pd.read_csv(
             BASE
             / "../league_ranking/league_ranking_games_for_quotient_precision_table_expected.csv"
@@ -177,4 +192,3 @@ class TestLeagueRankingEngine:
         engine = LeagueRankingEngine(LEAGUE_CONFIG)
         result = engine.compute_league_table(games)
         assert result.to_csv() == expected_result.to_csv()
-

@@ -12,6 +12,8 @@ class LeaguePoints:
     points_draw_same_league: float
     points_win_other_league: float
     points_win_same_league: float
+    points_loss_other_league: float
+    points_loss_same_league: float
 
     @classmethod
     def from_ruleset(cls, ruleset: LeagueRuleset):
@@ -22,6 +24,8 @@ class LeaguePoints:
             points_draw_same_league=float(ruleset.points_draw_same_league),
             points_win_other_league=float(ruleset.points_win_other_league),
             points_win_same_league=float(ruleset.points_win_same_league),
+            points_loss_other_league=float(ruleset.points_loss_other_league),
+            points_loss_same_league=float(ruleset.points_loss_same_league),
         )
 
 

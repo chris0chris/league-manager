@@ -33,7 +33,7 @@ from gamedays.service.gameday_settings import (
     IS_HOME,
     MAIN_ROUND,
 )
-from league_table.service.ranking.engine import FinalRankingEngine
+from league_table.service.ranking.engine import FinalRankingEngine, TieBreakerEngine
 
 
 class DfflPoints(object):
@@ -112,7 +112,6 @@ class GamedayModelWrapper:
             return qualify_round
 
         from league_table.models import LeagueSeasonConfig
-        from league_table.service.ranking.tiebreakers import TieBreakerEngine
 
         try:
             league_ruleset = LeagueSeasonConfig.objects.get(

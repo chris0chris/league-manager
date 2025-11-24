@@ -180,3 +180,6 @@ class TeamPointAdjustments(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     sum_points = models.DecimalField(max_digits=5, decimal_places=2)
     tie_step_for_sum_points = models.ForeignKey(TieBreakStep, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.team.description}: {self.sum_points} -> {self.tie_step_for_sum_points} ### {self.league_season_config}"
