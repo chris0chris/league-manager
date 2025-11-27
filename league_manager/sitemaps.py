@@ -44,6 +44,15 @@ class LeagueSphereSitemap(Sitemap):
         """
         return settings.SITEMAP_DOMAIN
 
+    def get_protocol(self, protocol=None):
+        """
+        Override to always return HTTPS protocol for secure connections.
+
+        Returns:
+            str: 'https' protocol
+        """
+        return 'https'
+
 
 class StaticViewSitemap(LeagueSphereSitemap):
     """
