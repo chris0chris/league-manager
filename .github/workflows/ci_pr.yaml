@@ -20,14 +20,12 @@ jobs:
     secrets: inherit
     with:
       project: scorecard
-      report: false
 
   build-test-liveticker:
     uses: ./.github/workflows/part_node_test.yaml
     secrets: inherit
     with:
       project: liveticker
-      report: false
 
   build-passcheck:
     uses: ./.github/workflows/part_node_build.yaml

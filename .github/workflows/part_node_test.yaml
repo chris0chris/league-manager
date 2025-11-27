@@ -7,11 +7,6 @@ on:
         required: true
         description: The project to build
         type: string
-      report:
-        required: false
-        default: true
-        description: Whether to generate the report
-        type: boolean
 
 permissions:
   contents: write
@@ -31,18 +26,10 @@ jobs:
           node-version: '24.x'
           cache: 'npm'
           cache-dependency-path: ${{ inputs.project }}/package.json
-      - name: 📊✅ ${{ inputs.project }} Test report
-        if: ${{ inputs.report }}
-        uses: ArtiomTr/jest-coverage-report-action@v2
-        with:
-          working-directory: ${{ inputs.project }}
-          test-script: npm run test:run
-          custom-title: Report for ${{ inputs.project }}
       - name: 🧪 Testing ${{ inputs.project }}
-        if: ${{ ! inputs.report }}
         run: |
           npm ci
-          npm run test:run
+          npm run test:coverage
       - name: 📊 Upload Coverage to Codecov
         # secrets not directly accessible https://stackoverflow.com/questions/72925899/github-actions-detect-if-secret-exists
         env:

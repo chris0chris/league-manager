@@ -11,6 +11,16 @@ def homeview(request):
     return render(request, 'homeview.html')
 
 
+def robots_txt_view(request):
+    """
+    Serve robots.txt file.
+
+    Uses Django template rendering to serve robots.txt.
+    Works in all environments without requiring collectstatic.
+    """
+    return render(request, 'robots.txt', content_type='text/plain')
+
+
 class ClearCacheView(UserPassesTestMixin, View):
 
     def get(self, request):
