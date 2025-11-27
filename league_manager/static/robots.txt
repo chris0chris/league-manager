@@ -1,0 +1,24 @@
+# LeagueSphere robots.txt
+
+User-agent: *
+
+# Disallow common patterns that indicate write operations
+Disallow: /*/create/
+Disallow: /*/update/
+Disallow: /*/delete/
+Disallow: /*/edit*
+Disallow: /*/add*
+Disallow: /*/upload*
+Disallow: /*/transfer/
+
+# Allow specific public read-only sections
+Allow: /leaguetable/
+Allow: /liveticker/
+Allow: /scorecard/
+Allow: /gamedays/gameday/*/$
+Allow: /passcheck/team/
+Allow: /officials/team/
+Allow: /officials/einsaetze/
+
+# Sitemap location
+Sitemap: https://leaguesphere.app/sitemap.xml
