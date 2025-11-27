@@ -16,11 +16,36 @@ from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
+from django.conf import settings
 
 from gamedays.models import Gameday, Season, League, Team
 
 
-class StaticViewSitemap(Sitemap):
+class LeagueSphereSitemap(Sitemap):
+    """
+    Base sitemap class that uses settings-based domain configuration.
+
+    Overrides Django's default behavior of using the Sites framework
+    to look up domain from the database. Instead, uses SITEMAP_DOMAIN
+    setting which is environment-specific (dev.py, prod.py).
+
+    This approach:
+    - Matches our pattern of hardcoding config in settings files
+    - Maintains test isolation (tests use base.py with example.com)
+    - Avoids database dependency for domain configuration
+    """
+
+    def get_domain(self, site=None):
+        """
+        Override to return domain from settings instead of Sites framework.
+
+        Returns:
+            str: Domain from SITEMAP_DOMAIN setting
+        """
+        return settings.SITEMAP_DOMAIN
+
+
+class StaticViewSitemap(LeagueSphereSitemap):
     """
     Sitemap for static read-only pages.
 
@@ -54,7 +79,7 @@ class StaticViewSitemap(Sitemap):
         return 0.8
 
 
-class LeaguetableSitemap(Sitemap):
+class LeaguetableSitemap(LeagueSphereSitemap):
     """
     Sitemap for league standings pages.
 
@@ -84,7 +109,7 @@ class LeaguetableSitemap(Sitemap):
         return item
 
 
-class GamedaySitemap(Sitemap):
+class GamedaySitemap(LeagueSphereSitemap):
     """
     Sitemap for public gameday detail pages.
 
@@ -118,7 +143,7 @@ class GamedaySitemap(Sitemap):
         )
 
 
-class PasscheckTeamSitemap(Sitemap):
+class PasscheckTeamSitemap(LeagueSphereSitemap):
     """
     Sitemap for team roster pages (passcheck).
 
@@ -138,7 +163,7 @@ class PasscheckTeamSitemap(Sitemap):
         return f"/passcheck/team/{obj.pk}/list/"
 
 
-class OfficialsSitemap(Sitemap):
+class OfficialsSitemap(LeagueSphereSitemap):
     """
     Sitemap for officials pages.
 

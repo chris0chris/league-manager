@@ -114,6 +114,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Sites framework
 SITE_ID = 1
 
+# Sitemap domain configuration
+# Override in environment-specific settings (dev.py, prod.py)
+SITEMAP_DOMAIN = 'example.com'  # Default for tests
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 

@@ -14,6 +14,9 @@ ALLOWED_HOSTS = ['127.0.0.1', '.ngrok-free.app', 'localhost', '172.21.0.3', 'dja
 
 CSRF_TRUSTED_ORIGINS = ['https://lm.lehel.xyz', 'https://lm.servyy-test.lxd']
 
+# Sitemap domain for development
+SITEMAP_DOMAIN = 'localhost:8000'
+
 if PROFILING:
     INSTALLED_APPS = [
                          'silk',
