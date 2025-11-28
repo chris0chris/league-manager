@@ -33,7 +33,6 @@ RULESET = LeagueConfigRuleset(
         {"is_ascending": False, "key": "overall_points_scored"},
         {"is_ascending": True, "key": "name_ascending"},
     ],
-    excluded_league_id=0,
     league_quotient_precision=3,
 )
 
@@ -41,6 +40,7 @@ LEAGUE_CONFIG = LeagueConfig(
     ruleset=RULESET,
     team_point_adjustments_map=[],
     excluded_gameday_ids=[],
+    leagues_for_league_points_ids=[]
 )
 
 
@@ -125,13 +125,13 @@ class TestLeagueRankingEngine:
             ),
             league_quotient_precision=RULESET.league_quotient_precision,
             tie_break_order=RULESET.tie_break_order,
-            excluded_league_id=RULESET.excluded_league_id,
         )
 
         league_config = LeagueConfig(
             ruleset=custom_ruleset,
             team_point_adjustments_map=[],
             excluded_gameday_ids=[],
+            leagues_for_league_points_ids=[]
         )
 
         games = pd.read_csv(BASE / "../league_ranking/league_ranking_games.csv")
@@ -147,7 +147,6 @@ class TestLeagueRankingEngine:
         custom_ruleset = LeagueConfigRuleset(
             league_points=RULESET.league_points,
             tie_break_order=RULESET.tie_break_order,
-            excluded_league_id=RULESET.excluded_league_id,
             league_quotient_precision=1,
         )
 
@@ -168,6 +167,7 @@ class TestLeagueRankingEngine:
                 },
             ],
             excluded_gameday_ids=[],
+            leagues_for_league_points_ids=[]
         )
 
         games = pd.read_csv(BASE / "../league_ranking/league_ranking_games.csv")
@@ -177,6 +177,19 @@ class TestLeagueRankingEngine:
         )
 
         engine = LeagueRankingEngine(league_config)
+        result = engine.compute_league_table(games)
+        assert result.to_csv() == expected_result.to_csv()
+
+    def test_league_quotient_precision(self):
+        games = pd.read_csv(
+            BASE / "../league_ranking/league_ranking_games_for_quotient_precision.csv"
+        )
+        expected_result = pd.read_csv(
+            BASE
+            / "../league_ranking/league_ranking_games_for_quotient_precision_table_expected.csv"
+        )
+
+        engine = LeagueRankingEngine(LEAGUE_CONFIG)
         result = engine.compute_league_table(games)
         assert result.to_csv() == expected_result.to_csv()
 

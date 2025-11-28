@@ -28,9 +28,10 @@ LEAGUE_TABLE_GAME_COLUMNS = [
     "pa",
     "isHome",
     "gameinfo__standing",
+    "gameinfo__status",
 ]
 
-LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS = ["team_id", "league_id"]
+LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS = ["team_id", "league_id", "team__description"]
 
 
 class LeagueTable:
@@ -51,19 +52,15 @@ class LeagueTable:
                 gameinfo__gameday__league=league_season_config.league,
                 gameinfo__status="beendet",
             )
-            # .exclude(gameinfo__gameday__gte=421)
+            # .exclude(gameinfo__gameday__gte=428)
             .exclude(gameinfo__gameday__in=league_config.excluded_gameday_ids)
             .select_related("gameinfo", "team")
             .values(*LEAGUE_TABLE_GAME_COLUMNS)
         )
-        unique_team_ids = results.values_list("team_id", flat=True).distinct()
-        team_and_league_ids = (
-            SeasonLeagueTeam.objects.filter(
-                season=current_season, team__in=unique_team_ids
-            )
-            .exclude(league=league_config.ruleset.excluded_league_id)
-            .values(*LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS)
-        )
+        team_and_league_ids = SeasonLeagueTeam.objects.filter(
+            season=current_season,
+            league__in=league_config.leagues_for_league_points_ids,
+        ).values(*LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS)
         games_with_results = self._get_games_with_results_as_dataframe(
             results, team_and_league_ids
         )
@@ -91,24 +88,61 @@ class LeagueTable:
         results: QuerySet[Gameresult, dict[str, Any]],
         team_and_league_ids: QuerySet,
     ) -> pd.DataFrame:
-        df = pd.DataFrame(list(results))
-        if df.empty:
-            df = pd.DataFrame(columns=LEAGUE_TABLE_GAME_COLUMNS)
 
-        df["pf"] = df["fh"].fillna(0) + df["sh"].fillna(0)
+        # Always start with all teams
+        # teams_df = self._get_all_teams_df(team_and_league_ids)
+        teams_df = pd.DataFrame(team_and_league_ids)
 
-        team_assoc = pd.DataFrame(team_and_league_ids)
-        if team_assoc.empty:
-            team_assoc = pd.DataFrame(columns=LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS)
-        df = df.merge(
-            team_assoc,
-            left_on="team_id",
-            right_on="team_id",
+        results_df = pd.DataFrame(list(results))
+
+        if results_df.empty:
+            # No games played → return base team list only
+            df = teams_df.copy()
+
+            # Columns that must exist for the ranking engine
+            df["pf"] = 0
+            df["pa"] = 0
+            df["diff"] = 0
+            df["league_points"] = 0
+            df["max_league_points"] = 0
+            df["wins"] = 0
+            df["draws"] = 0
+            df["losses"] = 0
+            df["games_played"] = 0
+
+            # Game fields
+            df["gameinfo"] = pd.NA
+            df["fh"] = pd.NA
+            df["sh"] = pd.NA
+            df["isHome"] = pd.NA
+            df["gameinfo__status"] = "Initial"
+            df["gameinfo__standing"] = "Hauptrunde"
+
+            # Opponent placeholders (never used, but required for consistency)
+            df["opponent_team_id"] = df["team_id"]
+            df["opponent_league_id"] = df["league_id"]
+
+            return df
+
+        # Compute PF/PA/etc.
+        results_df["pf"] = (
+            results_df["fh"].fillna(0) + results_df["sh"].fillna(0)
+        ).astype(int)
+        results_df["pa"] = results_df["pa"].fillna(0).astype(int)
+        results_df["diff"] = results_df["pf"] - results_df["pa"]
+
+        # Merge results ONTO teams
+        merged = teams_df.merge(
+            results_df,
+            on="team_id",
             how="left",
-            suffixes=("", "_team"),
+            suffixes=("", "_game"),
         )
 
-        df_opponent = df[["gameinfo", "team_id", "league_id"]].copy()
+        df_empty = merged[merged["gameinfo"].isna()].copy()
+        df_games = merged[merged["gameinfo"].notna()].copy()
+
+        df_opponent = merged[["gameinfo", "team_id", "league_id"]].copy()
         df_opponent = df_opponent.rename(
             columns={
                 "team_id": "opponent_team_id",
@@ -116,8 +150,21 @@ class LeagueTable:
             }
         )
 
-        df = df.merge(df_opponent, on="gameinfo", how="left")
-        df = df[df["team_id"] != df["opponent_team_id"]]
+        df_games = df_games.merge(df_opponent, on="gameinfo", how="left")
+        df_games = df_games[df_games["team_id"] != df_games["opponent_team_id"]]
+
+        merged_final = pd.concat([df_empty, df_games], ignore_index=True)
+
+        merged_final["gameinfo__standing"] = "Hauptrunde"
+
+        return merged_final
+
+    def _get_all_teams_df(self, team_and_league_ids: QuerySet) -> pd.DataFrame:
+        df = pd.DataFrame(team_and_league_ids)
+
+        if df.empty:
+            # Should never happen unless config is broken
+            return pd.DataFrame(columns=LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS)
         return df
 
     def get_all_schedules(self):

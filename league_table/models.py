@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import CASCADE
 
 from gamedays.models import League, Season, Gameday, Team
 
@@ -53,15 +52,6 @@ class LeagueRuleset(models.Model):
     )
     max_points_other_league = models.DecimalField(
         max_digits=4, decimal_places=2, default=1
-    )
-
-    exclude_main_league_for_league_points = models.ForeignKey(
-        League,
-        on_delete=CASCADE,
-        related_name="excluded_league",
-        null=True,
-        blank=True,
-        default=None,
     )
 
     tie_break_steps = models.ManyToManyField(
@@ -149,6 +139,13 @@ class LeagueSeasonConfig(models.Model):
     )
     team_point_adjustments = models.ManyToManyField(
         Team, through="TeamPointAdjustments"
+    )
+
+    leagues_for_league_points = models.ManyToManyField(
+        League,
+        null=True,
+        blank=True,
+        default=None,
     )
 
     def get_team_point_adjustment_map(self):

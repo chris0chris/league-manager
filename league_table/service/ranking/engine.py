@@ -7,6 +7,7 @@ from gamedays.service.gameday_settings import (
     PF,
     PA,
     DIFF,
+    FINISHED,
 )
 from league_table.models import LeagueRuleset
 from league_table.service.datatypes import LeagueConfig, LeagueConfigRuleset
@@ -102,20 +103,62 @@ class LeagueRankingEngine:
         self.league_config = league_config
 
     def compute_initial_stats(self, df) -> pd.DataFrame:
-        """Return all finished games for the season+league with league-aware scoring."""
+        """Return finished games for the season+league with league-aware scoring."""
 
-        df["league_points"] = df.apply(self._compute_league_points, axis=1)
-
-        df["games_played"] = df["fh"].fillna(0).apply(lambda x: 1 if x >= 0 else 0)
-
-        # max_league_points column
-        df["max_league_points"] = self._compute_max_points(df)
+        lp = self.league_config.ruleset.league_points
+        mask_finished = df["gameinfo__status"] == FINISHED
 
         # diff column
         df["pf"] = df["fh"].fillna(0) + df["sh"].fillna(0)
-        df["wins"] = df.apply(lambda r: 1 if r["pf"] > r["pa"] else 0, axis=1)
-        df["draws"] = df.apply(lambda r: 1 if r["pf"] == r["pa"] else 0, axis=1)
-        df["losses"] = df.apply(lambda r: 1 if r["pf"] < r["pa"] else 0, axis=1)
+
+        # ---------------------------------------------------------------------
+        # Vectorized outcomes
+        # ---------------------------------------------------------------------
+        win_mask = df["pf"] > df["pa"]
+        draw_mask = df["pf"] == df["pa"]
+        loss_mask = df["pf"] < df["pa"]
+
+        same_league = df["league_id"] == df["opponent_league_id"]
+
+        # ---------------------------------------------------------------------
+        # Vectorized league points
+        # ---------------------------------------------------------------------
+        df["league_points"] = (
+            win_mask * mask_finished * same_league.map({True: lp.points_win_same_league,
+                                         False: lp.points_win_other_league})
+            +
+            draw_mask * mask_finished * same_league.map({True: lp.points_draw_same_league,
+                                         False: lp.points_draw_other_league})
+            +
+            loss_mask * mask_finished * same_league.map({True: lp.points_loss_same_league,
+                                         False: lp.points_loss_other_league})
+        )
+
+        # ---------------------------------------------------------------------
+        # Games played (only finished)
+        # ---------------------------------------------------------------------
+        df["games_played"] = mask_finished.astype("Int64")
+
+        # ---------------------------------------------------------------------
+        # Max league points per match (vectorized)
+        # ---------------------------------------------------------------------
+        df["max_league_points"] = same_league.map(
+            {
+                True: lp.max_points_same_league,
+                False: lp.max_points_other_league,
+            }
+        )
+
+        # ---------------------------------------------------------------------
+        # Wins / Draws / Losses (only for finished games)
+        # ---------------------------------------------------------------------
+        df["wins"] = (win_mask & mask_finished).astype("Int64")
+        df["draws"] = (draw_mask & mask_finished).astype("Int64")
+        df["losses"] = (loss_mask & mask_finished).astype("Int64")
+
+        # ---------------------------------------------------------------------
+        # Diff
+        # ---------------------------------------------------------------------
         df["diff"] = df["pf"] - df["pa"]
 
         return df
@@ -129,13 +172,11 @@ class LeagueRankingEngine:
         for adj in adjustments:
             team_id = adj["id"]
             points_delta = int(adj["points"])
-            field = adj["field"]  # usually "points"
+            field = adj["field"]
 
-            # Safety checks
             if field not in df.columns:
                 raise ValueError(f"Invalid adjustment field '{field}'")
 
-            # Apply adjustment
             df.loc[df["team_id"] == team_id, field] += points_delta
 
         return df
@@ -150,6 +191,7 @@ class LeagueRankingEngine:
             columns={
                 "team__description": "team__name",
                 "gameinfo__standing": "standing",
+                "gameinfo__status": "status",
             }
         )
 
@@ -164,7 +206,7 @@ class LeagueRankingEngine:
                 "pf": "sum",
                 "pa": "sum",
                 "diff": "sum",
-                "games_played": "count",
+                "games_played": "sum",
                 "standing": "first",
             }
         )

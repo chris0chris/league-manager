@@ -57,7 +57,6 @@ class LeagueConfigRuleset:
     league_points: LeaguePoints
     league_quotient_precision: int
     tie_break_order: list[dict]
-    excluded_league_id: int
 
     @classmethod
     def from_ruleset(cls, ruleset: LeagueRuleset):
@@ -65,7 +64,6 @@ class LeagueConfigRuleset:
             tie_break_order=ruleset.tie_break_order(),
             league_points=LeaguePoints.from_ruleset(ruleset),
             league_quotient_precision=ruleset.league_quotient_precision,
-            excluded_league_id=ruleset.exclude_main_league_for_league_points.pk,
         )
 
 
@@ -74,6 +72,7 @@ class LeagueConfig:
     ruleset: LeagueConfigRuleset
     team_point_adjustments_map: list[dict]
     excluded_gameday_ids: list[int]
+    leagues_for_league_points_ids: list[int]
 
     @classmethod
     def from_league_season_config(cls, league_season_config: LeagueSeasonConfig):
@@ -82,4 +81,5 @@ class LeagueConfig:
             ruleset=LeagueConfigRuleset.from_ruleset(ruleset),
             team_point_adjustments_map=league_season_config.get_team_point_adjustment_map(),
             excluded_gameday_ids=league_season_config.get_excluded_gameday_ids(),
+            leagues_for_league_points_ids=league_season_config.leagues_for_league_points.values_list('pk')
         )
