@@ -1,0 +1,5 @@
+team_id,team__name,pf,pa,diff,league_points,standing,league_quotient
+1,Team A,82,46,36,6,Group 1,1.000
+2,Team B,166,132,34,4,Group 1,0.400
+3,Team C,70,40,30,4,Group 1,1.000
+4,Team D,90,190,-100,0,Group 1,0.000

@@ -52,8 +52,8 @@ class LeagueTable:
                 gameinfo__gameday__league=league_season_config.league,
                 gameinfo__status="beendet",
             )
-            # .exclude(gameinfo__gameday__gte=428)
-            .exclude(gameinfo__gameday__in=league_config.excluded_gameday_ids)
+            .exclude(gameinfo__gameday__gte=428)
+            # .exclude(gameinfo__gameday__in=league_config.excluded_gameday_ids)
             .select_related("gameinfo", "team")
             .values(*LEAGUE_TABLE_GAME_COLUMNS)
         )
@@ -104,6 +104,7 @@ class LeagueTable:
             df["pa"] = 0
             df["diff"] = 0
             df["league_points"] = 0
+            df["league_quotient"] = 0
             df["max_league_points"] = 0
             df["wins"] = 0
             df["draws"] = 0

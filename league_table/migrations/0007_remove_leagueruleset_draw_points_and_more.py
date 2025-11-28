@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
             name="key",
             field=models.CharField(
                 choices=[
-                    ("league_points", "Siegpunkte"),
+                    ("league_quotient", "Ligaquotient"),
                     ("direct_wins", "Direkte Siegpunkte"),
                     ("direct_point_diff", "Direkte Punktedifferenz"),
                     ("direct_points_scored", "Direkt erzielte Punkte"),

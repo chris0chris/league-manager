@@ -25,7 +25,7 @@ RULESET = LeagueConfigRuleset(
         points_loss_same_league=0,
     ),
     tie_break_order=[
-        {"is_ascending": False, "key": "league_points"},
+        {"is_ascending": False, "key": "league_quotient"},
         {"is_ascending": False, "key": "direct_wins"},
         {"is_ascending": False, "key": "direct_point_diff"},
         {"is_ascending": False, "key": "direct_points_scored"},
@@ -79,6 +79,11 @@ class TestTieBreakEngine:
                 "0_empty_games.csv",
                 "0_empty_table_expected.csv",
             ),
+            (
+                "league_quotient_table.csv",
+                "league_quotient_games.csv",
+                "league_quotient_table_expected.csv",
+            ),
         ],
         ids=[
             "direct_points_diff",
@@ -87,6 +92,7 @@ class TestTieBreakEngine:
             "overall_points_scored",
             "name",
             "initial_empty_table_and_empty_games",
+            "league_quotient",
         ],
     )
     def test_run_tie_break_step(self, table_file, games_file, expected_result_file):
