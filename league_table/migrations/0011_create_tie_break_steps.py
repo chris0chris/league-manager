@@ -76,7 +76,7 @@ def create_tiebreak_steps_and_defaults(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("league_table", "0001_initial"),  # adjust to your last migration
+        ("league_table", "0010_alter_tiebreakstep_key"),  # adjust to your last migration
     ]
 
     operations = [

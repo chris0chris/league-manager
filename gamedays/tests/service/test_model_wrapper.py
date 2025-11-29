@@ -1,4 +1,5 @@
 import pathlib
+from unittest.mock import patch
 
 import pandas as pd
 from django.test import TestCase
@@ -9,6 +10,8 @@ from gamedays.service.gameday_settings import SCHEDULED, FIELD, HOME, POINTS_HOM
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.tests.setup_factories.dataframe_setup import DataFrameAssertion
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from league_table.tests.setup_factories.db_setup_leaguetable import LEAGUE_TABLE_TEST_RULESET
+from league_table.tests.setup_factories.factories_leaguetable import LeagueSeasonConfigFactory
 
 
 class TestGamedayModelWrapper(TestCase):
@@ -52,13 +55,19 @@ class TestGamedayModelWrapper(TestCase):
         gmw = GamedayModelWrapper(gameday.pk)
         assert gmw.get_final_table().empty
 
-    def test_get_final_table(self):
+    @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
+    def test_get_final_table(self, mock_get_league_config_ruleset):
+        mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
         gameday = DBSetup().g62_finalround(sf='beendet', p5='beendet', p3='beendet', p1='beendet')
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         gmw = GamedayModelWrapper(gameday.pk)
         DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('ts_final_table_6_teams')
 
-    def test_get_final_table_for_7_teams(self):
+    @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
+    def test_get_final_table_for_7_teams(self, mock_get_league_config_ruleset):
+        mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
         gameday = DBSetup().g72_finished()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         gmw = GamedayModelWrapper(gameday.pk)
         DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('ts_final_table_7_teams')
 

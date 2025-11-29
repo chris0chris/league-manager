@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from unittest.mock import patch
 
 import pytest
 from django.contrib.auth.models import User
@@ -31,11 +32,14 @@ from gamedays.service.gameday_service import (
     EmptyDefenseStatisticTable,
     EmptyOffenseStatisticTable
 )
-
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
 from gamedays.wizard import FIELD_GROUP_STEP, GAMEDAY_FORMAT_STEP, GAMEINFO_STEP
-from league_table.tests.setup_factories.factories_leaguetable import LeagueGroupFactory
+from league_table.tests.setup_factories.db_setup_leaguetable import LEAGUE_TABLE_TEST_RULESET
+from league_table.tests.setup_factories.factories_leaguetable import (
+    LeagueGroupFactory,
+    LeagueSeasonConfigFactory,
+)
 
 
 class TestGamedayCreateView(WebTest):
@@ -72,8 +76,11 @@ class TestGamedayCreateView(WebTest):
 
 class TestGamedayDetailView(TestCase):
 
-    def test_detail_view_with_finished_gameday(self):
+    @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
+    def test_detail_view_with_finished_gameday(self, mock_get_league_config_ruleset):
+        mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
         gameday = DBSetup().g62_finished()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         resp = self.client.get(
             reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk})
         )

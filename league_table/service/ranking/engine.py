@@ -9,15 +9,13 @@ from gamedays.service.gameday_settings import (
     DIFF,
     FINISHED,
 )
-from league_table.models import LeagueRuleset
 from league_table.service.datatypes import LeagueConfig, LeagueConfigRuleset
 from league_table.service.ranking.tiebreakers import TieBreaker, TIEBREAK_REGISTRY
 
 
 class FinalRankingEngine:
-    def __init__(self, games_with_result: pd.DataFrame, schedule: pd.DataFrame):
-        self.games = games_with_result
-        self.schedule = schedule
+    def __init__(self, league_config_ruleset: LeagueConfigRuleset):
+        self.league_config_ruleset = league_config_ruleset
 
     def _winner(self, row):
         """Return the winning team's name for a finished game."""
@@ -35,10 +33,10 @@ class FinalRankingEngine:
             return row["home"]
         return None  # handle draws safely
 
-    def compute_final_table(self) -> pd.DataFrame:
+    def compute_final_table(self, games: pd.DataFrame, schedule: pd.DataFrame) -> pd.DataFrame:
         """Compute final standings based on actual playoff results."""
         # ensure all games finished
-        if not self.games[self.games["status"] != "beendet"].empty:
+        if not games[games["status"] != "beendet"].empty:
             return pd.DataFrame()
 
         final_standing = []
@@ -46,13 +44,13 @@ class FinalRankingEngine:
         # define the expected placement games
         placements = ["P1", "P3", "P5", "P7", "P9", "P10"]
         for place in placements:
-            games = self.schedule[self.schedule["standing"] == place]
-            if games.empty:
+            local_games = games[games["standing"] == place]
+            if local_games.empty:
                 continue
 
-            if len(games) == 1:
+            if len(local_games) == 1:
                 # only one game, use current logic
-                result_row = games.iloc[0]
+                result_row = local_games.iloc[0]
                 winner = self._winner(result_row)
                 loser = self._loser(result_row)
                 if not winner or not loser:
@@ -63,32 +61,33 @@ class FinalRankingEngine:
                 # multiple games: use tie-breaker engine to decide order
                 # assume `TieBreakerEngine` can rank a subset of games
                 # For example, we rank the teams based on the aggregate pf/pa/points
-                subset_games = self.games[
-                    self.games["gameinfo"].isin(games["gameinfo"])
+                subset_games = local_games[
+                    local_games["gameinfo"].isin(local_games["gameinfo"])
                 ]
                 # Build a mini-standings table
                 mini_table = subset_games.groupby("team__name", as_index=False).agg(
                     {POINTS: "sum", PF: "sum", PA: "sum", "standing": "first"}
                 )
                 mini_table[DIFF] = mini_table[PF] - mini_table[PA]
+                mini_table["league_quotient"] = mini_table[POINTS]
+
 
                 # Sort using your tie-breaker logic (replace with your actual tie-breaker engine)
-                # TODO make dynamic
                 tie_breaker = TieBreakerEngine(
-                    LeagueRuleset.objects.first()
+                    self.league_config_ruleset
                 )  # or whatever engine you already have
-                mini_table_sorted = tie_breaker.rank(mini_table, games)
+                mini_table_sorted = tie_breaker.rank(mini_table, local_games)
 
                 # Add sorted teams to final_standing
                 final_standing.extend(mini_table_sorted["team__name"].tolist())
 
         # if some teams are not in playoffs, add them at the end
-        all_teams = self.games["team__name"].unique().tolist()
+        all_teams = games["team__name"].unique().tolist()
         missing = [t for t in all_teams if t not in final_standing]
         final_standing += missing
 
         # aggregate basic stats for presentation
-        table = self.games.groupby("team__name", as_index=False).agg(
+        table = games.groupby("team__name", as_index=False).agg(
             {POINTS: "sum", PF: "sum", PA: "sum"}
         )
         table[DIFF] = table[PF] - table[PA]

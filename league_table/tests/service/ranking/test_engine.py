@@ -9,39 +9,12 @@ from league_table.service.datatypes import (
     LeaguePoints,
 )
 from league_table.service.ranking.engine import LeagueRankingEngine, TieBreakerEngine
+from league_table.tests.setup_factories.db_setup_leaguetable import (
+    LEAGUE_TABLE_TEST_RULESET,
+    LEAGUE_TABLE_TEST_LEAGUE_CONFIG,
+)
 
 BASE = pathlib.Path(__file__).parent / "testdata/tiebreak"
-
-
-RULESET = LeagueConfigRuleset(
-    league_points=LeaguePoints(
-        max_points_other_league=2.0,
-        max_points_same_league=1.0,
-        points_draw_other_league=1.0,
-        points_draw_same_league=0.5,
-        points_win_other_league=2.0,
-        points_win_same_league=1.0,
-        points_loss_other_league=0,
-        points_loss_same_league=0,
-    ),
-    tie_break_order=[
-        {"is_ascending": False, "key": "league_quotient"},
-        {"is_ascending": False, "key": "direct_wins"},
-        {"is_ascending": False, "key": "direct_point_diff"},
-        {"is_ascending": False, "key": "direct_points_scored"},
-        {"is_ascending": False, "key": "overall_point_diff"},
-        {"is_ascending": False, "key": "overall_points_scored"},
-        {"is_ascending": True, "key": "name_ascending"},
-    ],
-    league_quotient_precision=3,
-)
-
-LEAGUE_CONFIG = LeagueConfig(
-    ruleset=RULESET,
-    team_point_adjustments_map=[],
-    excluded_gameday_ids=[],
-    leagues_for_league_points_ids=[]
-)
 
 
 class TestTieBreakEngine:
@@ -100,7 +73,7 @@ class TestTieBreakEngine:
         games = pd.read_csv(BASE / games_file)
         expected_result = pd.read_csv(BASE / expected_result_file)
 
-        engine = TieBreakerEngine(RULESET)
+        engine = TieBreakerEngine(LEAGUE_TABLE_TEST_RULESET)
 
         result = engine.rank(table, games)
         result = result.fillna(
@@ -129,15 +102,15 @@ class TestLeagueRankingEngine:
                 points_loss_same_league=-1.0,
                 points_loss_other_league=0,
             ),
-            league_quotient_precision=RULESET.league_quotient_precision,
-            tie_break_order=RULESET.tie_break_order,
+            league_quotient_precision=LEAGUE_TABLE_TEST_RULESET.league_quotient_precision,
+            tie_break_order=LEAGUE_TABLE_TEST_RULESET.tie_break_order,
         )
 
         league_config = LeagueConfig(
             ruleset=custom_ruleset,
             team_point_adjustments_map=[],
             excluded_gameday_ids=[],
-            leagues_for_league_points_ids=[]
+            leagues_for_league_points_ids=[],
         )
 
         games = pd.read_csv(BASE / "../league_ranking/league_ranking_games.csv")
@@ -151,8 +124,8 @@ class TestLeagueRankingEngine:
 
     def test_league_ranking_engine_with_team_point_adjustments(self):
         custom_ruleset = LeagueConfigRuleset(
-            league_points=RULESET.league_points,
-            tie_break_order=RULESET.tie_break_order,
+            league_points=LEAGUE_TABLE_TEST_RULESET.league_points,
+            tie_break_order=LEAGUE_TABLE_TEST_RULESET.tie_break_order,
             league_quotient_precision=1,
         )
 
@@ -173,7 +146,7 @@ class TestLeagueRankingEngine:
                 },
             ],
             excluded_gameday_ids=[],
-            leagues_for_league_points_ids=[]
+            leagues_for_league_points_ids=[],
         )
 
         games = pd.read_csv(BASE / "../league_ranking/league_ranking_games.csv")
@@ -195,7 +168,7 @@ class TestLeagueRankingEngine:
             / "../league_ranking/league_ranking_games_for_quotient_precision_table_expected.csv"
         )
 
-        engine = LeagueRankingEngine(LEAGUE_CONFIG)
+        engine = LeagueRankingEngine(LEAGUE_TABLE_TEST_LEAGUE_CONFIG)
         result = engine.compute_league_table(games)
         assert result.to_csv() == expected_result.to_csv()
 
@@ -208,6 +181,6 @@ class TestLeagueRankingEngine:
             / "../league_ranking/league_ranking_games_for_quotient_precision_table_expected.csv"
         )
 
-        engine = LeagueRankingEngine(LEAGUE_CONFIG)
+        engine = LeagueRankingEngine(LEAGUE_TABLE_TEST_LEAGUE_CONFIG)
         result = engine.compute_league_table(games)
         assert result.to_csv() == expected_result.to_csv()

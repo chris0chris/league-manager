@@ -13,7 +13,10 @@ from gamedays.models import Gameday, Gameinfo, Gameresult
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.tests.setup_factories.dataframe_setup import DataFrameAssertion
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from league_table.tests.setup_factories.factories_leaguetable import LeagueRulesetFactory
+from league_table.tests.setup_factories.db_setup_leaguetable import LEAGUE_TABLE_TEST_RULESET
+from league_table.tests.setup_factories.factories_leaguetable import (
+    LeagueSeasonConfigFactory,
+)
 
 
 def update_gameresults(game):
@@ -113,9 +116,11 @@ class TestScheduleUpdate(TransactionTestCase):
             update_gameresults(game)
         p5_first.update(status='beendet')
 
-    def test_update_9_teams_3_fields(self):
-        LeagueRulesetFactory()
+    @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
+    def test_update_9_teams_3_fields(self, mock_get_league_config_ruleset):
+        mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
         gameday = DBSetup().create_empty_gameday()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         gameday.format = "9_3"
         gameday.save()
         group_A = DBSetup().create_teams('A', 3)
@@ -159,8 +164,11 @@ class TestScheduleUpdate(TransactionTestCase):
         DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('final_table_9_teams')
         DataFrameAssertion.expect(gmw.get_schedule()).to_equal_json('schedule_9_teams_3_fields')
 
-    def test_update_11_teams_3_fields(self):
+    @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
+    def test_update_11_teams_3_fields(self, mock_get_league_config_ruleset):
+        mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
         gameday = DBSetup().create_empty_gameday()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         gameday.format = "11_3"
         gameday.save()
         group_A = DBSetup().create_teams('A', 4)
