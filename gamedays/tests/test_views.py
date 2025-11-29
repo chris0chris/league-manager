@@ -79,7 +79,7 @@ class TestGamedayDetailView(TestCase):
     @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
     def test_detail_view_with_finished_gameday(self, mock_get_league_config_ruleset):
         mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
-        gameday = DBSetup().g62_finished()
+        gameday = DBSetup().g62_with_tiebreak_finished()
         LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         resp = self.client.get(
             reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk})

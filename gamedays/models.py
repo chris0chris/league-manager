@@ -137,7 +137,7 @@ class Gameresult(models.Model):
         if self.sh is None:
             self.sh = ''
 
-        return f'{self.gameinfo.pk}__{self.gameinfo.field} {self.gameinfo.scheduled}: {self.team} -  / {self.pa}'
+        return f'{self.gameinfo.pk}__{self.gameinfo.field} {self.gameinfo.scheduled}: {self.team} ({"Home" if self.isHome else "Away"}) -> {self.fh + self.sh} / {self.pa}'
 
 
 class GameOfficial(models.Model):

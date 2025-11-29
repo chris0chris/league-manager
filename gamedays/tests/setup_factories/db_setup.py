@@ -279,3 +279,14 @@ class DBSetup:
     @classmethod
     def create_gameinfo(cls):
         return GameinfoFactory(gameday=GamedayFactory(), officials=TeamFactory())
+
+    def g62_with_tiebreak_finished(self, season=None):
+        gameday = self._create_gameday(
+            sf="beendet", p5="beendet", p3="beendet", p1="beendet", season=season
+        )
+        # A1 wins against A2
+        # A2 wins against A3
+        # and with the following update A3 wins against A1
+        gameday.gameinfo_set.all()[2].gameresult_set.filter(isHome=True).update(fh=3, sh=0, pa=1)
+        gameday.gameinfo_set.all()[2].gameresult_set.filter(isHome=False).update(fh=1, sh=0, pa=3)
+        return gameday

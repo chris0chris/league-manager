@@ -1,4 +1,5 @@
 TEAM_NAME = 'team__name'
+TEAM_ID = 'team_id'
 HOME = 'home'
 AWAY = 'away'
 POINTS = 'points'

@@ -32,6 +32,7 @@ from gamedays.service.gameday_settings import (
     IN_POSSESSION,
     IS_HOME,
     MAIN_ROUND,
+    TEAM_ID,
 )
 from league_table.models import LeagueSeasonConfig
 from league_table.service.datatypes import LeagueConfigRuleset
@@ -75,7 +76,7 @@ class GamedayModelWrapper:
 
         gameresult = pd.DataFrame(
             Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id']).order_by('-' + IS_HOME).values(
-                *([f.name for f in Gameresult._meta.local_fields] + [TEAM_NAME])))
+                *([f.name for f in Gameresult._meta.local_fields] + [TEAM_NAME, TEAM_ID])))
         if gameresult.empty:
             self._games_with_result: DataFrame = pd.DataFrame()
             return
@@ -256,7 +257,7 @@ class GamedayModelWrapper:
     def _get_table(self):
         qualify_round = self._games_with_result[self._games_with_result[STAGE].isin([QUALIIFY_ROUND, MAIN_ROUND])]
         qualify_round = qualify_round.groupby([STANDING, TEAM_NAME], as_index=False)
-        qualify_round = qualify_round.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'})
+        qualify_round = qualify_round.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum', TEAM_ID: 'first'})
         qualify_round = qualify_round.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
         qualify_round = qualify_round.sort_values(by=STANDING)
         return qualify_round
