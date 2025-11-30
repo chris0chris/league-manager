@@ -17,7 +17,7 @@
     </a>
 </div>
 <div class="d-flex justify-content-between align-items-center">
-    <h1>Spiel Übersicht: <b>{{ info.home_team }}</b> vs. <b>{{ info.away_team }}</b></h1>
+    <h1><b>{{ info.home_team }}</b> vs. <b>{{ info.away_team }}</b></h1>
 </div>
 
 {% endif %}
@@ -50,12 +50,12 @@
     </div>
 </div>
 <div class="card" style="overflow: auto">
-    <div aria-controls="collapseFinal" aria-expanded="false" class="card-header" data-bs-target="#collapseFinal"
+    <div aria-controls="collapseFinal" aria-expanded="true" class="card-header" data-bs-target="#collapseFinal"
          data-bs-toggle="collapse" id="headingFinal" role="button">
         <h2>Spielverlauf</h2>
     </div>
 
-    <div aria-labelledby="headingFinal" class="collapse" id="collapseFinal">
+    <div aria-labelledby="headingFinal" class="collapse show" id="collapseFinal">
         <div class="card-body">
             {{ info.events_table | safe }}
         </div>
