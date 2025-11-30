@@ -61,6 +61,8 @@ class LeagueTable:
             season=current_season,
             league__in=league_config.leagues_for_league_points_ids,
         ).values(*LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS)
+        if not team_and_league_ids.exists():
+            raise SeasonLeagueTeam.DoesNotExist
         games_with_results = self._get_games_with_results_as_dataframe(
             results, team_and_league_ids
         )

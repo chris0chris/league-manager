@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 
+from gamedays.models import SeasonLeagueTeam
 from league_table.service.league_table import LeagueTable
 
 
@@ -8,7 +9,6 @@ class LeagueTableView(View):
     template_name = 'leaguetable/league_table.html'
 
     def get(self, request, *args, **kwargs):
-        gss = LeagueTable()
         render_configs = {
             'index': False,
             'classes': ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center'],
@@ -17,12 +17,18 @@ class LeagueTableView(View):
             'escape': False,
             'table_id': 'schedule',
         }
+        try:
+            gss = LeagueTable()
+            schedule = gss.get_standing(
+                        league_slug=kwargs.get('league'),
+                        season_slug=kwargs.get('season'))
+            schedule = schedule.to_html(**render_configs)
+        except SeasonLeagueTeam.DoesNotExist:
+            schedule = None
+            
         context = {
             'info': {
-                'schedule': gss.get_standing(
-                    league_slug=kwargs.get('league'),
-                    season_slug=kwargs.get('season'),
-                ).to_html(**render_configs)
+                'schedule': schedule
             }
         }
         return render(request, self.template_name, context)

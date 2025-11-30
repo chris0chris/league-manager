@@ -11,12 +11,12 @@
 <div class="card" style="overflow: auto">
     <div aria-controls="collapseSchedule" aria-expanded="true" class="card-header" data-target="#collapseSchedule"
          data-toggle="collapse" id="headingSchedule" role="button">
-        <h2>Spielplan</h2>
+        <h2>Gesamttabelle</h2>
     </div>
     <div aria-labelledby="headingSchedule" class="collapse show" id="collapseSchedule">
         <div class="card-body">
             {% if info.schedule == None %}
-            Spielplan wurde noch nicht erstellt.
+            Tabelle wurde noch nicht erstellt.
             {% else %}
             <input class="mb-1" id="search" placeholder="Suche nach Teamname" type="text"><br/>
             {{ info.schedule | safe }}
