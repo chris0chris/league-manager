@@ -52,8 +52,8 @@ class LeagueTable:
                 gameinfo__gameday__league=league_season_config.league,
                 gameinfo__status="beendet",
             )
-            .exclude(gameinfo__gameday__gte=428)
-            # .exclude(gameinfo__gameday__in=league_config.excluded_gameday_ids)
+            # .exclude(gameinfo__gameday__gte=428)
+            .exclude(gameinfo__gameday__in=league_config.excluded_gameday_ids)
             .select_related("gameinfo", "team")
             .values(*LEAGUE_TABLE_GAME_COLUMNS)
         )
@@ -157,8 +157,6 @@ class LeagueTable:
         df_games = df_games[df_games["team_id"] != df_games["opponent_team_id"]]
 
         merged_final = pd.concat([df_empty, df_games], ignore_index=True)
-
-        merged_final["gameinfo__standing"] = "Hauptrunde"
 
         return merged_final
 
