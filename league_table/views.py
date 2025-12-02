@@ -9,14 +9,6 @@ class LeagueTableView(View):
     template_name = 'leaguetable/league_table.html'
 
     def get(self, request, *args, **kwargs):
-        render_configs = {
-            'index': False,
-            'classes': ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center'],
-            'border': 0,
-            'justify': 'left',
-            'escape': False,
-            'table_id': 'schedule',
-        }
         try:
             gss = LeagueTable()
             table = gss.get_standing(

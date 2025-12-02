@@ -17,6 +17,7 @@ from django.views.generic import (
 )
 from formtools.wizard.views import SessionWizardView
 
+from league_table.constants import LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE
 from .constants import (
     LEAGUE_GAMEDAY_DETAIL,
     LEAGUE_GAMEDAY_LIST_AND_YEAR,
@@ -80,8 +81,8 @@ class GamedayDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(GamedayDetailView, self).get_context_data()
-        pk = context['gameday'].pk
-        gs = GamedayService.create(pk)
+        gameday = context["gameday"]
+        gs = GamedayService.create(gameday.pk)
         render_configs = {
             'index': False,
             'classes': ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center'],
@@ -99,7 +100,7 @@ class GamedayDetailView(DetailView):
             elif self.request.user.username:
                 show_official_names = self.request.user.username in qualify_table
             from officials.service.signup_service import OfficialSignupService
-            officials = OfficialSignupService.get_signed_up_officials(pk, show_official_names)
+            officials = OfficialSignupService.get_signed_up_officials(gameday.pk, show_official_names)
             from officials.urls import OFFICIALS_PROFILE_LICENSE
             url_pattern_official = OFFICIALS_PROFILE_LICENSE
             from officials.urls import OFFICIALS_SIGN_UP_LIST
@@ -119,6 +120,10 @@ class GamedayDetailView(DetailView):
             'url_pattern_official': url_pattern_official,
             'url_pattern_official_signup': url_pattern_official_signup,
         }
+        context["league_table_url"] = reverse(
+                LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE,
+                kwargs={"season": gameday.season.slug, "league": gameday.league.slug},
+            )
         return context
 
 
