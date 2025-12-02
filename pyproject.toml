@@ -7,7 +7,7 @@ name = "leaguesphere"
 version = "2.12.2"
 requires-python = ">=3.11"
 dependencies = [
-    "Django==5.2.8",
+    "Django==5.2.9",
     "django-crispy-forms==2.5",
     "crispy-bootstrap5==2025.6",
     "numpy==2.3.5",
