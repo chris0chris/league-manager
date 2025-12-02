@@ -144,7 +144,6 @@ class LeagueSeasonConfig(models.Model):
 
     leagues_for_league_points = models.ManyToManyField(
         League,
-        null=True,
         blank=True,
         default=None,
     )
