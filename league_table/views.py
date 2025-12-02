@@ -19,16 +19,37 @@ class LeagueTableView(View):
         }
         try:
             gss = LeagueTable()
-            schedule = gss.get_standing(
+            table = gss.get_standing(
                         league_slug=kwargs.get('league'),
                         season_slug=kwargs.get('season'))
-            schedule = schedule.to_html(**render_configs)
+            group_classes = [
+                "",
+                "table-light",
+                "table-secondary",
+                "table-info",
+                "table-warning",
+                "table-primary",
+                "table-dark",
+                "table-success",
+                "table-danger",
+            ]
+
+            table["round_index"] = table["standing"].ne(table["standing"].shift()).cumsum() - 1
+
+            # map the color for each round
+            table["bg_class"] = table["round_index"].map(
+                lambda i: group_classes[i % len(group_classes)]
+            )
+
+            # drop round_index if you don't need it
+            table = table.drop(columns=["round_index"])
         except SeasonLeagueTeam.DoesNotExist:
-            schedule = None
-            
+            table = None
+
         context = {
             'info': {
-                'schedule': schedule
+                'table': table.to_dict(orient='records'),
+                'columns': table.columns
             }
         }
         return render(request, self.template_name, context)

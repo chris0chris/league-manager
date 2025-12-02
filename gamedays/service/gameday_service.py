@@ -150,7 +150,7 @@ class GamedayService:
         qualify_table = self.gmw.get_qualify_table2()
         if qualify_table is '':
             return EmptyQualifyTable
-        # qualify_table = qualify_table[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
+        qualify_table = qualify_table[[TEAM_NAME, POINTS, PF, PA, DIFF]]
         qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
         return qualify_table
 

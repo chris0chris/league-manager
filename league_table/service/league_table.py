@@ -40,7 +40,6 @@ class LeagueTable:
         pass
 
     def get_standing(self, league_slug: str, season_slug: str):
-        # TODO config für LeasgueSeasonConfig
         league_season_config = LeagueTableRepository.get_league_season_config(
             league_slug, season_slug
         )

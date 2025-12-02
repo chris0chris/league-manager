@@ -247,6 +247,11 @@ class LeagueRankingEngine:
             }
         )
 
+    def rank(self, games_with_results: pd.DataFrame):
+        table = self.compute_league_table(games_with_results)
+        tb_engine = TieBreakerEngine(self.league_config.ruleset)
+        return tb_engine.rank(table, games_with_results)
+
 
 class TieBreakerEngine:
     """Executes a chain of tie-breakers based on a LeagueRuleset."""
