@@ -17,7 +17,8 @@ services:
       test: ["CMD", "sh", "-c", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 60s
     labels:
       - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=false  # Don't auto-update DB
