@@ -9,6 +9,7 @@ services:
       --collation-server=utf8mb4_unicode_ci
     volumes:
       - "./mysql-data:/var/lib/mysql"
+    env_file: ls.env
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DB_NAME}
