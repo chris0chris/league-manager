@@ -247,8 +247,10 @@ class TestSitemapXMLEndpoint(TestCase):
         )
 
     def test_sitemap_xml_contains_home_page(self):
+        from django.conf import settings
         response = self.client.get("/sitemap.xml")
-        self.assertContains(response, "<loc>http://example.com/</loc>")
+        expected_domain = settings.SITEMAP_DOMAIN
+        self.assertContains(response, f"<loc>https://{expected_domain}/</loc>")
 
     def test_sitemap_xml_contains_priority(self):
         response = self.client.get("/sitemap.xml")

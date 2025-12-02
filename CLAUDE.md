@@ -8,6 +8,53 @@ LeagueSphere is a Django-based web application for managing flag football league
 
 **Main branch**: `master`
 
+## Working with Claude Code
+
+### Agent-Based Development
+
+This project uses specialized Claude Code agents for different development tasks:
+- **requirements-analyst** - Analyzes requirements and creates technical specifications
+- **architecture-designer** - Designs system architecture and technical approaches
+- **implementation-engineer** - Implements features following SOLID principles and clean code practices
+- **tdd-engineer** - Implements features using test-driven development (TDD)
+- **qa-verification-engineer** - Runs comprehensive quality checks including tests, coverage, linting, and security scans
+- **cleanup-coordinator** - Ensures PRs contain only relevant changes and no dead code
+- **git-commit-manager** - Handles git commits and PR creation following conventional commit format
+- **documentation-specialist** - Creates and maintains comprehensive documentation
+
+**Workflow:** Claude Code will automatically delegate tasks to appropriate specialized agents. Each agent has specific expertise and tools to handle their domain effectively.
+
+### Testing Strategy
+
+**During Feature Development:**
+- Individual tests can be run to verify specific functionality
+- Use focused test runs for quick feedback during implementation
+- Run specific test files or test methods related to the feature being developed
+
+**Before Any Push/PR:**
+- **MANDATORY**: Run the full test suite before pushing to any branch
+- All tests must pass (expect 7 Moodle API tests to fail without credentials - this is normal)
+- Ensure code formatting is applied (`black .`)
+- Verify linting passes for any modified frontend code
+
+**Full Test Command:**
+```bash
+# Backend tests (must pass before push)
+MYSQL_HOST=10.185.182.207 \
+MYSQL_DB_NAME=test_db \
+MYSQL_USER=user \
+MYSQL_PWD=user \
+SECRET_KEY=test-secret-key \
+pytest
+
+# Frontend tests (must pass for modified apps)
+npm --prefix passcheck/ run test:run
+npm --prefix liveticker/ run test:run
+npm --prefix scorecard/ run test:run
+```
+
+**Important:** Never push code with failing tests. The CI/CD pipeline will catch failures, but local verification prevents wasted CI time and maintains code quality.
+
 ## Architecture
 
 ### Backend (Django)
