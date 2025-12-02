@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+{% if not request.GET.isExtern %}
+<style>
+.game-log-table td {
+  width: 33%;
+}
+.game-split-score-table td {
+    width: 25%;
+}
+</style>
+
+<div class="d-flex justify-content-between align-items-center me-2">
+    <a href="{% url 'league-gameday-detail' pk=object.gameday.pk%}" class="btn btn-primary">
+        <span><i class="bi bi-chevron-left"></i>Zurück zum Spieltag</span>
+    </a>
+</div>
+<div class="d-flex justify-content-between align-items-center">
+    <h1><b>{{ info.home_team }}</b> vs. <b>{{ info.away_team }}</b></h1>
+</div>
+
+{% endif %}
+
+
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapseDetails" aria-expanded="true" class="card-header" data-bs-target="#collapseDetails"
+         data-bs-toggle="collapse" id="headingDetails" role="button">
+        <h2>Details</h2>
+    </div>
+
+    <div aria-labelledby="headingDetails" class="collapse show" id="collapseDetails">
+        <div class="card-body">
+            <div class="row mb-1">
+                <div class="col"><b>Spielbeginn:</b> {{ object.scheduled|time:"H:i" }} Uhr</div>
+            </div>
+            <div class="row mb-1">
+                <div class="col"><b>Feld:</b> {{ object.field }}</div>
+            </div>
+            <div class="row mb-1">
+                <div class="col"><b>Status:</b> {{ object.status }}</div>
+            </div>
+            <div class="row mb-1">
+                <div class="col"><b>Officials:</b> {{ object.officials.description }}</div>
+            </div>
+        </div>
+        <div class="card-body">
+            {{ info.split_score_table | safe }}
+        </div>
+    </div>
+</div>
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapseFinal" aria-expanded="true" class="card-header" data-bs-target="#collapseFinal"
+         data-bs-toggle="collapse" id="headingFinal" role="button">
+        <h2>Spielverlauf</h2>
+    </div>
+
+    <div aria-labelledby="headingFinal" class="collapse show" id="collapseFinal">
+        <div class="card-body">
+            {{ info.events_table | safe }}
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock content %}

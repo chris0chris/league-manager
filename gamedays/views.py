@@ -37,7 +37,7 @@ from .forms import (
 )
 from .models import Gameday, Gameinfo
 from .service.gameday_form_service import GamedayFormService
-from .service.gameday_service import GamedayService
+from .service.gameday_service import GamedayService, GamedayGameService
 from .wizard import (
     FIELD_GROUP_STEP,
     GAMEDAY_FORMAT_STEP,
@@ -107,6 +107,7 @@ class GamedayDetailView(DetailView):
             officials = []
             url_pattern_official = ''
             url_pattern_official_signup = ''
+
         context['info'] = {
             'schedule': gs.get_schedule().to_html(**render_configs),
             'qualify_table': qualify_table,
@@ -117,6 +118,8 @@ class GamedayDetailView(DetailView):
             'url_pattern_official': url_pattern_official,
             'url_pattern_official_signup': url_pattern_official_signup,
         }
+
+
         return context
 
 
@@ -187,6 +190,49 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         return self.request.user.is_staff
 
+    # noinspection PyMethodMayBeStatic
+    def _format_array(self, data):
+        return [value.strip() for value in data.split(',')]
+
+
+class GamedayGameDetailView(DetailView):
+    model = Gameinfo
+    template_name = 'gamedays/games/game_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(GamedayGameDetailView, self).get_context_data()
+        gameinfo = context['gameinfo']
+        ggs = GamedayGameService(gameinfo.pk)
+        render_configs = {
+            'index': False,
+            'border': 0,
+            'justify': 'center',
+            'escape': False,
+            'table_id': 'team_log_events',
+        }
+        classes = ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center']
+
+        split_score_table, split_score_repaired = ggs.get_split_score_table()
+
+        split_score_table_html = split_score_table.to_html(**{
+            **render_configs,
+            "classes": classes + ["game-split-score-table"]
+        })
+
+        if split_score_repaired:
+            split_score_table_html = f"""{split_score_table_html}</ br>
+<small>Die Aufteilung der Punkte je Halbzeit kann eventuell inkorrekt sein.</small>"""
+
+        context['info'] = {
+            'away_team': ggs.away_team_name,
+            'home_team': ggs.home_team_name,
+            'events_table': ggs.get_events_table().to_html(**{
+                **render_configs,
+                "classes": classes + ["game-log-table"],
+            }),
+            'split_score_table': split_score_table_html,
+        }
+        return context
 
 class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView):
     form_list = [
