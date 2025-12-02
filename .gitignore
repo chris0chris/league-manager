@@ -150,3 +150,7 @@ league_manager/league_manager/
 
 ngrok.sh
 /.install/
+
+# LeagueSphere staging MySQL data
+/deployed/mysql-data/
+*.sql
