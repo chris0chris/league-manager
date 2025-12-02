@@ -5,6 +5,14 @@
 ![Last Commit](https://img.shields.io/github/last-commit/dachrisch/leaguesphere?style=for-the-badge)
 [![codecov](https://img.shields.io/codecov/c/github/dachrisch/leaguesphere?style=for-the-badge)](https://codecov.io/gh/dachrisch/leaguesphere)
 
+## Installation
+
+This project uses [uv](https://docs.astral.sh/uv/) for package management.
+
+```bash
+uv sync --extra test  # Install with test dependencies
+```
+
 ## Dev Documentation
 
 ### Deploy

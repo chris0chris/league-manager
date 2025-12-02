@@ -38,14 +38,13 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
       - name: 📦⬇️ Install Dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r test_requirements.txt
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          export PATH="$HOME/.local/bin:$PATH"
+          uv sync --extra test
       - name: 🚀🧪 Run Tests
-        run: pytest --cov --junitxml=junit.xml -o junit_family=legacy
+        run: uv run pytest --cov --junitxml=junit.xml -o junit_family=legacy
         env:
           MYSQL_HOST: 0.0.0.0
           SECRET_KEY: 123456-TEST

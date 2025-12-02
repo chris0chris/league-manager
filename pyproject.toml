@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "leaguesphere"
+version = "2.12.2"
+requires-python = ">=3.11"
+dependencies = [
+    "Django==5.2.8",
+    "django-crispy-forms==2.5",
+    "crispy-bootstrap5==2025.6",
+    "numpy==2.3.5",
+    "pandas==2.3.3",
+    "django-pandas==0.6.7",
+    "djangorestframework==3.16.1",
+    "django-autocomplete-light==3.12.1",
+    "django-formtools==2.5.1",
+    "Markdown==3.10",
+    "django-cors-headers==4.9.0",
+    "Pillow==12.0.0",
+    "django-rest-knox==5.0.2",
+    "python-dotenv==1.2.1",
+    "mysqlclient==2.2.7",
+    "requests==2.32.5",
+    "django-health-check==3.20.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "django-webtest==1.9.14",
+    "pytest==9.0.1",
+    "pytest-django==4.11.1",
+    "pytest-cov==7.0.0",
+    "factory-boy==3.3.3",
+    "django-debug-toolbar==6.1.0",
+    "WebTest==3.0.7",
+    "bump2version==1.0.1",
+    "black==25.11.0",
+    "types-factory_boy==0.4.1",
+]
+prod = [
+    "gunicorn>=22.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = [
+    "accounts*",
+    "gamedays*",
+    "league_manager*",
+    "league_table*",
+    "liveticker*",
+    "locust_testing*",
+    "officials*",
+    "passcheck*",
+    "scorecard*",
+    "teammanager*",
+    "fe_template*"
+]
