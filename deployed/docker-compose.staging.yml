@@ -9,6 +9,7 @@ services:
       --collation-server=utf8mb4_unicode_ci
     volumes:
       - "./mysql-data:/var/lib/mysql"
+      - "./init.sql:/docker-entrypoint-initdb.d/init.sql:ro"
     env_file: ls.env
     networks:
       - backend
