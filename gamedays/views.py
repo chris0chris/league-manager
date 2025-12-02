@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Max
@@ -120,10 +121,11 @@ class GamedayDetailView(DetailView):
             'url_pattern_official': url_pattern_official,
             'url_pattern_official_signup': url_pattern_official_signup,
         }
-        context["league_table_url"] = reverse(
-                LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE,
-                kwargs={"season": gameday.season.slug, "league": gameday.league.slug},
-            )
+        if apps.is_installed("league_table"):
+            context["league_table_url"] = reverse(
+                    LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE,
+                    kwargs={"season": gameday.season.slug, "league": gameday.league.slug},
+                )
         return context
 
 

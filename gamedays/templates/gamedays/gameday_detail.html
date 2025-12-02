@@ -103,7 +103,9 @@
     </div>
     <div aria-labelledby="headingQualify2" class="collapse" id="collapseQualify2">
         <div class="card-body">
+            {% if league_table_url %}
             <a href="{{league_table_url}}" class="btn btn-primary">Gesamttabelle</a>
+            {% endif %}
             {{ info.qualify_table2 | safe }}
         </div>
     </div>
