@@ -34,7 +34,7 @@ from gamedays.service.gameday_settings import (
     MAIN_ROUND,
     TEAM_ID,
 )
-from league_table.models import LeagueSeasonConfig
+from league_table.models import LeagueSeasonConfig, LeagueRuleset
 from league_table.service.datatypes import LeagueConfigRuleset
 from league_table.service.ranking.engine import FinalRankingEngine, TieBreakerEngine
 
@@ -132,9 +132,13 @@ class GamedayModelWrapper:
         if self._gameinfo[self._gameinfo[STATUS] != FINISHED].empty is False:
             return pd.DataFrame()
         if self.has_finalround():
-            league_season_ruleset = LeagueSeasonConfig.objects.get(
-                league=self.gameday.league, season=self.gameday.season
-            ).ruleset
+            try:
+                league_season_ruleset = LeagueSeasonConfig.objects.get(
+                    league=self.gameday.league, season=self.gameday.season
+                ).ruleset
+            except LeagueSeasonConfig.DoesNotExist:
+                # fallback use default league ruleset
+                league_season_ruleset = LeagueRuleset.objects.get(pk=2)
             league_config_ruleset = LeagueConfigRuleset.from_ruleset(league_season_ruleset)
             engine = FinalRankingEngine(league_config_ruleset)
             return engine.compute_final_table(self._games_with_result, self._get_schedule())
