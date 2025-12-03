@@ -1,7 +1,7 @@
 name: ${SERVICE_NAME}
 services:
   mysql:
-    image: mysql:8.0
+    image: mysql:9.5
     container_name: ${COMPOSE_PROJECT_NAME}.mysql
     restart: unless-stopped
     command: >
