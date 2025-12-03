@@ -8,7 +8,7 @@
     </div>
     <div aria-labelledby="headingSchedule" class="collapse show" id="collapseSchedule">
         <div class="card-body">
-            {% if info.table == None %}
+            {% if not info.table %}
             Tabelle wurde noch nicht erstellt.
             {% else %}
             <div x-data="{

@@ -4,17 +4,7 @@ import pandas as pd
 from django.db.models import QuerySet
 
 from gamedays.models import Gameresult, SeasonLeagueTeam
-from gamedays.service.gameday_settings import (
-    SCHEDULED,
-    OFFICIALS_NAME,
-    STAGE,
-    STANDING,
-    HOME,
-    AWAY,
-    GAMEDAY_NAME,
-    GAMEDAY_ID,
-    GAMEINFO_ID,
-)
+from league_table.models import LeagueSeasonConfig
 from league_table.service.datatypes import LeagueConfig
 from league_table.service.leaguetable_repository import LeagueTableRepository
 from league_table.service.ranking.engine import LeagueRankingEngine, TieBreakerEngine
@@ -40,48 +30,41 @@ class LeagueTable:
         pass
 
     def get_standing(self, league_slug: str, season_slug: str):
-        league_season_config = LeagueTableRepository.get_league_season_config(
-            league_slug, season_slug
-        )
-        league_config = LeagueConfig.from_league_season_config(league_season_config)
-        current_season = league_season_config.season
-        results = (
-            Gameresult.objects.filter(
-                gameinfo__gameday__season=current_season,
-                gameinfo__gameday__league=league_season_config.league,
-                gameinfo__status="beendet",
+        try:
+            league_season_config = LeagueTableRepository.get_league_season_config(
+                league_slug, season_slug
             )
-            # .exclude(gameinfo__gameday__gte=428)
-            .exclude(gameinfo__gameday__in=league_config.excluded_gameday_ids)
-            .select_related("gameinfo", "team")
-            .values(*LEAGUE_TABLE_GAME_COLUMNS)
-        )
-        team_and_league_ids = SeasonLeagueTeam.objects.filter(
-            season=current_season,
-            league__in=league_config.leagues_for_league_points_ids,
-        ).values(*LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS)
-        if not team_and_league_ids.exists():
-            raise SeasonLeagueTeam.DoesNotExist
-        games_with_results = self._get_games_with_results_as_dataframe(
-            results, team_and_league_ids
-        )
-        engine = LeagueRankingEngine(league_config)
-        league_table = engine.compute_league_table(games_with_results)
+            league_config = LeagueConfig.from_league_season_config(league_season_config)
+            current_season = league_season_config.season
+            results = (
+                Gameresult.objects.filter(
+                    gameinfo__gameday__season=current_season,
+                    gameinfo__gameday__league=league_season_config.league,
+                    gameinfo__status="beendet",
+                )
+                # .exclude(gameinfo__gameday__gte=428)
+                .exclude(gameinfo__gameday__in=league_config.excluded_gameday_ids)
+                .select_related("gameinfo", "team")
+                .values(*LEAGUE_TABLE_GAME_COLUMNS)
+            )
+            team_and_league_ids = SeasonLeagueTeam.objects.filter(
+                season=current_season,
+                league__in=league_config.leagues_for_league_points_ids,
+            ).values(*LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS)
+            if not team_and_league_ids.exists():
+                raise SeasonLeagueTeam.DoesNotExist
+            games_with_results = self._get_games_with_results_as_dataframe(
+                results, team_and_league_ids
+            )
+            engine = LeagueRankingEngine(league_config)
+            league_table = engine.compute_league_table(games_with_results)
 
-        tb_engine = TieBreakerEngine(league_config.ruleset)
-        final_league_table = tb_engine.rank(league_table, games_with_results)
+            tb_engine = TieBreakerEngine(league_config.ruleset)
+            final_league_table = tb_engine.rank(league_table, games_with_results)
 
-        columns = [
-            GAMEDAY_NAME,
-            GAMEDAY_ID,
-            SCHEDULED,
-            OFFICIALS_NAME,
-            GAMEINFO_ID,
-            HOME,
-            AWAY,
-            STANDING,
-            STAGE,
-        ]
+        except (SeasonLeagueTeam.DoesNotExist, LeagueSeasonConfig.DoesNotExist):
+            final_league_table = pd.DataFrame()
+            final_league_table["standing"] = None
         return final_league_table
 
     def _get_games_with_results_as_dataframe(
