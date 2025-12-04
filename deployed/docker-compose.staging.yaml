@@ -14,7 +14,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD", "sh", "-c", "mariadb --skip-ssl -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
       interval: 10s
       timeout: 5s
       retries: 10
