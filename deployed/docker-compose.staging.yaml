@@ -67,7 +67,7 @@ services:
     env_file: ls.env
     environment:
       DJANGO_SETTINGS_MODULE: league_manager.settings.prod
-      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-false}
+      RUN_MIGRATIONS: true
     networks:
       - proxy
       - backend
