@@ -1,4 +1,4 @@
-name: 🐳🚀 Push Docker Image to Registry
+name: 🐳🚀 Push Docker Image to Staging
 
 on:
   workflow_call:
@@ -33,9 +33,8 @@ env:
   REGISTRY: docker.io
 
 jobs:
-  push:
+  push-staging:
     runs-on: ubuntu-latest
-    environment: prod
     steps:
       - uses: actions/checkout@v6
 
@@ -63,9 +62,9 @@ jobs:
       - name: 🐳🏷️ Tag Docker image
         run: |
           docker tag ${{ inputs.local_image_name }}:latest ${{ env.REGISTRY }}/${{ inputs.image_name }}:${{ inputs.version }}
-          docker tag ${{ inputs.local_image_name }}:latest ${{ env.REGISTRY }}/${{ inputs.image_name }}:latest
+          docker tag ${{ inputs.local_image_name }}:latest ${{ env.REGISTRY }}/${{ inputs.image_name }}:staging
 
-      - name: 🐳🚀 Push Docker image
+      - name: 🐳🚀 Push Docker image to staging
         run: |
           docker push ${{ env.REGISTRY }}/${{ inputs.image_name }}:${{ inputs.version }}
-          docker push ${{ env.REGISTRY }}/${{ inputs.image_name }}:latest
+          docker push ${{ env.REGISTRY }}/${{ inputs.image_name }}:staging

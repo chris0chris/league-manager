@@ -73,12 +73,38 @@ jobs:
       artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
       image_name: backend
 
-  # Deploy to registry (after all checks pass)
-  deploy-backend:
+  # Deploy to staging (automatic, after validation passes)
+  deploy-backend-staging:
     needs:
       - build-backend-image
       - test-backend-image
       - check-migrations
+    secrets: inherit
+    uses: ./.github/workflows/part_docker_push_staging.yaml
+    with:
+      artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
+      image_name: leaguesphere/backend
+      local_image_name: backend
+      version: "${{ github.ref_name }}"
+
+  deploy-frontend-staging:
+    needs:
+      - build-frontend-image
+      - test-backend-image
+      - check-migrations
+    secrets: inherit
+    uses: ./.github/workflows/part_docker_push_staging.yaml
+    with:
+      artifact_name: ${{ needs.build-frontend-image.outputs.artifact_name }}
+      image_name: leaguesphere/frontend
+      local_image_name: frontend
+      version: "${{ github.ref_name }}"
+
+  # Deploy to production (manual approval required)
+  deploy-backend-production:
+    needs:
+      - deploy-backend-staging
+      - build-backend-image
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_artifact.yaml
     with:
@@ -87,11 +113,10 @@ jobs:
       local_image_name: backend
       version: "${{ github.ref_name }}"
 
-  deploy-frontend:
+  deploy-frontend-production:
     needs:
+      - deploy-frontend-staging
       - build-frontend-image
-      - test-backend-image
-      - check-migrations
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_artifact.yaml
     with:
@@ -100,10 +125,10 @@ jobs:
       local_image_name: frontend
       version: "${{ github.ref_name }}"
 
-  # Run database migrations (after backend deployment)
+  # Run database migrations (after backend production deployment)
   run-migrations:
     needs:
-      - deploy-backend
+      - deploy-backend-production
       - build-backend-image
     secrets: inherit
     uses: ./.github/workflows/part_run_migrations.yaml

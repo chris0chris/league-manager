@@ -32,7 +32,7 @@ permissions:
 jobs:
   check-migrations:
     runs-on: ubuntu-latest
-    environment: prod
+    environment: staging
     steps:
       - name: 📥 Download Docker image artifact
         uses: actions/download-artifact@v6

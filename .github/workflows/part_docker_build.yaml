@@ -44,7 +44,7 @@ jobs:
         with:
           name: docker-image-${{ inputs.image_name }}
           path: /tmp/${{ inputs.image_name }}.tar
-          retention-days: 1
+          retention-days: 7
 
       - name: 🏷️ Set artifact name output
         id: set-artifact-name
