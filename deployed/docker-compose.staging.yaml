@@ -1,7 +1,7 @@
 name: ${SERVICE_NAME}
 services:
   mysql:
-    image: mysql:9.5
+    image: mariadb:latest
     container_name: ${COMPOSE_PROJECT_NAME}.mysql
     restart: unless-stopped
     command: >
@@ -14,14 +14,13 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "sh", "-c", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
+      test: [ "CMD", "sh", "-c", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD" ]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 60s
     labels:
       - traefik.enable=false
-      - com.centurylinklabs.watchtower.enable=false  # Don't auto-update DB
 
   www:
     image: leaguesphere/frontend:latest  # TODO: Change to :staging when images exist
@@ -74,11 +73,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     restart: unless-stopped
 
 networks:
