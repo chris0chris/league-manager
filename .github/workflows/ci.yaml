@@ -137,6 +137,7 @@ jobs:
   # Run database migrations (after backend production deployment)
   run-migrations:
     needs:
+      - build-backend-image
       - deploy-backend-production
     secrets: inherit
     uses: ./.github/workflows/part_run_migrations.yaml
