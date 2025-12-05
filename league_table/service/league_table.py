@@ -1,7 +1,7 @@
 from typing import Any
 
 import pandas as pd
-from django.db.models import QuerySet
+from django.db.models import QuerySet, F
 
 from gamedays.models import Gameresult, SeasonLeagueTeam
 from league_table.models import LeagueSeasonConfig
@@ -21,7 +21,7 @@ LEAGUE_TABLE_GAME_COLUMNS = [
     "gameinfo__status",
 ]
 
-LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS = ["team_id", "league_id", "team__description"]
+LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS = ["teams__id", "league_id", "teams__description", "league__name"]
 
 
 class LeagueTable:
@@ -47,10 +47,16 @@ class LeagueTable:
                 .select_related("gameinfo", "team")
                 .values(*LEAGUE_TABLE_GAME_COLUMNS)
             )
-            team_and_league_ids = SeasonLeagueTeam.objects.filter(
-                season=current_season,
-                league__in=league_config.leagues_for_league_points_ids,
-            ).values(*LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS)
+            team_and_league_ids = (
+                SeasonLeagueTeam.objects.filter(
+                    season=current_season,
+                    league__in=league_config.leagues_for_league_points_ids,
+                )
+                .values(*LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS)
+                .annotate(
+                    team_id=F("teams__id"), team__description=F("teams__description")
+                )
+            )
             if not team_and_league_ids.exists():
                 raise SeasonLeagueTeam.DoesNotExist
             games_with_results = self._get_games_with_results_as_dataframe(
@@ -84,30 +90,7 @@ class LeagueTable:
             df = teams_df.copy()
 
             # Columns that must exist for the ranking engine
-            df["pf"] = 0
-            df["pa"] = 0
-            df["diff"] = 0
-            df["league_points"] = 0
-            df["league_quotient"] = 0
-            df["max_league_points"] = 0
-            df["wins"] = 0
-            df["draws"] = 0
-            df["losses"] = 0
-            df["games_played"] = 0
-
-            # Game fields
-            df["gameinfo"] = pd.NA
-            df["fh"] = pd.NA
-            df["sh"] = pd.NA
-            df["isHome"] = pd.NA
-            df["gameinfo__status"] = "Initial"
-            df["gameinfo__standing"] = "Hauptrunde"
-
-            # Opponent placeholders (never used, but required for consistency)
-            df["opponent_team_id"] = df["team_id"]
-            df["opponent_league_id"] = df["league_id"]
-
-            return df
+            return self._init_df_with_default_values(df)
 
         # Compute PF/PA/etc.
         results_df["pf"] = (
@@ -125,6 +108,7 @@ class LeagueTable:
         )
 
         df_empty = merged[merged["gameinfo"].isna()].copy()
+        df_empty = self._init_df_with_default_values(df_empty)
         df_games = merged[merged["gameinfo"].notna()].copy()
 
         df_opponent = merged[["gameinfo", "team_id", "league_id"]].copy()
@@ -141,6 +125,32 @@ class LeagueTable:
         merged_final = pd.concat([df_empty, df_games], ignore_index=True)
 
         return merged_final
+
+    def _init_df_with_default_values(self, df) -> Any:
+        df["pf"] = 0
+        df["pa"] = 0
+        df["diff"] = 0
+        df["league_points"] = 0
+        df["league_quotient"] = 0
+        df["max_league_points"] = 0
+        df["wins"] = 0
+        df["draws"] = 0
+        df["losses"] = 0
+        df["games_played"] = 0
+
+        # Game fields
+        df["gameinfo"] = pd.NA
+        df["fh"] = pd.NA
+        df["sh"] = pd.NA
+        df["isHome"] = pd.NA
+        df["gameinfo__status"] = "Initial"
+        df["gameinfo__standing"] = "Initial"
+
+        df["league__name"] = "Initial"
+        df["opponent_team_id"] = df["team_id"]
+        df["opponent_league_id"] = df["league_id"]
+
+        return df
 
     def _get_all_teams_df(self, team_and_league_ids: QuerySet) -> pd.DataFrame:
         df = pd.DataFrame(team_and_league_ids)

@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Min, F
 
 from league_table.models import LeagueSeasonConfig
 
@@ -19,4 +19,9 @@ class LeagueTableRepository:
 
     @classmethod
     def get_league_list(cls) -> QuerySet[LeagueSeasonConfig, Any]:
-        return LeagueSeasonConfig.objects.all().order_by("league__name").values("league__slug", "league__name")
+        return (
+            LeagueSeasonConfig.objects.values("league__slug", "league__name")
+            .annotate(lsc_id=Min("id"))  # ensures one row per league
+            .order_by("league__name")
+            .values(slug=F("league__slug"), name=F("league__name"))
+        )

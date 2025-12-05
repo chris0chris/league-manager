@@ -13,9 +13,9 @@ class League_tableMenu(BaseMenu):
         league_list = LeagueTableRepository.get_league_list()
 
         return [MenuItem.create(
-                name=league["league__name"],
+                name=league["name"],
                 url=LEAGUE_TABLE_OVERALL_TABLE_BY_LEAGUE,
-                url_kwargs={"league": league["league__slug"]}
+                url_kwargs={"league": league["slug"]}
             ) for league in league_list]
         #     MenuItem.create(
         #         name='Alle Einsätze',

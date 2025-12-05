@@ -57,12 +57,10 @@ class Team(models.Model):
 class SeasonLeagueTeam(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     league = models.ForeignKey(League, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
-
-    objects: QuerySet["SeasonLeagueTeam"] = models.Manager()
+    teams = models.ManyToManyField(Team)
 
     def __str__(self):
-        return f'{self.season.name} {self.league} {self.team}'
+        return f'{self.season.name} {self.league} -> {self.teams.count()} Teams'
 
 
 class Gameday(models.Model):

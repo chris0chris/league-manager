@@ -5,7 +5,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.forms import modelformset_factory, BaseFormSet, formset_factory
 
-from gamedays.models import Season, League, Gameday, Gameinfo, Team
+from gamedays.models import Season, League, Gameday, Gameinfo, Team, SeasonLeagueTeam
 
 SCHEDULE_CUSTOM_CHOICE_C = "CUSTOM"
 SCHEDULE_MAP_GROUPS_C = "groups"
@@ -370,3 +370,13 @@ def get_gameinfo_formset(extra=0):
         validate_min=True,
         min_num=1,
     )
+
+class SeasonLeagueTeamForm(forms.ModelForm):
+    class Meta:
+        model = SeasonLeagueTeam
+        fields = "__all__"
+        widgets = {
+            'teams': autocomplete.ModelSelect2Multiple(
+                url="/dal/team"
+            )
+        }
