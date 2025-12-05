@@ -81,13 +81,16 @@ pre_commit_hooks = []
 post_commit_hooks = []
 
 [[tool.bumpversion.files]]
-filename="league_manager/__init__.py"
+filename = "league_manager/__init__.py"
 
 [[tool.bumpversion.files]]
-filename="liveticker/package.json"
+filename = "liveticker/package.json"
 
 [[tool.bumpversion.files]]
-filename="passcheck/package.json"
+filename = "passcheck/package.json"
 
 [[tool.bumpversion.files]]
-filename="scorecard/package.json"
+filename = "scorecard/package.json"
+
+[[tool.bumpversion.files]]
+filename = "uv.lock"
