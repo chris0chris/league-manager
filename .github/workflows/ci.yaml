@@ -64,6 +64,15 @@ jobs:
       image_name: backend
       test_command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
 
+  test-frontend-image:
+    needs:
+      - build-frontend-image
+    uses: ./.github/workflows/part_docker_test.yaml
+    with:
+      artifact_name: ${{ needs.build-frontend-image.outputs.artifact_name }}
+      image_name: frontend
+      test_command: ""
+
   check-migrations:
     needs:
       - build-backend-image
@@ -76,7 +85,6 @@ jobs:
   # Deploy to staging (automatic, after validation passes)
   deploy-backend-staging:
     needs:
-      - build-backend-image
       - test-backend-image
       - check-migrations
     secrets: inherit
@@ -89,8 +97,7 @@ jobs:
 
   deploy-frontend-staging:
     needs:
-      - build-frontend-image
-      - test-backend-image
+      - test-frontend-image
       - check-migrations
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_staging.yaml
@@ -104,7 +111,6 @@ jobs:
   deploy-backend-production:
     needs:
       - deploy-backend-staging
-      - build-backend-image
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_artifact.yaml
     with:
@@ -116,7 +122,6 @@ jobs:
   deploy-frontend-production:
     needs:
       - deploy-frontend-staging
-      - build-frontend-image
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_artifact.yaml
     with:
@@ -129,7 +134,6 @@ jobs:
   run-migrations:
     needs:
       - deploy-backend-production
-      - build-backend-image
     secrets: inherit
     uses: ./.github/workflows/part_run_migrations.yaml
     with:
