@@ -85,6 +85,7 @@ jobs:
   # Deploy to staging (automatic, after validation passes)
   deploy-backend-staging:
     needs:
+      - build-backend-image
       - test-backend-image
       - check-migrations
     secrets: inherit
@@ -97,6 +98,7 @@ jobs:
 
   deploy-frontend-staging:
     needs:
+      - build-frontend-image
       - test-frontend-image
       - check-migrations
     secrets: inherit
