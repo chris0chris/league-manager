@@ -112,6 +112,7 @@ jobs:
   # Deploy to production (manual approval required)
   deploy-backend-production:
     needs:
+      - build-backend-image
       - deploy-backend-staging
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_artifact.yaml
@@ -123,6 +124,7 @@ jobs:
 
   deploy-frontend-production:
     needs:
+      - build-frontend-image
       - deploy-frontend-staging
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_artifact.yaml
