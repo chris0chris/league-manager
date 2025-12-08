@@ -31,5 +31,6 @@ LEAGUE_TABLE_TEST_LEAGUE_CONFIG = LeagueConfig(
     ruleset=LEAGUE_TABLE_TEST_RULESET,
     team_point_adjustments_map=[],
     excluded_gameday_ids=[],
-    leagues_for_league_points_ids=[]
+    leagues_for_league_points_ids=[],
+    group_by_leagues=False
 )

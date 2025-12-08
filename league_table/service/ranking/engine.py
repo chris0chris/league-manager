@@ -194,6 +194,9 @@ class LeagueRankingEngine:
             }
         )
 
+        if self.league_config.group_by_leagues:
+            df_games['standing'] = df_games["league__name"]
+
         table = df_games.groupby("team_id", as_index=False).agg(
             {
                 "team__name": "first",

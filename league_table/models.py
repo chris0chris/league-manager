@@ -148,6 +148,8 @@ class LeagueSeasonConfig(models.Model):
         default=None,
     )
 
+    group_by_leagues = models.BooleanField(default=False)
+
     def get_team_point_adjustment_map(self):
         adjustments = TeamPointAdjustments.objects.filter(
             league_season_config=self
