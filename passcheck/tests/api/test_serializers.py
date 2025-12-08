@@ -44,7 +44,7 @@ class TestPasscheckGamesListSerializer:
 class TestRosterValidationSerializer(TestCase):
     def test_serializer_is_working_with_validator(self):
         prime_league, _, _, season, second_league_team = DbSetupPasscheck.create_eligibility_rules()
-        season_league: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(team=second_league_team)
+        season_league: SeasonLeagueTeam = SeasonLeagueTeam.objects.get(teams=second_league_team)
         prime_gameday = GamedayFactory(season=season, league=prime_league)
         ev = EligibilityValidator(season_league.league, prime_gameday)
         league_id = f'{prime_gameday.league_id}'

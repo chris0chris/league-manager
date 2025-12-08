@@ -111,6 +111,7 @@ class TestLeagueRankingEngine:
             team_point_adjustments_map=[],
             excluded_gameday_ids=[],
             leagues_for_league_points_ids=[],
+            group_by_leagues=False,
         )
 
         games = pd.read_csv(BASE / "../league_ranking/league_ranking_games.csv")
@@ -147,6 +148,7 @@ class TestLeagueRankingEngine:
             ],
             excluded_gameday_ids=[],
             leagues_for_league_points_ids=[],
+            group_by_leagues=False,
         )
 
         games = pd.read_csv(BASE / "../league_ranking/league_ranking_games.csv")

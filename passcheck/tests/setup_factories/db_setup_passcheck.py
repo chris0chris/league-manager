@@ -62,7 +62,7 @@ class DbSetupPasscheck:
         third_league = LeagueFactory(name='Third League')
         season = SeasonFactory(name='Season 1')
         second_league_team = TeamFactory(name='Second league team')
-        SeasonLeagueTeamFactory(season=season, league=second_league, team=second_league_team)
+        SeasonLeagueTeamFactory(season=season, league=second_league, teams=[second_league_team])
         EligibilityRuleFactory(
             league=second_league,
             eligible_in=[prime_league],

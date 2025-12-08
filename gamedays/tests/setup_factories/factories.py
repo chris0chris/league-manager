@@ -41,7 +41,18 @@ class SeasonLeagueTeamFactory(DjangoModelFactory):
 
     season = factory.SubFactory(SeasonFactory)
     league = factory.SubFactory(LeagueFactory)
-    team = factory.SubFactory(TeamFactory)
+    @factory.post_generation
+    def teams(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            # If the test passes teams=[team1, team2]
+            for team in extracted:
+                self.teams.add(team)
+        else:
+            # Default: create a single team
+            self.teams.add(TeamFactory())
 
 
 class GameOfficialFactory(DjangoModelFactory):
