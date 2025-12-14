@@ -40,7 +40,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: 📤 Upload Docker image as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: docker-image-${{ inputs.image_name }}
           path: /tmp/${{ inputs.image_name }}.tar
