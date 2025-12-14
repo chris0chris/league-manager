@@ -10,7 +10,7 @@ services:
     volumes:
       - "./mysql-data:/var/lib/mysql"
       - "./mysql-init:/docker-entrypoint-initdb.d:ro"
-    env_file: ls.env
+    env_file: ls.env.staging
     networks:
       - backend
     healthcheck:
@@ -23,7 +23,7 @@ services:
       - traefik.enable=false
 
   www:
-    image: leaguesphere/frontend:latest  # TODO: Change to :staging when images exist
+    image: leaguesphere/frontend:staging
     container_name: ${COMPOSE_PROJECT_NAME}.www
     labels:
       # HTTP -> HTTPS redirect
@@ -57,13 +57,13 @@ services:
     restart: unless-stopped
 
   app:
-    image: leaguesphere/backend:latest  # TODO: Change to :staging when images exist
+    image: leaguesphere/backend:staging
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
       - traefik.enable=false
       - io.portainer.accesscontrol.teams=${SERVICE_NAME}
-    env_file: ls.env
+    env_file: ls.env.staging
     environment:
       DJANGO_SETTINGS_MODULE: league_manager.settings.prod
       RUN_MIGRATIONS: true

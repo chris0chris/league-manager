@@ -342,6 +342,58 @@ CircleCI configuration exists in `.circleci/config.yml` but GitHub Actions is th
 
 **Health Checks:** Backend container includes health check endpoint at `/health/`
 
+### Staging Environment
+
+The project includes a dedicated staging environment for testing changes before production deployment.
+
+**Access URLs:**
+- Public: `https://stage.leaguesphere.app`
+- Internal (lehel.xyz): `https://leaguesphere-stage.lehel.xyz`
+- Local network: `http://leaguesphere-stage.lehel`
+
+**Docker Images:**
+- Backend: `docker.io/leaguesphere/backend:staging`
+- Frontend: `docker.io/leaguesphere/frontend:staging`
+
+**Configuration Files:**
+- Docker Compose: `/deployed/docker-compose.staging.yaml`
+- Environment: `/deployed/.env.staging` (Traefik/Compose variables)
+- Application: `/deployed/ls.env.staging` (Django secrets - use template)
+
+**Database:**
+- Name: `leaguesphere_staging`
+- User: `leaguesphere_staging`
+- Host: `mysql` (Docker internal network)
+- Automatic migrations: Enabled (`RUN_MIGRATIONS=true`)
+
+**Deployment:**
+- **Automatic:** Images are automatically pushed to `:staging` tag when tags are created via CI/CD
+- **Manual Deploy on Server:**
+  ```bash
+  cd ~/dev/leaguesphere/deployed/
+  docker compose -f docker-compose.staging.yaml --env-file .env.staging pull
+  docker compose -f docker-compose.staging.yaml --env-file .env.staging up -d
+  ```
+
+**Initial Setup:**
+1. Copy template: `cp ls.env.staging.template ls.env.staging`
+2. Generate secrets:
+   ```bash
+   # Database password
+   openssl rand -base64 32
+
+   # Django secret key
+   python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+   ```
+3. Update `ls.env.staging` with generated secrets
+4. Create MySQL init directory: `mkdir -p mysql-init`
+5. Deploy: `docker compose -f docker-compose.staging.yaml up -d`
+
+**CI/CD Pipeline:**
+- Staging images are built and pushed automatically after all tests pass
+- Workflow: `.github/workflows/part_docker_push_staging.yaml`
+- Triggered on tag creation (e.g., `2.12.16`)
+
 ### Test Infrastructure
 
 The project uses LXC containers for isolated test database environments.
