@@ -46,13 +46,14 @@ describe('Timeout component', () => {
       ],
     });
   });
-  it('should do nothing, when clicked on done', () => {
+  it('should do nothing, when clicked on done', async () => {
+    const user = userEvent.setup();
     setup();
     expect(screen.getByTestId('timeoutButton')).toBeEnabled();
-    userEvent.click(screen.getByTestId('timeoutButton'));
-    userEvent.type(screen.getByPlaceholderText('Minuten'), '00');
-    userEvent.type(screen.getByPlaceholderText('Sekunden'), '01');
-    userEvent.click(screen.getByRole('button', {name: 'Abbrechen'}));
+    await user.click(screen.getByTestId('timeoutButton'));
+    await user.type(screen.getByPlaceholderText('Minuten'), '00');
+    await user.type(screen.getByPlaceholderText('Sekunden'), '01');
+    await user.click(screen.getByRole('button', {name: 'Abbrechen'}));
     expect(screen.getByTestId('timeoutButton')).toBeEnabled();
     expect(screen.queryByText('00:01')).not.toBeInTheDocument();
     expect(onSubmitMock.mock.calls).toHaveLength(0);
