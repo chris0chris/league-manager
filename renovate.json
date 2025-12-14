@@ -23,7 +23,7 @@
       "automerge": true
     },
     {
-      "matchPaths": ["test_requirements.txt"],
+      "matchPaths": ["pyproject.toml"],
       "automerge": true
     }
   ]

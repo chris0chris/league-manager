@@ -1,0 +1,82 @@
+name: ${SERVICE_NAME}
+services:
+  mysql:
+    image: mariadb:latest
+    container_name: ${COMPOSE_PROJECT_NAME}.mysql
+    restart: unless-stopped
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - "./mysql-data:/var/lib/mysql"
+      - "./mysql-init:/docker-entrypoint-initdb.d:ro"
+    env_file: ls.env
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "sh", "-c", "mariadb --skip-ssl -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    labels:
+      - traefik.enable=false
+
+  www:
+    image: leaguesphere/frontend:latest  # TODO: Change to :staging when images exist
+    container_name: ${COMPOSE_PROJECT_NAME}.www
+    labels:
+      # HTTP -> HTTPS redirect
+      - traefik.http.routers.${SERVICE_NAME}-http.entrypoints=web
+      - traefik.http.routers.${SERVICE_NAME}-http.rule=Host(`stage.leaguesphere.app`)
+      - traefik.http.routers.${SERVICE_NAME}-http.middlewares=${SERVICE_NAME}-https
+      - traefik.http.middlewares.${SERVICE_NAME}-https.redirectscheme.scheme=https
+
+      # HTTPS for lehel.xyz (DNS resolver)
+      - traefik.http.routers.${SERVICE_NAME}.tls=true
+      - traefik.http.routers.${SERVICE_NAME}.rule=Host(`${SERVICE_HOST}`)
+      - traefik.http.routers.${SERVICE_NAME}.tls.certresolver=letsencryptdnsresolver
+
+      # HTTPS for leaguesphere.app (HTTP resolver)
+      - traefik.http.routers.${SERVICE_NAME}_prod.tls=true
+      - traefik.http.routers.${SERVICE_NAME}_prod.rule=Host(`stage.leaguesphere.app`)
+      - traefik.http.routers.${SERVICE_NAME}_prod.tls.certresolver=letsencrypthttpresolver
+
+      # Local resolution (HTTP)
+      - traefik.http.routers.${SERVICE_NAME}_local_qualified.rule=Host(`${SERVICE_NAME}.${LOCAL_HOSTNAME}`)
+      - traefik.http.routers.${SERVICE_NAME}_local_qualified.entrypoints=web
+
+      # Portainer team
+      - io.portainer.accesscontrol.teams=leaguesphere
+    networks:
+      - backend
+      - proxy
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  app:
+    image: leaguesphere/backend:latest  # TODO: Change to :staging when images exist
+    container_name: ${COMPOSE_PROJECT_NAME}.app
+    command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
+    labels:
+      - traefik.enable=false
+      - io.portainer.accesscontrol.teams=${SERVICE_NAME}
+    env_file: ls.env
+    environment:
+      DJANGO_SETTINGS_MODULE: league_manager.settings.prod
+      RUN_MIGRATIONS: true
+    networks:
+      - proxy
+      - backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  backend:
+    internal: true
+  proxy:
+    external: true

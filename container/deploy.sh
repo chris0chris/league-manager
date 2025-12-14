@@ -19,7 +19,7 @@ fi
 
 case "$1" in
     major|minor|patch)
-        (cd ..;bump2version "$1") && git push && git push --tags
+        (cd ..;bump-my-version bump "$1") && git push && git push --tags
         ;;
     -h|--help)
         show_help

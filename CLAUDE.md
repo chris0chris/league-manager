@@ -115,8 +115,7 @@ Environment variables are loaded from `.env` file (use `.env_template` as refere
 
 **Install dependencies:**
 ```bash
-pip install -r requirements.txt
-pip install -r test_requirements.txt
+uv sync --extra test
 ```
 
 **Run development server:**

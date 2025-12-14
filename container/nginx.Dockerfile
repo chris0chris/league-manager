@@ -5,19 +5,25 @@ ARG APP_DIR="/app"
 
 WORKDIR ${APP_DIR}
 
-# install build requirements
-RUN apt -y update
-RUN apt -y install pkg-config
-RUN apt -y install python3-dev
-RUN apt -y install build-essential
-RUN apt -y install default-libmysqlclient-dev
+# Install build dependencies
+RUN apt -y update && \
+    apt -y install pkg-config python3-dev build-essential default-libmysqlclient-dev
 
-# install environment
-COPY ../requirements.txt ${APP_DIR}
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Copy uv from official image (faster and more reliable than curl install)
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-COPY ../ ${APP_DIR}
+# Install dependencies first (without source code for better caching)
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project --no-editable
+
+# Copy the project into the image
+COPY . ${APP_DIR}
+
+# Sync the project (installs the local package)
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-editable
 
 # remove existing js files (will be packed below)
 RUN rm -rf liveticker/static/liveticker/js
@@ -25,13 +31,13 @@ RUN rm -rf scorecard/static/scorecard/js
 RUN rm -rf passcheck/static/passcheck/js
 
 # collect static files
-RUN python manage.py collectstatic --no-input --clear
+RUN .venv/bin/python manage.py collectstatic --no-input --clear
 
 FROM node:24-slim AS node-builder
 ARG APP_DIR="/liveticker-app"
 WORKDIR ${APP_DIR}
 
-COPY ../liveticker ${APP_DIR}
+COPY liveticker ${APP_DIR}
 RUN rm -rf static/liveticker/js
 
 RUN npm ci
@@ -40,7 +46,7 @@ RUN npm run build
 ARG APP_DIR="/scorecard-app"
 WORKDIR ${APP_DIR}
 
-COPY ../scorecard ${APP_DIR}
+COPY scorecard ${APP_DIR}
 RUN rm -rf static/scorecard/js
 
 RUN npm ci
@@ -49,7 +55,7 @@ RUN npm run build
 ARG APP_DIR="/passcheck-app"
 WORKDIR ${APP_DIR}
 
-COPY ../passcheck ${APP_DIR}
+COPY passcheck ${APP_DIR}
 RUN rm -rf static/passcheck/js
 
 RUN npm ci

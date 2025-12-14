@@ -5,7 +5,7 @@ orbs:
 jobs:
   python:
     docker:
-      - image: cimg/python:3.14.0
+      - image: cimg/python:3.14.2
       - image: cimg/mysql:9.5
         command: [ --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --default-storage-engine=InnoDB ]
         environment:
@@ -17,28 +17,32 @@ jobs:
     steps:
       - checkout
       # Download and cache dependencies
+      - run:
+          name: install uv
+          command: |
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            source ~/.cargo/env
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "requirements.txt" }}
+            - v2-dependencies-{{ checksum "pyproject.toml" }}
             # fallback to using the latest cache if no exact match is found
             - v2-dependencies-
 
       - run:
           name: install dependencies
           command: |
-            pip install -r requirements.txt
-            pip install -r test_requirements.txt
+            uv sync --extra test
       - save_cache:
           paths:
             - ~/.pyenv
-          key: v2-dependencies-{{ checksum "requirements.txt" }}
+          key: v2-dependencies-{{ checksum "pyproject.toml" }}
 
       - run:
           name: run tests
           environment:
             SECRET_KEY: 123456-TEST
           command: |
-            pytest --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
+            uv run pytest --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
       - store_test_results:
           path: test-reports
 
