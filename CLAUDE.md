@@ -24,6 +24,69 @@ This project uses specialized Claude Code agents for different development tasks
 
 **Workflow:** Claude Code will automatically delegate tasks to appropriate specialized agents. Each agent has specific expertise and tools to handle their domain effectively.
 
+### Deployment Safety & Infrastructure Changes
+
+**CRITICAL POLICY - MANDATORY COMPLIANCE:**
+
+**NEVER make infrastructure changes or hotfixes directly on production servers.**
+
+All infrastructure changes, Ansible playbook modifications, and environment configuration updates MUST follow this process:
+
+1. **Develop the Fix:**
+   - Create/modify Ansible playbooks and scripts in `/home/cda/dev/infrastructure/container`
+   - Update configuration files and templates
+   - Document the change
+
+2. **Test on servyy-test.lxd FIRST:**
+   - Deploy the full playbook to `servyy-test.lxd` test environment
+   - Verify all files are created/updated correctly
+   - Test both production and staging playbooks if both are affected
+   - Confirm no cross-contamination between environments
+   - **NEVER skip this step** - no exceptions
+
+3. **Only After Successful Testing:**
+   - Deploy to production servers (lehel.xyz)
+   - Verify deployment results
+   - Document what was changed
+
+**Forbidden Actions:**
+- ❌ Manual file edits on production servers (SSH + vi/nano/sed)
+- ❌ Direct scp/rsync of configuration files to production
+- ❌ Hotfixes without Ansible automation
+- ❌ Deploying to production without servyy-test validation
+- ❌ "Quick fixes" that bypass the test environment
+
+**Why This Matters:**
+- Manual changes are not reproducible
+- Hotfixes can corrupt production environments (e.g., staging overwriting production files)
+- Untested changes can break running services
+- Ansible ensures idempotency and proper variable scoping
+
+**Test Environment:**
+- Host: `servyy-test.lxd` (IP: `10.185.182.207`)
+- Purpose: Full deployment testing before production
+- Inventory: `/home/cda/dev/infrastructure/container/ansible/test` (if separate) or `--limit servyy-test` flag
+
+**Example Workflow:**
+```bash
+# 1. Develop fix in infrastructure repo
+cd /home/cda/dev/infrastructure/container
+
+# 2. Test on servyy-test FIRST
+ansible-playbook ansible/plays/playbook.yml -i ansible/production --limit servyy-test.lxd
+
+# 3. Verify results on test server
+ssh servyy-test.lxd "verify commands here"
+
+# 4. Only after success, deploy to production
+ansible-playbook ansible/plays/playbook.yml -i ansible/production --limit lehel.xyz
+```
+
+**If you need to make an infrastructure change:**
+1. Use the `@agent-service-master` or `@agent-service-tester` agents
+2. These agents understand the test-first deployment policy
+3. They will automatically test on servyy-test before production
+
 ### Testing Strategy
 
 **During Feature Development:**
