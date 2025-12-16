@@ -15,10 +15,10 @@ services:
       - backend
     healthcheck:
       test: ["CMD", "sh", "-c", "mariadb --skip-ssl -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
-      interval: 10s
+      interval: 15s
       timeout: 5s
-      retries: 10
-      start_period: 60s
+      retries: 15
+      start_period: 90s
     labels:
       - traefik.enable=false
 
@@ -74,6 +74,11 @@ services:
       mysql:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
 
 networks:
   backend:
