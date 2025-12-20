@@ -155,6 +155,8 @@ class ParticipationValidator:
         return self._evaluate_requirement(participant_license, minimum_total_games, 'minimum_total_games')
 
     def fails_minimum_consecutive_license_years(self, participant_license: int, license_years: str):
+        if license_years == '-':
+            return True
         years = list(map(int, license_years.split(",")))
         years.sort(reverse=True)
         consecutive_count = 1  # Start count with the latest year
