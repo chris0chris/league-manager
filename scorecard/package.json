@@ -46,7 +46,7 @@
     "moxios": "^0.4.0",
     "prettier": "3.7.4",
     "redux-mock-store": "^1.5.5",
-    "vite": "^7.2.7",
+    "vite": "^7.3.0",
     "vitest": "^4.0.15"
   },
   "scripts": {
