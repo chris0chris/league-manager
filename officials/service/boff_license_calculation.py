@@ -18,14 +18,14 @@ class LicenseStrategy(ABC):
             'user_current_license': {
                 F1_LICENSE: {
                     'name': 'F1',
-                    'minimum_season_games': 4, #5
+                    'minimum_season_games': 5,
                     'minimum_total_games': 0,
                     'minimum_consecutive_license_years': 0,
                 },
                 F2_LICENSE: {
                     'name': 'F2',
-                    'minimum_season_games': 5, #8
-                    'minimum_total_games': 20, #25
+                    'minimum_season_games': 8,
+                    'minimum_total_games': 25,
                     'minimum_consecutive_license_years': 5,
                 },
             },
@@ -35,14 +35,14 @@ class LicenseStrategy(ABC):
             'user_current_license': {
                 F2_LICENSE: {
                     'name': 'F2',
-                    'minimum_season_games': 4, #5
+                    'minimum_season_games': 5,
                     'minimum_total_games': 0,
                     'minimum_consecutive_license_years': 0,
                 },
                 F3_LICENSE: {
                     'name': 'F3',
-                    'minimum_season_games': 4, #5
-                    'minimum_total_games': 0, #12
+                    'minimum_season_games': 5,
+                    'minimum_total_games': 12,
                     'minimum_consecutive_license_years': 0,
                 },
             },
