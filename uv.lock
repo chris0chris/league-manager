@@ -358,14 +358,14 @@ wheels = [
 
 [[package]]
 name = "django-health-check"
-version = "3.20.4"
+version = "3.20.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cb/c1/febd7aedd583c3f90e5bab60f30a78b3d637dd85db33ff1d2ff583a8a601/django_health_check-3.20.4.tar.gz", hash = "sha256:aea57b41605fdc3297297ac2ed94da90cbe969678ae3a50dd9b1726e69594336", size = 20966, upload-time = "2025-12-19T21:20:39.188Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3c/66/23439b270554a120a3340ac6b1c4259a0506994da3a25b683cf3bf2d58f3/django_health_check-3.20.6.tar.gz", hash = "sha256:67e71c93d067499cf57e466f7c12f96e40a76136bab3fab8a61912b9255b89f6", size = 15613, upload-time = "2025-12-20T20:18:51.655Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/98/b365f7294b0b9e927e278cde8eed6120654ca170fb76b97fe58d1012e9e4/django_health_check-3.20.4-py3-none-any.whl", hash = "sha256:8e6dc747357c59803241711912d6c913986cbf7d01a5952dcae89904f1dfcaf2", size = 32436, upload-time = "2025-12-19T21:20:38.122Z" },
+    { url = "https://files.pythonhosted.org/packages/b2/18/6ccf98a7fce5426db253d97b37c303302927617397e1a649af2ede4778fb/django_health_check-3.20.6-py3-none-any.whl", hash = "sha256:d64b0cf13a36d7d20fb9945660a4292b73bc4ac04e3c9929e537c7207648faf0", size = 29521, upload-time = "2025-12-20T20:18:50.492Z" },
 ]
 
 [[package]]
@@ -524,7 +524,7 @@ requires-dist = [
     { name = "django-crispy-forms", specifier = "==2.5" },
     { name = "django-debug-toolbar", marker = "extra == 'test'", specifier = "==6.1.0" },
     { name = "django-formtools", specifier = "==2.5.1" },
-    { name = "django-health-check", specifier = "==3.20.4" },
+    { name = "django-health-check", specifier = "==3.20.6" },
     { name = "django-pandas", specifier = "==0.6.7" },
     { name = "django-rest-knox", specifier = "==5.0.2" },
     { name = "django-webtest", marker = "extra == 'test'", specifier = "==1.9.14" },
