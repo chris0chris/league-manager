@@ -18,14 +18,14 @@ class LicenseStrategy(ABC):
             'user_current_license': {
                 F1_LICENSE: {
                     'name': 'F1',
-                    'minimum_season_games': 4, #5
+                    'minimum_season_games': 5,
                     'minimum_total_games': 0,
                     'minimum_consecutive_license_years': 0,
                 },
                 F2_LICENSE: {
                     'name': 'F2',
-                    'minimum_season_games': 5, #8
-                    'minimum_total_games': 20, #25
+                    'minimum_season_games': 8,
+                    'minimum_total_games': 25,
                     'minimum_consecutive_license_years': 5,
                 },
             },
@@ -35,14 +35,14 @@ class LicenseStrategy(ABC):
             'user_current_license': {
                 F2_LICENSE: {
                     'name': 'F2',
-                    'minimum_season_games': 4, #5
+                    'minimum_season_games': 5,
                     'minimum_total_games': 0,
                     'minimum_consecutive_license_years': 0,
                 },
                 F3_LICENSE: {
                     'name': 'F3',
-                    'minimum_season_games': 4, #5
-                    'minimum_total_games': 0, #12
+                    'minimum_season_games': 5,
+                    'minimum_total_games': 12,
                     'minimum_consecutive_license_years': 0,
                 },
             },
@@ -155,6 +155,8 @@ class ParticipationValidator:
         return self._evaluate_requirement(participant_license, minimum_total_games, 'minimum_total_games')
 
     def fails_minimum_consecutive_license_years(self, participant_license: int, license_years: str):
+        if license_years == '-':
+            return True
         years = list(map(int, license_years.split(",")))
         years.sort(reverse=True)
         consecutive_count = 1  # Start count with the latest year
