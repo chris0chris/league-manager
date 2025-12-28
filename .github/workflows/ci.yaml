@@ -109,8 +109,9 @@ jobs:
       local_image_name: frontend
       version: "${{ github.ref_name }}"
 
-  # Deploy to production (manual approval required)
+  # Deploy to production (SKIP for RC tags)
   deploy-backend-production:
+    if: "!contains(github.ref_name, '-rc.')"
     needs:
       - build-backend-image
       - deploy-backend-staging
@@ -123,6 +124,7 @@ jobs:
       version: "${{ github.ref_name }}"
 
   deploy-frontend-production:
+    if: "!contains(github.ref_name, '-rc.')"
     needs:
       - build-frontend-image
       - deploy-frontend-staging
@@ -134,8 +136,9 @@ jobs:
       local_image_name: frontend
       version: "${{ github.ref_name }}"
 
-  # Run database migrations (after backend production deployment)
+  # Run database migrations (after backend production deployment, SKIP for RC tags)
   run-migrations:
+    if: "!contains(github.ref_name, '-rc.')"
     needs:
       - build-backend-image
       - deploy-backend-production

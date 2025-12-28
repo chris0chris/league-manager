@@ -336,6 +336,37 @@ npm --prefix liveticker/ -- vitest run src/components/__tests__/LivetickerApp.sp
 npm --prefix scorecard/ -- vitest run src/components/scorecard/__tests__/Details.spec.js
 ```
 
+### Deployment Scripts
+
+**Deploy to staging only:**
+```bash
+./container/deploy.sh stage
+```
+
+Creates a Release Candidate (RC) version tag that triggers deployment to staging environment only:
+- From stable (e.g., `2.12.16`) → creates `2.12.17-rc.1`
+- From RC (e.g., `2.12.17-rc.1`) → creates `2.12.17-rc.2`
+- Triggers: Tests → Build → Staging deployment only
+- URL: https://stage.leaguesphere.app
+
+**Deploy to production:**
+```bash
+./container/deploy.sh {major|minor|patch}
+```
+
+Creates a stable version tag that triggers deployment to both staging and production:
+- Example: `./container/deploy.sh patch` → creates `2.12.17` from `2.12.16`
+- Triggers: Tests → Build → Staging deployment → Production deployment → Migrations
+- URLs: https://stage.leaguesphere.app + https://leaguesphere.app
+
+**All deployment options:**
+```bash
+./container/deploy.sh stage   # Staging only (RC version)
+./container/deploy.sh patch   # Staging + Production (patch bump)
+./container/deploy.sh minor   # Staging + Production (minor bump)
+./container/deploy.sh major   # Staging + Production (major bump)
+```
+
 ## Versioning
 
 Version is managed via `bump2version` and synchronized across:
