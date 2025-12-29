@@ -42,12 +42,17 @@ case "$1" in
             echo "Incrementing RC build number..."
             bump-my-version bump rc_build
         else
-            # Stable version - bump patch and start RC
+            # Stable version - bump patch and create first RC
             echo "Bumping patch version and creating RC..."
-            # First bump patch: 2.12.16 → 2.12.17
-            bump-my-version bump patch --no-commit --no-tag
-            # Then set release to RC: 2.12.17 → 2.12.17-rc.1
-            bump-my-version bump release --commit --tag
+            # Extract version parts
+            MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
+            MINOR=$(echo $CURRENT_VERSION | cut -d. -f2)
+            PATCH=$(echo $CURRENT_VERSION | cut -d. -f3)
+            # Increment patch and set to rc.1
+            NEW_PATCH=$((PATCH + 1))
+            NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}-rc.1"
+            echo "Creating version: $NEW_VERSION"
+            bump-my-version bump --new-version "$NEW_VERSION" patch
         fi
 
         # Push commits and tags
