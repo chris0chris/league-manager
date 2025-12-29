@@ -65,7 +65,7 @@ services:
       - io.portainer.accesscontrol.teams=${SERVICE_NAME}
     env_file: ls.env.staging
     environment:
-      DJANGO_SETTINGS_MODULE: league_manager.settings.prod
+      DJANGO_SETTINGS_MODULE: league_manager.settings.stage
       RUN_MIGRATIONS: true
     networks:
       - proxy
