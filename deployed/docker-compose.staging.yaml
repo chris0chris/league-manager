@@ -68,7 +68,6 @@ services:
       DJANGO_SETTINGS_MODULE: league_manager.settings.stage
       RUN_MIGRATIONS: true
     networks:
-      - proxy
       - backend
     depends_on:
       mysql:

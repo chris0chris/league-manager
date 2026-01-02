@@ -47,7 +47,6 @@ services:
       DJANGO_SETTINGS_MODULE: league_manager.settings.prod
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-false}  # Default to false if not set
     networks:
-      - proxy
       - backend
     restart: unless-stopped
     healthcheck:
