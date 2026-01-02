@@ -5,7 +5,7 @@ URL="http://localhost/login/"
 ORIGIN="https://leaguesphere.app"
 
 # 0. Check if service is up
-UP_STATUS=$(curl -A healthcheck -s -o /dev/null -w "%{http_code}" "$URL")
+UP_STATUS=$(curl -A healthcheck-status -s -o /dev/null -w "%{http_code}" "$URL")
 if [ "$UP_STATUS" -ne 200 ]; then
   echo "Service not responding properly (status=$UP_STATUS)"
   exit 1
@@ -13,7 +13,7 @@ fi
 
 # 1. Cookie + CSRF-Token von Login-Form holen
 COOKIE_JAR=$(mktemp)
-HTML=$(curl -A healthcheck -s -c "$COOKIE_JAR" "$URL")
+HTML=$(curl -A healthcheck-csrf-get -s -c "$COOKIE_JAR" "$URL")
 
 # CSRF Cookie extrahieren
 CSRFTOKEN=$(grep csrftoken "$COOKIE_JAR" | awk '{print $7}')
@@ -24,7 +24,7 @@ if [ -z "$CSRFTOKEN" ]; then
 fi
 
 # 2. POST mit Cookie + Token
-STATUS=$(curl -A healthcheck -s -o /dev/null -w "%{http_code}" \
+STATUS=$(curl -A healthcheck-csrf-post -s -o /dev/null -w "%{http_code}" \
   -X POST "$URL" \
   -H "Origin: $ORIGIN" \
   -H "Referer: $ORIGIN/login/" \
