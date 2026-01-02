@@ -465,8 +465,8 @@ The project includes a dedicated staging environment for testing changes before 
 - **Manual Deploy on Server:**
   ```bash
   cd ~/dev/leaguesphere/deployed/
-  docker compose -f docker-compose.staging.yaml --env-file .env.staging pull
-  docker compose -f docker-compose.staging.yaml --env-file .env.staging up -d
+  docker compose -f docker-compose.staging.yaml 
+  docker compose -f docker-compose.staging.yaml  up -d
   ```
 
 **Initial Setup:**

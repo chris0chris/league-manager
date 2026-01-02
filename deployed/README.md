@@ -52,8 +52,8 @@ This directory contains Docker Compose configurations for deploying LeagueSphere
 
 4. **Pull and start staging environment:**
    ```bash
-   docker compose -f docker-compose.staging.yaml --env-file .env.staging pull
-   docker compose -f docker-compose.staging.yaml --env-file .env.staging up -d
+   docker compose -f docker-compose.staging.yaml pull
+   docker compose -f docker-compose.staging.yaml up -d
    ```
 
 5. **Verify deployment:**
@@ -82,8 +82,8 @@ When new `:staging` images are pushed to Docker Hub (automatically via CI/CD):
 
 ```bash
 cd ~/dev/leaguesphere/deployed/
-docker compose -f docker-compose.staging.yaml --env-file .env.staging pull
-docker compose -f docker-compose.staging.yaml --env-file .env.staging up -d
+docker compose -f docker-compose.staging.yaml pull
+docker compose -f docker-compose.staging.yaml up -d
 ```
 
 ### Troubleshooting
