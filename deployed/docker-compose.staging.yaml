@@ -73,11 +73,6 @@ services:
       mysql:
         condition: service_healthy
     restart: unless-stopped
-    healthcheck:
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 120s
 
 networks:
   backend:
