@@ -48,6 +48,9 @@ services:
 
       # Portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
+
+      # Watchtower scope
+      - com.centurylinklabs.watchtower.scope=ls-staging
     networks:
       - backend
       - proxy
@@ -62,7 +65,10 @@ services:
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     labels:
       - traefik.enable=false
-      - io.portainer.accesscontrol.teams=${SERVICE_NAME}
+      # portainer team
+      - io.portainer.accesscontrol.teams=leaguesphere
+      # Watchtower scope
+      - com.centurylinklabs.watchtower.scope=ls-staging
     env_file: ls.env.staging
     environment:
       DJANGO_SETTINGS_MODULE: league_manager.settings.stage
@@ -73,6 +79,23 @@ services:
       mysql:
         condition: service_healthy
     restart: unless-stopped
+
+  watchtower:
+    restart: unless-stopped
+    image: containrrr/watchtower
+    container_name: ${COMPOSE_PROJECT_NAME}.watchtower
+    labels:
+      - traefik.enable=false
+      - com.centurylinklabs.watchtower.scope=ls-staging
+    environment:
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_POLL_INTERVAL: "600"
+      WATCHTOWER_INCLUDE_RESTARTING: "true"
+      WATCHTOWER_SCOPE: "ls-staging"
+      TZ: "Europe/Berlin"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
 
 networks:
   backend:
