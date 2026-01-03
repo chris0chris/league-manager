@@ -47,7 +47,8 @@ services:
       DJANGO_SETTINGS_MODULE: league_manager.settings.prod
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-false}  # Default to false if not set
     networks:
-      - backend
+      - backend   # For www communication
+      - database  # For external MySQL access
     restart: unless-stopped
     healthcheck:
       interval: 15s
@@ -58,5 +59,7 @@ services:
 networks:
   backend:
     internal: true
+  database:
+    internal: false  # Allow external connectivity for MySQL
   proxy:
     external: true
