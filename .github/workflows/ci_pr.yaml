@@ -79,3 +79,18 @@ jobs:
     with:
       artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
       image_name: backend
+
+  # Test docker-compose network configuration for production (has external MySQL)
+  test-compose-network-production:
+    needs:
+      - build-backend-image
+      - build-frontend-image
+      - test-backend-image
+      - test-frontend-image
+      - check-migrations
+    uses: ./.github/workflows/part_test_compose_network.yaml
+    with:
+      compose_file: docker-compose.yaml
+      environment_name: production
+      backend_artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
+      frontend_artifact_name: ${{ needs.build-frontend-image.outputs.artifact_name }}

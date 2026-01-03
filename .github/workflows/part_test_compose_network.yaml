@@ -1,0 +1,187 @@
+name: 🌐 Test Docker Compose Network Configuration
+
+on:
+  workflow_call:
+    inputs:
+      compose_file:
+        required: true
+        description: Docker compose file to test (e.g., docker-compose.yaml)
+        type: string
+      environment_name:
+        required: true
+        description: Environment name for logging (e.g., production, staging)
+        type: string
+      backend_artifact_name:
+        required: true
+        description: The name of the backend Docker image artifact
+        type: string
+      frontend_artifact_name:
+        required: true
+        description: The name of the frontend Docker image artifact
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test-compose-network:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download backend Docker image artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ inputs.backend_artifact_name }}
+          path: /tmp
+
+      - name: 📥 Download frontend Docker image artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ inputs.frontend_artifact_name }}
+          path: /tmp
+
+      - name: 🐳 Load Docker images
+        run: |
+          docker load --input /tmp/backend.tar
+          docker load --input /tmp/frontend.tar
+          docker image ls -a
+
+      - name: 🐳 Start docker-compose stack and test connectivity
+        run: |
+          cd deployed
+
+          echo "Testing docker-compose network configuration: ${{ inputs.compose_file }} (${{ inputs.environment_name }})"
+
+          # Create .env file for Docker Compose (SERVICE_NAME, COMPOSE_PROJECT_NAME, etc.)
+          cat > .env <<EOF
+          SERVICE_NAME=leaguesphere
+          COMPOSE_PROJECT_NAME=leaguesphere
+          SERVICE_HOST=localhost
+          LOCAL_HOSTNAME=localhost
+          RUN_MIGRATIONS=false
+          EOF
+
+          # Create mock ls.env.ci file for application secrets
+          cat > ls.env.ci <<EOF
+          SECRET_KEY=ci-test-secret-key-not-for-production
+          MYSQL_HOST=mysql-mock.example.com
+          MYSQL_DB_NAME=ci_test_db
+          MYSQL_USER=ci_test_user
+          MYSQL_PWD=ci_test_password
+          DEBUG=False
+          EOF
+
+          # Create CI compose file with mock env and use locally built images
+          if [ "${{ inputs.environment_name }}" = "staging" ]; then
+            sed -e 's/env_file: ls.env.staging/env_file: ls.env.ci/g' \
+                -e 's|image: leaguesphere/backend:staging|image: backend:latest|g' \
+                -e 's|image: leaguesphere/frontend:staging|image: frontend:latest|g' \
+                ${{ inputs.compose_file }} > docker-compose.ci.yaml
+          else
+            sed -e 's/env_file: ls.env/env_file: ls.env.ci/g' \
+                -e 's|image: leaguesphere/backend:latest|image: backend:latest|g' \
+                -e 's|image: leaguesphere/frontend:latest|image: frontend:latest|g' \
+                ${{ inputs.compose_file }} > docker-compose.ci.yaml
+          fi
+
+          # Show the configuration we're testing
+          echo "=== Docker Compose Configuration ==="
+          cat docker-compose.ci.yaml
+          echo "===================================="
+
+          # Create external networks that the compose file expects
+          echo "Creating external networks..."
+          docker network create proxy 2>/dev/null || echo "Network proxy already exists"
+
+          # Start the stack
+          echo "Starting docker-compose stack..."
+          docker compose -f docker-compose.ci.yaml up -d
+
+          # Wait for services to be ready
+          echo "Waiting for services to start..."
+          sleep 10
+
+      - name: 🔍 Verify containers are running
+        run: |
+          cd deployed
+          docker compose -f docker-compose.ci.yaml ps
+
+          # Check app container is running
+          if ! docker compose -f docker-compose.ci.yaml ps | grep -q "app.*Up"; then
+            echo "❌ App container is not running"
+            docker compose -f docker-compose.ci.yaml logs app
+            exit 1
+          fi
+
+          echo "✅ App container is running"
+
+      - name: 🌐 Test external connectivity from app container
+        run: |
+          cd deployed
+
+          # Get app container name
+          APP_CONTAINER=$(docker compose -f docker-compose.ci.yaml ps -q app)
+
+          if [ -z "$APP_CONTAINER" ]; then
+            echo "❌ Failed to get app container ID"
+            exit 1
+          fi
+
+          echo "Testing connectivity from app container: $APP_CONTAINER"
+          echo ""
+
+          # Test 1: DNS Resolution + HTTPS Connectivity
+          echo "==== Test 1: DNS Resolution + HTTPS Connectivity ===="
+          if docker exec $APP_CONTAINER sh -c 'curl -f --max-time 10 https://www.google.com > /dev/null 2>&1'; then
+            echo "✅ DNS resolution and HTTPS connectivity successful"
+          else
+            echo "❌ External connectivity FAILED (DNS or network issue)"
+            echo "This usually means:"
+            echo "  - App container has no external network access (internal: true)"
+            echo "  - DNS resolution is blocked"
+            echo "  - HTTPS traffic is blocked"
+            echo ""
+            echo "Debug info:"
+            docker exec $APP_CONTAINER sh -c 'cat /etc/resolv.conf || true'
+            docker exec $APP_CONTAINER sh -c 'ip route || true'
+            docker network ls
+            docker network inspect $(docker inspect $APP_CONTAINER --format='{{range $net,$v := .NetworkSettings.Networks}}{{$net}} {{end}}') || true
+            exit 1
+          fi
+
+          echo ""
+
+          # Test 2: HTTP Connectivity (additional verification)
+          echo "==== Test 2: HTTP Connectivity ===="
+          if docker exec $APP_CONTAINER sh -c 'curl -f --max-time 10 http://www.google.com > /dev/null 2>&1'; then
+            echo "✅ HTTP connectivity successful"
+          else
+            echo "⚠️  HTTP connectivity failed (HTTPS worked, so this is likely just a redirect issue)"
+          fi
+
+          echo ""
+          echo "==== ✅ All connectivity tests passed! ===="
+
+      - name: 🔍 Show network configuration (for debugging)
+        if: always()
+        run: |
+          cd deployed
+          APP_CONTAINER=$(docker compose -f docker-compose.ci.yaml ps -q app)
+
+          if [ -n "$APP_CONTAINER" ]; then
+            echo "Networks attached to app container:"
+            docker inspect $APP_CONTAINER --format='{{range $net,$v := .NetworkSettings.Networks}}{{$net}}: {{$v.IPAddress}}{{"\n"}}{{end}}' || true
+
+            echo ""
+            echo "Network details:"
+            docker network inspect $(docker inspect $APP_CONTAINER --format='{{range $net,$v := .NetworkSettings.Networks}}{{$net}} {{end}}') || true
+          fi
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          cd deployed
+          docker compose -f docker-compose.ci.yaml down -v || true
+          rm -f docker-compose.ci.yaml ls.env.ci .env
