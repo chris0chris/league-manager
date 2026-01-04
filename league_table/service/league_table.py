@@ -42,7 +42,7 @@ class LeagueTable:
                     gameinfo__gameday__league=league_season_config.league,
                     gameinfo__status="beendet",
                 )
-                .exclude(gameinfo__gameday__gte=627)
+                # .exclude(gameinfo__gameday__gte=627)
                 .exclude(gameinfo__gameday__in=league_config.excluded_gameday_ids)
                 .select_related("gameinfo", "team")
                 .values(*LEAGUE_TABLE_GAME_COLUMNS)
