@@ -177,3 +177,8 @@ class LeagueTableService:
         return LeagueTableRepository.get_seasons_for_league_slug(
             league_slug
         )
+
+    def get_season_name(self):
+        if self.league_season_config is None:
+            return None
+        return self.league_season_config.season.name

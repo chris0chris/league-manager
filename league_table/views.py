@@ -44,7 +44,7 @@ class LeagueTableView(View):
                 "table": table.to_dict(orient="records"),
                 "columns": table.columns,
             },
-            "current_season": league_table_service.league_season_config.season.name,
+            "current_season": league_table_service.get_season_name(),
             "current_league": league_slug,
             "seasons": league_table_service.get_seasons_for_league_slug(league_slug),
             "url_pattern": LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE,

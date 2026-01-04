@@ -101,10 +101,6 @@ class EmptyGamedayService:
         return EmptyQualifyTable
 
     @staticmethod
-    def get_qualify_table2():
-        return EmptyQualifyTable
-
-    @staticmethod
     def get_final_table():
         return EmptyFinalTable
 
@@ -143,14 +139,6 @@ class GamedayService:
         if qualify_table is '':
             return EmptyQualifyTable
         qualify_table = qualify_table[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
-        qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
-        return qualify_table
-
-    def get_qualify_table2(self):
-        qualify_table = self.gmw.get_qualify_table2()
-        if qualify_table is '':
-            return EmptyQualifyTable
-        qualify_table = qualify_table[[TEAM_NAME, POINTS, PF, PA, DIFF]]
         qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
         return qualify_table
 

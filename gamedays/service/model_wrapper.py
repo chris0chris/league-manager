@@ -104,12 +104,6 @@ class GamedayModelWrapper:
         return schedule
 
     def get_qualify_table(self):
-        if not self.has_finalround():
-            return ''
-        qualify_round = self._get_table()
-        return qualify_round
-
-    def get_qualify_table2(self):
         qualify_round = self._get_table()
         if not apps.is_installed("league_table"):
             return qualify_round
@@ -143,7 +137,7 @@ class GamedayModelWrapper:
             engine = FinalRankingEngine(league_config_ruleset)
             return engine.compute_final_table(self._games_with_result, self._get_schedule())
         else:
-            return self.get_qualify_table2()
+            return self.get_qualify_table()
 
     def get_offense_player_statistics_table(self):
         scoring_events = [
