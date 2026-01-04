@@ -27,8 +27,9 @@ class LeagueRuleset(models.Model):
     ]
 
     name = models.CharField(max_length=50, unique=True)
-    league_quotient_precision = models.PositiveSmallIntegerField(default=3)
+    allow_official_registration = models.BooleanField(default=False)
 
+    league_quotient_precision = models.PositiveSmallIntegerField(default=3)
     points_win_same_league = models.DecimalField(
         max_digits=4, decimal_places=2, default=1
     )

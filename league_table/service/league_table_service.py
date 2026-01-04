@@ -32,7 +32,7 @@ class LeagueTableService:
     @classmethod
     def from_league_and_season(cls, league_slug: str, season_slug: str) -> "LeagueTableService":
         try:
-            league_season_config = LeagueTableRepository.get_league_season_config(
+            league_season_config = LeagueTableRepository.get_league_season_config_by_slug(
                 league_slug, season_slug
             )
             return cls(league_season_config)

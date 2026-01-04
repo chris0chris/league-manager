@@ -19,6 +19,8 @@ from django.views.generic import (
 from formtools.wizard.views import SessionWizardView
 
 from league_table.constants import LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE
+from league_table.models import LeagueSeasonConfig
+from league_table.service.leaguetable_repository import LeagueTableRepository
 from .constants import (
     LEAGUE_GAMEDAY_DETAIL,
     LEAGUE_GAMEDAY_LIST_AND_YEAR,
@@ -110,22 +112,39 @@ class GamedayDetailView(DetailView):
             officials = []
             url_pattern_official = ''
             url_pattern_official_signup = ''
-        context['info'] = {
-            'schedule': gs.get_schedule().to_html(**render_configs),
-            'qualify_table': qualify_table,
-            'qualify_table2': qualify_table2,
-            'final_table': gs.get_final_table().to_html(**render_configs),
-            'officials': officials,
-            'offense_table': gs.get_offense_player_statistics_table().to_html(**render_configs),
-            'defense_table': gs.get_defense_player_statistic_table().to_html(**render_configs),
-            'url_pattern_official': url_pattern_official,
-            'url_pattern_official_signup': url_pattern_official_signup,
-        }
+
         if apps.is_installed("league_table"):
+            season_slug = gameday.season.slug
+            league_slug = gameday.league.slug
             context["league_table_url"] = reverse(
                     LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE,
-                    kwargs={"season": gameday.season.slug, "league": gameday.league.slug},
+                    kwargs={"season": season_slug, "league": league_slug},
                 )
+            try:
+                league_season_config = LeagueTableRepository.get_league_season_config_by_slug(league_slug, season_slug)
+                if not league_season_config.ruleset.allow_official_registration:
+                    officials = []
+                    url_pattern_official = ''
+                    url_pattern_official_signup = ''
+            except LeagueSeasonConfig.DoesNotExist:
+                officials = []
+                url_pattern_official = ""
+                url_pattern_official_signup = ""
+        context["info"] = {
+            "schedule": gs.get_schedule().to_html(**render_configs),
+            "qualify_table": qualify_table,
+            "qualify_table2": qualify_table2,
+            "final_table": gs.get_final_table().to_html(**render_configs),
+            "officials": officials,
+            "offense_table": gs.get_offense_player_statistics_table().to_html(
+                **render_configs
+            ),
+            "defense_table": gs.get_defense_player_statistic_table().to_html(
+                **render_configs
+            ),
+            "url_pattern_official": url_pattern_official,
+            "url_pattern_official_signup": url_pattern_official_signup,
+        }
         return context
 
 
