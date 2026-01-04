@@ -24,22 +24,31 @@ LEAGUE_TABLE_GAME_COLUMNS = [
 LEAGUE_TABLE_TEAM_AND_LEAGUE_COLUMNS = ["teams__id", "league_id", "teams__description", "league__name"]
 
 
-class LeagueTable:
+class LeagueTableService:
 
-    def __init__(self):
-        pass
+    def __init__(self, league_season_config: LeagueSeasonConfig | None):
+        self.league_season_config = league_season_config
 
-    def get_standing(self, league_slug: str, season_slug: str):
+    @classmethod
+    def from_league_and_season(cls, league_slug: str, season_slug: str) -> "LeagueTableService":
         try:
             league_season_config = LeagueTableRepository.get_league_season_config(
                 league_slug, season_slug
             )
-            league_config = LeagueConfig.from_league_season_config(league_season_config)
-            current_season = league_season_config.season
+            return cls(league_season_config)
+        except LeagueSeasonConfig.DoesNotExist:
+            return cls(None)
+
+    def get_standing(self):
+        try:
+            if self.league_season_config is None:
+                raise LeagueSeasonConfig.DoesNotExist
+            league_config = LeagueConfig.from_league_season_config(self.league_season_config)
+            current_season = self.league_season_config.season
             results = (
                 Gameresult.objects.filter(
                     gameinfo__gameday__season=current_season,
-                    gameinfo__gameday__league=league_season_config.league,
+                    gameinfo__gameday__league=self.league_season_config.league,
                     gameinfo__status="beendet",
                 )
                 # .exclude(gameinfo__gameday__gte=627)
@@ -163,3 +172,8 @@ class LeagueTable:
     def get_all_schedules(self):
         # TODO
         return []
+
+    def get_seasons_for_league_slug(self, league_slug) -> list[str]:
+        return LeagueTableRepository.get_seasons_for_league_slug(
+            league_slug
+        )

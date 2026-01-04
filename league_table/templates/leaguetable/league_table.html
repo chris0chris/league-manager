@@ -11,6 +11,9 @@
             {% if not info.table %}
             Tabelle wurde noch nicht erstellt.
             {% else %}
+            {% include 'utils/season_filter.html'  %}
+            <br />
+
             <div x-data="{
                     showTieBreakCols: false,
                     showTableLong: false,

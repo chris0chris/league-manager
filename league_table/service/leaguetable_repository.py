@@ -25,3 +25,12 @@ class LeagueTableRepository:
             .order_by("league__name")
             .values(slug=F("league__slug"), name=F("league__name"))
         )
+
+    @classmethod
+    def get_seasons_for_league_slug(cls, league_slug):
+        return list(
+            LeagueSeasonConfig.objects.filter(league__slug=league_slug)
+            .values("season__name")
+            .order_by("-season__name")
+            .values_list("season__name", flat=True)
+        )
