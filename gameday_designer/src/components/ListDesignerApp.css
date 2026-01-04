@@ -1,0 +1,36 @@
+/**
+ * ListDesignerApp Component Styles
+ */
+
+.list-designer-app {
+  height: 100%;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.list-designer-app__header {
+  flex-shrink: 0;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.list-designer-app__toolbar {
+  flex-shrink: 0;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.list-designer-app__content {
+  flex: 1;
+  overflow: hidden;
+  margin: 0;
+  min-height: 0; /* Critical for flexbox overflow handling */
+}
+
+.list-designer-app__status-bar {
+  flex-shrink: 0;
+  background-color: #f8f9fa;
+}

@@ -1,0 +1,46 @@
+/**
+ * StageSection Component Styles
+ */
+
+.stage-section {
+  border: 1px dashed #6c757d;
+  background-color: #ffffff;
+  margin-left: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stage-section.selected {
+  border-color: #0d6efd;
+  border-style: solid;
+  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.15);
+}
+
+.stage-section__header {
+  background-color: #e7f3ff; /* Light blue */
+  border-bottom: 1px solid #dee2e6;
+  border-left: 3px solid #0d6efd; /* Bootstrap primary blue */
+  user-select: none;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.stage-section__header:hover {
+  background-color: #d4e9ff; /* Slightly darker on hover */
+}
+
+.stage-section__body {
+  padding: 0.75rem;
+}
+
+.stage-section h6 {
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Add button container at bottom of stage body */
+.stage-section__body .mt-2 {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'gameday_designer/js/gameday_designer.css' %}">
+    <style>
+        /* Make body and html take full height without overflow */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Make main container fill available space */
+        main.container {
+            height: calc(100vh - 149px); /* Subtract navbar (70px) and footer (79px) */
+            max-width: 100%;
+            padding: 0;
+            margin-top: 70px; /* Push below navbar */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Make content area fill available space */
+        main.container > div {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Designer container fills the content area */
+        #gameday-designer {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Make footer sticky at bottom */
+        .footer {
+            position: sticky;
+            bottom: 0;
+            z-index: 1000;
+            margin-top: 0 !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="gameday-designer"></div>
+{% endblock %}
+
+{% block extra_js %}
+    <script type="module" src="{% static 'gameday_designer/js/gameday_designer.js' %}"></script>
+{% endblock %}

@@ -21,6 +21,8 @@ services:
       start_period: 90s
     labels:
       - traefik.enable=false
+      # portainer team
+      - io.portainer.accesscontrol.teams=leaguesphere
 
   www:
     image: leaguesphere/frontend:staging

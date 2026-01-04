@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'accounts',
     'knox',
     'passcheck',
+    'gameday_designer',
     'health_check',
     'health_check.contrib.db_heartbeat',
 ]

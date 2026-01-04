@@ -1,0 +1,182 @@
+/**
+ * ListCanvas Component Styles
+ */
+
+.list-canvas {
+  height: 100%;
+  padding: 1rem;
+  background-color: transparent;
+  overflow: hidden;
+}
+
+.list-canvas__content {
+  height: 100%;
+  overflow: hidden;
+  align-items: start; /* Prevent columns from stretching to equal heights */
+}
+
+/* Teams column */
+.teams-column {
+  min-height: 300px;
+  max-height: 100%; /* Dynamic - constrained by Bootstrap Row */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Fields column */
+.fields-column {
+  min-height: 300px;
+  max-height: 100%; /* Dynamic - constrained by Bootstrap Row */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Team Pool Card */
+.team-pool-card {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  max-height: 100%;
+}
+
+.team-pool-card .card-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0; /* Allow flex child to shrink */
+}
+
+/* Fields Card */
+.fields-card {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  max-height: 100%;
+}
+
+.fields-card .card-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0; /* Allow flex child to shrink */
+}
+
+.list-canvas--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.list-canvas .empty-state {
+  text-align: center;
+  padding: 3rem;
+}
+
+
+/* Collapsed sidebar state */
+.teams-column--collapsed {
+  max-width: 50px;
+  min-width: 50px;
+  flex: 0 0 50px;
+  transition: max-width 0.3s ease, min-width 0.3s ease, flex-basis 0.3s ease;
+}
+
+.team-pool-card--collapsed {
+  width: 50px;
+  min-height: 300px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.team-pool-card--collapsed:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+.team-pool-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: 1rem 0;
+}
+
+.team-pool-sidebar__title {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #495057;
+  white-space: nowrap;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.team-pool-sidebar i.bi-people-fill {
+  font-size: 1.5rem;
+  color: #495057;
+}
+
+.team-pool-sidebar__indicators {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.team-pool-sidebar__indicators .badge {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.teams-column {
+  transition: max-width 0.3s ease, min-width 0.3s ease, flex-basis 0.3s ease;
+}
+
+.team-pool-card {
+  transition: width 0.3s ease;
+}
+
+/**
+ * Fields Grid Layout with Responsive CSS Grid
+ * Includes inline Add Field card
+ */
+.fields-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+}
+
+/* Responsive breakpoints for field grid */
+@media (max-width: 1024px) {
+  .fields-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive: Stack columns on small screens */
+@media (max-width: 767px) {
+  .list-canvas__content {
+    flex-direction: column;
+  }
+
+  .teams-column,
+  .fields-column {
+    height: auto;
+    max-height: 50vh; /* Limit height when stacked */
+  }
+}

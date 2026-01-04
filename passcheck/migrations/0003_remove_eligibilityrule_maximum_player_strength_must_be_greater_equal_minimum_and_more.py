@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='eligibilityrule',
-            constraint=models.CheckConstraint(check=models.Q(('maximum_player_strength', -1), ('maximum_player_strength__gte', models.F('minimum_player_strength')), _connector='OR'), name='maximum_player_strength_must_be_greater_equal_minimum'),
+            constraint=models.CheckConstraint(condition=models.Q(('maximum_player_strength', -1), ('maximum_player_strength__gte', models.F('minimum_player_strength')), _connector='OR'), name='maximum_player_strength_must_be_greater_equal_minimum'),
         ),
     ]
