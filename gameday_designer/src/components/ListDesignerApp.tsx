@@ -19,32 +19,22 @@ import { downloadFlowchartAsJson, validateForExport } from '../utils/flowchartEx
 import { importFromScheduleJson, validateScheduleJson } from '../utils/flowchartImport';
 import { scrollToGameWithExpansion } from '../utils/scrollHelpers';
 import { generateTournament, TournamentStructure } from '../utils/tournamentGenerator';
+import { createPlacementEdges } from '../utils/bracketEdgeGenerator';
+import {
+  getTeamColor,
+  generateTeamsForTournament,
+  assignTeamsToTournamentGames,
+} from '../utils/teamAssignment';
+import {
+  HIGHLIGHT_AUTO_CLEAR_DELAY,
+  TOURNAMENT_GENERATION_STATE_DELAY,
+  EDGE_INSPECTION_DELAY,
+  DEFAULT_TOURNAMENT_GROUP_NAME,
+} from '../utils/tournamentConstants';
 import type { GameNodeData, StageNode, GlobalTeam } from '../types/flowchart';
 import type { TournamentGenerationConfig } from '../types/tournament';
 
 import './ListDesignerApp.css';
-
-/**
- * Generate a distinct color for a team based on index.
- * Uses a palette of visually distinct colors.
- */
-const getTeamColor = (index: number): string => {
-  const colors = [
-    '#3498db', // Blue
-    '#e74c3c', // Red
-    '#2ecc71', // Green
-    '#f39c12', // Orange
-    '#9b59b6', // Purple
-    '#1abc9c', // Turquoise
-    '#e67e22', // Dark Orange
-    '#34495e', // Dark Gray Blue
-    '#16a085', // Dark Turquoise
-    '#c0392b', // Dark Red
-    '#27ae60', // Dark Green
-    '#8e44ad', // Dark Purple
-  ];
-  return colors[index % colors.length];
-};
 
 
 /**
@@ -130,10 +120,10 @@ const ListDesignerApp: React.FC = () => {
       // Expand path and scroll to source game
       await scrollToGameWithExpansion(sourceGameId, nodes, expandField, expandStage, true);
 
-      // Auto-clear highlight after 3 seconds
+      // Auto-clear highlight after delay
       setTimeout(() => {
         setHighlightedSourceGameId(null);
-      }, 3000);
+      }, HIGHLIGHT_AUTO_CLEAR_DELAY);
     },
     [nodes, expandField, expandStage]
   );
@@ -297,327 +287,30 @@ const ListDesignerApp: React.FC = () => {
   );
 
   /**
-   * Create GameToGameEdge connections for placement stages.
-   *
-   * Maps standard progression patterns:
-   * - Semifinals: Group winners → semifinals (crossover pattern)
-   * - Finals: Semifinal winners → final
-   * - 3rd Place: Semifinal losers → 3rd place match
-   *
-   * Returns an array of edge specifications to be added via addBulkGameToGameEdges.
-   */
-  const createPlacementEdges = useCallback(
-    (
-      targetGames: GameNode[],
-      sourceGames: GameNode[],
-      config: StageNodeData['progressionConfig']
-    ): Array<{
-      sourceGameId: string;
-      outputType: 'winner' | 'loser';
-      targetGameId: string;
-      targetSlot: 'home' | 'away';
-    }> => {
-      const edgesToAdd: Array<{
-        sourceGameId: string;
-        outputType: 'winner' | 'loser';
-        targetGameId: string;
-        targetSlot: 'home' | 'away';
-      }> = [];
-
-      if (!config || config.mode !== 'placement') {
-        return edgesToAdd;
-      }
-
-      const { positions, format } = config;
-
-      // Pattern matching based on game standings
-      const findGameByStanding = (games: GameNode[], pattern: string): GameNode | undefined => {
-        return games.find(g => g.data.standing === pattern);
-      };
-
-      try {
-        if (positions === 4 && format === 'single_elimination') {
-          // 4-team bracket: SF1, SF2, Final, 3rd Place
-          const sf1 = findGameByStanding(targetGames, 'SF1');
-          const sf2 = findGameByStanding(targetGames, 'SF2');
-          const final = findGameByStanding(targetGames, 'Final');
-          const thirdPlace = findGameByStanding(targetGames, '3rd Place');
-
-          // Check if all 4 games are in targetGames (single stage with all games)
-          const allGamesInTarget = !!(sf1 && sf2 && final && thirdPlace);
-
-          console.log('[createPlacementEdges] 4-team bracket:', {
-            allGamesInTarget,
-            sf1: sf1?.id,
-            sf2: sf2?.id,
-            final: final?.id,
-            thirdPlace: thirdPlace?.id,
-            sourceGamesCount: sourceGames.length,
-            targetGamesCount: targetGames.length
-          });
-
-          if (allGamesInTarget) {
-            // All games in one stage - create both source edges and internal edges
-            if (sourceGames.length > 0) {
-              // Map group stage games to semifinals
-              if (sourceGames.length >= 6) {
-                // Split groups (e.g., 2 groups × 3 games each)
-                edgesToAdd.push({ sourceGameId: sourceGames[0].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceGames[3].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'away' });
-                edgesToAdd.push({ sourceGameId: sourceGames[2].id, outputType: 'winner', targetGameId: sf2.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceGames[5].id, outputType: 'winner', targetGameId: sf2.id, targetSlot: 'away' });
-              } else if (sourceGames.length >= 3) {
-                // Single group (3 games for all teams)
-                edgesToAdd.push({ sourceGameId: sourceGames[0].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceGames[1].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'away' });
-                edgesToAdd.push({ sourceGameId: sourceGames[2].id, outputType: 'winner', targetGameId: sf2.id, targetSlot: 'home' });
-                if (sourceGames.length >= 4) {
-                  edgesToAdd.push({ sourceGameId: sourceGames[3].id, outputType: 'winner', targetGameId: sf2.id, targetSlot: 'away' });
-                } else {
-                  edgesToAdd.push({ sourceGameId: sourceGames[0].id, outputType: 'loser', targetGameId: sf2.id, targetSlot: 'away' });
-                }
-              } else if (sourceGames.length >= 2) {
-                edgesToAdd.push({ sourceGameId: sourceGames[0].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceGames[1].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'away' });
-                edgesToAdd.push({ sourceGameId: sourceGames[0].id, outputType: 'loser', targetGameId: sf2.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceGames[1].id, outputType: 'loser', targetGameId: sf2.id, targetSlot: 'away' });
-              }
-            }
-
-            // Create internal stage connections: SF1/SF2 → Final/3rd Place
-            console.log('[createPlacementEdges] Creating internal edges SF→Final/3rd');
-            console.log('  - SF1 winner → Final home:', sf1.id, '→', final.id);
-            edgesToAdd.push({ sourceGameId: sf1.id, outputType: 'winner', targetGameId: final.id, targetSlot: 'home' });
-            console.log('  - SF2 winner → Final away:', sf2.id, '→', final.id);
-            edgesToAdd.push({ sourceGameId: sf2.id, outputType: 'winner', targetGameId: final.id, targetSlot: 'away' });
-            console.log('  - SF1 loser → 3rd Place home:', sf1.id, '→', thirdPlace.id);
-            edgesToAdd.push({ sourceGameId: sf1.id, outputType: 'loser', targetGameId: thirdPlace.id, targetSlot: 'home' });
-            console.log('  - SF2 loser → 3rd Place away:', sf2.id, '→', thirdPlace.id);
-            edgesToAdd.push({ sourceGameId: sf2.id, outputType: 'loser', targetGameId: thirdPlace.id, targetSlot: 'away' });
-            console.log('[createPlacementEdges] Internal edges collected');
-          } else {
-            // Games split across stages - only create edges from sourceGames
-            if (sf1 && sf2 && sourceGames.length > 0) {
-              if (sourceGames.length >= 6) {
-                edgesToAdd.push({ sourceGameId: sourceGames[0].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceGames[3].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'away' });
-                edgesToAdd.push({ sourceGameId: sourceGames[2].id, outputType: 'winner', targetGameId: sf2.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceGames[5].id, outputType: 'winner', targetGameId: sf2.id, targetSlot: 'away' });
-              } else if (sourceGames.length >= 3) {
-                edgesToAdd.push({ sourceGameId: sourceGames[0].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceGames[1].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'away' });
-                edgesToAdd.push({ sourceGameId: sourceGames[2].id, outputType: 'winner', targetGameId: sf2.id, targetSlot: 'home' });
-                if (sourceGames.length >= 4) {
-                  edgesToAdd.push({ sourceGameId: sourceGames[3].id, outputType: 'winner', targetGameId: sf2.id, targetSlot: 'away' });
-                } else {
-                  edgesToAdd.push({ sourceGameId: sourceGames[0].id, outputType: 'loser', targetGameId: sf2.id, targetSlot: 'away' });
-                }
-              } else if (sourceGames.length >= 2) {
-                edgesToAdd.push({ sourceGameId: sourceGames[0].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceGames[1].id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'away' });
-                edgesToAdd.push({ sourceGameId: sourceGames[0].id, outputType: 'loser', targetGameId: sf2.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceGames[1].id, outputType: 'loser', targetGameId: sf2.id, targetSlot: 'away' });
-              }
-            }
-
-            // If final/3rd place exist in this stage, connect from previous stage SFs
-            const sourceSF1 = findGameByStanding(sourceGames, 'SF1');
-            const sourceSF2 = findGameByStanding(sourceGames, 'SF2');
-
-            if (sourceSF1 && sourceSF2) {
-              if (final) {
-                edgesToAdd.push({ sourceGameId: sourceSF1.id, outputType: 'winner', targetGameId: final.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceSF2.id, outputType: 'winner', targetGameId: final.id, targetSlot: 'away' });
-              }
-              if (thirdPlace) {
-                edgesToAdd.push({ sourceGameId: sourceSF1.id, outputType: 'loser', targetGameId: thirdPlace.id, targetSlot: 'home' });
-                edgesToAdd.push({ sourceGameId: sourceSF2.id, outputType: 'loser', targetGameId: thirdPlace.id, targetSlot: 'away' });
-              }
-            }
-          }
-        } else if (positions === 2 && format === 'single_elimination') {
-          // 2-position bracket: Just a final
-          const final = findGameByStanding(targetGames, 'Final');
-
-          // Map semifinal winners to final
-          if (sourceGames.length >= 2 && final) {
-            // Assume source games are semifinals
-            const sf1 = sourceGames[sourceGames.length - 2]; // Second-to-last game
-            const sf2 = sourceGames[sourceGames.length - 1]; // Last game
-
-            edgesToAdd.push({ sourceGameId: sf1.id, outputType: 'winner', targetGameId: final.id, targetSlot: 'home' });
-            edgesToAdd.push({ sourceGameId: sf2.id, outputType: 'winner', targetGameId: final.id, targetSlot: 'away' });
-          }
-        } else if (positions === 8 && format === 'single_elimination') {
-          // 8-team bracket: QF1-4, SF1-2, Final, 3rd Place
-          const qf1 = findGameByStanding(targetGames, 'QF1');
-          const qf2 = findGameByStanding(targetGames, 'QF2');
-          const qf3 = findGameByStanding(targetGames, 'QF3');
-          const qf4 = findGameByStanding(targetGames, 'QF4');
-          const sf1 = findGameByStanding(targetGames, 'SF1');
-          const sf2 = findGameByStanding(targetGames, 'SF2');
-          const final = findGameByStanding(targetGames, 'Final');
-          const thirdPlace = findGameByStanding(targetGames, '3rd Place');
-
-          // Quarterfinal winners → Semifinals
-          if (qf1 && qf2 && sf1) {
-            edgesToAdd.push({ sourceGameId: qf1.id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'home' });
-            edgesToAdd.push({ sourceGameId: qf2.id, outputType: 'winner', targetGameId: sf1.id, targetSlot: 'away' });
-          }
-          if (qf3 && qf4 && sf2) {
-            edgesToAdd.push({ sourceGameId: qf3.id, outputType: 'winner', targetGameId: sf2.id, targetSlot: 'home' });
-            edgesToAdd.push({ sourceGameId: qf4.id, outputType: 'winner', targetGameId: sf2.id, targetSlot: 'away' });
-          }
-
-          // Semifinal winners → Final
-          if (sf1 && sf2 && final) {
-            edgesToAdd.push({ sourceGameId: sf1.id, outputType: 'winner', targetGameId: final.id, targetSlot: 'home' });
-            edgesToAdd.push({ sourceGameId: sf2.id, outputType: 'winner', targetGameId: final.id, targetSlot: 'away' });
-          }
-
-          // Semifinal losers → 3rd Place
-          if (sf1 && sf2 && thirdPlace) {
-            edgesToAdd.push({ sourceGameId: sf1.id, outputType: 'loser', targetGameId: thirdPlace.id, targetSlot: 'home' });
-            edgesToAdd.push({ sourceGameId: sf2.id, outputType: 'loser', targetGameId: thirdPlace.id, targetSlot: 'away' });
-          }
-        } else if (positions === 4 && format === 'crossover') {
-          // Crossover format: CO1 (1v4), CO2 (2v3), Final, 3rd Place
-          const co1 = findGameByStanding(targetGames, 'CO1');
-          const co2 = findGameByStanding(targetGames, 'CO2');
-          const final = findGameByStanding(targetGames, 'Final');
-          const thirdPlace = findGameByStanding(targetGames, '3rd Place');
-
-          // Crossover winners → Final
-          if (co1 && co2 && final) {
-            edgesToAdd.push({ sourceGameId: co1.id, outputType: 'winner', targetGameId: final.id, targetSlot: 'home' });
-            edgesToAdd.push({ sourceGameId: co2.id, outputType: 'winner', targetGameId: final.id, targetSlot: 'away' });
-          }
-
-          // Crossover losers → 3rd Place
-          if (co1 && co2 && thirdPlace) {
-            edgesToAdd.push({ sourceGameId: co1.id, outputType: 'loser', targetGameId: thirdPlace.id, targetSlot: 'home' });
-            edgesToAdd.push({ sourceGameId: co2.id, outputType: 'loser', targetGameId: thirdPlace.id, targetSlot: 'away' });
-          }
-        }
-      } catch (error) {
-        console.error('Error creating placement edges:', error);
-      }
-
-      return edgesToAdd;
-    },
-    []
-  );
-
-  /**
    * Auto-assign teams to tournament games based on structure.
    *
-   * For round robin stages: Assign teams sequentially to games
-   * For placement stages: Create GameToGameEdge connections for winner/loser progression
+   * Adapter that delegates to the pure business logic utility and executes
+   * the returned operations using hooks.
+   *
+   * For round robin stages: Assigns teams sequentially to games
+   * For placement stages: Creates GameToGameEdge connections for winner/loser progression
    * For split field assignments: Group A gets first half of teams, Group B gets second half
    */
   const assignTeamsToTournament = useCallback(
     (structure: TournamentStructure, teams: GlobalTeam[]) => {
-      // Get all stages sorted by order
-      const stages = [...structure.stages].sort((a, b) => a.data.order - b.data.order);
+      // Get operations from pure business logic
+      const operations = assignTeamsToTournamentGames(structure, teams);
 
-      // Group stages by their order (for parallel execution like split groups)
-      const stagesByOrder = new Map<number, StageNode[]>();
-      stages.forEach(stage => {
-        const order = stage.data.order;
-        if (!stagesByOrder.has(order)) {
-          stagesByOrder.set(order, []);
+      // Execute operations using hooks
+      operations.forEach((op) => {
+        if (op.type === 'assign_team') {
+          assignTeamToGame(op.gameId, op.teamId, op.slot);
+        } else if (op.type === 'add_edges') {
+          addBulkGameToGameEdges(op.edges);
         }
-        stagesByOrder.get(order)!.push(stage);
-      });
-
-      // Track previous stage games for progression mapping (per order)
-      let previousOrderGames: GameNode[] = [];
-
-      // Process each stage group
-      stagesByOrder.forEach((parallelStages) => {
-        // Check if this is a split field assignment (multiple stages at same order)
-        const isSplitField = parallelStages.length > 1;
-
-        // Collect games from this order
-        const currentOrderGames: GameNode[] = [];
-
-        parallelStages.forEach((stage, stageIndex) => {
-          const stageData = stage.data;
-
-          // Get games for this stage, sorted by standing
-          const stageGames = structure.games
-            .filter(game => game.parentId === stage.id)
-            .sort((a, b) => {
-              const aNum = parseInt(a.data.standing.replace(/\D/g, '')) || 0;
-              const bNum = parseInt(b.data.standing.replace(/\D/g, '')) || 0;
-              return aNum - bNum;
-            });
-
-          if (stageGames.length === 0) {
-            return; // No games to assign
-          }
-
-          // Process based on progression mode
-          if (stageData.progressionMode === 'round_robin') {
-            // Assign teams directly to games
-            let stageTeams: GlobalTeam[];
-            if (isSplitField) {
-              // Split teams across stages (Group A gets first half, Group B gets second half, etc.)
-              const teamsPerGroup = Math.ceil(teams.length / parallelStages.length);
-              const startIndex = stageIndex * teamsPerGroup;
-              const endIndex = Math.min(startIndex + teamsPerGroup, teams.length);
-              stageTeams = teams.slice(startIndex, endIndex);
-            } else {
-              // Use all teams for this stage
-              stageTeams = teams;
-            }
-
-            // Assign teams to games using round robin pattern
-            // For each game, assign sequential team pairs
-            let teamIndex = 0;
-            stageGames.forEach((game) => {
-              if (teamIndex < stageTeams.length - 1) {
-                // Assign home team
-                assignTeamToGame(game.id, stageTeams[teamIndex].id, 'home');
-                // Assign away team
-                assignTeamToGame(game.id, stageTeams[teamIndex + 1].id, 'away');
-
-                // Move to next pair, wrapping around if needed
-                teamIndex += 2;
-                if (teamIndex >= stageTeams.length) {
-                  teamIndex = 0;
-                }
-              }
-            });
-
-            // Track these games for next order
-            currentOrderGames.push(...stageGames);
-          } else if (stageData.progressionMode === 'placement') {
-            // Create GameToGameEdge connections for placement stages
-            const edgesToAdd = createPlacementEdges(
-              stageGames,
-              previousOrderGames,
-              stageData.progressionConfig
-            );
-
-            console.log('[assignTeamsToTournament] Collected', edgesToAdd.length, 'edges for stage', stageData.name);
-
-            // Add all edges for this stage in bulk
-            if (edgesToAdd.length > 0) {
-              console.log('[assignTeamsToTournament] Adding edges in bulk:', edgesToAdd);
-              addBulkGameToGameEdges(edgesToAdd);
-            }
-
-            // Track these games for next order
-            currentOrderGames.push(...stageGames);
-          }
-        });
-
-        // Update previous order games for next iteration
-        previousOrderGames = currentOrderGames;
       });
     },
-    [assignTeamToGame, addBulkGameToGameEdges, createPlacementEdges]
+    [assignTeamToGame, addBulkGameToGameEdges]
   );
 
   /**
@@ -635,20 +328,19 @@ const ListDesignerApp: React.FC = () => {
           // Add a group if none exists
           let groupId: string | null = null;
           if (globalTeamGroups.length === 0) {
-            const newGroup = addGlobalTeamGroup('Tournament Teams');
+            const newGroup = addGlobalTeamGroup(DEFAULT_TOURNAMENT_GROUP_NAME);
             groupId = newGroup.id;
           } else {
             groupId = globalTeamGroups[0].id;
           }
 
-          // Generate teams and collect them
-          const newTeams: GlobalTeam[] = [];
-          for (let i = 0; i < teamCount; i++) {
-            const team = addGlobalTeam(`Team ${i + 1}`, groupId);
-            // Assign a distinct color to each team
-            updateGlobalTeam(team.id, { color: getTeamColor(i) });
-            newTeams.push({ ...team, color: getTeamColor(i) });
-          }
+          // Generate teams using utility
+          const teamData = generateTeamsForTournament(teamCount);
+          const newTeams: GlobalTeam[] = teamData.map((data) => {
+            const team = addGlobalTeam(data.label, groupId);
+            updateGlobalTeam(team.id, { color: data.color });
+            return { ...team, color: data.color };
+          });
 
           // Use the newly created teams
           teamsToUse = [...globalTeams, ...newTeams];
@@ -660,36 +352,14 @@ const ListDesignerApp: React.FC = () => {
         // Auto-assign teams if requested
         if (config.autoAssignTeams && teamsToUse.length > 0) {
           setTimeout(() => {
-            console.log('[handleGenerateTournament] Calling assignTeamsToTournament with', structure.games.length, 'games');
             assignTeamsToTournament(structure, teamsToUse);
-
-            // Log edges state after assignment
-            setTimeout(() => {
-              console.log('[handleGenerateTournament] Inspecting edges state after assignment...');
-              console.log('[handleGenerateTournament] Total edges in state:', edges.length);
-              console.log('[handleGenerateTournament] All edges:', edges);
-
-              // Find playoff games
-              const playoffGames = nodes.filter(n =>
-                n.type === 'game' &&
-                ['SF1', 'SF2', 'Final', '3rd Place'].includes(n.data.standing)
-              );
-              console.log('[handleGenerateTournament] Playoff games:', playoffGames.map(g => ({ id: g.id, standing: g.data.standing, homeTeamId: g.data.homeTeamId, awayTeamId: g.data.awayTeamId })));
-
-              // Find edges targeting playoff games
-              const playoffGameIds = playoffGames.map(g => g.id);
-              const playoffEdges = edges.filter(e =>
-                e.type === 'game-to-game' && playoffGameIds.includes(e.target)
-              );
-              console.log('[handleGenerateTournament] Edges targeting playoff games:', playoffEdges);
-            }, 100);
-          }, 500);  // Increased timeout to ensure nodes are in state
+          }, TOURNAMENT_GENERATION_STATE_DELAY);
         }
       } catch (error) {
         console.error('Failed to generate tournament:', error);
       }
     },
-    [globalTeams, globalTeamGroups, addBulkTournament, addGlobalTeam, addGlobalTeamGroup, updateGlobalTeam, assignTeamsToTournament, edges, nodes]
+    [globalTeams, globalTeamGroups, addBulkTournament, addGlobalTeam, addGlobalTeamGroup, updateGlobalTeam, assignTeamsToTournament]
   );
 
   // Calculate if export is available
