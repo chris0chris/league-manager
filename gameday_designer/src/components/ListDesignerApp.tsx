@@ -19,19 +19,16 @@ import { downloadFlowchartAsJson, validateForExport } from '../utils/flowchartEx
 import { importFromScheduleJson, validateScheduleJson } from '../utils/flowchartImport';
 import { scrollToGameWithExpansion } from '../utils/scrollHelpers';
 import { generateTournament, TournamentStructure } from '../utils/tournamentGenerator';
-import { createPlacementEdges } from '../utils/bracketEdgeGenerator';
 import {
-  getTeamColor,
   generateTeamsForTournament,
   assignTeamsToTournamentGames,
 } from '../utils/teamAssignment';
 import {
   HIGHLIGHT_AUTO_CLEAR_DELAY,
   TOURNAMENT_GENERATION_STATE_DELAY,
-  EDGE_INSPECTION_DELAY,
   DEFAULT_TOURNAMENT_GROUP_NAME,
 } from '../utils/tournamentConstants';
-import type { GameNodeData, StageNode, GlobalTeam } from '../types/flowchart';
+import type { GameNodeData, GlobalTeam } from '../types/flowchart';
 import type { TournamentGenerationConfig } from '../types/tournament';
 
 import './ListDesignerApp.css';
