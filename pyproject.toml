@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "leaguesphere"
-version = "2.12.17-rc.21"
+version = "2.13.0"
 requires-python = ">=3.11"
 dependencies = [
     "Django==5.2.9",
@@ -59,7 +59,7 @@ include = [
 ]
 
 [tool.bumpversion]
-current_version = "2.12.17-rc.21"
+current_version = "2.13.0"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\-rc\\.(?P<rc_build>\\d+))?"
 serialize = [
     "{major}.{minor}.{patch}-rc.{rc_build}",
@@ -104,4 +104,6 @@ filename = "passcheck/package.json"
 filename = "scorecard/package.json"
 
 [[tool.bumpversion.files]]
-filename = "uv.lock"
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
