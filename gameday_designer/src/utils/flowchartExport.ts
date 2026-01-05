@@ -8,20 +8,15 @@
 import type {
   FlowState,
   FlowNode,
-  FlowEdge,
   FlowField,
   GameNodeData,
-  TeamNodeData,
   FieldNodeData,
   StageNodeData,
 } from '../types/flowchart';
 import {
   isGameNode,
-  isTeamNode,
   isFieldNode,
   isStageNode,
-  isTeamToGameEdge,
-  isGameToGameEdge,
 } from '../types/flowchart';
 import type { ScheduleJson, GameJson, TeamReference } from '../types/designer';
 import { formatTeamReference } from './teamReference';

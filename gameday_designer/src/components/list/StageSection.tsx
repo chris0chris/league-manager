@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { Card, Button, Form } from 'react-bootstrap';
+import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import GameTable from './GameTable';
 import type { StageNode, FlowNode, FlowEdge, GameNode, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
 import { isGameNode } from '../../types/flowchart';
@@ -82,6 +83,7 @@ const StageSection: React.FC<StageSectionProps> = ({
   onRemoveGameToGameEdge,
   isExpanded: isExpandedProp,
 }) => {
+  const { t } = useTypedTranslation(['ui', 'domain']);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(stage.data.name);
 
@@ -192,7 +194,7 @@ const StageSection: React.FC<StageSectionProps> = ({
 
         {/* Start Time Input */}
         <div className="d-flex align-items-center gap-2 me-2">
-          <Form.Label className="mb-0 text-muted small">Start:</Form.Label>
+          <Form.Label className="mb-0 text-muted small">{t('ui:label.start')}:</Form.Label>
           <Form.Control
             type="time"
             size="sm"
@@ -225,7 +227,7 @@ const StageSection: React.FC<StageSectionProps> = ({
               size="sm"
               variant="link"
               onClick={handleStartEdit}
-              aria-label="Edit stage name"
+              aria-label={t('ui:tooltip.editStageName')}
               className="p-0 me-auto"
               style={{ fontSize: '0.875rem' }}
             >
@@ -239,11 +241,11 @@ const StageSection: React.FC<StageSectionProps> = ({
             size="sm"
             variant="outline-primary"
             onClick={handleAddGame}
-            aria-label="Add Game"
+            aria-label={t('ui:button.addGame')}
             className="me-2"
           >
             <i className="bi bi-plus-circle me-1"></i>
-            Add Game
+            {t('ui:button.addGame')}
           </Button>
         )}
 
@@ -256,7 +258,7 @@ const StageSection: React.FC<StageSectionProps> = ({
             onUpdate(stage.id, { color: e.target.value });
           }}
           onClick={(e) => e.stopPropagation()}
-          title="Stage color"
+          title={t('ui:tooltip.stageColor')}
           className="me-2"
           style={{
             width: '28px',
@@ -271,7 +273,7 @@ const StageSection: React.FC<StageSectionProps> = ({
           variant="outline-danger"
           size="sm"
           onClick={handleDelete}
-          aria-label="Delete Stage"
+          aria-label={t('ui:tooltip.deleteStage')}
         >
           <i className="bi bi-trash"></i>
         </Button>
@@ -281,36 +283,48 @@ const StageSection: React.FC<StageSectionProps> = ({
         <Card.Body className="stage-section__body">
           {/* Games Section */}
           <div>
-            <h6 className="text-uppercase text-muted mb-2">Games</h6>
+            <h6 className="text-uppercase text-muted mb-2">{t('domain:games')}</h6>
 
             {games.length === 0 ? (
               <div className="text-center py-3">
                 <i className="bi bi-trophy me-2"></i>
-                <p className="text-muted mb-3">No games in this stage</p>
+                <p className="text-muted mb-3">{t('ui:message.noGamesInStage')}</p>
                 <Button
                   variant="outline-primary"
                   onClick={handleAddGame}
-                  aria-label="Add Game"
+                  aria-label={t('ui:button.addGame')}
                 >
                   <i className="bi bi-plus-circle me-1"></i>
-                  Add Game
+                  {t('ui:button.addGame')}
                 </Button>
               </div>
             ) : (
-              <GameTable
-                games={games}
-                edges={edges}
-                allNodes={allNodes}
-                globalTeams={globalTeams}
-                globalTeamGroups={globalTeamGroups}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
-                onSelectNode={onSelectNode}
-                selectedNodeId={selectedNodeId}
-                onAssignTeam={onAssignTeam}
-                onAddGameToGameEdge={onAddGameToGameEdge}
-                onRemoveGameToGameEdge={onRemoveGameToGameEdge}
-              />
+              <>
+                <GameTable
+                  games={games}
+                  edges={edges}
+                  allNodes={allNodes}
+                  globalTeams={globalTeams}
+                  globalTeamGroups={globalTeamGroups}
+                  onUpdate={onUpdate}
+                  onDelete={onDelete}
+                  onSelectNode={onSelectNode}
+                  selectedNodeId={selectedNodeId}
+                  onAssignTeam={onAssignTeam}
+                  onAddGameToGameEdge={onAddGameToGameEdge}
+                  onRemoveGameToGameEdge={onRemoveGameToGameEdge}
+                />
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  className="w-100 mt-2"
+                  onClick={handleAddGame}
+                  aria-label={t('ui:button.addGame')}
+                >
+                  <i className="bi bi-plus-circle me-1"></i>
+                  {t('ui:button.addGame')}
+                </Button>
+              </>
             )}
           </div>
         </Card.Body>

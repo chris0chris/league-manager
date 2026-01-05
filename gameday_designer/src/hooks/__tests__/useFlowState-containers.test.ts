@@ -16,9 +16,6 @@ import {
   isFieldNode,
   isStageNode,
   isGameNode,
-  createFieldNode,
-  createStageNode,
-  createGameNodeInStage,
 } from '../../types/flowchart';
 
 describe('useFlowState - Container Operations', () => {
@@ -307,19 +304,24 @@ describe('useFlowState - Container Operations', () => {
         stageId = result.current.addStageNode(fieldId)!.id;
       });
 
+      let gameId2: string;
+
       act(() => {
         gameId = result.current.addGameNodeInStage(stageId).id;
-        // Add a team
-        const team = result.current.addTeamNode();
+        gameId2 = result.current.addGameNodeInStage(stageId).id;
+        // Add a game-to-game edge instead of team edge (teams are now in global pool)
         result.current.setEdges([
           {
             id: 'edge-1',
-            type: 'teamToGame' as const,
-            source: team.id,
-            target: gameId,
-            sourceHandle: 'output',
+            type: 'gameToGame' as const,
+            source: gameId,
+            target: gameId2,
+            sourceHandle: 'winner',
             targetHandle: 'home',
-            data: { targetPort: 'home' as const },
+            data: {
+              sourcePort: 'winner' as const,
+              targetPort: 'home' as const
+            },
           },
         ]);
       });
@@ -330,7 +332,7 @@ describe('useFlowState - Container Operations', () => {
         result.current.deleteNode(fieldId);
       });
 
-      // Edge should be removed because target game was deleted
+      // Edge should be removed because both source and target games were deleted
       expect(result.current.edges).toHaveLength(0);
     });
   });

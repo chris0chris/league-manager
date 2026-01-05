@@ -114,12 +114,14 @@ describe('GameSlotEditor', () => {
   describe('stage options', () => {
     it('has Vorrunde option', () => {
       renderEditor();
-      expect(screen.getByRole('option', { name: 'Vorrunde' })).toBeInTheDocument();
+      // Option text is now translated to "Preliminary Round"
+      expect(screen.getByRole('option', { name: 'Preliminary Round' })).toBeInTheDocument();
     });
 
     it('has Finalrunde option', () => {
       renderEditor();
-      expect(screen.getByRole('option', { name: 'Finalrunde' })).toBeInTheDocument();
+      // Option text is now translated to "Final Round"
+      expect(screen.getByRole('option', { name: 'Final Round' })).toBeInTheDocument();
     });
   });
 

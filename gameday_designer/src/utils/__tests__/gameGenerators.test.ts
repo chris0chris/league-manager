@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { generateRoundRobinGames, generatePlacementGames } from '../gameGenerators';
-import type { RoundRobinConfig, PlacementConfig, GameNode } from '../../types/flowchart';
+import type { RoundRobinConfig, PlacementConfig } from '../../types/flowchart';
 
 describe('gameGenerators', () => {
   describe('generateRoundRobinGames', () => {

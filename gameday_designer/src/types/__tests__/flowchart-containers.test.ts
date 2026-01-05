@@ -18,11 +18,11 @@ import {
   isStageNodeData,
   isFieldNode,
   isStageNode,
+  isGameNode,
   isContainerNode,
   createFieldNode,
   createStageNode,
   createGameNodeInStage,
-  createTeamNodeInStage,
 } from '../flowchart';
 
 describe('Container Types - Field and Stage', () => {
@@ -111,7 +111,7 @@ describe('Container Types - Field and Stage', () => {
           official: null,
           breakAfter: 0,
         };
-        expect(isFieldNodeData(data as any)).toBe(false);
+        expect(isFieldNodeData(data as unknown as FieldNodeData)).toBe(false);
       });
     });
 
@@ -141,7 +141,7 @@ describe('Container Types - Field and Stage', () => {
           reference: { type: 'static', name: 'Team A' },
           label: 'Team A',
         };
-        expect(isStageNodeData(data as any)).toBe(false);
+        expect(isStageNodeData(data as unknown as StageNodeData)).toBe(false);
       });
     });
 
@@ -420,35 +420,6 @@ describe('Container Types - Field and Stage', () => {
       });
     });
 
-    describe('createTeamNodeInStage', () => {
-      it('creates a team node with parent stage', () => {
-        const node = createTeamNodeInStage(
-          'team-1',
-          'stage-1',
-          { type: 'groupTeam', group: 0, team: 0 },
-          '0_0'
-        );
-
-        expect(node.id).toBe('team-1');
-        expect(node.type).toBe('team');
-        expect(node.parentId).toBe('stage-1');
-        expect(node.extent).toBe('parent');
-        expect(node.data.reference).toEqual({ type: 'groupTeam', group: 0, team: 0 });
-        expect(node.data.label).toBe('0_0');
-      });
-
-      it('creates a team node without parent (free-floating)', () => {
-        const node = createTeamNodeInStage(
-          'team-2',
-          undefined,
-          { type: 'static', name: 'Team A' },
-          'Team A'
-        );
-
-        expect(node.parentId).toBeUndefined();
-        expect(node.extent).toBeUndefined();
-      });
-    });
   });
 
   describe('Node Hierarchy', () => {
@@ -504,22 +475,22 @@ describe('Container Types - Field and Stage', () => {
   });
 
   describe('FlowNode Union Type', () => {
-    it('accepts all four node types', () => {
+    it('accepts field, stage, and game node types', () => {
       const fieldNode = createFieldNode('field-1');
       const stageNode = createStageNode('stage-1', 'field-1');
       const gameNode = createGameNodeInStage('game-1', 'stage-1');
-      const teamNode = createTeamNodeInStage(
-        'team-1',
-        'stage-1',
-        { type: 'static', name: 'A' },
-        'A'
-      );
 
-      const nodes: FlowNode[] = [fieldNode, stageNode, gameNode, teamNode];
+      const nodes: FlowNode[] = [fieldNode, stageNode, gameNode];
 
-      expect(nodes).toHaveLength(4);
+      expect(nodes).toHaveLength(3);
       expect(isFieldNode(nodes[0])).toBe(true);
       expect(isStageNode(nodes[1])).toBe(true);
+      expect(isGameNode(nodes[2])).toBe(true);
+
+      // Field and Stage are container nodes
+      expect(isContainerNode(nodes[0])).toBe(true);
+      expect(isContainerNode(nodes[1])).toBe(true);
+      expect(isContainerNode(nodes[2])).toBe(false); // Game is not a container
     });
   });
 });

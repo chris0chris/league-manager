@@ -8,6 +8,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import GlobalTeamTable from './list/GlobalTeamTable';
 import FieldSection from './list/FieldSection';
 import type { FlowNode, FlowEdge, FieldNode, StageNode, GlobalTeam, GlobalTeamGroup } from '../types/flowchart';
@@ -28,7 +29,7 @@ export interface ListCanvasProps {
   globalTeamGroups: GlobalTeamGroup[];
 
   /** Callback when a node is updated */
-  onUpdateNode: (nodeId: string, data: any) => void;
+  onUpdateNode: (nodeId: string, data: Record<string, unknown>) => void;
 
   /** Callback when a node is deleted */
   onDeleteNode: (nodeId: string) => void;
@@ -124,6 +125,7 @@ const ListCanvas: React.FC<ListCanvasProps> = ({
   expandedFieldIds,
   expandedStageIds,
 }) => {
+  const { t } = useTypedTranslation(['ui']);
   // State for team pool expansion
   const [isTeamPoolExpanded, setIsTeamPoolExpanded] = useState(true);
 
@@ -166,7 +168,7 @@ const ListCanvas: React.FC<ListCanvasProps> = ({
                 >
                   <i className="bi bi-chevron-left me-2"></i>
                   <i className="bi bi-people-fill me-2"></i>
-                  <strong>Team Pool</strong>
+                  <strong>{t('ui:label.teamPool')}</strong>
                   {globalTeamGroups.length > 0 && (
                     <Button
                       size="sm"
@@ -178,7 +180,7 @@ const ListCanvas: React.FC<ListCanvasProps> = ({
                       className="ms-auto"
                     >
                       <i className="bi bi-plus-circle me-1"></i>
-                      Add Group
+                      {t('ui:button.addGroup')}
                     </Button>
                   )}
                 </Card.Header>
@@ -212,7 +214,7 @@ const ListCanvas: React.FC<ListCanvasProps> = ({
                     </span>
                   </div>
                 )}
-                <div className="team-pool-sidebar__title">Team Pool</div>
+                <div className="team-pool-sidebar__title">{t('ui:label.teamPool')}</div>
               </div>
             )}
           </Card>
@@ -223,7 +225,7 @@ const ListCanvas: React.FC<ListCanvasProps> = ({
           <Card className="fields-card">
             <Card.Header className="d-flex align-items-center">
               <i className="bi bi-geo-alt-fill me-2"></i>
-              <strong>Fields</strong>
+              <strong>{t('ui:label.fields')}</strong>
               {fields.length > 0 && (
                 <Button
                   size="sm"
@@ -232,7 +234,7 @@ const ListCanvas: React.FC<ListCanvasProps> = ({
                   className="ms-auto"
                 >
                   <i className="bi bi-plus-circle me-1"></i>
-                  Add Field
+                  {t('ui:button.addField')}
                 </Button>
               )}
             </Card.Header>
@@ -240,14 +242,14 @@ const ListCanvas: React.FC<ListCanvasProps> = ({
               {fields.length === 0 ? (
                 <div className="text-center py-5">
                   <i className="bi bi-geo-alt" style={{ fontSize: '4rem', opacity: 0.3 }}></i>
-                  <h3 className="mt-3">No fields yet</h3>
-                  <p className="text-muted mb-3">Create your first field to organize games</p>
+                  <h3 className="mt-3">{t('ui:message.noFieldsYet')}</h3>
+                  <p className="text-muted mb-3">{t('ui:message.createFirstField')}</p>
                   <Button
                     variant="outline-primary"
                     onClick={onAddField}
                   >
                     <i className="bi bi-plus-circle me-1"></i>
-                    Add Field
+                    {t('ui:button.addField')}
                   </Button>
                 </div>
               ) : (

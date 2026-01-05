@@ -1,0 +1,19 @@
+{
+  "field": "Field",
+  "fields": "Fields",
+  "stage": "Stage",
+  "stages": "Stages",
+  "game": "Game",
+  "games": "Games",
+  "team": "Team",
+  "teams": "Teams",
+  "group": "Group",
+  "groups": "Groups",
+  "vorrunde": "Preliminary Round",
+  "finalrunde": "Final Round",
+  "minute": "Minute",
+  "minutes": "Minutes",
+  "firstGame": "First Game",
+  "teamPool": "Team Pool",
+  "globalTeamPool": "Global Team Pool"
+}

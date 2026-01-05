@@ -11,7 +11,8 @@
 
 import React, { useState, useCallback } from 'react';
 import { Card, Dropdown, DropdownButton } from 'react-bootstrap';
-import type { GlobalTeam, GlobalTeamGroup, FlowNode } from '../../types/flowchart';
+import { useTypedTranslation } from '../../i18n/useTypedTranslation';
+import type { GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
 
 export interface TeamGroupCardProps {
   /** The group to display */
@@ -60,6 +61,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
   index,
   totalGroups,
 }) => {
+  const { t } = useTypedTranslation(['ui']);
   const [isExpanded, setIsExpanded] = useState(true);
   const [editingGroupName, setEditingGroupName] = useState(false);
   const [groupName, setGroupName] = useState(group.name);
@@ -185,7 +187,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                 handleStartEditGroupName();
               }}
               style={{ cursor: 'text' }}
-              title="Double-click to edit"
+              title={t('ui:message.doubleClickToEdit')}
             >
               {group.name}
             </strong>
@@ -201,7 +203,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                 e.stopPropagation();
                 onAddTeam(group.id);
               }}
-              title="Add team to this group"
+              title={t('ui:tooltip.addTeamToGroup')}
             >
               <i className="bi bi-plus-circle"></i>
             </button>
@@ -210,7 +212,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
             className="btn btn-sm btn-outline-secondary"
             onClick={() => onReorderGroup(group.id, 'up')}
             disabled={index === 0}
-            title="Move group up"
+            title={t('ui:tooltip.moveGroupUp')}
           >
             <i className="bi bi-arrow-up"></i>
           </button>
@@ -218,14 +220,14 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
             className="btn btn-sm btn-outline-secondary"
             onClick={() => onReorderGroup(group.id, 'down')}
             disabled={index === totalGroups - 1}
-            title="Move group down"
+            title={t('ui:tooltip.moveGroupDown')}
           >
             <i className="bi bi-arrow-down"></i>
           </button>
           <button
             className="btn btn-sm btn-outline-danger"
             onClick={() => onDeleteGroup(group.id)}
-            title="Delete group"
+            title={t('ui:tooltip.deleteGroup')}
           >
             <i className="bi bi-trash"></i>
           </button>
@@ -238,14 +240,14 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
           {teams.length === 0 ? (
             <div className="text-center py-3">
               <i className="bi bi-person me-2"></i>
-              <p className="text-muted mb-3">No teams yet</p>
+              <p className="text-muted mb-3">{t('ui:message.noTeamsInGroup')}</p>
               <button
                 className="btn btn-outline-primary"
                 onClick={() => onAddTeam(group.id)}
-                title="Add team to this group"
+                title={t('ui:tooltip.addTeamToGroup')}
               >
                 <i className="bi bi-plus-circle me-1"></i>
-                Add Team
+                {t('ui:button.addTeam')}
               </button>
             </div>
           ) : (
@@ -266,7 +268,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                       type="color"
                       value={team.color || '#6c757d'}
                       onChange={(e) => onUpdateTeam(team.id, { color: e.target.value })}
-                      title="Team color"
+                      title={t('ui:tooltip.teamColor')}
                       style={{
                         width: '24px',
                         height: '24px',
@@ -294,7 +296,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                       <span
                         onDoubleClick={() => handleStartEditTeam(team)}
                         style={{ cursor: 'text' }}
-                        title="Double-click to edit"
+                        title={t('ui:message.doubleClickToEdit')}
                         className="text-truncate d-block"
                       >
                         {team.label}
@@ -316,7 +318,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                       className="btn btn-sm btn-outline-secondary p-1"
                       onClick={() => onReorderTeam(team.id, 'up')}
                       disabled={idx === 0}
-                      title="Move up"
+                      title={t('ui:tooltip.moveTeamUp')}
                       style={{ fontSize: '0.75rem', lineHeight: 1 }}
                     >
                       <i className="bi bi-arrow-up"></i>
@@ -327,7 +329,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                       className="btn btn-sm btn-outline-secondary p-1"
                       onClick={() => onReorderTeam(team.id, 'down')}
                       disabled={idx === teams.length - 1}
-                      title="Move down"
+                      title={t('ui:tooltip.moveTeamDown')}
                       style={{ fontSize: '0.75rem', lineHeight: 1 }}
                     >
                       <i className="bi bi-arrow-down"></i>
@@ -356,7 +358,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                     <button
                       className="btn btn-sm btn-outline-danger p-1"
                       onClick={() => onDeleteTeam(team.id)}
-                      title="Delete team"
+                      title={t('ui:tooltip.deleteTeam')}
                       style={{ fontSize: '0.75rem', lineHeight: 1 }}
                     >
                       <i className="bi bi-trash"></i>

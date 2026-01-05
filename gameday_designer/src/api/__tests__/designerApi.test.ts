@@ -23,8 +23,8 @@ const mockAxiosInstance = vi.hoisted(() => ({
   patch: vi.fn(),
   delete: vi.fn(),
   interceptors: {
-    request: { use: vi.fn((callback: any) => callback) },
-    response: { use: vi.fn((success: any, error: any) => ({ success, error })) },
+    request: { use: vi.fn((callback: (config: unknown) => unknown) => callback) },
+    response: { use: vi.fn((success: (response: unknown) => unknown, error: (error: unknown) => unknown) => ({ success, error })) },
   },
 }));
 
@@ -150,7 +150,7 @@ describe('DesignerApi', () => {
 
       mockAxiosInstance.get.mockResolvedValue({ data: mockResponse });
 
-      const result = await designerApi.listTemplates({ search: 'Standard' });
+      await designerApi.listTemplates({ search: 'Standard' });
 
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/templates/', {
         params: { search: 'Standard' },
@@ -239,7 +239,7 @@ describe('DesignerApi', () => {
       });
 
       await expect(
-        designerApi.createTemplate({ name: '' } as any)
+        designerApi.createTemplate({ name: '' } as Parameters<typeof designerApi.createTemplate>[0])
       ).rejects.toMatchObject({
         response: { status: 400 },
       });

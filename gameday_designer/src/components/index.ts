@@ -3,7 +3,6 @@
  */
 
 // Legacy slot-based components (kept for backward compatibility)
-export { default as Toolbar } from './Toolbar';
 export { default as GameSlotCard } from './GameSlotCard';
 export { default as FieldColumn } from './FieldColumn';
 export { default as DesignerCanvas } from './DesignerCanvas';
@@ -25,7 +24,6 @@ export { default as TeamTable } from './list/TeamTable';
 export { default as GameTable } from './list/GameTable';
 
 // Re-export legacy types
-export type { ToolbarProps } from './Toolbar';
 export type { GameSlotCardProps } from './GameSlotCard';
 export type { FieldColumnProps } from './FieldColumn';
 export type { DesignerCanvasProps } from './DesignerCanvas';

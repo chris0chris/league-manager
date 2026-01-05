@@ -11,11 +11,10 @@ import {
   createFieldNode,
   createStageNode,
   createGameNodeInStage,
-  createTeamNode,
-  createTeamToGameEdge,
   type FlowState,
-  type FlowEdge,
   type FlowField,
+  type GlobalTeam,
+  type GlobalTeamGroup,
 } from '../../types/flowchart';
 
 describe('Flowchart Export - Container Hierarchy', () => {
@@ -23,20 +22,25 @@ describe('Flowchart Export - Container Hierarchy', () => {
     it('derives field from game parent chain (game -> stage -> field)', () => {
       const field = createFieldNode('field-1', { name: 'Main Field' });
       const stage = createStageNode('stage-1', 'field-1', { name: 'Vorrunde' });
-      const game = createGameNodeInStage('game-1', 'stage-1', { standing: 'HF1' });
-      const homeTeam = createTeamNode('team-1', { type: 'groupTeam', group: 0, team: 0 }, '0_0');
-      const awayTeam = createTeamNode('team-2', { type: 'groupTeam', group: 0, team: 1 }, '0_1');
+      const game = createGameNodeInStage('game-1', 'stage-1', {
+        standing: 'HF1',
+        homeTeamId: 'team-1',
+        awayTeamId: 'team-2',
+      });
 
-      const edges: FlowEdge[] = [
-        createTeamToGameEdge('edge-1', 'team-1', 'game-1', 'home'),
-        createTeamToGameEdge('edge-2', 'team-2', 'game-1', 'away'),
+      const group: GlobalTeamGroup = { id: 'group-1', name: 'Gruppe A', order: 0 };
+      const teams: GlobalTeam[] = [
+        { id: 'team-1', groupId: 'group-1', label: '0_0', order: 0 },
+        { id: 'team-2', groupId: 'group-1', label: '0_1', order: 1 },
       ];
 
       // No legacy FlowField needed - field derived from container hierarchy
       const state: FlowState = {
-        nodes: [field, stage, game, homeTeam, awayTeam],
-        edges,
+        nodes: [field, stage, game],
+        edges: [],
         fields: [], // Empty - using container hierarchy
+        globalTeams: teams,
+        globalTeamGroups: [group],
       };
 
       const result = exportToScheduleJson(state);
@@ -51,19 +55,24 @@ describe('Flowchart Export - Container Hierarchy', () => {
     it('derives stage name from parent stage node', () => {
       const field = createFieldNode('field-1', { name: 'Field A' });
       const stage = createStageNode('stage-1', 'field-1', { name: 'Finalrunde', stageType: 'finalrunde' });
-      const game = createGameNodeInStage('game-1', 'stage-1', { standing: 'Finale' });
-      const homeTeam = createTeamNode('team-1', { type: 'groupTeam', group: 0, team: 0 }, '0_0');
-      const awayTeam = createTeamNode('team-2', { type: 'groupTeam', group: 0, team: 1 }, '0_1');
+      const game = createGameNodeInStage('game-1', 'stage-1', {
+        standing: 'Finale',
+        homeTeamId: 'team-1',
+        awayTeamId: 'team-2',
+      });
 
-      const edges: FlowEdge[] = [
-        createTeamToGameEdge('edge-1', 'team-1', 'game-1', 'home'),
-        createTeamToGameEdge('edge-2', 'team-2', 'game-1', 'away'),
+      const group: GlobalTeamGroup = { id: 'group-1', name: 'Gruppe A', order: 0 };
+      const teams: GlobalTeam[] = [
+        { id: 'team-1', groupId: 'group-1', label: '0_0', order: 0 },
+        { id: 'team-2', groupId: 'group-1', label: '0_1', order: 1 },
       ];
 
       const state: FlowState = {
-        nodes: [field, stage, game, homeTeam, awayTeam],
-        edges,
+        nodes: [field, stage, game],
+        edges: [],
         fields: [],
+        globalTeams: teams,
+        globalTeamGroups: [group],
       };
 
       const result = exportToScheduleJson(state);
@@ -78,25 +87,31 @@ describe('Flowchart Export - Container Hierarchy', () => {
       const stage1 = createStageNode('stage-1', 'field-1', { name: 'Vorrunde' });
       const stage2 = createStageNode('stage-2', 'field-2', { name: 'Vorrunde' });
 
-      const game1 = createGameNodeInStage('game-1', 'stage-1', { standing: 'G1' });
-      const game2 = createGameNodeInStage('game-2', 'stage-2', { standing: 'G2' });
+      const game1 = createGameNodeInStage('game-1', 'stage-1', {
+        standing: 'G1',
+        homeTeamId: 'team-1',
+        awayTeamId: 'team-2',
+      });
+      const game2 = createGameNodeInStage('game-2', 'stage-2', {
+        standing: 'G2',
+        homeTeamId: 'team-3',
+        awayTeamId: 'team-4',
+      });
 
-      const team1 = createTeamNode('team-1', { type: 'groupTeam', group: 0, team: 0 }, '0_0');
-      const team2 = createTeamNode('team-2', { type: 'groupTeam', group: 0, team: 1 }, '0_1');
-      const team3 = createTeamNode('team-3', { type: 'groupTeam', group: 1, team: 0 }, '1_0');
-      const team4 = createTeamNode('team-4', { type: 'groupTeam', group: 1, team: 1 }, '1_1');
-
-      const edges: FlowEdge[] = [
-        createTeamToGameEdge('edge-1', 'team-1', 'game-1', 'home'),
-        createTeamToGameEdge('edge-2', 'team-2', 'game-1', 'away'),
-        createTeamToGameEdge('edge-3', 'team-3', 'game-2', 'home'),
-        createTeamToGameEdge('edge-4', 'team-4', 'game-2', 'away'),
+      const group: GlobalTeamGroup = { id: 'group-1', name: 'Gruppe A', order: 0 };
+      const teams: GlobalTeam[] = [
+        { id: 'team-1', groupId: 'group-1', label: '0_0', order: 0 },
+        { id: 'team-2', groupId: 'group-1', label: '0_1', order: 1 },
+        { id: 'team-3', groupId: 'group-1', label: '1_0', order: 2 },
+        { id: 'team-4', groupId: 'group-1', label: '1_1', order: 3 },
       ];
 
       const state: FlowState = {
-        nodes: [field1, field2, stage1, stage2, game1, game2, team1, team2, team3, team4],
-        edges,
+        nodes: [field1, field2, stage1, stage2, game1, game2],
+        edges: [],
         fields: [],
+        globalTeams: teams,
+        globalTeamGroups: [group],
       };
 
       const result = exportToScheduleJson(state);
@@ -121,23 +136,29 @@ describe('Flowchart Export - Container Hierarchy', () => {
       const vorrunde = createStageNode('stage-vr', 'field-1', { name: 'Vorrunde', stageType: 'vorrunde' });
       const finalrunde = createStageNode('stage-fr', 'field-1', { name: 'Finalrunde', stageType: 'finalrunde' });
 
-      const gameVr = createGameNodeInStage('game-vr', 'stage-vr', { standing: 'VR1' });
-      const gameFr = createGameNodeInStage('game-fr', 'stage-fr', { standing: 'Finale' });
+      const gameVr = createGameNodeInStage('game-vr', 'stage-vr', {
+        standing: 'VR1',
+        homeTeamId: 'team-1',
+        awayTeamId: 'team-2',
+      });
+      const gameFr = createGameNodeInStage('game-fr', 'stage-fr', {
+        standing: 'Finale',
+        homeTeamId: 'team-1',
+        awayTeamId: 'team-2',
+      });
 
-      const team1 = createTeamNode('team-1', { type: 'groupTeam', group: 0, team: 0 }, '0_0');
-      const team2 = createTeamNode('team-2', { type: 'groupTeam', group: 0, team: 1 }, '0_1');
-
-      const edges: FlowEdge[] = [
-        createTeamToGameEdge('edge-1', 'team-1', 'game-vr', 'home'),
-        createTeamToGameEdge('edge-2', 'team-2', 'game-vr', 'away'),
-        createTeamToGameEdge('edge-3', 'team-1', 'game-fr', 'home'),
-        createTeamToGameEdge('edge-4', 'team-2', 'game-fr', 'away'),
+      const group: GlobalTeamGroup = { id: 'group-1', name: 'Gruppe A', order: 0 };
+      const teams: GlobalTeam[] = [
+        { id: 'team-1', groupId: 'group-1', label: '0_0', order: 0 },
+        { id: 'team-2', groupId: 'group-1', label: '0_1', order: 1 },
       ];
 
       const state: FlowState = {
-        nodes: [field, vorrunde, finalrunde, gameVr, gameFr, team1, team2],
-        edges,
+        nodes: [field, vorrunde, finalrunde, gameVr, gameFr],
+        edges: [],
         fields: [],
+        globalTeams: teams,
+        globalTeamGroups: [group],
       };
 
       const result = exportToScheduleJson(state);
@@ -158,6 +179,12 @@ describe('Flowchart Export - Container Hierarchy', () => {
     });
 
     it('falls back to legacy FlowField when container hierarchy not present', () => {
+      const group: GlobalTeamGroup = { id: 'group-1', name: 'Gruppe A', order: 0 };
+      const teams: GlobalTeam[] = [
+        { id: 'team-1', groupId: 'group-1', label: '0_0', order: 0 },
+        { id: 'team-2', groupId: 'group-1', label: '0_1', order: 1 },
+      ];
+
       // Game with fieldId but no container parent (v1 model)
       const gameNode = {
         id: 'game-1',
@@ -170,25 +197,25 @@ describe('Flowchart Export - Container Hierarchy', () => {
           fieldId: 'legacy-field-1',
           official: null,
           breakAfter: 0,
+          homeTeamId: 'team-1',
+          awayTeamId: 'team-2',
+          homeTeamDynamic: null,
+          awayTeamDynamic: null,
+          duration: 50,
+          manualTime: false,
         },
       };
-
-      const homeTeam = createTeamNode('team-1', { type: 'groupTeam', group: 0, team: 0 }, '0_0');
-      const awayTeam = createTeamNode('team-2', { type: 'groupTeam', group: 0, team: 1 }, '0_1');
-
-      const edges: FlowEdge[] = [
-        createTeamToGameEdge('edge-1', 'team-1', 'game-1', 'home'),
-        createTeamToGameEdge('edge-2', 'team-2', 'game-1', 'away'),
-      ];
 
       const legacyFields: FlowField[] = [
         { id: 'legacy-field-1', name: 'Legacy Field', order: 0 },
       ];
 
       const state: FlowState = {
-        nodes: [gameNode, homeTeam, awayTeam],
-        edges,
+        nodes: [gameNode],
+        edges: [],
         fields: legacyFields,
+        globalTeams: teams,
+        globalTeamGroups: [group],
       };
 
       const result = exportToScheduleJson(state);
@@ -203,19 +230,24 @@ describe('Flowchart Export - Container Hierarchy', () => {
     it('validates that games have a container field', () => {
       const field = createFieldNode('field-1', { name: 'Main Field' });
       const stage = createStageNode('stage-1', 'field-1');
-      const game = createGameNodeInStage('game-1', 'stage-1', { standing: 'HF1' });
-      const homeTeam = createTeamNode('team-1', { type: 'groupTeam', group: 0, team: 0 }, '0_0');
-      const awayTeam = createTeamNode('team-2', { type: 'groupTeam', group: 0, team: 1 }, '0_1');
+      const game = createGameNodeInStage('game-1', 'stage-1', {
+        standing: 'HF1',
+        homeTeamId: 'team-1',
+        awayTeamId: 'team-2',
+      });
 
-      const edges: FlowEdge[] = [
-        createTeamToGameEdge('edge-1', 'team-1', 'game-1', 'home'),
-        createTeamToGameEdge('edge-2', 'team-2', 'game-1', 'away'),
+      const group: GlobalTeamGroup = { id: 'group-1', name: 'Gruppe A', order: 0 };
+      const teams: GlobalTeam[] = [
+        { id: 'team-1', groupId: 'group-1', label: '0_0', order: 0 },
+        { id: 'team-2', groupId: 'group-1', label: '0_1', order: 1 },
       ];
 
       const state: FlowState = {
-        nodes: [field, stage, game, homeTeam, awayTeam],
-        edges,
+        nodes: [field, stage, game],
+        edges: [],
         fields: [],
+        globalTeams: teams,
+        globalTeamGroups: [group],
       };
 
       const errors = validateForExport(state);
@@ -226,6 +258,12 @@ describe('Flowchart Export - Container Hierarchy', () => {
     });
 
     it('reports error when game has no container field and no legacy field', () => {
+      const group: GlobalTeamGroup = { id: 'group-1', name: 'Gruppe A', order: 0 };
+      const teams: GlobalTeam[] = [
+        { id: 'team-1', groupId: 'group-1', label: '0_0', order: 0 },
+        { id: 'team-2', groupId: 'group-1', label: '0_1', order: 1 },
+      ];
+
       // Game with no parent and no fieldId
       const orphanGame = {
         id: 'game-1',
@@ -238,21 +276,21 @@ describe('Flowchart Export - Container Hierarchy', () => {
           fieldId: null,
           official: null,
           breakAfter: 0,
+          homeTeamId: 'team-1',
+          awayTeamId: 'team-2',
+          homeTeamDynamic: null,
+          awayTeamDynamic: null,
+          duration: 50,
+          manualTime: false,
         },
       };
 
-      const homeTeam = createTeamNode('team-1', { type: 'groupTeam', group: 0, team: 0 }, '0_0');
-      const awayTeam = createTeamNode('team-2', { type: 'groupTeam', group: 0, team: 1 }, '0_1');
-
-      const edges: FlowEdge[] = [
-        createTeamToGameEdge('edge-1', 'team-1', 'game-1', 'home'),
-        createTeamToGameEdge('edge-2', 'team-2', 'game-1', 'away'),
-      ];
-
       const state: FlowState = {
-        nodes: [orphanGame, homeTeam, awayTeam],
-        edges,
+        nodes: [orphanGame],
+        edges: [],
         fields: [],
+        globalTeams: teams,
+        globalTeamGroups: [group],
       };
 
       const errors = validateForExport(state);

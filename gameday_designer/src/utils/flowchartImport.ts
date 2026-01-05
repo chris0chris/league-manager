@@ -19,8 +19,8 @@ import {
   createFlowField,
   createGameToGameEdge,
 } from '../types/flowchart';
-import type { ScheduleJson, TeamReference } from '../types/designer';
-import { parseTeamReference, formatTeamReference } from './teamReference';
+import type { ScheduleJson } from '../types/designer';
+import { parseTeamReference } from './teamReference';
 
 /**
  * Result of the import operation.
@@ -35,30 +35,6 @@ export interface ImportResult {
   /** Error messages (fatal issues) */
   errors: string[];
 }
-
-/**
- * Layout configuration for auto-positioning nodes.
- */
-interface LayoutConfig {
-  /** Horizontal spacing between columns */
-  columnWidth: number;
-  /** Vertical spacing between rows */
-  rowHeight: number;
-  /** X offset for team nodes */
-  teamNodeX: number;
-  /** X offset for game nodes */
-  gameNodeX: number;
-  /** Starting Y position */
-  startY: number;
-}
-
-const DEFAULT_LAYOUT: LayoutConfig = {
-  columnWidth: 250,
-  rowHeight: 150,
-  teamNodeX: 50,
-  gameNodeX: 300,
-  startY: 50,
-};
 
 // Auto-layout removed - not needed for global team pool approach
 // Games are positioned within their container hierarchies (fields/stages)
@@ -213,8 +189,11 @@ export function importFromScheduleJson(json: unknown): ImportResult {
           const teamId = teamLabelMap.get(parsed.name);
           if (teamId) {
             // Update game node with team assignment
-            const fieldName = slot === 'home' ? 'homeTeamId' : 'awayTeamId';
-            (gameNode.data as any)[fieldName] = teamId;
+            if (slot === 'home') {
+              gameNode.data.homeTeamId = teamId;
+            } else {
+              gameNode.data.awayTeamId = teamId;
+            }
           }
         }
         // Note: Other reference types (groupTeam, standing) are not supported in import

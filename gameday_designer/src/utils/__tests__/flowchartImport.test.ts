@@ -7,7 +7,7 @@ import {
   importFromScheduleJson,
   validateScheduleJson,
 } from '../flowchartImport';
-import { isTeamNode, isGameNode, isTeamToGameEdge, isGameToGameEdge } from '../../types/flowchart';
+import { isGameNode, isGameToGameEdge } from '../../types/flowchart';
 
 describe('Flowchart Import Utility', () => {
   describe('importFromScheduleJson', () => {
@@ -19,8 +19,8 @@ describe('Flowchart Import Utility', () => {
             {
               stage: 'Vorrunde',
               standing: 'Spiel 1',
-              home: '0_0',
-              away: '0_1',
+              home: 'Team A',
+              away: 'Team B',
               official: 'Officials',
             },
           ],
@@ -33,18 +33,20 @@ describe('Flowchart Import Utility', () => {
       expect(result.state).toBeDefined();
       expect(result.warnings).toHaveLength(0);
 
-      const { nodes, edges, fields } = result.state!;
+      const { nodes, fields, globalTeams } = result.state!;
 
       // Should have 1 field
       expect(fields).toHaveLength(1);
       expect(fields[0].name).toBe('Feld 1');
 
-      // Should have 2 team nodes + 1 game node
-      expect(nodes.filter(isTeamNode)).toHaveLength(2);
+      // Should have 2 global teams + 1 game node
+      expect(globalTeams).toHaveLength(2);
       expect(nodes.filter(isGameNode)).toHaveLength(1);
 
-      // Should have 2 team-to-game edges
-      expect(edges.filter(isTeamToGameEdge)).toHaveLength(2);
+      // Game should have team assignments
+      const gameNode = nodes.find(isGameNode);
+      expect(gameNode?.data.homeTeamId).toBeTruthy();
+      expect(gameNode?.data.awayTeamId).toBeTruthy();
     });
 
     it('imports winner/loser references correctly', () => {
@@ -55,15 +57,15 @@ describe('Flowchart Import Utility', () => {
             {
               stage: 'Finalrunde',
               standing: 'HF1',
-              home: '0_0',
-              away: '0_1',
+              home: 'Team A',
+              away: 'Team B',
               official: '',
             },
             {
               stage: 'Finalrunde',
               standing: 'HF2',
-              home: '0_2',
-              away: '0_3',
+              home: 'Team C',
+              away: 'Team D',
               official: '',
             },
             {
@@ -83,8 +85,8 @@ describe('Flowchart Import Utility', () => {
 
       const { nodes, edges } = result.state!;
 
-      // Should have 4 team nodes + 3 game nodes
-      expect(nodes.filter(isTeamNode)).toHaveLength(4);
+      // Should have 4 global teams (Team A, B, C, D) + 3 game nodes
+      expect(result.state!.globalTeams).toHaveLength(4);
       expect(nodes.filter(isGameNode)).toHaveLength(3);
 
       // Should have game-to-game edges for the final
@@ -181,16 +183,15 @@ describe('Flowchart Import Utility', () => {
 
       expect(result.success).toBe(true);
 
-      const teamNodes = result.state!.nodes.filter(isTeamNode);
-      expect(teamNodes).toHaveLength(2);
+      // NOTE: Standing references like "P1 Gruppe 1" are NOT imported as global teams
+      // They are dynamic references (like winner/loser) that will be resolved at runtime
+      // The import only creates global teams for static team names
+      const globalTeams = result.state!.globalTeams;
+      expect(globalTeams).toHaveLength(0);
 
-      // Check that references are parsed correctly
-      const p1Node = teamNodes.find((n) => n.data.label === 'P1 Gruppe 1');
-      expect(p1Node?.data.reference).toEqual({
-        type: 'standing',
-        place: 1,
-        groupName: 'Gruppe 1',
-      });
+      // Verify the game was created successfully
+      const gameNodes = result.state!.nodes.filter(isGameNode);
+      expect(gameNodes).toHaveLength(1);
     });
 
     it('handles multiple fields', () => {
@@ -218,8 +219,8 @@ describe('Flowchart Import Utility', () => {
         {
           field: 'Feld 1',
           games: [
-            { stage: 'Vorrunde', standing: 'Spiel 1', home: '0_0', away: '0_1', official: '' },
-            { stage: 'Vorrunde', standing: 'Spiel 2', home: '0_0', away: '0_2', official: '' },
+            { stage: 'Vorrunde', standing: 'Spiel 1', home: 'Team A', away: 'Team B', official: '' },
+            { stage: 'Vorrunde', standing: 'Spiel 2', home: 'Team A', away: 'Team C', official: '' },
           ],
         },
       ];
@@ -228,9 +229,10 @@ describe('Flowchart Import Utility', () => {
 
       expect(result.success).toBe(true);
 
-      // Should have only 3 unique team nodes, not 4
-      const teamNodes = result.state!.nodes.filter(isTeamNode);
-      expect(teamNodes).toHaveLength(3);
+      // Should have only 3 unique global teams (Team A, Team B, Team C), not 4
+      // Team A appears twice but should only create one global team
+      const globalTeams = result.state!.globalTeams;
+      expect(globalTeams).toHaveLength(3);
     });
 
     it('fails for invalid input', () => {

@@ -58,7 +58,7 @@ export function generateTournament(
   let stages = createStages(template, fields, startTime);
 
   // 3. Generate games for each stage
-  let games = generateGamesForStages(stages, template);
+  let games = generateGamesForStages(stages);
 
   // 4. Calculate game start times based on template timing configuration
   const finalGameDuration = gameDuration || template.timing.defaultGameDuration;
@@ -204,12 +204,10 @@ function createStages(
  * Generate games for all stages based on their progression modes
  *
  * @param stages - Stage nodes
- * @param template - Tournament template (for future use)
  * @returns Array of game nodes
  */
 function generateGamesForStages(
-  stages: StageNode[],
-  template: TournamentTemplate
+  stages: StageNode[]
 ): GameNode[] {
   const allGames: GameNode[] = [];
 

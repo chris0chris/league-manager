@@ -26,21 +26,23 @@ interface MockRosterTableProps {
   team: Team;
 }
 
-vi.mock('../RosterTable', () => {
-  return function MockRosterTable(props: MockRosterTableProps) {
+vi.mock('../RosterTable', () => ({
+  default: function MockRosterTable(props: MockRosterTableProps) {
     return (
       <div data-testid="roster-table">
         Roster Table for {props.team.name}
       </div>
     );
-  };
-});
+  }
+}));
 
-vi.mock('../../utils/validation', () => {
-  return vi.fn().mockImplementation(() => ({
-    validateAndUpdate: vi.fn()
-  }));
-});
+const mockValidateAndUpdate = vi.fn();
+
+vi.mock('../../utils/validation', () => ({
+  default: class MockValidator {
+    validateAndUpdate = mockValidateAndUpdate;
+  }
+}));
 
 describe('RosterOverview', () => {
   const mockPlayer: Player = {
@@ -139,6 +141,19 @@ describe('RosterOverview', () => {
   });
 
   it('handles form submission', async () => {
+    // Set minimum_player_strength to 0 to enable submit button
+    const teamDataNoMinimum: TeamData = {
+      ...mockTeamData,
+      team: {
+        ...mockTeam,
+        validator: {
+          ...mockTeam.validator,
+          minimum_player_strength: 0
+        }
+      }
+    };
+    vi.mocked(games.getRosterList).mockResolvedValue(teamDataNoMinimum);
+
     renderWithRouter();
 
     await waitFor(() => {
@@ -156,6 +171,14 @@ describe('RosterOverview', () => {
     // Submit form
     const submitButton = screen.getByText('Passliste abschicken');
     fireEvent.click(submitButton);
+
+    // Confirm in modal
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Passliste bestätigen' })).toBeInTheDocument();
+    });
+
+    const confirmButton = screen.getByRole('button', { name: 'Passliste bestätigen' });
+    fireEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(games.submitRoster).toHaveBeenCalled();

@@ -51,7 +51,7 @@ export interface GlobalTeamGroup {
 /**
  * Base node type (replaces React Flow Node).
  */
-export interface Node<T = any, U extends string = string> {
+export interface Node<T = Record<string, unknown>, U extends string = string> {
   id: string;
   type: U;
   position: { x: number; y: number };
@@ -67,7 +67,7 @@ export interface Node<T = any, U extends string = string> {
 /**
  * Base edge type (replaces React Flow Edge).
  */
-export interface Edge<T = any> {
+export interface Edge<T = Record<string, unknown>> {
   id: string;
   type?: string;
   source: string;

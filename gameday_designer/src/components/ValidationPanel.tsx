@@ -8,6 +8,7 @@
 import React from 'react';
 import { Card, Alert, ListGroup, Badge } from 'react-bootstrap';
 import type { ValidationResult, ValidationError, ValidationWarning } from '../types/designer';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
 
 export interface ValidationPanelProps {
   /** Validation result to display */
@@ -23,6 +24,7 @@ const ValidationPanel: React.FC<ValidationPanelProps> = ({
   result,
   onNavigateToSlot,
 }) => {
+  const { t } = useTypedTranslation(['ui', 'validation']);
   const { isValid, errors, warnings } = result;
 
   /**
@@ -73,13 +75,13 @@ const ValidationPanel: React.FC<ValidationPanelProps> = ({
   // Build summary text
   const errorCount = errors.length;
   const warningCount = warnings.length;
-  const errorText = errorCount === 1 ? '1 error' : `${errorCount} errors`;
-  const warningText = warningCount === 1 ? '1 warning' : `${warningCount} warnings`;
+  const errorText = t('validation:errorCount', { count: errorCount });
+  const warningText = t('validation:warningCount', { count: warningCount });
 
   return (
     <Card className="validation-panel">
       <Card.Header className="d-flex justify-content-between align-items-center">
-        <span>Validation</span>
+        <span>{t('ui:label.validation')}</span>
         <span>
           {errorCount > 0 && (
             <Badge bg="danger" className="me-2">
@@ -97,7 +99,7 @@ const ValidationPanel: React.FC<ValidationPanelProps> = ({
         {isValid && errors.length === 0 && warnings.length === 0 ? (
           <Alert variant="success" className="m-3 mb-0">
             <i className="bi bi-check-circle me-2"></i>
-            Schedule is valid
+            {t('validation:scheduleValid')}
           </Alert>
         ) : (
           <ListGroup variant="flush">

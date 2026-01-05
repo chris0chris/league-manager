@@ -12,6 +12,8 @@
 
 import React, { useRef } from 'react';
 import { Button, ButtonGroup, ButtonToolbar } from 'react-bootstrap';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
+import LanguageSelector from './LanguageSelector';
 
 import './FlowToolbar.css';
 
@@ -56,6 +58,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
   hasNodes = false,
   canExport = false,
 }) => {
+  const { t } = useTypedTranslation(['ui']);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /**
@@ -104,21 +107,21 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
           <Button
             variant="outline-secondary"
             onClick={handleImportClick}
-            title="Import from JSON file"
+            title={t('ui:tooltip.importFromJson')}
             data-testid="import-button"
           >
             <i className="bi bi-upload me-1"></i>
-            Import
+            {t('ui:button.import')}
           </Button>
           <Button
             variant="outline-secondary"
             onClick={onExport}
             disabled={!canExport}
-            title="Export to JSON file"
+            title={t('ui:tooltip.exportToJson')}
             data-testid="export-button"
           >
             <i className="bi bi-download me-1"></i>
-            Export
+            {t('ui:button.export')}
           </Button>
         </ButtonGroup>
 
@@ -129,7 +132,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
               variant="outline-secondary"
               onClick={onUndo}
               disabled={!canUndo}
-              title="Undo (Ctrl+Z)"
+              title={t('ui:tooltip.undo')}
               data-testid="undo-button"
             >
               <i className="bi bi-arrow-counterclockwise"></i>
@@ -138,7 +141,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
               variant="outline-secondary"
               onClick={onRedo}
               disabled={!canRedo}
-              title="Redo (Ctrl+Y)"
+              title={t('ui:tooltip.redo')}
               data-testid="redo-button"
             >
               <i className="bi bi-arrow-clockwise"></i>
@@ -147,17 +150,22 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
         )}
 
         {/* Clear all button */}
-        <ButtonGroup>
+        <ButtonGroup className="me-2">
           <Button
             variant="outline-danger"
             onClick={handleClearAll}
             disabled={!hasNodes}
-            title="Clear all nodes and edges"
+            title={t('ui:tooltip.clearAllNodesAndEdges')}
             data-testid="clear-all-button"
           >
             <i className="bi bi-trash me-1"></i>
-            Clear All
+            {t('ui:button.clearAll')}
           </Button>
+        </ButtonGroup>
+
+        {/* Language selector */}
+        <ButtonGroup>
+          <LanguageSelector />
         </ButtonGroup>
       </ButtonToolbar>
 

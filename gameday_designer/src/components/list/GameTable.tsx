@@ -26,7 +26,7 @@ interface TeamOption {
 }
 
 // Custom Option component with colored dot for teams and stage headers
-const CustomOption = (props: any) => {
+const CustomOption = (props: { data: TeamSelectOption; isDisabled?: boolean; children?: React.ReactNode; innerProps?: unknown }) => {
   const { data } = props;
 
   // Stage header - disabled separator with colored border
@@ -78,7 +78,7 @@ const CustomOption = (props: any) => {
 };
 
 // Custom SingleValue component with colored dot for selected value
-const CustomSingleValue = (props: any) => {
+const CustomSingleValue = (props: { data: TeamSelectOption; children?: React.ReactNode }) => {
   const { data } = props;
   return (
     <components.SingleValue {...props}>

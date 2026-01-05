@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { exportToJson, importFromJson, validateScheduleJson } from '../jsonExport';
+import { describe, it, expect, vi } from 'vitest';
+import { exportToJson, importFromJson, validateScheduleJson, generateExportFilename, downloadScheduleJson } from '../jsonExport';
 import type { DesignerState, Field, GameSlot, ScheduleJson } from '../../types/designer';
 
 describe('exportToJson', () => {
@@ -892,5 +892,215 @@ function createStateWithGame(
     fields: [field],
     selectedGameSlot: null,
     validationResult: { isValid: true, errors: [], warnings: [] },
+  };
+}
+
+describe('validateScheduleJson - Additional Coverage', () => {
+  it('returns invalid if game property is not a string', () => {
+    const json: ScheduleJson[] = [
+      {
+        field: 'Field 1',
+        games: [
+          {
+            stage: 'Vorrunde',
+            standing: 123, // Should be string
+            home: '0_0',
+            away: '0_1',
+            official: '0_2',
+          } as unknown as { stage: string; standing: string; home: string; away: string; official: string },
+        ],
+      },
+    ];
+
+    const result = validateScheduleJson(json);
+
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes("'standing' must be a string"))).toBe(true);
+  });
+
+  it('returns invalid if break_after is not a number', () => {
+    const json: ScheduleJson[] = [
+      {
+        field: 'Field 1',
+        games: [
+          {
+            stage: 'Vorrunde',
+            standing: 'Spiel 1',
+            home: '0_0',
+            away: '0_1',
+            official: '0_2',
+            break_after: 'not-a-number', // Should be number
+          } as unknown as { stage: string; standing: string; home: string; away: string; official: string; break_after?: number },
+        ],
+      },
+    ];
+
+    const result = validateScheduleJson(json);
+
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes("'break_after' must be a number"))).toBe(true);
+  });
+
+  it('validates game with valid break_after', () => {
+    const json: ScheduleJson[] = [
+      {
+        field: 'Field 1',
+        games: [
+          {
+            stage: 'Vorrunde',
+            standing: 'Spiel 1',
+            home: '0_0',
+            away: '0_1',
+            official: '0_2',
+            break_after: 10,
+          },
+        ],
+      },
+    ];
+
+    const result = validateScheduleJson(json);
+
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+});
+
+describe('generateExportFilename', () => {
+  it('generates filename with game and field counts', () => {
+    const state: DesignerState = {
+      fields: [
+        {
+          id: 'field-1',
+          name: 'Field 1',
+          order: 0,
+          gameSlots: [
+            createGameSlot('Spiel 1'),
+            createGameSlot('Spiel 2'),
+          ],
+        },
+        {
+          id: 'field-2',
+          name: 'Field 2',
+          order: 1,
+          gameSlots: [
+            createGameSlot('Spiel 3'),
+          ],
+        },
+      ],
+      selectedGameSlot: null,
+      validationResult: { isValid: true, errors: [], warnings: [] },
+    };
+
+    const filename = generateExportFilename(state);
+
+    expect(filename).toBe('schedule_3_games_2_fields.json');
+  });
+
+  it('generates filename for empty state', () => {
+    const state: DesignerState = {
+      fields: [],
+      selectedGameSlot: null,
+      validationResult: { isValid: true, errors: [], warnings: [] },
+    };
+
+    const filename = generateExportFilename(state);
+
+    expect(filename).toBe('schedule_0_games_0_fields.json');
+  });
+});
+
+describe('downloadScheduleJson', () => {
+  it('creates and triggers download with default filename', () => {
+    const state: DesignerState = {
+      fields: [
+        {
+          id: 'field-1',
+          name: 'Field 1',
+          order: 0,
+          gameSlots: [createGameSlot('Spiel 1')],
+        },
+      ],
+      selectedGameSlot: null,
+      validationResult: { isValid: true, errors: [], warnings: [] },
+    };
+
+    // Mock DOM methods
+    const mockLink = {
+      href: '',
+      download: '',
+      click: vi.fn(),
+    };
+    const createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue(mockLink as unknown as HTMLAnchorElement);
+    const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as unknown as Node);
+    const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as unknown as Node);
+    const createObjectURLSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url');
+    const revokeObjectURLSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+
+    downloadScheduleJson(state);
+
+    expect(createElementSpy).toHaveBeenCalledWith('a');
+    expect(mockLink.download).toBe('schedule_1_games_1_fields.json');
+    expect(mockLink.click).toHaveBeenCalled();
+    expect(appendChildSpy).toHaveBeenCalled();
+    expect(removeChildSpy).toHaveBeenCalled();
+    expect(createObjectURLSpy).toHaveBeenCalled();
+    expect(revokeObjectURLSpy).toHaveBeenCalledWith('blob:mock-url');
+
+    // Cleanup
+    createElementSpy.mockRestore();
+    appendChildSpy.mockRestore();
+    removeChildSpy.mockRestore();
+    createObjectURLSpy.mockRestore();
+    revokeObjectURLSpy.mockRestore();
+  });
+
+  it('creates and triggers download with custom filename', () => {
+    const state: DesignerState = {
+      fields: [
+        {
+          id: 'field-1',
+          name: 'Field 1',
+          order: 0,
+          gameSlots: [createGameSlot('Spiel 1')],
+        },
+      ],
+      selectedGameSlot: null,
+      validationResult: { isValid: true, errors: [], warnings: [] },
+    };
+
+    const mockLink = {
+      href: '',
+      download: '',
+      click: vi.fn(),
+    };
+    const createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue(mockLink as unknown as HTMLAnchorElement);
+    const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as unknown as Node);
+    const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as unknown as Node);
+    const createObjectURLSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url');
+    const revokeObjectURLSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+
+    downloadScheduleJson(state, 'custom_schedule.json');
+
+    expect(mockLink.download).toBe('custom_schedule.json');
+    expect(mockLink.click).toHaveBeenCalled();
+
+    // Cleanup
+    createElementSpy.mockRestore();
+    appendChildSpy.mockRestore();
+    removeChildSpy.mockRestore();
+    createObjectURLSpy.mockRestore();
+    revokeObjectURLSpy.mockRestore();
+  });
+});
+
+function createGameSlot(standing: string): GameSlot {
+  return {
+    id: `slot-${standing}`,
+    stage: 'Vorrunde',
+    standing,
+    home: { type: 'static', name: '' },
+    away: { type: 'static', name: '' },
+    official: { type: 'static', name: '' },
+    breakAfter: 0,
   };
 }

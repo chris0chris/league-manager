@@ -10,9 +10,13 @@
     "axios": "^1.7.9",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
+    "i18next": "^25.7.3",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "i18next-resources-to-backend": "^1.2.1",
     "react": "^19.2.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.0",
+    "react-i18next": "^16.5.1",
     "react-select": "^5.10.2",
     "uuid": "^13.0.0",
     "web-vitals": "^5.1.0"
@@ -29,14 +33,17 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run --coverage",
     "test:coverage": "vitest run --coverage",
     "eslint": "eslint ./src",
     "eslint:junit": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-gameday_designer.xml",
     "eslint:json": "eslint ./src --format json -o js-lint-results-gameday_designer.json",
-    "dev": "vite build"
+    "dev": "vite build",
+    "i18n:types": "i18next-resources-for-ts toc -i ./src/i18n/locales/de -o ./src/i18n/types.d.ts",
+    "prebuild": "npm run i18n:types"
   },
   "eslintConfig": {
     "extends": [
@@ -69,6 +76,7 @@
     "eslint": "^9.39.1",
     "eslint-formatter-junit": "^9.0.1",
     "eslint-plugin-react-hooks": "^7.0.1",
+    "i18next-resources-for-ts": "^2.0.0",
     "jsdom": "^27.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3",

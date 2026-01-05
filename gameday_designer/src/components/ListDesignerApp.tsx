@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { Container, Row, Col, Button, OverlayTrigger, Popover, ListGroup, Card } from 'react-bootstrap';
+import { Container, Row, Col, Button, OverlayTrigger, Popover, ListGroup } from 'react-bootstrap';
 
 import ListCanvas from './ListCanvas';
 import FlowToolbar from './FlowToolbar';
@@ -46,21 +46,6 @@ const getTeamColor = (index: number): string => {
   return colors[index % colors.length];
 };
 
-/**
- * Generate a distinct color for a field based on index.
- * Uses lighter pastel colors for fields.
- */
-const getFieldColor = (index: number): string => {
-  const colors = [
-    '#d1ecf1', // Light Blue (default)
-    '#fff3cd', // Light Yellow
-    '#d4edda', // Light Green
-    '#f8d7da', // Light Red/Pink
-    '#e2e3e5', // Light Gray
-    '#d1d3e2', // Light Purple
-  ];
-  return colors[index % colors.length];
-};
 
 /**
  * ListDesignerApp component.
@@ -704,7 +689,7 @@ const ListDesignerApp: React.FC = () => {
         console.error('Failed to generate tournament:', error);
       }
     },
-    [globalTeams, globalTeamGroups, addBulkTournament, addGlobalTeam, addGlobalTeamGroup, assignTeamsToTournament]
+    [globalTeams, globalTeamGroups, addBulkTournament, addGlobalTeam, addGlobalTeamGroup, updateGlobalTeam, assignTeamsToTournament, edges, nodes]
   );
 
   // Calculate if export is available

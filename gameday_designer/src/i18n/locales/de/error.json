@@ -1,0 +1,5 @@
+{
+  "invalidScheduleFormat": "Ungültiges Zeitplanformat: {{errors}}",
+  "invalidJson": "Ungültige JSON-Datei. Bitte wählen Sie eine gültige Zeitplan-JSON-Datei.",
+  "fileReadError": "Fehler beim Lesen der Datei. Bitte versuchen Sie es erneut."
+}

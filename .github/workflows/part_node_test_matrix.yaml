@@ -1,11 +1,11 @@
-name: 🟢🏗️🧪📊 Build & run node tests
+name: 🟢🏗️🧪📊 Build & run node tests (matrix)
 
 on:
   workflow_call:
     inputs:
-      project:
+      projects:
         required: true
-        description: The project to build
+        description: JSON array of projects to test
         type: string
 
 permissions:
@@ -13,40 +13,50 @@ permissions:
   checks: write
 
 jobs:
-  build:
+  test-matrix:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJSON(inputs.projects) }}
     defaults:
       run:
-        working-directory: ${{ inputs.project }}
+        working-directory: ${{ matrix.project }}
     steps:
       - uses: actions/checkout@v6
+
       - name: 🟢⚙️ Setup node
         uses: actions/setup-node@v6
         with:
           node-version: '24.x'
           cache: 'npm'
-          cache-dependency-path: ${{ inputs.project }}/package.json
-      - name: 🧪 Testing ${{ inputs.project }}
+          cache-dependency-path: ${{ matrix.project }}/package.json
+
+      - name: 🧪 Testing ${{ matrix.project }}
         run: |
           npm ci
           npm run test:coverage
+
       - name: 📊 Upload Coverage to Codecov
-        # secrets not directly accessible https://stackoverflow.com/questions/72925899/github-actions-detect-if-secret-exists
         env:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ env.codecov_token != '' }}
         uses: codecov/codecov-action@v5
         with:
-          directory: ${{ inputs.project }}/coverage
+          directory: ${{ matrix.project }}/coverage
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
-      - name: 🔍 Run eslint ${{ inputs.project }}
+          flags: ${{ matrix.project }}
+
+      - name: 🔍 Run eslint ${{ matrix.project }}
         run: npm run eslint:json
         continue-on-error: true
-      - name: 👷 Building ${{ inputs.project }}
+
+      - name: 👷 Building ${{ matrix.project }}
         run: npm run build > typescript.log
-      - name: 🔍📝 Annotate ${{ inputs.project }} Linting Results
+
+      - name: 🔍📝 Annotate ${{ matrix.project }} Linting Results
         uses: DerLev/eslint-annotations@v2
         with:
-          eslint-report: ${{ inputs.project }}/js-lint-results-${{ inputs.project }}.json
-          typescript-log: ${{ inputs.project }}/typescript.log
+          eslint-report: ${{ matrix.project }}/js-lint-results-${{ matrix.project }}.json
+          typescript-log: ${{ matrix.project }}/typescript.log

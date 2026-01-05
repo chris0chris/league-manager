@@ -24,7 +24,6 @@ import type {
   FieldNode,
   StageNode,
   GameNode,
-  TeamNode,
   SelectionState,
   StageType,
   GlobalTeam,
@@ -74,8 +73,8 @@ export interface UseFlowStateReturn {
   selection: SelectionState;
 
   // Callbacks (for compatibility)
-  onNodesChange: (changes: any[]) => void;
-  onEdgesChange: (changes: any[]) => void;
+  onNodesChange: (changes: unknown[]) => void;
+  onEdgesChange: (changes: unknown[]) => void;
 
   // Node actions
   addGameNode: (options?: Partial<Omit<GameNodeData, 'type'>>) => FlowNode;
@@ -213,11 +212,31 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
   // ============================================================================
 
   /**
+   * Helper to derive a TeamReference from a GameToGameEdge.
+   */
+  const deriveDynamicRef = useCallback((edge: FlowEdge, nodes: FlowNode[]): TeamReference | null => {
+    const sourceNode = nodes.find((n) => n.id === edge.source);
+    if (!sourceNode || !isGameNode(sourceNode)) return null;
+
+    const sourceGame = sourceNode as GameNode;
+    const matchName = sourceGame.data.standing || sourceNode.id;
+
+    if (edge.sourceHandle === 'winner') {
+      return { type: 'winner', matchName };
+    } else if (edge.sourceHandle === 'loser') {
+      return { type: 'loser', matchName };
+    }
+
+    return null;
+  }, []);
+
+  /**
    * Sync dynamic team references when GameToGameEdges change.
    * Updates homeTeamDynamic/awayTeamDynamic fields on game nodes.
    */
   useEffect(() => {
     console.log('[useEffect edges sync] Running with', edges.length, 'edges');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNodes((nds) =>
       nds.map((n) => {
         if (!isGameNode(n)) return n;
@@ -268,26 +287,7 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
         };
       })
     );
-  }, [edges]);
-
-  /**
-   * Helper to derive a TeamReference from a GameToGameEdge.
-   */
-  function deriveDynamicRef(edge: FlowEdge, nodes: FlowNode[]): TeamReference | null {
-    const sourceNode = nodes.find((n) => n.id === edge.source);
-    if (!sourceNode || !isGameNode(sourceNode)) return null;
-
-    const sourceGame = sourceNode as GameNode;
-    const matchName = sourceGame.data.standing || sourceNode.id;
-
-    if (edge.sourceHandle === 'winner') {
-      return { type: 'winner', matchName };
-    } else if (edge.sourceHandle === 'loser') {
-      return { type: 'loser', matchName };
-    }
-
-    return null;
-  }
+  }, [edges, deriveDynamicRef]);
 
   // ============================================================================
   // Derived data
@@ -1491,7 +1491,7 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
       setFields(state.fields);
 
       // MIGRATION: Convert old format (with reference) to new format (with groupId)
-      const migratedTeams = (state.globalTeams || []).map((team: any) => {
+      const migratedTeams = (state.globalTeams || []).map((team: GlobalTeam & { reference?: string }) => {
         if ('reference' in team && !('groupId' in team)) {
           // Old format - convert to new format
           return {

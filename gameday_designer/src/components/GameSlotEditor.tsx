@@ -13,6 +13,7 @@ import React, { useState } from 'react';
 import { Modal, Form, Button, Row, Col } from 'react-bootstrap';
 import type { GameSlot, TeamReference } from '../types/designer';
 import TeamSelector from './TeamSelector';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
 
 export interface GameSlotEditorProps {
   /** Whether to show the modal */
@@ -48,6 +49,7 @@ const EditorForm: React.FC<EditorFormProps> = ({
   matchNames,
   groupNames,
 }) => {
+  const { t } = useTypedTranslation(['ui', 'domain']);
   // Local state initialized from gameSlot
   const [stage, setStage] = useState(gameSlot.stage);
   const [standing, setStanding] = useState(gameSlot.standing);
@@ -100,21 +102,21 @@ const EditorForm: React.FC<EditorFormProps> = ({
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group controlId="stage">
-              <Form.Label>Stage</Form.Label>
+              <Form.Label>{t('ui:label.stage')}</Form.Label>
               <Form.Select value={stage} onChange={handleStageChange}>
-                <option value="Vorrunde">Vorrunde</option>
-                <option value="Finalrunde">Finalrunde</option>
+                <option value="Vorrunde">{t('domain:vorrunde')}</option>
+                <option value="Finalrunde">{t('domain:finalrunde')}</option>
               </Form.Select>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group controlId="standing">
-              <Form.Label>Standing</Form.Label>
+              <Form.Label>{t('ui:label.standing')}</Form.Label>
               <Form.Control
                 type="text"
                 value={standing}
                 onChange={handleStandingChange}
-                placeholder="e.g., Gruppe 1, HF1, P1"
+                placeholder={t('ui:placeholder.standing')}
               />
             </Form.Group>
           </Col>
@@ -125,7 +127,7 @@ const EditorForm: React.FC<EditorFormProps> = ({
             <TeamSelector
               value={home}
               onChange={setHome}
-              label="Home"
+              label={t('ui:label.home')}
               matchNames={matchNames}
               groupNames={groupNames}
             />
@@ -134,7 +136,7 @@ const EditorForm: React.FC<EditorFormProps> = ({
             <TeamSelector
               value={away}
               onChange={setAway}
-              label="Away"
+              label={t('ui:label.away')}
               matchNames={matchNames}
               groupNames={groupNames}
             />
@@ -143,7 +145,7 @@ const EditorForm: React.FC<EditorFormProps> = ({
             <TeamSelector
               value={official}
               onChange={setOfficial}
-              label="Official"
+              label={t('ui:label.official')}
               matchNames={matchNames}
               groupNames={groupNames}
             />
@@ -153,7 +155,7 @@ const EditorForm: React.FC<EditorFormProps> = ({
         <Row>
           <Col md={4}>
             <Form.Group controlId="breakAfter">
-              <Form.Label>Break After (minutes)</Form.Label>
+              <Form.Label>{t('ui:label.breakAfter')}</Form.Label>
               <Form.Control
                 type="number"
                 min={0}
@@ -166,10 +168,10 @@ const EditorForm: React.FC<EditorFormProps> = ({
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onCancel}>
-          Cancel
+          {t('ui:button.cancel')}
         </Button>
         <Button variant="primary" onClick={handleSave}>
-          Save
+          {t('ui:button.save')}
         </Button>
       </Modal.Footer>
     </>
@@ -188,6 +190,8 @@ const GameSlotEditor: React.FC<GameSlotEditorProps> = ({
   matchNames,
   groupNames,
 }) => {
+  const { t } = useTypedTranslation('modal');
+
   if (!show || !gameSlot) {
     return null;
   }
@@ -195,7 +199,7 @@ const GameSlotEditor: React.FC<GameSlotEditorProps> = ({
   return (
     <Modal show={show} onHide={onCancel} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Edit Game</Modal.Title>
+        <Modal.Title>{t('editGame.title')}</Modal.Title>
       </Modal.Header>
       {/* Key forces remount when gameSlot.id changes */}
       <EditorForm
