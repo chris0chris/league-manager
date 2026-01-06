@@ -1,10 +1,10 @@
 # Plan: Architectural Optimization of Gameday Designer
 
 ## Phase 1: Hook Decomposition (SRP)
-- [ ] Task: Create `useNodesState` hook to handle node CRUD and hierarchy.
-- [ ] Task: Create `useEdgesState` hook to handle edge management and dynamic reference derivation.
-- [ ] Task: Create `useTeamPoolState` hook to manage global teams and groups.
-- [ ] Task: Refactor `useFlowState` to orchestrate these specialized hooks.
+- [x] Task: Create `useNodesState` hook to handle node CRUD and hierarchy. (3897b49)
+- [x] Task: Create `useEdgesState` hook to handle edge management and dynamic reference derivation. (3897b49)
+- [x] Task: Create `useTeamPoolState` hook to manage global teams and groups. (3897b49)
+- [x] Task: Refactor `useFlowState` to orchestrate these specialized hooks. (3897b49)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Hook Decomposition' (Protocol in workflow.md)
 
 ## Phase 2: Logic Harmonization & Service Layer
