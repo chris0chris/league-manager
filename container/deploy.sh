@@ -38,48 +38,36 @@ case "$1" in
 
         # Determine bump strategy
         if [[ $CURRENT_VERSION =~ -rc\.([0-9]+)$ ]]; then
-            # Already on RC version, find next available RC number
+            # Already on RC version - bump rc_build (e.g., 2.13.1-rc.1 → 2.13.1-rc.2)
+            # Uses bump-my-version which automatically runs post-commit hooks for uv.lock
             echo "Incrementing RC build number..."
-            # Parse current version
-            if [[ $CURRENT_VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-rc\.([0-9]+)$ ]]; then
-                MAJOR="${BASH_REMATCH[1]}"
-                MINOR="${BASH_REMATCH[2]}"
-                PATCH="${BASH_REMATCH[3]}"
-                RC_NUM="${BASH_REMATCH[4]}"
-
-                # Find next available RC number
-                NEXT_RC=$((RC_NUM + 1))
-                while git rev-parse "v${MAJOR}.${MINOR}.${PATCH}-rc.${NEXT_RC}" >/dev/null 2>&1; do
-                    echo "Tag v${MAJOR}.${MINOR}.${PATCH}-rc.${NEXT_RC} already exists, trying next..."
-                    NEXT_RC=$((NEXT_RC + 1))
-                done
-
-                NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-rc.${NEXT_RC}"
-            else
-                echo "Error: Could not parse RC version"
-                exit 1
-            fi
+            bump-my-version bump rc_build
         else
-            # Stable version - bump patch and create RC.1
-            echo "Bumping patch version and creating RC..."
+            # Stable version - bump patch and create RC.1 (e.g., 2.13.0 → 2.13.1-rc.1)
+            # Manual approach needed because bump-my-version cannot create RC from stable
+            echo "Bumping patch version and creating RC.1..."
             IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
             NEW_PATCH=$((PATCH + 1))
             NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}-rc.1"
+
+            echo "Creating version: $NEW_VERSION"
+
+            # Update version files directly
+            sed -i "s/__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" league_manager/__init__.py
+            sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" liveticker/package.json
+            sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" passcheck/package.json
+            sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" scorecard/package.json
+            sed -i "s/current_version = \".*\"/current_version = \"$NEW_VERSION\"/" pyproject.toml
+
+            # Regenerate uv.lock to match updated pyproject.toml
+            echo "Regenerating uv.lock..."
+            uv lock
+
+            # Commit and tag
+            git add league_manager/__init__.py liveticker/package.json passcheck/package.json scorecard/package.json pyproject.toml uv.lock
+            git commit -m "Bump version: $CURRENT_VERSION → $NEW_VERSION"
+            git tag -a "v$NEW_VERSION" -m "Bump version: $CURRENT_VERSION → $NEW_VERSION"
         fi
-
-        echo "Creating version: $NEW_VERSION"
-
-        # Update version files directly
-        sed -i "s/__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" league_manager/__init__.py
-        sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" liveticker/package.json
-        sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" passcheck/package.json
-        sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" scorecard/package.json
-        sed -i "s/current_version = \".*\"/current_version = \"$NEW_VERSION\"/" pyproject.toml
-
-        # Commit and tag
-        git add league_manager/__init__.py liveticker/package.json passcheck/package.json scorecard/package.json pyproject.toml uv.lock
-        git commit -m "Bump version: $CURRENT_VERSION → $NEW_VERSION"
-        git tag -a "v$NEW_VERSION" -m "Bump version: $CURRENT_VERSION → $NEW_VERSION"
 
         # Push commits and tags
         git push && git push --tags
