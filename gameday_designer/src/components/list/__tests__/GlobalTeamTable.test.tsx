@@ -518,7 +518,7 @@ describe('GlobalTeamTable', () => {
       const team1Row = screen.getByText('Team 1').closest('div[class*="d-flex"]');
       const dropdownButtons = within(team1Row!).getAllByRole('button');
       // The dropdown button should be the one with the folder icon (4th button: up, down, folder, delete)
-      const dropdownToggle = dropdownButtons.find(btn => btn.querySelector('.bi-folder'));
+      const dropdownToggle = dropdownButtons.find(btn => btn.querySelector('.bi-folder-fill'));
       expect(dropdownToggle).toBeDefined();
       await user.click(dropdownToggle!);
 

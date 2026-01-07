@@ -15,6 +15,7 @@ import FlowToolbar from './FlowToolbar';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
 import NotificationToast from './NotificationToast';
 import { useDesignerController } from '../hooks/useDesignerController';
+import { ICONS } from '../utils/iconConstants';
 
 import './ListDesignerApp.css';
 

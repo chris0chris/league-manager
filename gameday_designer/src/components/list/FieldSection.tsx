@@ -203,9 +203,9 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
             <div className="text-center py-4">
               <i className={`bi ${ICONS.STAGE} me-2`} style={{ fontSize: '2rem', opacity: 0.3 }}></i>
               <p className="text-muted mb-3">{t('ui:message.noStagesYet')}</p>
-              <Button variant="outline-primary" onClick={handleAddStage} aria-label={t('ui:button.addStage')}>
+              <Button variant="outline-primary" onClick={handleAddStage} aria-label={t('ui:button.addStage')} className="btn-adaptive">
                 <i className={`bi ${ICONS.ADD} me-1`}></i>
-                {t('ui:button.addStage')}
+                <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
               </Button>
             </div>
           ) : (

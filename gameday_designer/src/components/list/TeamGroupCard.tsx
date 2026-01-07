@@ -242,12 +242,12 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
               <i className={`bi ${ICONS.TEAM} me-2`} style={{ fontSize: '2rem', opacity: 0.3 }}></i>
               <p className="text-muted mb-3">{t('ui:message.noTeamsInGroup')}</p>
               <button
-                className="btn btn-outline-primary"
+                className="btn btn-outline-primary btn-adaptive"
                 onClick={() => onAddTeam(group.id)}
                 title={t('ui:tooltip.addTeamToGroup')}
               >
                 <i className={`bi ${ICONS.ADD} me-1`}></i>
-                {t('ui:button.addTeam')}
+                <span className="btn-label-adaptive">{t('ui:button.addTeam')}</span>
               </button>
             </div>
           ) : (

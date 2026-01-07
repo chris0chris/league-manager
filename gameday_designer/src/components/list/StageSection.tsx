@@ -208,9 +208,9 @@ const StageSection: React.FC<StageSectionProps> = memo(({
               <div className="text-center py-3">
                 <i className={`bi ${ICONS.TOURNAMENT} me-2`} style={{ fontSize: '2rem', opacity: 0.3 }}></i>
                 <p className="text-muted mb-3">{t('ui:message.noGamesInStage')}</p>
-                <Button variant="outline-primary" onClick={handleAddGame} aria-label={t('ui:button.addGame')}>
+                <Button variant="outline-primary" onClick={handleAddGame} aria-label={t('ui:button.addGame')} className="btn-adaptive">
                   <i className={`bi ${ICONS.ADD} me-1`} />
-                  {t('ui:button.addGame')}
+                  <span className="btn-label-adaptive">{t('ui:button.addGame')}</span>
                 </Button>
               </div>
             ) : (

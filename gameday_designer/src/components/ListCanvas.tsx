@@ -181,9 +181,9 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
                   <i className={`bi ${ICONS.FIELD}`} style={{ fontSize: '4rem', opacity: 0.3 }} />
                   <h3 className="mt-3">{t('ui:message.noFieldsYet')}</h3>
                   <p className="text-muted mb-3">{t('ui:message.createFirstField')}</p>
-                  <Button variant="outline-primary" onClick={onAddField}>
+                  <Button variant="outline-primary" onClick={onAddField} className="btn-adaptive">
                     <i className={`bi ${ICONS.ADD} me-1`} />
-                    {t('ui:button.addField')}
+                    <span className="btn-label-adaptive">{t('ui:button.addField')}</span>
                   </Button>
                 </div>
               ) : (
