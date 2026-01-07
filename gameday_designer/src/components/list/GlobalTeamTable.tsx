@@ -17,6 +17,7 @@ import { Button } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import type { GlobalTeam, GlobalTeamGroup, FlowNode } from '../../types/flowchart';
 import TeamGroupCard from './TeamGroupCard';
+import { ICONS } from '../../utils/iconConstants';
 import './GlobalTeamTable.css';
 
 export interface GlobalTeamTableProps {
@@ -214,20 +215,20 @@ const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
       {sortedGroups.length === 0 ? (
         /* Empty state - icon, message, and button */
         <div className="text-center py-5">
-          <i className="bi bi-people" style={{ fontSize: '4rem', opacity: 0.3 }}></i>
+          <i className={`bi ${ICONS.TEAM}`} style={{ fontSize: '4rem', opacity: 0.3 }}></i>
           <h3 className="mt-3">{t('ui:message.noGroupsYet')}</h3>
           <p className="text-muted mb-3">{t('ui:message.createFirstGroup')}</p>
           <Button
             variant="outline-primary"
             onClick={onAddGroup}
           >
-            <i className="bi bi-plus-circle me-1"></i>
+            <i className={`bi ${ICONS.ADD} me-1`}></i>
             {t('ui:button.addGroup')}
           </Button>
         </div>
       ) : (
         /* CSS Grid layout for groups */
-        <div className="team-groups-grid">
+        <div className="team-groups-grid compact-actions">
           {/* Render group cards */}
           {sortedGroups.map((group, index) => {
             const teamsInGroup = teamsByGroup.get(group.id) || [];

@@ -40,6 +40,7 @@ const ListDesignerApp: React.FC = () => {
     addGameToGameEdge,
     removeGameToGameEdge,
     addGameNodeInStage,
+    addNotification,
   } = useDesignerController();
 
   const {
@@ -84,16 +85,17 @@ const ListDesignerApp: React.FC = () => {
           <Button
             variant="outline-primary"
             onClick={() => setShowTournamentModal(true)}
-            className="me-2"
+            className="me-2 btn-adaptive"
             title="Generate tournament structure"
           >
-            <i className="bi bi-trophy me-1"></i>
-            Generate Tournament
+            <i className={`bi ${ICONS.TOURNAMENT} me-1`}></i>
+            <span className="btn-label-adaptive">Generate Tournament</span>
           </Button>
           <FlowToolbar
             onImport={handleImport}
             onExport={handleExport}
             onClearAll={handleClearAll}
+            onNotify={addNotification}
             hasNodes={hasNodes}
             canExport={canExport}
           />

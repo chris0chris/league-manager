@@ -27,6 +27,8 @@ export interface FlowToolbarProps {
   onExport: () => void;
   /** Callback to clear all nodes and edges */
   onClearAll: () => void;
+  /** Callback for notifications */
+  onNotify?: (message: string, type: import('../types/designer').NotificationType, title?: string) => void;
   /** Callback for undo action */
   onUndo?: () => void;
   /** Callback for redo action */
@@ -51,6 +53,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
   onImport,
   onExport,
   onClearAll,
+  onNotify,
   onUndo,
   onRedo,
   canUndo = false,
@@ -76,7 +79,11 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
         onImport(json);
       } catch (error) {
         console.error('Failed to parse JSON file:', error);
-        alert('Failed to parse JSON file. Please ensure it is valid JSON.');
+        if (onNotify) {
+          onNotify(t('error:invalidScheduleFormat', { errors: 'Invalid JSON' }), 'danger', 'Import Error');
+        } else {
+          alert('Failed to parse JSON file. Please ensure it is valid JSON.');
+        }
       }
     };
     reader.readAsText(file);
@@ -109,9 +116,10 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             onClick={handleImportClick}
             title={t('ui:tooltip.importFromJson')}
             data-testid="import-button"
+            className="btn-adaptive"
           >
             <i className="bi bi-upload me-1"></i>
-            {t('ui:button.import')}
+            <span className="btn-label-adaptive">{t('ui:button.import')}</span>
           </Button>
           <Button
             variant="outline-secondary"
@@ -119,9 +127,10 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             disabled={!canExport}
             title={t('ui:tooltip.exportToJson')}
             data-testid="export-button"
+            className="btn-adaptive"
           >
             <i className="bi bi-download me-1"></i>
-            {t('ui:button.export')}
+            <span className="btn-label-adaptive">{t('ui:button.export')}</span>
           </Button>
         </ButtonGroup>
 
@@ -134,6 +143,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
               disabled={!canUndo}
               title={t('ui:tooltip.undo')}
               data-testid="undo-button"
+              className="btn-adaptive"
             >
               <i className="bi bi-arrow-counterclockwise"></i>
             </Button>
@@ -143,6 +153,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
               disabled={!canRedo}
               title={t('ui:tooltip.redo')}
               data-testid="redo-button"
+              className="btn-adaptive"
             >
               <i className="bi bi-arrow-clockwise"></i>
             </Button>
@@ -157,9 +168,10 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             disabled={!hasNodes}
             title={t('ui:tooltip.clearAllNodesAndEdges')}
             data-testid="clear-all-button"
+            className="btn-adaptive"
           >
             <i className="bi bi-trash me-1"></i>
-            {t('ui:button.clearAll')}
+            <span className="btn-label-adaptive">{t('ui:button.clearAll')}</span>
           </Button>
         </ButtonGroup>
 
