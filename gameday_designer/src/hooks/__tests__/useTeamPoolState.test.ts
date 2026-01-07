@@ -5,7 +5,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useTeamPoolState } from '../useTeamPoolState';
-import { FlowNode, GlobalTeam, GlobalTeamGroup, createGameNode } from '../../types/flowchart';
+import { FlowNode, GlobalTeam, GlobalTeamGroup, createGameNode, GameNode } from '../../types/flowchart';
 
 describe('useTeamPoolState', () => {
   describe('core team operations', () => {
@@ -142,12 +142,12 @@ describe('useTeamPoolState', () => {
       act(() => {
         result.current.assignTeamToGame('g1', 't1', 'home');
       });
-      expect((nodes[0] as any).data.homeTeamId).toBe('t1');
+      expect((nodes[0] as unknown as GameNode).data.homeTeamId).toBe('t1');
 
       act(() => {
         result.current.unassignTeamFromGame('g1', 'home');
       });
-      expect((nodes[0] as any).data.homeTeamId).toBeNull();
+      expect((nodes[0] as unknown as GameNode).data.homeTeamId).toBeNull();
     });
 
     it('tracks team usage', () => {

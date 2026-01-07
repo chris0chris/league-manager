@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useEdgesState } from '../useEdgesState';
-import { FlowNode, FlowEdge, createGameNode } from '../../types/flowchart';
+import { FlowNode, FlowEdge, createGameNode, GameNode } from '../../types/flowchart';
 
 describe('useEdgesState', () => {
   const setupHook = (
@@ -46,7 +46,7 @@ describe('useEdgesState', () => {
       expect(edges[0].target).toBe('game-2');
 
       const nodes = getNodes();
-      const targetGame = nodes.find(n => n.id === 'game-2') as any;
+      const targetGame = nodes.find(n => n.id === 'game-2') as unknown as GameNode;
       expect(targetGame.data.homeTeamDynamic).toEqual({
         type: 'winner',
         matchName: 'Game 1'
@@ -67,9 +67,9 @@ describe('useEdgesState', () => {
       });
 
       expect(getEdges()).toHaveLength(2);
-      const targetGame = getNodes().find(n => n.id === 'game-2') as any;
-      expect(targetGame.data.homeTeamDynamic.type).toBe('winner');
-      expect(targetGame.data.awayTeamDynamic.type).toBe('loser');
+      const targetGame = getNodes().find(n => n.id === 'game-2') as unknown as GameNode;
+      expect(targetGame.data.homeTeamDynamic?.type).toBe('winner');
+      expect(targetGame.data.awayTeamDynamic?.type).toBe('loser');
     });
 
     it('returns empty array if no edges to add', () => {
@@ -95,7 +95,7 @@ describe('useEdgesState', () => {
       });
 
       expect(getEdges()).toHaveLength(0);
-      const targetGame = getNodes().find(n => n.id === 'game-2') as any;
+      const targetGame = getNodes().find(n => n.id === 'game-2') as unknown as GameNode;
       expect(targetGame.data.homeTeamDynamic).toBeNull();
     });
   });
@@ -114,7 +114,7 @@ describe('useEdgesState', () => {
       });
 
       expect(getEdges()).toHaveLength(0);
-      const targetGame = getNodes().find(n => n.id === 'game-2') as any;
+      const targetGame = getNodes().find(n => n.id === 'game-2') as unknown as GameNode;
       expect(targetGame.data.homeTeamDynamic).toBeNull();
     });
   });
@@ -132,7 +132,7 @@ describe('useEdgesState', () => {
       });
 
       expect(getEdges()).toHaveLength(0);
-      const targetGame = getNodes().find(n => n.id === 'game-2') as any;
+      const targetGame = getNodes().find(n => n.id === 'game-2') as unknown as GameNode;
       expect(targetGame.data.homeTeamDynamic).toBeNull();
     });
   });
@@ -140,16 +140,16 @@ describe('useEdgesState', () => {
   describe('syncNodesWithEdges', () => {
     it('re-synchronizes node data based on current edges', () => {
       const { result, getNodes } = setupHook([], [mockGame1, mockGame2]);
-      const edges: any = [
+      const edges = [
         { id: 'e1', type: 'gameToGame', source: 'game-1', sourceHandle: 'winner', target: 'game-2', targetHandle: 'home' }
-      ];
+      ] as unknown as FlowEdge[];
 
       act(() => {
         result.current.syncNodesWithEdges([mockGame1, mockGame2], edges);
       });
 
-      const targetGame = getNodes().find(n => n.id === 'game-2') as any;
-      expect(targetGame.data.homeTeamDynamic.matchName).toBe('Game 1');
+      const targetGame = getNodes().find(n => n.id === 'game-2') as unknown as GameNode;
+      expect(targetGame.data.homeTeamDynamic?.matchName).toBe('Game 1');
     });
   });
 });

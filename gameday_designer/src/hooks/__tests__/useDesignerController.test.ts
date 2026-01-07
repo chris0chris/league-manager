@@ -156,11 +156,18 @@ describe('useDesignerController', () => {
   });
 
   describe('Tournament Generation', () => {
-    const mockConfig: any = {
-      template: { teamCount: { exact: 4 } },
+    const mockConfig = {
+      template: { 
+        id: 't1',
+        name: 'Test',
+        teamCount: { exact: 4 },
+        fieldCount: 2,
+        groupCount: 1,
+        gameDuration: 30,
+      },
       generateTeams: false,
       autoAssignTeams: false
-    };
+    } as unknown as TournamentGenerationConfig & { generateTeams: boolean; autoAssignTeams: boolean };
 
     const mockStructure = { 
       fields: [], 
@@ -170,7 +177,7 @@ describe('useDesignerController', () => {
 
     it('generates tournament without teams', async () => {
       const { result } = renderHook(() => useDesignerController());
-      vi.mocked(tournamentGenerator.generateTournament).mockReturnValueOnce(mockStructure as any);
+      vi.mocked(tournamentGenerator.generateTournament).mockReturnValueOnce(mockStructure as unknown as TournamentStructure);
       
       await act(async () => {
         await result.current.handlers.handleGenerateTournament(mockConfig);
@@ -185,8 +192,8 @@ describe('useDesignerController', () => {
       const { result } = renderHook(() => useDesignerController());
       const mockTeams = [{ id: 'team-1', label: 'Team 1', color: '#ff0000' }];
       
-      vi.mocked(tournamentGenerator.generateTournament).mockReturnValue(mockStructure as any);
-      vi.mocked(teamAssignment.generateTeamsForTournament).mockReturnValue(mockTeams as any);
+      vi.mocked(tournamentGenerator.generateTournament).mockReturnValue(mockStructure as unknown as TournamentStructure);
+      vi.mocked(teamAssignment.generateTeamsForTournament).mockReturnValue(mockTeams as unknown as Array<{ label: string; color: string }>);
       
       await act(async () => {
         await result.current.handlers.handleGenerateTournament({
