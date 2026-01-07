@@ -7,6 +7,7 @@
  */
 
 import type { TeamReference } from './designer';
+import { DEFAULT_GAME_DURATION } from '../utils/tournamentConstants';
 
 // ============================================================================
 // Global Team Pool (v2)
@@ -547,7 +548,7 @@ export function createGameNode(
       homeTeamDynamic: options.homeTeamDynamic ?? null,
       awayTeamDynamic: options.awayTeamDynamic ?? null,
       // Time scheduling fields (Phase 1)
-      duration: options.duration ?? 50,
+      duration: options.duration ?? DEFAULT_GAME_DURATION,
       startTime: options.startTime,
       manualTime: options.manualTime ?? false,
     },
@@ -613,7 +614,7 @@ export function createStageNode(
       color: options?.color,
       // Time scheduling fields (Phase 1)
       startTime: options?.startTime,
-      defaultGameDuration: options?.defaultGameDuration ?? 50,
+      defaultGameDuration: options?.defaultGameDuration ?? DEFAULT_GAME_DURATION,
       // Progression fields (Phase 2)
       progressionMode: options?.progressionMode ?? 'manual',
       progressionConfig: options?.progressionConfig ?? { mode: 'manual' },
@@ -658,7 +659,7 @@ export function createGameNodeInStage(
       homeTeamDynamic: options?.homeTeamDynamic ?? null,
       awayTeamDynamic: options?.awayTeamDynamic ?? null,
       // Time scheduling fields (Phase 1)
-      duration: options?.duration ?? 50,
+      duration: options?.duration ?? DEFAULT_GAME_DURATION,
       startTime: options?.startTime,
       manualTime: options?.manualTime ?? false,
     },

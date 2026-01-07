@@ -34,6 +34,7 @@
     "tournamentFormat": "Tournament Format",
     "numberOfFields": "Number of Fields",
     "startTime": "Start Time",
+    "gameDuration": "Game Duration (min)",
     "preview": "Preview",
     "fields": "Fields",
     "teamPool": "Team Pool",

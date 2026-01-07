@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { DEFAULT_GAME_DURATION } from '../../utils/tournamentConstants';
 import {
   isGameNodeData,
   isGameNode,
@@ -97,7 +98,7 @@ describe('Flowchart Types', () => {
             homeTeamDynamic: null,
             awayTeamDynamic: null,
             startTime: undefined,
-            duration: 50,
+            duration: DEFAULT_GAME_DURATION,
             manualTime: false,
           },
         });
@@ -130,7 +131,7 @@ describe('Flowchart Types', () => {
           homeTeamDynamic: null,
           awayTeamDynamic: null,
           startTime: undefined,
-          duration: 50,
+          duration: DEFAULT_GAME_DURATION,
           manualTime: false,
         });
       });

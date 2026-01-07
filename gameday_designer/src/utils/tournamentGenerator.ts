@@ -55,15 +55,15 @@ export function generateTournament(
   const fields = createFields(fieldCount);
 
   // 2. Create stages and assign to fields
-  let stages = createStages(template, fields, startTime);
+  const finalGameDuration = gameDuration || template.timing.defaultGameDuration;
+  const finalBreakDuration = breakDuration || template.timing.defaultBreakBetweenGames;
+  
+  let stages = createStages(template, fields, startTime, finalGameDuration);
 
   // 3. Generate games for each stage
   let games = generateGamesForStages(stages);
 
   // 4. Calculate game start times based on template timing configuration
-  const finalGameDuration = gameDuration || template.timing.defaultGameDuration;
-  const finalBreakDuration = breakDuration || template.timing.defaultBreakBetweenGames;
-
   games = calculateGameTimes(
     fields,
     stages,
@@ -133,12 +133,14 @@ function createFields(count: number): FieldNode[] {
  * @param template - Tournament template
  * @param fields - Available fields
  * @param startTime - Start time for first game
+ * @param gameDuration - Default game duration
  * @returns Array of stage nodes
  */
 function createStages(
   template: TournamentTemplate,
   fields: FieldNode[],
-  startTime: string
+  startTime: string,
+  gameDuration: number
 ): StageNode[] {
   const stages: StageNode[] = [];
   let stageOrderCounter = 0;
@@ -155,7 +157,7 @@ function createStages(
           progressionMode: stageTemplate.progressionMode,
           progressionConfig: stageTemplate.config,
           startTime: startTime,
-          defaultGameDuration: template.timing.defaultGameDuration,
+          defaultGameDuration: gameDuration,
         });
         stages.push(stage);
       }
@@ -172,7 +174,7 @@ function createStages(
           progressionMode: stageTemplate.progressionMode,
           progressionConfig: stageTemplate.config,
           startTime: startTime,
-          defaultGameDuration: template.timing.defaultGameDuration,
+          defaultGameDuration: gameDuration,
         });
         stages.push(stage);
       }
@@ -189,7 +191,7 @@ function createStages(
           progressionMode: stageTemplate.progressionMode,
           progressionConfig: stageTemplate.config,
           startTime: startTime,
-          defaultGameDuration: template.timing.defaultGameDuration,
+          defaultGameDuration: gameDuration,
         });
         stages.push(stage);
       }
