@@ -8,8 +8,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Modal, Button, Form, Card, Row, Col, Alert } from 'react-bootstrap';
 import { TournamentTemplate, TournamentGenerationConfig } from '../../types/tournament';
-import { TOURNAMENT_TEMPLATES, getAllTemplates } from '../../utils/tournamentTemplates';
-import { TEAM_COLORS, DEFAULT_START_TIME, DEFAULT_GAME_DURATION } from '../../utils/tournamentConstants';
+import { getAllTemplates } from '../../utils/tournamentTemplates';
+import { DEFAULT_START_TIME, DEFAULT_GAME_DURATION } from '../../utils/tournamentConstants';
 import { GlobalTeam } from '../../types/flowchart';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 
