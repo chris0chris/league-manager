@@ -66,7 +66,7 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
 
   // --- Specialized Hooks ---
   const nodesManager = useNodesState(nodes, setNodes);
-  const edgesManager = useEdgesState(edges, setEdges, nodesManager.updateNode);
+  const edgesManager = useEdgesState(edges, setEdges, setNodes);
   const teamPoolManager = useTeamPoolState(
     globalTeams,
     setGlobalTeams,
@@ -76,26 +76,10 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
     setNodes
   );
 
-  // Sync dynamic references from edges to nodes
+  // Sync nodes when standing names change (since dynamic references use match names)
   useEffect(() => {
-    setNodes((nds) =>
-      nds.map((n) => {
-        if (!isGameNode(n)) return n;
-
-        const homeEdge = edges.find((e) => e.type === 'gameToGame' && e.target === n.id && e.targetHandle === 'home');
-        const awayEdge = edges.find((e) => e.type === 'gameToGame' && e.target === n.id && e.targetHandle === 'away');
-
-        const homeTeamDynamic = homeEdge ? edgesManager.deriveDynamicRef(homeEdge, nds) : null;
-        const awayTeamDynamic = awayEdge ? edgesManager.deriveDynamicRef(awayEdge, nds) : null;
-
-        if (n.data.homeTeamDynamic === homeTeamDynamic && n.data.awayTeamDynamic === awayTeamDynamic) {
-          return n;
-        }
-
-        return { ...n, data: { ...n.data, homeTeamDynamic, awayTeamDynamic } };
-      })
-    );
-  }, [edges, edgesManager.deriveDynamicRef]);
+    edgesManager.syncNodesWithEdges(nodes, edges);
+  }, [nodes.map(n => isGameNode(n) ? n.data.standing : '').join(','), edgesManager.syncNodesWithEdges]);
 
   // --- Actions ---
 
@@ -196,14 +180,33 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
       }
 
       const deletedIds = Array.from(nodeIdsToDelete);
-      setNodes((nds) => nds.filter((n) => !nodeIdsToDelete.has(n.id)));
+      
+      // Atomic updates
+      setNodes((nds) => {
+        const remainingNodes = nds.filter((n) => !nodeIdsToDelete.has(n.id));
+        // Also cleanup lost dynamic refs in remaining nodes
+        return remainingNodes.map(node => {
+          if (!isGameNode(node)) return node;
+          const lostHome = edges.some(e => e.target === node.id && e.targetHandle === 'home' && deletedIds.includes(e.source));
+          const lostAway = edges.some(e => e.target === node.id && e.targetHandle === 'away' && deletedIds.includes(e.source));
+          if (!lostHome && !lostAway) return node;
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              ...(lostHome ? { homeTeamDynamic: null } : {}),
+              ...(lostAway ? { awayTeamDynamic: null } : {})
+            }
+          };
+        });
+      });
       setEdges((eds) => eds.filter((e) => !deletedIds.includes(e.source) && !deletedIds.includes(e.target)));
       setSelection((sel) => ({
         nodeIds: sel.nodeIds.filter((id) => !deletedIds.includes(id)),
         edgeIds: sel.edgeIds.filter((id) => !deletedIds.includes(id)),
       }));
     },
-    [nodes, setNodes, setEdges]
+    [nodes, edges, setNodes, setEdges]
   );
 
   // --- Hierarchy Helpers ---

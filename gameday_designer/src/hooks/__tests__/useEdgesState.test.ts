@@ -6,7 +6,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useEdgesState } from '../useEdgesState';
 import { FlowEdge, FlowNode, createGameNode } from '../../types/flowchart';
-import React from 'react';
 
 describe('useEdgesState', () => {
   const setupHook = (initialEdges: FlowEdge[] = []) => {
@@ -18,19 +17,19 @@ describe('useEdgesState', () => {
         edges = update;
       }
     });
-    const updateNode = vi.fn();
+    const setNodes = vi.fn();
 
     const { result, rerender } = renderHook(
-      ({ edges }) => useEdgesState(edges, setEdges, updateNode),
+      ({ edges }) => useEdgesState(edges, setEdges, setNodes),
       { initialProps: { edges } }
     );
 
-    return { result, setEdges, updateNode, getEdges: () => edges, rerender };
+    return { result, setEdges, setNodes, getEdges: () => edges, rerender };
   };
 
   describe('addGameToGameEdge', () => {
-    it('creates a new GameToGameEdge', () => {
-      const { result, getEdges, updateNode } = setupHook();
+    it('creates a new GameToGameEdge and syncs nodes', () => {
+      const { result, getEdges, setNodes } = setupHook();
 
       act(() => {
         result.current.addGameToGameEdge('game1', 'winner', 'game2', 'home');
@@ -40,7 +39,9 @@ describe('useEdgesState', () => {
       expect(edges).toHaveLength(1);
       expect(edges[0].source).toBe('game1');
       expect(edges[0].target).toBe('game2');
-      expect(updateNode).toHaveBeenCalledWith('game2', { homeTeamId: null });
+      
+      // Should have called setNodes to update target game
+      expect(setNodes).toHaveBeenCalled();
     });
   });
 
