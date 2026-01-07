@@ -7,11 +7,11 @@
 - [x] Task: Refactor `useFlowState` to orchestrate these specialized hooks. (3897b49)
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Hook Decomposition' (Protocol in workflow.md) (3897b49)
 
-## Phase 2: Logic Harmonization & Service Layer
+## Phase 2: Logic Harmonization & Service Layer [checkpoint: eb8dd30]
 - [x] Task: Align frontend `timeCalculation.ts` with backend `TemplateApplicationService` logic. (5b6f960)
 - [x] Task: Create `TemplateValidationService` in Python to mirror `useFlowValidation.ts`. (ec37d3a)
 - [x] Task: Implement atomic bulk updates for edges to eliminate `useEffect` sync race conditions. (fd7a45d)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Logic Harmonization' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Logic Harmonization' (Protocol in workflow.md) (eb8dd30)
 
 ## Phase 3: Component Decoupling
 - [ ] Task: Refactor `ListDesignerApp.tsx` to move event handlers into a dedicated controller hook.
