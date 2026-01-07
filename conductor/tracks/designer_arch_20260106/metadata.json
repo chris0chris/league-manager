@@ -1,0 +1,8 @@
+{
+  "track_id": "designer_arch_20260106",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-06T12:00:00Z",
+  "updated_at": "2026-01-06T12:00:00Z",
+  "description": "Refactor useFlowState, harmonize cross-stack logic, and decouple ListDesignerApp."
+}

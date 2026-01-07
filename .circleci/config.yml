@@ -106,6 +106,27 @@ jobs:
           name: "JavaScript Build"
           command: npm --prefix passcheck/ run build
 
+  gameday_designer_js:
+    executor:
+      name: node/default
+      tag: "20.11"
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - node/install-packages:
+          app-dir: gameday_designer/
+      - run:
+          name: "JavaScript Test Suite"
+          command: npm --prefix gameday_designer/ run test
+      - run:
+          name: "JavaScript Linter"
+          command: npm --prefix gameday_designer/ run eslint:junit
+      - store_test_results:
+          path: /tmp/eslint
+      - run:
+          name: "JavaScript Build"
+          command: npm --prefix gameday_designer/ run build
+
 workflows:
   version: 2
   build_and_test:
@@ -114,3 +135,4 @@ workflows:
       - scorecard_js
       - liveticker_js
       - passcheck_js
+      - gameday_designer_js

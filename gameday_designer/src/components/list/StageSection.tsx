@@ -2,10 +2,9 @@
  * StageSection Component
  *
  * Displays a collapsible stage container with game tables.
- * Part of the list-based UI for the Gameday Designer.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import { Card, Button, Form } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import GameTable from './GameTable';
@@ -14,60 +13,23 @@ import { isGameNode } from '../../types/flowchart';
 import './StageSection.css';
 
 export interface StageSectionProps {
-  /** The stage node to display */
   stage: StageNode;
-
-  /** All nodes in the flowchart (for filtering games) */
   allNodes: FlowNode[];
-
-  /** All edges in the flowchart */
   edges: FlowEdge[];
-
-  /** Global team pool */
   globalTeams: GlobalTeam[];
-
-  /** Global team groups */
   globalTeamGroups: GlobalTeamGroup[];
-
-  /** Callback when stage data is updated */
   onUpdate: (nodeId: string, data: Partial<StageNode['data']>) => void;
-
-  /** Callback when stage is deleted */
   onDelete: (nodeId: string) => void;
-
-  /** Callback when a node is selected */
   onSelectNode: (nodeId: string | null) => void;
-
-  /** Currently selected node ID */
   selectedNodeId: string | null;
-
-  /** Callback to assign a team to a game */
   onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
-
-  /** Callback to add a game to this stage */
   onAddGame: (stageId: string) => void;
-
-  /** Callback to add a GameToGameEdge */
   onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
-
-  /** Callback to remove a GameToGameEdge */
   onRemoveGameToGameEdge: (targetGameId: string, targetSlot: 'home' | 'away') => void;
-
-  /** Whether this stage is expanded (controlled) */
   isExpanded: boolean;
 }
 
-/**
- * StageSection component.
- *
- * Renders a stage as a collapsible card with:
- * - Stage name (inline editable)
- * - Stage type badge
- * - Metadata (game count)
- * - Delete Stage button
- * - GameTable for games in this stage
- */
-const StageSection: React.FC<StageSectionProps> = ({
+const StageSection: React.FC<StageSectionProps> = memo(({
   stage,
   allNodes,
   edges,
@@ -86,19 +48,11 @@ const StageSection: React.FC<StageSectionProps> = ({
   const { t } = useTypedTranslation(['ui', 'domain']);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(stage.data.name);
-
-  // Use local state but sync with prop when it changes (for programmatic expansion)
   const [localExpanded, setLocalExpanded] = useState(true);
+  
+  // Combine local state with prop
   const isExpanded = isExpandedProp || localExpanded;
 
-  // Sync with prop changes (when expanded programmatically)
-  React.useEffect(() => {
-    if (isExpandedProp) {
-      setLocalExpanded(true);
-    }
-  }, [isExpandedProp]);
-
-  // Filter games that belong to this stage
   const games = useMemo(
     () =>
       allNodes.filter(
@@ -108,16 +62,10 @@ const StageSection: React.FC<StageSectionProps> = ({
     [allNodes, stage.id]
   );
 
-  /**
-   * Toggle stage expansion.
-   */
   const handleToggleExpand = useCallback(() => {
     setLocalExpanded((prev) => !prev);
   }, []);
 
-  /**
-   * Handle Delete Stage button click.
-   */
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -126,9 +74,6 @@ const StageSection: React.FC<StageSectionProps> = ({
     [stage.id, onDelete]
   );
 
-  /**
-   * Start editing stage name.
-   */
   const handleStartEdit = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -138,9 +83,6 @@ const StageSection: React.FC<StageSectionProps> = ({
     [stage.data.name]
   );
 
-  /**
-   * Save edited stage name.
-   */
   const handleSaveName = useCallback(() => {
     setIsEditingName(false);
     if (editedName.trim() !== '' && editedName !== stage.data.name) {
@@ -150,9 +92,6 @@ const StageSection: React.FC<StageSectionProps> = ({
     }
   }, [editedName, stage.id, stage.data.name, onUpdate]);
 
-  /**
-   * Handle name input key press.
-   */
   const handleNameKeyPress = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
@@ -165,9 +104,6 @@ const StageSection: React.FC<StageSectionProps> = ({
     [handleSaveName, stage.data.name]
   );
 
-  /**
-   * Handle Add Game button click.
-   */
   const handleAddGame = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -176,10 +112,18 @@ const StageSection: React.FC<StageSectionProps> = ({
     [stage.id, onAddGame]
   );
 
+  const handleTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    onUpdate(stage.id, { startTime: e.target.value || undefined });
+  }, [stage.id, onUpdate]);
+
+  const handleColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    onUpdate(stage.id, { color: e.target.value });
+  }, [stage.id, onUpdate]);
+
   return (
-    <Card
-      className={`stage-section mb-2`}
-    >
+    <Card className="stage-section mb-2">
       <Card.Header
         className="stage-section__header d-flex align-items-center"
         onClick={handleToggleExpand}
@@ -188,21 +132,15 @@ const StageSection: React.FC<StageSectionProps> = ({
           borderLeft: `3px solid ${stage.data.color || '#0d6efd'}`,
         }}
       >
-        <i
-          className={`bi bi-chevron-${isExpanded ? 'down' : 'right'} me-2`}
-        ></i>
+        <i className={`bi bi-chevron-${isExpanded ? 'down' : 'right'} me-2`}></i>
 
-        {/* Start Time Input */}
         <div className="d-flex align-items-center gap-2 me-2">
           <Form.Label className="mb-0 text-muted small">{t('ui:label.start')}:</Form.Label>
           <Form.Control
             type="time"
             size="sm"
             value={stage.data.startTime || ''}
-            onChange={(e) => {
-              e.stopPropagation();
-              onUpdate(stage.id, { startTime: e.target.value || undefined });
-            }}
+            onChange={handleTimeChange}
             onClick={(e) => e.stopPropagation()}
             style={{ width: '110px' }}
           />
@@ -223,77 +161,43 @@ const StageSection: React.FC<StageSectionProps> = ({
         ) : (
           <>
             <strong className="me-2">{stage.data.name}</strong>
-            <Button
-              size="sm"
-              variant="link"
-              onClick={handleStartEdit}
-              aria-label={t('ui:tooltip.editStageName')}
-              className="p-0 me-auto"
-              style={{ fontSize: '0.875rem' }}
-            >
+            <Button size="sm" variant="link" onClick={handleStartEdit} aria-label={t('ui:tooltip.editStageName')} className="p-0 me-auto" style={{ fontSize: '0.875rem' }}>
               <i className="bi bi-pencil"></i>
             </Button>
           </>
         )}
 
         {games.length > 0 && (
-          <Button
-            size="sm"
-            variant="outline-primary"
-            onClick={handleAddGame}
-            aria-label={t('ui:button.addGame')}
-            className="me-2"
-          >
+          <Button size="sm" variant="outline-primary" onClick={handleAddGame} aria-label={t('ui:button.addGame')} className="me-2">
             <i className="bi bi-plus-circle me-1"></i>
             {t('ui:button.addGame')}
           </Button>
         )}
 
-        {/* Stage color picker */}
         <input
           type="color"
           value={stage.data.color || '#e7f3ff'}
-          onChange={(e) => {
-            e.stopPropagation();
-            onUpdate(stage.id, { color: e.target.value });
-          }}
+          onChange={handleColorChange}
           onClick={(e) => e.stopPropagation()}
           title={t('ui:tooltip.stageColor')}
           className="me-2"
-          style={{
-            width: '28px',
-            height: '28px',
-            border: 'none',
-            borderRadius: '50%',
-            cursor: 'pointer'
-          }}
+          style={{ width: '28px', height: '28px', border: 'none', borderRadius: '50%', cursor: 'pointer' }}
         />
 
-        <Button
-          variant="outline-danger"
-          size="sm"
-          onClick={handleDelete}
-          aria-label={t('ui:tooltip.deleteStage')}
-        >
+        <Button variant="outline-danger" size="sm" onClick={handleDelete} aria-label={t('ui:tooltip.deleteStage')}>
           <i className="bi bi-trash"></i>
         </Button>
       </Card.Header>
 
       {isExpanded && (
         <Card.Body className="stage-section__body">
-          {/* Games Section */}
           <div>
             <h6 className="text-uppercase text-muted mb-2">{t('domain:games')}</h6>
-
             {games.length === 0 ? (
               <div className="text-center py-3">
                 <i className="bi bi-trophy me-2"></i>
                 <p className="text-muted mb-3">{t('ui:message.noGamesInStage')}</p>
-                <Button
-                  variant="outline-primary"
-                  onClick={handleAddGame}
-                  aria-label={t('ui:button.addGame')}
-                >
+                <Button variant="outline-primary" onClick={handleAddGame} aria-label={t('ui:button.addGame')}>
                   <i className="bi bi-plus-circle me-1"></i>
                   {t('ui:button.addGame')}
                 </Button>
@@ -314,13 +218,7 @@ const StageSection: React.FC<StageSectionProps> = ({
                   onAddGameToGameEdge={onAddGameToGameEdge}
                   onRemoveGameToGameEdge={onRemoveGameToGameEdge}
                 />
-                <Button
-                  variant="outline-secondary"
-                  size="sm"
-                  className="w-100 mt-2"
-                  onClick={handleAddGame}
-                  aria-label={t('ui:button.addGame')}
-                >
+                <Button variant="outline-secondary" size="sm" className="w-100 mt-2" onClick={handleAddGame} aria-label={t('ui:button.addGame')}>
                   <i className="bi bi-plus-circle me-1"></i>
                   {t('ui:button.addGame')}
                 </Button>
@@ -331,6 +229,6 @@ const StageSection: React.FC<StageSectionProps> = ({
       )}
     </Card>
   );
-};
+});
 
 export default StageSection;

@@ -222,25 +222,27 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
 
         # Use validation service
         service = TemplateValidationService(template)
-        result = service.validate()
+        is_valid, errors, warnings = service.validate()
 
         return Response({
-            'is_valid': result.is_valid,
+            'is_valid': is_valid,
             'errors': [
                 {
-                    'field': err.field,
+                    'id': err.id,
+                    'type': err.type,
                     'message': err.message,
-                    'severity': err.severity
+                    'affected_slots': err.affected_slots
                 }
-                for err in result.errors
+                for err in errors
             ],
             'warnings': [
                 {
-                    'field': warn.field,
+                    'id': warn.id,
+                    'type': warn.type,
                     'message': warn.message,
-                    'severity': warn.severity
+                    'affected_slots': warn.affected_slots
                 }
-                for warn in result.warnings
+                for warn in warnings
             ]
         }, status=status.HTTP_200_OK)
 

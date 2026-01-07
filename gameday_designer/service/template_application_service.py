@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 
 from gamedays.models import Gameday, Team, Gameinfo, Gameresult
 from gameday_designer.models import ScheduleTemplate, TemplateSlot, TemplateApplication
+from gameday_designer.service.time_service import TimeService
 
 
 class ApplicationError(Exception):
@@ -199,83 +200,42 @@ class TemplateApplicationService:
             List of created Gameinfo objects
         """
         gameinfos = []
-        slots = self.template.slots.all().order_by('field', 'slot_order')
-
-        # Track last scheduled time per field
-        field_times: Dict[int, datetime.time] = {}
-
-        for slot in slots:
-            # Calculate scheduled time
-            scheduled = self._calculate_scheduled_time(slot, field_times)
-            field_times[slot.field] = scheduled
-
-            # Resolve official team
-            official_team = self._resolve_team_placeholder(
-                slot.official_group,
-                slot.official_team,
-                slot.official_reference
+        
+        # Process each field independently for time calculation
+        for field_num in range(1, self.template.num_fields + 1):
+            slots = list(self.template.slots.filter(field=field_num).order_by('slot_order'))
+            if not slots:
+                continue
+                
+            # Convert model objects to simple dicts for TimeService
+            slot_data = [{'break_after': s.break_after} for s in slots]
+            start_times = TimeService.calculate_game_times(
+                self.gameday.start,
+                self.template.game_duration,
+                slot_data
             )
+            
+            for slot, scheduled in zip(slots, start_times):
+                # Resolve official team
+                official_team = self._resolve_team_placeholder(
+                    slot.official_group,
+                    slot.official_team,
+                    slot.official_reference
+                )
 
-            # Create Gameinfo
-            gameinfo = Gameinfo.objects.create(
-                gameday=self.gameday,
-                scheduled=scheduled,
-                field=slot.field,
-                stage=slot.stage,
-                standing=slot.standing,
-                officials=official_team,
-                status='Geplant',
-            )
-
-            gameinfos.append(gameinfo)
+                # Create Gameinfo
+                gameinfo = Gameinfo.objects.create(
+                    gameday=self.gameday,
+                    scheduled=scheduled,
+                    field=slot.field,
+                    stage=slot.stage,
+                    standing=slot.standing,
+                    officials=official_team,
+                    status='Geplant',
+                )
+                gameinfos.append(gameinfo)
 
         return gameinfos
-
-    def _calculate_scheduled_time(
-        self,
-        slot: TemplateSlot,
-        field_times: Dict[int, datetime.time]
-    ) -> datetime.time:
-        """
-        Calculate scheduled time for a slot.
-
-        For the first slot on a field, use gameday start time.
-        For subsequent slots, add game_duration + break_after from previous slot.
-
-        Args:
-            slot: The TemplateSlot to schedule
-            field_times: Dictionary tracking last scheduled time per field
-
-        Returns:
-            Scheduled time as datetime.time
-        """
-        if slot.field not in field_times:
-            # First slot on this field - use gameday start time
-            return self.gameday.start
-
-        # Get previous slot's end time
-        prev_time = field_times[slot.field]
-
-        # Get previous slot to check break_after
-        prev_slots = self.template.slots.filter(
-            field=slot.field,
-            slot_order=slot.slot_order - 1
-        )
-
-        if prev_slots.exists():
-            prev_slot = prev_slots.first()
-            break_minutes = prev_slot.break_after
-        else:
-            break_minutes = 0
-
-        # Calculate new time: previous time + game duration + break
-        total_minutes = self.template.game_duration + break_minutes
-
-        # Convert time to datetime, add minutes, convert back to time
-        prev_datetime = datetime.datetime.combine(datetime.date.today(), prev_time)
-        new_datetime = prev_datetime + datetime.timedelta(minutes=total_minutes)
-
-        return new_datetime.time()
 
     def _resolve_team_placeholder(
         self,
@@ -356,7 +316,7 @@ class TemplateApplicationService:
                     gameinfo=gameinfo,
                     team=away_team,
                     isHome=False,
-                    fh=None,
+                    fh=None,  # To be filled in during game
                     sh=None,
                     pa=None,
                 )
