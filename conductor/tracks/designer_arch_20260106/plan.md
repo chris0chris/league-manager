@@ -9,7 +9,7 @@
 
 ## Phase 2: Logic Harmonization & Service Layer
 - [x] Task: Align frontend `timeCalculation.ts` with backend `TemplateApplicationService` logic. (5b6f960)
-- [ ] Task: Harmonize frontend `useFlowValidation` with backend `TemplateValidationService` rules.
+- [x] Task: Create `TemplateValidationService` in Python to mirror `useFlowValidation.ts`. (ec37d3a)
 - [ ] Task: Implement atomic bulk updates for edges to eliminate `useEffect` sync race conditions.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Logic Harmonization' (Protocol in workflow.md)
 
