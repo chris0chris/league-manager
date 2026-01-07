@@ -13,7 +13,7 @@
 - [x] Task: Implement atomic bulk updates for edges to eliminate `useEffect` sync race conditions. (fd7a45d)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Logic Harmonization' (Protocol in workflow.md) (eb8dd30)
 
-## Phase 3: Component Decoupling
+## Phase 3: Component Decoupling [checkpoint: 66c1659]
 - [x] Task: Refactor `ListDesignerApp.tsx` to move event handlers into a dedicated controller hook. (827ef6a)
 - [x] Task: Audit and optimize re-renders in `ListCanvas` and its child sections. (8835bdd)
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Component Decoupling' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Component Decoupling' (Protocol in workflow.md) (66c1659)
