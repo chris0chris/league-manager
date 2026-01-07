@@ -5,8 +5,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useTeamPoolState } from '../useTeamPoolState';
-import { GlobalTeam, GlobalTeamGroup, FlowNode } from '../../types/flowchart';
-import React from 'react';
+import { FlowNode, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
 
 describe('useTeamPoolState', () => {
   const setupHook = (

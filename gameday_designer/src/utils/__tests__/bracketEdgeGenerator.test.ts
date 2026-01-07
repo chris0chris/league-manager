@@ -43,6 +43,7 @@ describe('bracketEdgeGenerator', () => {
     it('should return empty array for null config', () => {
       const targetGames: GameNode[] = [];
       const sourceGames: GameNode[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = createPlacementEdges(targetGames, sourceGames, null as any);
       expect(result).toEqual([]);
     });
@@ -50,6 +51,7 @@ describe('bracketEdgeGenerator', () => {
     it('should return empty array for undefined config', () => {
       const targetGames: GameNode[] = [];
       const sourceGames: GameNode[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = createPlacementEdges(targetGames, sourceGames, undefined as any);
       expect(result).toEqual([]);
     });
@@ -492,6 +494,7 @@ describe('bracketEdgeGenerator', () => {
       const sourceGames: GameNode[] = [];
       const config: StageNodeData['progressionConfig'] = {
         mode: 'placement',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         positions: 99 as any, // Invalid positions
         format: 'single_elimination',
       };

@@ -4,7 +4,7 @@
  * Displays a collapsible field container with nested stage sections.
  */
 
-import React, { useState, useCallback, memo, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, memo, useMemo } from 'react';
 import { Card, Button } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import StageSection from './StageSection';
@@ -55,13 +55,8 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
   const [editedName, setEditedName] = useState(field.data.name);
   const [localExpanded, setLocalExpanded] = useState(true);
   
+  // Combine local state with prop (if prop is true, it overrides local state)
   const isExpanded = isExpandedProp || localExpanded;
-
-  useEffect(() => {
-    if (isExpandedProp) {
-      setLocalExpanded(true);
-    }
-  }, [isExpandedProp]);
 
   const sortedStages = useMemo(() => 
     [...stages].sort((a, b) => a.data.order - b.data.order),

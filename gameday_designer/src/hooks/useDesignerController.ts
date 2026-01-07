@@ -21,7 +21,7 @@ import {
   TOURNAMENT_GENERATION_STATE_DELAY,
   DEFAULT_TOURNAMENT_GROUP_NAME,
 } from '../utils/tournamentConstants';
-import type { GameNodeData, GlobalTeam } from '../types/flowchart';
+import type { GlobalTeam } from '../types/flowchart';
 import type { TournamentGenerationConfig } from '../types/tournament';
 
 export function useDesignerController() {
@@ -32,10 +32,8 @@ export function useDesignerController() {
     fields,
     globalTeams,
     globalTeamGroups,
-    selectedNode,
     addFieldNode,
     addStageNode,
-    addGameNodeInStage,
     addBulkTournament,
     updateNode,
     deleteNode,
@@ -48,13 +46,7 @@ export function useDesignerController() {
     deleteGlobalTeam,
     reorderGlobalTeam,
     addGlobalTeamGroup,
-    updateGlobalTeamGroup,
-    deleteGlobalTeamGroup,
-    reorderGlobalTeamGroup,
-    getTeamUsage,
     assignTeamToGame,
-    addGameToGameEdge,
-    removeGameToGameEdge,
     addBulkGameToGameEdges,
   } = flowState;
 

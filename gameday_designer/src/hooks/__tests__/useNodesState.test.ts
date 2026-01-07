@@ -8,10 +8,7 @@ import { useNodesState } from '../useNodesState';
 import {
   isFieldNode,
   isStageNode,
-  isGameNode,
-  FlowNode,
 } from '../../types/flowchart';
-import React from 'react';
 
 describe('useNodesState', () => {
   const setupHook = (initialNodes: FlowNode[] = []) => {

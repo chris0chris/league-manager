@@ -24,7 +24,7 @@ interface TeamOption {
 }
 
 // Custom Option component with colored dot for teams and stage headers
-const CustomOption = memo((props: any) => {
+const CustomOption = memo((props: { data: TeamOption; isDisabled?: boolean; children?: React.ReactNode; innerProps?: Record<string, unknown> }) => {
   const { data } = props;
 
   if (data.isStageHeader) {
@@ -74,7 +74,7 @@ const CustomOption = memo((props: any) => {
 });
 
 // Custom SingleValue component with colored dot for selected value
-const CustomSingleValue = memo((props: any) => {
+const CustomSingleValue = memo((props: { data: TeamOption; children?: React.ReactNode }) => {
   const { data } = props;
   return (
     <components.SingleValue {...props}>
@@ -369,7 +369,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
 
     Array.from(gamesByStage.entries()).forEach(([stageId, stageData]) => {
       const stageNode = allNodes.find(n => n.id === stageId);
-      options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as any)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
+      options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as import('../../types/flowchart').StageNodeData)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
       stageData.games.forEach((sourceGame) => {
         options.push({ value: `winner:${sourceGame.id}`, label: `⚡ Winner of ${sourceGame.data.standing}`, isTeam: false });
         options.push({ value: `loser:${sourceGame.id}`, label: `💔 Loser of ${sourceGame.data.standing}`, isTeam: false });
@@ -429,7 +429,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
 
     Array.from(gamesByStage.entries()).forEach(([stageId, stageData]) => {
       const stageNode = allNodes.find(n => n.id === stageId);
-      options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as any)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
+      options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as import('../../types/flowchart').StageNodeData)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
       stageData.games.forEach((sourceGame) => {
         options.push({ value: `winner:${sourceGame.id}`, label: `⚡ Winner of ${sourceGame.data.standing}`, isTeam: false });
         options.push({ value: `loser:${sourceGame.id}`, label: `💔 Loser of ${sourceGame.data.standing}`, isTeam: false });

@@ -4,7 +4,7 @@
  * Displays a collapsible stage container with game tables.
  */
 
-import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import { Card, Button, Form } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import GameTable from './GameTable';
@@ -50,13 +50,8 @@ const StageSection: React.FC<StageSectionProps> = memo(({
   const [editedName, setEditedName] = useState(stage.data.name);
   const [localExpanded, setLocalExpanded] = useState(true);
   
+  // Combine local state with prop
   const isExpanded = isExpandedProp || localExpanded;
-
-  useEffect(() => {
-    if (isExpandedProp) {
-      setLocalExpanded(true);
-    }
-  }, [isExpandedProp]);
 
   const games = useMemo(
     () =>

@@ -5,10 +5,7 @@ import type {
   FlowEdge,
   FlowField,
   FlowState,
-  TeamNodeData,
   GameNodeData,
-  FieldNodeData,
-  StageNodeData,
   FieldNode,
   StageNode,
   GameNode,
@@ -77,9 +74,10 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
   );
 
   // Sync nodes when standing names change (since dynamic references use match names)
+  const standignsDependency = nodes.map(n => isGameNode(n) ? n.data.standing : '').join(',');
   useEffect(() => {
     edgesManager.syncNodesWithEdges(nodes, edges);
-  }, [nodes.map(n => isGameNode(n) ? n.data.standing : '').join(','), edgesManager.syncNodesWithEdges]);
+  }, [standignsDependency, edgesManager, nodes, edges]);
 
   // --- Actions ---
 
@@ -125,7 +123,7 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
     setNodes(state.nodes);
     setEdges(state.edges);
     setFields(state.fields);
-    const migratedTeams = (state.globalTeams || []).map((team: any) => {
+    const migratedTeams = (state.globalTeams || []).map((team: GlobalTeam & { reference?: string }) => {
       if ('reference' in team && !('groupId' in team)) {
         return { id: team.id, label: team.label || 'Team', groupId: null, order: team.order };
       }
