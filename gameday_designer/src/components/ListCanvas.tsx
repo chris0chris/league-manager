@@ -93,7 +93,6 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
         map.get(stage.parentId)!.push(stage as StageNode);
       }
     });
-    // Sort stages within each field
     map.forEach(stages => stages.sort((a, b) => a.data.order - b.data.order));
     return map;
   }, [nodes]);
@@ -174,6 +173,7 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
                 <div className="text-center py-5">
                   <i className="bi bi-geo-alt" style={{ fontSize: '4rem', opacity: 0.3 }} />
                   <h3 className="mt-3">{t('ui:message.noFieldsYet')}</h3>
+                  <p className="text-muted mb-3">{t('ui:message.createFirstField')}</p>
                   <Button variant="outline-primary" onClick={onAddField}>
                     <i className="bi bi-plus-circle me-1" />
                     {t('ui:button.addField')}
