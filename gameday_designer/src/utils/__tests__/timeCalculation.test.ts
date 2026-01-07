@@ -13,13 +13,14 @@ import { describe, it, expect } from 'vitest';
 import { calculateGameTimes, addMinutesToTime, getStageEndTime } from '../timeCalculation';
 import { createStageNode, createFieldNode } from '../../types/flowchart';
 import type { GameNode } from '../../types/flowchart';
+import { DEFAULT_START_TIME, DEFAULT_GAME_DURATION } from '../tournamentConstants';
 
 // Helper to create a mock game node
 function createMockGameNode(
   id: string,
   parentId: string,
   standing: string,
-  duration: number = 50
+  duration: number = DEFAULT_GAME_DURATION
 ): GameNode {
   return {
     id,
@@ -46,7 +47,7 @@ function createMockGameNode(
 
 describe('timeCalculation - addMinutesToTime', () => {
   it('should add minutes to a time string', () => {
-    expect(addMinutesToTime('09:00', 50)).toBe('09:50');
+    expect(addMinutesToTime(DEFAULT_START_TIME, DEFAULT_GAME_DURATION)).toBe('11:10');
     expect(addMinutesToTime('09:30', 30)).toBe('10:00');
     expect(addMinutesToTime('23:30', 45)).toBe('00:15');
   });
@@ -75,17 +76,17 @@ describe('timeCalculation - getStageEndTime', () => {
       name: 'Test Stage',
       stageType: 'vorrunde',
       order: 0,
-      startTime: '09:00',
-      defaultGameDuration: 50,
+      startTime: DEFAULT_START_TIME,
+      defaultGameDuration: DEFAULT_GAME_DURATION,
     });
 
-    const game1 = createMockGameNode('game-1', stageId, 'Game 1', 50);
+    const game1 = createMockGameNode('game-1', stageId, 'Game 1', DEFAULT_GAME_DURATION);
     const games = [game1];
 
     const endTime = getStageEndTime(stage, games, 10);
 
-    // 09:00 + 50 minutes = 09:50 (break not added after last game)
-    expect(endTime).toBe('09:50');
+    // 10:00 + 70 minutes = 11:10 (break not added after last game)
+    expect(endTime).toBe('11:10');
   });
 
   it('should calculate end time for multiple sequential games', () => {
@@ -96,20 +97,20 @@ describe('timeCalculation - getStageEndTime', () => {
       name: 'Test Stage',
       stageType: 'vorrunde',
       order: 0,
-      startTime: '09:00',
-      defaultGameDuration: 50,
+      startTime: DEFAULT_START_TIME,
+      defaultGameDuration: DEFAULT_GAME_DURATION,
     });
 
     const games = [
-      createMockGameNode('game-1', stageId, 'Game 1', 50),
-      createMockGameNode('game-2', stageId, 'Game 2', 50),
-      createMockGameNode('game-3', stageId, 'Game 3', 50),
+      createMockGameNode('game-1', stageId, 'Game 1', DEFAULT_GAME_DURATION),
+      createMockGameNode('game-2', stageId, 'Game 2', DEFAULT_GAME_DURATION),
+      createMockGameNode('game-3', stageId, 'Game 3', DEFAULT_GAME_DURATION),
     ];
 
     const endTime = getStageEndTime(stage, games, 10);
 
-    // 09:00 + (50 + 10) + (50 + 10) + 50 = 09:00 + 170 = 11:50
-    expect(endTime).toBe('11:50');
+    // 10:00 + (70 + 10) + (70 + 10) + 70 = 10:00 + 230 = 13:50
+    expect(endTime).toBe('13:50');
   });
 
   it('should handle custom game durations', () => {
@@ -120,19 +121,19 @@ describe('timeCalculation - getStageEndTime', () => {
       name: 'Test Stage',
       stageType: 'vorrunde',
       order: 0,
-      startTime: '09:00',
-      defaultGameDuration: 50,
+      startTime: DEFAULT_START_TIME,
+      defaultGameDuration: DEFAULT_GAME_DURATION,
     });
 
     const games = [
       createMockGameNode('game-1', stageId, 'Game 1', 60), // Custom duration
-      createMockGameNode('game-2', stageId, 'Game 2', 50),
+      createMockGameNode('game-2', stageId, 'Game 2', DEFAULT_GAME_DURATION),
     ];
 
     const endTime = getStageEndTime(stage, games, 10);
 
-    // 09:00 + (60 + 10) + 50 = 09:00 + 120 = 11:00
-    expect(endTime).toBe('11:00');
+    // 10:00 + (60 + 10) + 70 = 10:00 + 140 = 12:20
+    expect(endTime).toBe('12:20');
   });
 });
 
@@ -147,27 +148,27 @@ describe('timeCalculation - calculateGameTimes', () => {
         name: 'Group Stage',
         stageType: 'vorrunde',
         order: 0,
-        startTime: '09:00',
-        defaultGameDuration: 50,
+        startTime: DEFAULT_START_TIME,
+        defaultGameDuration: DEFAULT_GAME_DURATION,
       });
 
       const games = [
-        createMockGameNode('game-1', stageId, 'Game 1', 50),
-        createMockGameNode('game-2', stageId, 'Game 2', 50),
-        createMockGameNode('game-3', stageId, 'Game 3', 50),
+        createMockGameNode('game-1', stageId, 'Game 1', DEFAULT_GAME_DURATION),
+        createMockGameNode('game-2', stageId, 'Game 2', DEFAULT_GAME_DURATION),
+        createMockGameNode('game-3', stageId, 'Game 3', DEFAULT_GAME_DURATION),
       ];
 
       const result = calculateGameTimes(
         [field],
         [stage],
         games,
-        50,  // game duration
+        DEFAULT_GAME_DURATION,  // game duration
         10   // break duration
       );
 
-      expect(result[0].data.startTime).toBe('09:00');
-      expect(result[1].data.startTime).toBe('10:00'); // 09:00 + 50 + 10
-      expect(result[2].data.startTime).toBe('11:00'); // 10:00 + 50 + 10
+      expect(result[0].data.startTime).toBe(DEFAULT_START_TIME);
+      expect(result[1].data.startTime).toBe('11:20'); // 10:00 + 70 + 10
+      expect(result[2].data.startTime).toBe('12:40'); // 11:20 + 70 + 10
     });
 
     it('should use game-specific duration when available', () => {
@@ -179,19 +180,19 @@ describe('timeCalculation - calculateGameTimes', () => {
         name: 'Group Stage',
         stageType: 'vorrunde',
         order: 0,
-        startTime: '09:00',
-        defaultGameDuration: 50,
+        startTime: DEFAULT_START_TIME,
+        defaultGameDuration: DEFAULT_GAME_DURATION,
       });
 
       const games = [
         createMockGameNode('game-1', stageId, 'Game 1', 60), // Custom 60 min
-        createMockGameNode('game-2', stageId, 'Game 2', 50),
+        createMockGameNode('game-2', stageId, 'Game 2', DEFAULT_GAME_DURATION),
       ];
 
-      const result = calculateGameTimes([field], [stage], games, 50, 10);
+      const result = calculateGameTimes([field], [stage], games, DEFAULT_GAME_DURATION, 10);
 
-      expect(result[0].data.startTime).toBe('09:00');
-      expect(result[1].data.startTime).toBe('10:10'); // 09:00 + 60 + 10
+      expect(result[0].data.startTime).toBe(DEFAULT_START_TIME);
+      expect(result[1].data.startTime).toBe('11:10'); // 10:00 + 60 + 10
     });
   });
 
@@ -212,40 +213,40 @@ describe('timeCalculation - calculateGameTimes', () => {
           name: 'Group Stage A',
           stageType: 'vorrunde',
           order: 0,
-          startTime: '09:00',
-          defaultGameDuration: 50,
+          startTime: DEFAULT_START_TIME,
+          defaultGameDuration: DEFAULT_GAME_DURATION,
         }),
         createStageNode(stage2Id, field2Id, {
           name: 'Group Stage B',
           stageType: 'vorrunde',
           order: 0, // Same order = parallel execution
-          startTime: '09:00',
-          defaultGameDuration: 50,
+          startTime: DEFAULT_START_TIME,
+          defaultGameDuration: DEFAULT_GAME_DURATION,
         }),
       ];
 
       const games = [
         // Field 1 games
-        createMockGameNode('game-1', stage1Id, 'Game 1', 50),
-        createMockGameNode('game-2', stage1Id, 'Game 2', 50),
-        createMockGameNode('game-3', stage1Id, 'Game 3', 50),
+        createMockGameNode('game-1', stage1Id, 'Game 1', DEFAULT_GAME_DURATION),
+        createMockGameNode('game-2', stage1Id, 'Game 2', DEFAULT_GAME_DURATION),
+        createMockGameNode('game-3', stage1Id, 'Game 3', DEFAULT_GAME_DURATION),
         // Field 2 games
-        createMockGameNode('game-4', stage2Id, 'Game 4', 50),
-        createMockGameNode('game-5', stage2Id, 'Game 5', 50),
-        createMockGameNode('game-6', stage2Id, 'Game 6', 50),
+        createMockGameNode('game-4', stage2Id, 'Game 4', DEFAULT_GAME_DURATION),
+        createMockGameNode('game-5', stage2Id, 'Game 5', DEFAULT_GAME_DURATION),
+        createMockGameNode('game-6', stage2Id, 'Game 6', DEFAULT_GAME_DURATION),
       ];
 
-      const result = calculateGameTimes(fields, stages, games, 50, 10);
+      const result = calculateGameTimes(fields, stages, games, DEFAULT_GAME_DURATION, 10);
 
       // Field 1 games
-      expect(result[0].data.startTime).toBe('09:00');
-      expect(result[1].data.startTime).toBe('10:00');
-      expect(result[2].data.startTime).toBe('11:00');
+      expect(result[0].data.startTime).toBe(DEFAULT_START_TIME);
+      expect(result[1].data.startTime).toBe('11:20');
+      expect(result[2].data.startTime).toBe('12:40');
 
       // Field 2 games (parallel start times)
-      expect(result[3].data.startTime).toBe('09:00');
-      expect(result[4].data.startTime).toBe('10:00');
-      expect(result[5].data.startTime).toBe('11:00');
+      expect(result[3].data.startTime).toBe(DEFAULT_START_TIME);
+      expect(result[4].data.startTime).toBe('11:20');
+      expect(result[5].data.startTime).toBe('12:40');
     });
 
     it('should handle subsequent stages starting after previous stage finishes', () => {
@@ -267,56 +268,56 @@ describe('timeCalculation - calculateGameTimes', () => {
           name: 'Group A',
           stageType: 'vorrunde',
           order: 0,
-          startTime: '09:00',
-          defaultGameDuration: 50,
+          startTime: DEFAULT_START_TIME,
+          defaultGameDuration: DEFAULT_GAME_DURATION,
         }),
         createStageNode(groupStage2Id, field2Id, {
           name: 'Group B',
           stageType: 'vorrunde',
           order: 0,
-          startTime: '09:00',
-          defaultGameDuration: 50,
+          startTime: DEFAULT_START_TIME,
+          defaultGameDuration: DEFAULT_GAME_DURATION,
         }),
         // Playoff stages (order 1, parallel, start after group stages)
         createStageNode(playoffStage1Id, field1Id, {
           name: 'Playoffs',
           stageType: 'finalrunde',
           order: 1,
-          defaultGameDuration: 50,
+          defaultGameDuration: DEFAULT_GAME_DURATION,
         }),
         createStageNode(playoffStage2Id, field2Id, {
           name: 'Playoffs',
           stageType: 'finalrunde',
           order: 1,
-          defaultGameDuration: 50,
+          defaultGameDuration: DEFAULT_GAME_DURATION,
         }),
       ];
 
       const games = [
         // Group stage games (3 games per field)
-        createMockGameNode('group-1', groupStage1Id, 'G1', 50),
-        createMockGameNode('group-2', groupStage1Id, 'G2', 50),
-        createMockGameNode('group-3', groupStage1Id, 'G3', 50),
-        createMockGameNode('group-4', groupStage2Id, 'G4', 50),
-        createMockGameNode('group-5', groupStage2Id, 'G5', 50),
-        createMockGameNode('group-6', groupStage2Id, 'G6', 50),
+        createMockGameNode('group-1', groupStage1Id, 'G1', DEFAULT_GAME_DURATION),
+        createMockGameNode('group-2', groupStage1Id, 'G2', DEFAULT_GAME_DURATION),
+        createMockGameNode('group-3', groupStage1Id, 'G3', DEFAULT_GAME_DURATION),
+        createMockGameNode('group-4', groupStage2Id, 'G4', DEFAULT_GAME_DURATION),
+        createMockGameNode('group-5', groupStage2Id, 'G5', DEFAULT_GAME_DURATION),
+        createMockGameNode('group-6', groupStage2Id, 'G6', DEFAULT_GAME_DURATION),
         // Playoff games (2 games per field)
-        createMockGameNode('playoff-1', playoffStage1Id, 'SF1', 50),
-        createMockGameNode('playoff-2', playoffStage1Id, 'Final', 50),
-        createMockGameNode('playoff-3', playoffStage2Id, 'SF2', 50),
-        createMockGameNode('playoff-4', playoffStage2Id, '3rd Place', 50),
+        createMockGameNode('playoff-1', playoffStage1Id, 'SF1', DEFAULT_GAME_DURATION),
+        createMockGameNode('playoff-2', playoffStage1Id, 'Final', DEFAULT_GAME_DURATION),
+        createMockGameNode('playoff-3', playoffStage2Id, 'SF2', DEFAULT_GAME_DURATION),
+        createMockGameNode('playoff-4', playoffStage2Id, '3rd Place', DEFAULT_GAME_DURATION),
       ];
 
-      const result = calculateGameTimes(fields, stages, games, 50, 10);
+      const result = calculateGameTimes(fields, stages, games, DEFAULT_GAME_DURATION, 10);
 
-      // Group stage ends at 11:50 (last game ends, no break after)
-      // Playoff stage starts at 12:00 (after 10 min break)
+      // Group stage ends at 13:50 (last game ends, no break after)
+      // Playoff stage starts at 14:00 (after 10 min break)
 
-      // Playoff games should start at 12:00
-      expect(result[6].data.startTime).toBe('12:00'); // SF1
-      expect(result[7].data.startTime).toBe('13:00'); // Final
-      expect(result[8].data.startTime).toBe('12:00'); // SF2 (parallel)
-      expect(result[9].data.startTime).toBe('13:00'); // 3rd Place (parallel)
+      // Playoff games should start at 14:00
+      expect(result[6].data.startTime).toBe('14:00'); // SF1
+      expect(result[7].data.startTime).toBe('15:20'); // Final
+      expect(result[8].data.startTime).toBe('14:00'); // SF2 (parallel)
+      expect(result[9].data.startTime).toBe('15:20'); // 3rd Place (parallel)
     });
   });
 
@@ -327,11 +328,11 @@ describe('timeCalculation - calculateGameTimes', () => {
         name: 'Empty Stage',
         stageType: 'vorrunde',
         order: 0,
-        startTime: '09:00',
-        defaultGameDuration: 50,
+        startTime: DEFAULT_START_TIME,
+        defaultGameDuration: DEFAULT_GAME_DURATION,
       });
 
-      const result = calculateGameTimes([field], [stage], [], 50, 10);
+      const result = calculateGameTimes([field], [stage], [], DEFAULT_GAME_DURATION, 10);
 
       expect(result).toEqual([]);
     });
@@ -345,18 +346,18 @@ describe('timeCalculation - calculateGameTimes', () => {
         name: 'Group Stage',
         stageType: 'vorrunde',
         order: 0,
-        // No explicit startTime - should use default '09:00'
-        defaultGameDuration: 50,
+        // No explicit startTime - should use default '10:00'
+        defaultGameDuration: DEFAULT_GAME_DURATION,
       });
 
       const games = [
-        createMockGameNode('game-1', stageId, 'Game 1', 50),
+        createMockGameNode('game-1', stageId, 'Game 1', DEFAULT_GAME_DURATION),
       ];
 
-      const result = calculateGameTimes([field], [stage], games, 50, 10);
+      const result = calculateGameTimes([field], [stage], games, DEFAULT_GAME_DURATION, 10);
 
-      // Should default to 09:00 if no startTime specified
-      expect(result[0].data.startTime).toBe('09:00');
+      // Should default to 10:00 if no startTime specified
+      expect(result[0].data.startTime).toBe(DEFAULT_START_TIME);
     });
 
     it('should not override manually set times', () => {
@@ -368,28 +369,28 @@ describe('timeCalculation - calculateGameTimes', () => {
         name: 'Group Stage',
         stageType: 'vorrunde',
         order: 0,
-        startTime: '09:00',
-        defaultGameDuration: 50,
+        startTime: DEFAULT_START_TIME,
+        defaultGameDuration: DEFAULT_GAME_DURATION,
       });
 
       const games = [
-        createMockGameNode('game-1', stageId, 'Game 1', 50),
+        createMockGameNode('game-1', stageId, 'Game 1', DEFAULT_GAME_DURATION),
         {
-          ...createMockGameNode('game-2', stageId, 'Game 2', 50),
+          ...createMockGameNode('game-2', stageId, 'Game 2', DEFAULT_GAME_DURATION),
           data: {
-            ...createMockGameNode('game-2', stageId, 'Game 2', 50).data,
+            ...createMockGameNode('game-2', stageId, 'Game 2', DEFAULT_GAME_DURATION).data,
             startTime: '15:00',
             manualTime: true, // Manually set time
           },
         },
-        createMockGameNode('game-3', stageId, 'Game 3', 50),
+        createMockGameNode('game-3', stageId, 'Game 3', DEFAULT_GAME_DURATION),
       ];
 
-      const result = calculateGameTimes([field], [stage], games, 50, 10);
+      const result = calculateGameTimes([field], [stage], games, DEFAULT_GAME_DURATION, 10);
 
-      expect(result[0].data.startTime).toBe('09:00');
+      expect(result[0].data.startTime).toBe(DEFAULT_START_TIME);
       expect(result[1].data.startTime).toBe('15:00'); // Should preserve manual time
-      expect(result[2].data.startTime).toBe('16:00'); // Should continue from manual time
+      expect(result[2].data.startTime).toBe('16:20'); // Should continue from manual time
     });
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import type { StageNode, GameNode, FieldNode } from '../types/flowchart';
+import { DEFAULT_START_TIME, DEFAULT_GAME_DURATION } from './tournamentConstants';
 
 /**
  * Parse a time string (HH:MM) into minutes since midnight.
@@ -87,7 +88,7 @@ export function calculateGameStartTime(
   }
 
   let currentTime = stageStartTime;
-  const defaultDuration = stage.data.defaultGameDuration ?? 50;
+  const defaultDuration = stage.data.defaultGameDuration ?? DEFAULT_GAME_DURATION;
 
   for (let i = 0; i < gameIndex; i++) {
     const game = games[i];
@@ -147,11 +148,11 @@ export function getStageEndTime(
   breakDuration: number
 ): string {
   if (gamesInStage.length === 0) {
-    return stage.data.startTime || '09:00';
+    return stage.data.startTime || DEFAULT_START_TIME;
   }
 
-  const startTime = stage.data.startTime || '09:00';
-  const defaultDuration = stage.data.defaultGameDuration || 50;
+  const startTime = stage.data.startTime || DEFAULT_START_TIME;
+  const defaultDuration = stage.data.defaultGameDuration || DEFAULT_GAME_DURATION;
 
   let currentTime = startTime;
 
@@ -201,12 +202,12 @@ export function calculateGameTimes(
     let orderStartTime: string;
 
     if (order === 0) {
-      orderStartTime = parallelStages[0]?.data.startTime || '09:00';
+      orderStartTime = parallelStages[0]?.data.startTime || DEFAULT_START_TIME;
     } else {
       if (previousOrderEndTime) {
         orderStartTime = addMinutesToTime(previousOrderEndTime, breakDuration);
       } else {
-        orderStartTime = parallelStages[0]?.data.startTime || '09:00';
+        orderStartTime = parallelStages[0]?.data.startTime || DEFAULT_START_TIME;
       }
     }
 

@@ -193,3 +193,17 @@ export const TEAM_COLORS = [
   '#27ae60', // Dark Green
   '#8e44ad', // Dark Purple
 ] as const;
+
+// ============================================================================
+// Default Gameday Settings
+// ============================================================================
+
+/**
+ * Default start time for first game (10:00)
+ */
+export const DEFAULT_START_TIME = '10:00';
+
+/**
+ * Default game duration in minutes (70)
+ */
+export const DEFAULT_GAME_DURATION = 70;

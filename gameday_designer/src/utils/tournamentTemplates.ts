@@ -6,6 +6,7 @@
  */
 
 import { TournamentTemplate } from '../types/tournament';
+import { DEFAULT_START_TIME, DEFAULT_GAME_DURATION } from './tournamentConstants';
 
 /**
  * F6-2-2 Format: 6 Teams - 2 Groups of 3
@@ -37,8 +38,8 @@ export const TEMPLATE_F6_2_2: TournamentTemplate = {
     },
   ],
   timing: {
-    firstGameStartTime: '09:00',
-    defaultGameDuration: 50,
+    firstGameStartTime: DEFAULT_START_TIME,
+    defaultGameDuration: DEFAULT_GAME_DURATION,
     defaultBreakBetweenGames: 10,
   },
 };
@@ -80,8 +81,8 @@ export const TEMPLATE_F8_2_3: TournamentTemplate = {
     },
   ],
   timing: {
-    firstGameStartTime: '09:00',
-    defaultGameDuration: 50,
+    firstGameStartTime: DEFAULT_START_TIME,
+    defaultGameDuration: DEFAULT_GAME_DURATION,
     defaultBreakBetweenGames: 10,
   },
 };

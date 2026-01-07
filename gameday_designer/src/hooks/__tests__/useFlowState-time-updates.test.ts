@@ -43,26 +43,26 @@ describe('useFlowState - Time Calculation and Updates', () => {
         result.current.updateNode(stageId, { startTime: '10:00' });
       });
 
-      // Add three games with default duration (50 minutes) and breaks
+      // Add three games with default duration (70 minutes) and breaks
       // Set their times manually first
       act(() => {
         game1Id = result.current.addGameNodeInStage(stageId, {
           standing: '1',
-          duration: 50,
+          duration: 70,
           breakAfter: 10,
           startTime: '10:00',
         }).id;
         game2Id = result.current.addGameNodeInStage(stageId, {
           standing: '2',
-          duration: 50,
+          duration: 70,
           breakAfter: 10,
-          startTime: '11:00',
+          startTime: '11:20',
         }).id;
         game3Id = result.current.addGameNodeInStage(stageId, {
           standing: '3',
-          duration: 50,
+          duration: 70,
           breakAfter: 0,
-          startTime: '12:00',
+          startTime: '12:40',
         }).id;
       });
 
@@ -78,8 +78,8 @@ describe('useFlowState - Time Calculation and Updates', () => {
       );
 
       expect(game1Before?.data.startTime).toBe('10:00');
-      expect(game2Before?.data.startTime).toBe('11:00');
-      expect(game3Before?.data.startTime).toBe('12:00');
+      expect(game2Before?.data.startTime).toBe('11:20');
+      expect(game3Before?.data.startTime).toBe('12:40');
 
       // Change game 1 duration to 30 minutes
       act(() => {
@@ -100,7 +100,7 @@ describe('useFlowState - Time Calculation and Updates', () => {
       expect(game1After?.data.startTime).toBe('10:00'); // unchanged
       expect(game1After?.data.duration).toBe(30);
       expect(game2After?.data.startTime).toBe('10:40'); // 10:00 + 30 + 10
-      expect(game3After?.data.startTime).toBe('11:40'); // 10:40 + 50 + 10
+      expect(game3After?.data.startTime).toBe('12:00'); // 10:40 + 70 + 10
     });
 
     it('should recalculate subsequent game times when break changes', () => {
@@ -130,15 +130,15 @@ describe('useFlowState - Time Calculation and Updates', () => {
       act(() => {
         game1Id = result.current.addGameNodeInStage(stageId, {
           standing: '1',
-          duration: 50,
+          duration: 70,
           breakAfter: 10,
           startTime: '14:00',
         }).id;
         game2Id = result.current.addGameNodeInStage(stageId, {
           standing: '2',
-          duration: 50,
+          duration: 70,
           breakAfter: 0,
-          startTime: '15:00',
+          startTime: '15:20',
         }).id;
       });
 
@@ -152,7 +152,7 @@ describe('useFlowState - Time Calculation and Updates', () => {
         (n) => n.id === game2Id && isGameNode(n)
       );
 
-      expect(game2After?.data.startTime).toBe('15:10'); // 14:00 + 50 + 20
+      expect(game2After?.data.startTime).toBe('15:30'); // 14:00 + 70 + 20
     });
 
     it('should preserve manual time overrides during recalculation', () => {
@@ -182,15 +182,15 @@ describe('useFlowState - Time Calculation and Updates', () => {
       act(() => {
         game1Id = result.current.addGameNodeInStage(stageId, {
           standing: '1',
-          duration: 50,
+          duration: 70,
           breakAfter: 10,
           startTime: '10:00',
         }).id;
         game2Id = result.current.addGameNodeInStage(stageId, {
           standing: '2',
-          duration: 50,
+          duration: 70,
           breakAfter: 10,
-          startTime: '11:00',
+          startTime: '11:20',
         }).id;
       });
 
@@ -306,14 +306,14 @@ describe('useFlowState - Time Calculation and Updates', () => {
 
       // Set stage start time
       act(() => {
-        result.current.updateNode(stageId, { startTime: '09:00' });
+        result.current.updateNode(stageId, { startTime: '10:00' });
       });
 
       // Verify stage has start time
       const stage = result.current.nodes.find(
         (n) => n.id === stageId && isStageNode(n)
       );
-      expect(stage?.data.startTime).toBe('09:00');
+      expect(stage?.data.startTime).toBe('10:00');
     });
 
     it('should preserve games without startTime when stage has no startTime', () => {
