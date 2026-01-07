@@ -15,5 +15,5 @@
 
 ## Phase 3: Component Decoupling
 - [x] Task: Refactor `ListDesignerApp.tsx` to move event handlers into a dedicated controller hook. (827ef6a)
-- [ ] Task: Audit and optimize re-renders in `ListCanvas` and its child sections.
+- [x] Task: Audit and optimize re-renders in `ListCanvas` and its child sections. (8835bdd)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Component Decoupling' (Protocol in workflow.md)
