@@ -73,12 +73,6 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
     setNodes
   );
 
-  // Sync nodes when standing names change (since dynamic references use match names)
-  const standignsDependency = nodes.map(n => isGameNode(n) ? n.data.standing : '').join(',');
-  useEffect(() => {
-    edgesManager.syncNodesWithEdges(nodes, edges);
-  }, [standignsDependency, edgesManager, nodes, edges]);
-
   // --- Actions ---
 
   const onNodesChange = useCallback(() => {}, []);
