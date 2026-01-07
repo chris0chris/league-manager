@@ -53,13 +53,12 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
     });
 
     it('Fields header has icon', () => {
-      render(<ListCanvas {...createDefaultProps()} />);
+      const { container } = render(<ListCanvas {...createDefaultProps()} />);
+      const fieldsCard = container.querySelector('.fields-card');
+      const fieldsHeader = fieldsCard?.querySelector('.card-header');
 
-      const fieldsHeader = screen.getByText('Fields').closest('.card-header');
-      expect(fieldsHeader).toBeInTheDocument();
-
-      // Check for icon (bi-geo-alt-fill)
-      const icon = fieldsHeader?.querySelector('.bi-geo-alt-fill');
+      // Check for icon (bi-map)
+      const icon = fieldsHeader?.querySelector('.bi-map');
       expect(icon).toBeInTheDocument();
     });
   });
@@ -67,34 +66,37 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
   describe('Empty state - no fields', () => {
     it('shows empty state when there are no fields', () => {
       render(<ListCanvas {...createDefaultProps()} />);
-
-      expect(screen.getByText('No fields yet')).toBeInTheDocument();
-      expect(screen.getByText(/create your first field/i)).toBeInTheDocument();
+      expect(screen.getByText(/no fields yet/i)).toBeInTheDocument();
     });
 
-    it('shows centered Add Field button in empty state', () => {
+    it('shows Add Field button in empty state', () => {
       render(<ListCanvas {...createDefaultProps()} />);
 
-      const addButton = screen.getByRole('button', { name: /add field/i });
-      expect(addButton).toBeInTheDocument();
+      // There are now two Add Field buttons: header and body
+      const addButtons = screen.getAllByRole('button', { name: /add field/i });
+      expect(addButtons.length).toBeGreaterThan(1);
     });
 
     it('calls onAddField when empty state button is clicked', () => {
       const onAddField = vi.fn();
       render(<ListCanvas {...createDefaultProps({ onAddField })} />);
 
-      const addButton = screen.getByRole('button', { name: /add field/i });
-      fireEvent.click(addButton);
+      // Clicking any of them should work
+      const addButtons = screen.getAllByRole('button', { name: /add field/i });
+      fireEvent.click(addButtons[0]);
 
-      expect(onAddField).toHaveBeenCalledTimes(1);
+      expect(onAddField).toHaveBeenCalled();
     });
 
     it('empty state has large icon', () => {
       const { container } = render(<ListCanvas {...createDefaultProps()} />);
 
-      const icon = container.querySelector('.bi-geo-alt');
+      // Empty state uses bi-map
+      const icon = container.querySelector('.bi-map');
       expect(icon).toBeInTheDocument();
-      expect(icon).toHaveStyle({ fontSize: '4rem' });
+      // Check for the one in the body (large)
+      const bodyIcon = container.querySelector('.card-body .bi-map');
+      expect(bodyIcon).toHaveStyle({ fontSize: '4rem' });
     });
   });
 

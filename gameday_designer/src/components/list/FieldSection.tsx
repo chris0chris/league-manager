@@ -154,13 +154,13 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
             <strong className="me-2">{field.data.name}</strong>
             <Button
               size="sm"
-              variant="outline-secondary"
+              variant="link"
               onClick={handleStartEdit}
               aria-label={t('ui:tooltip.editFieldName')}
-              className="me-auto btn-adaptive"
+              className="p-0 me-auto"
               style={{ fontSize: '0.875rem' }}
             >
-              <i className={`bi ${ICONS.EDIT}`}></i>
+              <i className="bi bi-pencil"></i>
             </Button>
           </>
         )}

@@ -6,8 +6,8 @@
 export const ICONS = {
   // Main Entities
   GAMEDAY: 'bi-calendar2-range',
-  FIELD: 'bi-geo-alt-fill',
-  STAGE: 'bi-diagram-3-fill',
+  FIELD: 'bi-map',
+  STAGE: 'bi-layers',
   GAME: 'bi-pennant-fill',
   TEAM: 'bi-people-fill',
   OFFICIAL: 'bi-person-badge-fill',
