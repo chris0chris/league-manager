@@ -12,15 +12,15 @@ Refine the foundation for global UI elements, including toasts, icons, and share
   - Add CSS classes to `ListDesignerApp.css` or a shared utility file to handle responsive label visibility (e.g., hiding `.btn-label` on small containers).
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Global UI & Asset Refinement' (Protocol in workflow.md)
 
-## Phase 2: Field & Stage Component Polish
+## Phase 2: Field & Stage Component Polish [checkpoint: cd3880c]
 Update the hierarchical containers to follow the new action button logic and styling.
 
-- [ ] **Task: Refactor FieldSection Buttons**
+- [x] **Task: Refactor FieldSection Buttons** (756ee09)
   - Ensure "Add Stage" in header is always visible.
   - Remove "Add Stage" button from the bottom of `FieldSection`.
   - Replace grey pencil link with `outline-secondary` Button.
   - Write Vitest tests to verify button presence in both empty and populated states.
-- [ ] **Task: Refactor StageSection Buttons**
+- [x] **Task: Refactor StageSection Buttons** (d1bac1f)
   - Ensure "Add Game" in header is always visible.
   - Remove "Add Game" button from the bottom of `StageSection`.
   - Replace grey pencil link with `outline-secondary` Button.
