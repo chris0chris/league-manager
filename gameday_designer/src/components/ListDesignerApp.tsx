@@ -13,6 +13,7 @@ import { Container, Row, Col, Button, OverlayTrigger, Popover, ListGroup } from 
 import ListCanvas from './ListCanvas';
 import FlowToolbar from './FlowToolbar';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
+import NotificationToast from './NotificationToast';
 import { useDesignerController } from '../hooks/useDesignerController';
 
 import './ListDesignerApp.css';
@@ -29,6 +30,7 @@ const ListDesignerApp: React.FC = () => {
     globalTeamGroups,
     selectedNode,
     validation,
+    notifications,
     ui,
     handlers,
     updateGlobalTeamGroup,
@@ -67,6 +69,7 @@ const ListDesignerApp: React.FC = () => {
     handleAssignTeam,
     handleGenerateTournament,
     setShowTournamentModal,
+    dismissNotification,
   } = handlers;
 
   return (
@@ -110,7 +113,7 @@ const ListDesignerApp: React.FC = () => {
               <>
                 {validation.errors.length > 0 && (
                   <OverlayTrigger
-                    placement="top"
+                    placement="bottom"
                     overlay={
                       <Popover id="errors-popover">
                         <Popover.Header as="h3">
@@ -136,7 +139,7 @@ const ListDesignerApp: React.FC = () => {
                 )}
                 {validation.warnings.length > 0 && (
                   <OverlayTrigger
-                    placement="top"
+                    placement="bottom"
                     overlay={
                       <Popover id="warnings-popover">
                         <Popover.Header as="h3">
@@ -211,6 +214,12 @@ const ListDesignerApp: React.FC = () => {
         onHide={() => setShowTournamentModal(false)}
         teams={globalTeams}
         onGenerate={handleGenerateTournament}
+      />
+
+      {/* Global Notifications */}
+      <NotificationToast 
+        notifications={notifications} 
+        onClose={dismissNotification} 
       />
     </Container>
   );

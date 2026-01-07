@@ -137,7 +137,9 @@ describe('useDesignerController', () => {
         result.current.handlers.handleImport({});
       });
       
-      expect(mockAlert).toHaveBeenCalledWith(expect.stringContaining('Invalid JSON format'));
+      expect(result.current.notifications).toHaveLength(1);
+      expect(result.current.notifications[0].type).toBe('danger');
+      expect(result.current.notifications[0].message).toContain('Invalid JSON format');
     });
 
     it('handles failed import processing', () => {
@@ -151,7 +153,9 @@ describe('useDesignerController', () => {
         result.current.handlers.handleImport({});
       });
       
-      expect(mockAlert).toHaveBeenCalledWith(expect.stringContaining('Import failed'));
+      expect(result.current.notifications).toHaveLength(1);
+      expect(result.current.notifications[0].type).toBe('danger');
+      expect(result.current.notifications[0].message).toContain('Import failed');
     });
   });
 
