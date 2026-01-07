@@ -14,6 +14,6 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Logic Harmonization' (Protocol in workflow.md) (eb8dd30)
 
 ## Phase 3: Component Decoupling
-- [ ] Task: Refactor `ListDesignerApp.tsx` to move event handlers into a dedicated controller hook.
+- [x] Task: Refactor `ListDesignerApp.tsx` to move event handlers into a dedicated controller hook. (827ef6a)
 - [ ] Task: Audit and optimize re-renders in `ListCanvas` and its child sections.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Component Decoupling' (Protocol in workflow.md)
