@@ -34,3 +34,33 @@
   flex-shrink: 0;
   background-color: #f8f9fa;
 }
+
+/**
+ * Adaptive Button Labels
+ * Hides the text label on small screens or in compact contexts.
+ */
+.btn-label-adaptive {
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .btn-label-adaptive {
+    display: none;
+  }
+  
+  .btn-adaptive i {
+    margin-right: 0 !important;
+  }
+}
+
+/**
+ * Force compact mode for buttons inside narrow containers (like grid columns)
+ */
+.compact-actions .btn-label-adaptive {
+  display: none;
+}
+
+.compact-actions .btn-adaptive i {
+  margin-right: 0 !important;
+}
+
