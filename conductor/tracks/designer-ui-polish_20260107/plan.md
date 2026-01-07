@@ -27,14 +27,14 @@ Update the hierarchical containers to follow the new action button logic and sty
   - Write Vitest tests for Stage-level button logic.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Field & Stage Component Polish' (Protocol in workflow.md)
 
-## Phase 3: Game & Team Component Polish
+## Phase 3: Game & Team Component Polish [checkpoint: 11607fe]
 Standardize the interactive elements within game tables and team management cards.
 
-- [ ] **Task: Polish GameTable Actions**
+- [x] **Task: Polish GameTable Actions** (37dd337)
   - Update edit/delete buttons in `GameTable` to use the standard visible style.
   - Apply the refreshed icon set to game actions.
   - Ensure consistent visibility for row actions.
-- [ ] **Task: Polish Team Management UI**
+- [x] **Task: Polish Team Management UI** (f19896f)
   - Update `TeamGroupCard` and `GlobalTeamTable` buttons.
   - Ensure the "+ Team" button is permanently visible in group headers.
   - Standardize edit/reorder buttons to match the new UI patterns.
