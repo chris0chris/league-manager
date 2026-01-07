@@ -10,6 +10,7 @@ import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import GameTable from './GameTable';
 import type { StageNode, FlowNode, FlowEdge, GameNode, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
 import { isGameNode } from '../../types/flowchart';
+import { ICONS } from '../../utils/iconConstants';
 import './StageSection.css';
 
 export interface StageSectionProps {
@@ -132,7 +133,7 @@ const StageSection: React.FC<StageSectionProps> = memo(({
           borderLeft: `3px solid ${stage.data.color || '#0d6efd'}`,
         }}
       >
-        <i className={`bi bi-chevron-${isExpanded ? 'down' : 'right'} me-2`}></i>
+        <i className={`bi ${isExpanded ? ICONS.EXPANDED : ICONS.COLLAPSED} me-2`}></i>
 
         <div className="d-flex align-items-center gap-2 me-2">
           <Form.Label className="mb-0 text-muted small">{t('ui:label.start')}:</Form.Label>
@@ -161,18 +162,29 @@ const StageSection: React.FC<StageSectionProps> = memo(({
         ) : (
           <>
             <strong className="me-2">{stage.data.name}</strong>
-            <Button size="sm" variant="link" onClick={handleStartEdit} aria-label={t('ui:tooltip.editStageName')} className="p-0 me-auto" style={{ fontSize: '0.875rem' }}>
-              <i className="bi bi-pencil"></i>
+            <Button 
+              size="sm" 
+              variant="outline-secondary" 
+              onClick={handleStartEdit} 
+              aria-label={t('ui:tooltip.editStageName')} 
+              className="me-auto btn-adaptive" 
+              style={{ fontSize: '0.875rem' }}
+            >
+              <i className={`bi ${ICONS.EDIT}`}></i>
             </Button>
           </>
         )}
 
-        {games.length > 0 && (
-          <Button size="sm" variant="outline-primary" onClick={handleAddGame} aria-label={t('ui:button.addGame')} className="me-2">
-            <i className="bi bi-plus-circle me-1"></i>
-            {t('ui:button.addGame')}
-          </Button>
-        )}
+        <Button 
+          size="sm" 
+          variant="outline-primary" 
+          onClick={handleAddGame} 
+          aria-label={t('ui:button.addGame')} 
+          className="me-2 btn-adaptive"
+        >
+          <i className={`bi ${ICONS.ADD} me-1`}></i>
+          <span className="btn-label-adaptive">{t('ui:button.addGame')}</span>
+        </Button>
 
         <input
           type="color"
@@ -184,8 +196,14 @@ const StageSection: React.FC<StageSectionProps> = memo(({
           style={{ width: '28px', height: '28px', border: 'none', borderRadius: '50%', cursor: 'pointer' }}
         />
 
-        <Button variant="outline-danger" size="sm" onClick={handleDelete} aria-label={t('ui:tooltip.deleteStage')}>
-          <i className="bi bi-trash"></i>
+        <Button 
+          variant="outline-danger" 
+          size="sm" 
+          onClick={handleDelete} 
+          aria-label={t('ui:tooltip.deleteStage')}
+          className="btn-adaptive"
+        >
+          <i className={`bi ${ICONS.DELETE}`}></i>
         </Button>
       </Card.Header>
 
@@ -195,10 +213,10 @@ const StageSection: React.FC<StageSectionProps> = memo(({
             <h6 className="text-uppercase text-muted mb-2">{t('domain:games')}</h6>
             {games.length === 0 ? (
               <div className="text-center py-3">
-                <i className="bi bi-trophy me-2"></i>
+                <i className={`bi ${ICONS.GAME} me-2`} style={{ fontSize: '2rem', opacity: 0.3 }}></i>
                 <p className="text-muted mb-3">{t('ui:message.noGamesInStage')}</p>
                 <Button variant="outline-primary" onClick={handleAddGame} aria-label={t('ui:button.addGame')}>
-                  <i className="bi bi-plus-circle me-1"></i>
+                  <i className={`bi ${ICONS.ADD} me-1`}></i>
                   {t('ui:button.addGame')}
                 </Button>
               </div>
@@ -218,10 +236,6 @@ const StageSection: React.FC<StageSectionProps> = memo(({
                   onAddGameToGameEdge={onAddGameToGameEdge}
                   onRemoveGameToGameEdge={onRemoveGameToGameEdge}
                 />
-                <Button variant="outline-secondary" size="sm" className="w-100 mt-2" onClick={handleAddGame} aria-label={t('ui:button.addGame')}>
-                  <i className="bi bi-plus-circle me-1"></i>
-                  {t('ui:button.addGame')}
-                </Button>
               </>
             )}
           </div>

@@ -232,8 +232,8 @@ describe('StageSection', () => {
     expect(screen.getByText('Game 1')).toBeInTheDocument();
   });
 
-  describe('Inline Add Game button pattern', () => {
-    it('Add Game button is in body below table, NOT in header', () => {
+  describe('Add Game button pattern', () => {
+    it('Add Game button is in the header', () => {
       const { container } = render(
         <StageSection
           {...createDefaultProps({
@@ -243,14 +243,11 @@ describe('StageSection', () => {
         />
       );
 
-      const body = container.querySelector('.stage-section__body');
+      const header = container.querySelector('.stage-section__header');
 
-      // Body should contain Add Game button below the table
-      const addButtonInBody = body?.querySelector('button[aria-label*="Add Game"]');
-      expect(addButtonInBody).toBeInTheDocument();
-
-      // Note: There's also an Add Game button in header when games exist
-      // This test now accepts both buttons exist
+      // Header should contain Add Game button
+      const addButtonInHeader = header?.querySelector('button[aria-label*="Add Game"]');
+      expect(addButtonInHeader).toBeInTheDocument();
     });
 
     it('calls onAddGame when Add Game button is clicked', () => {
@@ -266,13 +263,14 @@ describe('StageSection', () => {
         />
       );
 
-      const addButton = screen.getByRole('button', { name: /add game/i });
-      fireEvent.click(addButton);
+      // Get header Add Game button
+      const addButtons = screen.getAllByRole('button', { name: /add game/i });
+      fireEvent.click(addButtons[0]);
 
       expect(mockOnAddGame).toHaveBeenCalledWith('stage-1');
     });
 
-    it('Add Game button appears at bottom when games exist', () => {
+    it('No Add Game button appears at bottom when games exist', () => {
       render(
         <StageSection
           {...createDefaultProps({
@@ -282,35 +280,15 @@ describe('StageSection', () => {
         />
       );
 
-      // Should find Add Game buttons (there are TWO: one in header, one in body)
+      // Should only find one Add Game button (in header)
       const addButtons = screen.getAllByRole('button', { name: /add game/i });
-      expect(addButtons.length).toBeGreaterThan(0);
-
-      // Find the one in the body (full width, outline-secondary)
-      const bodyButton = addButtons.find(btn => btn.classList.contains('w-100'));
-      expect(bodyButton).toBeDefined();
-      expect(bodyButton).toHaveClass('btn-sm');
-      expect(bodyButton).toHaveClass('btn-outline-secondary');
+      expect(addButtons).toHaveLength(1);
+      
+      // Verify it's in the header
+      expect(addButtons[0].closest('.stage-section__header')).not.toBeNull();
     });
 
-    it('Add Game button is full width below table', () => {
-      render(
-        <StageSection
-          {...createDefaultProps({
-            stage: sampleStage,
-            allNodes: [sampleStage, sampleGame],
-          })}
-        />
-      );
-
-      // There are TWO Add Game buttons - find the one with full width (in body)
-      const addButtons = screen.getAllByRole('button', { name: /add game/i });
-      const bodyButton = addButtons.find(btn => btn.classList.contains('w-100'));
-      expect(bodyButton).toBeDefined();
-      expect(bodyButton).toHaveClass('w-100');
-    });
-
-    it('shows inline Add Game button in empty state', () => {
+    it('shows inline Add Game button in empty state (big button)', () => {
       render(
         <StageSection
           {...createDefaultProps({
@@ -323,9 +301,12 @@ describe('StageSection', () => {
       // Should show empty state text
       expect(screen.getByText(/no games/i)).toBeInTheDocument();
 
-      // Should show Add Game button
-      const addButton = screen.getByRole('button', { name: /add game/i });
-      expect(addButton).toBeInTheDocument();
+      // Should show big Add Game button in body (there are two buttons now, header and body)
+      const addButtons = screen.getAllByRole('button', { name: /add game/i });
+      expect(addButtons.length).toBeGreaterThan(1);
+      
+      const bodyButton = addButtons.find(btn => btn.closest('.stage-section__body'));
+      expect(bodyButton).toBeDefined();
     });
   });
 });
