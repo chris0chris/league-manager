@@ -187,7 +187,7 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
                   </Button>
                 </div>
               ) : (
-                <div className="fields-grid">
+                <div className="fields-grid compact-actions">
                   {fields.map((field) => (
                     <FieldSection
                       key={field.id}

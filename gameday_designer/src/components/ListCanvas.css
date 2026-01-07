@@ -157,19 +157,16 @@
  */
 .fields-grid {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-}
-
-/* Responsive breakpoints for field grid */
-@media (max-width: 1024px) {
-  .fields-grid {
-    grid-template-columns: 1fr;
-  }
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
 }
 
 /* Responsive: Stack columns on small screens */
 @media (max-width: 767px) {
+  .fields-grid {
+    grid-template-columns: 1fr;
+  }
+  
   .list-canvas__content {
     flex-direction: column;
   }
@@ -180,3 +177,4 @@
     max-height: 50vh; /* Limit height when stacked */
   }
 }
+
