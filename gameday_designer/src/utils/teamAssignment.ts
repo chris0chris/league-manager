@@ -12,6 +12,7 @@ import type { TournamentStructure } from './tournamentGenerator';
 import type { EdgeSpec } from './bracketEdgeGenerator';
 import { createPlacementEdges } from './bracketEdgeGenerator';
 import { TEAM_COLORS } from './tournamentConstants';
+import { getRoundRobinPairings } from './roundRobinLogic';
 
 /**
  * Team data for generation
@@ -173,31 +174,30 @@ export function assignTeamsToTournamentGames(
           stageTeams = teams;
         }
 
-        // Assign teams to games using round robin pattern
-        // For each game, assign sequential team pairs
-        let teamIndex = 0;
-        stageGames.forEach((game) => {
-          if (teamIndex < stageTeams.length - 1) {
-            // Assign home team
-            operations.push({
-              type: 'assign_team',
-              gameId: game.id,
-              teamId: stageTeams[teamIndex].id,
-              slot: 'home',
-            });
+        // Get consistent pairings
+        const pairings = getRoundRobinPairings(stageTeams.length, (stageData.progressionConfig as RoundRobinConfig).doubleRound);
 
-            // Assign away team
-            operations.push({
-              type: 'assign_team',
-              gameId: game.id,
-              teamId: stageTeams[teamIndex + 1].id,
-              slot: 'away',
-            });
+        // Assign teams to games using these pairings
+        stageGames.forEach((game, index) => {
+          if (index < pairings.length) {
+            const [homeIdx, awayIdx] = pairings[index];
+            
+            if (stageTeams[homeIdx]) {
+              operations.push({
+                type: 'assign_team',
+                gameId: game.id,
+                teamId: stageTeams[homeIdx].id,
+                slot: 'home',
+              });
+            }
 
-            // Move to next pair, wrapping around if needed
-            teamIndex += 2;
-            if (teamIndex >= stageTeams.length) {
-              teamIndex = 0;
+            if (stageTeams[awayIdx]) {
+              operations.push({
+                type: 'assign_team',
+                gameId: game.id,
+                teamId: stageTeams[awayIdx].id,
+                slot: 'away',
+              });
             }
           }
         });

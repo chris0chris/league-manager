@@ -9,6 +9,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { RoundRobinConfig, PlacementConfig, GameNode } from '../types/flowchart';
 import { createGameNodeInStage } from '../types/flowchart';
+import { getRoundRobinPairings } from './roundRobinLogic';
 
 /**
  * Generates games for a round robin tournament using the circular rotation algorithm.
@@ -38,56 +39,28 @@ export function generateRoundRobinGames(
   const gameDuration = duration ?? 50;
   const gameBreak = breakDuration ?? 0;
 
-  // Circular rotation algorithm for round robin
-  // For N teams, we need N rounds if odd (to account for byes), N-1 if even
-  const isOdd = teamCount % 2 === 1;
-  const adjustedTeamCount = isOdd ? teamCount + 1 : teamCount; // Add dummy team for odd count
-  const roundsPerCycle = adjustedTeamCount - 1;
-  const rounds = doubleRound ? 2 * roundsPerCycle : roundsPerCycle;
+  const pairings = getRoundRobinPairings(teamCount, doubleRound);
 
-  // Create team array (with dummy team if odd)
-  const teams = Array.from({ length: adjustedTeamCount }, (_, i) => i < teamCount ? i + 1 : 0);
-  let gameCounter = 1;
-
-  for (let round = 0; round < rounds; round++) {
-    // In each round, pair teams using circular rotation
-    for (let i = 0; i < Math.floor(adjustedTeamCount / 2); i++) {
-      const team1Index = i;
-      const team2Index = adjustedTeamCount - 1 - i;
-      const team1 = teams[team1Index];
-      const team2 = teams[team2Index];
-
-      // Skip if either team is the dummy (0) or if they're the same
-      if (team1 === 0 || team2 === 0 || team1 === team2) continue;
-
-      const gameId = uuidv4();
-      const game = createGameNodeInStage(
-        gameId,
-        stageId,
-        {
-          standing: `Game ${gameCounter}`,
-          duration: gameDuration,
-          breakAfter: gameBreak,
-          manualTime: false,
-          startTime: undefined,
-          homeTeamId: null,
-          awayTeamId: null,
-          homeTeamDynamic: null,
-          awayTeamDynamic: null,
-        },
-        { x: 30, y: 50 }
-      );
-
-      games.push(game);
-      gameCounter++;
-    }
-
-    // Rotate teams (keep first team fixed, rotate others)
-    if (adjustedTeamCount > 2 && round < rounds - 1) {
-      const lastTeam = teams.pop()!;
-      teams.splice(1, 0, lastTeam);
-    }
-  }
+  pairings.forEach((pairing, index) => {
+    const gameId = uuidv4();
+    const game = createGameNodeInStage(
+      gameId,
+      stageId,
+      {
+        standing: `Game ${index + 1}`,
+        duration: gameDuration,
+        breakAfter: gameBreak,
+        manualTime: false,
+        startTime: undefined,
+        homeTeamId: null,
+        awayTeamId: null,
+        homeTeamDynamic: null,
+        awayTeamDynamic: null,
+      },
+      { x: 30, y: 50 }
+    );
+    games.push(game);
+  });
 
   return games;
 }

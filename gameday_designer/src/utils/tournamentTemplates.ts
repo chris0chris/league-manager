@@ -28,6 +28,7 @@ export const TEMPLATE_F6_2_2: TournamentTemplate = {
       progressionMode: 'round_robin',
       config: { mode: 'round_robin', teamCount: 3, doubleRound: false },
       fieldAssignment: 'split', // Group A → Field 1, Group B → Field 2
+      splitCount: 2,
     },
     {
       name: 'Playoffs',
@@ -74,6 +75,7 @@ export const TEMPLATE_F8_2_3: TournamentTemplate = {
       progressionMode: 'round_robin',
       config: { mode: 'round_robin', teamCount: 4, doubleRound: false },
       fieldAssignment: 'split',
+      splitCount: 2,
     },
     {
       name: 'Playoffs',

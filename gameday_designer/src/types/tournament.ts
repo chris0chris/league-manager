@@ -68,6 +68,12 @@ export interface TournamentStageTemplate {
   fieldAssignment: 'all' | 'split' | number;
 
   /**
+   * For 'split' field assignment, specify how many groups to split into.
+   * If omitted, defaults to number of fields.
+   */
+  splitCount?: number;
+
+  /**
    * Optional mapping for progression from source games.
    * Key is target game standing (e.g., 'SF1'), value is source mapping.
    */

@@ -166,11 +166,29 @@ function createStages(
       }
       stageOrderCounter++;
     } else if (stageTemplate.fieldAssignment === 'split') {
-      // Split groups across fields (Group A → Field 1, Group B → Field 2)
-      for (let i = 0; i < fields.length; i++) {
+      // Split teams into multiple groups (Group A, Group B, etc.)
+      // Distribute groups across available fields
+      
+      let groupCount = stageTemplate.splitCount;
+      
+      // Calculate groupCount if not explicitly provided
+      if (groupCount === undefined && stageTemplate.progressionMode === 'round_robin') {
+        const totalTeams = template.teamCount.exact || template.teamCount.min;
+        const teamsPerGroup = (stageTemplate.config as RoundRobinConfig).teamCount;
+        if (teamsPerGroup > 0) {
+          groupCount = Math.floor(totalTeams / teamsPerGroup);
+        }
+      }
+      
+      // Fallback to field count if calculation failed or not RR
+      const finalGroupCount = groupCount || fields.length;
+
+      for (let i = 0; i < finalGroupCount; i++) {
         const stageId = `stage-${uuidv4()}`;
         const groupLabel = String.fromCharCode(65 + i); // A, B, C...
-        const stage = createStageNode(stageId, fields[i].id, {
+        const fieldIndex = i % fields.length;
+        
+        const stage = createStageNode(stageId, fields[fieldIndex].id, {
           name: `${stageTemplate.name} ${groupLabel}`,
           stageType: stageTemplate.stageType,
           order: stageOrderCounter,

@@ -545,25 +545,41 @@ export function createPlacementEdges(
   }
 
   const { positions, format } = config;
+  const edges: EdgeSpec[] = [];
 
   try {
-    // If custom mapping is provided and we have source games, use it
+    // 1. Add custom entry edges if mapping is provided
     if (mapping && sourceGames.length > 0) {
-      return createEdgesFromMapping(targetGames, sourceGames, mapping);
+      edges.push(...createEdgesFromMapping(targetGames, sourceGames, mapping));
     }
 
+    // 2. Add standard bracket edges (source-to-target or internal)
     if (positions === BRACKET_SIZE_WITH_SEMIFINALS && format === 'single_elimination') {
-      return create4TeamSingleEliminationEdges(targetGames, sourceGames);
+      // If we already added entry edges via mapping, we only need internal edges
+      const entryEdgesAdded = mapping && sourceGames.length > 0;
+      if (entryEdgesAdded) {
+        const sf1 = findGameByStanding(targetGames, GAME_STANDING_SF1);
+        const sf2 = findGameByStanding(targetGames, GAME_STANDING_SF2);
+        const final = findGameByStanding(targetGames, GAME_STANDING_FINAL);
+        const thirdPlace = findGameByStanding(targetGames, GAME_STANDING_THIRD_PLACE);
+        if (sf1 && sf2 && final && thirdPlace) {
+          edges.push(...createInternalBracketEdges(sf1, sf2, final, thirdPlace));
+        }
+      } else {
+        edges.push(...create4TeamSingleEliminationEdges(targetGames, sourceGames));
+      }
     } else if (positions === BRACKET_SIZE_FINAL_ONLY && format === 'single_elimination') {
-      return create2TeamFinalEdges(targetGames, sourceGames);
+      if (!(mapping && sourceGames.length > 0)) {
+        edges.push(...create2TeamFinalEdges(targetGames, sourceGames));
+      }
     } else if (positions === BRACKET_SIZE_WITH_QUARTERFINALS && format === 'single_elimination') {
-      return create8TeamSingleEliminationEdges(targetGames);
+      edges.push(...create8TeamSingleEliminationEdges(targetGames));
     } else if (positions === BRACKET_SIZE_WITH_SEMIFINALS && format === 'crossover') {
-      return create4TeamCrossoverEdges(targetGames);
+      edges.push(...create4TeamCrossoverEdges(targetGames));
     }
   } catch (error) {
     console.error('Error creating placement edges:', error);
   }
 
-  return [];
+  return edges;
 }
