@@ -6,6 +6,8 @@ import * as flowchartImport from '../../utils/flowchartImport';
 import * as scrollHelpers from '../../utils/scrollHelpers';
 import * as tournamentGenerator from '../../utils/tournamentGenerator';
 import * as teamAssignment from '../../utils/teamAssignment';
+import type { TournamentGenerationConfig } from '../../types/tournament';
+import type { TournamentStructure } from '../../utils/tournamentGenerator';
 
 // Mock utilities
 vi.mock('../../utils/flowchartExport', () => ({
@@ -32,7 +34,6 @@ vi.mock('../../utils/teamAssignment', () => ({
 }));
 
 // Mock window functions
-const mockAlert = vi.spyOn(window, 'alert').mockImplementation(() => {});
 const mockConfirm = vi.spyOn(window, 'confirm').mockImplementation(() => true);
 
 describe('useDesignerController', () => {
@@ -176,12 +177,13 @@ describe('useDesignerController', () => {
     const mockStructure = { 
       fields: [], 
       stages: [], 
-      games: [] 
-    };
+      games: [],
+      edges: []
+    } as TournamentStructure;
 
     it('generates tournament without teams', async () => {
       const { result } = renderHook(() => useDesignerController());
-      vi.mocked(tournamentGenerator.generateTournament).mockReturnValueOnce(mockStructure as unknown as TournamentStructure);
+      vi.mocked(tournamentGenerator.generateTournament).mockReturnValueOnce(mockStructure);
       
       await act(async () => {
         await result.current.handlers.handleGenerateTournament(mockConfig);
@@ -196,7 +198,7 @@ describe('useDesignerController', () => {
       const { result } = renderHook(() => useDesignerController());
       const mockTeams = [{ id: 'team-1', label: 'Team 1', color: '#ff0000' }];
       
-      vi.mocked(tournamentGenerator.generateTournament).mockReturnValue(mockStructure as unknown as TournamentStructure);
+      vi.mocked(tournamentGenerator.generateTournament).mockReturnValue(mockStructure);
       vi.mocked(teamAssignment.generateTeamsForTournament).mockReturnValue(mockTeams as unknown as Array<{ label: string; color: string }>);
       
       await act(async () => {
