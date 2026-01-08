@@ -24,6 +24,69 @@ This project uses specialized Claude Code agents for different development tasks
 
 **Workflow:** Claude Code will automatically delegate tasks to appropriate specialized agents. Each agent has specific expertise and tools to handle their domain effectively.
 
+### Deployment Safety & Infrastructure Changes
+
+**CRITICAL POLICY - MANDATORY COMPLIANCE:**
+
+**NEVER make infrastructure changes or hotfixes directly on production servers.**
+
+All infrastructure changes, Ansible playbook modifications, and environment configuration updates MUST follow this process:
+
+1. **Develop the Fix:**
+   - Create/modify Ansible playbooks and scripts in `/home/cda/dev/infrastructure/container`
+   - Update configuration files and templates
+   - Document the change
+
+2. **Test on servyy-test.lxd FIRST:**
+   - Deploy the full playbook to `servyy-test.lxd` test environment
+   - Verify all files are created/updated correctly
+   - Test both production and staging playbooks if both are affected
+   - Confirm no cross-contamination between environments
+   - **NEVER skip this step** - no exceptions
+
+3. **Only After Successful Testing:**
+   - Deploy to production servers (lehel.xyz)
+   - Verify deployment results
+   - Document what was changed
+
+**Forbidden Actions:**
+- ❌ Manual file edits on production servers (SSH + vi/nano/sed)
+- ❌ Direct scp/rsync of configuration files to production
+- ❌ Hotfixes without Ansible automation
+- ❌ Deploying to production without servyy-test validation
+- ❌ "Quick fixes" that bypass the test environment
+
+**Why This Matters:**
+- Manual changes are not reproducible
+- Hotfixes can corrupt production environments (e.g., staging overwriting production files)
+- Untested changes can break running services
+- Ansible ensures idempotency and proper variable scoping
+
+**Test Environment:**
+- Host: `servyy-test.lxd` (IP: `10.185.182.207`)
+- Purpose: Full deployment testing before production
+- Inventory: `/home/cda/dev/infrastructure/container/ansible/test` (if separate) or `--limit servyy-test` flag
+
+**Example Workflow:**
+```bash
+# 1. Develop fix in infrastructure repo
+cd /home/cda/dev/infrastructure/container
+
+# 2. Test on servyy-test FIRST
+ansible-playbook ansible/plays/playbook.yml -i ansible/production --limit servyy-test.lxd
+
+# 3. Verify results on test server
+ssh servyy-test.lxd "verify commands here"
+
+# 4. Only after success, deploy to production
+ansible-playbook ansible/plays/playbook.yml -i ansible/production --limit lehel.xyz
+```
+
+**If you need to make an infrastructure change:**
+1. Use the `@agent-service-master` or `@agent-service-tester` agents
+2. These agents understand the test-first deployment policy
+3. They will automatically test on servyy-test before production
+
 ### Testing Strategy
 
 **During Feature Development:**
@@ -273,6 +336,37 @@ npm --prefix liveticker/ -- vitest run src/components/__tests__/LivetickerApp.sp
 npm --prefix scorecard/ -- vitest run src/components/scorecard/__tests__/Details.spec.js
 ```
 
+### Deployment Scripts
+
+**Deploy to staging only:**
+```bash
+./container/deploy.sh stage
+```
+
+Creates a Release Candidate (RC) version tag that triggers deployment to staging environment only:
+- From stable (e.g., `2.12.16`) → creates `2.12.17-rc.1`
+- From RC (e.g., `2.12.17-rc.1`) → creates `2.12.17-rc.2`
+- Triggers: Tests → Build → Staging deployment only
+- URL: https://stage.leaguesphere.app
+
+**Deploy to production:**
+```bash
+./container/deploy.sh {major|minor|patch}
+```
+
+Creates a stable version tag that triggers deployment to both staging and production:
+- Example: `./container/deploy.sh patch` → creates `2.12.17` from `2.12.16`
+- Triggers: Tests → Build → Staging deployment → Production deployment → Migrations
+- URLs: https://stage.leaguesphere.app + https://leaguesphere.app
+
+**All deployment options:**
+```bash
+./container/deploy.sh stage   # Staging only (RC version)
+./container/deploy.sh patch   # Staging + Production (patch bump)
+./container/deploy.sh minor   # Staging + Production (minor bump)
+./container/deploy.sh major   # Staging + Production (major bump)
+```
+
 ## Versioning
 
 Version is managed via `bump2version` and synchronized across:
@@ -341,6 +435,58 @@ CircleCI configuration exists in `.circleci/config.yml` but GitHub Actions is th
 - `leaguesphere/frontend:latest` and `leaguesphere/frontend:<version>`
 
 **Health Checks:** Backend container includes health check endpoint at `/health/`
+
+### Staging Environment
+
+The project includes a dedicated staging environment for testing changes before production deployment.
+
+**Access URLs:**
+- Public: `https://stage.leaguesphere.app`
+- Internal (lehel.xyz): `https://leaguesphere-stage.lehel.xyz`
+- Local network: `http://leaguesphere-stage.lehel`
+
+**Docker Images:**
+- Backend: `docker.io/leaguesphere/backend:staging`
+- Frontend: `docker.io/leaguesphere/frontend:staging`
+
+**Configuration Files:**
+- Docker Compose: `/deployed/docker-compose.staging.yaml`
+- Environment: `/deployed/.env.staging` (Traefik/Compose variables)
+- Application: `/deployed/ls.env.staging` (Django secrets - use template)
+
+**Database:**
+- Name: `leaguesphere_staging`
+- User: `leaguesphere_staging`
+- Host: `mysql` (Docker internal network)
+- Automatic migrations: Enabled (`RUN_MIGRATIONS=true`)
+
+**Deployment:**
+- **Automatic:** Images are automatically pushed to `:staging` tag when tags are created via CI/CD
+- **Manual Deploy on Server:**
+  ```bash
+  cd ~/dev/leaguesphere/deployed/
+  docker compose -f docker-compose.staging.yaml 
+  docker compose -f docker-compose.staging.yaml  up -d
+  ```
+
+**Initial Setup:**
+1. Copy template: `cp ls.env.staging.template ls.env.staging`
+2. Generate secrets:
+   ```bash
+   # Database password
+   openssl rand -base64 32
+
+   # Django secret key
+   python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+   ```
+3. Update `ls.env.staging` with generated secrets
+4. Create MySQL init directory: `mkdir -p mysql-init`
+5. Deploy: `docker compose -f docker-compose.staging.yaml up -d`
+
+**CI/CD Pipeline:**
+- Staging images are built and pushed automatically after all tests pass
+- Workflow: `.github/workflows/part_docker_push_staging.yaml`
+- Triggered on tag creation (e.g., `2.12.16`)
 
 ### Test Infrastructure
 

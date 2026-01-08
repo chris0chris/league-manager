@@ -1,0 +1,62 @@
+name: 🟢🏗️🧪📊 Build & run node tests (matrix)
+
+on:
+  workflow_call:
+    inputs:
+      projects:
+        required: true
+        description: JSON array of projects to test
+        type: string
+
+permissions:
+  contents: write
+  checks: write
+
+jobs:
+  test-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJSON(inputs.projects) }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: 🟢⚙️ Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.project }}/package.json
+
+      - name: 🧪 Testing ${{ matrix.project }}
+        run: |
+          npm ci
+          npm run test:coverage
+
+      - name: 📊 Upload Coverage to Codecov
+        env:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+        if: ${{ env.codecov_token != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          directory: ${{ matrix.project }}/coverage
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.project }}
+
+      - name: 🔍 Run eslint ${{ matrix.project }}
+        run: npm run eslint:json
+        continue-on-error: true
+
+      - name: 👷 Building ${{ matrix.project }}
+        run: npm run build > typescript.log
+
+      - name: 🔍📝 Annotate ${{ matrix.project }} Linting Results
+        uses: DerLev/eslint-annotations@v2
+        with:
+          eslint-report: ${{ matrix.project }}/js-lint-results-${{ matrix.project }}.json
+          typescript-log: ${{ matrix.project }}/typescript.log

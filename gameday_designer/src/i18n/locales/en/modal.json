@@ -1,0 +1,22 @@
+{
+  "clearAll": {
+    "title": "Clear All",
+    "message": "Are you sure you want to clear all fields, stages, games, teams, and groups? This action cannot be undone."
+  },
+  "editGame": {
+    "title": "Edit Game"
+  },
+  "tournamentGenerator": {
+    "title": "Generate Tournament",
+    "noTemplates": "No tournament templates available.",
+    "generateTeams": "Generate {{count}} teams automatically",
+    "autoAssignTeams": "Auto-assign teams to games",
+    "previewTitle": "Preview:",
+    "previewFields_one": "{{count}} field",
+    "previewFields_other": "{{count}} fields",
+    "previewStages_one": "{{count}} stage",
+    "previewStages_other": "{{count}} stages",
+    "previewFirstGame": "First game at {{time}}",
+    "previewGameDuration": "Default game duration: {{duration}} minutes"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "field": "Feld",
+  "fields": "Felder",
+  "stage": "Etappe",
+  "stages": "Etappen",
+  "game": "Spiel",
+  "games": "Spiele",
+  "team": "Team",
+  "teams": "Teams",
+  "group": "Gruppe",
+  "groups": "Gruppen",
+  "vorrunde": "Vorrunde",
+  "finalrunde": "Finalrunde",
+  "minute": "Minute",
+  "minutes": "Minuten",
+  "firstGame": "Erstes Spiel",
+  "teamPool": "Team-Pool",
+  "globalTeamPool": "Globaler Team-Pool"
+}

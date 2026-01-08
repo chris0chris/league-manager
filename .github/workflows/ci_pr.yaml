@@ -15,23 +15,11 @@ jobs:
     uses: ./.github/workflows/part_build_test.yaml
     secrets: inherit
 
-  build-test-scorecard:
-    uses: ./.github/workflows/part_node_test.yaml
+  build-test-frontend:
+    uses: ./.github/workflows/part_node_test_matrix.yaml
     secrets: inherit
     with:
-      project: scorecard
-
-  build-test-liveticker:
-    uses: ./.github/workflows/part_node_test.yaml
-    secrets: inherit
-    with:
-      project: liveticker
-
-  build-passcheck:
-    uses: ./.github/workflows/part_node_build.yaml
-    secrets: inherit
-    with:
-      project: passcheck
+      projects: '["scorecard", "liveticker", "gameday_designer", "passcheck"]'
 
   # Build Docker images once (after tests pass)
   build-backend-image:
@@ -44,9 +32,7 @@ jobs:
 
   build-frontend-image:
     needs:
-      - build-test-scorecard
-      - build-test-liveticker
-      - build-passcheck
+      - build-test-frontend
     uses: ./.github/workflows/part_docker_build.yaml
     with:
       dockerfile: container/nginx.Dockerfile
@@ -79,3 +65,18 @@ jobs:
     with:
       artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
       image_name: backend
+
+  # Test docker-compose network configuration for production (has external MySQL)
+  test-compose-network-production:
+    needs:
+      - build-backend-image
+      - build-frontend-image
+      - test-backend-image
+      - test-frontend-image
+      - check-migrations
+    uses: ./.github/workflows/part_test_compose_network.yaml
+    with:
+      compose_file: docker-compose.yaml
+      environment_name: production
+      backend_artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
+      frontend_artifact_name: ${{ needs.build-frontend-image.outputs.artifact_name }}

@@ -95,7 +95,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='playerlistgameday',
-            constraint=models.CheckConstraint(check=models.Q(('gameday_jersey__gte', 0), ('gameday_jersey__lte', 99)),
+            constraint=models.CheckConstraint(condition=models.Q(('gameday_jersey__gte', 0), ('gameday_jersey__lte', 99)),
                                               name='gameday_jersey_number_btw_0_and_99'),
         ),
         migrations.AddConstraint(
@@ -108,13 +108,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='playerlist',
-            constraint=models.CheckConstraint(check=models.Q(('jersey_number__gte', 0), ('jersey_number__lte', 99)),
+            constraint=models.CheckConstraint(condition=models.Q(('jersey_number__gte', 0), ('jersey_number__lte', 99)),
                                               name='jersey_number_btw_0_and_99'),
         ),
         migrations.AddConstraint(
             model_name='eligibilityrule',
             constraint=models.CheckConstraint(
-                check=models.Q(('maximum_player_strength__gte', models.F('minimum_player_strength'))),
+                condition=models.Q(('maximum_player_strength__gte', models.F('minimum_player_strength'))),
                 name='maximum_player_strength_must_be_greater_equal_minimum'),
         ),
     ]

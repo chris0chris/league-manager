@@ -1,0 +1,7 @@
+{
+  "errorCount_one": "{{count}} Fehler",
+  "errorCount_other": "{{count}} Fehler",
+  "warningCount_one": "{{count}} Warnung",
+  "warningCount_other": "{{count}} Warnungen",
+  "scheduleValid": "Zeitplan ist gültig"
+}

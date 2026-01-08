@@ -17,23 +17,11 @@ jobs:
     uses: ./.github/workflows/part_build_test.yaml
     secrets: inherit
 
-  build-test-scorecard:
-    uses: ./.github/workflows/part_node_test.yaml
+  build-test-frontend:
+    uses: ./.github/workflows/part_node_test_matrix.yaml
     secrets: inherit
     with:
-      project: scorecard
-
-  build-test-liveticker:
-    uses: ./.github/workflows/part_node_test.yaml
-    secrets: inherit
-    with:
-      project: liveticker
-
-  build-passcheck:
-    uses: ./.github/workflows/part_node_build.yaml
-    secrets: inherit
-    with:
-      project: passcheck
+      projects: '["scorecard", "liveticker", "gameday_designer", "passcheck"]'
 
   # Build Docker images once (after tests pass)
   build-backend-image:
@@ -46,9 +34,7 @@ jobs:
 
   build-frontend-image:
     needs:
-      - build-test-scorecard
-      - build-test-liveticker
-      - build-passcheck
+      - build-test-frontend
     uses: ./.github/workflows/part_docker_build.yaml
     with:
       dockerfile: container/nginx.Dockerfile
@@ -82,12 +68,26 @@ jobs:
       artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
       image_name: backend
 
-  # Deploy to staging (automatic, after validation passes)
+  # Test docker-compose network configuration for production (has external MySQL)
+  test-compose-network-production:
+    needs:
+      - build-backend-image
+      - build-frontend-image
+      - test-backend-image
+      - test-frontend-image
+      - check-migrations
+    uses: ./.github/workflows/part_test_compose_network.yaml
+    with:
+      compose_file: docker-compose.yaml
+      environment_name: production
+      backend_artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
+      frontend_artifact_name: ${{ needs.build-frontend-image.outputs.artifact_name }}
+
+  # Deploy to staging (automatic, after all validation passes)
   deploy-backend-staging:
     needs:
       - build-backend-image
-      - test-backend-image
-      - check-migrations
+      - test-compose-network-production
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_staging.yaml
     with:
@@ -99,8 +99,7 @@ jobs:
   deploy-frontend-staging:
     needs:
       - build-frontend-image
-      - test-frontend-image
-      - check-migrations
+      - test-compose-network-production
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_staging.yaml
     with:
@@ -109,11 +108,24 @@ jobs:
       local_image_name: frontend
       version: "${{ github.ref_name }}"
 
-  # Deploy to production (manual approval required)
+  # Single approval step for production
+  approve-production:
+    if: "!contains(github.ref_name, '-rc.')"
+    runs-on: ubuntu-latest
+    environment: approve
+    needs:
+      - deploy-backend-staging
+      - deploy-frontend-staging
+    steps:
+      - name: 📢 Approve Production Deployment
+        run: echo "🚀 Production deployment approved"
+
+  # Deploy to production (SKIP for RC tags)
   deploy-backend-production:
+    if: "!contains(github.ref_name, '-rc.')"
     needs:
       - build-backend-image
-      - deploy-backend-staging
+      - approve-production
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_artifact.yaml
     with:
@@ -123,9 +135,10 @@ jobs:
       version: "${{ github.ref_name }}"
 
   deploy-frontend-production:
+    if: "!contains(github.ref_name, '-rc.')"
     needs:
       - build-frontend-image
-      - deploy-frontend-staging
+      - approve-production
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_artifact.yaml
     with:
@@ -134,8 +147,9 @@ jobs:
       local_image_name: frontend
       version: "${{ github.ref_name }}"
 
-  # Run database migrations (after backend production deployment)
+  # Run database migrations (after backend production deployment, SKIP for RC tags)
   run-migrations:
+    if: "!contains(github.ref_name, '-rc.')"
     needs:
       - build-backend-image
       - deploy-backend-production

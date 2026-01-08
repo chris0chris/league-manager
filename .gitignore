@@ -144,8 +144,18 @@ server*
 /**/static/**/VERSION
 /**/*LICENSE.txt
 
-#react
-#/**/**/main.js
+# Frontend build artifacts (built in Docker)
+scorecard/static/scorecard/js/*.js
+scorecard/static/scorecard/js/*.css
+liveticker/static/liveticker/js/*.js
+liveticker/static/liveticker/js/*.css
+passcheck/static/passcheck/js/*.js
+passcheck/static/passcheck/js/*.css
+gameday_designer/static/gameday_designer/js/*.js
+gameday_designer/static/gameday_designer/js/*.css
+gameday_designer/static/gameday_designer/js/*.woff
+gameday_designer/static/gameday_designer/js/*.woff2
+
 league_manager/league_manager/
 
 ngrok.sh

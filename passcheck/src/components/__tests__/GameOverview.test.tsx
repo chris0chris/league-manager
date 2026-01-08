@@ -20,23 +20,27 @@ vi.mock('../../hooks/useMessage', () => ({
   }))
 }));
 
-vi.mock('react-router-dom', () => ({
-  MemoryRouter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Route: ({ element }: { element: React.ReactNode }) => <div>{element}</div>,
-  Routes: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  useNavigate: () => vi.fn(),
-  useParams: () => ({ gamedayId: undefined })
-}));
+const mockNavigate = vi.fn();
+const mockParams = { gamedayId: undefined };
 
-vi.mock('../GameCard', () => {
-  return function MockGameCard({ game }: { game: Game }) {
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useParams: () => mockParams
+  };
+});
+
+vi.mock('../GameCard', () => ({
+  default: function MockGameCard({ game }: { game: Game }) {
     return (
       <div data-testid="game-card">
         {game.home.name} vs {game.away.name}
       </div>
     );
-  };
-});
+  }
+}));
 
 describe('GameOverview', () => {
   const mockGames: Game[] = [
@@ -151,6 +155,8 @@ describe('GameOverview', () => {
   });
 
   it('renders with gamedayId parameter', async () => {
+    mockParams.gamedayId = '1';
+
     renderWithRouter('/gameday/1');
 
     await waitFor(() => {
@@ -158,6 +164,9 @@ describe('GameOverview', () => {
     });
 
     expect(games.getPasscheckData).toHaveBeenCalledWith('1');
+
+    // Reset for other tests
+    mockParams.gamedayId = undefined;
   });
 
   it('toggles gameday selection checkbox', async () => {

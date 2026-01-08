@@ -1,0 +1,22 @@
+{
+  "clearAll": {
+    "title": "Alles löschen",
+    "message": "Sind Sie sicher, dass Sie alle Felder, Etappen, Spiele, Teams und Gruppen löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "editGame": {
+    "title": "Spiel bearbeiten"
+  },
+  "tournamentGenerator": {
+    "title": "Turnier generieren",
+    "noTemplates": "Keine Turniervorlagen verfügbar.",
+    "generateTeams": "{{count}} Teams automatisch generieren",
+    "autoAssignTeams": "Teams automatisch Spielen zuweisen",
+    "previewTitle": "Vorschau:",
+    "previewFields_one": "{{count}} Feld",
+    "previewFields_other": "{{count}} Felder",
+    "previewStages_one": "{{count}} Etappe",
+    "previewStages_other": "{{count}} Etappen",
+    "previewFirstGame": "Erstes Spiel um {{time}}",
+    "previewGameDuration": "Standard-Spieldauer: {{duration}} Minuten"
+  }
+}

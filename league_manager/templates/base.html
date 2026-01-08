@@ -18,6 +18,7 @@
     {% else %}
     <title>LeagueSphere</title>
     {% endif %}
+    {% block extra_css %}{% endblock %}
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script crossorigin="anonymous"
@@ -60,7 +61,7 @@
                                 <a class="dropdown-item"
                                    href="{{ menu_item.url }}"
                                    {% if menu_item.is_static %}target="_blank" {% endif %}>
-                                    {{ menu_item.name }}
+                                    {{ menu_item.name|safe }}
                                 </a>
                                 {% endif %}
                             </li>
@@ -107,6 +108,7 @@
     {% block footer %}{% endblock %}
 </main>
 
+{% block extra_js %}{% endblock %}
 </body>
 <footer class="footer mt-auto py-3 bg-light border-top">
     <div class="container text-center">

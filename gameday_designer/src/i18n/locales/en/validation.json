@@ -1,0 +1,7 @@
+{
+  "errorCount_one": "{{count}} error",
+  "errorCount_other": "{{count}} errors",
+  "warningCount_one": "{{count}} warning",
+  "warningCount_other": "{{count}} warnings",
+  "scheduleValid": "Schedule is valid"
+}

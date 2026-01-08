@@ -1,0 +1,33 @@
+/**
+ * FlowToolbar Styles
+ */
+
+.flow-toolbar {
+  /* Padding and background removed - toolbar is now embedded in header */
+}
+
+.flow-toolbar .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.flow-toolbar .btn i {
+  font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .flow-toolbar {
+    padding: 8px 12px;
+  }
+
+  .flow-toolbar .btn {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .flow-toolbar .btn span {
+    display: none;
+  }
+}

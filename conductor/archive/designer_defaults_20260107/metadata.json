@@ -1,0 +1,8 @@
+{
+  "track_id": "designer_defaults_20260107",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-07T21:10:00Z",
+  "updated_at": "2026-01-07T21:10:00Z",
+  "description": "Set default time to 10:00, default duration to 70 minutes and make duration editable in tournament generation dialog"
+}

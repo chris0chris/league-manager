@@ -1,0 +1,21 @@
+/**
+ * GlobalTeamTable Component Styles
+ *
+ * CSS Grid layout for team groups with responsive breakpoints
+ */
+
+.team-groups-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Team group card styles */
+.team-group-card {
+  transition: box-shadow 0.2s ease;
+}
+
+.team-group-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
