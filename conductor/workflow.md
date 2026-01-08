@@ -44,10 +44,10 @@ All tasks follow a strict lifecycle:
    - Add dated note explaining the change
    - Resume implementation
 
-8. **Commit Code Changes:**
-   - Stage all code changes related to the task.
-   - Propose a clear, concise commit message e.g, `feat(ui): Create basic HTML structure for calculator`.
-   - Perform the commit.
+8. **Verify Quality and Commit Code Changes:**
+   - **Step 8.1: Run QA Checks:** Execute the project's full suite of quality checks (linting, type-checking, formatting). Use the command identified in the 'Before Committing' section (e.g., `npm run check`).
+   - **Step 8.2: Resolve Issues:** Fix any errors or warnings identified by the checks. **CRITICAL:** All linting and static analysis must pass before proceeding.
+   - **Step 8.3: Stage and Commit:** Stage all code changes related to the task and perform the commit with a clear, concise message.
 
 9. **Attach Task Summary with Git Notes:**
    - **Step 9.1: Get Commit Hash:** Obtain the hash of the *just-completed commit* (`git log -1 --format="%H"`).
@@ -80,11 +80,11 @@ All tasks follow a strict lifecycle:
         -   For each remaining code file, verify a corresponding test file exists.
         -   If a test file is missing, you **must** create one. Before writing the test, **first, analyze other test files in the repository to determine the correct naming convention and testing style.** The new tests **must** validate the functionality described in this phase's tasks (`plan.md`).
 
-3.  **Execute Automated Tests with Proactive Debugging:**
-    -   Before execution, you **must** announce the exact shell command you will use to run the tests.
-    -   **Example Announcement:** "I will now run the automated test suite to verify the phase. **Command:** `CI=true npm test`"
-    -   Execute the announced command.
-    -   If tests fail, you **must** inform the user and begin debugging. You may attempt to propose a fix a **maximum of two times**. If the tests still fail after your second proposed fix, you **must stop**, report the persistent failure, and ask the user for guidance.
+3.  **Execute Automated Tests and Linting with Proactive Debugging:**
+    -   Before execution, you **must** announce the exact shell commands you will use to run the tests and linter.
+    -   **Example Announcement:** "I will now run the automated test suite and linter to verify the phase. **Commands:** `CI=true npm test && npm run lint`"
+    -   Execute the announced commands.
+    -   If tests or linting fail, you **must** inform the user and begin debugging. You may attempt to propose a fix a **maximum of two times**. If the failures persist after your second proposed fix, you **must stop**, report the errors, and ask the user for guidance.
 
 4.  **Propose a Detailed, Actionable Manual Verification Plan:**
     -   **CRITICAL:** To generate the plan, first analyze `product.md`, `product-guidelines.md`, and `plan.md` to determine the user-facing goals of the completed phase.

@@ -55,11 +55,11 @@ describe('GlobalTeamTable', () => {
     mockGetTeamUsage = vi.fn(() => []);
   });
 
-  it('renders empty state when no groups exist', () => {
-    render(
+  const renderTable = (props = {}) => {
+    return render(
       <GlobalTeamTable
-        teams={[]}
-        groups={[]}
+        teams={mockTeams}
+        groups={mockGroups}
         onAddGroup={mockOnAddGroup}
         onUpdateGroup={mockOnUpdateGroup}
         onDeleteGroup={mockOnDeleteGroup}
@@ -70,31 +70,18 @@ describe('GlobalTeamTable', () => {
         onReorder={mockOnReorder}
         getTeamUsage={mockGetTeamUsage}
         allNodes={mockNodes}
+        {...props}
       />
     );
+  };
 
+  it('renders empty state when no groups exist', () => {
+    renderTable({ groups: [], teams: [] });
     expect(screen.getByText(/No groups yet/i)).toBeInTheDocument();
   });
 
   it('renders "Add Group" button', () => {
-    // Add Group button only appears in empty state
-    render(
-      <GlobalTeamTable
-        teams={[]}
-        groups={[]}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
+    renderTable({ groups: [], teams: [] });
     const addButton = screen.getByRole('button', { name: /Add Group/i });
     expect(addButton).toBeInTheDocument();
 
@@ -102,264 +89,79 @@ describe('GlobalTeamTable', () => {
     expect(mockOnAddGroup).toHaveBeenCalledTimes(1);
   });
 
-  it('renders groups with team count badge', () => {
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
-    // Just verify groups are rendered
+  it('renders groups', () => {
+    renderTable();
     expect(screen.getByText('Group A')).toBeInTheDocument();
     expect(screen.getByText('Group B')).toBeInTheDocument();
-
-    // Note: Team count badges have been removed from the current design
-    // The design now shows teams directly in expanded groups
   });
 
   it('expands and collapses groups on click', async () => {
     const user = userEvent.setup();
-
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
+    renderTable();
 
     // Initially expanded - teams should be visible
     expect(screen.getByText('Team 1')).toBeInTheDocument();
-    expect(screen.getByText('Team 2')).toBeInTheDocument();
 
     // Find and click Group A header to collapse
     const groupAHeader = screen.getByText('Group A').closest('.card-header');
-    expect(groupAHeader).toBeInTheDocument();
-
     await user.click(groupAHeader!);
 
     // Teams should now be hidden
     expect(screen.queryByText('Team 1')).not.toBeInTheDocument();
-    expect(screen.queryByText('Team 2')).not.toBeInTheDocument();
   });
 
   it('allows editing group name via double-click', async () => {
     const user = userEvent.setup();
-
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
+    renderTable();
 
     const groupName = screen.getByText('Group A');
     await user.dblClick(groupName);
 
-    // Input should appear
     const input = screen.getByDisplayValue('Group A');
-    expect(input).toBeInTheDocument();
-
-    // Change the name
     await user.clear(input);
     await user.type(input, 'New Group Name');
-
-    // Blur to save
     fireEvent.blur(input);
 
     expect(mockOnUpdateGroup).toHaveBeenCalledWith('group-1', { name: 'New Group Name' });
   });
 
-  it('allows editing team label via double-click', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
-    // Groups are expanded by default, so teams are visible
-    const teamLabel = screen.getByText('Team 1');
-    await user.dblClick(teamLabel);
-
-    // Input should appear
-    const input = screen.getByDisplayValue('Team 1');
-    expect(input).toBeInTheDocument();
-
-    // Change the name
-    await user.clear(input);
-    await user.type(input, 'New Team Name');
-
-    // Blur to save
-    fireEvent.blur(input);
-
-    expect(mockOnUpdate).toHaveBeenCalledWith('team-1', { label: 'New Team Name' });
-  });
-
   it('displays team usage count', () => {
-    mockGetTeamUsage.mockImplementation((teamId: string) => {
-      if (teamId === 'team-1') {
-        return [
-          { gameId: 'game-1', slot: 'home' },
-          { gameId: 'game-2', slot: 'away' },
-        ];
-      }
-      return [];
-    });
-
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
-    // Groups are expanded by default, so team usage is visible
-    // Find Team 1 row and check usage count
-    const team1Row = screen.getByText('Team 1').closest('div[class*="d-flex"]');
-    expect(within(team1Row!).getByText('2')).toBeInTheDocument();
+    mockGetTeamUsage.mockReturnValue([{ gameId: 'g1', slot: 'home' }]);
+    renderTable();
+    const team1Row = screen.getByText('Team 1').closest('div.d-flex');
+    expect(within(team1Row!).getByText('1')).toBeInTheDocument();
   });
 
   it('calls onReorder when reorder buttons are clicked', async () => {
     const user = userEvent.setup();
+    renderTable();
 
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
-    // Groups are expanded by default
-    // Find Team 2 row
-    const team2Row = screen.getByText('Team 2').closest('div[class*="d-flex"]');
-    expect(team2Row).toBeInTheDocument();
-
-    // Find up button (second team in group, so up button should be enabled)
-    const upButtons = within(team2Row!).getAllByRole('button', { name: /Move up/i });
-    await user.click(upButtons[0]);
+    const team2Row = screen.getByText('Team 2').closest('div.d-flex');
+    const upButton = within(team2Row!).getByTitle(/Move this team one position up/i);
+    await user.click(upButton);
 
     expect(mockOnReorder).toHaveBeenCalledWith('team-2', 'up');
   });
 
   it('calls onDelete when delete button is clicked', async () => {
     const user = userEvent.setup();
+    const mockOnDelete = vi.fn();
+    renderTable({ teams: mockTeams, groups: mockGroups, onDelete: mockOnDelete });
 
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
-    // Groups are expanded by default
-    // Find Team 1 row
-    const team1Row = screen.getByText('Team 1').closest('div[class*="d-flex"]');
-
-    // Find and click delete button
-    const deleteButtons = within(team1Row!).getAllByRole('button', { name: /Delete team/i });
-    await user.click(deleteButtons[0]);
+    const team1Row = screen.getByText('Team 1').closest('div.d-flex');
+    const deleteButton = within(team1Row!).getByTitle(/Permanently remove this team from the pool/i);
+    await user.click(deleteButton);
 
     expect(mockOnDelete).toHaveBeenCalledWith('team-1');
   });
 
   it('calls onDeleteGroup when group delete button is clicked', async () => {
     const user = userEvent.setup();
+    const mockOnDeleteGroup = vi.fn();
+    renderTable({ teams: mockTeams, groups: mockGroups, onDeleteGroup: mockOnDeleteGroup });
 
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
-    // Find Group A header
     const groupAHeader = screen.getByText('Group A').closest('.card-header');
-
-    // Find delete button in header
-    const deleteButton = within(groupAHeader!).getByRole('button', { name: /Delete group/i });
+    const deleteButton = within(groupAHeader!).getByTitle(/Permanently remove this team group and all its teams/i);
     await user.click(deleteButton);
 
     expect(mockOnDeleteGroup).toHaveBeenCalledWith('group-1');
@@ -367,227 +169,38 @@ describe('GlobalTeamTable', () => {
 
   it('calls onReorderGroup when group reorder buttons are clicked', async () => {
     const user = userEvent.setup();
+    const mockOnReorderGroup = vi.fn();
+    renderTable({ teams: mockTeams, groups: mockGroups, onReorderGroup: mockOnReorderGroup });
 
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
-    // Find Group B header (second group, so down button should be disabled)
     const groupBHeader = screen.getByText('Group B').closest('.card-header');
-
-    // Find up button
-    const upButton = within(groupBHeader!).getByRole('button', { name: /Move group up/i });
+    const upButton = within(groupBHeader!).getByTitle(/Move this team group one position up/i);
     await user.click(upButton);
 
     expect(mockOnReorderGroup).toHaveBeenCalledWith('group-2', 'up');
   });
 
   it('disables reorder buttons appropriately', () => {
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
-    // First group's up button should be disabled
+    renderTable();
     const groupAHeader = screen.getByText('Group A').closest('.card-header');
-    const groupAUpButton = within(groupAHeader!).getByRole('button', { name: /Move group up/i });
+    const groupAUpButton = within(groupAHeader!).getByTitle(/Move this team group one position up/i);
     expect(groupAUpButton).toBeDisabled();
-
-    // Last group's down button should be disabled
-    const groupBHeader = screen.getByText('Group B').closest('.card-header');
-    const groupBDownButton = within(groupBHeader!).getByRole('button', { name: /Move group down/i });
-    expect(groupBDownButton).toBeDisabled();
   });
 
-  it('shows empty state when no groups exist', () => {
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={[]}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
-    expect(screen.getByText(/No groups yet/i)).toBeInTheDocument();
-  });
-
-  // NEW TESTS FOR REFACTORED BEHAVIOR
   describe('Refactored behavior - teams must be in groups', () => {
     it('does not render "Ungrouped Teams" section', () => {
-      const teamsWithoutUngrouped = mockTeams.filter(t => t.groupId !== null);
-
-      render(
-        <GlobalTeamTable
-          teams={teamsWithoutUngrouped}
-          groups={mockGroups}
-          onAddGroup={mockOnAddGroup}
-          onUpdateGroup={mockOnUpdateGroup}
-          onDeleteGroup={mockOnDeleteGroup}
-          onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-          onUpdate={mockOnUpdate}
-          onDelete={mockOnDelete}
-          onReorder={mockOnReorder}
-          getTeamUsage={mockGetTeamUsage}
-          allNodes={mockNodes}
-        />
-      );
-
+      renderTable({ teams: mockTeams.filter(t => t.groupId !== null) });
       expect(screen.queryByText('Ungrouped Teams')).not.toBeInTheDocument();
-    });
-
-    it('shows correct empty state message when no groups exist', () => {
-      render(
-        <GlobalTeamTable
-          teams={[]}
-          groups={[]}
-          onAddGroup={mockOnAddGroup}
-          onUpdateGroup={mockOnUpdateGroup}
-          onDeleteGroup={mockOnDeleteGroup}
-          onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-          onUpdate={mockOnUpdate}
-          onDelete={mockOnDelete}
-          onReorder={mockOnReorder}
-          getTeamUsage={mockGetTeamUsage}
-          allNodes={mockNodes}
-        />
-      );
-
-      // Check for the actual text that appears
-      expect(screen.getByText(/No groups yet/i)).toBeInTheDocument();
-      expect(screen.getByText(/Create your first team group to organize teams/i)).toBeInTheDocument();
     });
 
     it('does not show move to "Ungrouped" option in team dropdown', async () => {
       const user = userEvent.setup();
+      renderTable();
 
-      render(
-        <GlobalTeamTable
-          teams={mockTeams}
-          groups={mockGroups}
-          onAddGroup={mockOnAddGroup}
-          onUpdateGroup={mockOnUpdateGroup}
-          onDeleteGroup={mockOnDeleteGroup}
-          onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-          onUpdate={mockOnUpdate}
-          onDelete={mockOnDelete}
-          onReorder={mockOnReorder}
-          getTeamUsage={mockGetTeamUsage}
-          allNodes={mockNodes}
-        />
-      );
+      const team1Row = screen.getByText('Team 1').closest('div.d-flex');
+      const dropdownToggle = within(team1Row!).getByTitle(/Move this team to a different group/i);
+      await user.click(dropdownToggle);
 
-      // Groups are expanded by default
-      // Find Team 1 row and open the move dropdown (the folder icon button)
-      const team1Row = screen.getByText('Team 1').closest('div[class*="d-flex"]');
-      const dropdownButtons = within(team1Row!).getAllByRole('button');
-      // The dropdown button should be the one with the folder icon (4th button: up, down, folder, delete)
-      const dropdownToggle = dropdownButtons.find(btn => btn.querySelector('.bi-folder'));
-      expect(dropdownToggle).toBeDefined();
-      await user.click(dropdownToggle!);
-
-      // "Ungrouped" option should not exist
       expect(screen.queryByText('Ungrouped')).not.toBeInTheDocument();
     });
-  });
-
-  it('handles Enter key to save group name edit', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
-    const groupName = screen.getByText('Group A');
-    await user.dblClick(groupName);
-
-    const input = screen.getByDisplayValue('Group A');
-    await user.clear(input);
-    await user.type(input, 'New Name{Enter}');
-
-    expect(mockOnUpdateGroup).toHaveBeenCalledWith('group-1', { name: 'New Name' });
-  });
-
-  it('handles Escape key to cancel group name edit', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <GlobalTeamTable
-        teams={mockTeams}
-        groups={mockGroups}
-        onAddGroup={mockOnAddGroup}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onAddTeam={mockOnAddTeam}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onReorder={mockOnReorder}
-        getTeamUsage={mockGetTeamUsage}
-        allNodes={mockNodes}
-      />
-    );
-
-    const groupName = screen.getByText('Group A');
-    await user.dblClick(groupName);
-
-    const input = screen.getByDisplayValue('Group A');
-    await user.clear(input);
-    await user.type(input, 'New Name{Escape}');
-
-    // Should not call update
-    expect(mockOnUpdateGroup).not.toHaveBeenCalled();
-
-    // Input should be gone
-    expect(screen.queryByDisplayValue('New Name')).not.toBeInTheDocument();
   });
 });

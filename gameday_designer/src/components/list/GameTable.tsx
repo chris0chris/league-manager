@@ -11,6 +11,7 @@ import type { GameNode, FlowEdge, FlowNode, GlobalTeam, GlobalTeamGroup, GameNod
 import { isGameNode } from '../../types/flowchart';
 import { findSourceGameForReference, getGamePath } from '../../utils/edgeAnalysis';
 import { isValidTimeFormat } from '../../utils/timeCalculation';
+import { ICONS } from '../../utils/iconConstants';
 import './GameTable.css';
 
 // Type for select options
@@ -455,7 +456,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
   };
 
   if (games.length === 0) {
-    return <div className="text-muted text-center py-2"><i className="bi bi-trophy me-2" />No games in this stage.</div>;
+    return <div className="text-muted text-center py-2"><i className={`bi ${ICONS.TOURNAMENT} me-2`} />No games in this stage.</div>;
   }
 
   return (
@@ -494,7 +495,15 @@ const GameTable: React.FC<GameTableProps> = memo(({
                 </span>
               )}
             </td>
-            <td><button className="btn btn-sm btn-outline-danger" onClick={(e) => handleDelete(e, game.id)}><i className="bi bi-trash" /></button></td>
+            <td>
+              <button 
+                className="btn btn-sm btn-outline-danger btn-adaptive" 
+                onClick={(e) => handleDelete(e, game.id)}
+                title="Delete game"
+              >
+                <i className={`bi ${ICONS.DELETE}`} />
+              </button>
+            </td>
           </tr>
         ))}
       </tbody>

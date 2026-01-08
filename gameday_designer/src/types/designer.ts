@@ -153,6 +153,27 @@ export interface ValidationResult {
 }
 
 /**
+ * Notification types for user feedback.
+ */
+export type NotificationType = 'success' | 'danger' | 'warning' | 'info';
+
+/**
+ * Represents a notification to be displayed to the user.
+ */
+export interface Notification {
+  /** Unique identifier for the notification */
+  id: string;
+  /** Message to display */
+  message: string;
+  /** Type of notification (determines styling) */
+  type: NotificationType;
+  /** Whether the notification is visible */
+  show: boolean;
+  /** Optional title for the notification */
+  title?: string;
+}
+
+/**
  * Main state for the designer application.
  */
 export interface DesignerState {

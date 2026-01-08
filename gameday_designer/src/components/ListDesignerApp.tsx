@@ -13,7 +13,10 @@ import { Container, Row, Col, Button, OverlayTrigger, Popover, ListGroup } from 
 import ListCanvas from './ListCanvas';
 import FlowToolbar from './FlowToolbar';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
+import NotificationToast from './NotificationToast';
 import { useDesignerController } from '../hooks/useDesignerController';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
+import { ICONS } from '../utils/iconConstants';
 
 import './ListDesignerApp.css';
 
@@ -22,6 +25,7 @@ import './ListDesignerApp.css';
  * ListDesignerApp component.
  */
 const ListDesignerApp: React.FC = () => {
+  const { t } = useTypedTranslation(['ui']);
   const {
     nodes,
     edges,
@@ -29,6 +33,7 @@ const ListDesignerApp: React.FC = () => {
     globalTeamGroups,
     selectedNode,
     validation,
+    notifications,
     ui,
     handlers,
     updateGlobalTeamGroup,
@@ -38,6 +43,7 @@ const ListDesignerApp: React.FC = () => {
     addGameToGameEdge,
     removeGameToGameEdge,
     addGameNodeInStage,
+    addNotification,
   } = useDesignerController();
 
   const {
@@ -67,6 +73,7 @@ const ListDesignerApp: React.FC = () => {
     handleAssignTeam,
     handleGenerateTournament,
     setShowTournamentModal,
+    dismissNotification,
   } = handlers;
 
   return (
@@ -81,16 +88,17 @@ const ListDesignerApp: React.FC = () => {
           <Button
             variant="outline-primary"
             onClick={() => setShowTournamentModal(true)}
-            className="me-2"
-            title="Generate tournament structure"
+            className="me-2 btn-adaptive"
+            title={t('ui:tooltip.generateTournament')}
           >
-            <i className="bi bi-trophy me-1"></i>
-            Generate Tournament
+            <i className={`bi ${ICONS.TOURNAMENT} me-2`}></i>
+            <span className="btn-label-adaptive">{t('ui:button.generateTournament')}</span>
           </Button>
           <FlowToolbar
             onImport={handleImport}
             onExport={handleExport}
             onClearAll={handleClearAll}
+            onNotify={addNotification}
             hasNodes={hasNodes}
             canExport={canExport}
           />
@@ -110,7 +118,7 @@ const ListDesignerApp: React.FC = () => {
               <>
                 {validation.errors.length > 0 && (
                   <OverlayTrigger
-                    placement="top"
+                    placement="bottom"
                     overlay={
                       <Popover id="errors-popover">
                         <Popover.Header as="h3">
@@ -136,7 +144,7 @@ const ListDesignerApp: React.FC = () => {
                 )}
                 {validation.warnings.length > 0 && (
                   <OverlayTrigger
-                    placement="top"
+                    placement="bottom"
                     overlay={
                       <Popover id="warnings-popover">
                         <Popover.Header as="h3">
@@ -211,6 +219,12 @@ const ListDesignerApp: React.FC = () => {
         onHide={() => setShowTournamentModal(false)}
         teams={globalTeams}
         onGenerate={handleGenerateTournament}
+      />
+
+      {/* Global Notifications */}
+      <NotificationToast 
+        notifications={notifications} 
+        onClose={dismissNotification} 
       />
     </Container>
   );

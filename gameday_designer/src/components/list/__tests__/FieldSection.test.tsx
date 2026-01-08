@@ -119,12 +119,12 @@ describe('FieldSection', () => {
 
     // Should be expanded - stage name visible
     expect(screen.getByText('Vorrunde')).toBeInTheDocument();
-    // And "Add Stage" button should be visible (there will be 2: one below the stages, one in empty state)
+    // And "Add Stage" button should be visible in the header
     const addButtons = screen.getAllByRole('button', { name: /add stage/i });
     expect(addButtons.length).toBeGreaterThan(0);
   });
 
-  it('Add Stage button is in body footer, NOT in header', () => {
+  it('Add Stage button is in the header', () => {
     const { container } = render(
       <FieldSection
         field={sampleField}
@@ -148,15 +148,10 @@ describe('FieldSection', () => {
     );
 
     const header = container.querySelector('.field-section__header');
-    const body = container.querySelector('.field-section__body');
 
-    // Header should NOT contain Add Stage button
+    // Header should contain Add Stage button
     const addButtonInHeader = header?.querySelector('button[aria-label*="Add Stage"]');
-    expect(addButtonInHeader).toBeNull();
-
-    // Body should contain Add Stage button
-    const addButtonInBody = body?.querySelector('button[aria-label*="Add Stage"]');
-    expect(addButtonInBody).toBeInTheDocument();
+    expect(addButtonInHeader).toBeInTheDocument();
   });
 
   it('calls onAddStage when Add Stage button is clicked', () => {
@@ -184,13 +179,14 @@ describe('FieldSection', () => {
       />
     );
 
-    const addButton = screen.getByRole('button', { name: /add stage/i });
-    fireEvent.click(addButton);
+    // Get the header add stage button
+    const addButtons = screen.getAllByRole('button', { name: /add stage/i });
+    fireEvent.click(addButtons[0]);
 
     expect(mockOnAddStage).toHaveBeenCalledWith('field-1');
   });
 
-  it('Add Stage button appears at bottom when stages exist', () => {
+  it('No Add Stage button appears at bottom when stages exist', () => {
     render(
       <FieldSection
         field={sampleField}
@@ -213,43 +209,12 @@ describe('FieldSection', () => {
       />
     );
 
-    // Should find Add Stage button even when stages exist (get last one - the one below stages)
+    // Only the header button should exist
     const addButtons = screen.getAllByRole('button', { name: /add stage/i });
-    const addButton = addButtons[addButtons.length - 1]; // Get the bottom one
-    expect(addButton).toBeInTheDocument();
-
-    // Button should be small size and outline-secondary
-    expect(addButton).toHaveClass('btn-sm');
-    expect(addButton).toHaveClass('btn-outline-secondary');
-  });
-
-  it('Add Stage button is full width in body footer', () => {
-    render(
-      <FieldSection
-        field={sampleField}
-        stages={[sampleStage]}
-        allNodes={[sampleField, sampleStage]}
-        edges={[]}
-        onUpdate={vi.fn()}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-        onAssignTeam={vi.fn()}
-        onAddGame={vi.fn()}
-        highlightedSourceGameId={null}
-        onDynamicReferenceClick={vi.fn()}
-        onAddGameToGameEdge={vi.fn()}
-        onRemoveGameToGameEdge={vi.fn()}
-        isExpanded={true}
-        expandedStageIds={new Set()}
-      />
-    );
-
-    // Get the bottom Add Stage button (the one below stages)
-    const addButtons = screen.getAllByRole('button', { name: /add stage/i });
-    const addButton = addButtons[addButtons.length - 1];
-    expect(addButton).toHaveClass('w-100');
+    expect(addButtons).toHaveLength(1);
+    
+    // Verify it's in the header by checking its container
+    expect(addButtons[0].closest('.field-section__header')).not.toBeNull();
   });
 
   it('calls onDelete when delete button is clicked', () => {
@@ -277,7 +242,7 @@ describe('FieldSection', () => {
       />
     );
 
-    const deleteButton = screen.getByRole('button', { name: /delete field/i });
+    const deleteButton = screen.getByTitle(/Permanently remove this field/i);
     fireEvent.click(deleteButton);
 
     expect(mockOnDelete).toHaveBeenCalledWith('field-1');
@@ -381,8 +346,8 @@ describe('FieldSection', () => {
       />
     );
 
-    // Click the edit button (pencil icon)
-    const editButton = screen.getByRole('button', { name: /edit field name/i });
+    // Click the edit button
+    const editButton = screen.getByTitle(/Click to edit the name of this playing field/i);
     fireEvent.click(editButton);
 
     const input = screen.getByDisplayValue('Feld 1');
@@ -392,5 +357,127 @@ describe('FieldSection', () => {
     expect(mockOnUpdate).toHaveBeenCalledWith('field-1', {
       name: 'Main Field',
     });
+  });
+
+  it('allows canceling field name edit with Escape', () => {
+    render(
+      <FieldSection
+        field={sampleField}
+        stages={[]}
+        allNodes={[sampleField]}
+        edges={[]}
+        onUpdate={vi.fn()}
+        onDelete={vi.fn()}
+        onAddStage={vi.fn()}
+        onSelectNode={vi.fn()}
+        selectedNodeId={null}
+      />
+    );
+
+    fireEvent.click(screen.getByTitle(/Click to edit the name of this playing field/i));
+    const input = screen.getByDisplayValue('Feld 1');
+    fireEvent.change(input, { target: { value: 'New Name' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    expect(screen.queryByDisplayValue('New Name')).not.toBeInTheDocument();
+    expect(screen.getByText('Feld 1')).toBeInTheDocument();
+  });
+
+  it('saves field name edit with Enter', () => {
+    const mockOnUpdate = vi.fn();
+    render(
+      <FieldSection
+        field={sampleField}
+        stages={[]}
+        allNodes={[sampleField]}
+        edges={[]}
+        onUpdate={mockOnUpdate}
+        onDelete={vi.fn()}
+        onAddStage={vi.fn()}
+        onSelectNode={vi.fn()}
+        selectedNodeId={null}
+      />
+    );
+
+    fireEvent.click(screen.getByTitle(/Click to edit the name of this playing field/i));
+    const input = screen.getByDisplayValue('Feld 1');
+    fireEvent.change(input, { target: { value: 'Main Field' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(mockOnUpdate).toHaveBeenCalledWith('field-1', { name: 'Main Field' });
+  });
+
+  it('calls onUpdate when color is changed', () => {
+    const mockOnUpdate = vi.fn();
+    render(
+      <FieldSection
+        field={sampleField}
+        stages={[]}
+        allNodes={[sampleField]}
+        edges={[]}
+        onUpdate={mockOnUpdate}
+        onDelete={vi.fn()}
+        onAddStage={vi.fn()}
+        onSelectNode={vi.fn()}
+        selectedNodeId={null}
+      />
+    );
+
+    const colorInput = screen.getByTitle(/Change the accent color for this field/i);
+    fireEvent.change(colorInput, { target: { value: '#ff0000' } });
+
+    expect(mockOnUpdate).toHaveBeenCalledWith('field-1', { color: '#ff0000' });
+  });
+
+  it('toggles expansion when header is clicked', () => {
+    render(
+      <FieldSection
+        field={sampleField}
+        stages={[sampleStage]}
+        allNodes={[sampleField, sampleStage]}
+        edges={[]}
+        onUpdate={vi.fn()}
+        onDelete={vi.fn()}
+        onAddStage={vi.fn()}
+        onSelectNode={vi.fn()}
+        selectedNodeId={null}
+        isExpanded={false}
+        expandedStageIds={new Set()}
+      />
+    );
+
+    const header = screen.getByText('Feld 1').closest('.field-section__header');
+    
+    // Initially expanded by local state if prop is false? 
+    // Wait, the component says: const isExpanded = isExpandedProp || localExpanded;
+    // localExpanded defaults to true.
+    
+    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+    
+    fireEvent.click(header!);
+    // Now it should be collapsed (localExpanded becomes false)
+    expect(screen.queryByText('Vorrunde')).not.toBeInTheDocument();
+  });
+
+  it('shows big Add Stage button in empty state', () => {
+    const mockOnAddStage = vi.fn();
+    render(
+      <FieldSection
+        field={sampleField}
+        stages={[]}
+        allNodes={[sampleField]}
+        edges={[]}
+        onUpdate={vi.fn()}
+        onDelete={vi.fn()}
+        onAddStage={mockOnAddStage}
+        onSelectNode={vi.fn()}
+        selectedNodeId={null}
+      />
+    );
+
+    const bigAddButton = screen.getByText(/No stages yet/i).parentElement?.querySelector('button');
+    expect(bigAddButton).toBeInTheDocument();
+    fireEvent.click(bigAddButton!);
+    expect(mockOnAddStage).toHaveBeenCalledWith('field-1');
   });
 });

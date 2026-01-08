@@ -21,8 +21,9 @@ import {
   TOURNAMENT_GENERATION_STATE_DELAY,
   DEFAULT_TOURNAMENT_GROUP_NAME,
 } from '../utils/tournamentConstants';
-import type { GlobalTeam } from '../types/flowchart';
+import type { GlobalTeam, Notification, NotificationType } from '../types/flowchart';
 import type { TournamentGenerationConfig } from '../types/tournament';
+import { v4 as uuidv4 } from 'uuid';
 
 export function useDesignerController() {
   const flowState = useFlowState();
@@ -58,8 +59,25 @@ export function useDesignerController() {
   const [expandedFieldIds, setExpandedFieldIds] = useState<Set<string>>(new Set());
   const [expandedStageIds, setExpandedStageIds] = useState<Set<string>>(new Set());
   const [showTournamentModal, setShowTournamentModal] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // --- UI Actions ---
+
+  const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string) => {
+    const id = uuidv4();
+    setNotifications((prev) => [
+      ...prev,
+      { id, message, type, title, show: true }
+    ]);
+  }, []);
+
+  const dismissNotification = useCallback((id: string) => {
+    setNotifications((prev) => prev.map(n => n.id === id ? { ...n, show: false } : n));
+    // Clean up after animation
+    setTimeout(() => {
+      setNotifications((prev) => prev.filter(n => n.id !== id));
+    }, 300);
+  }, []);
 
   const expandField = useCallback((fieldId: string) => {
     setExpandedFieldIds((prev) => new Set([...prev, fieldId]));
@@ -84,19 +102,20 @@ export function useDesignerController() {
     (json: unknown) => {
       const errors = validateScheduleJson(json);
       if (errors.length > 0) {
-        alert(`Invalid JSON format:\n${errors.join('\n')}`);
+        addNotification(`Invalid JSON format: ${errors.join(', ')}`, 'danger', 'Import Error');
         return;
       }
 
       const result = importFromScheduleJson(json);
       if (!result.success || !result.state) {
-        alert(`Import failed:\n${result.errors.join('\n')}`);
+        addNotification(`Import failed: ${result.errors.join(', ')}`, 'danger', 'Import Error');
         return;
       }
 
       importState(result.state);
+      addNotification('Schedule imported successfully', 'success', 'Import Success');
     },
-    [importState]
+    [importState, addNotification]
   );
 
   const handleExport = useCallback(() => {
@@ -109,7 +128,8 @@ export function useDesignerController() {
       if (!proceed) return;
     }
     downloadFlowchartAsJson(state);
-  }, [exportState]);
+    addNotification('Schedule exported successfully', 'success', 'Export Success');
+  }, [exportState, addNotification]);
 
   const assignTeamsToTournament = useCallback(
     (structure: TournamentStructure, teams: GlobalTeam[]) => {
@@ -161,11 +181,13 @@ export function useDesignerController() {
         }
         
         setShowTournamentModal(false);
+        addNotification('Tournament generated successfully', 'success', 'Generation Success');
       } catch (error) {
         console.error('Failed to generate tournament:', error);
+        addNotification('Failed to generate tournament. See console for details.', 'danger', 'Generation Error');
       }
     },
-    [globalTeams, globalTeamGroups, addBulkTournament, addGlobalTeam, addGlobalTeamGroup, updateGlobalTeam, assignTeamsToTournament]
+    [globalTeams, globalTeamGroups, addBulkTournament, addGlobalTeam, addGlobalTeamGroup, updateGlobalTeam, assignTeamsToTournament, addNotification]
   );
 
   const canExport = useMemo(() => {
@@ -176,6 +198,7 @@ export function useDesignerController() {
     // State
     ...flowState,
     validation,
+    notifications,
     ui: {
       highlightedSourceGameId,
       expandedFieldIds,
@@ -205,6 +228,7 @@ export function useDesignerController() {
       handleAddGlobalTeamGroup: () => addGlobalTeamGroup(),
       handleAddFieldContainer: () => addFieldNode({}, true),
       handleAddStage: (fieldId: string) => addStageNode(fieldId),
+      dismissNotification,
     }
   };
 }

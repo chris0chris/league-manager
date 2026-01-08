@@ -9,6 +9,7 @@ import { Card, Button } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import StageSection from './StageSection';
 import type { FieldNode, StageNode, FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
+import { ICONS } from '../../utils/iconConstants';
 import './FieldSection.css';
 
 export interface FieldSectionProps {
@@ -134,7 +135,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
           borderLeft: `4px solid ${field.data.color || '#0dcaf0'}`,
         }}
       >
-        <i className={`bi bi-chevron-${isExpanded ? 'down' : 'right'} me-2`}></i>
+        <i className={`bi ${isExpanded ? ICONS.EXPANDED : ICONS.COLLAPSED} me-2`}></i>
 
         {isEditingName ? (
           <input
@@ -156,26 +157,27 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
               variant="link"
               onClick={handleStartEdit}
               aria-label={t('ui:tooltip.editFieldName')}
-              className="p-0 me-auto"
+              className="p-0 me-auto btn-adaptive"
               style={{ fontSize: '0.875rem' }}
+              title={t('ui:tooltip.editFieldName')}
             >
-              <i className="bi bi-pencil"></i>
+              <i className={`bi ${ICONS.PENCIL_SMALL}`}></i>
+              <span className="btn-label-adaptive">{t('ui:button.edit')}</span>
             </Button>
           </>
         )}
 
-        {sortedStages.length > 0 && (
-          <Button
-            size="sm"
-            variant="outline-primary"
-            onClick={handleAddStage}
-            aria-label={t('ui:button.addStage')}
-            className="me-2"
-          >
-            <i className="bi bi-plus-circle me-1"></i>
-            {t('ui:button.addStage')}
-          </Button>
-        )}
+        <Button
+          size="sm"
+          variant="outline-primary"
+          onClick={handleAddStage}
+          aria-label={t('ui:button.addStage')}
+          className="me-2 btn-adaptive"
+          title={t('ui:tooltip.addStage')}
+        >
+          <i className={`bi ${ICONS.ADD}`}></i>
+          <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
+        </Button>
 
         <input
           type="color"
@@ -187,8 +189,15 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
           style={{ width: '28px', height: '28px', border: 'none', borderRadius: '50%', cursor: 'pointer' }}
         />
 
-        <Button variant="outline-danger" size="sm" onClick={handleDelete} aria-label={t('ui:tooltip.deleteField')}>
-          <i className="bi bi-trash"></i>
+        <Button 
+          variant="outline-danger" 
+          size="sm" 
+          onClick={handleDelete} 
+          aria-label={t('ui:tooltip.deleteField')}
+          className="btn-adaptive"
+          title={t('ui:tooltip.deleteField')}
+        >
+          <i className={`bi ${ICONS.DELETE}`}></i>
         </Button>
       </Card.Header>
 
@@ -196,11 +205,17 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
         <Card.Body className="field-section__body">
           {sortedStages.length === 0 ? (
             <div className="text-center py-4">
-              <i className="bi bi-layers me-2"></i>
+              <i className={`bi ${ICONS.STAGE} me-2`} style={{ fontSize: '2rem', opacity: 0.3 }}></i>
               <p className="text-muted mb-3">{t('ui:message.noStagesYet')}</p>
-              <Button variant="outline-primary" onClick={handleAddStage} aria-label={t('ui:button.addStage')}>
-                <i className="bi bi-plus-circle me-1"></i>
-                {t('ui:button.addStage')}
+              <Button 
+                variant="outline-primary" 
+                onClick={handleAddStage} 
+                aria-label={t('ui:button.addStage')} 
+                className="btn-adaptive"
+                title={t('ui:tooltip.addStage')}
+              >
+                <i className={`bi ${ICONS.ADD}`}></i>
+                <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
               </Button>
             </div>
           ) : (
@@ -224,10 +239,6 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
                   isExpanded={expandedStageIds.has(stage.id)}
                 />
               ))}
-              <Button variant="outline-secondary" size="sm" className="w-100 mt-2" onClick={handleAddStage} aria-label={t('ui:button.addStage')}>
-                <i className="bi bi-plus-circle me-1"></i>
-                {t('ui:button.addStage')}
-              </Button>
             </>
           )}
         </Card.Body>

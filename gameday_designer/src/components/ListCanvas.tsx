@@ -12,6 +12,7 @@ import GlobalTeamTable from './list/GlobalTeamTable';
 import FieldSection from './list/FieldSection';
 import type { FlowNode, FlowEdge, FieldNode, StageNode, GlobalTeam, GlobalTeamGroup } from '../types/flowchart';
 import { isFieldNode, isStageNode } from '../types/flowchart';
+import { ICONS } from '../utils/iconConstants';
 import './ListCanvas.css';
 
 export interface ListCanvasProps {
@@ -114,15 +115,19 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
             {isTeamPoolExpanded ? (
               <>
                 <Card.Header className="d-flex align-items-center" onClick={handleToggleTeamPool} style={{ cursor: 'pointer' }}>
-                  <i className="bi bi-chevron-left me-2" />
-                  <i className="bi bi-people-fill me-2" />
+                  <i className={`bi ${ICONS.COLLAPSED} me-2`} />
+                  <i className={`bi ${ICONS.TEAM} me-2`} />
                   <strong>{t('ui:label.teamPool')}</strong>
-                  {globalTeamGroups.length > 0 && (
-                    <Button size="sm" variant="outline-primary" onClick={handleAddGroupHeader} className="ms-auto">
-                      <i className="bi bi-plus-circle me-1" />
-                      {t('ui:button.addGroup')}
-                    </Button>
-                  )}
+                  <Button 
+                    size="sm" 
+                    variant="outline-primary" 
+                    onClick={handleAddGroupHeader} 
+                    className="ms-auto btn-adaptive"
+                    title={t('ui:tooltip.addGroup')}
+                  >
+                    <i className={`bi ${ICONS.ADD} me-2`} />
+                    <span className="btn-label-adaptive">{t('ui:button.addGroup')}</span>
+                  </Button>
                 </Card.Header>
                 <Card.Body>
                   <GlobalTeamTable
@@ -143,7 +148,7 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
               </>
             ) : (
               <div className="team-pool-sidebar">
-                <i className="bi bi-people-fill mb-2" />
+                <i className={`bi ${ICONS.TEAM} mb-2`} />
                 {globalTeamGroups.length > 0 && (
                   <div className="team-pool-sidebar__indicators">
                     <span className="badge bg-primary">{globalTeamGroups.length}</span>
@@ -159,28 +164,37 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
         <Col md={isTeamPoolExpanded ? 9 : true} className="fields-column">
           <Card className="fields-card">
             <Card.Header className="d-flex align-items-center">
-              <i className="bi bi-geo-alt-fill me-2" />
+              <i className={`bi ${ICONS.FIELD} me-2`} />
               <strong>{t('ui:label.fields')}</strong>
-              {fields.length > 0 && (
-                <Button size="sm" variant="outline-primary" onClick={onAddField} className="ms-auto">
-                  <i className="bi bi-plus-circle me-1" />
-                  {t('ui:button.addField')}
-                </Button>
-              )}
+              <Button 
+                size="sm" 
+                variant="outline-primary" 
+                onClick={onAddField} 
+                className="ms-auto btn-adaptive"
+                title={t('ui:tooltip.addField')}
+              >
+                <i className={`bi ${ICONS.ADD} me-2`} />
+                <span className="btn-label-adaptive">{t('ui:button.addField')}</span>
+              </Button>
             </Card.Header>
             <Card.Body>
               {fields.length === 0 ? (
                 <div className="text-center py-5">
-                  <i className="bi bi-geo-alt" style={{ fontSize: '4rem', opacity: 0.3 }} />
+                  <i className={`bi ${ICONS.FIELD}`} style={{ fontSize: '4rem', opacity: 0.3 }} />
                   <h3 className="mt-3">{t('ui:message.noFieldsYet')}</h3>
                   <p className="text-muted mb-3">{t('ui:message.createFirstField')}</p>
-                  <Button variant="outline-primary" onClick={onAddField}>
-                    <i className="bi bi-plus-circle me-1" />
-                    {t('ui:button.addField')}
+                  <Button 
+                    variant="outline-primary" 
+                    onClick={onAddField} 
+                    className="btn-adaptive"
+                    title={t('ui:tooltip.addField')}
+                  >
+                    <i className={`bi ${ICONS.ADD} me-2`} />
+                    <span className="btn-label-adaptive">{t('ui:button.addField')}</span>
                   </Button>
                 </div>
               ) : (
-                <div className="fields-grid">
+                <div className="fields-grid compact-actions">
                   {fields.map((field) => (
                     <FieldSection
                       key={field.id}

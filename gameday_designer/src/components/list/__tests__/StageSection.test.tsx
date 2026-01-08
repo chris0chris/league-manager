@@ -122,7 +122,7 @@ describe('StageSection', () => {
       />
     );
 
-    const deleteButton = screen.getByRole('button', { name: /delete stage/i });
+    const deleteButton = screen.getByTitle(/Permanently remove this phase/i);
     fireEvent.click(deleteButton);
 
     expect(mockOnDelete).toHaveBeenCalledWith('stage-1');
@@ -169,8 +169,8 @@ describe('StageSection', () => {
       />
     );
 
-    // Click the edit button (pencil icon)
-    const editButton = screen.getByRole('button', { name: /edit stage name/i });
+    // Click the edit button
+    const editButton = screen.getByTitle(/Click to edit the name of this tournament phase/i);
     fireEvent.click(editButton);
 
     const input = screen.getByDisplayValue('Vorrunde');
@@ -232,8 +232,8 @@ describe('StageSection', () => {
     expect(screen.getByText('Game 1')).toBeInTheDocument();
   });
 
-  describe('Inline Add Game button pattern', () => {
-    it('Add Game button is in body below table, NOT in header', () => {
+  describe('Add Game button pattern', () => {
+    it('Add Game button is in the header', () => {
       const { container } = render(
         <StageSection
           {...createDefaultProps({
@@ -243,14 +243,11 @@ describe('StageSection', () => {
         />
       );
 
-      const body = container.querySelector('.stage-section__body');
+      const header = container.querySelector('.stage-section__header');
 
-      // Body should contain Add Game button below the table
-      const addButtonInBody = body?.querySelector('button[aria-label*="Add Game"]');
-      expect(addButtonInBody).toBeInTheDocument();
-
-      // Note: There's also an Add Game button in header when games exist
-      // This test now accepts both buttons exist
+      // Header should contain Add Game button
+      const addButtonInHeader = header?.querySelector('button[aria-label*="Add Game"]');
+      expect(addButtonInHeader).toBeInTheDocument();
     });
 
     it('calls onAddGame when Add Game button is clicked', () => {
@@ -266,13 +263,14 @@ describe('StageSection', () => {
         />
       );
 
-      const addButton = screen.getByRole('button', { name: /add game/i });
-      fireEvent.click(addButton);
+      // Get header Add Game button
+      const addButtons = screen.getAllByRole('button', { name: /add game/i });
+      fireEvent.click(addButtons[0]);
 
       expect(mockOnAddGame).toHaveBeenCalledWith('stage-1');
     });
 
-    it('Add Game button appears at bottom when games exist', () => {
+    it('No Add Game button appears at bottom when games exist', () => {
       render(
         <StageSection
           {...createDefaultProps({
@@ -282,35 +280,15 @@ describe('StageSection', () => {
         />
       );
 
-      // Should find Add Game buttons (there are TWO: one in header, one in body)
+      // Should only find one Add Game button (in header)
       const addButtons = screen.getAllByRole('button', { name: /add game/i });
-      expect(addButtons.length).toBeGreaterThan(0);
-
-      // Find the one in the body (full width, outline-secondary)
-      const bodyButton = addButtons.find(btn => btn.classList.contains('w-100'));
-      expect(bodyButton).toBeDefined();
-      expect(bodyButton).toHaveClass('btn-sm');
-      expect(bodyButton).toHaveClass('btn-outline-secondary');
+      expect(addButtons).toHaveLength(1);
+      
+      // Verify it's in the header
+      expect(addButtons[0].closest('.stage-section__header')).not.toBeNull();
     });
 
-    it('Add Game button is full width below table', () => {
-      render(
-        <StageSection
-          {...createDefaultProps({
-            stage: sampleStage,
-            allNodes: [sampleStage, sampleGame],
-          })}
-        />
-      );
-
-      // There are TWO Add Game buttons - find the one with full width (in body)
-      const addButtons = screen.getAllByRole('button', { name: /add game/i });
-      const bodyButton = addButtons.find(btn => btn.classList.contains('w-100'));
-      expect(bodyButton).toBeDefined();
-      expect(bodyButton).toHaveClass('w-100');
-    });
-
-    it('shows inline Add Game button in empty state', () => {
+    it('shows inline Add Game button in empty state (big button)', () => {
       render(
         <StageSection
           {...createDefaultProps({
@@ -323,9 +301,108 @@ describe('StageSection', () => {
       // Should show empty state text
       expect(screen.getByText(/no games/i)).toBeInTheDocument();
 
-      // Should show Add Game button
-      const addButton = screen.getByRole('button', { name: /add game/i });
-      expect(addButton).toBeInTheDocument();
+      // Should show big Add Game button in body (there are two buttons now, header and body)
+      const addButtons = screen.getAllByRole('button', { name: /add game/i });
+      expect(addButtons.length).toBeGreaterThan(1);
+      
+      const bodyButton = addButtons.find(btn => btn.closest('.stage-section__body'));
+      expect(bodyButton).toBeDefined();
     });
+  });
+
+  it('allows canceling stage name edit with Escape', () => {
+    render(
+      <StageSection
+        {...createDefaultProps({
+          stage: sampleStage,
+          allNodes: [sampleStage],
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByTitle(/Click to edit the name of this tournament phase/i));
+    const input = screen.getByDisplayValue('Vorrunde');
+    fireEvent.change(input, { target: { value: 'New Name' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    expect(screen.queryByDisplayValue('New Name')).not.toBeInTheDocument();
+    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+  });
+
+  it('saves stage name edit with Enter', () => {
+    const mockOnUpdate = vi.fn();
+    render(
+      <StageSection
+        {...createDefaultProps({
+          stage: sampleStage,
+          allNodes: [sampleStage],
+          onUpdate: mockOnUpdate,
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByTitle(/Click to edit the name of this tournament phase/i));
+    const input = screen.getByDisplayValue('Vorrunde');
+    fireEvent.change(input, { target: { value: 'New Name' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { name: 'New Name' });
+  });
+
+  it('calls onUpdate when start time is changed', () => {
+    const mockOnUpdate = vi.fn();
+    render(
+      <StageSection
+        {...createDefaultProps({
+          stage: sampleStage,
+          allNodes: [sampleStage],
+          onUpdate: mockOnUpdate,
+        })}
+      />
+    );
+
+    const timeInput = screen.getByLabelText(/Start/i);
+    fireEvent.change(timeInput, { target: { value: '10:30' } });
+
+    expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { startTime: '10:30' });
+  });
+
+  it('calls onUpdate when color is changed', () => {
+    const mockOnUpdate = vi.fn();
+    render(
+      <StageSection
+        {...createDefaultProps({
+          stage: sampleStage,
+          allNodes: [sampleStage],
+          onUpdate: mockOnUpdate,
+        })}
+      />
+    );
+
+    const colorInput = screen.getByTitle(/Change the accent color for this phase/i);
+    fireEvent.change(colorInput, { target: { value: '#00ff00' } });
+
+    expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { color: '#00ff00' });
+  });
+
+  it('toggles expansion when header is clicked', () => {
+    render(
+      <StageSection
+        {...createDefaultProps({
+          stage: sampleStage,
+          allNodes: [sampleStage, sampleGame],
+          isExpanded: false,
+        })}
+      />
+    );
+
+    const header = screen.getByText('Vorrunde').closest('.stage-section__header');
+    
+    // Initially expanded by local state if prop is false
+    expect(screen.getByText('Game 1')).toBeInTheDocument();
+    
+    fireEvent.click(header!);
+    // Now it should be collapsed
+    expect(screen.queryByText('Game 1')).not.toBeInTheDocument();
   });
 });
