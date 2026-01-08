@@ -49,6 +49,7 @@ describe('tournamentGenerator - Timing Integration', () => {
     // Game 2: 10:00 + 60m + 0m = 11:00
     expect(result.games).toHaveLength(2);
     expect(result.games[0].data.startTime).toBe('10:00');
+    expect(result.games[0].data.breakAfter).toBe(0); // <--- Verified
     expect(result.games[1].data.startTime).toBe('11:00');
   });
 
@@ -66,6 +67,7 @@ describe('tournamentGenerator - Timing Integration', () => {
     // Game 1: 10:00
     // Game 2: 10:00 + 60m + 10m (default) = 11:10
     expect(result.games[0].data.startTime).toBe('10:00');
+    expect(result.games[0].data.breakAfter).toBe(10); // <--- Verified
     expect(result.games[1].data.startTime).toBe('11:10');
   });
 });

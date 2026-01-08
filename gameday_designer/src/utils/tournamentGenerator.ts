@@ -58,7 +58,7 @@ export function generateTournament(
   const finalGameDuration = gameDuration ?? template.timing.defaultGameDuration;
   const finalBreakDuration = breakDuration ?? template.timing.defaultBreakBetweenGames;
   
-  let stages = createStages(template, fields, startTime, finalGameDuration);
+  let stages = createStages(template, fields, startTime, finalGameDuration, finalBreakDuration);
 
   // 3. Generate games for each stage
   let games = generateGamesForStages(stages);
@@ -140,7 +140,8 @@ function createStages(
   template: TournamentTemplate,
   fields: FieldNode[],
   startTime: string,
-  gameDuration: number
+  gameDuration: number,
+  breakDuration: number
 ): StageNode[] {
   const stages: StageNode[] = [];
   let stageOrderCounter = 0;
@@ -158,6 +159,7 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          defaultBreakBetweenGames: breakDuration,
           progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
@@ -176,6 +178,7 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          defaultBreakBetweenGames: breakDuration,
           progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
@@ -194,6 +197,7 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          defaultBreakBetweenGames: breakDuration,
           progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
@@ -224,13 +228,15 @@ function generateGamesForStages(
       games = generateRoundRobinGames(
         stage.id,
         stageData.progressionConfig as RoundRobinConfig,
-        stageData.defaultGameDuration
+        stageData.defaultGameDuration,
+        stageData.defaultBreakBetweenGames
       );
     } else if (stageData.progressionMode === 'placement') {
       games = generatePlacementGames(
         stage.id,
         stageData.progressionConfig as PlacementConfig,
-        stageData.defaultGameDuration
+        stageData.defaultGameDuration,
+        stageData.defaultBreakBetweenGames
       );
     }
     // 'manual' mode generates no games automatically
