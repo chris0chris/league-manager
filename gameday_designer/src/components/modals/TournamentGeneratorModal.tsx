@@ -58,16 +58,38 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
   const [startTime, setStartTime] = useState<string>(DEFAULT_START_TIME);
   const [gameDuration, setGameDuration] = useState<number>(DEFAULT_GAME_DURATION);
   const [generateTeams, setGenerateTeams] = useState<boolean>(false);
-  const [autoAssignTeams, setAutoAssignTeams] = useState<boolean>(true);
-
-  // Validation
-  const isDurationValid = gameDuration >= 15 && gameDuration <= 180;
-
-  // Update field count when template changes (derived from selectedTemplate on first render)
-  useEffect(() => {
+    const [autoAssignTeams, setAutoAssignTeams] = useState<boolean>(true);
+  
+    /**
+     * Reset form to default values
+     */
+    const resetForm = () => {
+      setSelectedTemplate(availableTemplates[0] || null);
+      setFieldCount(availableTemplates[0]?.fieldOptions[0] || 1);
+      setStartTime(DEFAULT_START_TIME);
+      setGameDuration(DEFAULT_GAME_DURATION);
+      setGenerateTeams(false);
+      setAutoAssignTeams(true);
+    };
+  
+    // Reset form when modal is closed
+    useEffect(() => {
+      if (!show) {
+        resetForm();
+      }
+      // We only want to reset when 'show' changes to false
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [show]);
+  
+    // Validation
+    const isDurationValid = gameDuration >= 15 && gameDuration <= 180;
+  
+      // Update field count when template changes
+  
+      useEffect(() => {
+  
+    
     if (selectedTemplate && selectedTemplate.fieldOptions.length > 0 && fieldCount === 1) {
-      // Only update if still at default value
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFieldCount(selectedTemplate.fieldOptions[0]);
     }
   }, [selectedTemplate, fieldCount]);
