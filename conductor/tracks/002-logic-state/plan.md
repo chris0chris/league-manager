@@ -9,10 +9,10 @@ Enhance the core logic, state management, and user interactions of the Gameday D
 - [x] **Task 3: Fix time selection bug (#670)** 7690b50
 - [ ] **Task 4: Enable group placement selection (#671)**
 - [ ] **Task 5: Automatic team color generation (#672)**
-- [ ] **Task 6: Fix Tournament Generation Validation (Bug 1)**
+- [x] **Task 6: Fix Tournament Generation Validation (Bug 1)** c0d8c31
   - Disable "Generate" if team requirements not met.
-- [ ] **Task 7: Fix Default Tournament Timing (Bug 2)**
+- [x] **Task 7: Fix Default Tournament Timing (Bug 2)** c0d8c31
   - Use configurated duration instead of hardcoded 50 mins in generators.
-- [ ] **Task 8: Fix Individual Game Time Input (Bug 3)**
+- [x] **Task 8: Fix Individual Game Time Input (Bug 3)** c0d8c31
   - Ensure editing game time correctly sets `manualTime` and propagates state.
 
