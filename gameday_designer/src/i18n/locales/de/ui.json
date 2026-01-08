@@ -35,6 +35,7 @@
     "numberOfFields": "Anzahl der Felder",
     "startTime": "Startzeit",
     "gameDuration": "Spieldauer (min)",
+    "breakDuration": "Pause zw. Spielen (min)",
     "preview": "Vorschau",
     "fields": "Felder",
     "teamPool": "Team-Pool",

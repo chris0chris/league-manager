@@ -55,8 +55,8 @@ export function generateTournament(
   const fields = createFields(fieldCount);
 
   // 2. Create stages and assign to fields
-  const finalGameDuration = gameDuration || template.timing.defaultGameDuration;
-  const finalBreakDuration = breakDuration || template.timing.defaultBreakBetweenGames;
+  const finalGameDuration = gameDuration ?? template.timing.defaultGameDuration;
+  const finalBreakDuration = breakDuration ?? template.timing.defaultBreakBetweenGames;
   
   let stages = createStages(template, fields, startTime, finalGameDuration);
 

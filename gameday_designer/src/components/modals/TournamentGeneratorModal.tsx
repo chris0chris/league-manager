@@ -57,20 +57,22 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
   );
   const [startTime, setStartTime] = useState<string>(DEFAULT_START_TIME);
   const [gameDuration, setGameDuration] = useState<number>(DEFAULT_GAME_DURATION);
+  const [breakDuration, setBreakDuration] = useState<number>(10);
   const [generateTeams, setGenerateTeams] = useState<boolean>(false);
-    const [autoAssignTeams, setAutoAssignTeams] = useState<boolean>(true);
-  
-    /**
-     * Reset form to default values
-     */
-    const resetForm = () => {
-      setSelectedTemplate(availableTemplates[0] || null);
-      setFieldCount(availableTemplates[0]?.fieldOptions[0] || 1);
-      setStartTime(DEFAULT_START_TIME);
-      setGameDuration(DEFAULT_GAME_DURATION);
-      setGenerateTeams(false);
-      setAutoAssignTeams(true);
-    };
+  const [autoAssignTeams, setAutoAssignTeams] = useState<boolean>(true);
+
+  /**
+   * Reset form to default values
+   */
+  const resetForm = () => {
+    setSelectedTemplate(availableTemplates[0] || null);
+    setFieldCount(availableTemplates[0]?.fieldOptions[0] || 1);
+    setStartTime(DEFAULT_START_TIME);
+    setGameDuration(DEFAULT_GAME_DURATION);
+    setBreakDuration(10);
+    setGenerateTeams(false);
+    setAutoAssignTeams(true);
+  };
   
     // Reset form when modal is closed
     useEffect(() => {
@@ -112,10 +114,13 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
         timing: {
           ...selectedTemplate.timing,
           defaultGameDuration: gameDuration,
+          defaultBreakBetweenGames: breakDuration,
         },
       },
       fieldCount,
       startTime,
+      gameDuration,
+      breakDuration,
       generateTeams,
       autoAssignTeams,
     });
@@ -180,7 +185,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
             {selectedTemplate && (
               <>
                 <Row>
-                  <Col md={4}>
+                  <Col md={3}>
                     <Form.Group className="mb-3" controlId="tournament-field-count">
                       <Form.Label>{t('ui:label.numberOfFields')}</Form.Label>
                       <Form.Select
@@ -195,7 +200,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                       </Form.Select>
                     </Form.Group>
                   </Col>
-                  <Col md={4}>
+                  <Col md={3}>
                     <Form.Group className="mb-3" controlId="tournament-start-time">
                       <Form.Label>{t('ui:label.startTime')}</Form.Label>
                       <Form.Control
@@ -205,7 +210,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={4}>
+                  <Col md={3}>
                     <Form.Group className="mb-3" controlId="tournament-game-duration">
                       <Form.Label>{t('ui:label.gameDuration')}</Form.Label>
                       <Form.Control
@@ -219,6 +224,18 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                       <Form.Control.Feedback type="invalid">
                         Duration must be between 15 and 180 minutes.
                       </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group className="mb-3" controlId="tournament-break-duration">
+                      <Form.Label>{t('ui:label.breakDuration')}</Form.Label>
+                      <Form.Control
+                        type="number"
+                        min={0}
+                        max={60}
+                        value={breakDuration}
+                        onChange={(e) => setBreakDuration(parseInt(e.target.value) || 0)}
+                      />
                     </Form.Group>
                   </Col>
                 </Row>
@@ -270,6 +287,9 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                     {t('modal:tournamentGenerator.previewGameDuration', {
                       duration: gameDuration
                     })}
+                  </li>
+                  <li>
+                    {t('ui:label.breakDuration')}: {breakDuration} min
                   </li>
                 </ul>
               </Alert>
