@@ -29,10 +29,12 @@ import { createGameNodeInStage } from '../types/flowchart';
  */
 export function generateRoundRobinGames(
   stageId: string,
-  config: RoundRobinConfig
+  config: RoundRobinConfig,
+  duration?: number
 ): GameNode[] {
   const { teamCount, doubleRound } = config;
   const games: GameNode[] = [];
+  const gameDuration = duration ?? 50;
 
   // Circular rotation algorithm for round robin
   // For N teams, we need N rounds if odd (to account for byes), N-1 if even
@@ -62,7 +64,7 @@ export function generateRoundRobinGames(
         stageId,
         {
           standing: `Game ${gameCounter}`,
-          duration: 50,
+          duration: gameDuration,
           breakAfter: 0,
           manualTime: false,
           startTime: undefined,
@@ -108,15 +110,16 @@ export function generateRoundRobinGames(
  */
 export function generatePlacementGames(
   stageId: string,
-  config: PlacementConfig
+  config: PlacementConfig,
+  duration?: number
 ): GameNode[] {
   const { positions, format } = config;
   const games: GameNode[] = [];
 
   if (format === 'single_elimination') {
-    return generateSingleEliminationGames(stageId, positions);
+    return generateSingleEliminationGames(stageId, positions, duration);
   } else if (format === 'crossover') {
-    return generateCrossoverGames(stageId, positions);
+    return generateCrossoverGames(stageId, positions, duration);
   }
 
   return games;
@@ -134,40 +137,41 @@ export function generatePlacementGames(
  */
 function generateSingleEliminationGames(
   stageId: string,
-  positions: number
+  positions: number,
+  duration?: number
 ): GameNode[] {
   const games: GameNode[] = [];
 
   if (positions === 2) {
     // Just a final
-    games.push(createPlacementGame(stageId, 'Final'));
+    games.push(createPlacementGame(stageId, 'Final', duration));
     return games;
   }
 
   if (positions === 4) {
     // 2 semifinals + final + 3rd place
-    games.push(createPlacementGame(stageId, 'SF1'));
-    games.push(createPlacementGame(stageId, 'SF2'));
-    games.push(createPlacementGame(stageId, 'Final'));
-    games.push(createPlacementGame(stageId, '3rd Place'));
+    games.push(createPlacementGame(stageId, 'SF1', duration));
+    games.push(createPlacementGame(stageId, 'SF2', duration));
+    games.push(createPlacementGame(stageId, 'Final', duration));
+    games.push(createPlacementGame(stageId, '3rd Place', duration));
     return games;
   }
 
   if (positions === 8) {
     // 4 quarterfinals + 2 semifinals + final + 3rd place
-    games.push(createPlacementGame(stageId, 'QF1'));
-    games.push(createPlacementGame(stageId, 'QF2'));
-    games.push(createPlacementGame(stageId, 'QF3'));
-    games.push(createPlacementGame(stageId, 'QF4'));
-    games.push(createPlacementGame(stageId, 'SF1'));
-    games.push(createPlacementGame(stageId, 'SF2'));
-    games.push(createPlacementGame(stageId, 'Final'));
-    games.push(createPlacementGame(stageId, '3rd Place'));
+    games.push(createPlacementGame(stageId, 'QF1', duration));
+    games.push(createPlacementGame(stageId, 'QF2', duration));
+    games.push(createPlacementGame(stageId, 'QF3', duration));
+    games.push(createPlacementGame(stageId, 'QF4', duration));
+    games.push(createPlacementGame(stageId, 'SF1', duration));
+    games.push(createPlacementGame(stageId, 'SF2', duration));
+    games.push(createPlacementGame(stageId, 'Final', duration));
+    games.push(createPlacementGame(stageId, '3rd Place', duration));
     return games;
   }
 
   // For other position counts, just create a final
-  games.push(createPlacementGame(stageId, 'Final'));
+  games.push(createPlacementGame(stageId, 'Final', duration));
   return games;
 }
 
@@ -182,27 +186,28 @@ function generateSingleEliminationGames(
  */
 function generateCrossoverGames(
   stageId: string,
-  positions: number
+  positions: number,
+  duration?: number
 ): GameNode[] {
   const games: GameNode[] = [];
 
   if (positions === 2) {
     // Just a final
-    games.push(createPlacementGame(stageId, 'Final'));
+    games.push(createPlacementGame(stageId, 'Final', duration));
     return games;
   }
 
   if (positions === 4) {
     // Crossover: 1v4, 2v3, then finals
-    games.push(createPlacementGame(stageId, 'CO1')); // 1st vs 4th
-    games.push(createPlacementGame(stageId, 'CO2')); // 2nd vs 3rd
-    games.push(createPlacementGame(stageId, 'Final'));
-    games.push(createPlacementGame(stageId, '3rd Place'));
+    games.push(createPlacementGame(stageId, 'CO1', duration)); // 1st vs 4th
+    games.push(createPlacementGame(stageId, 'CO2', duration)); // 2nd vs 3rd
+    games.push(createPlacementGame(stageId, 'Final', duration));
+    games.push(createPlacementGame(stageId, '3rd Place', duration));
     return games;
   }
 
   // For other position counts, fallback to simple final
-  games.push(createPlacementGame(stageId, 'Final'));
+  games.push(createPlacementGame(stageId, 'Final', duration));
   return games;
 }
 
@@ -213,14 +218,14 @@ function generateCrossoverGames(
  * @param standing - The standing/label for the game
  * @returns A GameNode object
  */
-function createPlacementGame(stageId: string, standing: string): GameNode {
+function createPlacementGame(stageId: string, standing: string, duration?: number): GameNode {
   const gameId = uuidv4();
   return createGameNodeInStage(
     gameId,
     stageId,
     {
       standing,
-      duration: 50,
+      duration: duration ?? 50,
       breakAfter: 0,
       manualTime: false,
       startTime: undefined,

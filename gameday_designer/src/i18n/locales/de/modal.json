@@ -11,6 +11,7 @@
     "noTemplates": "Keine Turniervorlagen verfügbar.",
     "generateTeams": "{{count}} Teams automatisch generieren",
     "autoAssignTeams": "Teams automatisch Spielen zuweisen",
+    "insufficientTeams": "Nicht genügend Teams im Pool. Dieses Format benötigt mindestens {{min}} Teams, oder wählen Sie 'Teams automatisch generieren'.",
     "previewTitle": "Vorschau:",
     "previewFields_one": "{{count}} Feld",
     "previewFields_other": "{{count}} Felder",

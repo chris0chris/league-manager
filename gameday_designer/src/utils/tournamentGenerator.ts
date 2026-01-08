@@ -220,12 +220,14 @@ function generateGamesForStages(
     if (stageData.progressionMode === 'round_robin') {
       games = generateRoundRobinGames(
         stage.id,
-        stageData.progressionConfig as RoundRobinConfig
+        stageData.progressionConfig as RoundRobinConfig,
+        stageData.defaultGameDuration
       );
     } else if (stageData.progressionMode === 'placement') {
       games = generatePlacementGames(
         stage.id,
-        stageData.progressionConfig as PlacementConfig
+        stageData.progressionConfig as PlacementConfig,
+        stageData.defaultGameDuration
       );
     }
     // 'manual' mode generates no games automatically

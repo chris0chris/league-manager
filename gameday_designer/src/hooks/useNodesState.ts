@@ -265,7 +265,7 @@ export function useNodesState(
           }
         }
 
-        if (updatedNode && isGameNode(updatedNode) && ('breakAfter' in data || 'duration' in data)) {
+        if (updatedNode && isGameNode(updatedNode) && ('breakAfter' in data || 'duration' in data || 'startTime' in data)) {
           const stageId = updatedNode.parentId;
           if (stageId) {
             const stage = updatedNodes.find((n): n is StageNode => n.id === stageId && isStageNode(n));

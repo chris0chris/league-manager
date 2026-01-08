@@ -39,7 +39,7 @@ export interface TournamentGeneratorModalProps {
 const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
   show,
   onHide,
-  // teams - unused for now but kept in props for potential future use
+  teams,
   onGenerate,
 }) => {
   const { t } = useTypedTranslation(['ui', 'modal', 'domain']);
@@ -81,12 +81,18 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [show]);
   
-    // Validation
-    const isDurationValid = gameDuration >= 15 && gameDuration <= 180;
-  
+      // Validation
+      const isDurationValid = gameDuration >= 15 && gameDuration <= 180;
+      const isTeamCountValid = useMemo(() => {
+        if (!selectedTemplate) return false;
+        if (generateTeams) return true;
+        return teams.length >= selectedTemplate.teamCount.min;
+      }, [selectedTemplate, generateTeams, teams.length]);
+    
+      const canGenerate = selectedTemplate && isDurationValid && isTeamCountValid;
+    
       // Update field count when template changes
-  
-      useEffect(() => {
+          useEffect(() => {
   
     
     if (selectedTemplate && selectedTemplate.fieldOptions.length > 0 && fieldCount === 1) {
@@ -98,7 +104,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
    * Handle generate button click
    */
   const handleGenerate = () => {
-    if (!selectedTemplate || !isDurationValid) return;
+    if (!canGenerate) return;
 
     onGenerate({
       template: {
@@ -237,6 +243,13 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                     className="mt-2"
                   />
                 </Form.Group>
+
+                {selectedTemplate && !isTeamCountValid && (
+                  <Alert variant="warning" className="mb-3">
+                    <i className="bi bi-exclamation-triangle me-2"></i>
+                    {t('modal:tournamentGenerator.insufficientTeams', { min: selectedTemplate.teamCount.min })}
+                  </Alert>
+                )}
               </>
             )}
 
@@ -272,7 +285,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
         <Button
           variant="primary"
           onClick={handleGenerate}
-          disabled={!selectedTemplate}
+          disabled={!canGenerate}
         >
           <i className="bi bi-lightning-fill me-1"></i>
           {t('ui:button.generateTournament')}
