@@ -158,6 +158,7 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
       }
@@ -175,6 +176,7 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
       }
@@ -192,6 +194,7 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
       }

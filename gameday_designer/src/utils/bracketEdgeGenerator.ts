@@ -52,6 +52,44 @@ function findGameByStanding(games: GameNode[], standing: string): GameNode | und
 }
 
 /**
+ * Create edges based on a custom progression mapping
+ */
+function createEdgesFromMapping(
+  targetGames: GameNode[],
+  sourceGames: GameNode[],
+  mapping: NonNullable<StageNodeData['progressionMapping']>
+): EdgeSpec[] {
+  const edges: EdgeSpec[] = [];
+
+  Object.entries(mapping).forEach(([targetStanding, sourceMap]) => {
+    const targetGame = findGameByStanding(targetGames, targetStanding);
+    if (!targetGame) return;
+
+    // Home slot
+    if (sourceGames[sourceMap.home.sourceIndex]) {
+      edges.push({
+        sourceGameId: sourceGames[sourceMap.home.sourceIndex].id,
+        outputType: sourceMap.home.type,
+        targetGameId: targetGame.id,
+        targetSlot: 'home',
+      });
+    }
+
+    // Away slot
+    if (sourceGames[sourceMap.away.sourceIndex]) {
+      edges.push({
+        sourceGameId: sourceGames[sourceMap.away.sourceIndex].id,
+        outputType: sourceMap.away.type,
+        targetGameId: targetGame.id,
+        targetSlot: 'away',
+      });
+    }
+  });
+
+  return edges;
+}
+
+/**
  * Create edges for split group pattern (6+ source games)
  * Maps: Group A 1st/3rd vs Group B 1st/3rd to semifinals
  */
@@ -484,6 +522,7 @@ function create4TeamCrossoverEdges(targetGames: GameNode[]): EdgeSpec[] {
  * @param targetGames - Games in the target stage (e.g., playoffs)
  * @param sourceGames - Games from the source stage (e.g., group stage)
  * @param config - Progression configuration from stage data
+ * @param mapping - Optional custom progression mapping
  * @returns Array of edge specifications for game-to-game connections
  *
  * @example
@@ -498,7 +537,8 @@ function create4TeamCrossoverEdges(targetGames: GameNode[]): EdgeSpec[] {
 export function createPlacementEdges(
   targetGames: GameNode[],
   sourceGames: GameNode[],
-  config: StageNodeData['progressionConfig']
+  config: StageNodeData['progressionConfig'],
+  mapping?: StageNodeData['progressionMapping']
 ): EdgeSpec[] {
   if (!config || config.mode !== 'placement') {
     return [];
@@ -507,6 +547,11 @@ export function createPlacementEdges(
   const { positions, format } = config;
 
   try {
+    // If custom mapping is provided and we have source games, use it
+    if (mapping && sourceGames.length > 0) {
+      return createEdgesFromMapping(targetGames, sourceGames, mapping);
+    }
+
     if (positions === BRACKET_SIZE_WITH_SEMIFINALS && format === 'single_elimination') {
       return create4TeamSingleEliminationEdges(targetGames, sourceGames);
     } else if (positions === BRACKET_SIZE_FINAL_ONLY && format === 'single_elimination') {

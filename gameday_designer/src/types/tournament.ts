@@ -66,6 +66,15 @@ export interface TournamentStageTemplate {
    * - number: Assign to specific field index
    */
   fieldAssignment: 'all' | 'split' | number;
+
+  /**
+   * Optional mapping for progression from source games.
+   * Key is target game standing (e.g., 'SF1'), value is source mapping.
+   */
+  progressionMapping?: Record<string, {
+    home: { sourceIndex: number; type: 'winner' | 'loser' };
+    away: { sourceIndex: number; type: 'winner' | 'loser' };
+  }>;
 }
 
 /**

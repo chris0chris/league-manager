@@ -177,7 +177,8 @@ export const GAME_STANDING_CO2 = 'CO2';
 export const DEFAULT_TOURNAMENT_GROUP_NAME = 'Tournament Teams';
 
 /**
- * Team color palette for auto-generated teams
+ * Team color palette for auto-generated teams.
+ * Professional, high-contrast colors suitable for tournament UI.
  */
 export const TEAM_COLORS = [
   '#3498db', // Blue
@@ -192,6 +193,10 @@ export const TEAM_COLORS = [
   '#c0392b', // Dark Red
   '#27ae60', // Dark Green
   '#8e44ad', // Dark Purple
+  '#2980b9', // Strong Blue
+  '#d35400', // Pumpkin
+  '#7f8c8d', // Gray
+  '#2c3e50', // Midnight Blue
 ] as const;
 
 // ============================================================================

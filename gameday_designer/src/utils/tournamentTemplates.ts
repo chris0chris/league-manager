@@ -35,6 +35,16 @@ export const TEMPLATE_F6_2_2: TournamentTemplate = {
       progressionMode: 'placement',
       config: { mode: 'placement', positions: 4, format: 'single_elimination' },
       fieldAssignment: 0, // All playoff games on Field 1
+      progressionMapping: {
+        'SF1': {
+          home: { sourceIndex: 0, type: 'winner' },
+          away: { sourceIndex: 3, type: 'winner' }
+        },
+        'SF2': {
+          home: { sourceIndex: 2, type: 'winner' },
+          away: { sourceIndex: 5, type: 'winner' }
+        }
+      }
     },
   ],
   timing: {
@@ -71,6 +81,24 @@ export const TEMPLATE_F8_2_3: TournamentTemplate = {
       progressionMode: 'placement',
       config: { mode: 'placement', positions: 8, format: 'single_elimination' },
       fieldAssignment: 'all',
+      progressionMapping: {
+        'QF1': {
+          home: { sourceIndex: 0, type: 'winner' },
+          away: { sourceIndex: 6, type: 'winner' }
+        },
+        'QF2': {
+          home: { sourceIndex: 1, type: 'winner' },
+          away: { sourceIndex: 7, type: 'winner' }
+        },
+        'QF3': {
+          home: { sourceIndex: 2, type: 'winner' },
+          away: { sourceIndex: 8, type: 'winner' }
+        },
+        'QF4': {
+          home: { sourceIndex: 3, type: 'winner' },
+          away: { sourceIndex: 9, type: 'winner' }
+        }
+      }
     },
     {
       name: '3rd/5th Place',

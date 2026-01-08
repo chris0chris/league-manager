@@ -226,6 +226,11 @@ export interface StageNodeData {
   progressionMode?: ProgressionMode;
   /** Configuration for progression mode */
   progressionConfig?: ProgressionConfig;
+  /** Optional mapping for progression from source games */
+  progressionMapping?: Record<string, {
+    home: { sourceIndex: number; type: 'winner' | 'loser' };
+    away: { sourceIndex: number; type: 'winner' | 'loser' };
+  }>;
 }
 
 // ============================================================================

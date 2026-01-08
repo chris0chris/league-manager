@@ -209,7 +209,8 @@ export function assignTeamsToTournamentGames(
         const edgesToAdd = createPlacementEdges(
           stageGames,
           previousOrderGames,
-          stageData.progressionConfig
+          stageData.progressionConfig,
+          stageData.progressionMapping
         );
 
         // Add all edges for this stage in bulk
