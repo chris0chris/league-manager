@@ -6,12 +6,11 @@ import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useNodesState } from '../useNodesState';
 import {
-  isGameNode,
   createFieldNode,
   createStageNode,
   createGameNodeInStage,
 } from '../../types/flowchart';
-import type { FlowNode, GameNode, StageNode } from '../../types/flowchart';
+import type { FlowNode, GameNode } from '../../types/flowchart';
 
 describe('useNodesState - Manual Time Overrides', () => {
   const setupHook = (initialNodes: FlowNode[] = []) => {

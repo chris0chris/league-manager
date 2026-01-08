@@ -6,8 +6,7 @@ import { describe, it, expect } from 'vitest';
 import { generateTournament } from '../tournamentGenerator';
 import { assignTeamsToTournamentGames } from '../teamAssignment';
 import { TEMPLATE_F6_2_2 } from '../tournamentTemplates';
-import type { GlobalTeam, GameNode } from '../../types/flowchart';
-import { isStageNode } from '../../types/flowchart';
+import type { GlobalTeam } from '../../types/flowchart';
 
 describe('Tournament Generation - 6 Teams Integration', () => {
   const teams: GlobalTeam[] = [
@@ -43,8 +42,8 @@ describe('Tournament Generation - 6 Teams Integration', () => {
     const operations = assignTeamsToTournamentGames(structure, teams);
     
     // Create copies of nodes and edges to simulate state updates
-    let finalGames = [...structure.games];
-    let finalEdges = [...structure.edges];
+    const finalGames = [...structure.games];
+    const finalEdges = [...structure.edges];
 
     operations.forEach(op => {
       if (op.type === 'assign_team') {

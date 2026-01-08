@@ -13,7 +13,13 @@ import { DEFAULT_START_TIME } from '../../../utils/tournamentConstants';
 describe('TournamentGeneratorModal - Reset Behavior', () => {
   const mockOnHide = vi.fn();
   const mockOnGenerate = vi.fn();
-  const mockTeams: GlobalTeam[] = [];
+  const mockTeams: GlobalTeam[] = Array.from({ length: 6 }, (_, i) => ({
+    id: `t${i}`,
+    label: `Team ${i}`,
+    color: '#000',
+    order: i,
+    groupId: 'g1'
+  }));
 
   beforeEach(async () => {
     vi.clearAllMocks();

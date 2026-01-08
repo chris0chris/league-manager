@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { isValidTimeFormat, parseTime, formatTime } from '../timeCalculation';
+import { isValidTimeFormat, parseTime } from '../timeCalculation';
 
 describe('timeCalculation - Format Validation and Parsing', () => {
   describe('isValidTimeFormat', () => {

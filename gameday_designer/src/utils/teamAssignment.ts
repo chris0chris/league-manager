@@ -175,7 +175,8 @@ export function assignTeamsToTournamentGames(
         }
 
         // Get consistent pairings
-        const pairings = getRoundRobinPairings(stageTeams.length, (stageData.progressionConfig as RoundRobinConfig).doubleRound);
+        const doubleRound = (stageData.progressionConfig as RoundRobinConfig)?.doubleRound ?? false;
+        const pairings = getRoundRobinPairings(stageTeams.length, doubleRound);
 
         // Assign teams to games using these pairings
         stageGames.forEach((game, index) => {

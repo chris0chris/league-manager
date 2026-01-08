@@ -25,9 +25,12 @@ export function getRoundRobinPairings(
   const roundsPerCycle = adjustedTeamCount - 1;
   const cycles = doubleRound ? 2 : 1;
 
-  // Create team indices array (0 to adjustedTeamCount-1)
-  // For odd counts, adjustedTeamCount-1 is the 'dummy' team index
-  const teams = Array.from({ length: adjustedTeamCount }, (_, i) => i);
+  // Create team indices array
+  // For odd counts, we put the dummy team at index 0 and it stays fixed during rotation.
+  // This results in Round 1 having Team 1 vs Team 2 as the first game.
+  const teams = isOdd 
+    ? [teamCount, ...Array.from({ length: teamCount }, (_, i) => i)]
+    : Array.from({ length: teamCount }, (_, i) => i);
 
   for (let cycle = 0; cycle < cycles; cycle++) {
     const cycleTeams = [...teams];
@@ -38,8 +41,8 @@ export function getRoundRobinPairings(
         const team1 = cycleTeams[team1Index];
         const team2 = cycleTeams[team2Index];
 
-        // Skip if either team is the dummy (the last index in teams array for odd counts)
-        const dummyIndex = teamCount; // index of dummy team
+        // dummyIndex is always teamCount
+        const dummyIndex = teamCount;
         if (team1 === dummyIndex || team2 === dummyIndex) continue;
 
         // In second cycle, swap home/away
