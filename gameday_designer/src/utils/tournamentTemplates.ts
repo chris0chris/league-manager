@@ -106,6 +106,12 @@ export const TEMPLATE_F8_2_3: TournamentTemplate = {
       progressionMode: 'placement',
       config: { mode: 'placement', positions: 4, format: 'single_elimination' },
       fieldAssignment: 1,
+      progressionMapping: {
+        'SF1': { // Using SF1 label for consolation semi
+          home: { sourceIndex: 4, type: 'loser' },
+          away: { sourceIndex: 5, type: 'loser' }
+        }
+      }
     },
   ],
   timing: {
