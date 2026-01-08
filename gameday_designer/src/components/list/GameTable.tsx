@@ -329,7 +329,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
           <Form.Control
             type="time"
             size="sm"
-            value={timeValue}
+            value={editedValue}
             onChange={(e) => setEditedValue(e.target.value)}
             onBlur={() => handleSaveEdit(game.id, 'time')}
             onKeyDown={(e) => handleKeyPress(e, game.id, 'time')}

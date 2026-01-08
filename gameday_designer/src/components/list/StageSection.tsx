@@ -115,7 +115,8 @@ const StageSection: React.FC<StageSectionProps> = memo(({
 
   const handleTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
-    onUpdate(stage.id, { startTime: e.target.value || undefined });
+    const value = e.target.value;
+    onUpdate(stage.id, { startTime: value || undefined });
   }, [stage.id, onUpdate]);
 
   const handleColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
