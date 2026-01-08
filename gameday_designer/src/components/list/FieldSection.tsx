@@ -157,10 +157,12 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
               variant="link"
               onClick={handleStartEdit}
               aria-label={t('ui:tooltip.editFieldName')}
-              className="p-0 me-auto"
+              className="p-0 me-auto btn-adaptive"
               style={{ fontSize: '0.875rem' }}
+              title={t('ui:tooltip.editFieldName')}
             >
-              <i className="bi bi-pencil"></i>
+              <i className={`bi ${ICONS.PENCIL_SMALL}`}></i>
+              <span className="btn-label-adaptive">{t('ui:button.edit')}</span>
             </Button>
           </>
         )}
@@ -171,8 +173,9 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
           onClick={handleAddStage}
           aria-label={t('ui:button.addStage')}
           className="me-2 btn-adaptive"
+          title={t('ui:tooltip.addStage')}
         >
-          <i className={`bi ${ICONS.ADD} me-1`}></i>
+          <i className={`bi ${ICONS.ADD}`}></i>
           <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
         </Button>
 
@@ -192,6 +195,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
           onClick={handleDelete} 
           aria-label={t('ui:tooltip.deleteField')}
           className="btn-adaptive"
+          title={t('ui:tooltip.deleteField')}
         >
           <i className={`bi ${ICONS.DELETE}`}></i>
         </Button>
@@ -203,8 +207,14 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
             <div className="text-center py-4">
               <i className={`bi ${ICONS.STAGE} me-2`} style={{ fontSize: '2rem', opacity: 0.3 }}></i>
               <p className="text-muted mb-3">{t('ui:message.noStagesYet')}</p>
-              <Button variant="outline-primary" onClick={handleAddStage} aria-label={t('ui:button.addStage')} className="btn-adaptive">
-                <i className={`bi ${ICONS.ADD} me-1`}></i>
+              <Button 
+                variant="outline-primary" 
+                onClick={handleAddStage} 
+                aria-label={t('ui:button.addStage')} 
+                className="btn-adaptive"
+                title={t('ui:tooltip.addStage')}
+              >
+                <i className={`bi ${ICONS.ADD}`}></i>
                 <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
               </Button>
             </div>

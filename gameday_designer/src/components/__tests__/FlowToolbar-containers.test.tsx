@@ -43,24 +43,27 @@ describe('FlowToolbar - Inline Add Button Pattern', () => {
 
   describe('Remaining toolbar buttons', () => {
     it('renders Import button', () => {
-      render(<FlowToolbar {...defaultProps} />);
+      render(<FlowToolbar {...defaultProps} hasNodes={true} />);
 
       expect(screen.getByTestId('import-button')).toBeInTheDocument();
-      expect(screen.getByText('Import')).toBeInTheDocument();
+      // Label is removed from Import button (icon-only now)
+      expect(screen.queryByText('Import')).not.toBeInTheDocument();
     });
 
     it('renders Export button', () => {
-      render(<FlowToolbar {...defaultProps} />);
+      render(<FlowToolbar {...defaultProps} canExport={true} />);
 
       expect(screen.getByTestId('export-button')).toBeInTheDocument();
-      expect(screen.getByText('Export')).toBeInTheDocument();
+      // Label is removed from Export button (icon-only now)
+      expect(screen.queryByText('Export')).not.toBeInTheDocument();
     });
 
     it('renders Clear All button', () => {
-      render(<FlowToolbar {...defaultProps} />);
+      render(<FlowToolbar {...defaultProps} hasNodes={true} />);
 
       expect(screen.getByTestId('clear-all-button')).toBeInTheDocument();
-      expect(screen.getByText('Clear All')).toBeInTheDocument();
+      // Label is removed from Clear All button
+      expect(screen.queryByText('Clear All')).not.toBeInTheDocument();
     });
 
     it('disables Export when canExport is false', () => {

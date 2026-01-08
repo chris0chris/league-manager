@@ -205,7 +205,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
             }}
             title={t('ui:tooltip.addTeamToGroup')}
           >
-            <i className={`bi ${ICONS.ADD}`}></i>
+            <i className={`bi ${ICONS.ADD} me-2`}></i>
             <span className="btn-label-adaptive">{t('ui:button.addTeam')}</span>
           </button>
           <button
@@ -214,7 +214,8 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
             disabled={index === 0}
             title={t('ui:tooltip.moveGroupUp')}
           >
-            <i className={`bi ${ICONS.REORDER_UP}`}></i>
+            <i className={`bi ${ICONS.REORDER_UP} me-2`}></i>
+            <span className="btn-label-adaptive">{t('ui:button.up')}</span>
           </button>
           <button
             className="btn btn-sm btn-outline-secondary btn-adaptive"
@@ -222,7 +223,8 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
             disabled={index === totalGroups - 1}
             title={t('ui:tooltip.moveGroupDown')}
           >
-            <i className={`bi ${ICONS.REORDER_DOWN}`}></i>
+            <i className={`bi ${ICONS.REORDER_DOWN} me-2`}></i>
+            <span className="btn-label-adaptive">{t('ui:button.down')}</span>
           </button>
           <button
             className="btn btn-sm btn-outline-danger btn-adaptive"
@@ -244,9 +246,9 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
               <button
                 className="btn btn-outline-primary btn-adaptive"
                 onClick={() => onAddTeam(group.id)}
-                title={t('ui:tooltip.addTeamToGroup')}
+                title="Add your first team to this group"
               >
-                <i className={`bi ${ICONS.ADD} me-1`}></i>
+                <i className={`bi ${ICONS.ADD}`}></i>
                 <span className="btn-label-adaptive">{t('ui:button.addTeam')}</span>
               </button>
             </div>
@@ -268,7 +270,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                       type="color"
                       value={team.color || '#6c757d'}
                       onChange={(e) => onUpdateTeam(team.id, { color: e.target.value })}
-                      title={t('ui:tooltip.teamColor')}
+                      title="Change the color badge for this team"
                       style={{
                         width: '24px',
                         height: '24px',
@@ -296,7 +298,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                       <span
                         onDoubleClick={() => handleStartEditTeam(team)}
                         style={{ cursor: 'text' }}
-                        title={t('ui:message.doubleClickToEdit')}
+                        title="Double-click to edit team label"
                         className="text-truncate d-block"
                       >
                         {team.label}
@@ -306,7 +308,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
 
                   {/* Usage count */}
                   <div className="me-2 flex-shrink-0">
-                    <small className="text-muted">
+                    <small className="text-muted" title="Number of games this team is assigned to">
                       <strong>{usages.length}</strong>
                     </small>
                   </div>
@@ -321,7 +323,8 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                       title={t('ui:tooltip.moveTeamUp')}
                       style={{ fontSize: '0.75rem', lineHeight: 1 }}
                     >
-                      <i className={`bi ${ICONS.REORDER_UP}`}></i>
+                      <i className={`bi ${ICONS.REORDER_UP} me-2`}></i>
+                      <span className="btn-label-adaptive">{t('ui:button.up')}</span>
                     </button>
 
                     {/* Reorder down */}
@@ -332,16 +335,18 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                       title={t('ui:tooltip.moveTeamDown')}
                       style={{ fontSize: '0.75rem', lineHeight: 1 }}
                     >
-                      <i className={`bi ${ICONS.REORDER_DOWN}`}></i>
+                      <i className={`bi ${ICONS.REORDER_DOWN} me-2`}></i>
+                      <span className="btn-label-adaptive">{t('ui:button.down')}</span>
                     </button>
 
                     {/* Move to group dropdown */}
                     <DropdownButton
                       id={`move-team-${team.id}`}
-                      title={<i className={`bi ${ICONS.FOLDER}`}></i>}
+                      title={<i className={`bi ${ICONS.FOLDER}`} title={t('ui:tooltip.moveTeamToGroup')}></i>}
                       size="sm"
                       variant="outline-primary"
                       className="p-0 btn-adaptive"
+                      popperConfig={{ strategy: 'fixed' }}
                     >
                       {allGroups.map((g) => (
                         <Dropdown.Item

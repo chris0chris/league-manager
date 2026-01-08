@@ -38,7 +38,7 @@ export const ICONS = {
   // Special
   TIME: 'bi-clock',
   LOCATION: 'bi-map',
-  FOLDER: 'bi-folder-fill',
+  FOLDER: 'bi-collection',
   PENCIL_SMALL: 'bi-pencil-fill',
 } as const;
 

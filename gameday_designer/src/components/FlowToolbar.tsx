@@ -14,6 +14,7 @@ import React, { useRef } from 'react';
 import { Button, ButtonGroup, ButtonToolbar } from 'react-bootstrap';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import LanguageSelector from './LanguageSelector';
+import { ICONS } from '../utils/iconConstants';
 
 import './FlowToolbar.css';
 
@@ -116,10 +117,8 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             onClick={handleImportClick}
             title={t('ui:tooltip.importFromJson')}
             data-testid="import-button"
-            className="btn-adaptive"
           >
-            <i className="bi bi-upload me-1"></i>
-            <span className="btn-label-adaptive">{t('ui:button.import')}</span>
+            <i className={`bi ${ICONS.IMPORT}`}></i>
           </Button>
           <Button
             variant="outline-secondary"
@@ -127,10 +126,8 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             disabled={!canExport}
             title={t('ui:tooltip.exportToJson')}
             data-testid="export-button"
-            className="btn-adaptive"
           >
-            <i className="bi bi-download me-1"></i>
-            <span className="btn-label-adaptive">{t('ui:button.export')}</span>
+            <i className={`bi ${ICONS.EXPORT}`}></i>
           </Button>
         </ButtonGroup>
 
@@ -145,7 +142,8 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
               data-testid="undo-button"
               className="btn-adaptive"
             >
-              <i className="bi bi-arrow-counterclockwise"></i>
+              <i className={`bi ${ICONS.CLEAR} me-2`}></i>
+              <span className="btn-label-adaptive">{t('ui:button.undo')}</span>
             </Button>
             <Button
               variant="outline-secondary"
@@ -155,7 +153,8 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
               data-testid="redo-button"
               className="btn-adaptive"
             >
-              <i className="bi bi-arrow-clockwise"></i>
+              <i className="bi bi-arrow-clockwise me-2"></i>
+              <span className="btn-label-adaptive">{t('ui:button.redo')}</span>
             </Button>
           </ButtonGroup>
         )}
@@ -168,10 +167,8 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             disabled={!hasNodes}
             title={t('ui:tooltip.clearAllNodesAndEdges')}
             data-testid="clear-all-button"
-            className="btn-adaptive"
           >
-            <i className="bi bi-trash me-1"></i>
-            <span className="btn-label-adaptive">{t('ui:button.clearAll')}</span>
+            <i className={`bi ${ICONS.DELETE}`}></i>
           </Button>
         </ButtonGroup>
 

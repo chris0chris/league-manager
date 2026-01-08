@@ -15,6 +15,7 @@ import FlowToolbar from './FlowToolbar';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
 import NotificationToast from './NotificationToast';
 import { useDesignerController } from '../hooks/useDesignerController';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { ICONS } from '../utils/iconConstants';
 
 import './ListDesignerApp.css';
@@ -24,6 +25,7 @@ import './ListDesignerApp.css';
  * ListDesignerApp component.
  */
 const ListDesignerApp: React.FC = () => {
+  const { t } = useTypedTranslation(['ui']);
   const {
     nodes,
     edges,
@@ -87,10 +89,10 @@ const ListDesignerApp: React.FC = () => {
             variant="outline-primary"
             onClick={() => setShowTournamentModal(true)}
             className="me-2 btn-adaptive"
-            title="Generate tournament structure"
+            title={t('ui:tooltip.generateTournament')}
           >
-            <i className={`bi ${ICONS.TOURNAMENT} me-1`}></i>
-            <span className="btn-label-adaptive">Generate Tournament</span>
+            <i className={`bi ${ICONS.TOURNAMENT} me-2`}></i>
+            <span className="btn-label-adaptive">{t('ui:button.generateTournament')}</span>
           </Button>
           <FlowToolbar
             onImport={handleImport}

@@ -122,7 +122,7 @@ describe('StageSection', () => {
       />
     );
 
-    const deleteButton = screen.getByRole('button', { name: /delete stage/i });
+    const deleteButton = screen.getByTitle(/Permanently remove this phase/i);
     fireEvent.click(deleteButton);
 
     expect(mockOnDelete).toHaveBeenCalledWith('stage-1');
@@ -169,8 +169,8 @@ describe('StageSection', () => {
       />
     );
 
-    // Click the edit button (pencil icon)
-    const editButton = screen.getByRole('button', { name: /edit stage name/i });
+    // Click the edit button
+    const editButton = screen.getByTitle(/Click to edit the name of this tournament phase/i);
     fireEvent.click(editButton);
 
     const input = screen.getByDisplayValue('Vorrunde');

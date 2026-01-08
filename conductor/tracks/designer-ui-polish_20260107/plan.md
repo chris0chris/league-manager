@@ -10,7 +10,7 @@ Refine the foundation for global UI elements, including toasts, icons, and share
   - Update `useTypedTranslation` or a dedicated icon utility to use the new Bootstrap icons (`bi-calendar2-range`, `bi-diagram-3`, `bi-pennant`, etc.).
 - [x] **Task: Create Adaptive Label Utility** (a0ac5d5)
   - Add CSS classes to `ListDesignerApp.css` or a shared utility file to handle responsive label visibility (e.g., hiding `.btn-label` on small containers).
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Global UI & Asset Refinement' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Global UI & Asset Refinement' (Protocol in workflow.md)
 
 ## Phase 2: Field & Stage Component Polish [checkpoint: cd3880c]
 Update the hierarchical containers to follow the new action button logic and styling.
@@ -25,7 +25,7 @@ Update the hierarchical containers to follow the new action button logic and sty
   - Remove "Add Game" button from the bottom of `StageSection`.
   - Replace grey pencil link with `outline-secondary` Button.
   - Write Vitest tests for Stage-level button logic.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Field & Stage Component Polish' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Field & Stage Component Polish' (Protocol in workflow.md)
 
 ## Phase 3: Game & Team Component Polish [checkpoint: 11607fe]
 Standardize the interactive elements within game tables and team management cards.
@@ -38,17 +38,17 @@ Standardize the interactive elements within game tables and team management card
   - Update `TeamGroupCard` and `GlobalTeamTable` buttons.
   - Ensure the "+ Team" button is permanently visible in group headers.
   - Standardize edit/reorder buttons to match the new UI patterns.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Game & Team Component Polish' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Game & Team Component Polish' (Protocol in workflow.md)
 
 ## Phase 4: Responsive Layout & Final Verification
 Implement the responsive grid and fine-tune the adaptive UI behaviors.
 
-- [ ] **Task: Implement Responsive Field Grid**
+- [x] **Task: Implement Responsive Field Grid** (f9461d5)
   - Update `ListCanvas.tsx` and `ListCanvas.css` to use CSS Grid for Field containers.
   - Define breakpoints for multi-column vs. single-column layout.
-- [ ] **Task: Apply Adaptive Button Labels**
+- [x] **Task: Apply Adaptive Button Labels** (3f88f47)
   - Apply the responsive label hiding utility to all buttons in Field, Stage, Game, and Team components.
-- [ ] **Task: Final UI/UX Audit**
+- [x] **Task: Final UI/UX Audit** (94bb0f4)
   - Verify mobile responsiveness and touch targets.
   - Confirm all "grey inline buttons" are removed.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Responsive Layout & Final Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Responsive Layout & Final Verification' (Protocol in workflow.md)

@@ -153,20 +153,44 @@
 
 /**
  * Fields Grid Layout with Responsive CSS Grid
- * Includes inline Add Field card
+ * Restricted to at most 2 columns with min 900px width.
  */
 .fields-grid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(900px, 100%), 1fr));
+}
+
+/* Force 1 column if container is not wide enough for two 900px fields + gap */
+@media (max-width: 1850px) {
+  .fields-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cap at 2 columns even on ultra-wide screens */
+@media (min-width: 2750px) {
+  .fields-grid {
+    grid-template-columns: 1fr 1fr;
+    max-width: 2000px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/**
+ * Empty state buttons should ALWAYS show labels regardless of screen size
+ */
+.text-center .btn-label-adaptive {
+  display: inline !important;
+}
+
+.text-center .btn-adaptive i {
+  margin-right: 0.5rem !important;
 }
 
 /* Responsive: Stack columns on small screens */
 @media (max-width: 767px) {
-  .fields-grid {
-    grid-template-columns: 1fr;
-  }
-  
   .list-canvas__content {
     flex-direction: column;
   }
@@ -177,4 +201,5 @@
     max-height: 50vh; /* Limit height when stacked */
   }
 }
+
 

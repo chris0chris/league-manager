@@ -242,7 +242,7 @@ describe('FieldSection', () => {
       />
     );
 
-    const deleteButton = screen.getByRole('button', { name: /delete field/i });
+    const deleteButton = screen.getByTitle(/Permanently remove this field/i);
     fireEvent.click(deleteButton);
 
     expect(mockOnDelete).toHaveBeenCalledWith('field-1');
@@ -346,8 +346,8 @@ describe('FieldSection', () => {
       />
     );
 
-    // Click the edit button (pencil icon)
-    const editButton = screen.getByRole('button', { name: /edit field name/i });
+    // Click the edit button
+    const editButton = screen.getByTitle(/Click to edit the name of this playing field/i);
     fireEvent.click(editButton);
 
     const input = screen.getByDisplayValue('Feld 1');

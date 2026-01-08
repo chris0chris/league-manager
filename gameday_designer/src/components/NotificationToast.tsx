@@ -15,7 +15,7 @@ interface NotificationToastProps {
 const NotificationToast: React.FC<NotificationToastProps> = ({ notifications, onClose }) => {
   return (
     <ToastContainer 
-      position="top-end" 
+      position="bottom-end" 
       className="p-3" 
       style={{ zIndex: 10000 }}
     >
