@@ -108,12 +108,24 @@ jobs:
       local_image_name: frontend
       version: "${{ github.ref_name }}"
 
+  # Single approval step for production
+  approve-production:
+    if: "!contains(github.ref_name, '-rc.')"
+    runs-on: ubuntu-latest
+    environment: approve
+    needs:
+      - deploy-backend-staging
+      - deploy-frontend-staging
+    steps:
+      - name: 📢 Approve Production Deployment
+        run: echo "🚀 Production deployment approved"
+
   # Deploy to production (SKIP for RC tags)
   deploy-backend-production:
     if: "!contains(github.ref_name, '-rc.')"
     needs:
       - build-backend-image
-      - deploy-backend-staging
+      - approve-production
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_artifact.yaml
     with:
@@ -126,7 +138,7 @@ jobs:
     if: "!contains(github.ref_name, '-rc.')"
     needs:
       - build-frontend-image
-      - deploy-frontend-staging
+      - approve-production
     secrets: inherit
     uses: ./.github/workflows/part_docker_push_artifact.yaml
     with:
