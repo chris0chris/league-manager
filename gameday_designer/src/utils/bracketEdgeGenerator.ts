@@ -52,6 +52,44 @@ function findGameByStanding(games: GameNode[], standing: string): GameNode | und
 }
 
 /**
+ * Create edges based on a custom progression mapping
+ */
+function createEdgesFromMapping(
+  targetGames: GameNode[],
+  sourceGames: GameNode[],
+  mapping: NonNullable<StageNodeData['progressionMapping']>
+): EdgeSpec[] {
+  const edges: EdgeSpec[] = [];
+
+  Object.entries(mapping).forEach(([targetStanding, sourceMap]) => {
+    const targetGame = findGameByStanding(targetGames, targetStanding);
+    if (!targetGame) return;
+
+    // Home slot
+    if (sourceGames[sourceMap.home.sourceIndex]) {
+      edges.push({
+        sourceGameId: sourceGames[sourceMap.home.sourceIndex].id,
+        outputType: sourceMap.home.type,
+        targetGameId: targetGame.id,
+        targetSlot: 'home',
+      });
+    }
+
+    // Away slot
+    if (sourceGames[sourceMap.away.sourceIndex]) {
+      edges.push({
+        sourceGameId: sourceGames[sourceMap.away.sourceIndex].id,
+        outputType: sourceMap.away.type,
+        targetGameId: targetGame.id,
+        targetSlot: 'away',
+      });
+    }
+  });
+
+  return edges;
+}
+
+/**
  * Create edges for split group pattern (6+ source games)
  * Maps: Group A 1st/3rd vs Group B 1st/3rd to semifinals
  */
@@ -484,6 +522,7 @@ function create4TeamCrossoverEdges(targetGames: GameNode[]): EdgeSpec[] {
  * @param targetGames - Games in the target stage (e.g., playoffs)
  * @param sourceGames - Games from the source stage (e.g., group stage)
  * @param config - Progression configuration from stage data
+ * @param mapping - Optional custom progression mapping
  * @returns Array of edge specifications for game-to-game connections
  *
  * @example
@@ -498,27 +537,49 @@ function create4TeamCrossoverEdges(targetGames: GameNode[]): EdgeSpec[] {
 export function createPlacementEdges(
   targetGames: GameNode[],
   sourceGames: GameNode[],
-  config: StageNodeData['progressionConfig']
+  config: StageNodeData['progressionConfig'],
+  mapping?: StageNodeData['progressionMapping']
 ): EdgeSpec[] {
   if (!config || config.mode !== 'placement') {
     return [];
   }
 
   const { positions, format } = config;
+  const edges: EdgeSpec[] = [];
 
   try {
+    // 1. Add custom entry edges if mapping is provided
+    if (mapping && sourceGames.length > 0) {
+      edges.push(...createEdgesFromMapping(targetGames, sourceGames, mapping));
+    }
+
+    // 2. Add standard bracket edges (source-to-target or internal)
     if (positions === BRACKET_SIZE_WITH_SEMIFINALS && format === 'single_elimination') {
-      return create4TeamSingleEliminationEdges(targetGames, sourceGames);
+      // If we already added entry edges via mapping, we only need internal edges
+      const entryEdgesAdded = mapping && sourceGames.length > 0;
+      if (entryEdgesAdded) {
+        const sf1 = findGameByStanding(targetGames, GAME_STANDING_SF1);
+        const sf2 = findGameByStanding(targetGames, GAME_STANDING_SF2);
+        const final = findGameByStanding(targetGames, GAME_STANDING_FINAL);
+        const thirdPlace = findGameByStanding(targetGames, GAME_STANDING_THIRD_PLACE);
+        if (sf1 && sf2 && final && thirdPlace) {
+          edges.push(...createInternalBracketEdges(sf1, sf2, final, thirdPlace));
+        }
+      } else {
+        edges.push(...create4TeamSingleEliminationEdges(targetGames, sourceGames));
+      }
     } else if (positions === BRACKET_SIZE_FINAL_ONLY && format === 'single_elimination') {
-      return create2TeamFinalEdges(targetGames, sourceGames);
+      if (!(mapping && sourceGames.length > 0)) {
+        edges.push(...create2TeamFinalEdges(targetGames, sourceGames));
+      }
     } else if (positions === BRACKET_SIZE_WITH_QUARTERFINALS && format === 'single_elimination') {
-      return create8TeamSingleEliminationEdges(targetGames);
+      edges.push(...create8TeamSingleEliminationEdges(targetGames));
     } else if (positions === BRACKET_SIZE_WITH_SEMIFINALS && format === 'crossover') {
-      return create4TeamCrossoverEdges(targetGames);
+      edges.push(...create4TeamCrossoverEdges(targetGames));
     }
   } catch (error) {
     console.error('Error creating placement edges:', error);
   }
 
-  return [];
+  return edges;
 }

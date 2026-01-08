@@ -194,8 +194,8 @@ describe('tournamentConstants', () => {
   });
 
   describe('Team Colors', () => {
-    it('should have 12 distinct colors', () => {
-      expect(TEAM_COLORS.length).toBe(12);
+    it('should have 16 distinct colors', () => {
+      expect(TEAM_COLORS.length).toBe(16);
     });
 
     it('should have all colors in hex format', () => {

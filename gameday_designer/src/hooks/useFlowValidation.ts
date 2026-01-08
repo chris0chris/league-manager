@@ -191,7 +191,27 @@ function checkOfficialPlaying(
 
     const officialStr = formatTeamReference(data.official);
 
-    // Check if official matches home team
+    // Check if official matches home team (v2 direct ID)
+    if (data.homeTeamId === data.official) {
+      errors.push({
+        id: `${node.id}_official_playing_home_v2`,
+        type: 'official_playing',
+        message: `Game "${data.standing}": Team "${officialStr}" cannot officiate a game they are playing in`,
+        affectedNodes: [node.id],
+      });
+    }
+
+    // Check if official matches away team (v2 direct ID)
+    if (data.awayTeamId === data.official) {
+      errors.push({
+        id: `${node.id}_official_playing_away_v2`,
+        type: 'official_playing',
+        message: `Game "${data.standing}": Team "${officialStr}" cannot officiate a game they are playing in`,
+        affectedNodes: [node.id],
+      });
+    }
+
+    // Check if official matches home team (v1 edges)
     if (homeEdge && isTeamToGameEdge(homeEdge)) {
       const homeNode = nodes.find((n) => n.id === homeEdge.source);
       if (homeNode && isTeamNode(homeNode)) {

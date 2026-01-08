@@ -220,12 +220,19 @@ export interface StageNodeData {
   startTime?: string;
   /** Default game duration for stage in minutes (default 50) */
   defaultGameDuration?: number;
+  /** Default break between games in minutes (default 0) */
+  defaultBreakBetweenGames?: number;
 
   // Progression types (Phase 2)
   /** Progression mode for game generation */
   progressionMode?: ProgressionMode;
   /** Configuration for progression mode */
   progressionConfig?: ProgressionConfig;
+  /** Optional mapping for progression from source games */
+  progressionMapping?: Record<string, {
+    home: { sourceIndex: number; type: 'winner' | 'loser' };
+    away: { sourceIndex: number; type: 'winner' | 'loser' };
+  }>;
 }
 
 // ============================================================================
@@ -615,9 +622,11 @@ export function createStageNode(
       // Time scheduling fields (Phase 1)
       startTime: options?.startTime,
       defaultGameDuration: options?.defaultGameDuration ?? DEFAULT_GAME_DURATION,
+      defaultBreakBetweenGames: options?.defaultBreakBetweenGames ?? 0,
       // Progression fields (Phase 2)
       progressionMode: options?.progressionMode ?? 'manual',
       progressionConfig: options?.progressionConfig ?? { mode: 'manual' },
+      progressionMapping: options?.progressionMapping,
     },
     style: { width: 300, height: 150 },
     extent: 'parent',

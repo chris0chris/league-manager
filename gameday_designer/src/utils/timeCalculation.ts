@@ -16,10 +16,12 @@ import { DEFAULT_START_TIME, DEFAULT_GAME_DURATION } from './tournamentConstants
  */
 export function parseTime(timeStr: string): number {
   if (!isValidTimeFormat(timeStr)) {
-    throw new Error(`Invalid time format: ${timeStr}. Expected HH:MM`);
+    throw new Error(`Invalid time format: ${timeStr}. Expected HH:MM or HH:MM:SS`);
   }
 
-  const [hours, minutes] = timeStr.split(':').map(Number);
+  const parts = timeStr.split(':').map(Number);
+  const hours = parts[0];
+  const minutes = parts[1];
   return hours * 60 + minutes;
 }
 
@@ -61,7 +63,7 @@ export function addMinutesToTime(time: string, minutes: number): string {
  * @returns true if valid HH:MM format (24-hour)
  */
 export function isValidTimeFormat(timeStr: string): boolean {
-  const timeRegex = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/;
+  const timeRegex = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])(:[0-5][0-9])?$/;
   return timeRegex.test(timeStr);
 }
 

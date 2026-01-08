@@ -55,10 +55,10 @@ export function generateTournament(
   const fields = createFields(fieldCount);
 
   // 2. Create stages and assign to fields
-  const finalGameDuration = gameDuration || template.timing.defaultGameDuration;
-  const finalBreakDuration = breakDuration || template.timing.defaultBreakBetweenGames;
+  const finalGameDuration = gameDuration ?? template.timing.defaultGameDuration;
+  const finalBreakDuration = breakDuration ?? template.timing.defaultBreakBetweenGames;
   
-  let stages = createStages(template, fields, startTime, finalGameDuration);
+  let stages = createStages(template, fields, startTime, finalGameDuration, finalBreakDuration);
 
   // 3. Generate games for each stage
   let games = generateGamesForStages(stages);
@@ -140,7 +140,8 @@ function createStages(
   template: TournamentTemplate,
   fields: FieldNode[],
   startTime: string,
-  gameDuration: number
+  gameDuration: number,
+  breakDuration: number
 ): StageNode[] {
   const stages: StageNode[] = [];
   let stageOrderCounter = 0;
@@ -158,16 +159,36 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          defaultBreakBetweenGames: breakDuration,
+          progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
       }
       stageOrderCounter++;
     } else if (stageTemplate.fieldAssignment === 'split') {
-      // Split groups across fields (Group A → Field 1, Group B → Field 2)
-      for (let i = 0; i < fields.length; i++) {
+      // Split teams into multiple groups (Group A, Group B, etc.)
+      // Distribute groups across available fields
+      
+      let groupCount = stageTemplate.splitCount;
+      
+      // Calculate groupCount if not explicitly provided
+      if (groupCount === undefined && stageTemplate.progressionMode === 'round_robin') {
+        const totalTeams = template.teamCount.exact || template.teamCount.min;
+        const teamsPerGroup = (stageTemplate.config as RoundRobinConfig).teamCount;
+        if (teamsPerGroup > 0) {
+          groupCount = Math.floor(totalTeams / teamsPerGroup);
+        }
+      }
+      
+      // Fallback to field count if calculation failed or not RR
+      const finalGroupCount = groupCount || fields.length;
+
+      for (let i = 0; i < finalGroupCount; i++) {
         const stageId = `stage-${uuidv4()}`;
         const groupLabel = String.fromCharCode(65 + i); // A, B, C...
-        const stage = createStageNode(stageId, fields[i].id, {
+        const fieldIndex = i % fields.length;
+        
+        const stage = createStageNode(stageId, fields[fieldIndex].id, {
           name: `${stageTemplate.name} ${groupLabel}`,
           stageType: stageTemplate.stageType,
           order: stageOrderCounter,
@@ -175,6 +196,8 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          defaultBreakBetweenGames: breakDuration,
+          progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
       }
@@ -192,6 +215,8 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          defaultBreakBetweenGames: breakDuration,
+          progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
       }
@@ -220,12 +245,16 @@ function generateGamesForStages(
     if (stageData.progressionMode === 'round_robin') {
       games = generateRoundRobinGames(
         stage.id,
-        stageData.progressionConfig as RoundRobinConfig
+        stageData.progressionConfig as RoundRobinConfig,
+        stageData.defaultGameDuration,
+        stageData.defaultBreakBetweenGames
       );
     } else if (stageData.progressionMode === 'placement') {
       games = generatePlacementGames(
         stage.id,
-        stageData.progressionConfig as PlacementConfig
+        stageData.progressionConfig as PlacementConfig,
+        stageData.defaultGameDuration,
+        stageData.defaultBreakBetweenGames
       );
     }
     // 'manual' mode generates no games automatically

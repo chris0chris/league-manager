@@ -329,7 +329,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
           <Form.Control
             type="time"
             size="sm"
-            value={timeValue}
+            value={editedValue}
             onChange={(e) => setEditedValue(e.target.value)}
             onBlur={() => handleSaveEdit(game.id, 'time')}
             onKeyDown={(e) => handleKeyPress(e, game.id, 'time')}
@@ -372,8 +372,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
       const stageNode = allNodes.find(n => n.id === stageId);
       options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as import('../../types/flowchart').StageNodeData)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
       stageData.games.forEach((sourceGame) => {
-        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ Winner of ${sourceGame.data.standing}`, isTeam: false });
-        options.push({ value: `loser:${sourceGame.id}`, label: `💔 Loser of ${sourceGame.data.standing}`, isTeam: false });
+        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ Winner of ${sourceGame.data.standing} (${stageData.name})`, isTeam: false });
+        options.push({ value: `loser:${sourceGame.id}`, label: `💔 Loser of ${sourceGame.data.standing} (${stageData.name})`, isTeam: false });
       });
     });
 
@@ -432,8 +432,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
       const stageNode = allNodes.find(n => n.id === stageId);
       options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as import('../../types/flowchart').StageNodeData)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
       stageData.games.forEach((sourceGame) => {
-        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ Winner of ${sourceGame.data.standing}`, isTeam: false });
-        options.push({ value: `loser:${sourceGame.id}`, label: `💔 Loser of ${sourceGame.data.standing}`, isTeam: false });
+        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ Winner of ${sourceGame.data.standing} (${stageData.name})`, isTeam: false });
+        options.push({ value: `loser:${sourceGame.id}`, label: `💔 Loser of ${sourceGame.data.standing} (${stageData.name})`, isTeam: false });
       });
     });
 

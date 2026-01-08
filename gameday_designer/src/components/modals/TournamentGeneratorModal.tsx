@@ -39,7 +39,7 @@ export interface TournamentGeneratorModalProps {
 const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
   show,
   onHide,
-  // teams - unused for now but kept in props for potential future use
+  teams,
   onGenerate,
 }) => {
   const { t } = useTypedTranslation(['ui', 'modal', 'domain']);
@@ -57,17 +57,47 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
   );
   const [startTime, setStartTime] = useState<string>(DEFAULT_START_TIME);
   const [gameDuration, setGameDuration] = useState<number>(DEFAULT_GAME_DURATION);
+  const [breakDuration, setBreakDuration] = useState<number>(10);
   const [generateTeams, setGenerateTeams] = useState<boolean>(false);
   const [autoAssignTeams, setAutoAssignTeams] = useState<boolean>(true);
 
-  // Validation
-  const isDurationValid = gameDuration >= 15 && gameDuration <= 180;
-
-  // Update field count when template changes (derived from selectedTemplate on first render)
-  useEffect(() => {
+  /**
+   * Reset form to default values
+   */
+  const resetForm = () => {
+    setSelectedTemplate(availableTemplates[0] || null);
+    setFieldCount(availableTemplates[0]?.fieldOptions[0] || 1);
+    setStartTime(DEFAULT_START_TIME);
+    setGameDuration(DEFAULT_GAME_DURATION);
+    setBreakDuration(10);
+    setGenerateTeams(false);
+    setAutoAssignTeams(true);
+  };
+  
+    // Reset form when modal is closed
+    useEffect(() => {
+      if (!show) {
+        resetForm();
+      }
+      // We only want to reset when 'show' changes to false
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [show]);
+  
+      // Validation
+      const isDurationValid = gameDuration >= 15 && gameDuration <= 180;
+      const isTeamCountValid = useMemo(() => {
+        if (!selectedTemplate) return false;
+        if (generateTeams) return true;
+        return teams.length >= selectedTemplate.teamCount.min;
+      }, [selectedTemplate, generateTeams, teams.length]);
+    
+      const canGenerate = selectedTemplate && isDurationValid && isTeamCountValid;
+    
+      // Update field count when template changes
+          useEffect(() => {
+  
+    
     if (selectedTemplate && selectedTemplate.fieldOptions.length > 0 && fieldCount === 1) {
-      // Only update if still at default value
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFieldCount(selectedTemplate.fieldOptions[0]);
     }
   }, [selectedTemplate, fieldCount]);
@@ -76,7 +106,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
    * Handle generate button click
    */
   const handleGenerate = () => {
-    if (!selectedTemplate || !isDurationValid) return;
+    if (!canGenerate) return;
 
     onGenerate({
       template: {
@@ -84,10 +114,13 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
         timing: {
           ...selectedTemplate.timing,
           defaultGameDuration: gameDuration,
+          defaultBreakBetweenGames: breakDuration,
         },
       },
       fieldCount,
       startTime,
+      gameDuration,
+      breakDuration,
       generateTeams,
       autoAssignTeams,
     });
@@ -152,7 +185,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
             {selectedTemplate && (
               <>
                 <Row>
-                  <Col md={4}>
+                  <Col md={3}>
                     <Form.Group className="mb-3" controlId="tournament-field-count">
                       <Form.Label>{t('ui:label.numberOfFields')}</Form.Label>
                       <Form.Select
@@ -167,7 +200,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                       </Form.Select>
                     </Form.Group>
                   </Col>
-                  <Col md={4}>
+                  <Col md={3}>
                     <Form.Group className="mb-3" controlId="tournament-start-time">
                       <Form.Label>{t('ui:label.startTime')}</Form.Label>
                       <Form.Control
@@ -177,7 +210,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={4}>
+                  <Col md={3}>
                     <Form.Group className="mb-3" controlId="tournament-game-duration">
                       <Form.Label>{t('ui:label.gameDuration')}</Form.Label>
                       <Form.Control
@@ -191,6 +224,18 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                       <Form.Control.Feedback type="invalid">
                         Duration must be between 15 and 180 minutes.
                       </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group className="mb-3" controlId="tournament-break-duration">
+                      <Form.Label>{t('ui:label.breakDuration')}</Form.Label>
+                      <Form.Control
+                        type="number"
+                        min={0}
+                        max={60}
+                        value={breakDuration}
+                        onChange={(e) => setBreakDuration(parseInt(e.target.value) || 0)}
+                      />
                     </Form.Group>
                   </Col>
                 </Row>
@@ -215,6 +260,13 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                     className="mt-2"
                   />
                 </Form.Group>
+
+                {selectedTemplate && !isTeamCountValid && (
+                  <Alert variant="warning" className="mb-3">
+                    <i className="bi bi-exclamation-triangle me-2"></i>
+                    {t('modal:tournamentGenerator.insufficientTeams', { min: selectedTemplate.teamCount.min })}
+                  </Alert>
+                )}
               </>
             )}
 
@@ -236,6 +288,9 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                       duration: gameDuration
                     })}
                   </li>
+                  <li>
+                    {t('ui:label.breakDuration')}: {breakDuration} min
+                  </li>
                 </ul>
               </Alert>
             )}
@@ -250,7 +305,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
         <Button
           variant="primary"
           onClick={handleGenerate}
-          disabled={!selectedTemplate}
+          disabled={!canGenerate}
         >
           <i className="bi bi-lightning-fill me-1"></i>
           {t('ui:button.generateTournament')}
