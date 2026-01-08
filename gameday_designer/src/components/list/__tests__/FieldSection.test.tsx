@@ -358,4 +358,126 @@ describe('FieldSection', () => {
       name: 'Main Field',
     });
   });
+
+  it('allows canceling field name edit with Escape', () => {
+    render(
+      <FieldSection
+        field={sampleField}
+        stages={[]}
+        allNodes={[sampleField]}
+        edges={[]}
+        onUpdate={vi.fn()}
+        onDelete={vi.fn()}
+        onAddStage={vi.fn()}
+        onSelectNode={vi.fn()}
+        selectedNodeId={null}
+      />
+    );
+
+    fireEvent.click(screen.getByTitle(/Click to edit the name of this playing field/i));
+    const input = screen.getByDisplayValue('Feld 1');
+    fireEvent.change(input, { target: { value: 'New Name' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    expect(screen.queryByDisplayValue('New Name')).not.toBeInTheDocument();
+    expect(screen.getByText('Feld 1')).toBeInTheDocument();
+  });
+
+  it('saves field name edit with Enter', () => {
+    const mockOnUpdate = vi.fn();
+    render(
+      <FieldSection
+        field={sampleField}
+        stages={[]}
+        allNodes={[sampleField]}
+        edges={[]}
+        onUpdate={mockOnUpdate}
+        onDelete={vi.fn()}
+        onAddStage={vi.fn()}
+        onSelectNode={vi.fn()}
+        selectedNodeId={null}
+      />
+    );
+
+    fireEvent.click(screen.getByTitle(/Click to edit the name of this playing field/i));
+    const input = screen.getByDisplayValue('Feld 1');
+    fireEvent.change(input, { target: { value: 'Main Field' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(mockOnUpdate).toHaveBeenCalledWith('field-1', { name: 'Main Field' });
+  });
+
+  it('calls onUpdate when color is changed', () => {
+    const mockOnUpdate = vi.fn();
+    render(
+      <FieldSection
+        field={sampleField}
+        stages={[]}
+        allNodes={[sampleField]}
+        edges={[]}
+        onUpdate={mockOnUpdate}
+        onDelete={vi.fn()}
+        onAddStage={vi.fn()}
+        onSelectNode={vi.fn()}
+        selectedNodeId={null}
+      />
+    );
+
+    const colorInput = screen.getByTitle(/Change the accent color for this field/i);
+    fireEvent.change(colorInput, { target: { value: '#ff0000' } });
+
+    expect(mockOnUpdate).toHaveBeenCalledWith('field-1', { color: '#ff0000' });
+  });
+
+  it('toggles expansion when header is clicked', () => {
+    render(
+      <FieldSection
+        field={sampleField}
+        stages={[sampleStage]}
+        allNodes={[sampleField, sampleStage]}
+        edges={[]}
+        onUpdate={vi.fn()}
+        onDelete={vi.fn()}
+        onAddStage={vi.fn()}
+        onSelectNode={vi.fn()}
+        selectedNodeId={null}
+        isExpanded={false}
+        expandedStageIds={new Set()}
+      />
+    );
+
+    const header = screen.getByText('Feld 1').closest('.field-section__header');
+    
+    // Initially expanded by local state if prop is false? 
+    // Wait, the component says: const isExpanded = isExpandedProp || localExpanded;
+    // localExpanded defaults to true.
+    
+    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+    
+    fireEvent.click(header!);
+    // Now it should be collapsed (localExpanded becomes false)
+    expect(screen.queryByText('Vorrunde')).not.toBeInTheDocument();
+  });
+
+  it('shows big Add Stage button in empty state', () => {
+    const mockOnAddStage = vi.fn();
+    render(
+      <FieldSection
+        field={sampleField}
+        stages={[]}
+        allNodes={[sampleField]}
+        edges={[]}
+        onUpdate={vi.fn()}
+        onDelete={vi.fn()}
+        onAddStage={mockOnAddStage}
+        onSelectNode={vi.fn()}
+        selectedNodeId={null}
+      />
+    );
+
+    const bigAddButton = screen.getByText(/No stages yet/i).parentElement?.querySelector('button');
+    expect(bigAddButton).toBeInTheDocument();
+    fireEvent.click(bigAddButton!);
+    expect(mockOnAddStage).toHaveBeenCalledWith('field-1');
+  });
 });

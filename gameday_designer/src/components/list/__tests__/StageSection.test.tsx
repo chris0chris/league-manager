@@ -309,4 +309,100 @@ describe('StageSection', () => {
       expect(bodyButton).toBeDefined();
     });
   });
+
+  it('allows canceling stage name edit with Escape', () => {
+    render(
+      <StageSection
+        {...createDefaultProps({
+          stage: sampleStage,
+          allNodes: [sampleStage],
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByTitle(/Click to edit the name of this tournament phase/i));
+    const input = screen.getByDisplayValue('Vorrunde');
+    fireEvent.change(input, { target: { value: 'New Name' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    expect(screen.queryByDisplayValue('New Name')).not.toBeInTheDocument();
+    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+  });
+
+  it('saves stage name edit with Enter', () => {
+    const mockOnUpdate = vi.fn();
+    render(
+      <StageSection
+        {...createDefaultProps({
+          stage: sampleStage,
+          allNodes: [sampleStage],
+          onUpdate: mockOnUpdate,
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByTitle(/Click to edit the name of this tournament phase/i));
+    const input = screen.getByDisplayValue('Vorrunde');
+    fireEvent.change(input, { target: { value: 'New Name' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { name: 'New Name' });
+  });
+
+  it('calls onUpdate when start time is changed', () => {
+    const mockOnUpdate = vi.fn();
+    render(
+      <StageSection
+        {...createDefaultProps({
+          stage: sampleStage,
+          allNodes: [sampleStage],
+          onUpdate: mockOnUpdate,
+        })}
+      />
+    );
+
+    const timeInput = screen.getByLabelText(/Start/i);
+    fireEvent.change(timeInput, { target: { value: '10:30' } });
+
+    expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { startTime: '10:30' });
+  });
+
+  it('calls onUpdate when color is changed', () => {
+    const mockOnUpdate = vi.fn();
+    render(
+      <StageSection
+        {...createDefaultProps({
+          stage: sampleStage,
+          allNodes: [sampleStage],
+          onUpdate: mockOnUpdate,
+        })}
+      />
+    );
+
+    const colorInput = screen.getByTitle(/Change the accent color for this phase/i);
+    fireEvent.change(colorInput, { target: { value: '#00ff00' } });
+
+    expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { color: '#00ff00' });
+  });
+
+  it('toggles expansion when header is clicked', () => {
+    render(
+      <StageSection
+        {...createDefaultProps({
+          stage: sampleStage,
+          allNodes: [sampleStage, sampleGame],
+          isExpanded: false,
+        })}
+      />
+    );
+
+    const header = screen.getByText('Vorrunde').closest('.stage-section__header');
+    
+    // Initially expanded by local state if prop is false
+    expect(screen.getByText('Game 1')).toBeInTheDocument();
+    
+    fireEvent.click(header!);
+    // Now it should be collapsed
+    expect(screen.queryByText('Game 1')).not.toBeInTheDocument();
+  });
 });

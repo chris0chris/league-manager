@@ -136,8 +136,9 @@ const StageSection: React.FC<StageSectionProps> = memo(({
         <i className={`bi ${isExpanded ? ICONS.EXPANDED : ICONS.COLLAPSED} me-2`}></i>
 
         <div className="d-flex align-items-center gap-2 me-2">
-          <Form.Label className="mb-0 text-muted small">{t('ui:label.start')}:</Form.Label>
+          <Form.Label htmlFor={`stage-start-${stage.id}`} className="mb-0 text-muted small">{t('ui:label.start')}:</Form.Label>
           <Form.Control
+            id={`stage-start-${stage.id}`}
             type="time"
             size="sm"
             value={stage.data.startTime || ''}
