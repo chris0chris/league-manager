@@ -7,13 +7,13 @@
 - [x] Task: Refactor validation logic to return translation keys or objects compatible with `i18next`. a818904
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Internationalization (i18n)' (Protocol in workflow.md) a818904
 
-## Phase 2: Interactive Error Highlighting
-- [ ] Task: Implement a global `highlightedElement` state (using Context API or existing state management).
-- [ ] Task: Add a pulsing border CSS animation to the project's global styles or component modules.
-- [ ] Task: Update the Validation Bar to trigger the highlight state with the element's ID and type on click.
-- [ ] Task: Implement "Scroll into View" utility and integrate it into the highlight trigger.
-- [ ] Task: Update Game, Stage, Field, and Team components to listen for the highlight state and apply the pulsing effect.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Interactive Error Highlighting' (Protocol in workflow.md)
+## Phase 2: Interactive Error Highlighting [checkpoint: ea9c51c]
+- [x] Task: Implement a global `highlightedElement` state (using Context API or existing state management). ea9c51c
+- [x] Task: Add a pulsing border CSS animation to the project's global styles or component modules. ea9c51c
+- [x] Task: Update the Validation Bar to trigger the highlight state with the element's ID and type on click. ea9c51c
+- [x] Task: Implement "Scroll into View" utility and integrate it into the highlight trigger. ea9c51c
+- [x] Task: Update Game, Stage, Field, and Team components to listen for the highlight state and apply the pulsing effect. ea9c51c
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Interactive Error Highlighting' (Protocol in workflow.md) ea9c51c
 
 ## Phase 3: Expanded Cross-Stage Validation Logic
 - [ ] Task: Update the Validation Service signature to receive and process the entire hierarchical gameday state.
