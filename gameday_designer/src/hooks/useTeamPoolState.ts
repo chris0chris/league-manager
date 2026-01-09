@@ -32,27 +32,21 @@ export function useTeamPoolState(
   const addGlobalTeam = useCallback(
     (label?: string, groupId?: string | null): GlobalTeam => {
       const id = `team-${uuidv4()}`;
-      
-      let newTeam: GlobalTeam | null = null;
+      const order = globalTeams.length;
+      const color = TEAM_COLORS[order % TEAM_COLORS.length];
 
-      setGlobalTeams((teams) => {
-        const order = teams.length;
-        const color = TEAM_COLORS[order % TEAM_COLORS.length];
-        
-        newTeam = {
-          id,
-          label: label ?? `Team ${order + 1}`,
-          groupId: groupId ?? null,
-          order,
-          color,
-        };
-        
-        return [...teams, newTeam];
-      });
+      const newTeam: GlobalTeam = {
+        id,
+        label: label ?? `Team ${order + 1}`,
+        groupId: groupId ?? null,
+        order,
+        color,
+      };
 
-      return newTeam!;
+      setGlobalTeams((teams) => [...teams, newTeam]);
+      return newTeam;
     },
-    [setGlobalTeams]
+    [globalTeams, setGlobalTeams]
   );
 
   /**

@@ -268,7 +268,11 @@ describe('useFlowState - Edge Cases', () => {
       // Create group with teams
       act(() => {
         groupId = result.current.addGlobalTeamGroup('Group A').id;
+      });
+      act(() => {
         team1Id = result.current.addGlobalTeam('Team 1', groupId).id;
+      });
+      act(() => {
         team2Id = result.current.addGlobalTeam('Team 2', groupId).id;
       });
 
@@ -346,10 +350,18 @@ describe('useFlowState - Edge Cases', () => {
       // Create two groups with teams
       act(() => {
         group1Id = result.current.addGlobalTeamGroup('Group 1').id;
+      });
+      act(() => {
         team1Id = result.current.addGlobalTeam('Team 1', group1Id).id;
+      });
+      act(() => {
         team2Id = result.current.addGlobalTeam('Team 2', group1Id).id;
+      });
 
+      act(() => {
         group2Id = result.current.addGlobalTeamGroup('Group 2').id;
+      });
+      act(() => {
         team3Id = result.current.addGlobalTeam('Team 3', group2Id).id;
       });
 
