@@ -16,6 +16,7 @@ import type {
   GlobalTeamGroup,
 } from '../types/flowchart';
 import { isGameNode } from '../types/flowchart';
+import { TEAM_COLORS } from '../utils/tournamentConstants';
 
 export function useTeamPoolState(
   globalTeams: GlobalTeam[],
@@ -32,12 +33,14 @@ export function useTeamPoolState(
     (label?: string, groupId?: string | null): GlobalTeam => {
       const id = `team-${uuidv4()}`;
       const order = globalTeams.length;
+      const color = TEAM_COLORS[order % TEAM_COLORS.length];
 
       const newTeam: GlobalTeam = {
         id,
         label: label ?? `Team ${order + 1}`,
         groupId: groupId ?? null,
         order,
+        color,
       };
 
       setGlobalTeams((teams) => [...teams, newTeam]);

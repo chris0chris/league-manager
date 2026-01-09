@@ -73,6 +73,8 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
       act(() => {
         game1Id = result.current.addGameNodeInStage(stageId, { standing: 'Game 1' }).id;
         game2Id = result.current.addGameNodeInStage(stageId, { standing: 'Game 2' }).id;
+      });
+      act(() => {
         teamId = result.current.addGlobalTeam('Team A').id;
       });
 
@@ -459,6 +461,8 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
       act(() => {
         game1Id = result.current.addGameNodeInStage(stageId, { standing: 'Game 1' }).id;
         game2Id = result.current.addGameNodeInStage(stageId, { standing: 'Game 2' }).id;
+      });
+      act(() => {
         teamId = result.current.addGlobalTeam('Team A').id;
       });
 
