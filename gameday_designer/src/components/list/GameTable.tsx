@@ -7,7 +7,15 @@
 import React, { useState, useCallback, memo, useMemo } from 'react';
 import { Table, Form } from 'react-bootstrap';
 import Select, { components, StylesConfig, GroupBase } from 'react-select';
-import type { GameNode, FlowEdge, FlowNode, GlobalTeam, GlobalTeamGroup, GameNodeData } from '../../types/flowchart';
+import type { 
+  GameNode, 
+  FlowEdge, 
+  FlowNode, 
+  GlobalTeam, 
+  GlobalTeamGroup, 
+  GameNodeData,
+  HighlightedElement
+} from '../../types/flowchart';
 import { isGameNode } from '../../types/flowchart';
 import { findSourceGameForReference, getGamePath } from '../../utils/edgeAnalysis';
 import { isValidTimeFormat } from '../../utils/timeCalculation';
@@ -172,6 +180,7 @@ export interface GameTableProps {
   allNodes: FlowNode[];
   globalTeams: GlobalTeam[];
   globalTeamGroups: GlobalTeamGroup[];
+  highlightedElement?: HighlightedElement | null;
   onUpdate: (nodeId: string, data: Partial<GameNode['data']>) => void;
   onDelete: (nodeId: string) => void;
   onSelectNode: (nodeId: string | null) => void;
@@ -179,6 +188,8 @@ export interface GameTableProps {
   onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
   onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
   onRemoveGameToGameEdge: (targetGameId: string, targetSlot: 'home' | 'away') => void;
+  highlightedSourceGameId?: string | null;
+  onDynamicReferenceClick: (sourceGameId: string) => void;
 }
 
 const GameTable: React.FC<GameTableProps> = memo(({
@@ -187,6 +198,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
   allNodes,
   globalTeams,
   globalTeamGroups,
+  highlightedElement,
   onDelete,
   onSelectNode,
   selectedNodeId,
@@ -194,6 +206,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
   onUpdate,
   onAddGameToGameEdge,
   onRemoveGameToGameEdge,
+  highlightedSourceGameId,
+  onDynamicReferenceClick,
 }) => {
   const [editingGameId, setEditingGameId] = useState<string | null>(null);
   const [editingField, setEditingField] = useState<'standing' | 'breakAfter' | 'time' | null>(null);
@@ -438,7 +452,16 @@ const GameTable: React.FC<GameTableProps> = memo(({
     });
 
     return (
-      <div onClick={(e) => e.stopPropagation()}>
+      <div 
+        onClick={(e) => {
+          e.stopPropagation();
+          if (dynamicRef && onDynamicReferenceClick) {
+            const sourceGame = findSourceGameForReference(game.id, slot, edges, allNodes);
+            if (sourceGame) onDynamicReferenceClick(sourceGame.id);
+          }
+        }}
+        style={{ cursor: dynamicRef ? 'pointer' : 'default' }}
+      >
         <Select<TeamOption>
           value={options.find(opt => opt.value === currentValue) || options[0]}
           options={options}
@@ -463,49 +486,63 @@ const GameTable: React.FC<GameTableProps> = memo(({
     <Table striped bordered hover size="sm">
       <thead><tr><th>Standing</th><th>Time</th><th>Home</th><th>Away</th><th>Official</th><th>Break After</th><th>Actions</th></tr></thead>
       <tbody>
-        {games.map((game) => (
-          <tr key={game.id} id={`game-${game.id}`} onClick={() => handleRowClick(game.id)} style={{ cursor: 'pointer', backgroundColor: selectedNodeId === game.id ? '#fff3cd' : undefined }}>
-            <td onClick={(e) => e.stopPropagation()}>
-              {editingGameId === game.id && editingField === 'standing' ? (
-                <Form.Control type="text" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'standing')} onKeyDown={(e) => handleKeyPress(e, game.id, 'standing')} autoFocus style={{ fontSize: '0.875rem' }} />
-              ) : (
-                <span 
-                  onClick={(e) => handleStartEdit(e, game, 'standing')} 
-                  style={{ cursor: 'text' }}
-                  title="Click to edit"
+        {games.map((game) => {
+          const isHighlighted = highlightedElement?.id === game.id && highlightedElement?.type === 'game';
+          const isSourceHighlighted = highlightedSourceGameId === game.id;
+
+          return (
+            <tr 
+              key={game.id} 
+              id={`game-${game.id}`} 
+              onClick={() => handleRowClick(game.id)} 
+              className={`${isHighlighted ? 'element-highlighted' : ''} ${isSourceHighlighted ? 'source-highlighted' : ''}`}
+              style={{ 
+                cursor: 'pointer', 
+                backgroundColor: selectedNodeId === game.id ? '#fff3cd' : undefined 
+              }}
+            >
+              <td onClick={(e) => e.stopPropagation()}>
+                {editingGameId === game.id && editingField === 'standing' ? (
+                  <Form.Control type="text" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'standing')} onKeyDown={(e) => handleKeyPress(e, game.id, 'standing')} autoFocus style={{ fontSize: '0.875rem' }} />
+                ) : (
+                  <span 
+                    onClick={(e) => handleStartEdit(e, game, 'standing')} 
+                    style={{ cursor: 'text' }}
+                    title="Click to edit"
+                  >
+                    {game.data.standing}
+                  </span>
+                )}
+              </td>
+              {renderTimeCell(game)}
+              <td>{renderTeamCell(game, 'home')}</td>
+              <td>{renderTeamCell(game, 'away')}</td>
+              <td>{renderOfficialCell(game)}</td>
+              <td onClick={(e) => e.stopPropagation()}>
+                {editingGameId === game.id && editingField === 'breakAfter' ? (
+                  <Form.Control type="number" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'breakAfter')} onKeyDown={(e) => handleKeyPress(e, game.id, 'breakAfter')} autoFocus min="0" style={{ fontSize: '0.875rem', width: '80px' }} />
+                ) : (
+                  <span 
+                    onClick={(e) => handleStartEdit(e, game, 'breakAfter')} 
+                    style={{ cursor: 'text' }}
+                    title="Click to edit"
+                  >
+                    {game.data.breakAfter || 0}
+                  </span>
+                )}
+              </td>
+              <td>
+                <button 
+                  className="btn btn-sm btn-outline-danger btn-adaptive" 
+                  onClick={(e) => handleDelete(e, game.id)}
+                  title="Delete game"
                 >
-                  {game.data.standing}
-                </span>
-              )}
-            </td>
-            {renderTimeCell(game)}
-            <td>{renderTeamCell(game, 'home')}</td>
-            <td>{renderTeamCell(game, 'away')}</td>
-            <td>{renderOfficialCell(game)}</td>
-            <td onClick={(e) => e.stopPropagation()}>
-              {editingGameId === game.id && editingField === 'breakAfter' ? (
-                <Form.Control type="number" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'breakAfter')} onKeyDown={(e) => handleKeyPress(e, game.id, 'breakAfter')} autoFocus min="0" style={{ fontSize: '0.875rem', width: '80px' }} />
-              ) : (
-                <span 
-                  onClick={(e) => handleStartEdit(e, game, 'breakAfter')} 
-                  style={{ cursor: 'text' }}
-                  title="Click to edit"
-                >
-                  {game.data.breakAfter || 0}
-                </span>
-              )}
-            </td>
-            <td>
-              <button 
-                className="btn btn-sm btn-outline-danger btn-adaptive" 
-                onClick={(e) => handleDelete(e, game.id)}
-                title="Delete game"
-              >
-                <i className={`bi ${ICONS.DELETE}`} />
-              </button>
-            </td>
-          </tr>
-        ))}
+                  <i className={`bi ${ICONS.DELETE}`} />
+                </button>
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </Table>
   );

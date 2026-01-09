@@ -366,8 +366,18 @@ export interface FlowState {
 }
 
 // ============================================================================
-// Selection State
+// Selection and Highlighting State
 // ============================================================================
+
+/**
+ * Represents an element that is currently visually highlighted.
+ */
+export interface HighlightedElement {
+  /** ID of the element to highlight */
+  id: string;
+  /** Type of the element (for context-aware styling) */
+  type: 'game' | 'stage' | 'field' | 'team';
+}
 
 /**
  * Represents what is currently selected in the canvas.

@@ -8,7 +8,15 @@ import React, { useState, useCallback, memo, useMemo } from 'react';
 import { Card, Button } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import StageSection from './StageSection';
-import type { FieldNode, StageNode, FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
+import type { 
+  FieldNode, 
+  StageNode, 
+  FlowNode, 
+  FlowEdge, 
+  GlobalTeam, 
+  GlobalTeamGroup,
+  HighlightedElement
+} from '../../types/flowchart';
 import { ICONS } from '../../utils/iconConstants';
 import './FieldSection.css';
 
@@ -19,6 +27,7 @@ export interface FieldSectionProps {
   edges: FlowEdge[];
   globalTeams: GlobalTeam[];
   globalTeamGroups: GlobalTeamGroup[];
+  highlightedElement?: HighlightedElement | null;
   onUpdate: (nodeId: string, data: Partial<FieldNode['data']>) => void;
   onDelete: (nodeId: string) => void;
   onAddStage: (fieldId: string) => void;
@@ -30,6 +39,8 @@ export interface FieldSectionProps {
   onRemoveGameToGameEdge: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   isExpanded: boolean;
   expandedStageIds: Set<string>;
+  highlightedSourceGameId?: string | null;
+  onDynamicReferenceClick: (sourceGameId: string) => void;
 }
 
 const FieldSection: React.FC<FieldSectionProps> = memo(({
@@ -39,6 +50,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
   edges,
   globalTeams,
   globalTeamGroups,
+  highlightedElement,
   onUpdate,
   onDelete,
   onAddStage,
@@ -50,6 +62,8 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
   onRemoveGameToGameEdge,
   isExpanded: isExpandedProp,
   expandedStageIds,
+  highlightedSourceGameId,
+  onDynamicReferenceClick,
 }) => {
   const { t } = useTypedTranslation(['ui']);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -65,6 +79,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
   );
 
   const isSelected = selectedNodeId === field.id;
+  const isHighlighted = highlightedElement?.id === field.id && highlightedElement?.type === 'field';
 
   const handleToggleExpand = useCallback(() => {
     setLocalExpanded((prev) => !prev);
@@ -124,7 +139,8 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
 
   return (
     <Card
-      className={`field-section mb-3 ${isSelected ? 'selected' : ''}`}
+      id={`field-${field.id}`}
+      className={`field-section mb-3 ${isSelected ? 'selected' : ''} ${isHighlighted ? 'element-highlighted' : ''}`}
       onClick={handleSelectField}
     >
       <Card.Header
@@ -228,6 +244,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
                   edges={edges}
                   globalTeams={globalTeams}
                   globalTeamGroups={globalTeamGroups}
+                  highlightedElement={highlightedElement}
                   onUpdate={onUpdate}
                   onDelete={onDelete}
                   onSelectNode={onSelectNode}
@@ -237,6 +254,8 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
                   onAddGameToGameEdge={onAddGameToGameEdge}
                   onRemoveGameToGameEdge={onRemoveGameToGameEdge}
                   isExpanded={expandedStageIds.has(stage.id)}
+                  highlightedSourceGameId={highlightedSourceGameId}
+                  onDynamicReferenceClick={onDynamicReferenceClick}
                 />
               ))}
             </>

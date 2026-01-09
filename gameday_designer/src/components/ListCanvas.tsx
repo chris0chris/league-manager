@@ -41,7 +41,8 @@ export interface ListCanvasProps {
   onRemoveGameToGameEdge: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   expandedFieldIds: Set<string>;
   expandedStageIds: Set<string>;
-  highlightedSourceGameId: string | null;
+  highlightedElement?: HighlightedElement | null;
+  highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
 }
 
@@ -71,6 +72,9 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
   onRemoveGameToGameEdge,
   expandedFieldIds,
   expandedStageIds,
+  highlightedElement,
+  highlightedSourceGameId,
+  onDynamicReferenceClick,
 }) => {
   const { t } = useTypedTranslation(['ui']);
   const [isTeamPoolExpanded, setIsTeamPoolExpanded] = useState(true);

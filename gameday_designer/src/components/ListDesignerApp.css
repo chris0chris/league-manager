@@ -78,6 +78,28 @@
   margin-right: 0.25rem !important;
 }
 
+/**
+ * Pulse Highlighting
+ * Used for validation errors and dynamic reference selection.
+ */
+@keyframes pulse-highlight {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+    border-color: rgba(0, 123, 255, 1);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+    border-color: rgba(0, 123, 255, 1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+    border-color: inherit;
+  }
+}
 
-
-
+.element-highlighted {
+  animation: pulse-highlight 1.5s infinite;
+  z-index: 10;
+  position: relative;
+  border-width: 2px !important;
+}

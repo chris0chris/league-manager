@@ -1,7 +1,7 @@
 {
   "clearAll": {
     "title": "Alles löschen",
-    "message": "Sind Sie sicher, dass Sie alle Felder, Etappen, Spiele, Teams und Gruppen löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    "message": "Sind Sie sicher, dass Sie alle Felder, Phasen, Spiele, Teams und Gruppen löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "editGame": {
     "title": "Spiel bearbeiten"
@@ -15,8 +15,8 @@
     "previewTitle": "Vorschau:",
     "previewFields_one": "{{count}} Feld",
     "previewFields_other": "{{count}} Felder",
-    "previewStages_one": "{{count}} Etappe",
-    "previewStages_other": "{{count}} Etappen",
+    "previewStages_one": "{{count}} Phase",
+    "previewStages_other": "{{count}} Phasen",
     "previewFirstGame": "Erstes Spiel um {{time}}",
     "previewGameDuration": "Standard-Spieldauer: {{duration}} Minuten"
   }

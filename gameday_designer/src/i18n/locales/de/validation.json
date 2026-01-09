@@ -14,6 +14,6 @@
   "game_invalid_parent": "Das übergeordnete Element von Spiel \"{{game}}\" ist keine gültige Phase",
   "team_outside_container": "Team \"{{team}}\" muss sich innerhalb einer Phase befinden",
   "team_invalid_parent": "Das übergeordnete Element von Team \"{{team}}\" ist keine gültige Phase",
-  "stage_outside_container": "Phase \"{{stage}}\" befindet sich nicht innerhalb eines Feldes",
+  "stage_outside_field": "Phase \"{{stage}}\" befindet sich nicht innerhalb eines Feldes",
   "stage_invalid_parent": "Das übergeordnete Element von Phase \"{{stage}}\" ist kein gültiges Feld"
 }

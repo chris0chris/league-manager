@@ -58,8 +58,18 @@ const ListDesignerApp: React.FC = () => {
     return item.message;
   };
 
+  /**
+   * Helper to determine highlight type from error type.
+   */
+  const getHighlightType = (errorType: string): HighlightedElement['type'] => {
+    if (errorType.includes('stage')) return 'stage';
+    if (errorType.includes('field')) return 'field';
+    if (errorType.includes('team')) return 'team';
+    return 'game';
+  };
+
   const {
-    highlightedSourceGameId,
+    highlightedElement,
     expandedFieldIds,
     expandedStageIds,
     showTournamentModal,
@@ -68,6 +78,9 @@ const ListDesignerApp: React.FC = () => {
   } = ui;
 
   const {
+    expandField,
+    expandStage,
+    handleHighlightElement,
     handleDynamicReferenceClick,
     handleImport,
     handleExport,
@@ -130,6 +143,8 @@ const ListDesignerApp: React.FC = () => {
               <>
                 {validation.errors.length > 0 && (
                   <OverlayTrigger
+                    trigger="click"
+                    rootClose
                     placement="bottom"
                     overlay={
                       <Popover id="errors-popover">
@@ -139,7 +154,17 @@ const ListDesignerApp: React.FC = () => {
                         <Popover.Body className="p-0">
                           <ListGroup variant="flush">
                             {validation.errors.map((error) => (
-                              <ListGroup.Item key={error.id} variant="danger" className="small">
+                              <ListGroup.Item 
+                                key={error.id} 
+                                variant="danger" 
+                                action
+                                onClick={() => {
+                                  // @ts-ignore
+                                  const nodeId = error.affectedNodes?.[0] || error.affectedSlots?.[0];
+                                  if (nodeId) handleHighlightElement(nodeId, getHighlightType(error.type));
+                                }}
+                                className="small"
+                              >
                                 {getMessage(error)}
                               </ListGroup.Item>
                             ))}
@@ -148,7 +173,7 @@ const ListDesignerApp: React.FC = () => {
                       </Popover>
                     }
                   >
-                    <span className="text-danger" style={{ cursor: 'help' }}>
+                    <span className="text-danger" style={{ cursor: 'pointer' }}>
                       <i className="bi bi-x-circle-fill me-1"></i>
                       {t('validation:errorCount', { count: validation.errors.length })}
                     </span>
@@ -156,6 +181,8 @@ const ListDesignerApp: React.FC = () => {
                 )}
                 {validation.warnings.length > 0 && (
                   <OverlayTrigger
+                    trigger="click"
+                    rootClose
                     placement="bottom"
                     overlay={
                       <Popover id="warnings-popover">
@@ -165,7 +192,17 @@ const ListDesignerApp: React.FC = () => {
                         <Popover.Body className="p-0">
                           <ListGroup variant="flush">
                             {validation.warnings.map((warning) => (
-                              <ListGroup.Item key={warning.id} variant="warning" className="small">
+                              <ListGroup.Item 
+                                key={warning.id} 
+                                variant="warning" 
+                                action
+                                onClick={() => {
+                                  // @ts-ignore
+                                  const nodeId = warning.affectedNodes?.[0] || warning.affectedSlots?.[0];
+                                  if (nodeId) handleHighlightElement(nodeId, getHighlightType(warning.type));
+                                }}
+                                className="small"
+                              >
                                 {getMessage(warning)}
                               </ListGroup.Item>
                             ))}
@@ -174,7 +211,7 @@ const ListDesignerApp: React.FC = () => {
                       </Popover>
                     }
                   >
-                    <span className="text-warning" style={{ cursor: 'help' }}>
+                    <span className="text-warning" style={{ cursor: 'pointer' }}>
                       <i className="bi bi-exclamation-triangle-fill me-1"></i>
                       {t('validation:warningCount', { count: validation.warnings.length })}
                     </span>
@@ -216,7 +253,7 @@ const ListDesignerApp: React.FC = () => {
           getTeamUsage={getTeamUsage}
           onAssignTeam={handleAssignTeam}
           onAddGame={addGameNodeInStage}
-          highlightedSourceGameId={highlightedSourceGameId}
+          highlightedElement={highlightedElement}
           onDynamicReferenceClick={handleDynamicReferenceClick}
           onAddGameToGameEdge={addGameToGameEdge}
           onRemoveGameToGameEdge={removeGameToGameEdge}
