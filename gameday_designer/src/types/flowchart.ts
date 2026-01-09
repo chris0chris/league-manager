@@ -413,6 +413,10 @@ export interface FlowValidationError {
   type: FlowValidationErrorType;
   /** Human-readable error message */
   message: string;
+  /** Translation key for the error message */
+  messageKey?: string;
+  /** Parameters for the translation key */
+  messageParams?: Record<string, unknown>;
   /** IDs of affected nodes */
   affectedNodes: string[];
 }
@@ -427,6 +431,10 @@ export interface FlowValidationWarning {
   type: FlowValidationWarningType;
   /** Human-readable warning message */
   message: string;
+  /** Translation key for the warning message */
+  messageKey?: string;
+  /** Parameters for the translation key */
+  messageParams?: Record<string, unknown>;
   /** IDs of affected nodes */
   affectedNodes: string[];
 }

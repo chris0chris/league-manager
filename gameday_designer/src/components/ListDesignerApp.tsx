@@ -17,6 +17,7 @@ import NotificationToast from './NotificationToast';
 import { useDesignerController } from '../hooks/useDesignerController';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { ICONS } from '../utils/iconConstants';
+import type { ValidationError, ValidationWarning } from '../types/designer';
 
 import './ListDesignerApp.css';
 
@@ -25,7 +26,7 @@ import './ListDesignerApp.css';
  * ListDesignerApp component.
  */
 const ListDesignerApp: React.FC = () => {
-  const { t } = useTypedTranslation(['ui']);
+  const { t } = useTypedTranslation(['ui', 'validation']);
   const {
     nodes,
     edges,
@@ -45,6 +46,17 @@ const ListDesignerApp: React.FC = () => {
     addGameNodeInStage,
     addNotification,
   } = useDesignerController();
+
+  /**
+   * Helper to translate error/warning message.
+   */
+  const getMessage = (item: ValidationError | ValidationWarning) => {
+    if (item.messageKey) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return t(`validation:${item.messageKey}` as any, item.messageParams);
+    }
+    return item.message;
+  };
 
   const {
     highlightedSourceGameId,
@@ -112,7 +124,7 @@ const ListDesignerApp: React.FC = () => {
             {validation.isValid && validation.warnings.length === 0 ? (
               <span className="text-success">
                 <i className="bi bi-check-circle-fill me-2"></i>
-                Valid
+                {t('validation:scheduleValid')}
               </span>
             ) : (
               <>
@@ -122,13 +134,13 @@ const ListDesignerApp: React.FC = () => {
                     overlay={
                       <Popover id="errors-popover">
                         <Popover.Header as="h3">
-                          {validation.errors.length} Error{validation.errors.length !== 1 ? 's' : ''}
+                          {t('validation:errorCount', { count: validation.errors.length })}
                         </Popover.Header>
                         <Popover.Body className="p-0">
                           <ListGroup variant="flush">
                             {validation.errors.map((error) => (
                               <ListGroup.Item key={error.id} variant="danger" className="small">
-                                {error.message}
+                                {getMessage(error)}
                               </ListGroup.Item>
                             ))}
                           </ListGroup>
@@ -138,7 +150,7 @@ const ListDesignerApp: React.FC = () => {
                   >
                     <span className="text-danger" style={{ cursor: 'help' }}>
                       <i className="bi bi-x-circle-fill me-1"></i>
-                      {validation.errors.length} error{validation.errors.length !== 1 ? 's' : ''}
+                      {t('validation:errorCount', { count: validation.errors.length })}
                     </span>
                   </OverlayTrigger>
                 )}
@@ -148,13 +160,13 @@ const ListDesignerApp: React.FC = () => {
                     overlay={
                       <Popover id="warnings-popover">
                         <Popover.Header as="h3">
-                          {validation.warnings.length} Warning{validation.warnings.length !== 1 ? 's' : ''}
+                          {t('validation:warningCount', { count: validation.warnings.length })}
                         </Popover.Header>
                         <Popover.Body className="p-0">
                           <ListGroup variant="flush">
                             {validation.warnings.map((warning) => (
                               <ListGroup.Item key={warning.id} variant="warning" className="small">
-                                {warning.message}
+                                {getMessage(warning)}
                               </ListGroup.Item>
                             ))}
                           </ListGroup>
@@ -164,17 +176,17 @@ const ListDesignerApp: React.FC = () => {
                   >
                     <span className="text-warning" style={{ cursor: 'help' }}>
                       <i className="bi bi-exclamation-triangle-fill me-1"></i>
-                      {validation.warnings.length} warning{validation.warnings.length !== 1 ? 's' : ''}
+                      {t('validation:warningCount', { count: validation.warnings.length })}
                     </span>
                   </OverlayTrigger>
                 )}
               </>
             )}
             <span className="text-muted small ms-auto">
-              {nodes.filter((n) => n.type === 'field').length} fields |{' '}
-              {nodes.filter((n) => n.type === 'stage').length} stages |{' '}
-              {globalTeams.length} teams |{' '}
-              {nodes.filter((n) => n.type === 'game').length} games
+              {nodes.filter((n) => n.type === 'field').length} {t('ui:label.fields')} |{' '}
+              {nodes.filter((n) => n.type === 'stage').length} {t('ui:label.stages')} |{' '}
+              {globalTeams.length} {t('ui:label.teams')} |{' '}
+              {nodes.filter((n) => n.type === 'game').length} {t('ui:label.games')}
             </span>
           </div>
         </Col>

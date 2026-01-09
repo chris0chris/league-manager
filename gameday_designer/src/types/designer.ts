@@ -122,6 +122,10 @@ export interface ValidationError {
   type: ValidationErrorType;
   /** Human-readable error message */
   message: string;
+  /** Translation key for the error message */
+  messageKey?: string;
+  /** Parameters for the translation key */
+  messageParams?: Record<string, unknown>;
   /** IDs of affected game slots */
   affectedSlots: string[];
 }
@@ -136,6 +140,10 @@ export interface ValidationWarning {
   type: ValidationWarningType;
   /** Human-readable warning message */
   message: string;
+  /** Translation key for the warning message */
+  messageKey?: string;
+  /** Parameters for the translation key */
+  messageParams?: Record<string, unknown>;
   /** IDs of affected game slots */
   affectedSlots: string[];
 }

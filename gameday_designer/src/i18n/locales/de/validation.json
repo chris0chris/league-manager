@@ -3,5 +3,17 @@
   "errorCount_other": "{{count}} Fehler",
   "warningCount_one": "{{count}} Warnung",
   "warningCount_other": "{{count}} Warnungen",
-  "scheduleValid": "Zeitplan ist gültig"
+  "scheduleValid": "Zeitplan ist gültig",
+  "incomplete_game_inputs": "Spiel \"{{game}}\" fehlt die {{missing}} Team-Verbindung",
+  "circular_dependency": "Zirkuläre Abhängigkeit erkannt: {{path}}",
+  "official_playing": "Spiel \"{{game}}\": Team \"{{team}}\" kann kein Spiel leiten, in dem es selbst spielt",
+  "duplicate_standing": "Platzierung \"{{standing}}\" wird von {{count}} Spielen verwendet",
+  "orphaned_team": "Team \"{{team}}\" ist mit keinem Spiel verbunden",
+  "unassigned_field": "Spiel \"{{game}}\" ist keinem Feld zugewiesen",
+  "game_outside_container": "Spiel \"{{game}}\" muss sich innerhalb einer Phase befinden",
+  "game_invalid_parent": "Das übergeordnete Element von Spiel \"{{game}}\" ist keine gültige Phase",
+  "team_outside_container": "Team \"{{team}}\" muss sich innerhalb einer Phase befinden",
+  "team_invalid_parent": "Das übergeordnete Element von Team \"{{team}}\" ist keine gültige Phase",
+  "stage_outside_container": "Phase \"{{stage}}\" befindet sich nicht innerhalb eines Feldes",
+  "stage_invalid_parent": "Das übergeordnete Element von Phase \"{{stage}}\" ist kein gültiges Feld"
 }

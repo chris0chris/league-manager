@@ -71,6 +71,11 @@ function checkIncompleteInputs(
         id: `${node.id}_incomplete_inputs`,
         type: 'incomplete_game_inputs',
         message: `Game "${data.standing || node.id}" is missing ${missingPorts.join(' and ')} team connection`,
+        messageKey: 'incomplete_game_inputs',
+        messageParams: {
+            game: data.standing || node.id,
+            missing: missingPorts.join(' and ')
+        },
         affectedNodes: [node.id],
       });
     }
@@ -152,10 +157,16 @@ function checkCircularDependencies(
             : id;
         });
 
+        const pathString = `${standingNames.join(' -> ')} -> ${standingNames[0]}`;
+
         errors.push({
           id: `circular_dependency_${cycleKey}`,
           type: 'circular_dependency',
-          message: `Circular dependency detected: ${standingNames.join(' -> ')} -> ${standingNames[0]}`,
+          message: `Circular dependency detected: ${pathString}`,
+          messageKey: 'circular_dependency',
+          messageParams: {
+            path: pathString
+          },
           affectedNodes: cycle,
         });
       }
@@ -197,6 +208,11 @@ function checkOfficialPlaying(
         id: `${node.id}_official_playing_home_v2`,
         type: 'official_playing',
         message: `Game "${data.standing}": Team "${officialStr}" cannot officiate a game they are playing in`,
+        messageKey: 'official_playing',
+        messageParams: {
+            game: data.standing,
+            team: officialStr
+        },
         affectedNodes: [node.id],
       });
     }
@@ -207,6 +223,11 @@ function checkOfficialPlaying(
         id: `${node.id}_official_playing_away_v2`,
         type: 'official_playing',
         message: `Game "${data.standing}": Team "${officialStr}" cannot officiate a game they are playing in`,
+        messageKey: 'official_playing',
+        messageParams: {
+            game: data.standing,
+            team: officialStr
+        },
         affectedNodes: [node.id],
       });
     }
@@ -222,6 +243,11 @@ function checkOfficialPlaying(
             id: `${node.id}_official_playing_home`,
             type: 'official_playing',
             message: `Game "${data.standing}": Team "${officialStr}" cannot officiate a game they are playing in`,
+            messageKey: 'official_playing',
+            messageParams: {
+                game: data.standing,
+                team: officialStr
+            },
             affectedNodes: [node.id, homeNode.id],
           });
         }
@@ -239,6 +265,11 @@ function checkOfficialPlaying(
             id: `${node.id}_official_playing_away`,
             type: 'official_playing',
             message: `Game "${data.standing}": Team "${officialStr}" cannot officiate a game they are playing in`,
+            messageKey: 'official_playing',
+            messageParams: {
+                game: data.standing,
+                team: officialStr
+            },
             affectedNodes: [node.id, awayNode.id],
           });
         }
@@ -273,6 +304,11 @@ function checkDuplicateStandings(nodes: FlowNode[]): FlowValidationWarning[] {
         id: `duplicate_standing_${standing}`,
         type: 'duplicate_standing',
         message: `Standing "${standing}" is used by ${nodeIds.length} games`,
+        messageKey: 'duplicate_standing',
+        messageParams: {
+            standing: standing,
+            count: nodeIds.length
+        },
         affectedNodes: nodeIds,
       });
     }
@@ -301,6 +337,10 @@ function checkOrphanedTeams(
         id: `${node.id}_orphaned`,
         type: 'orphaned_team',
         message: `Team "${data.label || formatTeamReference(data.reference)}" is not connected to any game`,
+        messageKey: 'orphaned_team',
+        messageParams: {
+            team: data.label || formatTeamReference(data.reference)
+        },
         affectedNodes: [node.id],
       });
     }
@@ -333,6 +373,10 @@ function checkUnassignedFields(nodes: FlowNode[]): FlowValidationWarning[] {
         id: `${node.id}_unassigned_field`,
         type: 'unassigned_field',
         message: `Game "${data.standing || node.id}" has no field assigned`,
+        messageKey: 'unassigned_field',
+        messageParams: {
+            game: data.standing || node.id
+        },
         affectedNodes: [node.id],
       });
     }
@@ -377,6 +421,10 @@ function checkGamesOutsideContainers(nodes: FlowNode[]): FlowValidationError[] {
         id: `${node.id}_outside_container`,
         type: 'game_outside_container',
         message: `Game "${data.standing || node.id}" must be inside a stage container`,
+        messageKey: 'game_outside_container',
+        messageParams: {
+            game: data.standing || node.id
+        },
         affectedNodes: [node.id],
       });
       continue;
@@ -389,6 +437,10 @@ function checkGamesOutsideContainers(nodes: FlowNode[]): FlowValidationError[] {
         id: `${node.id}_outside_container`,
         type: 'game_outside_container',
         message: `Game "${data.standing || node.id}" parent is not a valid stage`,
+        messageKey: 'game_invalid_parent',
+        messageParams: {
+            game: data.standing || node.id
+        },
         affectedNodes: [node.id],
       });
     }
@@ -415,6 +467,10 @@ function checkTeamsOutsideContainers(nodes: FlowNode[]): FlowValidationError[] {
         id: `${node.id}_outside_container`,
         type: 'team_outside_container',
         message: `Team "${data.label || node.id}" must be inside a stage container`,
+        messageKey: 'team_outside_container',
+        messageParams: {
+            team: data.label || node.id
+        },
         affectedNodes: [node.id],
       });
       continue;
@@ -427,6 +483,10 @@ function checkTeamsOutsideContainers(nodes: FlowNode[]): FlowValidationError[] {
         id: `${node.id}_outside_container`,
         type: 'team_outside_container',
         message: `Team "${data.label || node.id}" parent is not a valid stage`,
+        messageKey: 'team_invalid_parent',
+        messageParams: {
+            team: data.label || node.id
+        },
         affectedNodes: [node.id],
       });
     }
@@ -453,6 +513,10 @@ function checkStagesOutsideFields(nodes: FlowNode[]): FlowValidationError[] {
         id: `${node.id}_outside_field`,
         type: 'stage_outside_field',
         message: `Stage "${data.name}" is not inside a field container`,
+        messageKey: 'stage_outside_field',
+        messageParams: {
+            stage: data.name
+        },
         affectedNodes: [node.id],
       });
       continue;
@@ -465,6 +529,10 @@ function checkStagesOutsideFields(nodes: FlowNode[]): FlowValidationError[] {
         id: `${node.id}_outside_field`,
         type: 'stage_outside_field',
         message: `Stage "${data.name}" parent is not a valid field`,
+        messageKey: 'stage_invalid_parent',
+        messageParams: {
+            stage: data.name
+        },
         affectedNodes: [node.id],
       });
     }

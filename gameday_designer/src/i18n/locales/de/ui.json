@@ -38,6 +38,9 @@
     "breakDuration": "Pause zw. Spielen (min)",
     "preview": "Vorschau",
     "fields": "Felder",
+    "stages": "Phasen",
+    "teams": "Teams",
+    "games": "Spiele",
     "teamPool": "Team-Pool",
     "globalTeamPool": "Globaler Team-Pool",
     "start": "Start"
