@@ -3,37 +3,55 @@
 import pandas as pd
 
 from gamedays.service.gameday_settings import (
-    POINTS,
-    PF,
-    PA,
-    DIFF,
     FINISHED,
 )
 from league_table.service.datatypes import LeagueConfig, LeagueConfigRuleset
 from league_table.service.ranking.tiebreakers import TieBreaker, TIEBREAK_REGISTRY
 
 
+class TeamStatsEngine:
+    def __init__(self, ruleset: LeagueConfigRuleset):
+        self.ruleset = ruleset
+
+    def build(self, games_df: pd.DataFrame) -> pd.DataFrame:
+        df = self._compute_team_stats(games_df)
+
+        grouped = df.groupby("team_id").agg(
+            {
+                "team__name": "first",
+                "pf": "sum",
+                "pa": "sum",
+                "wins": "sum",
+                "draws": "sum",
+                "losses": "sum",
+                "games_played": "sum",
+                "standing": "first",
+            }
+        )
+
+        grouped["diff"] = grouped["pf"] - grouped["pa"]
+        grouped["win_quotient"] = (grouped["wins"] / grouped["games_played"]).round(
+            self.ruleset.league_quotient_precision
+        )
+
+        return grouped.reset_index()
+
+    def _compute_team_stats(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df.copy()
+
+        df["wins"] = (df["pf"] > df["pa"]).astype(int)
+        df["draws"] = (df["pf"] == df["pa"]).astype(int)
+        df["losses"] = (df["pf"] < df["pa"]).astype(int)
+        df["games_played"] = 1
+
+        return df
+
+
 class FinalRankingEngine:
     def __init__(self, league_config_ruleset: LeagueConfigRuleset):
         self.league_config_ruleset = league_config_ruleset
 
-    def _winner(self, row):
-        """Return the winning team's name for a finished game."""
-        if row["points_home"] > row["points_away"]:
-            return row["home"]
-        elif row["points_home"] < row["points_away"]:
-            return row["away"]
-        return None  # handle draws safely
-
-    def _loser(self, row):
-        """Return the losing team's name."""
-        if row["points_home"] > row["points_away"]:
-            return row["away"]
-        elif row["points_home"] < row["points_away"]:
-            return row["home"]
-        return None  # handle draws safely
-
-    def compute_final_table(self, games: pd.DataFrame, schedule: pd.DataFrame) -> pd.DataFrame:
+    def compute_final_table(self, games: pd.DataFrame) -> pd.DataFrame:
         """Compute final standings based on actual playoff results."""
         # ensure all games finished
         if not games[games["status"] != "beendet"].empty:
@@ -48,51 +66,22 @@ class FinalRankingEngine:
             if local_games.empty:
                 continue
 
-            if len(local_games) == 1:
-                # only one game, use current logic
-                result_row = local_games.iloc[0]
-                winner = self._winner(result_row)
-                loser = self._loser(result_row)
-                if not winner or not loser:
-                    continue
-                final_standing.append(winner)
-                final_standing.append(loser)
-            else:
-                # multiple games: use tie-breaker engine to decide order
-                # assume `TieBreakerEngine` can rank a subset of games
-                # For example, we rank the teams based on the aggregate pf/pa/points
-                subset_games = local_games[
-                    local_games["gameinfo"].isin(local_games["gameinfo"])
-                ]
-                # Build a mini-standings table
-                mini_table = subset_games.groupby("team__name", as_index=False).agg(
-                    {POINTS: "sum", PF: "sum", PA: "sum", "standing": "first"}
-                )
-                mini_table[DIFF] = mini_table[PF] - mini_table[PA]
-                mini_table["league_quotient"] = mini_table[POINTS]
+            tie_breaker = TieBreakerEngine(self.league_config_ruleset)
+            mini_table_sorted = tie_breaker.rank_by_games(local_games)
 
-
-                # Sort using your tie-breaker logic (replace with your actual tie-breaker engine)
-                tie_breaker = TieBreakerEngine(
-                    self.league_config_ruleset
-                )  # or whatever engine you already have
-                mini_table_sorted = tie_breaker.rank(mini_table, local_games)
-
-                # Add sorted teams to final_standing
-                final_standing.extend(mini_table_sorted["team__name"].tolist())
+            final_standing.extend(mini_table_sorted["team_id"].tolist())
 
         # if some teams are not in playoffs, add them at the end
-        all_teams = games["team__name"].unique().tolist()
+        all_teams = games["team_id"].unique().tolist()
         missing = [t for t in all_teams if t not in final_standing]
         final_standing += missing
 
         # aggregate basic stats for presentation
-        table = games.groupby("team__name", as_index=False).agg(
-            {POINTS: "sum", PF: "sum", PA: "sum"}
-        )
-        table[DIFF] = table[PF] - table[PA]
-        table.set_index("team__name", inplace=True)
-        table = table.reindex(final_standing).reset_index()
+        table = TeamStatsEngine(self.league_config_ruleset).build(games)
+        table = table.set_index("team_id").reindex(final_standing).reset_index()
+        table["rank"] = range(1, len(table) + 1)
+        table = table.rename(columns={"win_quotient": "league_quotient"})
+        table["standing"] = "Finalrunde"
 
         return table
 
@@ -101,64 +90,38 @@ class LeagueRankingEngine:
     def __init__(self, league_config: LeagueConfig):
         self.league_config = league_config
 
-    def compute_initial_stats(self, df) -> pd.DataFrame:
-        """Return finished games for the season+league with league-aware scoring."""
+    def compute_league_specific_stats(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df.copy()
 
         lp = self.league_config.ruleset.league_points
-        mask_finished = df["gameinfo__status"] == FINISHED
-
-        # diff column
-        df["pf"] = df["fh"].fillna(0) + df["sh"].fillna(0)
-
-        # ---------------------------------------------------------------------
-        # Vectorized outcomes
-        # ---------------------------------------------------------------------
-        win_mask = df["pf"] > df["pa"]
-        draw_mask = df["pf"] == df["pa"]
-        loss_mask = df["pf"] < df["pa"]
+        mask_finished = df["status"] == FINISHED
 
         same_league = df["league_id"] == df["opponent_league_id"]
 
-        # ---------------------------------------------------------------------
-        # Vectorized league points
-        # ---------------------------------------------------------------------
         df["league_points"] = (
-            win_mask * mask_finished * same_league.map({True: lp.points_win_same_league,
-                                         False: lp.points_win_other_league})
-            +
-            draw_mask * mask_finished * same_league.map({True: lp.points_draw_same_league,
-                                         False: lp.points_draw_other_league})
-            +
-            loss_mask * mask_finished * same_league.map({True: lp.points_loss_same_league,
-                                         False: lp.points_loss_other_league})
+            (df["pf"] > df["pa"])
+            * mask_finished
+            * same_league.map(
+                {True: lp.points_win_same_league, False: lp.points_win_other_league}
+            )
+            + (df["pf"] == df["pa"])
+            * mask_finished
+            * same_league.map(
+                {True: lp.points_draw_same_league, False: lp.points_draw_other_league}
+            )
+            + (df["pf"] < df["pa"])
+            * mask_finished
+            * same_league.map(
+                {True: lp.points_loss_same_league, False: lp.points_loss_other_league}
+            )
         )
 
-        # ---------------------------------------------------------------------
-        # Games played (only finished)
-        # ---------------------------------------------------------------------
-        df["games_played"] = mask_finished.astype("Int64")
-
-        # ---------------------------------------------------------------------
-        # Max league points per match (vectorized)
-        # ---------------------------------------------------------------------
         df["max_league_points"] = same_league.map(
             {
                 True: lp.max_points_same_league,
                 False: lp.max_points_other_league,
             }
         )
-
-        # ---------------------------------------------------------------------
-        # Wins / Draws / Losses (only for finished games)
-        # ---------------------------------------------------------------------
-        df["wins"] = (win_mask & mask_finished).astype("Int64")
-        df["draws"] = (draw_mask & mask_finished).astype("Int64")
-        df["losses"] = (loss_mask & mask_finished).astype("Int64")
-
-        # ---------------------------------------------------------------------
-        # Diff
-        # ---------------------------------------------------------------------
-        df["diff"] = df["pf"] - df["pa"]
 
         return df
 
@@ -182,11 +145,10 @@ class LeagueRankingEngine:
 
     def compute_league_table(self, games_with_results: pd.DataFrame) -> pd.DataFrame:
         """Aggregate all game results into one final league table."""
-        df_games = self.compute_initial_stats(games_with_results)
-        if df_games.empty:
+        if games_with_results.empty:
             return pd.DataFrame()
 
-        df_games = df_games.rename(
+        df_games = games_with_results.rename(
             columns={
                 "team__description": "team__name",
                 "gameinfo__standing": "standing",
@@ -195,23 +157,25 @@ class LeagueRankingEngine:
         )
 
         if self.league_config.group_by_leagues:
-            df_games['standing'] = df_games["league__name"]
+            df_games["standing"] = df_games["league__name"]
 
-        table = df_games.groupby("team_id", as_index=False).agg(
+        team_stats = TeamStatsEngine(self.league_config.ruleset).build(df_games)
+
+        league_stats = self.compute_league_specific_stats(df_games)
+
+        league_agg = league_stats.groupby("team_id", as_index=False).agg(
             {
-                "team__name": "first",
                 "league_points": "sum",
                 "max_league_points": "sum",
-                "wins": "sum",
-                "draws": "sum",
-                "losses": "sum",
-                "pf": "sum",
-                "pa": "sum",
-                "diff": "sum",
-                "games_played": "sum",
-                "standing": "first",
             }
         )
+
+        table = team_stats.merge(
+            league_agg,
+            on="team_id",
+            how="left",
+        )
+
         table = self.apply_team_point_adjustments(table)
 
         table["league_quotient"] = (
@@ -287,6 +251,11 @@ class TieBreakerEngine:
         result = result.sort_values(by=["standing", "rank"], ignore_index=True)
 
         return result
+
+    def rank_by_games(self, games_df: pd.DataFrame) -> pd.DataFrame:
+        stats = TeamStatsEngine(self.ruleset).build(games_df)
+        stats = stats.rename(columns={"win_quotient": "league_quotient"})
+        return self.rank(stats, games_df)
 
     # -------------------------------------------------------------------------
     # INTERNALS

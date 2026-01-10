@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django.views import View
 
+from gamedays.service.builders import TableContextBuilder
 from league_table.constants import LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE
 from league_table.service.league_table_service import LeagueTableService
 
 
 class LeagueTableView(View):
-    template_name = "leaguetable/league_table.html"
+    template_name = "leaguetable/overview_table.html"
 
     def get(self, request, *args, **kwargs):
         league_slug = kwargs.get("league")
@@ -15,35 +16,9 @@ class LeagueTableView(View):
             league_slug, season_slug
         )
         table = league_table_service.get_standing()
-        group_classes = [
-            "",
-            "table-light",
-            "table-secondary",
-            "table-info",
-            "table-warning",
-            "table-primary",
-            "table-dark",
-            "table-success",
-            "table-danger",
-        ]
-
-        table["round_index"] = (
-            table["standing"].ne(table["standing"].shift()).cumsum() - 1
-        )
-
-        # map the color for each round
-        table["bg_class"] = table["round_index"].map(
-            lambda i: group_classes[i % len(group_classes)]
-        )
-
-        # drop round_index if you don't need it
-        table = table.drop(columns=["round_index"])
 
         context = {
-            "info": {
-                "table": table.to_dict(orient="records"),
-                "columns": table.columns,
-            },
+            "info": TableContextBuilder.build(table),
             "current_season": league_table_service.get_season_name(),
             "current_league": league_slug,
             "seasons": league_table_service.get_seasons_for_league_slug(league_slug),

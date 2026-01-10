@@ -85,7 +85,6 @@ class EmptyDefenseStatisticTable:
         return EMPTY_DATA
 
 
-
 class EmptyGamedayService:
 
     @staticmethod
@@ -138,16 +137,16 @@ class GamedayService:
         qualify_table = self.gmw.get_qualify_table()
         if qualify_table is '':
             return EmptyQualifyTable
-        qualify_table = qualify_table[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
-        qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
+        # TODO qualify_table = qualify_table[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
+        # qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
         return qualify_table
 
     def get_final_table(self):
         final_table = self.gmw.get_final_table()
         if final_table.empty:
             return final_table
-        final_table = final_table[[TEAM_NAME, POINTS, PF, PA, DIFF]]
-        final_table = final_table.rename(columns=TABLE_HEADERS)
+        # TODO final_table = final_table[[TEAM_NAME, POINTS, PF, PA, DIFF]]
+        # final_table = final_table.rename(columns=TABLE_HEADERS)
         return final_table
 
     def get_games_to_whistle(self, team):

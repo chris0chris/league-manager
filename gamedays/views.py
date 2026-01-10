@@ -40,6 +40,7 @@ from .forms import (
     SCHEDULE_CUSTOM_CHOICE_C,
 )
 from .models import Gameday, Gameinfo
+from .service.builders import TableContextBuilder
 from .service.gameday_form_service import GamedayFormService
 from .service.gameday_service import GamedayService
 from .wizard import (
@@ -94,7 +95,7 @@ class GamedayDetailView(DetailView):
             'escape': False,
             'table_id': 'schedule',
         }
-        qualify_table = gs.get_qualify_table().to_html(**render_configs)
+        qualify_table = gs.get_qualify_table()
         if 'officials' in settings.INSTALLED_APPS:
             show_official_names = False
             if self.request.user.is_staff:
@@ -112,7 +113,10 @@ class GamedayDetailView(DetailView):
             url_pattern_official = ''
             url_pattern_official_signup = ''
 
+        final_table = gs.get_final_table()
         if apps.is_installed("league_table"):
+            qualify_table = TableContextBuilder.build(qualify_table)
+            final_table = TableContextBuilder.build(final_table)
             season_slug = gameday.season.slug
             league_slug = gameday.league.slug
             context["league_table_url"] = reverse(
@@ -129,10 +133,14 @@ class GamedayDetailView(DetailView):
                 officials = []
                 url_pattern_official = ""
                 url_pattern_official_signup = ""
+        else:
+            qualify_table = qualify_table.to_html(**render_configs)
+            final_table = final_table.to_html(**render_configs)
+
         context["info"] = {
             "schedule": gs.get_schedule().to_html(**render_configs),
             "qualify_table": qualify_table,
-            "final_table": gs.get_final_table().to_html(**render_configs),
+            "final_table": final_table,
             "officials": officials,
             "offense_table": gs.get_offense_player_statistics_table().to_html(
                 **render_configs

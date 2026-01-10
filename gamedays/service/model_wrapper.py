@@ -36,7 +36,10 @@ from gamedays.service.gameday_settings import (
 )
 from league_table.models import LeagueSeasonConfig, LeagueRuleset
 from league_table.service.datatypes import LeagueConfigRuleset
-from league_table.service.ranking.engine import FinalRankingEngine, TieBreakerEngine
+from league_table.service.ranking.engine import (
+    FinalRankingEngine,
+    TieBreakerEngine,
+)
 
 
 class DfflPoints(object):
@@ -116,8 +119,12 @@ class GamedayModelWrapper:
             ).ruleset
             league_config_ruleset = LeagueConfigRuleset.from_ruleset(league_season_ruleset)
             engine = TieBreakerEngine(league_config_ruleset)
+            # TODO
             qualify_round["league_quotient"] = qualify_round["points"]
-            table = engine.rank(qualify_round, self._games_with_result)
+            games_with_result = self._games_with_result
+            games_with_result["gameinfo__status"] = games_with_result[STATUS]
+            games_with_result = games_with_result[(games_with_result[STATUS] == FINISHED) & (games_with_result[STAGE] == QUALIIFY_ROUND)]
+            table = engine.rank_by_games(games_with_result)
             return table.sort_values(by=STANDING)
         except LeagueSeasonConfig.DoesNotExist:
             return qualify_round
@@ -135,7 +142,7 @@ class GamedayModelWrapper:
                 league_season_ruleset = LeagueRuleset.objects.get(pk=2)
             league_config_ruleset = LeagueConfigRuleset.from_ruleset(league_season_ruleset)
             engine = FinalRankingEngine(league_config_ruleset)
-            return engine.compute_final_table(self._games_with_result, self._get_schedule())
+            return engine.compute_final_table(self._games_with_result)
         else:
             return self.get_qualify_table()
 

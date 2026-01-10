@@ -90,9 +90,10 @@
     <div aria-labelledby="headingQualify" class="collapse" id="collapseQualify">
         <div class="card-body">
             {% if league_table_url %}
-            <a href="{{league_table_url}}" class="btn btn-primary">Gesamttabelle</a>
-            {% endif %}
+            {% include 'leaguetable/league_table.html' with info=info.qualify_table  %}
+            {% else %}
             {{ info.qualify_table | safe }}
+            {% endif %}
         </div>
     </div>
 </div>
@@ -109,7 +110,12 @@
             {% if info.final_table == None %}
             Abschlusstabelle wird berechnet, sobald alle Spiele fertig sind.
             {% else %}
-            {{ info.final_table | safe }}
+                {% if league_table_url %}
+                <a href="{{league_table_url}}" class="btn btn-primary mb-3">Gesamttabelle</a>
+                {% include 'leaguetable/league_table.html' with info=info.final_table  %}
+                {% else %}
+                {{ info.final_table | safe }}
+                {% endif %}
             {% endif %}
         </div>
     </div>

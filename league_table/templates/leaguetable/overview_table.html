@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapseSchedule" aria-expanded="true" class="card-header" data-target="#collapseSchedule"
+         data-toggle="collapse" id="headingSchedule" role="button">
+        <h2>Gesamttabelle</h2>
+    </div>
+    <div aria-labelledby="headingSchedule" class="collapse show" id="collapseSchedule">
+        <div class="card-body">
+            {% if not info.table %}
+            Tabelle wurde noch nicht erstellt.
+            {% else %}
+            {% include 'utils/season_filter.html'  %}
+            <br />
+
+            {% include 'leaguetable/league_table.html' %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
