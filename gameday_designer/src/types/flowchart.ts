@@ -403,7 +403,11 @@ export type FlowValidationErrorType =
   | 'self_reference'
   | 'stage_outside_field'
   | 'team_outside_container'
-  | 'game_outside_container';
+  | 'game_outside_container'
+  | 'field_overlap'
+  | 'team_overlap'
+  | 'progression_incomplete'
+  | 'progression_order';
 
 /**
  * Validation warning types for the flowchart approach.
@@ -411,7 +415,10 @@ export type FlowValidationErrorType =
 export type FlowValidationWarningType =
   | 'duplicate_standing'
   | 'orphaned_team'
-  | 'unassigned_field';
+  | 'unassigned_field'
+  | 'stage_time_conflict'
+  | 'stage_sequence_type'
+  | 'uneven_game_distribution';
 
 /**
  * Validation error for the flowchart.
