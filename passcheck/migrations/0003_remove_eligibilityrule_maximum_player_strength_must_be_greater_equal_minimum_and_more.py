@@ -6,16 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('passcheck', '0002_passcheckverification_note'),
+        ("passcheck", "0002_passcheckverification_note"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='eligibilityrule',
-            name='maximum_player_strength_must_be_greater_equal_minimum',
+            model_name="eligibilityrule",
+            name="maximum_player_strength_must_be_greater_equal_minimum",
         ),
         migrations.AddConstraint(
-            model_name='eligibilityrule',
-            constraint=models.CheckConstraint(condition=models.Q(('maximum_player_strength', -1), ('maximum_player_strength__gte', models.F('minimum_player_strength')), _connector='OR'), name='maximum_player_strength_must_be_greater_equal_minimum'),
+            model_name="eligibilityrule",
+            constraint=models.CheckConstraint(
+                condition=models.Q(
+                    ("maximum_player_strength", -1),
+                    (
+                        "maximum_player_strength__gte",
+                        models.F("minimum_player_strength"),
+                    ),
+                    _connector="OR",
+                ),
+                name="maximum_player_strength_must_be_greater_equal_minimum",
+            ),
         ),
     ]

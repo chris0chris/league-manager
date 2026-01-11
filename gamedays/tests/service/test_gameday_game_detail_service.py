@@ -5,8 +5,12 @@ from django.test import TestCase
 
 from gamedays.models import Team, Gameinfo, Gameresult, TeamLog
 from gamedays.service.game_service import GameService
-from gamedays.service.gameday_service import GamedayGameService, EmptyGamedayService, EmptySplitScoreTable, \
-    EmptyEventsTable
+from gamedays.service.gameday_service import (
+    GamedayGameService,
+    EmptyGamedayService,
+    EmptySplitScoreTable,
+    EmptyEventsTable,
+)
 from gamedays.service.gamelog import GameLog
 from gamedays.tests.setup_factories.db_setup import DBSetup
 

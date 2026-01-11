@@ -7,14 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gamedays', '0022_person'),
-        ('league_table', '0001_initial'),
+        ("gamedays", "0022_person"),
+        ("league_table", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='gameinfo',
-            name='league_group',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='league_table.leaguegroup'),
+            model_name="gameinfo",
+            name="league_group",
+            field=models.ForeignKey(
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="league_table.leaguegroup",
+            ),
         ),
     ]

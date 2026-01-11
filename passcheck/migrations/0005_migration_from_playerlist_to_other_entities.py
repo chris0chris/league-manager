@@ -4,9 +4,9 @@ from django.db import migrations
 
 
 def migrate_player_data(apps, schema_editor):
-    Playerlist = apps.get_model('passcheck', 'Playerlist')
-    Person = apps.get_model('gamedays', 'Person')
-    Player = apps.get_model('passcheck', 'Player')
+    Playerlist = apps.get_model("passcheck", "Playerlist")
+    Person = apps.get_model("gamedays", "Person")
+    Player = apps.get_model("passcheck", "Player")
 
     for playerlist in Playerlist.objects.all():
         person = Person.objects.create(
@@ -22,13 +22,13 @@ def migrate_player_data(apps, schema_editor):
         )
 
         playerlist.player_id = player.id
-        playerlist.joined_on = '2024-04-01'
+        playerlist.joined_on = "2024-04-01"
         playerlist.save()
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('passcheck', '0004_playerlist_joined_on_playerlist_left_on_player_and_more'),
+        ("passcheck", "0004_playerlist_joined_on_playerlist_left_on_player_and_more"),
     ]
 
     operations = [

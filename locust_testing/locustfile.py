@@ -6,7 +6,9 @@ class QuickstartUser(HttpUser):
 
     @task(1)
     def scorecard(self):
-        headers = {'Authorization': 'Token 9b39dde76ce54045c4aea49ba4de807be9967c06bf491dbd82f6066197989957'}
+        headers = {
+            "Authorization": "Token 9b39dde76ce54045c4aea49ba4de807be9967c06bf491dbd82f6066197989957"
+        }
         self.client.get("/scorecard/", headers=headers)
 
     @task(100)

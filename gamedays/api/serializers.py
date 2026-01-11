@@ -7,9 +7,9 @@ from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
 class GamedaySerializer(ModelSerializer):
     class Meta:
         model = Gameday
-        fields = '__all__'
-        read_only_fields = ['author']
-        extra_kwargs = {'start': {'format': '%H:%M'}}
+        fields = "__all__"
+        read_only_fields = ["author"]
+        extra_kwargs = {"start": {"format": "%H:%M"}}
 
 
 class GamedayInfoSerializer(Serializer):
@@ -23,52 +23,61 @@ class GamedayInfoSerializer(Serializer):
 class GameOfficialSerializer(ModelSerializer):
     class Meta:
         model = GameOfficial
-        exclude = ('gameinfo',)
+        exclude = ("gameinfo",)
 
 
 class GameinfoSerializer(ModelSerializer):
     class Meta:
         model = Gameinfo
-        fields = ['status', 'gameStarted', 'gameHalftime', 'gameFinished']
-        extra_kwargs = {'gameStarted': {'format': '%H:%M'},
-                        'gameHalftime': {'format': '%H:%M'},
-                        'gameFinished': {'format': '%H:%M'}
-                        }
+        fields = ["status", "gameStarted", "gameHalftime", "gameFinished"]
+        extra_kwargs = {
+            "gameStarted": {"format": "%H:%M"},
+            "gameHalftime": {"format": "%H:%M"},
+            "gameFinished": {"format": "%H:%M"},
+        }
 
 
 class GameSetupSerializer(ModelSerializer):
     class Meta:
         model = GameSetup
-        fields = ['ctResult', 'direction', 'fhPossession']
+        fields = ["ctResult", "direction", "fhPossession"]
 
 
 class GameFinalizer(ModelSerializer):
     class Meta:
         model = GameSetup
-        fields = ['homeCaptain', 'awayCaptain', 'hasFinalScoreChanged', 'note']
+        fields = ["homeCaptain", "awayCaptain", "hasFinalScoreChanged", "note"]
 
 
 class GameLogSerializer(Serializer):
-    ID = 'id'
-    GAME_HALFTIME = 'gameHalftime'
-    HOME_TEAM = 'home'
-    AWAY_TEAM = 'away'
-    SCORE_HOME_SH = 'score_home_sh'
-    SCORE_HOME_FH = 'score_home_fh'
-    SCORE_HOME_OVERALL = 'score_home_overall'
-    SCORE_AWAY_OVERALL = 'score_away_overall'
-    SCORE_AWAY_FH = 'score_away_fh'
-    SCORE_AWAY_SH = 'score_away_sh'
-    TEAMLOG_HOME = 'teamlog_home'
-    TEAMLOG_AWAY = 'teamlog_away'
+    ID = "id"
+    GAME_HALFTIME = "gameHalftime"
+    HOME_TEAM = "home"
+    AWAY_TEAM = "away"
+    SCORE_HOME_SH = "score_home_sh"
+    SCORE_HOME_FH = "score_home_fh"
+    SCORE_HOME_OVERALL = "score_home_overall"
+    SCORE_AWAY_OVERALL = "score_away_overall"
+    SCORE_AWAY_FH = "score_away_fh"
+    SCORE_AWAY_SH = "score_away_sh"
+    TEAMLOG_HOME = "teamlog_home"
+    TEAMLOG_AWAY = "teamlog_away"
 
-    ALL_FIELD_VALUES = [ID, GAME_HALFTIME, HOME_TEAM, AWAY_TEAM,
-                        SCORE_HOME_OVERALL, SCORE_HOME_FH, SCORE_HOME_SH,
-                        SCORE_AWAY_OVERALL, SCORE_AWAY_FH, SCORE_AWAY_SH,
-                        ]
+    ALL_FIELD_VALUES = [
+        ID,
+        GAME_HALFTIME,
+        HOME_TEAM,
+        AWAY_TEAM,
+        SCORE_HOME_OVERALL,
+        SCORE_HOME_FH,
+        SCORE_HOME_SH,
+        SCORE_AWAY_OVERALL,
+        SCORE_AWAY_FH,
+        SCORE_AWAY_SH,
+    ]
 
     gameId = IntegerField(source=ID)
-    isFirstHalf = SerializerMethodField('check_first_half')
+    isFirstHalf = SerializerMethodField("check_first_half")
     home = SerializerMethodField()
     away = SerializerMethodField()
 
@@ -85,18 +94,14 @@ class GameLogSerializer(Serializer):
         score_key = self.SCORE_HOME_OVERALL if is_home else self.SCORE_AWAY_OVERALL
         fh_key = self.SCORE_HOME_FH if is_home else self.SCORE_AWAY_FH
         sh_key = self.SCORE_HOME_SH if is_home else self.SCORE_AWAY_SH
-        entries_firsthalf, entries_secondhalf = self._get_entries(is_home=is_home, obj=obj)
+        entries_firsthalf, entries_secondhalf = self._get_entries(
+            is_home=is_home, obj=obj
+        )
         return {
-            'name': obj[self.HOME_TEAM] if is_home else obj[self.AWAY_TEAM],
-            'score': obj[score_key],
-            'firsthalf': {
-                'score': obj[fh_key],
-                'entries': entries_firsthalf
-            },
-            'secondhalf': {
-                'score': obj[sh_key],
-                'entries': entries_secondhalf
-            },
+            "name": obj[self.HOME_TEAM] if is_home else obj[self.AWAY_TEAM],
+            "score": obj[score_key],
+            "firsthalf": {"score": obj[fh_key], "entries": entries_firsthalf},
+            "secondhalf": {"score": obj[sh_key], "entries": entries_secondhalf},
         }
 
     def _get_entries(self, is_home: bool, obj: dict):
@@ -105,7 +110,7 @@ class GameLogSerializer(Serializer):
         teamlog_firsthalf = []
         teamlog_secondhalf = []
         for entry in teamlog:
-            if entry['half'] == 1:
+            if entry["half"] == 1:
                 teamlog_firsthalf += [entry]
             else:
                 teamlog_secondhalf += [entry]
@@ -117,27 +122,27 @@ class GameLogSerializer(Serializer):
         result = dict()
         entry: dict
         for entry in half_entries:
-            if result.get(entry['sequence']) is None:
-                result[entry['sequence']] = {
-                    'sequence': entry['sequence']
-                }
-            if entry['cop']:
-                result[entry['sequence']].update({
-                    'cop': entry['cop'],
-                    'name': entry['event'],
-                })
+            if result.get(entry["sequence"]) is None:
+                result[entry["sequence"]] = {"sequence": entry["sequence"]}
+            if entry["cop"]:
+                result[entry["sequence"]].update(
+                    {
+                        "cop": entry["cop"],
+                        "name": entry["event"],
+                    }
+                )
             else:
-                if entry['event'] == 'Touchdown':
-                    key = 'td'
-                elif entry['event'] == '1-Extra-Punkt':
-                    key = 'pat1'
-                elif entry['event'] == '2-Extra-Punkte':
-                    key = 'pat2'
-                elif entry['event'] == 'Overtime':
-                    key = 'OT'
+                if entry["event"] == "Touchdown":
+                    key = "td"
+                elif entry["event"] == "1-Extra-Punkt":
+                    key = "pat1"
+                elif entry["event"] == "2-Extra-Punkte":
+                    key = "pat2"
+                elif entry["event"] == "Overtime":
+                    key = "OT"
                 else:
-                    key = entry['event']
-                result[entry['sequence']].update({key: entry['player']})
-            if entry['isDeleted']:
-                result[entry['sequence']].update({'isDeleted': True})
+                    key = entry["event"]
+                result[entry["sequence"]].update({key: entry["player"]})
+            if entry["isDeleted"]:
+                result[entry["sequence"]].update({"isDeleted": True})
         return list(result.values())

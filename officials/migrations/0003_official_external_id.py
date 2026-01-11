@@ -5,13 +5,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('officials', '0002_rename_offical_officiallicensehistory_official'),
+        ("officials", "0002_rename_offical_officiallicensehistory_official"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='official',
-            name='external_id',
+            model_name="official",
+            name="external_id",
             field=models.CharField(default=None, max_length=100, null=True),
         ),
     ]

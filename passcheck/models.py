@@ -7,6 +7,7 @@ from django.db.models import QuerySet, Q
 
 from gamedays.models import Gameday, Team, League, Person
 
+
 class Player(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
     pass_number = models.CharField(max_length=20, validators=[integer_validator])
@@ -20,24 +21,28 @@ class Playerlist(models.Model):
     jersey_number = models.IntegerField(null=True)
     joined_on = models.DateField(default=date.today)
     left_on = models.DateField(null=True, blank=True, default=None)
-    gamedays = models.ManyToManyField(Gameday, through='PlayerlistGameday')
+    gamedays = models.ManyToManyField(Gameday, through="PlayerlistGameday")
 
     objects: QuerySet = models.Manager()
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['team', 'jersey_number'],
-                name='unique_team_jersey_number',
-                condition=models.Q(left_on=None) & ~models.Q(jersey_number=None)
+                fields=["team", "jersey_number"],
+                name="unique_team_jersey_number",
+                condition=models.Q(left_on=None) & ~models.Q(jersey_number=None),
             ),
-            models.CheckConstraint(condition=Q(jersey_number__gte=0) & Q(jersey_number__lte=99),
-                                   name='jersey_number_btw_0_and_99'),
+            models.CheckConstraint(
+                condition=Q(jersey_number__gte=0) & Q(jersey_number__lte=99),
+                name="jersey_number_btw_0_and_99",
+            ),
         ]
 
     def __str__(self):
-        return (f'{self.team.description}: {self.player.person.first_name} '
-                f'{self.player.person.last_name} ({self.player.pass_number}) #{self.jersey_number}')
+        return (
+            f"{self.team.description}: {self.player.person.first_name} "
+            f"{self.player.person.last_name} ({self.player.pass_number}) #{self.jersey_number}"
+        )
 
 
 class PlayerlistGameday(models.Model):
@@ -46,10 +51,12 @@ class PlayerlistGameday(models.Model):
     gameday_jersey = models.IntegerField()
 
     class Meta:
-        db_table = 'passcheck_playerlist_gamedays'
+        db_table = "passcheck_playerlist_gamedays"
         constraints = [
-            models.CheckConstraint(condition=Q(gameday_jersey__gte=0) & Q(gameday_jersey__lte=99),
-                                   name='gameday_jersey_number_btw_0_and_99'),
+            models.CheckConstraint(
+                condition=Q(gameday_jersey__gte=0) & Q(gameday_jersey__lte=99),
+                name="gameday_jersey_number_btw_0_and_99",
+            ),
         ]
 
     objects: QuerySet = models.Manager()
@@ -57,20 +64,18 @@ class PlayerlistGameday(models.Model):
 
 class PlayerlistTransfer(models.Model):
     TRANSFER_STATUS = (
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
     )
     created_at = models.DateTimeField(auto_now_add=True)
     current_team = models.ForeignKey(Playerlist, on_delete=models.CASCADE)
     new_team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    approved_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
-    approval_date = models.DateTimeField(default=None, null=True, blank=True)
-    status = models.CharField(
-        max_length=20,
-        choices=TRANSFER_STATUS,
-        default='pending'
+    approved_by = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, null=True, blank=True, default=None
     )
+    approval_date = models.DateTimeField(default=None, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=TRANSFER_STATUS, default="pending")
     note = models.TextField(default=None, blank=True, null=True)
 
     objects: QuerySet = models.Manager()
@@ -80,8 +85,8 @@ class PlayerlistTransfer(models.Model):
 
 
 class EmptyPasscheckVerification:
-    official_name = ''
-    note = ''
+    official_name = ""
+    note = ""
 
 
 class PasscheckVerification(models.Model):
@@ -100,9 +105,13 @@ class PasscheckVerification(models.Model):
 
 
 class TeamRelationship(models.Model):
-    team = models.OneToOneField(Team, related_name='relationship_team', on_delete=models.CASCADE)
+    team = models.OneToOneField(
+        Team, related_name="relationship_team", on_delete=models.CASCADE
+    )
     league = models.ForeignKey(League, on_delete=models.CASCADE)
-    additional_teams = models.ManyToManyField(Team, related_name='relationship_additional_teams')
+    additional_teams = models.ManyToManyField(
+        Team, related_name="relationship_additional_teams"
+    )
 
     objects: QuerySet = models.Manager()
 
@@ -111,8 +120,10 @@ class TeamRelationship(models.Model):
 
 
 class EligibilityRule(models.Model):
-    league = models.ForeignKey(League, related_name='eligibility_for', on_delete=models.CASCADE)
-    eligible_in = models.ManyToManyField(League, related_name='eligible_in')
+    league = models.ForeignKey(
+        League, related_name="eligibility_for", on_delete=models.CASCADE
+    )
+    eligible_in = models.ManyToManyField(League, related_name="eligible_in")
     max_gamedays = models.IntegerField()
     max_subs_in_other_leagues = models.IntegerField(null=True, default=None, blank=True)
     minimum_player_strength = models.IntegerField()
@@ -126,12 +137,17 @@ class EligibilityRule(models.Model):
 
     class Meta:
         constraints = [
-            models.CheckConstraint(condition=(Q(maximum_player_strength=-1) | models.Q(
-                maximum_player_strength__gte=models.F('minimum_player_strength'))),
-                                   name='maximum_player_strength_must_be_greater_equal_minimum'),
-
+            models.CheckConstraint(
+                condition=(
+                    Q(maximum_player_strength=-1)
+                    | models.Q(
+                        maximum_player_strength__gte=models.F("minimum_player_strength")
+                    )
+                ),
+                name="maximum_player_strength_must_be_greater_equal_minimum",
+            ),
         ]
 
     def __str__(self):
         emoji = "⬆️" if self.is_relegation_allowed else "⛔"
-        return f'{self.league} -> {[league.name for league in self.eligible_in.all()]} {emoji}'
+        return f"{self.league} -> {[league.name for league in self.eligible_in.all()]} {emoji}"

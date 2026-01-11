@@ -7,18 +7,38 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gamedays', '0020_gamesetup_note'),
-        ('officials', '0009_official_officials_o_id_f573ca_idx_and_more'),
+        ("gamedays", "0020_gamesetup_note"),
+        ("officials", "0009_official_officials_o_id_f573ca_idx_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='OfficialGamesSignup',
+            name="OfficialGamesSignup",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('signed_up_at', models.DateTimeField(auto_now_add=True)),
-                ('gameday', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gamedays.gameday')),
-                ('official', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='officials.official')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("signed_up_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "gameday",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="gamedays.gameday",
+                    ),
+                ),
+                (
+                    "official",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="officials.official",
+                    ),
+                ),
             ],
         ),
     ]

@@ -12,9 +12,15 @@ GAMEINFO_STEP = "gameinfo-step"
 class GameinfoStepHandler(WizardStepHandler):
     def handle_form(self, wizard, form: BaseFormSet, data):
         field_group_step = wizard.wizard_state.get(FIELD_GROUP_STEP) or {}
-        number_fields = int(field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.NUMBER_FIELDS_C, 1))
-        number_groups = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.NUMBER_GROUPS_C)
-        group_names = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.GROUP_NAMES_C)
+        number_fields = int(
+            field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.NUMBER_FIELDS_C, 1)
+        )
+        number_groups = field_group_step.get(
+            GamedayGaminfoFieldsAndGroupsForm.NUMBER_GROUPS_C
+        )
+        group_names = field_group_step.get(
+            GamedayGaminfoFieldsAndGroupsForm.GROUP_NAMES_C
+        )
         if number_groups:
             number_groups = int(number_groups)
             group_choices = [

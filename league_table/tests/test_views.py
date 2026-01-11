@@ -42,9 +42,13 @@ from league_table.tests.setup_factories.factories_leaguetable import LeagueGroup
 class TestGameinfoWizardWithLeagueGroup(WebTest):
 
     # TODO generischer Spielplan erzeugt Gruppen-Select mit den ausgewählten Gruppen und nicht wie in der JSON Datei hinterlegt ist
-    def test_wizard_renders_gameinfo_with_league_group_while_generic_format_selected(self):
+    def test_wizard_renders_gameinfo_with_league_group_while_generic_format_selected(
+        self,
+    ):
         group1 = LeagueGroupFactory(name="Group 1")
-        group2 = LeagueGroupFactory(name="Group 2", season=group1.season, league=group1.league)
+        group2 = LeagueGroupFactory(
+            name="Group 2", season=group1.season, league=group1.league
+        )
         teams = DBSetup().create_teams(name="LeagueGroupTeam", number_teams=3)
         user = UserFactory(is_staff=True)
         self.app.set_user(user)
@@ -56,7 +60,10 @@ class TestGameinfoWizardWithLeagueGroup(WebTest):
         assert isinstance(
             field_group_step.context["form"], GamedayGaminfoFieldsAndGroupsForm
         )
-        assert field_group_step.context["form"].fields['group_names'].choices == [(group1.pk, group1.name), (group2.pk, group2.name)]
+        assert field_group_step.context["form"].fields["group_names"].choices == [
+            (group1.pk, group1.name),
+            (group2.pk, group2.name),
+        ]
 
         field_group_step_form = field_group_step.forms["fields-groups-form"]
         field_group_step_form[f"{FIELD_GROUP_STEP}-format"] = "3_1"
@@ -81,9 +88,13 @@ class TestGameinfoWizardWithLeagueGroup(WebTest):
         # )
         # assert isinstance(gameinfo_update_page.context["form"][0], GameinfoForm)
 
-    def test_wizard_renders_gameinfo_with_league_group_while_custom_format_selected(self):
+    def test_wizard_renders_gameinfo_with_league_group_while_custom_format_selected(
+        self,
+    ):
         group1 = LeagueGroupFactory(name="Group 1")
-        group2 = LeagueGroupFactory(name="Group 2", season=group1.season, league=group1.league)
+        group2 = LeagueGroupFactory(
+            name="Group 2", season=group1.season, league=group1.league
+        )
         user = UserFactory(is_staff=True)
         self.app.set_user(user)
         gameday = GamedayFactory(season=group1.season, league=group1.league)
@@ -107,4 +118,6 @@ class TestGameinfoWizardWithLeagueGroup(WebTest):
         )
         gameinfo_form = gameinfo_create_page.context["form"][0]
         assert isinstance(gameinfo_form, GameinfoForm)
-        assert gameinfo_form.fields['standing'].choices == [(str(group2.pk), group2.name)]
+        assert gameinfo_form.fields["standing"].choices == [
+            (str(group2.pk), group2.name)
+        ]

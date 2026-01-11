@@ -1,1 +1,1 @@
-default_app_config = 'gamedays.apps.GamedaysConfig'
+default_app_config = "gamedays.apps.GamedaysConfig"

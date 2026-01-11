@@ -9,44 +9,106 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('gamedays', '0022_person'),
+        ("gamedays", "0022_person"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='LeagueRuleset',
+            name="LeagueRuleset",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, unique=True)),
-                ('win_points', models.PositiveSmallIntegerField(default=2)),
-                ('draw_points', models.PositiveSmallIntegerField(default=1)),
-                ('loss_points', models.PositiveSmallIntegerField(default=0)),
-                ('allow_draws', models.BooleanField(default=True)),
-                ('use_direct_comparison', models.BooleanField(default=True)),
-                ('use_point_diff_direct', models.BooleanField(default=True)),
-                ('use_points_scored_direct', models.BooleanField(default=True)),
-                ('use_overall_point_diff', models.BooleanField(default=True)),
-                ('use_overall_points_scored', models.BooleanField(default=True)),
-                ('use_name_ascending', models.BooleanField(default=True)),
-                ('require_complete_round_robin_for_direct', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50, unique=True)),
+                ("win_points", models.PositiveSmallIntegerField(default=2)),
+                ("draw_points", models.PositiveSmallIntegerField(default=1)),
+                ("loss_points", models.PositiveSmallIntegerField(default=0)),
+                ("allow_draws", models.BooleanField(default=True)),
+                ("use_direct_comparison", models.BooleanField(default=True)),
+                ("use_point_diff_direct", models.BooleanField(default=True)),
+                ("use_points_scored_direct", models.BooleanField(default=True)),
+                ("use_overall_point_diff", models.BooleanField(default=True)),
+                ("use_overall_points_scored", models.BooleanField(default=True)),
+                ("use_name_ascending", models.BooleanField(default=True)),
+                (
+                    "require_complete_round_robin_for_direct",
+                    models.BooleanField(default=True),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='LeagueGroup',
+            name="LeagueGroup",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('league', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='groups_league', to='gamedays.league')),
-                ('season', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='groups_season', to='gamedays.season')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                (
+                    "league",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="groups_league",
+                        to="gamedays.league",
+                    ),
+                ),
+                (
+                    "season",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="groups_season",
+                        to="gamedays.season",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='LeagueSeasonConfig',
+            name="LeagueSeasonConfig",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('league', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='config_league', to='gamedays.league')),
-                ('ruleset', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='league_table.leagueruleset')),
-                ('season', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='config_season', to='gamedays.season')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "league",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="config_league",
+                        to="gamedays.league",
+                    ),
+                ),
+                (
+                    "ruleset",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="league_table.leagueruleset",
+                    ),
+                ),
+                (
+                    "season",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="config_season",
+                        to="gamedays.season",
+                    ),
+                ),
             ],
         ),
     ]

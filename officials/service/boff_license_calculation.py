@@ -14,67 +14,67 @@ class LicenseStrategy(ABC):
 
     COURSE_MAPPING = {
         F1_LICENSE: {
-            'course_license': 'F1',
-            'user_current_license': {
+            "course_license": "F1",
+            "user_current_license": {
                 F1_LICENSE: {
-                    'name': 'F1',
-                    'minimum_season_games': 5,
-                    'minimum_total_games': 0,
-                    'minimum_consecutive_license_years': 0,
+                    "name": "F1",
+                    "minimum_season_games": 5,
+                    "minimum_total_games": 0,
+                    "minimum_consecutive_license_years": 0,
                 },
                 F2_LICENSE: {
-                    'name': 'F2',
-                    'minimum_season_games': 8,
-                    'minimum_total_games': 25,
-                    'minimum_consecutive_license_years': 5,
+                    "name": "F2",
+                    "minimum_season_games": 8,
+                    "minimum_total_games": 25,
+                    "minimum_consecutive_license_years": 5,
                 },
             },
         },
         F2_LICENSE: {
-            'course_license': 'F2',
-            'user_current_license': {
+            "course_license": "F2",
+            "user_current_license": {
                 F2_LICENSE: {
-                    'name': 'F2',
-                    'minimum_season_games': 5,
-                    'minimum_total_games': 0,
-                    'minimum_consecutive_license_years': 0,
+                    "name": "F2",
+                    "minimum_season_games": 5,
+                    "minimum_total_games": 0,
+                    "minimum_consecutive_license_years": 0,
                 },
                 F3_LICENSE: {
-                    'name': 'F3',
-                    'minimum_season_games': 5,
-                    'minimum_total_games': 12,
-                    'minimum_consecutive_license_years': 0,
+                    "name": "F3",
+                    "minimum_season_games": 5,
+                    "minimum_total_games": 12,
+                    "minimum_consecutive_license_years": 0,
                 },
             },
         },
         F3_LICENSE: {
-            'course_license': 'F3',
-            'user_current_license': {
+            "course_license": "F3",
+            "user_current_license": {
                 F3_LICENSE: {
-                    'name': 'F3',
-                    'minimum_season_games': 4,
-                    'minimum_total_games': 0,
-                    'minimum_consecutive_license_years': 0,
+                    "name": "F3",
+                    "minimum_season_games": 4,
+                    "minimum_total_games": 0,
+                    "minimum_consecutive_license_years": 0,
                 },
                 F4_LICENSE: {
-                    'name': 'F4',
-                    'minimum_season_games': 4,
-                    'minimum_total_games': 0,
-                    'minimum_consecutive_license_years': 0,
+                    "name": "F4",
+                    "minimum_season_games": 4,
+                    "minimum_total_games": 0,
+                    "minimum_consecutive_license_years": 0,
                 },
             },
         },
         F4_LICENSE: {
-            'course_license': 'F4',
-            'user_current_license': {
+            "course_license": "F4",
+            "user_current_license": {
                 NONE_LICENSE: {
-                    'name': 'keine Lizenz',
-                    'minimum_season_games': 0,
-                    'minimum_total_games': 0,
-                    'minimum_consecutive_license_years': 0,
+                    "name": "keine Lizenz",
+                    "minimum_season_games": 0,
+                    "minimum_total_games": 0,
+                    "minimum_consecutive_license_years": 0,
                 },
             },
-        }
+        },
     }.get
 
     @abstractmethod
@@ -140,22 +140,30 @@ class LicenseCalculator:
     def get_license_name(cls, course_license):
         course = LicenseStrategy.COURSE_MAPPING(course_license)
         if course is None:
-            return '-'
-        return course.get('course_license', '-')
+            return "-"
+        return course.get("course_license", "-")
 
 
 class ParticipationValidator:
     def __init__(self, course_license):
-        self.course = LicenseStrategy.COURSE_MAPPING(course_license).get('user_current_license')
+        self.course = LicenseStrategy.COURSE_MAPPING(course_license).get(
+            "user_current_license"
+        )
 
     def fails_minimum_season_games(self, participant_license, minimum_season_games):
-        return self._evaluate_requirement(participant_license, minimum_season_games, 'minimum_season_games')
+        return self._evaluate_requirement(
+            participant_license, minimum_season_games, "minimum_season_games"
+        )
 
     def fails_check_minimum_total_games(self, participant_license, minimum_total_games):
-        return self._evaluate_requirement(participant_license, minimum_total_games, 'minimum_total_games')
+        return self._evaluate_requirement(
+            participant_license, minimum_total_games, "minimum_total_games"
+        )
 
-    def fails_minimum_consecutive_license_years(self, participant_license: int, license_years: str):
-        if license_years == '-':
+    def fails_minimum_consecutive_license_years(
+        self, participant_license: int, license_years: str
+    ):
+        if license_years == "-":
             return True
         years = list(map(int, license_years.split(",")))
         years.sort(reverse=True)
@@ -165,8 +173,9 @@ class ParticipationValidator:
                 consecutive_count += 1
             else:
                 break
-        return self._evaluate_requirement(participant_license, consecutive_count,
-                                          'minimum_consecutive_license_years')
+        return self._evaluate_requirement(
+            participant_license, consecutive_count, "minimum_consecutive_license_years"
+        )
 
     def fails_current_license_requirement(self, participant_license):
         if participant_license is None and None not in self.course:

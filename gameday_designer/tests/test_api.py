@@ -4,6 +4,7 @@ Tests for gameday_designer API endpoints.
 Following TDD methodology (RED phase) - writing tests BEFORE ViewSet implementation.
 Tests define expected API behavior for all endpoints and actions.
 """
+
 import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
@@ -11,8 +12,11 @@ from rest_framework import status
 
 from gamedays.models import Association, Gameday, Team, Season, League
 from gameday_designer.models import (
-    ScheduleTemplate, TemplateSlot, TemplateUpdateRule,
-    TemplateUpdateRuleTeam, TemplateApplication
+    ScheduleTemplate,
+    TemplateSlot,
+    TemplateUpdateRule,
+    TemplateUpdateRuleTeam,
+    TemplateApplication,
 )
 
 
@@ -26,10 +30,7 @@ def api_client():
 def staff_user(db):
     """Create staff user."""
     return User.objects.create_user(
-        username='staff',
-        email='staff@example.com',
-        password='password',
-        is_staff=True
+        username="staff", email="staff@example.com", password="password", is_staff=True
     )
 
 
@@ -37,44 +38,38 @@ def staff_user(db):
 def association_user(db):
     """Create regular user."""
     return User.objects.create_user(
-        username='assoc_user',
-        email='assoc@example.com',
-        password='password',
-        is_staff=False
+        username="assoc_user",
+        email="assoc@example.com",
+        password="password",
+        is_staff=False,
     )
 
 
 @pytest.fixture
 def association(db):
     """Create test association."""
-    return Association.objects.create(
-        name='Test Association',
-        abbr='TEST'
-    )
+    return Association.objects.create(name="Test Association", abbr="TEST")
 
 
 @pytest.fixture
 def other_association(db):
     """Create another association."""
-    return Association.objects.create(
-        name='Other Association',
-        abbr='OTHER'
-    )
+    return Association.objects.create(name="Other Association", abbr="OTHER")
 
 
 @pytest.fixture
 def template(db, association, staff_user):
     """Create test template."""
     return ScheduleTemplate.objects.create(
-        name='Test Template',
-        description='A test schedule template',
+        name="Test Template",
+        description="A test schedule template",
         num_teams=6,
         num_fields=2,
         num_groups=1,
         game_duration=70,
         association=association,
         created_by=staff_user,
-        updated_by=staff_user
+        updated_by=staff_user,
     )
 
 
@@ -82,15 +77,15 @@ def template(db, association, staff_user):
 def global_template(db, staff_user):
     """Create global template."""
     return ScheduleTemplate.objects.create(
-        name='Global Template',
-        description='Global template for all',
+        name="Global Template",
+        description="Global template for all",
         num_teams=8,
         num_fields=3,
         num_groups=2,
         game_duration=60,
         association=None,
         created_by=staff_user,
-        updated_by=staff_user
+        updated_by=staff_user,
     )
 
 
@@ -101,27 +96,27 @@ def template_with_slots(db, template):
         template=template,
         field=1,
         slot_order=1,
-        stage='Vorrunde',
-        standing='Gruppe 1',
+        stage="Vorrunde",
+        standing="Gruppe 1",
         home_group=0,
         home_team=0,
         away_group=0,
         away_team=1,
         official_group=0,
-        official_team=2
+        official_team=2,
     )
     TemplateSlot.objects.create(
         template=template,
         field=1,
         slot_order=2,
-        stage='Vorrunde',
-        standing='Gruppe 1',
+        stage="Vorrunde",
+        standing="Gruppe 1",
         home_group=0,
         home_team=2,
         away_group=0,
         away_team=3,
         official_group=0,
-        official_team=4
+        official_team=4,
     )
     return template
 
@@ -131,17 +126,17 @@ def gameday(db, association, staff_user):
     """Create test gameday."""
     from datetime import date, time
 
-    league = League.objects.create(name='Test League')
-    season = Season.objects.create(name='2025')
+    league = League.objects.create(name="Test League")
+    season = Season.objects.create(name="2025")
 
     return Gameday.objects.create(
-        name='Test Gameday',
+        name="Test Gameday",
         date=date(2025, 1, 15),
         start=time(10, 0),
-        format='6_2',
+        format="6_2",
         season=season,
         league=league,
-        author=staff_user
+        author=staff_user,
     )
 
 
@@ -150,9 +145,7 @@ def teams(db, association):
     """Create test teams."""
     return [
         Team.objects.create(
-            name=f'Team {i}',
-            description=f'Test team {i}',
-            association=association
+            name=f"Team {i}", description=f"Test team {i}", association=association
         )
         for i in range(6)
     ]
@@ -164,31 +157,32 @@ class TestTemplateListEndpoint:
 
     def test_anonymous_can_list_templates(self, api_client, template, global_template):
         """Anonymous users can list templates."""
-        response = api_client.get('/api/designer/templates/')
+        response = api_client.get("/api/designer/templates/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) >= 2  # At least our two fixtures
 
     def test_list_returns_lightweight_serializer(self, api_client, template_with_slots):
         """List endpoint uses lightweight serializer (no nested data)."""
-        response = api_client.get('/api/designer/templates/')
+        response = api_client.get("/api/designer/templates/")
 
         assert response.status_code == status.HTTP_200_OK
         template_data = next(
-            (t for t in response.data if t['id'] == template_with_slots.pk),
-            None
+            (t for t in response.data if t["id"] == template_with_slots.pk), None
         )
 
         assert template_data is not None
-        assert 'name' in template_data
-        assert 'association_name' in template_data
-        assert 'slots' not in template_data  # Not in list view
-        assert 'update_rules' not in template_data  # Not in list view
+        assert "name" in template_data
+        assert "association_name" in template_data
+        assert "slots" not in template_data  # Not in list view
+        assert "update_rules" not in template_data  # Not in list view
 
-    def test_staff_sees_all_templates(self, api_client, staff_user, template, global_template):
+    def test_staff_sees_all_templates(
+        self, api_client, staff_user, template, global_template
+    ):
         """Staff users see all templates."""
         api_client.force_authenticate(user=staff_user)
-        response = api_client.get('/api/designer/templates/')
+        response = api_client.get("/api/designer/templates/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) >= 2
@@ -196,14 +190,14 @@ class TestTemplateListEndpoint:
     def test_filtering_by_association(self, api_client, template, global_template):
         """Can filter templates by association."""
         response = api_client.get(
-            f'/api/designer/templates/?association={template.association.pk}'
+            f"/api/designer/templates/?association={template.association.pk}"
         )
 
         assert response.status_code == status.HTTP_200_OK
         # Should only return templates for that association
         for t in response.data:
-            if t['association'] is not None:
-                assert t['association'] == template.association.pk
+            if t["association"] is not None:
+                assert t["association"] == template.association.pk
 
 
 @pytest.mark.django_db
@@ -212,61 +206,51 @@ class TestTemplateDetailEndpoint:
 
     def test_anonymous_can_retrieve_template(self, api_client, template_with_slots):
         """Anonymous users can retrieve template details."""
-        response = api_client.get(f'/api/designer/templates/{template_with_slots.pk}/')
+        response = api_client.get(f"/api/designer/templates/{template_with_slots.pk}/")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['id'] == template_with_slots.pk
-        assert response.data['name'] == 'Test Template'
+        assert response.data["id"] == template_with_slots.pk
+        assert response.data["name"] == "Test Template"
 
     def test_detail_includes_nested_slots(self, api_client, template_with_slots):
         """Detail endpoint includes nested slots."""
-        response = api_client.get(f'/api/designer/templates/{template_with_slots.pk}/')
+        response = api_client.get(f"/api/designer/templates/{template_with_slots.pk}/")
 
         assert response.status_code == status.HTTP_200_OK
-        assert 'slots' in response.data
-        assert len(response.data['slots']) == 2
-        assert response.data['slots'][0]['slot_order'] == 1
+        assert "slots" in response.data
+        assert len(response.data["slots"]) == 2
+        assert response.data["slots"][0]["slot_order"] == 1
 
-    def test_detail_includes_nested_update_rules(
-        self,
-        api_client,
-        template,
-        db
-    ):
+    def test_detail_includes_nested_update_rules(self, api_client, template, db):
         """Detail endpoint includes nested update rules."""
         slot = TemplateSlot.objects.create(
             template=template,
             field=1,
             slot_order=1,
-            stage='Finalrunde',
-            standing='Finale',
-            home_reference='Gewinner HF1',
-            away_reference='Gewinner HF2'
+            stage="Finalrunde",
+            standing="Finale",
+            home_reference="Gewinner HF1",
+            away_reference="Gewinner HF2",
         )
 
         update_rule = TemplateUpdateRule.objects.create(
-            template=template,
-            slot=slot,
-            pre_finished='Halbfinale'
+            template=template, slot=slot, pre_finished="Halbfinale"
         )
 
         TemplateUpdateRuleTeam.objects.create(
-            update_rule=update_rule,
-            role='home',
-            standing='HF1',
-            place=1
+            update_rule=update_rule, role="home", standing="HF1", place=1
         )
 
-        response = api_client.get(f'/api/designer/templates/{template.pk}/')
+        response = api_client.get(f"/api/designer/templates/{template.pk}/")
 
         assert response.status_code == status.HTTP_200_OK
-        assert 'update_rules' in response.data
-        assert len(response.data['update_rules']) == 1
-        assert response.data['update_rules'][0]['pre_finished'] == 'Halbfinale'
+        assert "update_rules" in response.data
+        assert len(response.data["update_rules"]) == 1
+        assert response.data["update_rules"][0]["pre_finished"] == "Halbfinale"
 
     def test_retrieve_nonexistent_template_returns_404(self, api_client):
         """Retrieving non-existent template returns 404."""
-        response = api_client.get('/api/designer/templates/99999/')
+        response = api_client.get("/api/designer/templates/99999/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -278,20 +262,20 @@ class TestTemplateCreateEndpoint:
     def test_anonymous_cannot_create_template(self, api_client, association):
         """Anonymous users cannot create templates."""
         data = {
-            'name': 'New Template',
-            'description': 'Should fail',
-            'num_teams': 6,
-            'num_fields': 2,
-            'num_groups': 1,
-            'game_duration': 70,
-            'association': association.pk
+            "name": "New Template",
+            "description": "Should fail",
+            "num_teams": 6,
+            "num_fields": 2,
+            "num_groups": 1,
+            "game_duration": 70,
+            "association": association.pk,
         }
 
-        response = api_client.post('/api/designer/templates/', data, format='json')
+        response = api_client.post("/api/designer/templates/", data, format="json")
 
         assert response.status_code in [
             status.HTTP_401_UNAUTHORIZED,
-            status.HTTP_403_FORBIDDEN
+            status.HTTP_403_FORBIDDEN,
         ]
 
     def test_staff_can_create_template(self, api_client, staff_user, association):
@@ -299,79 +283,76 @@ class TestTemplateCreateEndpoint:
         api_client.force_authenticate(user=staff_user)
 
         data = {
-            'name': 'Staff Template',
-            'description': 'Created by staff',
-            'num_teams': 4,
-            'num_fields': 1,
-            'num_groups': 1,
-            'game_duration': 60,
-            'association': association.pk
+            "name": "Staff Template",
+            "description": "Created by staff",
+            "num_teams": 4,
+            "num_fields": 1,
+            "num_groups": 1,
+            "game_duration": 60,
+            "association": association.pk,
         }
 
-        response = api_client.post('/api/designer/templates/', data, format='json')
+        response = api_client.post("/api/designer/templates/", data, format="json")
 
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.data['name'] == 'Staff Template'
-        assert response.data['created_by'] == staff_user.pk
-        assert response.data['updated_by'] == staff_user.pk
+        assert response.data["name"] == "Staff Template"
+        assert response.data["created_by"] == staff_user.pk
+        assert response.data["updated_by"] == staff_user.pk
 
     def test_staff_can_create_global_template(self, api_client, staff_user):
         """Staff users can create global templates."""
         api_client.force_authenticate(user=staff_user)
 
         data = {
-            'name': 'Global Template',
-            'description': 'For all associations',
-            'num_teams': 8,
-            'num_fields': 3,
-            'num_groups': 2,
-            'game_duration': 60,
-            'association': None
+            "name": "Global Template",
+            "description": "For all associations",
+            "num_teams": 8,
+            "num_fields": 3,
+            "num_groups": 2,
+            "game_duration": 60,
+            "association": None,
         }
 
-        response = api_client.post('/api/designer/templates/', data, format='json')
+        response = api_client.post("/api/designer/templates/", data, format="json")
 
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.data['association'] is None
-        assert response.data['association_name'] == 'Global'
+        assert response.data["association"] is None
+        assert response.data["association_name"] == "Global"
 
     def test_association_user_can_create_template(
-        self,
-        api_client,
-        association_user,
-        association
+        self, api_client, association_user, association
     ):
         """Association users can create templates."""
         api_client.force_authenticate(user=association_user)
 
         data = {
-            'name': 'User Template',
-            'description': 'Created by association user',
-            'num_teams': 6,
-            'num_fields': 2,
-            'num_groups': 1,
-            'game_duration': 70,
-            'association': association.pk
+            "name": "User Template",
+            "description": "Created by association user",
+            "num_teams": 6,
+            "num_fields": 2,
+            "num_groups": 1,
+            "game_duration": 70,
+            "association": association.pk,
         }
 
-        response = api_client.post('/api/designer/templates/', data, format='json')
+        response = api_client.post("/api/designer/templates/", data, format="json")
 
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.data['created_by'] == association_user.pk
+        assert response.data["created_by"] == association_user.pk
 
     def test_create_validates_required_fields(self, api_client, staff_user):
         """Creating template validates required fields."""
         api_client.force_authenticate(user=staff_user)
 
         data = {
-            'name': 'Incomplete Template',
+            "name": "Incomplete Template",
             # Missing required fields
         }
 
-        response = api_client.post('/api/designer/templates/', data, format='json')
+        response = api_client.post("/api/designer/templates/", data, format="json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'num_teams' in response.data or 'non_field_errors' in response.data
+        assert "num_teams" in response.data or "non_field_errors" in response.data
 
 
 @pytest.mark.django_db
@@ -381,24 +362,22 @@ class TestTemplateUpdateEndpoint:
     def test_anonymous_cannot_update_template(self, api_client, template):
         """Anonymous users cannot update templates."""
         data = {
-            'name': 'Updated Name',
-            'description': template.description,
-            'num_teams': template.num_teams,
-            'num_fields': template.num_fields,
-            'num_groups': template.num_groups,
-            'game_duration': template.game_duration,
-            'association': template.association.pk
+            "name": "Updated Name",
+            "description": template.description,
+            "num_teams": template.num_teams,
+            "num_fields": template.num_fields,
+            "num_groups": template.num_groups,
+            "game_duration": template.game_duration,
+            "association": template.association.pk,
         }
 
         response = api_client.put(
-            f'/api/designer/templates/{template.pk}/',
-            data,
-            format='json'
+            f"/api/designer/templates/{template.pk}/", data, format="json"
         )
 
         assert response.status_code in [
             status.HTTP_401_UNAUTHORIZED,
-            status.HTTP_403_FORBIDDEN
+            status.HTTP_403_FORBIDDEN,
         ]
 
     def test_staff_can_update_any_template(self, api_client, staff_user, template):
@@ -406,94 +385,78 @@ class TestTemplateUpdateEndpoint:
         api_client.force_authenticate(user=staff_user)
 
         data = {
-            'name': 'Updated by Staff',
-            'description': template.description,
-            'num_teams': template.num_teams,
-            'num_fields': template.num_fields,
-            'num_groups': template.num_groups,
-            'game_duration': template.game_duration,
-            'association': template.association.pk
+            "name": "Updated by Staff",
+            "description": template.description,
+            "num_teams": template.num_teams,
+            "num_fields": template.num_fields,
+            "num_groups": template.num_groups,
+            "game_duration": template.game_duration,
+            "association": template.association.pk,
         }
 
         response = api_client.put(
-            f'/api/designer/templates/{template.pk}/',
-            data,
-            format='json'
+            f"/api/designer/templates/{template.pk}/", data, format="json"
         )
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['name'] == 'Updated by Staff'
-        assert response.data['updated_by'] == staff_user.pk
+        assert response.data["name"] == "Updated by Staff"
+        assert response.data["updated_by"] == staff_user.pk
 
     def test_partial_update_with_patch(self, api_client, staff_user, template):
         """PATCH allows partial updates."""
         api_client.force_authenticate(user=staff_user)
 
-        data = {
-            'description': 'Partially updated description'
-        }
+        data = {"description": "Partially updated description"}
 
         response = api_client.patch(
-            f'/api/designer/templates/{template.pk}/',
-            data,
-            format='json'
+            f"/api/designer/templates/{template.pk}/", data, format="json"
         )
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['description'] == 'Partially updated description'
-        assert response.data['name'] == template.name  # Unchanged
+        assert response.data["description"] == "Partially updated description"
+        assert response.data["name"] == template.name  # Unchanged
 
     def test_association_user_can_update_association_template(
-        self,
-        api_client,
-        association_user,
-        template
+        self, api_client, association_user, template
     ):
         """Association users can update templates for their association."""
         api_client.force_authenticate(user=association_user)
 
         data = {
-            'name': 'Updated by User',
-            'description': template.description,
-            'num_teams': template.num_teams,
-            'num_fields': template.num_fields,
-            'num_groups': template.num_groups,
-            'game_duration': template.game_duration,
-            'association': template.association.pk
+            "name": "Updated by User",
+            "description": template.description,
+            "num_teams": template.num_teams,
+            "num_fields": template.num_fields,
+            "num_groups": template.num_groups,
+            "game_duration": template.game_duration,
+            "association": template.association.pk,
         }
 
         response = api_client.put(
-            f'/api/designer/templates/{template.pk}/',
-            data,
-            format='json'
+            f"/api/designer/templates/{template.pk}/", data, format="json"
         )
 
         # Permission allows this
         assert response.status_code == status.HTTP_200_OK
 
     def test_association_user_cannot_update_global_template(
-        self,
-        api_client,
-        association_user,
-        global_template
+        self, api_client, association_user, global_template
     ):
         """Association users cannot update global templates."""
         api_client.force_authenticate(user=association_user)
 
         data = {
-            'name': 'Trying to update',
-            'description': global_template.description,
-            'num_teams': global_template.num_teams,
-            'num_fields': global_template.num_fields,
-            'num_groups': global_template.num_groups,
-            'game_duration': global_template.game_duration,
-            'association': None
+            "name": "Trying to update",
+            "description": global_template.description,
+            "num_teams": global_template.num_teams,
+            "num_fields": global_template.num_fields,
+            "num_groups": global_template.num_groups,
+            "game_duration": global_template.game_duration,
+            "association": None,
         }
 
         response = api_client.put(
-            f'/api/designer/templates/{global_template.pk}/',
-            data,
-            format='json'
+            f"/api/designer/templates/{global_template.pk}/", data, format="json"
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -505,11 +468,11 @@ class TestTemplateDeleteEndpoint:
 
     def test_anonymous_cannot_delete_template(self, api_client, template):
         """Anonymous users cannot delete templates."""
-        response = api_client.delete(f'/api/designer/templates/{template.pk}/')
+        response = api_client.delete(f"/api/designer/templates/{template.pk}/")
 
         assert response.status_code in [
             status.HTTP_401_UNAUTHORIZED,
-            status.HTTP_403_FORBIDDEN
+            status.HTTP_403_FORBIDDEN,
         ]
 
     def test_staff_can_delete_template(self, api_client, staff_user, template):
@@ -517,21 +480,18 @@ class TestTemplateDeleteEndpoint:
         api_client.force_authenticate(user=staff_user)
 
         template_pk = template.pk
-        response = api_client.delete(f'/api/designer/templates/{template_pk}/')
+        response = api_client.delete(f"/api/designer/templates/{template_pk}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not ScheduleTemplate.objects.filter(pk=template_pk).exists()
 
     def test_association_user_cannot_delete_template(
-        self,
-        api_client,
-        association_user,
-        template
+        self, api_client, association_user, template
     ):
         """Association users cannot delete templates."""
         api_client.force_authenticate(user=association_user)
 
-        response = api_client.delete(f'/api/designer/templates/{template.pk}/')
+        response = api_client.delete(f"/api/designer/templates/{template.pk}/")
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert ScheduleTemplate.objects.filter(pk=template.pk).exists()
@@ -542,165 +502,141 @@ class TestTemplateApplyEndpoint:
     """Test POST /api/designer/templates/{id}/apply/ (custom action)."""
 
     def test_anonymous_cannot_apply_template(
-        self,
-        api_client,
-        template_with_slots,
-        gameday,
-        teams
+        self, api_client, template_with_slots, gameday, teams
     ):
         """Anonymous users cannot apply templates."""
         data = {
-            'gameday_id': gameday.pk,
-            'team_mapping': {
-                '0_0': teams[0].pk,
-                '0_1': teams[1].pk,
-                '0_2': teams[2].pk,
-                '0_3': teams[3].pk,
-                '0_4': teams[4].pk,
-                '0_5': teams[5].pk,
-            }
+            "gameday_id": gameday.pk,
+            "team_mapping": {
+                "0_0": teams[0].pk,
+                "0_1": teams[1].pk,
+                "0_2": teams[2].pk,
+                "0_3": teams[3].pk,
+                "0_4": teams[4].pk,
+                "0_5": teams[5].pk,
+            },
         }
 
         response = api_client.post(
-            f'/api/designer/templates/{template_with_slots.pk}/apply/',
+            f"/api/designer/templates/{template_with_slots.pk}/apply/",
             data,
-            format='json'
+            format="json",
         )
 
         assert response.status_code in [
             status.HTTP_401_UNAUTHORIZED,
-            status.HTTP_403_FORBIDDEN
+            status.HTTP_403_FORBIDDEN,
         ]
 
     def test_staff_can_apply_template(
-        self,
-        api_client,
-        staff_user,
-        template_with_slots,
-        gameday,
-        teams
+        self, api_client, staff_user, template_with_slots, gameday, teams
     ):
         """Staff users can apply templates."""
         api_client.force_authenticate(user=staff_user)
 
         data = {
-            'gameday_id': gameday.pk,
-            'team_mapping': {
-                '0_0': teams[0].pk,
-                '0_1': teams[1].pk,
-                '0_2': teams[2].pk,
-                '0_3': teams[3].pk,
-                '0_4': teams[4].pk,
-                '0_5': teams[5].pk,
-            }
+            "gameday_id": gameday.pk,
+            "team_mapping": {
+                "0_0": teams[0].pk,
+                "0_1": teams[1].pk,
+                "0_2": teams[2].pk,
+                "0_3": teams[3].pk,
+                "0_4": teams[4].pk,
+                "0_5": teams[5].pk,
+            },
         }
 
         response = api_client.post(
-            f'/api/designer/templates/{template_with_slots.pk}/apply/',
+            f"/api/designer/templates/{template_with_slots.pk}/apply/",
             data,
-            format='json'
+            format="json",
         )
 
         assert response.status_code == status.HTTP_200_OK
-        assert 'success' in response.data
-        assert response.data['success'] is True
+        assert "success" in response.data
+        assert response.data["success"] is True
 
     def test_association_user_can_apply_template(
-        self,
-        api_client,
-        association_user,
-        template_with_slots,
-        gameday,
-        teams
+        self, api_client, association_user, template_with_slots, gameday, teams
     ):
         """Association users can apply templates."""
         api_client.force_authenticate(user=association_user)
 
         data = {
-            'gameday_id': gameday.pk,
-            'team_mapping': {
-                '0_0': teams[0].pk,
-                '0_1': teams[1].pk,
-                '0_2': teams[2].pk,
-                '0_3': teams[3].pk,
-                '0_4': teams[4].pk,
-                '0_5': teams[5].pk,
-            }
+            "gameday_id": gameday.pk,
+            "team_mapping": {
+                "0_0": teams[0].pk,
+                "0_1": teams[1].pk,
+                "0_2": teams[2].pk,
+                "0_3": teams[3].pk,
+                "0_4": teams[4].pk,
+                "0_5": teams[5].pk,
+            },
         }
 
         response = api_client.post(
-            f'/api/designer/templates/{template_with_slots.pk}/apply/',
+            f"/api/designer/templates/{template_with_slots.pk}/apply/",
             data,
-            format='json'
+            format="json",
         )
 
         assert response.status_code == status.HTTP_200_OK
 
     def test_apply_validates_gameday_exists(
-        self,
-        api_client,
-        staff_user,
-        template_with_slots,
-        teams
+        self, api_client, staff_user, template_with_slots, teams
     ):
         """Apply endpoint validates gameday exists."""
         api_client.force_authenticate(user=staff_user)
 
         data = {
-            'gameday_id': 99999,  # Non-existent
-            'team_mapping': {
-                '0_0': teams[0].pk,
-                '0_1': teams[1].pk,
-                '0_2': teams[2].pk,
-                '0_3': teams[3].pk,
-                '0_4': teams[4].pk,
-                '0_5': teams[5].pk,
-            }
+            "gameday_id": 99999,  # Non-existent
+            "team_mapping": {
+                "0_0": teams[0].pk,
+                "0_1": teams[1].pk,
+                "0_2": teams[2].pk,
+                "0_3": teams[3].pk,
+                "0_4": teams[4].pk,
+                "0_5": teams[5].pk,
+            },
         }
 
         response = api_client.post(
-            f'/api/designer/templates/{template_with_slots.pk}/apply/',
+            f"/api/designer/templates/{template_with_slots.pk}/apply/",
             data,
-            format='json'
+            format="json",
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_apply_creates_audit_record(
-        self,
-        api_client,
-        staff_user,
-        template_with_slots,
-        gameday,
-        teams
+        self, api_client, staff_user, template_with_slots, gameday, teams
     ):
         """Applying template creates TemplateApplication audit record."""
         api_client.force_authenticate(user=staff_user)
 
         data = {
-            'gameday_id': gameday.pk,
-            'team_mapping': {
-                '0_0': teams[0].pk,
-                '0_1': teams[1].pk,
-                '0_2': teams[2].pk,
-                '0_3': teams[3].pk,
-                '0_4': teams[4].pk,
-                '0_5': teams[5].pk,
-            }
+            "gameday_id": gameday.pk,
+            "team_mapping": {
+                "0_0": teams[0].pk,
+                "0_1": teams[1].pk,
+                "0_2": teams[2].pk,
+                "0_3": teams[3].pk,
+                "0_4": teams[4].pk,
+                "0_5": teams[5].pk,
+            },
         }
 
         response = api_client.post(
-            f'/api/designer/templates/{template_with_slots.pk}/apply/',
+            f"/api/designer/templates/{template_with_slots.pk}/apply/",
             data,
-            format='json'
+            format="json",
         )
 
         assert response.status_code == status.HTTP_200_OK
 
         # Check audit record created
         application = TemplateApplication.objects.filter(
-            template=template_with_slots,
-            gameday=gameday
+            template=template_with_slots, gameday=gameday
         ).first()
 
         assert application is not None
@@ -714,29 +650,29 @@ class TestTemplateCloneEndpoint:
     def test_anonymous_cannot_clone_template(self, api_client, template):
         """Anonymous users cannot clone templates."""
         response = api_client.post(
-            f'/api/designer/templates/{template.pk}/clone/',
-            format='json'
+            f"/api/designer/templates/{template.pk}/clone/", format="json"
         )
 
         assert response.status_code in [
             status.HTTP_401_UNAUTHORIZED,
-            status.HTTP_403_FORBIDDEN
+            status.HTTP_403_FORBIDDEN,
         ]
 
-    def test_staff_can_clone_template(self, api_client, staff_user, template_with_slots):
+    def test_staff_can_clone_template(
+        self, api_client, staff_user, template_with_slots
+    ):
         """Staff users can clone templates."""
         api_client.force_authenticate(user=staff_user)
 
         original_count = ScheduleTemplate.objects.count()
 
         response = api_client.post(
-            f'/api/designer/templates/{template_with_slots.pk}/clone/',
-            format='json'
+            f"/api/designer/templates/{template_with_slots.pk}/clone/", format="json"
         )
 
         assert response.status_code == status.HTTP_201_CREATED
         assert ScheduleTemplate.objects.count() == original_count + 1
-        assert response.data['name'].startswith('Copy of ')
+        assert response.data["name"].startswith("Copy of ")
 
     def test_clone_includes_slots(self, api_client, staff_user, template_with_slots):
         """Cloning template copies slots."""
@@ -745,27 +681,22 @@ class TestTemplateCloneEndpoint:
         original_slot_count = template_with_slots.slots.count()
 
         response = api_client.post(
-            f'/api/designer/templates/{template_with_slots.pk}/clone/',
-            format='json'
+            f"/api/designer/templates/{template_with_slots.pk}/clone/", format="json"
         )
 
         assert response.status_code == status.HTTP_201_CREATED
 
-        cloned_template = ScheduleTemplate.objects.get(pk=response.data['id'])
+        cloned_template = ScheduleTemplate.objects.get(pk=response.data["id"])
         assert cloned_template.slots.count() == original_slot_count
 
     def test_association_user_can_clone_template(
-        self,
-        api_client,
-        association_user,
-        template
+        self, api_client, association_user, template
     ):
         """Association users can clone templates."""
         api_client.force_authenticate(user=association_user)
 
         response = api_client.post(
-            f'/api/designer/templates/{template.pk}/clone/',
-            format='json'
+            f"/api/designer/templates/{template.pk}/clone/", format="json"
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -778,24 +709,24 @@ class TestTemplateValidateEndpoint:
     def test_anyone_can_validate_template(self, api_client, template_with_slots):
         """Anyone can validate templates (even anonymous)."""
         response = api_client.get(
-            f'/api/designer/templates/{template_with_slots.pk}/validate/'
+            f"/api/designer/templates/{template_with_slots.pk}/validate/"
         )
 
         assert response.status_code == status.HTTP_200_OK
-        assert 'is_valid' in response.data
-        assert 'errors' in response.data
-        assert 'warnings' in response.data
+        assert "is_valid" in response.data
+        assert "errors" in response.data
+        assert "warnings" in response.data
 
     def test_validate_returns_validation_result(self, api_client, template_with_slots):
         """Validate endpoint returns validation result from service."""
         response = api_client.get(
-            f'/api/designer/templates/{template_with_slots.pk}/validate/'
+            f"/api/designer/templates/{template_with_slots.pk}/validate/"
         )
 
         assert response.status_code == status.HTTP_200_OK
-        assert isinstance(response.data['is_valid'], bool)
-        assert isinstance(response.data['errors'], list)
-        assert isinstance(response.data['warnings'], list)
+        assert isinstance(response.data["is_valid"], bool)
+        assert isinstance(response.data["errors"], list)
+        assert isinstance(response.data["warnings"], list)
 
 
 @pytest.mark.django_db
@@ -805,26 +736,26 @@ class TestTemplatePreviewEndpoint:
     def test_anyone_can_preview_template(self, api_client, template_with_slots):
         """Anyone can preview template schedule."""
         response = api_client.get(
-            f'/api/designer/templates/{template_with_slots.pk}/preview/'
+            f"/api/designer/templates/{template_with_slots.pk}/preview/"
         )
 
         assert response.status_code == status.HTTP_200_OK
-        assert 'slots' in response.data
-        assert len(response.data['slots']) == 2
+        assert "slots" in response.data
+        assert len(response.data["slots"]) == 2
 
     def test_preview_includes_slot_details(self, api_client, template_with_slots):
         """Preview includes detailed slot information."""
         response = api_client.get(
-            f'/api/designer/templates/{template_with_slots.pk}/preview/'
+            f"/api/designer/templates/{template_with_slots.pk}/preview/"
         )
 
         assert response.status_code == status.HTTP_200_OK
 
-        first_slot = response.data['slots'][0]
-        assert 'field' in first_slot
-        assert 'slot_order' in first_slot
-        assert 'stage' in first_slot
-        assert 'standing' in first_slot
+        first_slot = response.data["slots"][0]
+        assert "field" in first_slot
+        assert "slot_order" in first_slot
+        assert "stage" in first_slot
+        assert "standing" in first_slot
 
 
 @pytest.mark.django_db
@@ -833,29 +764,22 @@ class TestTemplateUsageEndpoint:
 
     def test_anyone_can_view_usage_statistics(self, api_client, template):
         """Anyone can view template usage statistics."""
-        response = api_client.get(f'/api/designer/templates/{template.pk}/usage/')
+        response = api_client.get(f"/api/designer/templates/{template.pk}/usage/")
 
         assert response.status_code == status.HTTP_200_OK
-        assert 'applications_count' in response.data
-        assert 'recent_applications' in response.data
+        assert "applications_count" in response.data
+        assert "recent_applications" in response.data
 
     def test_usage_shows_application_count(
-        self,
-        api_client,
-        template,
-        gameday,
-        staff_user
+        self, api_client, template, gameday, staff_user
     ):
         """Usage endpoint shows number of applications."""
         # Create some applications
         TemplateApplication.objects.create(
-            template=template,
-            gameday=gameday,
-            applied_by=staff_user,
-            team_mapping={}
+            template=template, gameday=gameday, applied_by=staff_user, team_mapping={}
         )
 
-        response = api_client.get(f'/api/designer/templates/{template.pk}/usage/')
+        response = api_client.get(f"/api/designer/templates/{template.pk}/usage/")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['applications_count'] >= 1
+        assert response.data["applications_count"] >= 1

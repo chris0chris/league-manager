@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ListDesignerApp from '../ListDesignerApp';
 import { useDesignerController } from '../../hooks/useDesignerController';
@@ -70,7 +70,7 @@ describe('ListDesignerApp Coverage', () => {
       warnings: []
     };
 
-    (useDesignerController as any).mockReturnValue({
+    (useDesignerController as Mock).mockReturnValue({
       ...defaultMockReturn,
       validation: mockValidation,
     });
@@ -99,7 +99,7 @@ describe('ListDesignerApp Coverage', () => {
       ]
     };
 
-    (useDesignerController as any).mockReturnValue({
+    (useDesignerController as Mock).mockReturnValue({
       ...defaultMockReturn,
       validation: mockValidation,
     });
@@ -131,7 +131,7 @@ describe('ListDesignerApp Coverage', () => {
       warnings: []
     };
 
-    (useDesignerController as any).mockReturnValue({
+    (useDesignerController as Mock).mockReturnValue({
       ...defaultMockReturn,
       validation: mockValidation,
     });

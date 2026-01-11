@@ -389,7 +389,7 @@ describe('useFlowValidation', () => {
           sourceHandle: 'winner',
           targetHandle: 'home',
           data: { sourcePort: 'winner', targetPort: 'home' },
-        } as any,
+        } as GameToGameEdge,
         {
           id: 'edge2',
           type: 'gameToGame',
@@ -398,7 +398,7 @@ describe('useFlowValidation', () => {
           sourceHandle: 'winner',
           targetHandle: 'home',
           data: { sourcePort: 'winner', targetPort: 'home' },
-        } as any,
+        } as GameToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges));
@@ -435,8 +435,8 @@ describe('useFlowValidation', () => {
       ];
 
       const edges: FlowEdge[] = [
-        { id: 'e1', type: 'gameToGame', source: 'g1', target: 'g3', sourceHandle: 'winner', targetHandle: 'home' } as any,
-        { id: 'e2', type: 'gameToGame', source: 'g2', target: 'g3', sourceHandle: 'winner', targetHandle: 'away' } as any,
+        { id: 'e1', type: 'gameToGame', source: 'g1', target: 'g3', sourceHandle: 'winner', targetHandle: 'home', data: { sourcePort: 'winner', targetPort: 'home' } } as GameToGameEdge,
+        { id: 'e2', type: 'gameToGame', source: 'g2', target: 'g3', sourceHandle: 'winner', targetHandle: 'away', data: { sourcePort: 'winner', targetPort: 'away' } } as GameToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges));
@@ -479,7 +479,7 @@ describe('useFlowValidation', () => {
       ];
 
       const edges: FlowEdge[] = [
-        { id: 'e1', type: 'teamToGame', source: 'team1', target: 'game1', targetHandle: 'home' } as any,
+        { id: 'e1', type: 'teamToGame', source: 'team1', target: 'game1', targetHandle: 'home', data: { targetPort: 'home' } } as TeamToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges));
@@ -519,7 +519,7 @@ describe('useFlowValidation', () => {
       ];
 
       const edges: FlowEdge[] = [
-        { id: 'e1', type: 'teamToGame', source: 'team1', target: 'game1', targetHandle: 'away' } as any,
+        { id: 'e1', type: 'teamToGame', source: 'team1', target: 'game1', targetHandle: 'away', data: { targetPort: 'away' } } as TeamToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges));
