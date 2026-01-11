@@ -5,6 +5,8 @@ import {
   isElementVisible,
   waitForElement,
   scrollToGameWithExpansion,
+  expandPathToNode,
+  scrollToElementWithExpansion,
 } from '../scrollHelpers';
 import type {
   FlowNode,
@@ -43,7 +45,7 @@ describe('scrollHelpers', () => {
     data: {
       name,
       order,
-      stageType: 'group',
+      stageType: 'vorrunde',
       description: '',
     },
     position: { x: 0, y: 0 },
@@ -138,6 +140,117 @@ describe('scrollHelpers', () => {
         block: 'center',
         inline: 'nearest',
       });
+    });
+  });
+
+  describe('expandPathToNode', () => {
+    it('expands path to game', () => {
+      const field = createField('field1', 'Feld 1', 0);
+      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const game = createGame('game1', 'Match 1', 'stage1');
+      const nodes: FlowNode[] = [field, stage, game];
+      const expandField = vi.fn();
+      const expandStage = vi.fn();
+
+      const result = expandPathToNode('game1', 'game', nodes, expandField, expandStage);
+
+      expect(result).toBe(true);
+      expect(expandField).toHaveBeenCalledWith('field1');
+      expect(expandStage).toHaveBeenCalledWith('stage1');
+    });
+
+    it('expands path to stage', () => {
+      const field = createField('field1', 'Feld 1', 0);
+      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const nodes: FlowNode[] = [field, stage];
+      const expandField = vi.fn();
+      const expandStage = vi.fn();
+
+      const result = expandPathToNode('stage1', 'stage', nodes, expandField, expandStage);
+
+      expect(result).toBe(true);
+      expect(expandField).toHaveBeenCalledWith('field1');
+      expect(expandStage).not.toHaveBeenCalled();
+    });
+
+    it('handles field type (nothing to expand)', () => {
+      const field = createField('field1', 'Feld 1', 0);
+      const nodes: FlowNode[] = [field];
+      const expandField = vi.fn();
+      const expandStage = vi.fn();
+
+      const result = expandPathToNode('field1', 'field', nodes, expandField, expandStage);
+
+      expect(result).toBe(true);
+      expect(expandField).not.toHaveBeenCalled();
+    });
+
+    it('handles team type (nothing to expand)', () => {
+      const nodes: FlowNode[] = [];
+      const expandField = vi.fn();
+      const expandStage = vi.fn();
+
+      const result = expandPathToNode('team1', 'team', nodes, expandField, expandStage);
+
+      expect(result).toBe(true);
+      expect(expandField).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('scrollToElementWithExpansion', () => {
+    it('scrolls to stage with expansion', async () => {
+      const field = createField('field1', 'Feld 1', 0);
+      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const nodes: FlowNode[] = [field, stage];
+      const expandField = vi.fn();
+      const expandStage = vi.fn();
+
+      const promise = scrollToElementWithExpansion('stage1', 'stage', nodes, expandField, expandStage);
+      
+      const element = document.createElement('div');
+      element.id = 'stage-stage1';
+      document.body.appendChild(element);
+      
+      vi.runAllTimers();
+      await promise;
+
+      expect(expandField).toHaveBeenCalledWith('field1');
+      expect(scrollIntoViewMock).toHaveBeenCalled();
+    });
+
+    it('scrolls to field', async () => {
+      const field = createField('field1', 'Feld 1', 0);
+      const nodes: FlowNode[] = [field];
+      const expandField = vi.fn();
+      const expandStage = vi.fn();
+
+      const promise = scrollToElementWithExpansion('field1', 'field', nodes, expandField, expandStage);
+      
+      const element = document.createElement('div');
+      element.id = 'field-field1';
+      document.body.appendChild(element);
+      
+      vi.runAllTimers();
+      await promise;
+
+      expect(scrollIntoViewMock).toHaveBeenCalled();
+    });
+
+    it('scrolls to team', async () => {
+      const nodes: FlowNode[] = [];
+      const expandField = vi.fn();
+      const expandStage = vi.fn();
+
+      const promise = scrollToElementWithExpansion('team1', 'team', nodes, expandField, expandStage);
+      
+      const element = document.createElement('div');
+      element.id = 'team-team1';
+      document.body.appendChild(element);
+      
+      vi.runAllTimers();
+      await promise;
+
+      expect(scrollIntoViewMock).toHaveBeenCalled();
     });
   });
 

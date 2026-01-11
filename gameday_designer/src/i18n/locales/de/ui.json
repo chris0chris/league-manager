@@ -1,7 +1,7 @@
 {
   "button": {
     "addField": "Feld hinzufügen",
-    "addStage": "Etappe hinzufügen",
+    "addStage": "Phase hinzufügen",
     "addGame": "Spiel hinzufügen",
     "addTeam": "Team hinzufügen",
     "addGroup": "Gruppe hinzufügen",
@@ -24,7 +24,7 @@
     "language": "Sprache",
     "german": "Deutsch",
     "english": "Englisch",
-    "stage": "Etappe",
+    "stage": "Phase",
     "standing": "Platzierung",
     "home": "Heim",
     "away": "Gast",
@@ -51,9 +51,9 @@
   "message": {
     "noTeamsYet": "Noch keine Teams",
     "noTeamsInGroup": "Keine Teams in dieser Gruppe",
-    "noStagesYet": "Noch keine Etappen",
+    "noStagesYet": "Noch keine Phasen",
     "noGamesYet": "Noch keine Spiele",
-    "noGamesInStage": "Keine Spiele in dieser Etappe",
+    "noGamesInStage": "Keine Spiele in dieser Phase",
     "noFieldsYet": "Noch keine Felder",
     "noGroupsYet": "Noch keine Gruppen",
     "createFirstField": "Erstellen Sie Ihr erstes Feld, um Spiele zu organisieren",
@@ -76,7 +76,7 @@
     "deleteStage": "Diese Phase und alle darin enthaltenen Spiele dauerhaft entfernen",
     "stageColor": "Die Akzentfarbe für diese Phase ändern",
     "importFromJson": "Einen Spielplan aus einer JSON-Datei importieren",
-    "exportToJson": "Den aktuellen Spielplan in eine JSON-Datei exportieren",
+    "exportFromJson": "Den aktuellen Spielplan in eine JSON-Datei exportieren",
     "undo": "Die letzte Aktion rückgängig machen",
     "redo": "Die zuvor rückgängig gemachte Aktion wiederholen",
     "clearAllNodesAndEdges": "Alle Felder, Phasen, Spiele und Teams dauerhaft löschen",

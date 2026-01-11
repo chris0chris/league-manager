@@ -920,12 +920,18 @@ describe('useFlowValidation', () => {
       expect(containerError?.message).toContain('not inside a field container');
     });
 
-    it('should error when team is not inside a stage', () => {
+    it('should error when team parent is not a valid stage', () => {
       const nodes: FlowNode[] = [
+        {
+          id: 'field1',
+          type: 'field',
+          data: { name: 'Field 1', order: 0 },
+          position: { x: 0, y: 0 },
+        },
         {
           id: 'team1',
           type: 'team',
-          parentId: null,
+          parentId: 'field1', // Invalid: team parent must be stage
           data: {
             label: 'Team A',
             reference: { type: 'static', teamId: 'team-a' },
@@ -939,11 +945,176 @@ describe('useFlowValidation', () => {
       expect(result.current.isValid).toBe(false);
       const containerError = result.current.errors.find(e => e.type === 'team_outside_container');
       expect(containerError).toBeDefined();
-      expect(containerError?.message).toContain('must be inside a stage container');
+      expect(containerError?.messageKey).toBe('team_invalid_parent');
+    });
+
+    it('should error when stage parent is not a valid field', () => {
+      const nodes: FlowNode[] = [
+        {
+          id: 'stage1',
+          type: 'stage',
+          parentId: 'nonexistent',
+          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          position: { x: 0, y: 0 },
+        },
+      ];
+
+      const { result } = renderHook(() => useFlowValidation(nodes, []));
+
+      expect(result.current.isValid).toBe(false);
+      const containerError = result.current.errors.find(e => e.type === 'stage_outside_field');
+      expect(containerError).toBeDefined();
+      expect(containerError?.messageKey).toBe('stage_invalid_parent');
     });
   });
 
-  describe('Unassigned Fields', () => {
+  describe('Legacy and Error Handling', () => {
+    it('should handle legacy fieldId for time overlap validation', () => {
+      const nodes: FlowNode[] = [
+        {
+          id: 'game1',
+          type: 'game',
+          parentId: null,
+          data: {
+            standing: 'Game 1',
+            homeTeamId: 'team1',
+            awayTeamId: 'team2',
+            fieldId: 'field1',
+            startTime: '10:00',
+            duration: 50,
+          },
+          position: { x: 0, y: 0 },
+        },
+        {
+          id: 'game2',
+          type: 'game',
+          parentId: null,
+          data: {
+            standing: 'Game 2',
+            homeTeamId: 'team3',
+            awayTeamId: 'team4',
+            fieldId: 'field1',
+            startTime: '10:30',
+            duration: 50,
+          },
+          position: { x: 0, y: 0 },
+        },
+      ];
+
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [{ id: 'field1', name: 'Field 1', order: 0 }]));
+
+      expect(result.current.errors).toHaveLength(3); // 2 hierarchy errors + 1 overlap error
+      const overlapError = result.current.errors.find(e => e.type === 'field_overlap');
+      expect(overlapError).toBeDefined();
+      expect(overlapError?.message).toContain('Field 1');
+    });
+
+    it('should handle invalid time formats gracefully in overlaps', () => {
+      const nodes: FlowNode[] = [
+        {
+          id: 'field1',
+          type: 'field',
+          data: { name: 'Field 1', order: 0 },
+          position: { x: 0, y: 0 },
+        },
+        {
+          id: 'stage1',
+          type: 'stage',
+          parentId: 'field1',
+          data: { name: 'Stage 1', order: 0 },
+          position: { x: 0, y: 0 },
+        },
+        {
+          id: 'game1',
+          type: 'game',
+          parentId: 'stage1',
+          data: {
+            standing: 'Game 1',
+            startTime: 'invalid',
+            homeTeamId: 't1',
+            awayTeamId: 't2',
+          },
+          position: { x: 0, y: 0 },
+        },
+      ];
+
+      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      expect(result.current.isValid).toBe(true);
+    });
+
+    it('should use field name from nodes if fields array is incomplete', () => {
+      const nodes: FlowNode[] = [
+        {
+          id: 'field1',
+          type: 'field',
+          data: { name: 'Real Field Name', order: 0 },
+          position: { x: 0, y: 0 },
+        },
+        {
+          id: 'stage1',
+          type: 'stage',
+          parentId: 'field1',
+          data: { name: 'Stage 1', order: 0 },
+          position: { x: 0, y: 0 },
+        },
+        {
+          id: 'game1',
+          type: 'game',
+          parentId: 'stage1',
+          data: { standing: 'G1', startTime: '10:00', duration: 60, homeTeamId: 't1', awayTeamId: 't2' },
+          position: { x: 0, y: 0 },
+        },
+        {
+          id: 'game2',
+          type: 'game',
+          parentId: 'stage1',
+          data: { standing: 'G2', startTime: '10:30', duration: 60, homeTeamId: 't3', awayTeamId: 't4' },
+          position: { x: 0, y: 0 },
+        },
+      ];
+
+      // Pass empty fields array
+      const { result } = renderHook(() => useFlowValidation(nodes, [], []));
+
+      const overlapError = result.current.errors.find(e => e.type === 'field_overlap');
+      expect(overlapError).toBeDefined();
+      expect(overlapError?.message).toContain('Real Field Name');
+    });
+
+    it('should fallback to Unknown Field if field name cannot be determined', () => {
+      const nodes: FlowNode[] = [
+        {
+          id: 'stage1',
+          type: 'stage',
+          parentId: 'nonexistent-field',
+          data: { name: 'Stage 1', order: 0 },
+          position: { x: 0, y: 0 },
+        },
+        {
+          id: 'game1',
+          type: 'game',
+          parentId: 'stage1',
+          data: { standing: 'G1', startTime: '10:00', duration: 60, homeTeamId: 't1', awayTeamId: 't2' },
+          position: { x: 0, y: 0 },
+        },
+        {
+          id: 'game2',
+          type: 'game',
+          parentId: 'stage1',
+          data: { standing: 'G2', startTime: '10:30', duration: 60, homeTeamId: 't3', awayTeamId: 't4' },
+          position: { x: 0, y: 0 },
+        },
+      ];
+
+      const { result } = renderHook(() => useFlowValidation(nodes, [], []));
+
+      const overlapError = result.current.errors.find(e => e.type === 'field_overlap');
+      expect(overlapError).toBeDefined();
+      expect(overlapError?.message).toContain('Unknown Field');
+    });
+  });
+
+  describe('Memoization', () => {
     it('should warn about game with no field (v1 model)', () => {
       const nodes: FlowNode[] = [
         {
