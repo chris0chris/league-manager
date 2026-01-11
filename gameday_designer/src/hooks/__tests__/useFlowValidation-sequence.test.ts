@@ -77,4 +77,46 @@ describe('useFlowValidation - Stage Sequence', () => {
       type2: 'vorrunde'
     });
   });
+
+  it('should error when a stage has no parent field', () => {
+    const nodes: FlowNode[] = [
+      {
+        id: 'stage1',
+        type: 'stage',
+        parentId: undefined, // Missing parent
+        data: { name: 'Stage 1', order: 0, stageType: 'vorrunde' },
+        position: { x: 0, y: 0 },
+      },
+    ];
+
+    const { result } = renderHook(() => useFlowValidation(nodes, []));
+
+    const error = result.current.errors.find(e => e.type === 'stage_outside_field' && e.id === 'stage1_outside_field');
+    expect(error).toBeDefined();
+    expect(error?.messageKey).toBe('stage_outside_field');
+  });
+
+  it('should error when a stage parent is not a field node', () => {
+    const nodes: FlowNode[] = [
+      {
+        id: 'game1',
+        type: 'game',
+        data: { standing: 'G1' },
+        position: { x: 0, y: 0 },
+      },
+      {
+        id: 'stage1',
+        type: 'stage',
+        parentId: 'game1', // Invalid parent type
+        data: { name: 'Stage 1', order: 0, stageType: 'vorrunde' },
+        position: { x: 0, y: 0 },
+      },
+    ];
+
+    const { result } = renderHook(() => useFlowValidation(nodes, []));
+
+    const error = result.current.errors.find(e => e.type === 'stage_outside_field' && e.id === 'stage1_outside_field');
+    expect(error).toBeDefined();
+    expect(error?.messageKey).toBe('stage_invalid_parent');
+  });
 });

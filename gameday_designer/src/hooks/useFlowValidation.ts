@@ -188,7 +188,8 @@ function checkCircularDependencies(
  */
 function checkOfficialPlaying(
   nodes: FlowNode[],
-  edges: FlowEdge[]
+  edges: FlowEdge[],
+  globalTeams: GlobalTeam[] = []
 ): FlowValidationError[] {
   const errors: FlowValidationError[] = [];
 
@@ -207,10 +208,21 @@ function checkOfficialPlaying(
       (e) => e.target === node.id && e.targetHandle === 'away'
     );
 
-    const officialStr = formatTeamReference(data.official);
+    const official = data.official;
+    let officialId: string | null = null;
+    let officialStr = '';
+
+    if (typeof official === 'string') {
+      officialId = official;
+      // Resolve team label for display if it's an ID
+      const team = globalTeams.find(t => t.id === official);
+      officialStr = team?.label || official;
+    } else if (official && typeof official === 'object') {
+      officialStr = formatTeamReference(official);
+    }
 
     // Check if official matches home team (v2 direct ID)
-    if (data.homeTeamId === data.official) {
+    if (data.homeTeamId && (data.homeTeamId === officialId || data.homeTeamId === officialStr)) {
       errors.push({
         id: `${node.id}_official_playing_home_v2`,
         type: 'official_playing',
@@ -225,7 +237,7 @@ function checkOfficialPlaying(
     }
 
     // Check if official matches away team (v2 direct ID)
-    if (data.awayTeamId === data.official) {
+    if (data.awayTeamId && (data.awayTeamId === officialId || data.awayTeamId === officialStr)) {
       errors.push({
         id: `${node.id}_official_playing_away_v2`,
         type: 'official_playing',
@@ -974,7 +986,7 @@ export function useFlowValidation(
     const errors: FlowValidationError[] = [
       ...checkIncompleteInputs(nodes, edges),
       ...checkCircularDependencies(nodes, edges),
-      ...checkOfficialPlaying(nodes, edges),
+      ...checkOfficialPlaying(nodes, edges, globalTeams),
       ...checkStagesOutsideFields(nodes),
       ...checkGamesOutsideContainers(nodes),
       ...checkTeamsOutsideContainers(nodes),

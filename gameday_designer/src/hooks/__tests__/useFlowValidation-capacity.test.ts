@@ -188,4 +188,68 @@ describe('useFlowValidation - Team Capacity', () => {
     const { result } = renderHook(() => useFlowValidation(nodes, [], [], [{ id: 'team1', label: 'Team 1', groupId: null, order: 0 }]));
     expect(result.current.isValid).toBe(true);
   });
+
+  it('should use official ID as fallback string if team label is not found', () => {
+    const nodes: FlowNode[] = [
+      {
+        id: 'game1',
+        type: 'game',
+        data: {
+          standing: 'G1',
+          homeTeamId: 't1',
+          official: 't1',
+        },
+        position: { x: 0, y: 0 },
+      },
+    ];
+
+    // Pass empty globalTeams
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], []));
+
+    const officialError = result.current.errors.find(e => e.type === 'official_playing');
+    expect(officialError).toBeDefined();
+    expect(officialError?.messageParams?.team).toBe('t1');
+  });
+
+  it('should handle object-based official references (v1 style)', () => {
+    const nodes: FlowNode[] = [
+      {
+        id: 'game1',
+        type: 'game',
+        data: {
+          standing: 'G1',
+          homeTeamId: 'My Static Team',
+          official: { type: 'static', name: 'My Static Team' },
+        },
+        position: { x: 0, y: 0 },
+      },
+    ];
+
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], []));
+
+    const officialError = result.current.errors.find(e => e.type === 'official_playing');
+    expect(officialError).toBeDefined();
+    expect(officialError?.messageParams?.team).toBe('My Static Team');
+  });
+
+  it('should detect when official is playing in away slot (v2 ID style)', () => {
+    const nodes: FlowNode[] = [
+      {
+        id: 'game1',
+        type: 'game',
+        data: {
+          standing: 'G1',
+          awayTeamId: 't1',
+          official: 't1',
+        },
+        position: { x: 0, y: 0 },
+      },
+    ];
+
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], []));
+
+    const officialError = result.current.errors.find(e => e.type === 'official_playing');
+    expect(officialError).toBeDefined();
+    expect(officialError?.id).toContain('official_playing_away_v2');
+  });
 });

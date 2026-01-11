@@ -156,34 +156,38 @@ describe('TeamGroupCard', () => {
     expect(mockOnReorderGroup).toHaveBeenCalledWith('group-1', 'down');
   });
 
-  it('calls onReorderTeam when clicking reorder team buttons', () => {
+  it('calls onReorderTeam when clicking reorder team buttons', async () => {
+    const user = userEvent.setup();
     render(<TeamGroupCard {...getDefaultProps()} />);
 
     // Click down on first team
-    const downButtons = screen.getAllByTitle(/move.*team.*down/i);
-    fireEvent.click(downButtons[0]);
+    // Specific regex to avoid matching "team group"
+    const downButtons = screen.getAllByTitle(/^Move this team one position down$/i);
+    await user.click(downButtons[0]);
     expect(mockOnReorderTeam).toHaveBeenCalledWith('team-1', 'down');
 
     // Click up on second team
-    const upButtons = screen.getAllByTitle(/move.*team.*up/i);
-    fireEvent.click(upButtons[1]);
+    const upButtons = screen.getAllByTitle(/^Move this team one position up$/i);
+    await user.click(upButtons[1]);
     expect(mockOnReorderTeam).toHaveBeenCalledWith('team-2', 'up');
   });
 
-  it('calls onDeleteTeam when clicking delete button', () => {
+  it('calls onDeleteTeam when clicking delete button', async () => {
+    const user = userEvent.setup();
     render(<TeamGroupCard {...getDefaultProps()} />);
 
-    const deleteButtons = screen.getAllByTitle(/remove.*team/i);
-    fireEvent.click(deleteButtons[0]);
+    const deleteButtons = screen.getAllByTitle(/^Permanently remove this team from the pool$/i);
+    await user.click(deleteButtons[0]);
 
     expect(mockOnDeleteTeam).toHaveBeenCalledWith('team-1');
   });
 
-  it('calls onDeleteGroup when clicking group delete button', () => {
+  it('calls onDeleteGroup when clicking group delete button', async () => {
+    const user = userEvent.setup();
     render(<TeamGroupCard {...getDefaultProps()} />);
 
-    const deleteButton = screen.getByTitle(/remove.*group/i);
-    fireEvent.click(deleteButton);
+    const deleteButton = screen.getByTitle(/^Permanently remove this team group and all its teams$/i);
+    await user.click(deleteButton);
 
     expect(mockOnDeleteGroup).toHaveBeenCalledWith('group-1');
   });

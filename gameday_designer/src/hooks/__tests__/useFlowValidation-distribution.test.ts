@@ -106,4 +106,68 @@ describe('useFlowValidation - Game Distribution', () => {
     const warning = result.current.warnings.find(w => w.type === 'uneven_game_distribution');
     expect(warning).toBeUndefined();
   });
+
+  it('should ignore teams without a group in distribution check', () => {
+    const ungroupedTeams: GlobalTeam[] = [
+      { id: 't1', label: 'Team 1', groupId: null, order: 0 },
+      { id: 't2', label: 'Team 2', groupId: null, order: 1 },
+    ];
+
+    const nodes: FlowNode[] = [
+      {
+        id: 'game1',
+        type: 'game',
+        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' },
+        position: { x: 0, y: 0 },
+      },
+    ];
+
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], ungroupedTeams, []));
+
+    const warning = result.current.warnings.find(w => w.type === 'uneven_game_distribution');
+    expect(warning).toBeUndefined();
+  });
+
+  it('should ignore groups with fewer than 2 teams in distribution check', () => {
+    const singleTeamGroup: GlobalTeam[] = [
+      { id: 't1', label: 'Team 1', groupId: 'g1', order: 0 },
+    ];
+    const groups: GlobalTeamGroup[] = [{ id: 'g1', name: 'Group 1', order: 0 }];
+
+    const nodes: FlowNode[] = [
+      {
+        id: 'game1',
+        type: 'game',
+        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: null },
+        position: { x: 0, y: 0 },
+      },
+    ];
+
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], singleTeamGroup, groups));
+
+    const warning = result.current.warnings.find(w => w.type === 'uneven_game_distribution');
+    expect(warning).toBeUndefined();
+  });
+
+  it('should fallback to Unknown Group if group name is not found', () => {
+    const teams: GlobalTeam[] = [
+      { id: 't1', label: 'T1', groupId: 'missing-group', order: 0 },
+      { id: 't2', label: 'T2', groupId: 'missing-group', order: 1 },
+    ];
+
+    const nodes: FlowNode[] = [
+      {
+        id: 'game1',
+        type: 'game',
+        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: null },
+        position: { x: 0, y: 0 },
+      },
+    ];
+
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], teams, []));
+
+    const warning = result.current.warnings.find(w => w.type === 'uneven_game_distribution');
+    expect(warning).toBeDefined();
+    expect(warning?.message).toContain('Unknown Group');
+  });
 });
