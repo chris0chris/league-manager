@@ -5,16 +5,16 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('gamedays', '0010_auto_20211112_1831'),
+        ("gamedays", "0010_auto_20211112_1831"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='gameday',
-            options={'ordering': ['date']},
+            name="gameday",
+            options={"ordering": ["date"]},
         ),
         migrations.AlterModelOptions(
-            name='gameinfo',
-            options={'ordering': ['scheduled']},
+            name="gameinfo",
+            options={"ordering": ["scheduled"]},
         ),
     ]

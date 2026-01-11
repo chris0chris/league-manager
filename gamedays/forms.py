@@ -105,17 +105,29 @@ SCHEDULE_MAP = {
     "9_2": {
         "name": "9 Teams 3 Gruppen 2 Felder",
         "fields": 2,
-        SCHEDULE_MAP_GROUPS_C: [{SCHEDULE_MAP_TEAMS_C: 3}, {SCHEDULE_MAP_TEAMS_C: 3}, {SCHEDULE_MAP_TEAMS_C: 3}],
+        SCHEDULE_MAP_GROUPS_C: [
+            {SCHEDULE_MAP_TEAMS_C: 3},
+            {SCHEDULE_MAP_TEAMS_C: 3},
+            {SCHEDULE_MAP_TEAMS_C: 3},
+        ],
     },
     "9_groupfinals_2": {
         "name": "9 Teams 3 Gruppen 2 Felder mit Gruppen Finale",
         "fields": 2,
-        SCHEDULE_MAP_GROUPS_C: [{SCHEDULE_MAP_TEAMS_C: 3}, {SCHEDULE_MAP_TEAMS_C: 3}, {SCHEDULE_MAP_TEAMS_C: 3}],
+        SCHEDULE_MAP_GROUPS_C: [
+            {SCHEDULE_MAP_TEAMS_C: 3},
+            {SCHEDULE_MAP_TEAMS_C: 3},
+            {SCHEDULE_MAP_TEAMS_C: 3},
+        ],
     },
     "9_3": {
         "name": "9 Teams 3 Gruppen 3 Felder",
         "fields": 3,
-        SCHEDULE_MAP_GROUPS_C: [{SCHEDULE_MAP_TEAMS_C: 3}, {SCHEDULE_MAP_TEAMS_C: 3}, {SCHEDULE_MAP_TEAMS_C: 3}],
+        SCHEDULE_MAP_GROUPS_C: [
+            {SCHEDULE_MAP_TEAMS_C: 3},
+            {SCHEDULE_MAP_TEAMS_C: 3},
+            {SCHEDULE_MAP_TEAMS_C: 3},
+        ],
     },
     "5_dfflf_2": {
         "name": "5 Teams 1 Grupppe 2 Felder - 20 Min Pause (DFFL Frauen)",
@@ -130,9 +142,9 @@ SCHEDULE_MAP = {
 }
 
 
-FORM_CONTROL = {'class': 'form-control'}
-FORM_CONTROL_AUTO = {**FORM_CONTROL, 'style': 'width: auto'}
-FORM_CONTROL_REQUIRED_TRUE = {**FORM_CONTROL, 'required': True}
+FORM_CONTROL = {"class": "form-control"}
+FORM_CONTROL_AUTO = {**FORM_CONTROL, "style": "width: auto"}
+FORM_CONTROL_REQUIRED_TRUE = {**FORM_CONTROL, "required": True}
 
 
 @dataclass
@@ -144,20 +156,21 @@ class GamedayFormContext:
 class GamedayForm(forms.ModelForm):
     name = forms.CharField(max_length=100)
     season = forms.ModelChoiceField(queryset=Season.objects.all())
-    league = forms.ModelChoiceField(queryset=League.objects.all(), empty_label='Bitte auswählen')
+    league = forms.ModelChoiceField(
+        queryset=League.objects.all(), empty_label="Bitte auswählen"
+    )
     address = forms.CharField(
-        label='Adresse',
-        widget=forms.TextInput(attrs=FORM_CONTROL)
+        label="Adresse", widget=forms.TextInput(attrs=FORM_CONTROL)
     )
 
     class Meta:
         model = Gameday
-        fields = ['name', 'season', 'league', 'date', 'start', 'address']
+        fields = ["name", "season", "league", "date", "start", "address"]
         widgets = {
-            'date': forms.DateInput(format='%Y-%m-%d',
-                                    attrs={'type': 'date'}
-                                    ),
-            'start': forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'value': '10:00'}),
+            "date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+            "start": forms.TimeInput(
+                format="%H:%M", attrs={"type": "time", "value": "10:00"}
+            ),
         }
 
     def __init__(self, *args, context: GamedayFormContext | None = None, **kwargs):
@@ -165,13 +178,13 @@ class GamedayForm(forms.ModelForm):
         self.context = context or GamedayFormContext(init_format=False, author=None)
         last_season = Season.objects.last()
         if last_season:
-            self.fields['season'].initial = last_season.id
+            self.fields["season"].initial = last_season.id
 
     def save(self, user=None):
         gameday = super(GamedayForm, self).save(commit=False)
         gameday.author = self.context.author
         if self.context.init_format:
-            gameday.format = 'INITIAL_EMPTY'
+            gameday.format = "INITIAL_EMPTY"
         gameday.save()
         return gameday
 
@@ -182,15 +195,27 @@ class GamedayGaminfoFieldsAndGroupsForm(forms.Form):
     GROUP_NAMES_C = "group_names"
     NUMBER_GROUPS_C = "number_groups"
 
-    number_groups = forms.IntegerField(label="Anzahl der Gruppen", required=False,
-                                       widget=forms.NumberInput(attrs=FORM_CONTROL_REQUIRED_TRUE))
-    group_names = forms.MultipleChoiceField(choices=(), label="Gruppenauswahl", required=False,
-                                            widget=forms.SelectMultiple(
-                                                attrs=FORM_CONTROL_REQUIRED_TRUE))
-    number_fields = forms.IntegerField(label="Anzahl der Felder", required=True,
-                                       widget=forms.NumberInput(attrs=FORM_CONTROL_REQUIRED_TRUE))
-    format = forms.ChoiceField(choices=SCHEDULE_CHOICES, label='Spieltagsformat',
-                               widget=forms.Select(attrs=FORM_CONTROL_REQUIRED_TRUE))
+    number_groups = forms.IntegerField(
+        label="Anzahl der Gruppen",
+        required=False,
+        widget=forms.NumberInput(attrs=FORM_CONTROL_REQUIRED_TRUE),
+    )
+    group_names = forms.MultipleChoiceField(
+        choices=(),
+        label="Gruppenauswahl",
+        required=False,
+        widget=forms.SelectMultiple(attrs=FORM_CONTROL_REQUIRED_TRUE),
+    )
+    number_fields = forms.IntegerField(
+        label="Anzahl der Felder",
+        required=True,
+        widget=forms.NumberInput(attrs=FORM_CONTROL_REQUIRED_TRUE),
+    )
+    format = forms.ChoiceField(
+        choices=SCHEDULE_CHOICES,
+        label="Spieltagsformat",
+        widget=forms.Select(attrs=FORM_CONTROL_REQUIRED_TRUE),
+    )
 
 
 class GamedayFormatBaseFormSet(BaseFormSet):
@@ -245,66 +270,102 @@ def get_gameday_format_formset(extra, needed_teams_list, data=None, prefix=None)
 
 class GameinfoForm(forms.ModelForm):
     home = forms.ModelChoiceField(
-        label='',
+        label="",
         queryset=Team.objects.all(),
-        widget=autocomplete.ModelSelect2(url='/dal/team'),
-        required=True
-    )
-    fh_home = forms.IntegerField(required=False,
-                                 label='',
-                                 widget=forms.NumberInput(
-                                     attrs={**FORM_CONTROL, 'aria-label': 'Punkte 1. HZ Heim'})
-                                 )
-    sh_home = forms.IntegerField(required=False,
-                                 label='',
-                                 widget=forms.NumberInput(
-                                     attrs={**FORM_CONTROL, 'aria-label': 'Punkte 2. HZ Heim'})
-                                 )
-    away = forms.ModelChoiceField(
-        label='',
-        queryset=Team.objects.all(),
-        widget=autocomplete.ModelSelect2(url='/dal/team'),
-        required=True
-    )
-    fh_away = forms.IntegerField(required=False,
-                                 label='',
-                                 widget=forms.NumberInput(
-                                     attrs={**FORM_CONTROL, 'aria-label': 'Punkte 1. HZ Gast'})
-                                 )
-    sh_away = forms.IntegerField(required=False,
-                                 label='',
-                                 widget=forms.NumberInput(
-                                     attrs={**FORM_CONTROL, 'aria-label': 'Punkte 2. HZ Gast'})
-                                 )
-    field = forms.ChoiceField(choices=(), label='', required=True, initial='',
-                              widget=forms.Select(attrs=FORM_CONTROL_AUTO))
-    standing = forms.ChoiceField(choices=(), required=True, initial='', label='',
-                                 widget=forms.Select(attrs=FORM_CONTROL_AUTO))
-    stage = forms.CharField(
-        label='',
+        widget=autocomplete.ModelSelect2(url="/dal/team"),
         required=True,
-        initial='Hauptrunde',
-        widget=forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 110px'})
+    )
+    fh_home = forms.IntegerField(
+        required=False,
+        label="",
+        widget=forms.NumberInput(
+            attrs={**FORM_CONTROL, "aria-label": "Punkte 1. HZ Heim"}
+        ),
+    )
+    sh_home = forms.IntegerField(
+        required=False,
+        label="",
+        widget=forms.NumberInput(
+            attrs={**FORM_CONTROL, "aria-label": "Punkte 2. HZ Heim"}
+        ),
+    )
+    away = forms.ModelChoiceField(
+        label="",
+        queryset=Team.objects.all(),
+        widget=autocomplete.ModelSelect2(url="/dal/team"),
+        required=True,
+    )
+    fh_away = forms.IntegerField(
+        required=False,
+        label="",
+        widget=forms.NumberInput(
+            attrs={**FORM_CONTROL, "aria-label": "Punkte 1. HZ Gast"}
+        ),
+    )
+    sh_away = forms.IntegerField(
+        required=False,
+        label="",
+        widget=forms.NumberInput(
+            attrs={**FORM_CONTROL, "aria-label": "Punkte 2. HZ Gast"}
+        ),
+    )
+    field = forms.ChoiceField(
+        choices=(),
+        label="",
+        required=True,
+        initial="",
+        widget=forms.Select(attrs=FORM_CONTROL_AUTO),
+    )
+    standing = forms.ChoiceField(
+        choices=(),
+        required=True,
+        initial="",
+        label="",
+        widget=forms.Select(attrs=FORM_CONTROL_AUTO),
+    )
+    stage = forms.CharField(
+        label="",
+        required=True,
+        initial="Hauptrunde",
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "style": "width: 110px"}
+        ),
     )
     officials = forms.ModelChoiceField(
-        label='',
+        label="",
         queryset=Team.objects.all(),
-        widget=autocomplete.ModelSelect2(url='/dal/team'),
-        required=True
+        widget=autocomplete.ModelSelect2(url="/dal/team"),
+        required=True,
     )
 
     class Meta:
         model = Gameinfo
-        fields = ['scheduled', 'field', 'officials', 'stage', 'status', 'gameStarted', 'gameHalftime',
-                  'gameFinished']
+        fields = [
+            "scheduled",
+            "field",
+            "officials",
+            "stage",
+            "status",
+            "gameStarted",
+            "gameHalftime",
+            "gameFinished",
+        ]
         widgets = {
-            'scheduled': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
-            'status': forms.Select(
-                choices=(('Geplant', 'Geplant'), ('1. Halbzeit', '1. Halbzeit'), ('2. Halbzeit', '2. Halbzeit'),
-                         ('beendet', 'Beendet')), attrs=FORM_CONTROL_AUTO),
-            'gameStarted': forms.TextInput(attrs={**FORM_CONTROL, 'type': 'time'}),
-            'gameHalftime': forms.TextInput(attrs={**FORM_CONTROL, 'type': 'time'}),
-            'gameFinished': forms.TextInput(attrs={**FORM_CONTROL, 'type': 'time'}),
+            "scheduled": forms.TimeInput(
+                attrs={"class": "form-control", "type": "time"}
+            ),
+            "status": forms.Select(
+                choices=(
+                    ("Geplant", "Geplant"),
+                    ("1. Halbzeit", "1. Halbzeit"),
+                    ("2. Halbzeit", "2. Halbzeit"),
+                    ("beendet", "Beendet"),
+                ),
+                attrs=FORM_CONTROL_AUTO,
+            ),
+            "gameStarted": forms.TextInput(attrs={**FORM_CONTROL, "type": "time"}),
+            "gameHalftime": forms.TextInput(attrs={**FORM_CONTROL, "type": "time"}),
+            "gameFinished": forms.TextInput(attrs={**FORM_CONTROL, "type": "time"}),
         }
 
     def __init__(self, *args, group_choices=None, field_choices=None, **kwargs):
@@ -316,36 +377,38 @@ class GameinfoForm(forms.ModelForm):
 
     def _set_empty_labels(self):
         for name in self.Meta.fields:
-            self.fields[name].label = ''
+            self.fields[name].label = ""
 
     def _set_choices(self, group_choices, field_choices):
         if group_choices is not None:
-            self.fields['standing'].choices = self._add_placeholder(group_choices)
+            self.fields["standing"].choices = self._add_placeholder(group_choices)
         if field_choices is not None:
-            self.fields['field'].choices = self._add_placeholder(field_choices)
+            self.fields["field"].choices = self._add_placeholder(field_choices)
 
     def _initialize_from_instance(self):
         home_result = self.instance.gameresult_set.filter(isHome=True).first()
         away_result = self.instance.gameresult_set.filter(isHome=False).first()
 
-        self.fields['standing'].initial = (
-                self.instance.league_group_id or self.instance.standing
+        self.fields["standing"].initial = (
+            self.instance.league_group_id or self.instance.standing
         )
-        self.fields['field'].initial = str(self.instance.field)
+        self.fields["field"].initial = str(self.instance.field)
         if home_result:
-            self.fields['home'].initial = home_result.team
-            self.fields['fh_home'].initial = home_result.fh
-            self.fields['sh_home'].initial = home_result.sh
+            self.fields["home"].initial = home_result.team
+            self.fields["fh_home"].initial = home_result.fh
+            self.fields["sh_home"].initial = home_result.sh
         if away_result:
-            self.fields['away'].initial = away_result.team
-            self.fields['fh_away'].initial = away_result.fh
-            self.fields['sh_away'].initial = away_result.sh
+            self.fields["away"].initial = away_result.team
+            self.fields["fh_away"].initial = away_result.fh
+            self.fields["sh_away"].initial = away_result.sh
 
     # noinspection PyMethodMayBeStatic
-    def _add_placeholder(self, choices, placeholder='Bitte auswählen'):
+    def _add_placeholder(self, choices, placeholder="Bitte auswählen"):
         if not choices:
-            return [('', placeholder)]
-        return [('', placeholder)] + list(choices) if len(choices) > 1 else list(choices)
+            return [("", placeholder)]
+        return (
+            [("", placeholder)] + list(choices) if len(choices) > 1 else list(choices)
+        )
 
 
 def get_gameinfo_formset(extra=0):

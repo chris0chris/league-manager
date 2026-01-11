@@ -4,6 +4,7 @@ Permissions for gameday_designer app.
 Following TDD methodology (GREEN phase) - implementing permissions to pass tests.
 Handles template access control based on user roles and associations.
 """
+
 from rest_framework import permissions
 from gameday_designer.models import ScheduleTemplate
 
@@ -26,7 +27,7 @@ class IsAssociationMemberOrStaff(permissions.BasePermission):
     - Retrieve/Update/Delete: has_object_permission() - object-level permission
     """
 
-    SAFE_METHODS = ('GET', 'HEAD', 'OPTIONS')
+    SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
 
     def has_permission(self, request, view):
         """
@@ -79,7 +80,7 @@ class IsAssociationMemberOrStaff(permissions.BasePermission):
             return True
 
         # DELETE is staff-only
-        if request.method == 'DELETE':
+        if request.method == "DELETE":
             return False
 
         # Global templates (association=None) are staff-only for modifications

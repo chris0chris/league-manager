@@ -9,17 +9,17 @@ import type { FlowNode } from '../types/flowchart';
 import { getGamePath } from './edgeAnalysis';
 
 /**
- * Scroll to a game row with smooth animation.
+ * Scroll to an element by ID with smooth animation.
  *
- * The game row must have an ID attribute in the format `game-{gameId}`.
- *
- * @param gameId - ID of the game to scroll to
+ * @param prefix - Prefix for the ID (e.g. 'game', 'stage', 'field')
+ * @param id - ID of the element to scroll to
  * @param smooth - Whether to use smooth scrolling (default: true)
  */
-export function scrollToGame(gameId: string, smooth: boolean = true): void {
-  const element = document.getElementById(`game-${gameId}`);
+export function scrollToElement(prefix: string, id: string, smooth: boolean = true): void {
+  const elementId = id.startsWith(`${prefix}-`) ? id : `${prefix}-${id}`;
+  const element = document.getElementById(elementId);
   if (!element) {
-    console.warn(`Cannot scroll to game ${gameId}: element not found`);
+    console.warn(`Cannot scroll to ${elementId}: element not found`);
     return;
   }
 
@@ -28,6 +28,85 @@ export function scrollToGame(gameId: string, smooth: boolean = true): void {
     block: 'center',
     inline: 'nearest',
   });
+}
+
+/**
+ * Scroll to a game row with smooth animation.
+ *
+ * The game row must have an ID attribute in the format `game-{gameId}`.
+ *
+ * @param gameId - ID of the game to scroll to
+ * @param smooth - Whether to use smooth scrolling (default: true)
+ */
+export function scrollToGame(gameId: string, smooth: boolean = true): void {
+  scrollToElement('game', gameId, smooth);
+}
+
+/**
+ * Expand collapsed containers to reveal a node (game, stage, or field).
+ *
+ * @param nodeId - ID of the node to reveal
+ * @param type - Type of the node
+ * @param nodes - All nodes in the flowchart
+ * @param expandField - Callback to expand a field by ID
+ * @param expandStage - Callback to expand a stage by ID
+ * @returns True if containers were expanded
+ */
+export function expandPathToNode(
+  nodeId: string,
+  type: 'game' | 'stage' | 'field' | 'team',
+  nodes: FlowNode[],
+  expandField: (fieldId: string) => void,
+  expandStage: (stageId: string) => void
+): boolean {
+  if (type === 'game') {
+    return expandPathToGame(nodeId, nodes, expandField, expandStage);
+  }
+
+  if (type === 'stage') {
+    const stageNode = nodes.find(n => n.id === nodeId && n.type === 'stage');
+    if (stageNode?.parentId) {
+      expandField(stageNode.parentId);
+      return true;
+    }
+  }
+
+  if (type === 'field') {
+    // Field is top-level, nothing to expand
+    return true;
+  }
+
+  // Teams are currently not nested in expandable containers in the pool
+  return true;
+}
+
+/**
+ * Scroll to any element with automatic expansion and waiting.
+ */
+export async function scrollToElementWithExpansion(
+  id: string,
+  type: 'game' | 'stage' | 'field' | 'team',
+  nodes: FlowNode[],
+  expandField: (fieldId: string) => void,
+  expandStage: (stageId: string) => void,
+  smooth: boolean = true
+): Promise<void> {
+  // Expand containers
+  expandPathToNode(id, type, nodes, expandField, expandStage);
+
+  const prefixMap = {
+    game: 'game',
+    stage: 'stage',
+    field: 'field',
+    team: 'team'
+  };
+  const prefix = prefixMap[type];
+
+  // Wait for element to appear after expansion
+  await waitForElement(`${prefix}-${id}`, 1000);
+
+  // Scroll to element
+  scrollToElement(prefix, id, smooth);
 }
 
 /**

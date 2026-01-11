@@ -11,12 +11,21 @@ Application Process:
 4. Create Gameresult objects (home/away teams)
 5. Create TemplateApplication audit record
 """
+
 import datetime
 import pytest
 from django.contrib.auth.models import User
 from django.db import transaction
 
-from gamedays.models import Association, Gameday, Season, League, Team, Gameinfo, Gameresult
+from gamedays.models import (
+    Association,
+    Gameday,
+    Season,
+    League,
+    Team,
+    Gameinfo,
+    Gameresult,
+)
 from gameday_designer.models import (
     ScheduleTemplate,
     TemplateSlot,
@@ -37,23 +46,23 @@ class TestTemplateApplicationServiceCompatibility:
         """Test that compatible template and gameday pass validation."""
         # Create template
         template = ScheduleTemplate.objects.create(
-            name='6 Team Format',
+            name="6 Team Format",
             num_teams=6,
             num_fields=2,
             num_groups=2,
         )
 
         # Create gameday with sufficient fields
-        season = Season.objects.create(name='2025')
-        league = League.objects.create(name='Test League')
-        user = User.objects.create(username='test_user')
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
         gameday = Gameday.objects.create(
-            name='Test Gameday',
+            name="Test Gameday",
             season=season,
             league=league,
             date=datetime.date.today(),
             start=datetime.time(10, 0),
-            format='6_2',
+            format="6_2",
             author=user,
         )
 
@@ -61,20 +70,20 @@ class TestTemplateApplicationServiceCompatibility:
         teams = []
         for i in range(6):
             team = Team.objects.create(
-                name=f'Team {i}',
-                description=f'Description for team {i}',
-                location='Test City'
+                name=f"Team {i}",
+                description=f"Description for team {i}",
+                location="Test City",
             )
             teams.append(team)
 
         # Create team mapping (2 groups × 3 teams)
         team_mapping = {
-            '0_0': teams[0].pk,
-            '0_1': teams[1].pk,
-            '0_2': teams[2].pk,
-            '1_0': teams[3].pk,
-            '1_1': teams[4].pk,
-            '1_2': teams[5].pk,
+            "0_0": teams[0].pk,
+            "0_1": teams[1].pk,
+            "0_2": teams[2].pk,
+            "1_0": teams[3].pk,
+            "1_1": teams[4].pk,
+            "1_2": teams[5].pk,
         }
 
         # Should not raise exception
@@ -84,7 +93,7 @@ class TestTemplateApplicationServiceCompatibility:
     def test_validate_compatibility_insufficient_fields(self):
         """Test that gameday with insufficient fields fails validation."""
         template = ScheduleTemplate.objects.create(
-            name='3 Field Format',
+            name="3 Field Format",
             num_teams=6,
             num_fields=3,  # Requires 3 fields
             num_groups=2,
@@ -95,8 +104,8 @@ class TestTemplateApplicationServiceCompatibility:
             template=template,
             field=3,
             slot_order=0,
-            stage='Vorrunde',
-            standing='Gruppe 1',
+            stage="Vorrunde",
+            standing="Gruppe 1",
             home_group=0,
             home_team=0,
             away_group=0,
@@ -106,20 +115,20 @@ class TestTemplateApplicationServiceCompatibility:
         )
 
         # Create gameday with only 2 fields
-        season = Season.objects.create(name='2025')
-        league = League.objects.create(name='Test League')
-        user = User.objects.create(username='test_user')
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
         gameday = Gameday.objects.create(
-            name='Test Gameday',
+            name="Test Gameday",
             season=season,
             league=league,
             date=datetime.date.today(),
             start=datetime.time(10, 0),
-            format='6_2',  # Only 2 fields
+            format="6_2",  # Only 2 fields
             author=user,
         )
 
-        team_mapping = {'0_0': 1, '0_1': 2, '1_0': 3}
+        team_mapping = {"0_0": 1, "0_1": 2, "1_0": 3}
 
         service = TemplateApplicationService(template, gameday, team_mapping)
 
@@ -129,7 +138,7 @@ class TestTemplateApplicationServiceCompatibility:
     def test_validate_compatibility_incomplete_team_mapping(self):
         """Test that incomplete team mapping fails validation."""
         template = ScheduleTemplate.objects.create(
-            name='6 Team Format',
+            name="6 Team Format",
             num_teams=6,
             num_fields=2,
             num_groups=2,
@@ -140,8 +149,8 @@ class TestTemplateApplicationServiceCompatibility:
             template=template,
             field=1,
             slot_order=0,
-            stage='Vorrunde',
-            standing='Gruppe 1',
+            stage="Vorrunde",
+            standing="Gruppe 1",
             home_group=0,
             home_team=0,
             away_group=0,
@@ -150,23 +159,23 @@ class TestTemplateApplicationServiceCompatibility:
             official_team=0,
         )
 
-        season = Season.objects.create(name='2025')
-        league = League.objects.create(name='Test League')
-        user = User.objects.create(username='test_user')
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
         gameday = Gameday.objects.create(
-            name='Test Gameday',
+            name="Test Gameday",
             season=season,
             league=league,
             date=datetime.date.today(),
             start=datetime.time(10, 0),
-            format='6_2',
+            format="6_2",
             author=user,
         )
 
         # Incomplete mapping (only 2 teams instead of 6)
         team_mapping = {
-            '0_0': 1,
-            '0_1': 2,
+            "0_0": 1,
+            "0_1": 2,
         }
 
         service = TemplateApplicationService(template, gameday, team_mapping)
@@ -177,7 +186,7 @@ class TestTemplateApplicationServiceCompatibility:
     def test_validate_compatibility_team_does_not_exist(self):
         """Test that mapping to non-existent team fails validation."""
         template = ScheduleTemplate.objects.create(
-            name='4 Team Format',
+            name="4 Team Format",
             num_teams=4,
             num_fields=1,
             num_groups=1,
@@ -187,8 +196,8 @@ class TestTemplateApplicationServiceCompatibility:
             template=template,
             field=1,
             slot_order=0,
-            stage='Vorrunde',
-            standing='Round Robin',
+            stage="Vorrunde",
+            standing="Round Robin",
             home_group=0,
             home_team=0,
             away_group=0,
@@ -197,25 +206,25 @@ class TestTemplateApplicationServiceCompatibility:
             official_team=2,
         )
 
-        season = Season.objects.create(name='2025')
-        league = League.objects.create(name='Test League')
-        user = User.objects.create(username='test_user')
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
         gameday = Gameday.objects.create(
-            name='Test Gameday',
+            name="Test Gameday",
             season=season,
             league=league,
             date=datetime.date.today(),
             start=datetime.time(10, 0),
-            format='4_1',
+            format="4_1",
             author=user,
         )
 
         # Mapping references team IDs that don't exist
         team_mapping = {
-            '0_0': 999,  # Does not exist
-            '0_1': 998,
-            '0_2': 997,
-            '0_3': 996,
+            "0_0": 999,  # Does not exist
+            "0_1": 998,
+            "0_2": 997,
+            "0_3": 996,
         }
 
         service = TemplateApplicationService(template, gameday, team_mapping)
@@ -231,7 +240,7 @@ class TestTemplateApplicationServiceGameinfoCreation:
     def test_apply_creates_gameinfos(self):
         """Test that applying template creates Gameinfo objects."""
         template = ScheduleTemplate.objects.create(
-            name='Simple Format',
+            name="Simple Format",
             num_teams=4,
             num_fields=1,
             num_groups=1,
@@ -243,8 +252,8 @@ class TestTemplateApplicationServiceGameinfoCreation:
             template=template,
             field=1,
             slot_order=0,
-            stage='Vorrunde',
-            standing='Round Robin',
+            stage="Vorrunde",
+            standing="Round Robin",
             home_group=0,
             home_team=0,
             away_group=0,
@@ -256,8 +265,8 @@ class TestTemplateApplicationServiceGameinfoCreation:
             template=template,
             field=1,
             slot_order=1,
-            stage='Vorrunde',
-            standing='Round Robin',
+            stage="Vorrunde",
+            standing="Round Robin",
             home_group=0,
             home_team=2,
             away_group=0,
@@ -266,27 +275,32 @@ class TestTemplateApplicationServiceGameinfoCreation:
             official_team=0,
         )
 
-        season = Season.objects.create(name='2025')
-        league = League.objects.create(name='Test League')
-        user = User.objects.create(username='test_user')
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
         gameday = Gameday.objects.create(
-            name='Test Gameday',
+            name="Test Gameday",
             season=season,
             league=league,
             date=datetime.date.today(),
             start=datetime.time(10, 0),
-            format='4_1',
+            format="4_1",
             author=user,
         )
 
         # Create teams
-        teams = [Team.objects.create(name=f'Team {i}', description=f'Desc {i}', location='City') for i in range(4)]
+        teams = [
+            Team.objects.create(
+                name=f"Team {i}", description=f"Desc {i}", location="City"
+            )
+            for i in range(4)
+        ]
 
         team_mapping = {
-            '0_0': teams[0].pk,
-            '0_1': teams[1].pk,
-            '0_2': teams[2].pk,
-            '0_3': teams[3].pk,
+            "0_0": teams[0].pk,
+            "0_1": teams[1].pk,
+            "0_2": teams[2].pk,
+            "0_3": teams[3].pk,
         }
 
         service = TemplateApplicationService(template, gameday, team_mapping)
@@ -296,20 +310,22 @@ class TestTemplateApplicationServiceGameinfoCreation:
         assert result.gameinfos_created == 2
 
         # Verify Gameinfo objects were created
-        gameinfos = Gameinfo.objects.filter(gameday=gameday).order_by('field', 'scheduled')
+        gameinfos = Gameinfo.objects.filter(gameday=gameday).order_by(
+            "field", "scheduled"
+        )
         assert gameinfos.count() == 2
 
         # Check first gameinfo
         gi1 = gameinfos[0]
         assert gi1.field == 1
-        assert gi1.stage == 'Vorrunde'
-        assert gi1.standing == 'Round Robin'
+        assert gi1.stage == "Vorrunde"
+        assert gi1.standing == "Round Robin"
         assert gi1.officials.pk == teams[2].pk
 
     def test_apply_creates_gameresults(self):
         """Test that applying template creates Gameresult objects for home/away teams."""
         template = ScheduleTemplate.objects.create(
-            name='Simple Format',
+            name="Simple Format",
             num_teams=4,
             num_fields=1,
             num_groups=1,
@@ -320,8 +336,8 @@ class TestTemplateApplicationServiceGameinfoCreation:
             template=template,
             field=1,
             slot_order=0,
-            stage='Vorrunde',
-            standing='Round Robin',
+            stage="Vorrunde",
+            standing="Round Robin",
             home_group=0,
             home_team=0,
             away_group=0,
@@ -330,26 +346,31 @@ class TestTemplateApplicationServiceGameinfoCreation:
             official_team=2,
         )
 
-        season = Season.objects.create(name='2025')
-        league = League.objects.create(name='Test League')
-        user = User.objects.create(username='test_user')
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
         gameday = Gameday.objects.create(
-            name='Test Gameday',
+            name="Test Gameday",
             season=season,
             league=league,
             date=datetime.date.today(),
             start=datetime.time(10, 0),
-            format='4_1',
+            format="4_1",
             author=user,
         )
 
-        teams = [Team.objects.create(name=f'Team {i}', description=f'Desc {i}', location='City') for i in range(4)]
+        teams = [
+            Team.objects.create(
+                name=f"Team {i}", description=f"Desc {i}", location="City"
+            )
+            for i in range(4)
+        ]
 
         team_mapping = {
-            '0_0': teams[0].pk,
-            '0_1': teams[1].pk,
-            '0_2': teams[2].pk,
-            '0_3': teams[3].pk,
+            "0_0": teams[0].pk,
+            "0_1": teams[1].pk,
+            "0_2": teams[2].pk,
+            "0_3": teams[3].pk,
         }
 
         service = TemplateApplicationService(template, gameday, team_mapping)
@@ -371,7 +392,7 @@ class TestTemplateApplicationServiceGameinfoCreation:
     def test_apply_calculates_scheduled_times(self):
         """Test that scheduled times are calculated based on game duration."""
         template = ScheduleTemplate.objects.create(
-            name='Timing Test',
+            name="Timing Test",
             num_teams=4,
             num_fields=1,
             num_groups=1,
@@ -384,8 +405,8 @@ class TestTemplateApplicationServiceGameinfoCreation:
                 template=template,
                 field=1,
                 slot_order=i,
-                stage='Vorrunde',
-                standing='Round Robin',
+                stage="Vorrunde",
+                standing="Round Robin",
                 home_group=0,
                 home_team=(i * 2) % 4,
                 away_group=0,
@@ -395,26 +416,31 @@ class TestTemplateApplicationServiceGameinfoCreation:
                 break_after=10 if i == 0 else 0,  # 10 min break after first game
             )
 
-        season = Season.objects.create(name='2025')
-        league = League.objects.create(name='Test League')
-        user = User.objects.create(username='test_user')
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
         gameday = Gameday.objects.create(
-            name='Test Gameday',
+            name="Test Gameday",
             season=season,
             league=league,
             date=datetime.date.today(),
             start=datetime.time(10, 0),  # Starts at 10:00
-            format='4_1',
+            format="4_1",
             author=user,
         )
 
-        teams = [Team.objects.create(name=f'Team {i}', description=f'Desc {i}', location='City') for i in range(4)]
-        team_mapping = {f'0_{i}': teams[i].pk for i in range(4)}
+        teams = [
+            Team.objects.create(
+                name=f"Team {i}", description=f"Desc {i}", location="City"
+            )
+            for i in range(4)
+        ]
+        team_mapping = {f"0_{i}": teams[i].pk for i in range(4)}
 
         service = TemplateApplicationService(template, gameday, team_mapping)
         result = service.apply()
 
-        gameinfos = Gameinfo.objects.filter(gameday=gameday).order_by('scheduled')
+        gameinfos = Gameinfo.objects.filter(gameday=gameday).order_by("scheduled")
 
         # First game: 10:00
         assert gameinfos[0].scheduled == datetime.time(10, 0)
@@ -433,7 +459,7 @@ class TestTemplateApplicationServiceClearExisting:
     def test_apply_clears_existing_gameinfos(self):
         """Test that applying template clears existing Gameinfo objects."""
         template = ScheduleTemplate.objects.create(
-            name='New Format',
+            name="New Format",
             num_teams=4,
             num_fields=1,
             num_groups=1,
@@ -443,8 +469,8 @@ class TestTemplateApplicationServiceClearExisting:
             template=template,
             field=1,
             slot_order=0,
-            stage='Vorrunde',
-            standing='Round Robin',
+            stage="Vorrunde",
+            standing="Round Robin",
             home_group=0,
             home_team=0,
             away_group=0,
@@ -453,32 +479,39 @@ class TestTemplateApplicationServiceClearExisting:
             official_team=2,
         )
 
-        season = Season.objects.create(name='2025')
-        league = League.objects.create(name='Test League')
-        user = User.objects.create(username='test_user')
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
         gameday = Gameday.objects.create(
-            name='Test Gameday',
+            name="Test Gameday",
             season=season,
             league=league,
             date=datetime.date.today(),
             start=datetime.time(10, 0),
-            format='4_1',
+            format="4_1",
             author=user,
         )
 
-        teams = [Team.objects.create(name=f'Team {i}', description=f'Desc {i}', location='City') for i in range(4)]
-        team_mapping = {f'0_{i}': teams[i].pk for i in range(4)}
+        teams = [
+            Team.objects.create(
+                name=f"Team {i}", description=f"Desc {i}", location="City"
+            )
+            for i in range(4)
+        ]
+        team_mapping = {f"0_{i}": teams[i].pk for i in range(4)}
 
         # Create official team for existing gameinfo
-        official_team = Team.objects.create(name='Official Team', description='Official desc', location='City')
+        official_team = Team.objects.create(
+            name="Official Team", description="Official desc", location="City"
+        )
 
         # Create existing gameinfo
         old_gameinfo = Gameinfo.objects.create(
             gameday=gameday,
             scheduled=datetime.time(14, 0),
             field=1,
-            stage='Old Stage',
-            standing='Old Standing',
+            stage="Old Stage",
+            standing="Old Standing",
             officials=official_team,
         )
         old_gameinfo_id = old_gameinfo.pk
@@ -492,7 +525,7 @@ class TestTemplateApplicationServiceClearExisting:
         # New gameinfo should exist
         assert Gameinfo.objects.filter(gameday=gameday).count() == 1
         new_gameinfo = Gameinfo.objects.get(gameday=gameday)
-        assert new_gameinfo.stage == 'Vorrunde'
+        assert new_gameinfo.stage == "Vorrunde"
 
 
 @pytest.mark.django_db
@@ -502,7 +535,7 @@ class TestTemplateApplicationServiceAuditTrail:
     def test_apply_creates_audit_record(self):
         """Test that applying template creates TemplateApplication audit record."""
         template = ScheduleTemplate.objects.create(
-            name='Audit Test',
+            name="Audit Test",
             num_teams=4,
             num_fields=1,
             num_groups=1,
@@ -512,8 +545,8 @@ class TestTemplateApplicationServiceAuditTrail:
             template=template,
             field=1,
             slot_order=0,
-            stage='Vorrunde',
-            standing='Round Robin',
+            stage="Vorrunde",
+            standing="Round Robin",
             home_group=0,
             home_team=0,
             away_group=0,
@@ -522,29 +555,40 @@ class TestTemplateApplicationServiceAuditTrail:
             official_team=2,
         )
 
-        season = Season.objects.create(name='2025')
-        league = League.objects.create(name='Test League')
-        user = User.objects.create(username='test_user')
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
         gameday = Gameday.objects.create(
-            name='Test Gameday',
+            name="Test Gameday",
             season=season,
             league=league,
             date=datetime.date.today(),
             start=datetime.time(10, 0),
-            format='4_1',
+            format="4_1",
             author=user,
         )
 
-        teams = [Team.objects.create(name=f'Team {i}', description=f'Desc {i}', location='City') for i in range(4)]
-        team_mapping = {f'0_{i}': teams[i].pk for i in range(4)}
+        teams = [
+            Team.objects.create(
+                name=f"Team {i}", description=f"Desc {i}", location="City"
+            )
+            for i in range(4)
+        ]
+        team_mapping = {f"0_{i}": teams[i].pk for i in range(4)}
 
-        service = TemplateApplicationService(template, gameday, team_mapping, applied_by=user)
+        service = TemplateApplicationService(
+            template, gameday, team_mapping, applied_by=user
+        )
         result = service.apply()
 
         # Check audit record created
-        assert TemplateApplication.objects.filter(template=template, gameday=gameday).exists()
+        assert TemplateApplication.objects.filter(
+            template=template, gameday=gameday
+        ).exists()
 
-        application = TemplateApplication.objects.get(template=template, gameday=gameday)
+        application = TemplateApplication.objects.get(
+            template=template, gameday=gameday
+        )
         assert application.applied_by == user
         assert application.team_mapping == team_mapping
         assert application.applied_at is not None
@@ -557,7 +601,7 @@ class TestTemplateApplicationServiceTransactions:
     def test_apply_is_atomic(self):
         """Test that application is atomic - all or nothing."""
         template = ScheduleTemplate.objects.create(
-            name='Transaction Test',
+            name="Transaction Test",
             num_teams=4,
             num_fields=1,
             num_groups=1,
@@ -567,8 +611,8 @@ class TestTemplateApplicationServiceTransactions:
             template=template,
             field=1,
             slot_order=0,
-            stage='Vorrunde',
-            standing='Round Robin',
+            stage="Vorrunde",
+            standing="Round Robin",
             home_group=0,
             home_team=0,
             away_group=0,
@@ -577,25 +621,25 @@ class TestTemplateApplicationServiceTransactions:
             official_team=2,
         )
 
-        season = Season.objects.create(name='2025')
-        league = League.objects.create(name='Test League')
-        user = User.objects.create(username='test_user')
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
         gameday = Gameday.objects.create(
-            name='Test Gameday',
+            name="Test Gameday",
             season=season,
             league=league,
             date=datetime.date.today(),
             start=datetime.time(10, 0),
-            format='4_1',
+            format="4_1",
             author=user,
         )
 
         # Team 999 does not exist - should cause failure
         team_mapping = {
-            '0_0': 999,  # Invalid
-            '0_1': 998,
-            '0_2': 997,
-            '0_3': 996,
+            "0_0": 999,  # Invalid
+            "0_1": 998,
+            "0_2": 997,
+            "0_3": 996,
         }
 
         service = TemplateApplicationService(template, gameday, team_mapping)
@@ -615,7 +659,7 @@ class TestTemplateApplicationServiceResult:
     def test_application_result_success(self):
         """Test successful application returns proper result."""
         template = ScheduleTemplate.objects.create(
-            name='Result Test',
+            name="Result Test",
             num_teams=4,
             num_fields=1,
             num_groups=1,
@@ -625,8 +669,8 @@ class TestTemplateApplicationServiceResult:
             template=template,
             field=1,
             slot_order=0,
-            stage='Vorrunde',
-            standing='Round Robin',
+            stage="Vorrunde",
+            standing="Round Robin",
             home_group=0,
             home_team=0,
             away_group=0,
@@ -635,29 +679,34 @@ class TestTemplateApplicationServiceResult:
             official_team=2,
         )
 
-        season = Season.objects.create(name='2025')
-        league = League.objects.create(name='Test League')
-        user = User.objects.create(username='test_user')
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
         gameday = Gameday.objects.create(
-            name='Test Gameday',
+            name="Test Gameday",
             season=season,
             league=league,
             date=datetime.date.today(),
             start=datetime.time(10, 0),
-            format='4_1',
+            format="4_1",
             author=user,
         )
 
-        teams = [Team.objects.create(name=f'Team {i}', description=f'Desc {i}', location='City') for i in range(4)]
-        team_mapping = {f'0_{i}': teams[i].pk for i in range(4)}
+        teams = [
+            Team.objects.create(
+                name=f"Team {i}", description=f"Desc {i}", location="City"
+            )
+            for i in range(4)
+        ]
+        team_mapping = {f"0_{i}": teams[i].pk for i in range(4)}
 
         service = TemplateApplicationService(template, gameday, team_mapping)
         result = service.apply()
 
         # Check result structure
-        assert hasattr(result, 'success')
-        assert hasattr(result, 'gameinfos_created')
-        assert hasattr(result, 'message')
+        assert hasattr(result, "success")
+        assert hasattr(result, "gameinfos_created")
+        assert hasattr(result, "message")
         assert result.success is True
         assert result.gameinfos_created == 1
         assert isinstance(result.message, str)

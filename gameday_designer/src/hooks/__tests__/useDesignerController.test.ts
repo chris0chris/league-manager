@@ -22,6 +22,7 @@ vi.mock('../../utils/flowchartImport', () => ({
 
 vi.mock('../../utils/scrollHelpers', () => ({
   scrollToGameWithExpansion: vi.fn().mockResolvedValue(undefined),
+  scrollToElementWithExpansion: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('../../utils/tournamentGenerator', () => ({
@@ -45,7 +46,7 @@ describe('useDesignerController', () => {
     it('initializes with default UI state', () => {
       const { result } = renderHook(() => useDesignerController());
       expect(result.current.ui.showTournamentModal).toBe(false);
-      expect(result.current.ui.highlightedSourceGameId).toBeNull();
+      expect(result.current.ui.highlightedElement).toBeNull();
       expect(result.current.ui.expandedFieldIds.size).toBe(0);
       expect(result.current.ui.canExport).toBe(false);
     });
@@ -82,14 +83,14 @@ describe('useDesignerController', () => {
         promise = result.current.handlers.handleDynamicReferenceClick('game-1');
       });
       
-      expect(result.current.ui.highlightedSourceGameId).toBe('game-1');
-      expect(scrollHelpers.scrollToGameWithExpansion).toHaveBeenCalled();
+      expect(result.current.ui.highlightedElement).toEqual({ id: 'game-1', type: 'game' });
+      expect(scrollHelpers.scrollToElementWithExpansion).toHaveBeenCalled();
       
       await act(async () => {
         vi.runOnlyPendingTimers();
       });
       
-      expect(result.current.ui.highlightedSourceGameId).toBeNull();
+      expect(result.current.ui.highlightedElement).toBeNull();
       await promise!;
       vi.useRealTimers();
     });

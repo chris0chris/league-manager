@@ -150,7 +150,7 @@ describe('ListDesignerApp', () => {
       });
 
       render(<ListDesignerApp />);
-      expect(screen.getByText('Valid')).toBeInTheDocument();
+      expect(screen.getByText('Schedule is valid')).toBeInTheDocument();
     });
 
     it('should show error count when validation has errors', () => {
@@ -491,7 +491,7 @@ describe('ListDesignerApp', () => {
 
     it('should show "Valid" status when empty', () => {
       render(<ListDesignerApp />);
-      expect(screen.getByText('Valid')).toBeInTheDocument();
+      expect(screen.getByText('Schedule is valid')).toBeInTheDocument();
     });
   });
 
@@ -510,7 +510,7 @@ describe('ListDesignerApp', () => {
       render(<ListDesignerApp />);
 
       const errorText = screen.getByText(/1 error/i);
-      await user.hover(errorText);
+      await user.click(errorText);
 
       // Popover may take time to appear
       await waitFor(() => {
@@ -532,7 +532,7 @@ describe('ListDesignerApp', () => {
       render(<ListDesignerApp />);
 
       const warningText = screen.getByText(/1 warning/i);
-      await user.hover(warningText);
+      await user.click(warningText);
 
       // Popover may take time to appear
       await waitFor(() => {

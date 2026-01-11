@@ -37,6 +37,9 @@
     "gameDuration": "Game Duration (min)",
     "preview": "Preview",
     "fields": "Fields",
+    "stages": "Stages",
+    "teams": "Teams",
+    "games": "Games",
     "teamPool": "Team Pool",
     "globalTeamPool": "Global Team Pool",
     "start": "Start"

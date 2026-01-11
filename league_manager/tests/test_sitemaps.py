@@ -242,12 +242,12 @@ class TestSitemapXMLEndpoint(TestCase):
     def test_sitemap_xml_contains_valid_namespace(self):
         response = self.client.get("/sitemap.xml")
         self.assertContains(
-            response,
-            'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'
+            response, 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'
         )
 
     def test_sitemap_xml_contains_home_page(self):
         from django.conf import settings
+
         response = self.client.get("/sitemap.xml")
         expected_domain = settings.SITEMAP_DOMAIN
         self.assertContains(response, f"<loc>https://{expected_domain}/</loc>")

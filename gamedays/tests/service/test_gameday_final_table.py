@@ -9,8 +9,10 @@ from gamedays.models import Team, Gameday, Gameinfo, Gameresult
 class ComparableMixin(object):
 
     def __repr__(self):
-        key_values = ','.join(map(lambda item: f'{item[0]}->{item[1]}', self.__dict__.items()))
-        return f'{self.__class__.__name__}({key_values})'
+        key_values = ",".join(
+            map(lambda item: f"{item[0]}->{item[1]}", self.__dict__.items())
+        )
+        return f"{self.__class__.__name__}({key_values})"
 
     def __eq__(self, other):
         if type(other) is type(self):
@@ -90,35 +92,55 @@ class PointsCalculator:
 def from_game_results(game_results: List[Gameresult]):
     team_entries = []
     points_calculator = PointsCalculator(
-        [WonGameresultPointsRule(), LostGameresultPointsRule(), TieGameresultPointsRule()])
+        [
+            WonGameresultPointsRule(),
+            LostGameresultPointsRule(),
+            TieGameresultPointsRule(),
+        ]
+    )
     for team in set(map(lambda result: result.team, game_results)):
         team_results = list(filter(lambda result: result.team == team, game_results))
 
-        team_entries.append(FinalTableEntry(team, points_calculator.calculate_points(team_results)))
+        team_entries.append(
+            FinalTableEntry(team, points_calculator.calculate_points(team_results))
+        )
 
     return GamedayFinalTable(team_entries)
 
 
 class GamedayFinalTableTest(TestCase):
     def test_3_teams_clear_winner(self):
-        team_1 = Team(1, name='a(12)')
-        team_2 = Team(2, name='b(6)')
-        team_3 = Team(3, name='c(0)')
+        team_1 = Team(1, name="a(12)")
+        team_2 = Team(2, name="b(6)")
+        team_3 = Team(3, name="c(0)")
 
-        gameday = Gameday(name='first day')
+        gameday = Gameday(name="first day")
         game_results = self.perform_match(gameday, team_1, team_2, fh=6, sh=0, pa=0)
-        game_results.extend(self.perform_match(gameday, team_3, team_2, fh=0, sh=0, pa=6))
-        game_results.extend(self.perform_match(gameday, team_3, team_1, fh=0, sh=0, pa=6))
+        game_results.extend(
+            self.perform_match(gameday, team_3, team_2, fh=0, sh=0, pa=6)
+        )
+        game_results.extend(
+            self.perform_match(gameday, team_3, team_1, fh=0, sh=0, pa=6)
+        )
 
-        self.assertEqual(GamedayFinalTable([
-            FinalTableEntry(team_1, 6),
-            FinalTableEntry(team_2, 3),
-            FinalTableEntry(team_3, 0)]),
-            from_game_results(game_results))
+        self.assertEqual(
+            GamedayFinalTable(
+                [
+                    FinalTableEntry(team_1, 6),
+                    FinalTableEntry(team_2, 3),
+                    FinalTableEntry(team_3, 0),
+                ]
+            ),
+            from_game_results(game_results),
+        )
 
     def perform_match(self, gameday, team_1, team_2, fh, sh, pa):
         game_results = []
         first_game = Gameinfo(scheduled=datetime.time(10), gameday=gameday)
-        game_results.append(Gameresult(gameinfo=first_game, team=team_1, fh=fh, sh=sh, pa=pa))
-        game_results.append(Gameresult(gameinfo=first_game, team=team_2, fh=pa, sh=sh, pa=fh))
+        game_results.append(
+            Gameresult(gameinfo=first_game, team=team_1, fh=fh, sh=sh, pa=pa)
+        )
+        game_results.append(
+            Gameresult(gameinfo=first_game, team=team_2, fh=pa, sh=sh, pa=fh)
+        )
         return game_results

@@ -4,11 +4,14 @@ Views for gameday_designer app.
 Following TDD methodology (GREEN phase) - implementing ViewSets to pass API tests.
 Provides REST API for schedule template management.
 """
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
+
+import logging
 
 from gamedays.models import Gameday
 from gameday_designer.models import ScheduleTemplate, TemplateApplication
@@ -16,20 +19,22 @@ from gameday_designer.serializers import (
     ScheduleTemplateListSerializer,
     ScheduleTemplateDetailSerializer,
     ApplyTemplateRequestSerializer,
-    TemplateApplicationSerializer
+    TemplateApplicationSerializer,
 )
 from gameday_designer.permissions import IsAssociationMemberOrStaff, CanApplyTemplate
-from gameday_designer.service.template_validation_service import TemplateValidationService
+from gameday_designer.service.template_validation_service import (
+    TemplateValidationService,
+)
 from gameday_designer.service.template_application_service import (
     TemplateApplicationService,
-    ApplicationError
+    ApplicationError,
 )
 
 
 @login_required
 def index(request):
     """Render the Gameday Designer React app."""
-    return render(request, 'gameday_designer/index.html')
+    return render(request, "gameday_designer/index.html")
 
 
 class ScheduleTemplateViewSet(viewsets.ModelViewSet):
@@ -58,7 +63,7 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
 
         List uses lightweight serializer, detail uses full serializer with nested data.
         """
-        if self.action == 'list':
+        if self.action == "list":
             return ScheduleTemplateListSerializer
         return ScheduleTemplateDetailSerializer
 
@@ -73,11 +78,11 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
         queryset = ScheduleTemplate.objects.all()
 
         # Filter by association if provided
-        association_id = self.request.query_params.get('association')
+        association_id = self.request.query_params.get("association")
         if association_id:
             queryset = queryset.filter(association_id=association_id)
 
-        return queryset.select_related('association', 'created_by', 'updated_by')
+        return queryset.select_related("association", "created_by", "updated_by")
 
     def perform_create(self, serializer):
         """
@@ -97,9 +102,9 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post'],
+        methods=["post"],
         permission_classes=[CanApplyTemplate],
-        serializer_class=ApplyTemplateRequestSerializer
+        serializer_class=ApplyTemplateRequestSerializer,
     )
     def apply(self, request, pk=None):
         """
@@ -115,12 +120,14 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
         template = self.get_object()
 
         # Validate request data
-        serializer = ApplyTemplateRequestSerializer(data=request.data, context={'request': request})
+        serializer = ApplyTemplateRequestSerializer(
+            data=request.data, context={"request": request}
+        )
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        gameday_id = serializer.validated_data['gameday_id']
-        team_mapping = serializer.validated_data['team_mapping']
+        gameday_id = serializer.validated_data["gameday_id"]
+        team_mapping = serializer.validated_data["team_mapping"]
 
         # Get gameday
         gameday = get_object_or_404(Gameday, pk=gameday_id)
@@ -131,23 +138,27 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
                 template=template,
                 gameday=gameday,
                 team_mapping=team_mapping,
-                applied_by=request.user if request.user.is_authenticated else None
+                applied_by=request.user if request.user.is_authenticated else None,
             )
             result = service.apply()
 
-            return Response({
-                'success': result.success,
-                'gameinfos_created': result.gameinfos_created,
-                'message': result.message
-            }, status=status.HTTP_200_OK)
-
-        except ApplicationError as e:
             return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
+                {
+                    "success": result.success,
+                    "gameinfos_created": result.gameinfos_created,
+                    "message": result.message,
+                },
+                status=status.HTTP_200_OK,
             )
 
-    @action(detail=True, methods=['post'])
+        except ApplicationError:
+            logging.exception("Error applying schedule template")
+            return Response(
+                {"error": "Failed to apply template."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    @action(detail=True, methods=["post"])
     def clone(self, request, pk=None):
         """
         Clone template (with all slots and update rules).
@@ -161,7 +172,7 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
 
         # Create new template with copied data
         cloned_template = ScheduleTemplate.objects.create(
-            name=f'Copy of {template.name}',
+            name=f"Copy of {template.name}",
             description=template.description,
             num_teams=template.num_teams,
             num_fields=template.num_fields,
@@ -169,7 +180,7 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
             game_duration=template.game_duration,
             association=template.association,
             created_by=request.user if request.user.is_authenticated else None,
-            updated_by=request.user if request.user.is_authenticated else None
+            updated_by=request.user if request.user.is_authenticated else None,
         )
 
         # Clone slots
@@ -184,8 +195,7 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
             # Need to map old slot to new slot
             original_slot = update_rule.slot
             new_slot = cloned_template.slots.get(
-                field=original_slot.field,
-                slot_order=original_slot.slot_order
+                field=original_slot.field, slot_order=original_slot.slot_order
             )
 
             cloned_rule = update_rule
@@ -203,12 +213,11 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
 
         # Return cloned template
         serializer = ScheduleTemplateDetailSerializer(
-            cloned_template,
-            context={'request': request}
+            cloned_template, context={"request": request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=["get"])
     def validate(self, request, pk=None):
         """
         Validate template consistency.
@@ -224,29 +233,32 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
         service = TemplateValidationService(template)
         is_valid, errors, warnings = service.validate()
 
-        return Response({
-            'is_valid': is_valid,
-            'errors': [
-                {
-                    'id': err.id,
-                    'type': err.type,
-                    'message': err.message,
-                    'affected_slots': err.affected_slots
-                }
-                for err in errors
-            ],
-            'warnings': [
-                {
-                    'id': warn.id,
-                    'type': warn.type,
-                    'message': warn.message,
-                    'affected_slots': warn.affected_slots
-                }
-                for warn in warnings
-            ]
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "is_valid": is_valid,
+                "errors": [
+                    {
+                        "id": err.id,
+                        "type": err.type,
+                        "message": err.message,
+                        "affected_slots": err.affected_slots,
+                    }
+                    for err in errors
+                ],
+                "warnings": [
+                    {
+                        "id": warn.id,
+                        "type": warn.type,
+                        "message": warn.message,
+                        "affected_slots": warn.affected_slots,
+                    }
+                    for warn in warnings
+                ],
+            },
+            status=status.HTTP_200_OK,
+        )
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=["get"])
     def preview(self, request, pk=None):
         """
         Preview template schedule.
@@ -260,16 +272,14 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
 
         from gameday_designer.serializers import TemplateSlotSerializer
 
-        slots = template.slots.all().order_by('field', 'slot_order')
+        slots = template.slots.all().order_by("field", "slot_order")
         serializer = TemplateSlotSerializer(
-            slots,
-            many=True,
-            context={'request': request}
+            slots, many=True, context={"request": request}
         )
 
-        return Response({'slots': serializer.data}, status=status.HTTP_200_OK)
+        return Response({"slots": serializer.data}, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=["get"])
     def usage(self, request, pk=None):
         """
         Get template usage statistics.
@@ -285,14 +295,15 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
         applications_count = applications.count()
 
         # Get 10 most recent applications
-        recent = applications.order_by('-applied_at')[:10]
+        recent = applications.order_by("-applied_at")[:10]
         recent_serializer = TemplateApplicationSerializer(
-            recent,
-            many=True,
-            context={'request': request}
+            recent, many=True, context={"request": request}
         )
 
-        return Response({
-            'applications_count': applications_count,
-            'recent_applications': recent_serializer.data
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "applications_count": applications_count,
+                "recent_applications": recent_serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )

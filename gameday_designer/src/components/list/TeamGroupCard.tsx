@@ -12,7 +12,7 @@
 import React, { useState, useCallback } from 'react';
 import { Card, Dropdown, DropdownButton } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
-import type { GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
+import type { GlobalTeam, GlobalTeamGroup, HighlightedElement } from '../../types/flowchart';
 import { ICONS } from '../../utils/iconConstants';
 
 export interface TeamGroupCardProps {
@@ -22,6 +22,8 @@ export interface TeamGroupCardProps {
   teams: GlobalTeam[];
   /** All groups (for move dropdown) */
   allGroups: GlobalTeamGroup[];
+  /** Currently highlighted element */
+  highlightedElement?: HighlightedElement | null;
   /** Callback to update group data */
   onUpdateGroup: (groupId: string, data: Partial<Omit<GlobalTeamGroup, 'id'>>) => void;
   /** Callback to delete group */
@@ -51,6 +53,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
   group,
   teams,
   allGroups,
+  highlightedElement,
   onUpdateGroup,
   onDeleteGroup,
   onReorderGroup,
@@ -257,11 +260,13 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
               {teams.map((team, idx) => {
               const isEditing = editingTeamId === team.id;
               const usages = getTeamUsage(team.id);
+              const isHighlighted = highlightedElement?.id === team.id && highlightedElement?.type === 'team';
 
               return (
                 <div
                   key={team.id}
-                  className="d-flex align-items-center justify-content-between py-2 px-2 border-bottom"
+                  id={`team-${team.id}`}
+                  className={`d-flex align-items-center justify-content-between py-2 px-2 border-bottom ${isHighlighted ? 'element-highlighted' : ''}`}
                   style={{ backgroundColor: '#fff', fontSize: '0.875rem' }}
                 >
                   {/* Team color */}

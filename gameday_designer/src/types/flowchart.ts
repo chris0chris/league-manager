@@ -366,8 +366,18 @@ export interface FlowState {
 }
 
 // ============================================================================
-// Selection State
+// Selection and Highlighting State
 // ============================================================================
+
+/**
+ * Represents an element that is currently visually highlighted.
+ */
+export interface HighlightedElement {
+  /** ID of the element to highlight */
+  id: string;
+  /** Type of the element (for context-aware styling) */
+  type: 'game' | 'stage' | 'field' | 'team';
+}
 
 /**
  * Represents what is currently selected in the canvas.
@@ -393,7 +403,11 @@ export type FlowValidationErrorType =
   | 'self_reference'
   | 'stage_outside_field'
   | 'team_outside_container'
-  | 'game_outside_container';
+  | 'game_outside_container'
+  | 'field_overlap'
+  | 'team_overlap'
+  | 'progression_incomplete'
+  | 'progression_order';
 
 /**
  * Validation warning types for the flowchart approach.
@@ -401,7 +415,10 @@ export type FlowValidationErrorType =
 export type FlowValidationWarningType =
   | 'duplicate_standing'
   | 'orphaned_team'
-  | 'unassigned_field';
+  | 'unassigned_field'
+  | 'stage_time_conflict'
+  | 'stage_sequence_type'
+  | 'uneven_game_distribution';
 
 /**
  * Validation error for the flowchart.
@@ -413,6 +430,10 @@ export interface FlowValidationError {
   type: FlowValidationErrorType;
   /** Human-readable error message */
   message: string;
+  /** Translation key for the error message */
+  messageKey?: string;
+  /** Parameters for the translation key */
+  messageParams?: Record<string, unknown>;
   /** IDs of affected nodes */
   affectedNodes: string[];
 }
@@ -427,6 +448,10 @@ export interface FlowValidationWarning {
   type: FlowValidationWarningType;
   /** Human-readable warning message */
   message: string;
+  /** Translation key for the warning message */
+  messageKey?: string;
+  /** Parameters for the translation key */
+  messageParams?: Record<string, unknown>;
   /** IDs of affected nodes */
   affectedNodes: string[];
 }

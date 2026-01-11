@@ -7,7 +7,11 @@ from gamedays.forms import (
     SCHEDULE_MAP_GROUPS_C,
     SCHEDULE_MAP_TEAMS_C,
 )
-from gamedays.management.schedule_manager import ScheduleCreator, Schedule, GroupSchedule
+from gamedays.management.schedule_manager import (
+    ScheduleCreator,
+    Schedule,
+    GroupSchedule,
+)
 from gamedays.wizard import WizardStepHandler, FIELD_GROUP_STEP
 from league_table.models import LeagueGroup
 
@@ -18,8 +22,12 @@ class GamedayFormatStepHandler(WizardStepHandler):
 
     def handle_form(self, wizard, form: GamedayFormatBaseFormSet, data):
         field_group_step = wizard.wizard_state.get(FIELD_GROUP_STEP, {})
-        group_array = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.GROUP_NAMES_C) or []
-        schedule_format = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
+        group_array = (
+            field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.GROUP_NAMES_C) or []
+        )
+        schedule_format = field_group_step.get(
+            GamedayGaminfoFieldsAndGroupsForm.FORMAT_C
+        )
         groups = SCHEDULE_MAP.get(schedule_format, {}).get(SCHEDULE_MAP_GROUPS_C, [])
         needed_teams = [group[SCHEDULE_MAP_TEAMS_C] for group in groups]
         number_groups = len(groups)
@@ -40,10 +48,16 @@ class GamedayFormatStepHandler(WizardStepHandler):
                 group_name = league_groups[index].name
                 current_form.fields[GamedayFormatForm.GROUP_C].label = group_name
                 current_form.fields[GamedayFormatForm.GROUP_NAME_C].initial = group_name
-                current_form.fields[GamedayFormatForm.LEAGUE_GROUP_C].initial = league_groups[index].pk
+                current_form.fields[GamedayFormatForm.LEAGUE_GROUP_C].initial = (
+                    league_groups[index].pk
+                )
             else:
-                current_form.fields[GamedayFormatForm.GROUP_C].label = league_groups[index]
-                current_form.fields[GamedayFormatForm.GROUP_NAME_C].initial = league_groups[index]
+                current_form.fields[GamedayFormatForm.GROUP_C].label = league_groups[
+                    index
+                ]
+                current_form.fields[GamedayFormatForm.GROUP_NAME_C].initial = (
+                    league_groups[index]
+                )
         return formset
 
     def handle_process_step(self, wizard, form: GamedayFormatBaseFormSet):
@@ -58,7 +72,10 @@ class GamedayFormatStepHandler(WizardStepHandler):
                 GroupSchedule(
                     name=cleaned_data[GamedayFormatForm.GROUP_NAME_C],
                     league_group=league_group,
-                    teams=[current_team.name for current_team in cleaned_data[GamedayFormatForm.GROUP_C]],
+                    teams=[
+                        current_team.name
+                        for current_team in cleaned_data[GamedayFormatForm.GROUP_C]
+                    ],
                 )
             ]
         field_group_step = wizard.wizard_state[FIELD_GROUP_STEP] or {}

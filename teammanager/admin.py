@@ -1,7 +1,16 @@
 from django.contrib import admin
 
-from gamedays.models import Season, League, Team, SeasonLeagueTeam, UserProfile, Permissions, UserPermissions, \
-    Achievement, PlayerAchievement
+from gamedays.models import (
+    Season,
+    League,
+    Team,
+    SeasonLeagueTeam,
+    UserProfile,
+    Permissions,
+    UserPermissions,
+    Achievement,
+    PlayerAchievement,
+)
 
 # Register your models here.
 

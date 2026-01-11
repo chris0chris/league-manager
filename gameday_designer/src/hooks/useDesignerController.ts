@@ -10,7 +10,7 @@ import { useFlowState } from './useFlowState';
 import { useFlowValidation } from './useFlowValidation';
 import { downloadFlowchartAsJson, validateForExport } from '../utils/flowchartExport';
 import { importFromScheduleJson, validateScheduleJson } from '../utils/flowchartImport';
-import { scrollToGameWithExpansion } from '../utils/scrollHelpers';
+import { scrollToElementWithExpansion } from '../utils/scrollHelpers';
 import { generateTournament, TournamentStructure } from '../utils/tournamentGenerator';
 import {
   generateTeamsForTournament,
@@ -21,7 +21,7 @@ import {
   TOURNAMENT_GENERATION_STATE_DELAY,
   DEFAULT_TOURNAMENT_GROUP_NAME,
 } from '../utils/tournamentConstants';
-import type { GlobalTeam, Notification, NotificationType } from '../types/flowchart';
+import type { GlobalTeam, HighlightedElement, Notification, NotificationType } from '../types/flowchart';
 import type { TournamentGenerationConfig } from '../types/tournament';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -52,10 +52,10 @@ export function useDesignerController() {
   } = flowState;
 
   // Validate the current flowchart
-  const validation = useFlowValidation(nodes, edges);
+  const validation = useFlowValidation(nodes, edges, fields, globalTeams, globalTeamGroups);
 
   // --- UI State ---
-  const [highlightedSourceGameId, setHighlightedSourceGameId] = useState<string | null>(null);
+  const [highlightedElement, setHighlightedElement] = useState<HighlightedElement | null>(null);
   const [expandedFieldIds, setExpandedFieldIds] = useState<Set<string>>(new Set());
   const [expandedStageIds, setExpandedStageIds] = useState<Set<string>>(new Set());
   const [showTournamentModal, setShowTournamentModal] = useState(false);
@@ -87,15 +87,22 @@ export function useDesignerController() {
     setExpandedStageIds((prev) => new Set([...prev, stageId]));
   }, []);
 
-  const handleDynamicReferenceClick = useCallback(
-    async (sourceGameId: string) => {
-      setHighlightedSourceGameId(sourceGameId);
-      await scrollToGameWithExpansion(sourceGameId, nodes, expandField, expandStage, true);
+  const handleHighlightElement = useCallback(
+    async (id: string, type: HighlightedElement['type']) => {
+      setHighlightedElement({ id, type });
+      await scrollToElementWithExpansion(id, type, nodes, expandField, expandStage, true);
       setTimeout(() => {
-        setHighlightedSourceGameId(null);
+        setHighlightedElement(null);
       }, HIGHLIGHT_AUTO_CLEAR_DELAY);
     },
     [nodes, expandField, expandStage]
+  );
+
+  const handleDynamicReferenceClick = useCallback(
+    (sourceGameId: string) => {
+      handleHighlightElement(sourceGameId, 'game');
+    },
+    [handleHighlightElement]
   );
 
   const handleImport = useCallback(
@@ -200,7 +207,7 @@ export function useDesignerController() {
     validation,
     notifications,
     ui: {
-      highlightedSourceGameId,
+      highlightedElement,
       expandedFieldIds,
       expandedStageIds,
       showTournamentModal,
@@ -211,6 +218,7 @@ export function useDesignerController() {
     handlers: {
       expandField,
       expandStage,
+      handleHighlightElement,
       handleDynamicReferenceClick,
       handleImport,
       handleExport,

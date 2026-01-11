@@ -10,7 +10,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer, GameOfficialSerializer
+from gamedays.api.serializers import (
+    GamedaySerializer,
+    GameinfoSerializer,
+    GameOfficialSerializer,
+)
 from gamedays.models import Gameday, Gameinfo, GameOfficial
 from gamedays.service.gameday_service import GamedayService
 
@@ -39,19 +43,21 @@ class GameOfficialCreateOrUpdateView(RetrieveUpdateAPIView):
     queryset = GameOfficial.objects.all()
 
     def get(self, request, *args, **kwargs):
-        game_id = kwargs.get('pk')
+        game_id = kwargs.get("pk")
         try:
             officials = GameOfficial.objects.filter(gameinfo_id=game_id)
             serializer = GameOfficialSerializer(instance=officials, many=True)
             return Response(serializer.data, status=HTTPStatus.OK)
         except GameOfficial.DoesNotExist:
-            raise NotFound(detail=f'No officials found for gameId {game_id}')
+            raise NotFound(detail=f"No officials found for gameId {game_id}")
 
     def update(self, request, *args, **kwargs):
-        pk = kwargs.get('pk')
+        pk = kwargs.get("pk")
         response_data = []
         for item in request.data:
-            official, _ = GameOfficial.objects.get_or_create(gameinfo_id=pk, position=item['position'])
+            official, _ = GameOfficial.objects.get_or_create(
+                gameinfo_id=pk, position=item["position"]
+            )
             serializer = GameOfficialSerializer(instance=official, data=item)
             if serializer.is_valid():
                 serializer.save()
@@ -65,17 +71,17 @@ class GamedayScheduleView(APIView):
 
     # noinspection PyMethodMayBeStatic
     def get(self, request: Request, *args, **kwargs):
-        gs = GamedayService.create(kwargs['pk'])
-        get = request.query_params.get('get')
+        gs = GamedayService.create(kwargs["pk"])
+        get = request.query_params.get("get")
         response = '{"error": "Please use parameter - get "}'
-        orient = request.query_params.get('orient')
-        orient = 'index' if orient is None else orient
-        if get == 'schedule':
+        orient = request.query_params.get("orient")
+        orient = "index" if orient is None else orient
+        if get == "schedule":
             response = gs.get_schedule().to_json(orient=orient)
-        elif get == 'qualify':
-            response = gs.get_qualify_table().to_json(orient='split')
-        elif get == 'final':
-            response = gs.get_final_table().to_json(orient='split')
+        elif get == "qualify":
+            response = gs.get_qualify_table().to_json(orient="split")
+        elif get == "final":
+            response = gs.get_final_table().to_json(orient="split")
         return Response(json.loads(response, object_pairs_hook=OrderedDict))
 
 

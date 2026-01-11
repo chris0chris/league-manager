@@ -6,6 +6,7 @@ Implements atomic transaction for data integrity.
 
 This is the GREEN phase of TDD - implementing service to make tests pass.
 """
+
 from dataclasses import dataclass, field
 from typing import Dict, Optional, Set, Tuple
 import datetime
@@ -20,6 +21,7 @@ from gameday_designer.service.time_service import TimeService
 
 class ApplicationError(Exception):
     """Exception raised when template application fails."""
+
     pass
 
 
@@ -33,6 +35,7 @@ class ApplicationResult:
         gameinfos_created: Number of Gameinfo objects created
         message: Human-readable status message
     """
+
     success: bool
     gameinfos_created: int = 0
     message: str = ""
@@ -59,7 +62,7 @@ class TemplateApplicationService:
         template: ScheduleTemplate,
         gameday: Gameday,
         team_mapping: Dict[str, int],
-        applied_by: Optional[User] = None
+        applied_by: Optional[User] = None,
     ):
         """
         Initialize application service.
@@ -104,7 +107,7 @@ class TemplateApplicationService:
         return ApplicationResult(
             success=True,
             gameinfos_created=len(gameinfos),
-            message=f'Successfully applied template "{self.template.name}" to gameday "{self.gameday.name}". Created {len(gameinfos)} games.'
+            message=f'Successfully applied template "{self.template.name}" to gameday "{self.gameday.name}". Created {len(gameinfos)} games.',
         )
 
     def _validate_compatibility(self):
@@ -129,14 +132,14 @@ class TemplateApplicationService:
         # We don't have num_fields on Gameday model, so we infer from format
         # Format is like "6_2" where 2 is number of fields
         try:
-            gameday_fields = int(self.gameday.format.split('_')[1])
+            gameday_fields = int(self.gameday.format.split("_")[1])
         except (ValueError, IndexError):
             # If we can't parse, assume it's okay (backward compatibility)
             gameday_fields = max_field_used
 
         if max_field_used > gameday_fields:
             raise ApplicationError(
-                f'Template requires field {max_field_used} but gameday only has {gameday_fields} fields'
+                f"Template requires field {max_field_used} but gameday only has {gameday_fields} fields"
             )
 
         # Get required team placeholders from slots
@@ -155,7 +158,7 @@ class TemplateApplicationService:
         for placeholder, team_id in self.team_mapping.items():
             if not Team.objects.filter(pk=team_id).exists():
                 raise ApplicationError(
-                    f'Team with ID {team_id} (for placeholder {placeholder}) does not exist'
+                    f"Team with ID {team_id} (for placeholder {placeholder}) does not exist"
                 )
 
     def _get_required_team_placeholders(self) -> Set[str]:
@@ -171,15 +174,15 @@ class TemplateApplicationService:
         for slot in slots:
             # Add home team placeholder (if not a reference)
             if slot.home_group is not None and slot.home_team is not None:
-                placeholders.add(f'{slot.home_group}_{slot.home_team}')
+                placeholders.add(f"{slot.home_group}_{slot.home_team}")
 
             # Add away team placeholder
             if slot.away_group is not None and slot.away_team is not None:
-                placeholders.add(f'{slot.away_group}_{slot.away_team}')
+                placeholders.add(f"{slot.away_group}_{slot.away_team}")
 
             # Add official team placeholder
             if slot.official_group is not None and slot.official_team is not None:
-                placeholders.add(f'{slot.official_group}_{slot.official_team}')
+                placeholders.add(f"{slot.official_group}_{slot.official_team}")
 
         return placeholders
 
@@ -200,27 +203,25 @@ class TemplateApplicationService:
             List of created Gameinfo objects
         """
         gameinfos = []
-        
+
         # Process each field independently for time calculation
         for field_num in range(1, self.template.num_fields + 1):
-            slots = list(self.template.slots.filter(field=field_num).order_by('slot_order'))
+            slots = list(
+                self.template.slots.filter(field=field_num).order_by("slot_order")
+            )
             if not slots:
                 continue
-                
+
             # Convert model objects to simple dicts for TimeService
-            slot_data = [{'break_after': s.break_after} for s in slots]
+            slot_data = [{"break_after": s.break_after} for s in slots]
             start_times = TimeService.calculate_game_times(
-                self.gameday.start,
-                self.template.game_duration,
-                slot_data
+                self.gameday.start, self.template.game_duration, slot_data
             )
-            
+
             for slot, scheduled in zip(slots, start_times):
                 # Resolve official team
                 official_team = self._resolve_team_placeholder(
-                    slot.official_group,
-                    slot.official_team,
-                    slot.official_reference
+                    slot.official_group, slot.official_team, slot.official_reference
                 )
 
                 # Create Gameinfo
@@ -231,17 +232,14 @@ class TemplateApplicationService:
                     stage=slot.stage,
                     standing=slot.standing,
                     officials=official_team,
-                    status='Geplant',
+                    status="Geplant",
                 )
                 gameinfos.append(gameinfo)
 
         return gameinfos
 
     def _resolve_team_placeholder(
-        self,
-        group: Optional[int],
-        team: Optional[int],
-        reference: Optional[str]
+        self, group: Optional[int], team: Optional[int], reference: Optional[str]
     ) -> Optional[Team]:
         """
         Resolve team from placeholder or reference.
@@ -260,7 +258,7 @@ class TemplateApplicationService:
             return None
 
         if group is not None and team is not None:
-            placeholder = f'{group}_{team}'
+            placeholder = f"{group}_{team}"
             team_id = self.team_mapping.get(placeholder)
 
             if team_id:
@@ -268,7 +266,7 @@ class TemplateApplicationService:
                     return Team.objects.get(pk=team_id)
                 except Team.DoesNotExist:
                     raise ApplicationError(
-                        f'Team with ID {team_id} (placeholder {placeholder}) does not exist'
+                        f"Team with ID {team_id} (placeholder {placeholder}) does not exist"
                     )
 
         return None
@@ -282,21 +280,17 @@ class TemplateApplicationService:
         Args:
             gameinfos: List of Gameinfo objects
         """
-        slots = self.template.slots.all().order_by('field', 'slot_order')
+        slots = self.template.slots.all().order_by("field", "slot_order")
 
         for gameinfo, slot in zip(gameinfos, slots):
             # Resolve home team
             home_team = self._resolve_team_placeholder(
-                slot.home_group,
-                slot.home_team,
-                slot.home_reference
+                slot.home_group, slot.home_team, slot.home_reference
             )
 
             # Resolve away team
             away_team = self._resolve_team_placeholder(
-                slot.away_group,
-                slot.away_team,
-                slot.away_reference
+                slot.away_group, slot.away_team, slot.away_reference
             )
 
             # Create home Gameresult

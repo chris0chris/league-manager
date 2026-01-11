@@ -11,7 +11,7 @@ class TestGameinfoWrapperWithLeagueTableDependencies(TestCase):
         group: LeagueGroup = LeagueGroupFactory.create()
         gameinfo = GameinfoFactory.create()
         assert gameinfo.league_group is None
-        assert gameinfo.standing == ''
+        assert gameinfo.standing == ""
         gameinfo_wrapper = GameinfoWrapper(gameinfo)
         gameinfo_wrapper.update_standing(group.pk)
         gameinfo.refresh_from_db()

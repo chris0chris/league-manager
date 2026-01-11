@@ -5,12 +5,14 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('gamedays', '0018_gameday_gamedays_ga_id_167c15_idx_and_more'),
+        ("gamedays", "0018_gameday_gamedays_ga_id_167c15_idx_and_more"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='gameofficial',
-            index=models.Index(fields=['gameinfo', 'position'], name='gamedays_ga_gameinf_d5ecbf_idx'),
+            model_name="gameofficial",
+            index=models.Index(
+                fields=["gameinfo", "position"], name="gamedays_ga_gameinf_d5ecbf_idx"
+            ),
         ),
     ]

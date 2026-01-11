@@ -41,7 +41,8 @@ export interface ListCanvasProps {
   onRemoveGameToGameEdge: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   expandedFieldIds: Set<string>;
   expandedStageIds: Set<string>;
-  highlightedSourceGameId: string | null;
+  highlightedElement?: HighlightedElement | null;
+  highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
 }
 
@@ -71,6 +72,9 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
   onRemoveGameToGameEdge,
   expandedFieldIds,
   expandedStageIds,
+  highlightedElement,
+  highlightedSourceGameId,
+  onDynamicReferenceClick,
 }) => {
   const { t } = useTypedTranslation(['ui']);
   const [isTeamPoolExpanded, setIsTeamPoolExpanded] = useState(true);
@@ -133,6 +137,7 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
                   <GlobalTeamTable
                     teams={globalTeams}
                     groups={globalTeamGroups}
+                    highlightedElement={highlightedElement}
                     onAddGroup={onAddGlobalTeamGroup}
                     onUpdateGroup={onUpdateGlobalTeamGroup}
                     onDeleteGroup={onDeleteGlobalTeamGroup}
@@ -215,6 +220,9 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
                       onRemoveGameToGameEdge={onRemoveGameToGameEdge}
                       isExpanded={expandedFieldIds.has(field.id)}
                       expandedStageIds={expandedStageIds}
+                      highlightedElement={highlightedElement}
+                      highlightedSourceGameId={highlightedSourceGameId}
+                      onDynamicReferenceClick={onDynamicReferenceClick}
                     />
                   ))}
                 </div>

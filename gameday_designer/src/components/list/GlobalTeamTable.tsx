@@ -15,7 +15,7 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
-import type { GlobalTeam, GlobalTeamGroup, FlowNode } from '../../types/flowchart';
+import type { GlobalTeam, GlobalTeamGroup, FlowNode, HighlightedElement } from '../../types/flowchart';
 import TeamGroupCard from './TeamGroupCard';
 import { ICONS } from '../../utils/iconConstants';
 import './GlobalTeamTable.css';
@@ -25,6 +25,8 @@ export interface GlobalTeamTableProps {
   teams: GlobalTeam[];
   /** All global team groups */
   groups: GlobalTeamGroup[];
+  /** Currently highlighted element */
+  highlightedElement?: HighlightedElement | null;
   /** Callback to add a new group */
   onAddGroup: () => void;
   /** Callback to update group data */
@@ -53,6 +55,7 @@ export interface GlobalTeamTableProps {
 const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
   teams,
   groups,
+  highlightedElement,
   onAddGroup,
   onUpdateGroup,
   onDeleteGroup,
@@ -240,6 +243,7 @@ const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
                 group={group}
                 teams={teamsInGroup}
                 allGroups={sortedGroups}
+                highlightedElement={highlightedElement}
                 onUpdateGroup={onUpdateGroup}
                 onDeleteGroup={onDeleteGroup}
                 onReorderGroup={onReorderGroup}

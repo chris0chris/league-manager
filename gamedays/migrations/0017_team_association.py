@@ -6,14 +6,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('gamedays', '0016_alter_team_description'),
+        ("gamedays", "0016_alter_team_description"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='team',
-            name='association',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
-                                    to='gamedays.association'),
+            model_name="team",
+            name="association",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                to="gamedays.association",
+            ),
         ),
     ]

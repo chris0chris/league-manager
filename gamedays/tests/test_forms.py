@@ -118,7 +118,8 @@ class TestGameinfoForm(TestCase):
 
     def test_gameinfo_form_sets_placeholder_choices_for_multiple_entries(self):
         form = GameinfoForm(
-            group_choices=[("A", "Group A")], field_choices=[("1", "Field 1"), ("2", "Field 2")]
+            group_choices=[("A", "Group A")],
+            field_choices=[("1", "Field 1"), ("2", "Field 2")],
         )
         assert form.fields["field"].choices[0] == ("", "Bitte auswählen")
         assert ("2", "Field 2") in form.fields["field"].choices
@@ -171,7 +172,7 @@ class TestGameinfoForm(TestCase):
 
 def test_get_formset_creates_correct_number_of_forms():
     formset = get_gameday_format_formset(
-                extra=2,
-                needed_teams_list=[0, 0],
-            )
+        extra=2,
+        needed_teams_list=[0, 0],
+    )
     assert len(formset.forms) == 2

@@ -34,7 +34,7 @@ class DataFrameAssertion(object):
 class JsonHelper(object):
     @staticmethod
     def read_file(filename) -> dict:
-        with open(pathlib.Path(__file__).parent / 'testdata' / f'{filename}.json') as f:
+        with open(pathlib.Path(__file__).parent / "testdata" / f"{filename}.json") as f:
             expected_gamelog = json.load(f)
         return expected_gamelog
 

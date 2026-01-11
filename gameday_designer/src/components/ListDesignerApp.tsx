@@ -17,6 +17,7 @@ import NotificationToast from './NotificationToast';
 import { useDesignerController } from '../hooks/useDesignerController';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { ICONS } from '../utils/iconConstants';
+import type { ValidationError, ValidationWarning } from '../types/designer';
 
 import './ListDesignerApp.css';
 
@@ -25,7 +26,7 @@ import './ListDesignerApp.css';
  * ListDesignerApp component.
  */
 const ListDesignerApp: React.FC = () => {
-  const { t } = useTypedTranslation(['ui']);
+  const { t } = useTypedTranslation(['ui', 'validation']);
   const {
     nodes,
     edges,
@@ -46,8 +47,30 @@ const ListDesignerApp: React.FC = () => {
     addNotification,
   } = useDesignerController();
 
+  /**
+   * Helper to translate error/warning message.
+   */
+  const getMessage = (item: ValidationError | ValidationWarning) => {
+    if (item.messageKey) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return t(`validation:${item.messageKey}` as any, item.messageParams);
+    }
+    return item.message;
+  };
+
+  /**
+   * Helper to determine highlight type from error type.
+   */
+  const getHighlightType = (errorType: string): HighlightedElement['type'] => {
+    if (errorType === 'field_overlap' || errorType === 'team_overlap') return 'game';
+    if (errorType.includes('stage')) return 'stage';
+    if (errorType.includes('field')) return 'field';
+    if (errorType.includes('team')) return 'team';
+    return 'game';
+  };
+
   const {
-    highlightedSourceGameId,
+    highlightedElement,
     expandedFieldIds,
     expandedStageIds,
     showTournamentModal,
@@ -56,6 +79,7 @@ const ListDesignerApp: React.FC = () => {
   } = ui;
 
   const {
+    handleHighlightElement,
     handleDynamicReferenceClick,
     handleImport,
     handleExport,
@@ -112,23 +136,35 @@ const ListDesignerApp: React.FC = () => {
             {validation.isValid && validation.warnings.length === 0 ? (
               <span className="text-success">
                 <i className="bi bi-check-circle-fill me-2"></i>
-                Valid
+                {t('validation:scheduleValid')}
               </span>
             ) : (
               <>
                 {validation.errors.length > 0 && (
                   <OverlayTrigger
+                    trigger="click"
+                    rootClose
                     placement="bottom"
                     overlay={
                       <Popover id="errors-popover">
                         <Popover.Header as="h3">
-                          {validation.errors.length} Error{validation.errors.length !== 1 ? 's' : ''}
+                          {t('validation:errorCount', { count: validation.errors.length })}
                         </Popover.Header>
                         <Popover.Body className="p-0">
                           <ListGroup variant="flush">
                             {validation.errors.map((error) => (
-                              <ListGroup.Item key={error.id} variant="danger" className="small">
-                                {error.message}
+                              <ListGroup.Item 
+                                key={error.id} 
+                                variant="danger" 
+                                action
+                                onClick={() => {
+                                  // @ts-expect-error error type mapping
+                                  const nodeId = error.affectedNodes?.[0] || error.affectedSlots?.[0];
+                                  if (nodeId) handleHighlightElement(nodeId, getHighlightType(error.type));
+                                }}
+                                className="small"
+                              >
+                                {getMessage(error)}
                               </ListGroup.Item>
                             ))}
                           </ListGroup>
@@ -136,25 +172,37 @@ const ListDesignerApp: React.FC = () => {
                       </Popover>
                     }
                   >
-                    <span className="text-danger" style={{ cursor: 'help' }}>
+                    <span className="text-danger" style={{ cursor: 'pointer' }}>
                       <i className="bi bi-x-circle-fill me-1"></i>
-                      {validation.errors.length} error{validation.errors.length !== 1 ? 's' : ''}
+                      {t('validation:errorCount', { count: validation.errors.length })}
                     </span>
                   </OverlayTrigger>
                 )}
                 {validation.warnings.length > 0 && (
                   <OverlayTrigger
+                    trigger="click"
+                    rootClose
                     placement="bottom"
                     overlay={
                       <Popover id="warnings-popover">
                         <Popover.Header as="h3">
-                          {validation.warnings.length} Warning{validation.warnings.length !== 1 ? 's' : ''}
+                          {t('validation:warningCount', { count: validation.warnings.length })}
                         </Popover.Header>
                         <Popover.Body className="p-0">
                           <ListGroup variant="flush">
                             {validation.warnings.map((warning) => (
-                              <ListGroup.Item key={warning.id} variant="warning" className="small">
-                                {warning.message}
+                              <ListGroup.Item 
+                                key={warning.id} 
+                                variant="warning" 
+                                action
+                                onClick={() => {
+                                  // @ts-expect-error error type mapping
+                                  const nodeId = warning.affectedNodes?.[0] || warning.affectedSlots?.[0];
+                                  if (nodeId) handleHighlightElement(nodeId, getHighlightType(warning.type));
+                                }}
+                                className="small"
+                              >
+                                {getMessage(warning)}
                               </ListGroup.Item>
                             ))}
                           </ListGroup>
@@ -162,19 +210,19 @@ const ListDesignerApp: React.FC = () => {
                       </Popover>
                     }
                   >
-                    <span className="text-warning" style={{ cursor: 'help' }}>
+                    <span className="text-warning" style={{ cursor: 'pointer' }}>
                       <i className="bi bi-exclamation-triangle-fill me-1"></i>
-                      {validation.warnings.length} warning{validation.warnings.length !== 1 ? 's' : ''}
+                      {t('validation:warningCount', { count: validation.warnings.length })}
                     </span>
                   </OverlayTrigger>
                 )}
               </>
             )}
             <span className="text-muted small ms-auto">
-              {nodes.filter((n) => n.type === 'field').length} fields |{' '}
-              {nodes.filter((n) => n.type === 'stage').length} stages |{' '}
-              {globalTeams.length} teams |{' '}
-              {nodes.filter((n) => n.type === 'game').length} games
+              {nodes.filter((n) => n.type === 'field').length} {t('ui:label.fields')} |{' '}
+              {nodes.filter((n) => n.type === 'stage').length} {t('ui:label.stages')} |{' '}
+              {globalTeams.length} {t('ui:label.teams')} |{' '}
+              {nodes.filter((n) => n.type === 'game').length} {t('ui:label.games')}
             </span>
           </div>
         </Col>
@@ -204,7 +252,7 @@ const ListDesignerApp: React.FC = () => {
           getTeamUsage={getTeamUsage}
           onAssignTeam={handleAssignTeam}
           onAddGame={addGameNodeInStage}
-          highlightedSourceGameId={highlightedSourceGameId}
+          highlightedElement={highlightedElement}
           onDynamicReferenceClick={handleDynamicReferenceClick}
           onAddGameToGameEdge={addGameToGameEdge}
           onRemoveGameToGameEdge={removeGameToGameEdge}
