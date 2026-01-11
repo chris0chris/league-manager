@@ -58,6 +58,7 @@ case "$1" in
             sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" passcheck/package.json
             sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" scorecard/package.json
             sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" gameday_designer/package.json
+            sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" pyproject.toml
             sed -i "s/current_version = \".*\"/current_version = \"$NEW_VERSION\"/" pyproject.toml
 
             # Regenerate uv.lock to match updated pyproject.toml
