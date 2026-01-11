@@ -52,7 +52,7 @@ export function useDesignerController() {
   } = flowState;
 
   // Validate the current flowchart
-  const validation = useFlowValidation(nodes, edges);
+  const validation = useFlowValidation(nodes, edges, fields, globalTeams, globalTeamGroups);
 
   // --- UI State ---
   const [highlightedElement, setHighlightedElement] = useState<HighlightedElement | null>(null);

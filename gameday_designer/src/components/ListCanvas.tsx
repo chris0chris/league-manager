@@ -137,6 +137,7 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
                   <GlobalTeamTable
                     teams={globalTeams}
                     groups={globalTeamGroups}
+                    highlightedElement={highlightedElement}
                     onAddGroup={onAddGlobalTeamGroup}
                     onUpdateGroup={onUpdateGlobalTeamGroup}
                     onDeleteGroup={onDeleteGlobalTeamGroup}

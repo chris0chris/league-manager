@@ -62,6 +62,7 @@ const ListDesignerApp: React.FC = () => {
    * Helper to determine highlight type from error type.
    */
   const getHighlightType = (errorType: string): HighlightedElement['type'] => {
+    if (errorType === 'field_overlap' || errorType === 'team_overlap') return 'game';
     if (errorType.includes('stage')) return 'stage';
     if (errorType.includes('field')) return 'field';
     if (errorType.includes('team')) return 'team';

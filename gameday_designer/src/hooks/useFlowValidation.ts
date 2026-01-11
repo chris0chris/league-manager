@@ -621,7 +621,19 @@ function checkTimeOverlaps(
       // Check overlap: if next game starts before current game ends
       // Note: We use < because if next starts exactly when current ends, it's NOT an overlap
       if (next.start < current.end) {
-        const fieldName = fields.find(f => f.id === fieldId)?.name || 'Unknown Field';
+        let fieldName = fields.find(f => f.id === fieldId)?.name;
+        
+        // If not found in fields array, look in nodes (v2 model)
+        if (!fieldName) {
+          const fieldNode = nodes.find(n => n.id === fieldId && isFieldNode(n)) as FieldNode | undefined;
+          if (fieldNode) {
+            fieldName = fieldNode.data.name;
+          }
+        }
+
+        if (!fieldName) {
+          fieldName = 'Unknown Field';
+        }
         
         errors.push({
           id: `overlap_${current.id}_${next.id}`,
