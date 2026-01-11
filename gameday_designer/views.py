@@ -11,6 +11,8 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 
+import logging
+
 from gamedays.models import Gameday
 from gameday_designer.models import ScheduleTemplate, TemplateApplication
 from gameday_designer.serializers import (
@@ -149,8 +151,12 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_200_OK,
             )
 
-        except ApplicationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except ApplicationError:
+            logging.exception("Error applying schedule template")
+            return Response(
+                {"error": "Failed to apply template."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     @action(detail=True, methods=["post"])
     def clone(self, request, pk=None):
