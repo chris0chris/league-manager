@@ -219,6 +219,9 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
                       onRemoveGameToGameEdge={onRemoveGameToGameEdge}
                       isExpanded={expandedFieldIds.has(field.id)}
                       expandedStageIds={expandedStageIds}
+                      highlightedElement={highlightedElement}
+                      highlightedSourceGameId={highlightedSourceGameId}
+                      onDynamicReferenceClick={onDynamicReferenceClick}
                     />
                   ))}
                 </div>

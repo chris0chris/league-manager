@@ -78,8 +78,6 @@ const ListDesignerApp: React.FC = () => {
   } = ui;
 
   const {
-    expandField,
-    expandStage,
     handleHighlightElement,
     handleDynamicReferenceClick,
     handleImport,
@@ -159,7 +157,7 @@ const ListDesignerApp: React.FC = () => {
                                 variant="danger" 
                                 action
                                 onClick={() => {
-                                  // @ts-ignore
+                                  // @ts-expect-error error type mapping
                                   const nodeId = error.affectedNodes?.[0] || error.affectedSlots?.[0];
                                   if (nodeId) handleHighlightElement(nodeId, getHighlightType(error.type));
                                 }}
@@ -197,7 +195,7 @@ const ListDesignerApp: React.FC = () => {
                                 variant="warning" 
                                 action
                                 onClick={() => {
-                                  // @ts-ignore
+                                  // @ts-expect-error error type mapping
                                   const nodeId = warning.affectedNodes?.[0] || warning.affectedSlots?.[0];
                                   if (nodeId) handleHighlightElement(nodeId, getHighlightType(warning.type));
                                 }}

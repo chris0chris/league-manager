@@ -603,7 +603,7 @@ function checkTimeOverlaps(
         end: endMinutes,
         standing: data.standing || node.id
       });
-    } catch (e) {
+    } catch {
       // Ignore invalid time formats (handled by other validation or UI)
       continue;
     }
@@ -695,7 +695,7 @@ function checkTeamCapacity(
         gamesByTeam.get(teamId)!.push(gameInfo);
       });
 
-    } catch (e) {
+    } catch {
       continue;
     }
   }
@@ -755,7 +755,7 @@ function checkStageSequence(
     }
   }
 
-  for (const [fieldId, stages] of stagesByField) {
+  for (const stages of stagesByField.values()) {
     // Sort by order within field
     stages.sort((a, b) => (a.data.order || 0) - (b.data.order || 0));
 
@@ -808,7 +808,7 @@ function checkStageSequence(
               affectedNodes: [current.id, next.id],
             });
           }
-        } catch (e) {
+        } catch {
           // Ignore invalid time formats
         }
       }
@@ -931,7 +931,7 @@ function checkUnevenGames(
           minGames,
           maxGames
         },
-        affectedNodes: [], // Groups don't have nodes directly, but we could link to all team nodes if they existed in flowchart
+        affectedNodes: [], // Groups don't have nodes directly
       });
     }
   }

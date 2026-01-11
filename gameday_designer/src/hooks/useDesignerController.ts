@@ -10,7 +10,7 @@ import { useFlowState } from './useFlowState';
 import { useFlowValidation } from './useFlowValidation';
 import { downloadFlowchartAsJson, validateForExport } from '../utils/flowchartExport';
 import { importFromScheduleJson, validateScheduleJson } from '../utils/flowchartImport';
-import { scrollToElementWithExpansion, scrollToGameWithExpansion } from '../utils/scrollHelpers';
+import { scrollToElementWithExpansion } from '../utils/scrollHelpers';
 import { generateTournament, TournamentStructure } from '../utils/tournamentGenerator';
 import {
   generateTeamsForTournament,
