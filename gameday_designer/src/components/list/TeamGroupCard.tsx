@@ -157,7 +157,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
   );
 
   return (
-    <Card className="team-group-card h-100">
+    <Card className="team-group-card">
       <Card.Header
         className="d-flex align-items-center"
         style={{ cursor: 'pointer', backgroundColor: '#e9ecef' }}
