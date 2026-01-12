@@ -47,7 +47,7 @@
     "prettier": "3.7.4",
     "redux-mock-store": "^1.5.5",
     "vite": "^7.2.7",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.17"
   },
   "scripts": {
     "start": "vite",
