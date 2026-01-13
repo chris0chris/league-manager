@@ -40,7 +40,7 @@
   - Audit console for React Flow edge-loop warnings.
 - [x] **Task 4: Conductor - User Manual Verification 'Validation & Visualization' (Protocol in workflow.md)**
 
-## Phase 5: Template Application Service
+## Phase 5: Template Application Service [checkpoint: b960a3d]
 - [x] **Task 1: Resolve Ranking References**
   - Update `TemplateApplicationService.apply()` to resolve dynamic ranks from Ranking Stages into concrete Team IDs.
 - [x] **Task 2: End-to-End Integration Test**
