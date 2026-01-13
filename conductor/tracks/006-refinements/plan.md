@@ -1,4 +1,4 @@
-# Plan: Gameday Designer Refinements (#671)
+# Plan: Gameday Designer Refinements (#671) [checkpoint: c6bf2dc]
 
 ## Phase 1: Validation Rules
 - [x] **Task 1: Prevent Self-Referencing Stages**
