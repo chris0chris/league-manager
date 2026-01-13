@@ -187,7 +187,7 @@ const StageSection: React.FC<StageSectionProps> = memo(({
         {isEditing ? (
           <>
             <div className="d-flex align-items-center gap-2 me-2">
-              <Form.Label htmlFor={`stage-type-${stage.id}`} className="mb-0 text-muted small">{t('ui:label.type') || 'Type'}:</Form.Label>
+              <Form.Label htmlFor={`stage-type-${stage.id}`} className="mb-0 text-muted small">{t('ui:label.type')}:</Form.Label>
               <Form.Select
                 id={`stage-type-${stage.id}`}
                 size="sm"
@@ -200,46 +200,48 @@ const StageSection: React.FC<StageSectionProps> = memo(({
                 <option value="RANKING">{t('domain:stageTypeRanking')}</option>
               </Form.Select>
             </div>
-            <input
-              type="text"
-              className="form-control form-control-sm me-2 me-auto"
-              value={editedName}
-              onChange={(e) => setEditedName(e.target.value)}
-              onBlur={handleSaveEdit}
-              onKeyDown={handleKeyPress}
-              onClick={(e) => e.stopPropagation()}
-              autoFocus
-              style={{ maxWidth: '200px' }}
-            />
-            <Button 
-              size="sm" 
-              variant="outline-success" 
-              onClick={(e) => { e.stopPropagation(); handleSaveEdit(); }}
-              className="me-1 p-1"
-              title={t('ui:button.save')}
-            >
-              <i className="bi bi-check-lg"></i>
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline-secondary" 
-              onClick={(e) => { e.stopPropagation(); setIsEditing(false); }}
-              className="me-2 p-1"
-              title={t('ui:button.cancel')}
-            >
-              <i className="bi bi-x-lg"></i>
-            </Button>
+            <div className="flex-grow-1 d-flex align-items-center gap-2">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                onBlur={handleSaveEdit}
+                onKeyDown={handleKeyPress}
+                onClick={(e) => e.stopPropagation()}
+                autoFocus
+                style={{ maxWidth: '300px' }}
+              />
+              <Button 
+                size="sm" 
+                variant="outline-success" 
+                onClick={(e) => { e.stopPropagation(); handleSaveEdit(); }}
+                className="p-1"
+                title={t('ui:button.save')}
+              >
+                <i className="bi bi-check-lg"></i>
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline-secondary" 
+                onClick={(e) => { e.stopPropagation(); setIsEditing(false); }}
+                className="p-1"
+                title={t('ui:button.cancel')}
+              >
+                <i className="bi bi-x-lg"></i>
+              </Button>
+            </div>
           </>
         ) : (
           <>
             <div className="me-3 small text-muted">
               {stage.data.stageType === 'RANKING' ? (
-                <span className="badge bg-info text-dark">
+                <span className="badge bg-info text-dark" style={{ fontSize: '0.85rem' }}>
                   <i className="bi bi-trophy-fill me-1"></i>
                   {t('domain:stageTypeRanking')}
                 </span>
               ) : (
-                <span className="badge bg-light text-dark border">
+                <span className="badge bg-light text-dark border" style={{ fontSize: '0.85rem' }}>
                   {t('domain:stageTypeStandard')}
                 </span>
               )}
