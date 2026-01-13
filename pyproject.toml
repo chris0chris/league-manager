@@ -81,7 +81,7 @@ moveable_tags = []
 commit_args = ""
 setup_hooks = []
 pre_commit_hooks = []
-post_commit_hooks = ["uv lock", "git add uv.lock", "git commit --amend --no-edit"]
+post_commit_hooks = []
 
 [tool.bumpversion.parts.release]
 optional_value = "stable"
@@ -110,6 +110,3 @@ filename = "gameday_designer/package.json"
 filename = "pyproject.toml"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
-
-[[tool.bumpversion.files]]
-filename = "uv.lock"
