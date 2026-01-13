@@ -19,6 +19,7 @@ import type {
   FieldNodeData,
   StageNodeData,
   StageType,
+  StageCategory,
   TournamentStructure,
 } from '../types/flowchart';
 import {

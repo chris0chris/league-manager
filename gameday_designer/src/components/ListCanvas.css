@@ -175,40 +175,18 @@
 
 /**
  * Fields Grid Layout with Responsive CSS Grid
- * Restricted to at most 2 columns with min 900px width.
+ * Enforce exactly 2 columns (50% each) on wide screens.
  */
 .fields-grid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(900px, 100%), 1fr));
+  grid-template-columns: 1fr;
 }
 
-/* Force 1 column if container is not wide enough for two 900px fields + gap */
-@media (max-width: 1850px) {
-  .fields-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Cap at 2 columns even on ultra-wide screens */
-@media (min-width: 2750px) {
+@media (min-width: 1200px) {
   .fields-grid {
     grid-template-columns: 1fr 1fr;
-    max-width: 2000px;
-    margin-left: auto;
-    margin-right: auto;
   }
-}
-
-/**
- * Empty state buttons should ALWAYS show labels regardless of screen size
- */
-.text-center .btn-label-adaptive {
-  display: inline !important;
-}
-
-.text-center .btn-adaptive i {
-  margin-right: 0.5rem !important;
 }
 
 /* Responsive: Stack columns on small screens */

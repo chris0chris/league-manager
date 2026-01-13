@@ -1,35 +1,28 @@
-# Specification: Gameday Designer Ranking & Layout Refinements
+# Specification: Gameday Designer Refinements (#671)
 
 ## Overview
-Address critical usability and validation issues identified in the Gameday Designer during testing of the new Ranking Stages. This track covers four specific refinements: validation for self-referencing stages, preventing teams from playing themselves, ensuring the stage type editor is read-only by default, and improving field layout responsiveness on wide screens.
+This track addresses several refinements and issues identified following the implementation of Ranking Stages. It focuses on stricter validation rules, UI/UX consistency, and responsive layout improvements.
 
 ## Functional Requirements
-1. **Self-Reference Validation**:
-   - **Rule**: A Ranking Stage cannot contain a game that references a rank *from that same stage*.
-   - **Enforcement**: This must be flagged as a critical validation **ERROR**.
-   - **UI**: The dropdown for team selection within a Ranking Stage should ideally disable or filter out ranks from itself.
+1. **Self-Reference Prevention**:
+   - A Ranking Stage must not be allowed to reference its own ranking results.
+   - The team selection dropdown within a stage should filter out ranks from that same stage.
+   - Validation must flag any self-referencing game-to-stage connections as an ERROR.
 
 2. **Self-Play Validation**:
-   - **Rule**: A game cannot have the same participant in both the Home and Away slots.
-   - **Scope**: Must check:
-     - Static Team ID vs Static Team ID (e.g., Team A vs Team A).
-     - Dynamic Reference vs Dynamic Reference (e.g., Winner Game 1 vs Winner Game 1).
-     - Mixed (Static vs Dynamic) is allowed unless the dynamic reference *resolves* to the same static ID (advanced, but basic ID matching is P0).
-   - **Enforcement**: This must be flagged as a validation **ERROR**.
+   - A game must trigger an ERROR if the same team is assigned to both the Home and Away slots (e.g., Team 1 vs Team 1).
+   - This must apply to both static team assignments and dynamic references.
 
-3. **Stage Type "Edit Mode"**:
-   - **Interaction**: The `stageType` dropdown in the Stage Header must be **read-only** (or displayed as text) by default.
-   - **Activation**: Clicking the existing "Edit" (pencil) button triggers "Edit Mode" for *both* the Stage Name and the Stage Type simultaneously.
-   - **Controls**: While in edit mode, "Save" (check) and "Cancel" (x) buttons are shown.
-   - **Persistence**: Changes are only applied to the model when "Save" is clicked.
+3. **Stage Type Edit Mode Integration**:
+   - Changing the `stageType` (Standard vs Ranking) must be disabled by default.
+   - It should only become active when the user clicks the "Edit" (pencil) button, consistent with the stage title editing behavior.
 
-4. **Responsive Layout**:
-   - **Behavior**: On wide screens where fields are displayed in 2 columns, each column must take up 50% of the available width.
-   - **Flexibility**: The layout should wrap to a single column (100% width) if the viewport drops below a sensible minimum width (e.g., standard tablet breakpoint).
+4. **Wide-Screen Layout Fix**:
+   - On wide screens where fields are displayed in 2 columns, each field must be constrained to exactly 50% of the available width.
+   - The layout should wrap to a single column (100% width) on smaller viewports.
 
 ## Acceptance Criteria
-- [ ] Attempting to select "Rank X from Stage A" *inside* "Stage A" triggers a validation error or is prevented.
-- [ ] Assigning "Team 1" vs "Team 1" triggers a validation error.
-- [ ] Assigning "Winner Game X" vs "Winner Game X" triggers a validation error.
-- [ ] The Stage Type dropdown is disabled/text-only until the Edit button is clicked.
-- [ ] Fields correctly resize to 50% width on large desktops and stack on smaller screens.
+- [ ] Ranking Stages cannot select ranks from themselves in the team dropdown.
+- [ ] Identical home/away team assignments trigger a validation error.
+- [ ] Stage type dropdown is read-only until "Edit" is clicked.
+- [ ] Field columns are exactly 50% width on wide screens.

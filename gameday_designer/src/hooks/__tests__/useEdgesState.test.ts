@@ -91,7 +91,7 @@ describe('useEdgesState', () => {
       });
 
       act(() => {
-        result.current.removeGameToGameEdge('game-2', 'home');
+        result.current.removeEdgeFromSlot('game-2', 'home');
       });
 
       expect(getEdges()).toHaveLength(0);

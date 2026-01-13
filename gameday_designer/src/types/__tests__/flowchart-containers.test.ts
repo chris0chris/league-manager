@@ -57,12 +57,12 @@ describe('Container Types - Field and Stage', () => {
         type: 'stage',
         name: 'Preliminary',
         category: 'preliminary',
+        stageType: 'STANDARD',
         order: 0,
       };
-
       expect(data.type).toBe('stage');
       expect(data.name).toBe('Preliminary');
-      expect(data.stageType).toBe('preliminary');
+      expect(data.stageType).toBe('STANDARD');
       expect(data.order).toBe(0);
     });
 
@@ -330,7 +330,7 @@ describe('Container Types - Field and Stage', () => {
         expect(node.position).toEqual({ x: 20, y: 60 });
         expect(node.data.type).toBe('stage');
         expect(node.data.name).toBe('Preliminary');
-        expect(node.data.stageType).toBe('preliminary');
+        expect(node.data.stageType).toBe('STANDARD');
         expect(node.data.order).toBe(0);
         expect(node.style).toEqual({ width: 300, height: 150 });
         expect(node.extent).toBe('parent');
@@ -346,7 +346,7 @@ describe('Container Types - Field and Stage', () => {
         });
 
         expect(node.data.name).toBe('Final');
-        expect(node.data.stageType).toBe('final');
+        expect(node.data.stageType).toBe('STANDARD');
       });
 
       it('creates a stage node with custom position', () => {
@@ -367,7 +367,7 @@ describe('Container Types - Field and Stage', () => {
           category: 'placement',
         });
 
-        expect(node.data.stageType).toBe('placement');
+        expect(node.data.stageType).toBe('STANDARD');
       });
 
       it('creates a custom stage', () => {
@@ -376,7 +376,7 @@ describe('Container Types - Field and Stage', () => {
           category: 'custom',
         });
 
-        expect(node.data.stageType).toBe('custom');
+        expect(node.data.stageType).toBe('STANDARD');
         expect(node.data.name).toBe('Gruppenphase');
       });
     });

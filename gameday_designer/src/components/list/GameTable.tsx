@@ -340,7 +340,14 @@ const GameTable: React.FC<GameTableProps> = memo(({
   const teamOptions = useMemo(() => buildGroupedTeamOptions(globalTeams, globalTeamGroups), [globalTeams, globalTeamGroups]);
 
   const rankingStageOptions = useMemo(() => {
-    const rankingStages = allNodes.filter(n => isStageNode(n) && n.data.stageType === 'RANKING') as StageNode[];
+    // Determine the current stage ID (assume all games in table belong to same stage)
+    const currentStageId = games[0]?.parentId;
+    
+    const rankingStages = allNodes.filter(n => 
+      isStageNode(n) && 
+      n.data.stageType === 'RANKING' &&
+      n.id !== currentStageId // Prevent self-reference
+    ) as StageNode[];
     const options: TeamOption[] = [];
 
     rankingStages.forEach(stage => {

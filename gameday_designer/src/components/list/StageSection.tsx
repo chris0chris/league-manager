@@ -63,8 +63,9 @@ const StageSection: React.FC<StageSectionProps> = memo(({
   onDynamicReferenceClick,
 }) => {
   const { t } = useTypedTranslation(['ui', 'domain']);
-  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(stage.data.name);
+  const [editedStageType, setEditedStageType] = useState(stage.data.stageType || 'STANDARD');
   const [localExpanded, setLocalExpanded] = useState(true);
   
   // Combine local state with prop
@@ -96,31 +97,44 @@ const StageSection: React.FC<StageSectionProps> = memo(({
   const handleStartEdit = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      setIsEditingName(true);
+      setIsEditing(true);
       setEditedName(stage.data.name);
+      setEditedStageType(stage.data.stageType || 'STANDARD');
     },
-    [stage.data.name]
+    [stage.data.name, stage.data.stageType]
   );
 
-  const handleSaveName = useCallback(() => {
-    setIsEditingName(false);
+  const handleSaveEdit = useCallback(() => {
+    setIsEditing(false);
+    const updates: Partial<StageNode['data']> = {};
+    
     if (editedName.trim() !== '' && editedName !== stage.data.name) {
-      onUpdate(stage.id, { name: editedName.trim() });
+      updates.name = editedName.trim();
+    }
+    
+    if (editedStageType !== stage.data.stageType) {
+      updates.stageType = editedStageType;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      onUpdate(stage.id, updates);
     } else {
       setEditedName(stage.data.name);
+      setEditedStageType(stage.data.stageType || 'STANDARD');
     }
-  }, [editedName, stage.id, stage.data.name, onUpdate]);
+  }, [editedName, editedStageType, stage.id, stage.data.name, stage.data.stageType, onUpdate]);
 
-  const handleNameKeyPress = useCallback(
+  const handleKeyPress = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
-        handleSaveName();
+        handleSaveEdit();
       } else if (e.key === 'Escape') {
-        setIsEditingName(false);
+        setIsEditing(false);
         setEditedName(stage.data.name);
+        setEditedStageType(stage.data.stageType || 'STANDARD');
       }
     },
-    [handleSaveName, stage.data.name]
+    [handleSaveEdit, stage.data.name, stage.data.stageType]
   );
 
   const handleAddGame = useCallback(
@@ -140,11 +154,6 @@ const StageSection: React.FC<StageSectionProps> = memo(({
   const handleColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
     onUpdate(stage.id, { color: e.target.value });
-  }, [stage.id, onUpdate]);
-
-  const handleStageTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    e.stopPropagation();
-    onUpdate(stage.id, { stageType: e.target.value as 'STANDARD' | 'RANKING' });
   }, [stage.id, onUpdate]);
 
   return (
@@ -175,35 +184,66 @@ const StageSection: React.FC<StageSectionProps> = memo(({
           />
         </div>
 
-        <div className="d-flex align-items-center gap-2 me-3">
-          <Form.Label htmlFor={`stage-type-${stage.id}`} className="mb-0 text-muted small">{t('ui:label.type') || 'Type'}:</Form.Label>
-          <Form.Select
-            id={`stage-type-${stage.id}`}
-            size="sm"
-            value={stage.data.stageType || 'STANDARD'}
-            onChange={handleStageTypeChange}
-            onClick={(e) => e.stopPropagation()}
-            style={{ width: '140px' }}
-          >
-            <option value="STANDARD">{t('domain:stageTypeStandard')}</option>
-            <option value="RANKING">{t('domain:stageTypeRanking')}</option>
-          </Form.Select>
-        </div>
-
-        {isEditingName ? (
-          <input
-            type="text"
-            className="form-control form-control-sm me-2 me-auto"
-            value={editedName}
-            onChange={(e) => setEditedName(e.target.value)}
-            onBlur={handleSaveName}
-            onKeyDown={handleNameKeyPress}
-            onClick={(e) => e.stopPropagation()}
-            autoFocus
-            style={{ maxWidth: '200px' }}
-          />
+        {isEditing ? (
+          <>
+            <div className="d-flex align-items-center gap-2 me-2">
+              <Form.Label htmlFor={`stage-type-${stage.id}`} className="mb-0 text-muted small">{t('ui:label.type') || 'Type'}:</Form.Label>
+              <Form.Select
+                id={`stage-type-${stage.id}`}
+                size="sm"
+                value={editedStageType}
+                onChange={(e) => setEditedStageType(e.target.value as 'STANDARD' | 'RANKING')}
+                onClick={(e) => e.stopPropagation()}
+                style={{ width: '140px' }}
+              >
+                <option value="STANDARD">{t('domain:stageTypeStandard')}</option>
+                <option value="RANKING">{t('domain:stageTypeRanking')}</option>
+              </Form.Select>
+            </div>
+            <input
+              type="text"
+              className="form-control form-control-sm me-2 me-auto"
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              onBlur={handleSaveEdit}
+              onKeyDown={handleKeyPress}
+              onClick={(e) => e.stopPropagation()}
+              autoFocus
+              style={{ maxWidth: '200px' }}
+            />
+            <Button 
+              size="sm" 
+              variant="outline-success" 
+              onClick={(e) => { e.stopPropagation(); handleSaveEdit(); }}
+              className="me-1 p-1"
+              title={t('ui:button.save')}
+            >
+              <i className="bi bi-check-lg"></i>
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline-secondary" 
+              onClick={(e) => { e.stopPropagation(); setIsEditing(false); }}
+              className="me-2 p-1"
+              title={t('ui:button.cancel')}
+            >
+              <i className="bi bi-x-lg"></i>
+            </Button>
+          </>
         ) : (
           <>
+            <div className="me-3 small text-muted">
+              {stage.data.stageType === 'RANKING' ? (
+                <span className="badge bg-info text-dark">
+                  <i className="bi bi-trophy-fill me-1"></i>
+                  {t('domain:stageTypeRanking')}
+                </span>
+              ) : (
+                <span className="badge bg-light text-dark border">
+                  {t('domain:stageTypeStandard')}
+                </span>
+              )}
+            </div>
             <strong className="me-2">{stage.data.name}</strong>
             <Button 
               size="sm" 

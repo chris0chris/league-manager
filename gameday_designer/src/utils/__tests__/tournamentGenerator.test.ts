@@ -500,7 +500,7 @@ describe('tournamentGenerator', () => {
       const result = generateTournament(sampleTeams, config);
 
       result.stages.forEach(stage => {
-        expect(['preliminary', 'final', 'placement']).toContain(stage.data.stageType);
+        expect(['STANDARD', 'RANKING']).toContain(stage.data.stageType);
       });
     });
   });

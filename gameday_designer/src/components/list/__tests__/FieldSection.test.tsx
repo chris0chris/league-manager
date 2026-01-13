@@ -67,7 +67,6 @@ describe('FieldSection', () => {
         edges={[]}
         globalTeams={[]}
         globalTeamGroups={[]}
-        globalTeamGroups={[]}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
         onAddStage={mockOnAddStage}

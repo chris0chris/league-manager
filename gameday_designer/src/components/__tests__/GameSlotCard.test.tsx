@@ -129,7 +129,7 @@ describe('GameSlotCard', () => {
 
     it('does not show break time when zero', () => {
       renderGameSlotCard();
-      expect(screen.queryByText(/min/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/\d+ min/i)).not.toBeInTheDocument();
     });
   });
 

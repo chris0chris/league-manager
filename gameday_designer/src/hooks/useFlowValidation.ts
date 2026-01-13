@@ -32,6 +32,7 @@ import {
   isStageNode,
   isTeamToGameEdge,
   isGameToGameEdge,
+  isStageToGameEdge,
 } from '../types/flowchart';
 import { formatTeamReference } from '../utils/teamReference';
 import { parseTime } from '../utils/timeCalculation';
@@ -1013,6 +1014,58 @@ function checkUnevenGames(
 }
 
 /**
+ * Check if a game has the same team assigned to both slots (Self-Play).
+ */
+function checkSelfPlay(
+  nodes: FlowNode[],
+  edges: FlowEdge[]
+): FlowValidationError[] {
+  const errors: FlowValidationError[] = [];
+  const gameNodes = nodes.filter(isGameNode);
+
+  for (const node of gameNodes) {
+    const data = node.data as GameNodeData;
+    
+    // 1. Check static IDs
+    if (data.homeTeamId && data.awayTeamId && data.homeTeamId === data.awayTeamId) {
+      errors.push({
+        id: `${node.id}_self_play_static`,
+        type: 'self_reference',
+        message: `Game "${data.standing || node.id}": A team cannot play against itself`,
+        messageKey: 'self_play',
+        messageParams: {
+          game: data.standing || node.id
+        },
+        affectedNodes: [node.id],
+      });
+      continue;
+    }
+
+    // 2. Check dynamic references
+    const homeEdge = edges.find(e => e.target === node.id && e.targetHandle === 'home');
+    const awayEdge = edges.find(e => e.target === node.id && e.targetHandle === 'away');
+
+    if (homeEdge && awayEdge) {
+      // If both are from same source game and same handle (e.g. winner vs winner)
+      if (homeEdge.source === awayEdge.source && homeEdge.sourceHandle === awayEdge.sourceHandle) {
+        errors.push({
+          id: `${node.id}_self_play_dynamic`,
+          type: 'self_reference',
+          message: `Game "${data.standing || node.id}": A team cannot play against itself (same dynamic source)`,
+          messageKey: 'self_play',
+          messageParams: {
+            game: data.standing || node.id
+          },
+          affectedNodes: [node.id],
+        });
+      }
+    }
+  }
+
+  return errors;
+}
+
+/**
  * useFlowValidation hook.
  *
  * Validates the flowchart and returns errors and warnings.
@@ -1043,6 +1096,7 @@ export function useFlowValidation(
       ...checkTeamCapacity(nodes, globalTeams),
       ...checkProgressionIntegrity(nodes, edges),
       ...checkCyclicStageReferences(nodes, edges),
+      ...checkSelfPlay(nodes, edges),
     ];
 
     const warnings: FlowValidationWarning[] = [

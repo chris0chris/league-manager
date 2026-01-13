@@ -44,6 +44,7 @@ describe('StageSection', () => {
       type: 'stage',
       name: 'Preliminary',
       category: 'preliminary',
+      stageType: 'STANDARD',
       order: 0,
     },
   };

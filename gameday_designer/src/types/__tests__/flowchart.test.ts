@@ -89,6 +89,7 @@ describe('Flowchart Types', () => {
           data: {
             type: 'game',
             stage: 'Preliminary',
+            stageType: 'STANDARD',
             standing: '',
             fieldId: null,
             official: null,
@@ -122,6 +123,7 @@ describe('Flowchart Types', () => {
         expect(node.data).toEqual({
           type: 'game',
           stage: 'Final',
+          stageType: 'STANDARD',
           standing: 'P1',
           fieldId: 'field-1',
           official: { type: 'static', name: 'Officials' },

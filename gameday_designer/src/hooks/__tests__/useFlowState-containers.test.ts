@@ -102,12 +102,12 @@ describe('useFlowState - Container Operations', () => {
       });
 
       act(() => {
-        result.current.addStageNode(fieldId, { name: 'Final', category: 'final' });
+        result.current.addStageNode(fieldId, { name: 'Final', category: 'final', stageType: 'STANDARD' });
       });
 
       const stage = result.current.nodes.find(isStageNode);
       expect(stage?.data.name).toBe('Final');
-      expect(stage?.data.stageType).toBe('final');
+      expect(stage?.data.stageType).toBe('STANDARD');
     });
 
     it('creates second stage with Finalrunde as default', () => {
