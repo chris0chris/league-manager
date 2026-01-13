@@ -45,7 +45,7 @@ describe('scrollHelpers', () => {
     data: {
       name,
       order,
-      stageType: 'vorrunde',
+      category: 'preliminary',
       description: '',
     },
     position: { x: 0, y: 0 },
@@ -146,7 +146,7 @@ describe('scrollHelpers', () => {
   describe('expandPathToNode', () => {
     it('expands path to game', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game = createGame('game1', 'Match 1', 'stage1');
       const nodes: FlowNode[] = [field, stage, game];
       const expandField = vi.fn();
@@ -161,7 +161,7 @@ describe('scrollHelpers', () => {
 
     it('expands path to stage', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const nodes: FlowNode[] = [field, stage];
       const expandField = vi.fn();
       const expandStage = vi.fn();
@@ -200,7 +200,7 @@ describe('scrollHelpers', () => {
   describe('scrollToElementWithExpansion', () => {
     it('scrolls to stage with expansion', async () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const nodes: FlowNode[] = [field, stage];
       const expandField = vi.fn();
       const expandStage = vi.fn();
@@ -273,7 +273,7 @@ describe('scrollHelpers', () => {
 
     it('calls expandField and expandStage with correct IDs', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game = createGame('game1', 'Match 1', 'stage1');
       const nodes: FlowNode[] = [field, stage, game];
       const expandField = vi.fn();
@@ -288,7 +288,7 @@ describe('scrollHelpers', () => {
 
     it('expands path for game in nested hierarchy', () => {
       const field = createField('field2', 'Feld 2', 1);
-      const stage = createStage('stage3', 'Finalrunde', 2, 'field2');
+      const stage = createStage('stage3', 'Final', 2, 'field2');
       const game = createGame('game5', 'Final', 'stage3');
       const nodes: FlowNode[] = [field, stage, game];
       const expandField = vi.fn();
@@ -304,8 +304,8 @@ describe('scrollHelpers', () => {
     it('handles multiple games and expands the correct path', () => {
       const field1 = createField('field1', 'Feld 1', 0);
       const field2 = createField('field2', 'Feld 2', 1);
-      const stage1 = createStage('stage1', 'Vorrunde', 0, 'field1');
-      const stage2 = createStage('stage2', 'Finalrunde', 1, 'field2');
+      const stage1 = createStage('stage1', 'Preliminary', 0, 'field1');
+      const stage2 = createStage('stage2', 'Final', 1, 'field2');
       const game1 = createGame('game1', 'Match 1', 'stage1');
       const game2 = createGame('game2', 'Final', 'stage2');
       const nodes: FlowNode[] = [field1, field2, stage1, stage2, game1, game2];
@@ -568,7 +568,7 @@ describe('scrollHelpers', () => {
 
     it('expands path, waits for element, and scrolls', async () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game = createGame('game1', 'Match 1', 'stage1');
       const nodes: FlowNode[] = [field, stage, game];
       const expandField = vi.fn();
@@ -596,7 +596,7 @@ describe('scrollHelpers', () => {
 
     it('waits for element to appear after expansion', async () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game = createGame('game1', 'Match 1', 'stage1');
       const nodes: FlowNode[] = [field, stage, game];
       const expandField = vi.fn();
@@ -623,7 +623,7 @@ describe('scrollHelpers', () => {
 
     it('uses auto scroll when smooth is false', async () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game = createGame('game1', 'Match 1', 'stage1');
       const nodes: FlowNode[] = [field, stage, game];
       const expandField = vi.fn();
@@ -647,7 +647,7 @@ describe('scrollHelpers', () => {
 
     it('does not scroll if element never appears', async () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game = createGame('game1', 'Match 1', 'stage1');
       const nodes: FlowNode[] = [field, stage, game];
       const expandField = vi.fn();

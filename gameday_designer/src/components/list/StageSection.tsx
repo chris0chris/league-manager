@@ -35,7 +35,8 @@ export interface StageSectionProps {
   onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
   onAddGame: (stageId: string) => void;
   onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
-  onRemoveGameToGameEdge: (targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   isExpanded: boolean;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
@@ -55,7 +56,8 @@ const StageSection: React.FC<StageSectionProps> = memo(({
   onAssignTeam,
   onAddGame,
   onAddGameToGameEdge,
-  onRemoveGameToGameEdge,
+  onAddStageToGameEdge,
+  onRemoveEdgeFromSlot,
   isExpanded: isExpandedProp,
   highlightedSourceGameId,
   onDynamicReferenceClick,
@@ -140,6 +142,11 @@ const StageSection: React.FC<StageSectionProps> = memo(({
     onUpdate(stage.id, { color: e.target.value });
   }, [stage.id, onUpdate]);
 
+  const handleStageTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    e.stopPropagation();
+    onUpdate(stage.id, { stageType: e.target.value as 'STANDARD' | 'RANKING' });
+  }, [stage.id, onUpdate]);
+
   return (
     <Card 
       id={`stage-${stage.id}`}
@@ -155,7 +162,7 @@ const StageSection: React.FC<StageSectionProps> = memo(({
       >
         <i className={`bi ${isExpanded ? ICONS.EXPANDED : ICONS.COLLAPSED} me-2`}></i>
 
-        <div className="d-flex align-items-center gap-2 me-2">
+        <div className="d-flex align-items-center gap-2 me-3">
           <Form.Label htmlFor={`stage-start-${stage.id}`} className="mb-0 text-muted small">{t('ui:label.start')}:</Form.Label>
           <Form.Control
             id={`stage-start-${stage.id}`}
@@ -166,6 +173,21 @@ const StageSection: React.FC<StageSectionProps> = memo(({
             onClick={(e) => e.stopPropagation()}
             style={{ width: '110px' }}
           />
+        </div>
+
+        <div className="d-flex align-items-center gap-2 me-3">
+          <Form.Label htmlFor={`stage-type-${stage.id}`} className="mb-0 text-muted small">{t('ui:label.type') || 'Type'}:</Form.Label>
+          <Form.Select
+            id={`stage-type-${stage.id}`}
+            size="sm"
+            value={stage.data.stageType || 'STANDARD'}
+            onChange={handleStageTypeChange}
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: '140px' }}
+          >
+            <option value="STANDARD">{t('domain:stageTypeStandard')}</option>
+            <option value="RANKING">{t('domain:stageTypeRanking')}</option>
+          </Form.Select>
         </div>
 
         {isEditingName ? (
@@ -266,7 +288,8 @@ const StageSection: React.FC<StageSectionProps> = memo(({
                   selectedNodeId={selectedNodeId}
                   onAssignTeam={onAssignTeam}
                   onAddGameToGameEdge={onAddGameToGameEdge}
-                  onRemoveGameToGameEdge={onRemoveGameToGameEdge}
+                  onAddStageToGameEdge={onAddStageToGameEdge}
+                  onRemoveEdgeFromSlot={onRemoveEdgeFromSlot}
                   highlightedSourceGameId={highlightedSourceGameId}
                   onDynamicReferenceClick={onDynamicReferenceClick}
                 />

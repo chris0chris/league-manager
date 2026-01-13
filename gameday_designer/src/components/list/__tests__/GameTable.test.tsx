@@ -43,7 +43,7 @@ describe('GameTable', () => {
 
     // Create basic structure
     field1 = createFieldNode('field-1', { name: 'Field 1', order: 0 });
-    stage1 = createStageNode('stage-1', 'field-1', { name: 'Stage 1', stageType: 'vorrunde', order: 0 });
+    stage1 = createStageNode('stage-1', 'field-1', { name: 'Stage 1', category: 'preliminary', order: 0 });
     game1 = createGameNodeInStage('game-1', 'stage-1', { standing: 'Game 1', breakAfter: 10 });
     game2 = createGameNodeInStage('game-2', 'stage-1', { standing: 'Game 2', startTime: '10:00', manualTime: true });
 

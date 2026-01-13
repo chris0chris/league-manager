@@ -12,7 +12,7 @@ import type {
   StageNode,
   FieldNode,
 } from '../types/flowchart';
-import { isGameNode, isStageNode, isFieldNode } from '../types/flowchart';
+import { isGameNode, isStageNode, isFieldNode, isStageToGameEdge } from '../types/flowchart';
 
 /**
  * Find the source game for a dynamic team reference.
@@ -34,7 +34,7 @@ export function findSourceGameForReference(
 ): GameNode | null {
   // Find edge targeting this game's slot
   const edge = edges.find(
-    (e) => e.target === targetGameId && e.targetHandle === slot
+    (e) => e.target === targetGameId && e.targetHandle === slot && e.type === 'gameToGame'
   );
 
   if (!edge) return null;
@@ -42,6 +42,40 @@ export function findSourceGameForReference(
   // Find source game node
   const sourceNode = nodes.find((n) => n.id === edge.source);
   return sourceNode && isGameNode(sourceNode) ? sourceNode : null;
+}
+
+/**
+ * Find the source stage for a dynamic team reference (Ranking Stage).
+ *
+ * @param targetGameId - ID of the game receiving the team
+ * @param slot - Which slot on the target game ('home' or 'away')
+ * @param edges - All edges in the flowchart
+ * @param nodes - All nodes in the flowchart
+ * @returns The source stage node and rank, or null if not found
+ */
+export function findSourceStageForReference(
+  targetGameId: string,
+  slot: 'home' | 'away',
+  edges: FlowEdge[],
+  nodes: FlowNode[]
+): { stage: StageNode; rank: number } | null {
+  // Find edge targeting this game's slot
+  const edge = edges.find(
+    (e) => e.target === targetGameId && e.targetHandle === slot && isStageToGameEdge(e)
+  );
+
+  if (!edge || !isStageToGameEdge(edge)) return null;
+
+  // Find source stage node
+  const sourceNode = nodes.find((n) => n.id === edge.source);
+  if (sourceNode && isStageNode(sourceNode)) {
+    return {
+      stage: sourceNode as StageNode,
+      rank: edge.data.sourceRank
+    };
+  }
+  
+  return null;
 }
 
 /**

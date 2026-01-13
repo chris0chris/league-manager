@@ -104,8 +104,8 @@ const EditorForm: React.FC<EditorFormProps> = ({
             <Form.Group controlId="stage">
               <Form.Label>{t('ui:label.stage')}</Form.Label>
               <Form.Select value={stage} onChange={handleStageChange}>
-                <option value="Vorrunde">{t('domain:vorrunde')}</option>
-                <option value="Finalrunde">{t('domain:finalrunde')}</option>
+                <option value="Preliminary">{t('domain:preliminary')}</option>
+                <option value="Final">{t('domain:final')}</option>
               </Form.Select>
             </Form.Group>
           </Col>

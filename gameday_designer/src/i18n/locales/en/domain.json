@@ -9,11 +9,13 @@
   "teams": "Teams",
   "group": "Group",
   "groups": "Groups",
-  "vorrunde": "Preliminary Round",
-  "finalrunde": "Final Round",
+  "preliminary": "Preliminary Round",
+  "final": "Final Round",
   "minute": "Minute",
   "minutes": "Minutes",
   "firstGame": "First Game",
   "teamPool": "Team Pool",
-  "globalTeamPool": "Global Team Pool"
+  "globalTeamPool": "Global Team Pool",
+  "stageTypeStandard": "Standard Stage",
+  "stageTypeRanking": "Ranking Stage"
 }

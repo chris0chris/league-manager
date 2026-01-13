@@ -36,7 +36,8 @@ export interface FieldSectionProps {
   onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
   onAddGame: (stageId: string) => void;
   onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
-  onRemoveGameToGameEdge: (targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   isExpanded: boolean;
   expandedStageIds: Set<string>;
   highlightedSourceGameId?: string | null;
@@ -59,7 +60,8 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
   onAssignTeam,
   onAddGame,
   onAddGameToGameEdge,
-  onRemoveGameToGameEdge,
+  onAddStageToGameEdge,
+  onRemoveEdgeFromSlot,
   isExpanded: isExpandedProp,
   expandedStageIds,
   highlightedSourceGameId,
@@ -252,7 +254,8 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
                   onAssignTeam={onAssignTeam}
                   onAddGame={onAddGame}
                   onAddGameToGameEdge={onAddGameToGameEdge}
-                  onRemoveGameToGameEdge={onRemoveGameToGameEdge}
+                  onAddStageToGameEdge={onAddStageToGameEdge}
+                  onRemoveEdgeFromSlot={onRemoveEdgeFromSlot}
                   isExpanded={expandedStageIds.has(stage.id)}
                   highlightedSourceGameId={highlightedSourceGameId}
                   onDynamicReferenceClick={onDynamicReferenceClick}

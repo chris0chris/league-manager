@@ -100,8 +100,10 @@ export interface TeamNodeData {
 export interface GameNodeData {
   /** Node type discriminator */
   type: 'game';
-  /** Tournament stage: "Vorrunde", "Finalrunde", or custom */
+  /** Tournament stage: "Preliminary", "Final", or custom */
   stage: string;
+  /** Stage type discriminator: "STANDARD" or "RANKING" */
+  stageType: 'STANDARD' | 'RANKING';
   /** Standing/match identifier: e.g., "HF1", "P1", "Spiel 3" */
   standing: string;
   /** Assigned field ID (null if unassigned) - deprecated in v2, use parentId hierarchy */
@@ -135,9 +137,14 @@ export interface GameNodeData {
 // ============================================================================
 
 /**
- * Stage type enumeration for ordering stages within a field.
+ * Stage category enumeration for ordering stages within a field.
  */
-export type StageType = 'vorrunde' | 'finalrunde' | 'platzierung' | 'custom';
+export type StageCategory = 'preliminary' | 'final' | 'placement' | 'custom';
+
+/**
+ * Stage type discriminator for ranking logic.
+ */
+export type StageType = 'STANDARD' | 'RANKING';
 
 /**
  * Progression mode for game generation templates (Phase 2).
@@ -206,9 +213,11 @@ export interface FieldNodeData {
 export interface StageNodeData {
   /** Node type discriminator */
   type: 'stage';
-  /** Display name (e.g., "Vorrunde", "Finalrunde") */
+  /** Display name (e.g., "Preliminary", "Final") */
   name: string;
   /** Stage category for ordering */
+  category: StageCategory;
+  /** Stage type discriminator for ranking logic */
   stageType: StageType;
   /** Order within parent field */
   order: number;
@@ -284,6 +293,12 @@ export type GameOutputHandle = 'winner' | 'loser';
 export type TeamOutputHandle = 'output';
 
 /**
+ * Handle IDs for stage node connections (Ranking Stages).
+ * Format: rank-1, rank-2, etc.
+ */
+export type RankOutputHandle = `rank-${number}`;
+
+/**
  * Data for an edge connecting a team to a game input.
  */
 export interface TeamToGameEdgeData {
@@ -297,6 +312,16 @@ export interface TeamToGameEdgeData {
 export interface GameToGameEdgeData {
   /** Source port on the source game node */
   sourcePort: GameOutputHandle;
+  /** Target port on the target game node */
+  targetPort: GameInputHandle;
+}
+
+/**
+ * Data for an edge connecting a stage rank to a game input.
+ */
+export interface StageToGameEdgeData {
+  /** Source rank on the source stage node (1-indexed) */
+  sourceRank: number;
   /** Target port on the target game node */
   targetPort: GameInputHandle;
 }
@@ -323,9 +348,19 @@ export interface GameToGameEdge extends Edge {
 }
 
 /**
+ * Edge connecting a stage node (Ranking Stage) to a game node.
+ */
+export interface StageToGameEdge extends Edge {
+  type: 'stageToGame';
+  sourceHandle: RankOutputHandle;
+  targetHandle: GameInputHandle;
+  data: StageToGameEdgeData;
+}
+
+/**
  * Union type for all edge types used in the designer.
  */
-export type FlowEdge = GameToGameEdge;
+export type FlowEdge = GameToGameEdge | StageToGameEdge;
 
 // ============================================================================
 // Field Types (Simplified from slot-based approach)
@@ -549,6 +584,13 @@ export function isGameToGameEdge(edge: FlowEdge): edge is GameToGameEdge {
   return edge.type === 'gameToGame';
 }
 
+/**
+ * Type guard to check if an edge is a StageToGameEdge.
+ */
+export function isStageToGameEdge(edge: FlowEdge): edge is StageToGameEdge {
+  return edge.type === 'stageToGame';
+}
+
 // ============================================================================
 // Factory Functions
 // ============================================================================
@@ -569,7 +611,8 @@ export function createGameNode(
     position,
     data: {
       type: 'game',
-      stage: options.stage ?? 'Vorrunde',
+      stage: options.stage ?? 'Preliminary',
+      stageType: options.stageType ?? 'STANDARD',
       standing: options.standing ?? '',
       fieldId: options.fieldId ?? null,
       official: options.official ?? null,
@@ -640,8 +683,9 @@ export function createStageNode(
     position,
     data: {
       type: 'stage',
-      name: options?.name ?? 'Vorrunde',
-      stageType: options?.stageType ?? 'vorrunde',
+      name: options?.name ?? 'Preliminary',
+      category: options?.category ?? 'preliminary',
+      stageType: options?.stageType ?? 'STANDARD',
       order: options?.order ?? 0,
       color: options?.color,
       // Time scheduling fields (Phase 1)
@@ -682,7 +726,8 @@ export function createGameNodeInStage(
     position,
     data: {
       type: 'game',
-      stage: options?.stage ?? 'Vorrunde',
+      stage: options?.stage ?? 'Preliminary',
+      stageType: options?.stageType ?? 'STANDARD',
       standing: options?.standing ?? '',
       fieldId: options?.fieldId ?? null,
       official: options?.official ?? null,
@@ -727,6 +772,30 @@ export function createGameToGameEdge(
     targetHandle: targetPort,
     data: {
       sourcePort,
+      targetPort,
+    },
+  };
+}
+
+/**
+ * Creates a new stage-to-game edge.
+ */
+export function createStageToGameEdge(
+  id: string,
+  sourceStageId: string,
+  sourceRank: number,
+  targetGameId: string,
+  targetPort: GameInputHandle
+): StageToGameEdge {
+  return {
+    id,
+    type: 'stageToGame',
+    source: sourceStageId,
+    target: targetGameId,
+    sourceHandle: `rank-${sourceRank}`,
+    targetHandle: targetPort,
+    data: {
+      sourceRank,
       targetPort,
     },
   };

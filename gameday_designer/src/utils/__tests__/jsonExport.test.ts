@@ -28,7 +28,7 @@ describe('exportToJson', () => {
             gameSlots: [
               {
                 id: 'slot-1',
-                stage: 'Vorrunde',
+                stage: 'Preliminary',
                 standing: 'Spiel 1',
                 home: { type: 'groupTeam', group: 0, team: 0 },
                 away: { type: 'groupTeam', group: 0, team: 1 },
@@ -48,7 +48,7 @@ describe('exportToJson', () => {
       expect(result[0].field).toBe('Feld 1');
       expect(result[0].games).toHaveLength(1);
       expect(result[0].games[0]).toEqual({
-        stage: 'Vorrunde',
+        stage: 'Preliminary',
         standing: 'Spiel 1',
         home: '0_0',
         away: '0_1',
@@ -66,7 +66,7 @@ describe('exportToJson', () => {
             gameSlots: [
               {
                 id: 'slot-1',
-                stage: 'Vorrunde',
+                stage: 'Preliminary',
                 standing: 'Spiel 1',
                 home: { type: 'groupTeam', group: 0, team: 0 },
                 away: { type: 'groupTeam', group: 0, team: 1 },
@@ -75,7 +75,7 @@ describe('exportToJson', () => {
               },
               {
                 id: 'slot-2',
-                stage: 'Vorrunde',
+                stage: 'Preliminary',
                 standing: 'Spiel 2',
                 home: { type: 'groupTeam', group: 0, team: 2 },
                 away: { type: 'groupTeam', group: 0, team: 3 },
@@ -91,7 +91,7 @@ describe('exportToJson', () => {
             gameSlots: [
               {
                 id: 'slot-3',
-                stage: 'Finalrunde',
+                stage: 'Final',
                 standing: 'HF1',
                 home: { type: 'winner', matchName: 'Spiel 1' },
                 away: { type: 'winner', matchName: 'Spiel 2' },
@@ -236,7 +236,7 @@ describe('exportToJson', () => {
             gameSlots: [
               {
                 id: 'slot-1',
-                stage: 'Vorrunde',
+                stage: 'Preliminary',
                 standing: 'Spiel 1',
                 home: { type: 'groupTeam', group: 0, team: 0 },
                 away: { type: 'groupTeam', group: 0, team: 1 },
@@ -245,7 +245,7 @@ describe('exportToJson', () => {
               },
               {
                 id: 'slot-2',
-                stage: 'Vorrunde',
+                stage: 'Preliminary',
                 standing: 'Spiel 2',
                 home: { type: 'groupTeam', group: 0, team: 2 },
                 away: { type: 'groupTeam', group: 0, team: 3 },
@@ -254,7 +254,7 @@ describe('exportToJson', () => {
               },
               {
                 id: 'slot-3',
-                stage: 'Finalrunde',
+                stage: 'Final',
                 standing: 'Spiel 3',
                 home: { type: 'loser', matchName: 'Spiel 1' },
                 away: { type: 'loser', matchName: 'Spiel 2' },
@@ -263,7 +263,7 @@ describe('exportToJson', () => {
               },
               {
                 id: 'slot-4',
-                stage: 'Finalrunde',
+                stage: 'Final',
                 standing: 'Spiel 4',
                 home: { type: 'winner', matchName: 'Spiel 1' },
                 away: { type: 'winner', matchName: 'Spiel 2' },
@@ -272,7 +272,7 @@ describe('exportToJson', () => {
               },
               {
                 id: 'slot-5',
-                stage: 'Finalrunde',
+                stage: 'Final',
                 standing: 'Spiel 5',
                 home: { type: 'loser', matchName: 'Spiel 4' },
                 away: { type: 'winner', matchName: 'Spiel 3' },
@@ -281,7 +281,7 @@ describe('exportToJson', () => {
               },
               {
                 id: 'slot-6',
-                stage: 'Finalrunde',
+                stage: 'Final',
                 standing: 'P1',
                 home: { type: 'winner', matchName: 'Spiel 5' },
                 away: { type: 'winner', matchName: 'Spiel 4' },
@@ -303,42 +303,42 @@ describe('exportToJson', () => {
           field: '1',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 1',
               home: '0_0',
               away: '0_1',
               official: '0_2',
             },
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 2',
               home: '0_2',
               away: '0_3',
               official: '0_0',
             },
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'Spiel 3',
               home: 'Verlierer Spiel 1',
               away: 'Verlierer Spiel 2',
               official: 'Gewinner Spiel 1',
             },
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'Spiel 4',
               home: 'Gewinner Spiel 1',
               away: 'Gewinner Spiel 2',
               official: 'Verlierer Spiel 3',
             },
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'Spiel 5',
               home: 'Verlierer Spiel 4',
               away: 'Gewinner Spiel 3',
               official: 'Verlierer Spiel 3',
             },
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'P1',
               home: 'Gewinner Spiel 5',
               away: 'Gewinner Spiel 4',
@@ -361,7 +361,7 @@ describe('importFromJson', () => {
           field: '1',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 1',
               home: '0_0',
               away: '0_1',
@@ -376,7 +376,7 @@ describe('importFromJson', () => {
       expect(result.fields).toHaveLength(1);
       expect(result.fields[0].name).toBe('1');
       expect(result.fields[0].gameSlots).toHaveLength(1);
-      expect(result.fields[0].gameSlots[0].stage).toBe('Vorrunde');
+      expect(result.fields[0].gameSlots[0].stage).toBe('Preliminary');
       expect(result.fields[0].gameSlots[0].standing).toBe('Spiel 1');
     });
 
@@ -386,7 +386,7 @@ describe('importFromJson', () => {
           field: 'Field A',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Game 1',
               home: '0_0',
               away: '0_1',
@@ -398,7 +398,7 @@ describe('importFromJson', () => {
           field: 'Field B',
           games: [
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'Final',
               home: 'Gewinner Game 1',
               away: 'P1 Gruppe 1',
@@ -431,7 +431,7 @@ describe('importFromJson', () => {
           field: '1',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 1',
               home: '1_3',
               away: '2_0',
@@ -455,7 +455,7 @@ describe('importFromJson', () => {
           field: '1',
           games: [
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'HF1',
               home: 'P1 Gruppe 1',
               away: 'P2 Gruppe 2',
@@ -491,7 +491,7 @@ describe('importFromJson', () => {
           field: '1',
           games: [
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'Final',
               home: 'Gewinner HF1',
               away: 'Gewinner HF2',
@@ -515,7 +515,7 @@ describe('importFromJson', () => {
           field: '1',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Exhibition',
               home: 'Team A',
               away: 'Team B',
@@ -541,7 +541,7 @@ describe('importFromJson', () => {
           field: '1',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 1',
               home: '0_0',
               away: '0_1',
@@ -563,7 +563,7 @@ describe('importFromJson', () => {
           field: '1',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 1',
               home: '0_0',
               away: '0_1',
@@ -627,14 +627,14 @@ describe('importFromJson', () => {
           field: '1',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 1',
               home: '0_0',
               away: '0_1',
               official: '0_2',
             },
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 2',
               home: '0_2',
               away: '0_3',
@@ -674,7 +674,7 @@ describe('importFromJson', () => {
           field: '1',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 1',
               home: '0_0',
               away: '0_1',
@@ -695,7 +695,7 @@ describe('importFromJson', () => {
           field: '1',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 1',
               home: '0_0',
               away: '0_1',
@@ -721,7 +721,7 @@ describe('validateScheduleJson', () => {
         field: '1',
         games: [
           {
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             standing: 'Spiel 1',
             home: '0_0',
             away: '0_1',
@@ -783,7 +783,7 @@ describe('validateScheduleJson', () => {
         field: '1',
         games: [
           {
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             // missing standing, home, away, official
           } as unknown as { stage: string; standing: string; home: string; away: string; official: string },
         ],
@@ -815,14 +815,14 @@ describe('round-trip import/export', () => {
         field: '1',
         games: [
           {
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             standing: 'Spiel 1',
             home: '0_0',
             away: '0_1',
             official: '0_2',
           },
           {
-            stage: 'Finalrunde',
+            stage: 'Final',
             standing: 'P1',
             home: 'Gewinner Spiel 1',
             away: 'P1 Gruppe 1',
@@ -844,7 +844,7 @@ describe('round-trip import/export', () => {
         field: '1',
         games: [
           {
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             standing: 'Spiel 1',
             home: '0_0',
             away: '0_1',
@@ -873,7 +873,7 @@ function createStateWithGame(
 ): DesignerState {
   const slot: GameSlot = {
     id: 'test-slot',
-    stage: 'Vorrunde',
+    stage: 'Preliminary',
     standing: 'Test',
     home: overrides.home ?? { type: 'static', name: '' },
     away: overrides.away ?? { type: 'static', name: '' },
@@ -902,7 +902,7 @@ describe('validateScheduleJson - Additional Coverage', () => {
         field: 'Field 1',
         games: [
           {
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             standing: 123, // Should be string
             home: '0_0',
             away: '0_1',
@@ -924,7 +924,7 @@ describe('validateScheduleJson - Additional Coverage', () => {
         field: 'Field 1',
         games: [
           {
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             standing: 'Spiel 1',
             home: '0_0',
             away: '0_1',
@@ -947,7 +947,7 @@ describe('validateScheduleJson - Additional Coverage', () => {
         field: 'Field 1',
         games: [
           {
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             standing: 'Spiel 1',
             home: '0_0',
             away: '0_1',
@@ -1096,7 +1096,7 @@ describe('downloadScheduleJson', () => {
 function createGameSlot(standing: string): GameSlot {
   return {
     id: `slot-${standing}`,
-    stage: 'Vorrunde',
+    stage: 'Preliminary',
     standing,
     home: { type: 'static', name: '' },
     away: { type: 'static', name: '' },

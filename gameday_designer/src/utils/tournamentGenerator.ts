@@ -11,14 +11,17 @@ import {
   FieldNode,
   StageNode,
   GameNode,
-  GameToGameEdge,
+  FlowEdge,
   GlobalTeam,
   RoundRobinConfig,
   PlacementConfig,
+  createGameToGameEdge,
+  createStageToGameEdge,
 } from '../types/flowchart';
 import { createFieldNode, createStageNode } from '../types/flowchart';
 import { generateRoundRobinGames, generatePlacementGames } from './gameGenerators';
 import { calculateGameTimes } from './timeCalculation';
+import { createPlacementEdges } from './bracketEdgeGenerator';
 
 /**
  * Complete tournament structure
@@ -27,7 +30,7 @@ export interface TournamentStructure {
   fields: FieldNode[];
   stages: StageNode[];
   games: GameNode[];
-  edges: GameToGameEdge[];
+  edges: FlowEdge[];
 }
 
 /**
@@ -87,9 +90,65 @@ export function generateTournament(
     return stage;
   });
 
-  // 5. Create progression edges (winner/loser flows)
-  // MVP: Manual edge creation via UI
-  const edges: GameToGameEdge[] = [];
+  // 5. Create progression edges (winner/loser/rank flows)
+  const edges: FlowEdge[] = [];
+  
+  stages.forEach(stage => {
+    const stageData = stage.data;
+    if (stageData.progressionMode === 'placement' || stageData.progressionMapping) {
+      // Find source games (from all previously generated games)
+      const targetGames = games.filter(g => g.parentId === stage.id);
+      
+      // Resolve sourceStageIndex to actual stage ID if present in mapping
+      let resolvedMapping = stageData.progressionMapping;
+      if (resolvedMapping) {
+        resolvedMapping = { ...resolvedMapping };
+        Object.keys(resolvedMapping).forEach(standing => {
+          const mapping = resolvedMapping![standing];
+          if (mapping.home.type === 'rank' && mapping.home.sourceStageId === undefined) {
+            // This is a template reference using sourceIndex as stage index
+            // For now, we assume stage order in template matches stage order in generated list
+            // but filtered by the template's own stage definition.
+            // Simplified: we look at stages created before this one.
+            const sourceStage = stages.find(s => s.data.order === (mapping.home as any).sourceStageIndex);
+            if (sourceStage) mapping.home.sourceStageId = sourceStage.id;
+          }
+          if (mapping.away.type === 'rank' && mapping.away.sourceStageId === undefined) {
+            const sourceStage = stages.find(s => s.data.order === (mapping.away as any).sourceStageIndex);
+            if (sourceStage) mapping.away.sourceStageId = sourceStage.id;
+          }
+        });
+      }
+
+      const edgeSpecs = createPlacementEdges(
+        targetGames,
+        games, 
+        stageData.progressionConfig,
+        resolvedMapping
+      );
+
+      edgeSpecs.forEach(spec => {
+        const edgeId = `edge-${uuidv4()}`;
+        if (spec.outputType === 'rank' && spec.sourceStageId) {
+          edges.push(createStageToGameEdge(
+            edgeId,
+            spec.sourceStageId,
+            spec.sourceRank!,
+            spec.targetGameId,
+            spec.targetSlot
+          ));
+        } else if (spec.sourceGameId) {
+          edges.push(createGameToGameEdge(
+            edgeId,
+            spec.sourceGameId,
+            spec.outputType as 'winner' | 'loser',
+            spec.targetGameId,
+            spec.targetSlot
+          ));
+        }
+      });
+    }
+  });
 
   return { fields, stages, games, edges };
 }

@@ -22,7 +22,7 @@ describe('GameSlotCard', () => {
 
   const defaultGameSlot: GameSlot = {
     id: 'slot-1',
-    stage: 'Vorrunde',
+    stage: 'Preliminary',
     standing: 'Gruppe 1',
     home: { type: 'groupTeam', group: 0, team: 0 },
     away: { type: 'groupTeam', group: 0, team: 1 },
@@ -52,7 +52,7 @@ describe('GameSlotCard', () => {
   describe('display', () => {
     it('displays the stage', () => {
       renderGameSlotCard();
-      expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+      expect(screen.getByText('Preliminary')).toBeInTheDocument();
     });
 
     it('displays the standing', () => {

@@ -60,6 +60,7 @@ class TemplateSlotSerializer(serializers.ModelSerializer):
             "field",
             "slot_order",
             "stage",
+            "stage_type",
             "standing",
             "home_group",
             "home_team",

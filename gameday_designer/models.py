@@ -93,12 +93,20 @@ class TemplateSlot(models.Model):
       - Reference string (e.g., "Gewinner HF1") for final rounds determined by earlier results
     """
 
+    STAGE_TYPE_CHOICES = [
+        ("STANDARD", "Standard Stage"),
+        ("RANKING", "Ranking Stage"),
+    ]
+
     template = models.ForeignKey(
         ScheduleTemplate, on_delete=CASCADE, related_name="slots"
     )
     field = models.PositiveIntegerField()
     slot_order = models.PositiveIntegerField()
-    stage = models.CharField(max_length=50)  # "Vorrunde", "Finalrunde"
+    stage = models.CharField(max_length=50)  # "Preliminary", "Final"
+    stage_type = models.CharField(
+        max_length=20, choices=STAGE_TYPE_CHOICES, default="STANDARD"
+    )
     standing = models.CharField(max_length=100)  # "Gruppe 1", "HF", "P1", etc.
 
     # Home team placeholder (either group/team OR reference, not both)

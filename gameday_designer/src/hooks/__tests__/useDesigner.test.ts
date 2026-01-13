@@ -255,7 +255,7 @@ describe('useDesigner', () => {
 
       const slot = result.current.state.fields[0].gameSlots[0];
 
-      expect(slot.stage).toBe('Vorrunde');
+      expect(slot.stage).toBe('Preliminary');
       expect(slot.standing).toBe('');
       expect(slot.home.type).toBe('static');
       expect(slot.away.type).toBe('static');
@@ -363,11 +363,11 @@ describe('useDesigner', () => {
       const slotId = result.current.state.fields[0].gameSlots[0].id;
 
       act(() => {
-        result.current.updateGameSlot(slotId, { stage: 'Finalrunde' });
+        result.current.updateGameSlot(slotId, { stage: 'Final' });
       });
 
       expect(result.current.state.fields[0].gameSlots[0].stage).toBe(
-        'Finalrunde'
+        'Final'
       );
     });
 
@@ -433,14 +433,14 @@ describe('useDesigner', () => {
 
       act(() => {
         result.current.updateGameSlot(slotId, {
-          stage: 'Finalrunde',
+          stage: 'Final',
           standing: 'P1',
           breakAfter: 5,
         });
       });
 
       const slot = result.current.state.fields[0].gameSlots[0];
-      expect(slot.stage).toBe('Finalrunde');
+      expect(slot.stage).toBe('Final');
       expect(slot.standing).toBe('P1');
       expect(slot.breakAfter).toBe(5);
     });
@@ -460,12 +460,12 @@ describe('useDesigner', () => {
 
       act(() => {
         result.current.updateGameSlot('non-existent-slot', {
-          stage: 'Finalrunde',
+          stage: 'Final',
         });
       });
 
       expect(result.current.state.fields[0].gameSlots[0].stage).toBe(
-        'Vorrunde'
+        'Preliminary'
       );
     });
   });
@@ -488,7 +488,7 @@ describe('useDesigner', () => {
 
       act(() => {
         result.current.updateGameSlot(slotId, {
-          stage: 'Finalrunde',
+          stage: 'Final',
           standing: 'HF1',
         });
       });
@@ -543,7 +543,7 @@ describe('useDesigner', () => {
 
       act(() => {
         result.current.updateGameSlot(slotId, {
-          stage: 'Finalrunde',
+          stage: 'Final',
           standing: 'HF1',
           home: homeRef,
           away: awayRef,
@@ -557,7 +557,7 @@ describe('useDesigner', () => {
       });
 
       const duplicate = result.current.state.fields[0].gameSlots[1];
-      expect(duplicate.stage).toBe('Finalrunde');
+      expect(duplicate.stage).toBe('Final');
       expect(duplicate.standing).toBe('HF1');
       expect(duplicate.home).toEqual(homeRef);
       expect(duplicate.away).toEqual(awayRef);
@@ -719,7 +719,7 @@ describe('useDesigner', () => {
             gameSlots: [
               {
                 id: 'imported-slot-1',
-                stage: 'Vorrunde',
+                stage: 'Preliminary',
                 standing: 'Spiel 1',
                 home: { type: 'groupTeam' as const, group: 0, team: 0 },
                 away: { type: 'groupTeam' as const, group: 0, team: 1 },

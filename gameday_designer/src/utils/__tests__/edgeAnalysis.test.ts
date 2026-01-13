@@ -139,7 +139,7 @@ describe('edgeAnalysis', () => {
     });
 
     it('returns null when source node is not a game node', () => {
-      const stage1 = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage1 = createStage('stage1', 'Preliminary', 0, 'field1');
       const game2 = createGame('game2', 'Match 2', 'stage1');
       const nodes: FlowNode[] = [stage1, game2];
       const edges: FlowEdge[] = [
@@ -277,7 +277,7 @@ describe('edgeAnalysis', () => {
     });
 
     it('returns null when stage has no parent field', () => {
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game = createGame('game1', 'Match 1', 'stage1');
       // Stage references field1 but field1 doesn't exist
       const nodes: FlowNode[] = [stage, game];
@@ -289,7 +289,7 @@ describe('edgeAnalysis', () => {
 
     it('returns complete path when all hierarchy exists', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game = createGame('game1', 'Match 1', 'stage1');
       const nodes: FlowNode[] = [field, stage, game];
 
@@ -305,8 +305,8 @@ describe('edgeAnalysis', () => {
     it('works with complex hierarchy across multiple fields', () => {
       const field1 = createField('field1', 'Feld 1', 0);
       const field2 = createField('field2', 'Feld 2', 1);
-      const stage1 = createStage('stage1', 'Vorrunde', 0, 'field1');
-      const stage2 = createStage('stage2', 'Finalrunde', 1, 'field2');
+      const stage1 = createStage('stage1', 'Preliminary', 0, 'field1');
+      const stage2 = createStage('stage2', 'Final', 1, 'field2');
       const game1 = createGame('game1', 'Match 1', 'stage1');
       const game2 = createGame('game2', 'Final', 'stage2');
       const nodes: FlowNode[] = [field1, field2, stage1, stage2, game1, game2];
@@ -329,7 +329,7 @@ describe('edgeAnalysis', () => {
     });
 
     it('returns null when stage parentId is null', () => {
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       stage.parentId = undefined;
       const game = createGame('game1', 'Match 1', 'stage1');
       const nodes: FlowNode[] = [stage, game];
@@ -351,7 +351,7 @@ describe('edgeAnalysis', () => {
 
     it('returns true when both games are in the same stage', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game1 = createGame('game1', 'Match 1', 'stage1');
       const game2 = createGame('game2', 'Match 2', 'stage1');
       const nodes: FlowNode[] = [field, stage, game1, game2];
@@ -363,8 +363,8 @@ describe('edgeAnalysis', () => {
 
     it('returns false when games are in different stages', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage1 = createStage('stage1', 'Vorrunde', 0, 'field1');
-      const stage2 = createStage('stage2', 'Finalrunde', 1, 'field1');
+      const stage1 = createStage('stage1', 'Preliminary', 0, 'field1');
+      const stage2 = createStage('stage2', 'Final', 1, 'field1');
       const game1 = createGame('game1', 'Match 1', 'stage1');
       const game2 = createGame('game2', 'Final', 'stage2');
       const nodes: FlowNode[] = [field, stage1, stage2, game1, game2];
@@ -377,8 +377,8 @@ describe('edgeAnalysis', () => {
     it('returns false when games are in different fields', () => {
       const field1 = createField('field1', 'Feld 1', 0);
       const field2 = createField('field2', 'Feld 2', 1);
-      const stage1 = createStage('stage1', 'Vorrunde', 0, 'field1');
-      const stage2 = createStage('stage2', 'Vorrunde', 0, 'field2');
+      const stage1 = createStage('stage1', 'Preliminary', 0, 'field1');
+      const stage2 = createStage('stage2', 'Preliminary', 0, 'field2');
       const game1 = createGame('game1', 'Match 1', 'stage1');
       const game2 = createGame('game2', 'Match 1', 'stage2');
       const nodes: FlowNode[] = [field1, field2, stage1, stage2, game1, game2];
@@ -400,7 +400,7 @@ describe('edgeAnalysis', () => {
 
     it('returns true when both games are in the same field (same stage)', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game1 = createGame('game1', 'Match 1', 'stage1');
       const game2 = createGame('game2', 'Match 2', 'stage1');
       const nodes: FlowNode[] = [field, stage, game1, game2];
@@ -412,8 +412,8 @@ describe('edgeAnalysis', () => {
 
     it('returns true when both games are in the same field (different stages)', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage1 = createStage('stage1', 'Vorrunde', 0, 'field1');
-      const stage2 = createStage('stage2', 'Finalrunde', 1, 'field1');
+      const stage1 = createStage('stage1', 'Preliminary', 0, 'field1');
+      const stage2 = createStage('stage2', 'Final', 1, 'field1');
       const game1 = createGame('game1', 'Match 1', 'stage1');
       const game2 = createGame('game2', 'Final', 'stage2');
       const nodes: FlowNode[] = [field, stage1, stage2, game1, game2];
@@ -426,8 +426,8 @@ describe('edgeAnalysis', () => {
     it('returns false when games are in different fields', () => {
       const field1 = createField('field1', 'Feld 1', 0);
       const field2 = createField('field2', 'Feld 2', 1);
-      const stage1 = createStage('stage1', 'Vorrunde', 0, 'field1');
-      const stage2 = createStage('stage2', 'Vorrunde', 0, 'field2');
+      const stage1 = createStage('stage1', 'Preliminary', 0, 'field1');
+      const stage2 = createStage('stage2', 'Preliminary', 0, 'field2');
       const game1 = createGame('game1', 'Match 1', 'stage1');
       const game2 = createGame('game2', 'Match 1', 'stage2');
       const nodes: FlowNode[] = [field1, field2, stage1, stage2, game1, game2];
@@ -448,7 +448,7 @@ describe('edgeAnalysis', () => {
     });
 
     it('returns empty array when stage has no games', () => {
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const nodes: FlowNode[] = [stage];
 
       const result = getGamesInStage('stage1', nodes);
@@ -457,7 +457,7 @@ describe('edgeAnalysis', () => {
     });
 
     it('returns all games in a stage', () => {
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game1 = createGame('game1', 'Match 1', 'stage1');
       const game2 = createGame('game2', 'Match 2', 'stage1');
       const nodes: FlowNode[] = [stage, game1, game2];
@@ -470,8 +470,8 @@ describe('edgeAnalysis', () => {
     });
 
     it('filters games from other stages', () => {
-      const stage1 = createStage('stage1', 'Vorrunde', 0, 'field1');
-      const stage2 = createStage('stage2', 'Finalrunde', 1, 'field1');
+      const stage1 = createStage('stage1', 'Preliminary', 0, 'field1');
+      const stage2 = createStage('stage2', 'Final', 1, 'field1');
       const game1 = createGame('game1', 'Match 1', 'stage1');
       const game2 = createGame('game2', 'Match 2', 'stage1');
       const game3 = createGame('game3', 'Final', 'stage2');
@@ -487,7 +487,7 @@ describe('edgeAnalysis', () => {
 
     it('handles non-game nodes in the nodes array', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game1 = createGame('game1', 'Match 1', 'stage1');
       const nodes: FlowNode[] = [field, stage, game1];
 
@@ -518,8 +518,8 @@ describe('edgeAnalysis', () => {
 
     it('returns all stages in a field', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage1 = createStage('stage1', 'Vorrunde', 0, 'field1');
-      const stage2 = createStage('stage2', 'Finalrunde', 1, 'field1');
+      const stage1 = createStage('stage1', 'Preliminary', 0, 'field1');
+      const stage2 = createStage('stage2', 'Final', 1, 'field1');
       const nodes: FlowNode[] = [field, stage1, stage2];
 
       const result = getStagesInField('field1', nodes);
@@ -532,9 +532,9 @@ describe('edgeAnalysis', () => {
     it('filters stages from other fields', () => {
       const field1 = createField('field1', 'Feld 1', 0);
       const field2 = createField('field2', 'Feld 2', 1);
-      const stage1 = createStage('stage1', 'Vorrunde', 0, 'field1');
-      const stage2 = createStage('stage2', 'Finalrunde', 1, 'field1');
-      const stage3 = createStage('stage3', 'Vorrunde', 0, 'field2');
+      const stage1 = createStage('stage1', 'Preliminary', 0, 'field1');
+      const stage2 = createStage('stage2', 'Final', 1, 'field1');
+      const stage3 = createStage('stage3', 'Preliminary', 0, 'field2');
       const nodes: FlowNode[] = [field1, field2, stage1, stage2, stage3];
 
       const result = getStagesInField('field1', nodes);
@@ -547,8 +547,8 @@ describe('edgeAnalysis', () => {
 
     it('sorts stages by order', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage1 = createStage('stage1', 'Vorrunde', 2, 'field1');
-      const stage2 = createStage('stage2', 'Finalrunde', 0, 'field1');
+      const stage1 = createStage('stage1', 'Preliminary', 2, 'field1');
+      const stage2 = createStage('stage2', 'Final', 0, 'field1');
       const stage3 = createStage('stage3', 'Halbfinale', 1, 'field1');
       const nodes: FlowNode[] = [field, stage1, stage2, stage3];
 
@@ -562,7 +562,7 @@ describe('edgeAnalysis', () => {
 
     it('handles non-stage nodes in the nodes array', () => {
       const field = createField('field1', 'Feld 1', 0);
-      const stage = createStage('stage1', 'Vorrunde', 0, 'field1');
+      const stage = createStage('stage1', 'Preliminary', 0, 'field1');
       const game = createGame('game1', 'Match 1', 'stage1');
       const nodes: FlowNode[] = [field, stage, game];
 

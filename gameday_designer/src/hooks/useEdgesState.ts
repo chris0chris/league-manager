@@ -16,7 +16,13 @@ import type {
   GameInputHandle,
   GameOutputHandle,
 } from '../types/flowchart';
-import { createGameToGameEdge, isGameNode } from '../types/flowchart';
+import {
+  createGameToGameEdge,
+  createStageToGameEdge,
+  isGameNode,
+  isStageNode,
+  StageToGameEdgeData,
+} from '../types/flowchart';
 import type { TeamReference } from '../types/designer';
 
 export function useEdgesState(
@@ -25,19 +31,26 @@ export function useEdgesState(
   setNodes: React.Dispatch<React.SetStateAction<FlowNode[]>>
 ) {
   /**
-   * Helper to derive a TeamReference from a GameToGameEdge.
+   * Helper to derive a TeamReference from an edge.
    */
   const deriveDynamicRef = useCallback((edge: FlowEdge, nodes: FlowNode[]): TeamReference | null => {
     const sourceNode = nodes.find((n) => n.id === edge.source);
-    if (!sourceNode || !isGameNode(sourceNode)) return null;
+    if (!sourceNode) return null;
 
-    const sourceGame = sourceNode as GameNode;
-    const matchName = sourceGame.data.standing || sourceNode.id;
+    if (edge.type === 'gameToGame' && isGameNode(sourceNode)) {
+      const sourceGame = sourceNode as GameNode;
+      const matchName = sourceGame.data.standing || sourceNode.id;
 
-    if (edge.sourceHandle === 'winner') {
-      return { type: 'winner', matchName };
-    } else if (edge.sourceHandle === 'loser') {
-      return { type: 'loser', matchName };
+      if (edge.sourceHandle === 'winner') {
+        return { type: 'winner', matchName };
+      } else if (edge.sourceHandle === 'loser') {
+        return { type: 'loser', matchName };
+      }
+    } else if (edge.type === 'stageToGame' && isStageNode(sourceNode)) {
+      const sourceStage = sourceNode as StageNode;
+      const stageName = sourceStage.data.name;
+      const place = (edge.data as StageToGameEdgeData).sourceRank;
+      return { type: 'rank', place, stageId: sourceNode.id, stageName };
     }
 
     return null;
@@ -51,8 +64,8 @@ export function useEdgesState(
     setNodes(nds => nds.map(node => {
       if (!isGameNode(node)) return node;
 
-      const homeEdge = currentEdges.find(e => e.type === 'gameToGame' && e.target === node.id && e.targetHandle === 'home');
-      const awayEdge = currentEdges.find(e => e.type === 'gameToGame' && e.target === node.id && e.targetHandle === 'away');
+      const homeEdge = currentEdges.find(e => e.target === node.id && e.targetHandle === 'home');
+      const awayEdge = currentEdges.find(e => e.target === node.id && e.targetHandle === 'away');
 
       const homeTeamDynamic = homeEdge ? deriveDynamicRef(homeEdge, currentNodes) : null;
       const awayTeamDynamic = awayEdge ? deriveDynamicRef(awayEdge, currentNodes) : null;
@@ -156,9 +169,43 @@ export function useEdgesState(
   );
 
   /**
-   * Remove a GameToGameEdge targeting a specific game slot.
+   * Add a StageToGameEdge from source stage (Ranking) to target game.
    */
-  const removeGameToGameEdge = useCallback(
+  const addStageToGameEdge = useCallback(
+    (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: GameInputHandle): string => {
+      const edgeId = `edge-${uuidv4()}`;
+      const newEdge = createStageToGameEdge(edgeId, sourceStageId, sourceRank, targetGameId, targetSlot);
+
+      setEdges(eds => [...eds, newEdge]);
+      
+      // Perform atomic sync
+      setNodes(nds => {
+        const updatedNodes = nds.map(node => {
+          if (node.id === targetGameId && isGameNode(node)) {
+            const dynamicRef = deriveDynamicRef(newEdge, nds);
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                [targetSlot === 'home' ? 'homeTeamDynamic' : 'awayTeamDynamic']: dynamicRef,
+                [targetSlot === 'home' ? 'homeTeamId' : 'awayTeamId']: null,
+              }
+            };
+          }
+          return node;
+        });
+        return updatedNodes;
+      });
+
+      return edgeId;
+    },
+    [setEdges, setNodes, deriveDynamicRef]
+  );
+
+  /**
+   * Remove an edge (any type) targeting a specific game slot.
+   */
+  const removeEdgeFromSlot = useCallback(
     (targetGameId: string, targetSlot: GameInputHandle): void => {
       setEdges((eds) => eds.filter((e) => !(e.target === targetGameId && e.targetHandle === targetSlot)));
       
@@ -186,7 +233,7 @@ export function useEdgesState(
     (edgeId: string) => {
       setEdges((eds) => {
         const edgeToDelete = eds.find(e => e.id === edgeId);
-        if (edgeToDelete && edgeToDelete.type === 'gameToGame') {
+        if (edgeToDelete && (edgeToDelete.type === 'gameToGame' || edgeToDelete.type === 'stageToGame')) {
           setNodes(nds => nds.map(node => {
             if (node.id === edgeToDelete.target && isGameNode(node)) {
               return {
@@ -244,7 +291,8 @@ export function useEdgesState(
     syncNodesWithEdges,
     addGameToGameEdge,
     addBulkGameToGameEdges,
-    removeGameToGameEdge,
+    addStageToGameEdge,
+    removeEdgeFromSlot,
     deleteEdge,
     deleteEdgesByNodes,
   };

@@ -16,14 +16,14 @@ describe('useFlowValidation - Stage Sequence', () => {
         id: 'stage1',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 1', order: 0, startTime: '10:00', stageType: 'vorrunde' },
+        data: { name: 'Stage 1', order: 0, startTime: '10:00', category: 'preliminary' },
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage2',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 2', order: 1, startTime: '09:00', stageType: 'vorrunde' },
+        data: { name: 'Stage 2', order: 1, startTime: '09:00', category: 'preliminary' },
         position: { x: 0, y: 0 },
       },
     ];
@@ -53,14 +53,14 @@ describe('useFlowValidation - Stage Sequence', () => {
         id: 'stage1',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Playoffs', order: 0, stageType: 'finalrunde' },
+        data: { name: 'Playoffs', order: 0, category: 'final' },
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage2',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Pool Play', order: 1, stageType: 'vorrunde' },
+        data: { name: 'Pool Play', order: 1, category: 'preliminary' },
         position: { x: 0, y: 0 },
       },
     ];
@@ -72,9 +72,9 @@ describe('useFlowValidation - Stage Sequence', () => {
     expect(warning?.messageKey).toBe('stage_sequence_type');
     expect(warning?.messageParams).toEqual({
       stage1: 'Playoffs',
-      type1: 'finalrunde',
+      type1: 'final',
       stage2: 'Pool Play',
-      type2: 'vorrunde'
+      type2: 'preliminary'
     });
   });
 
@@ -84,7 +84,7 @@ describe('useFlowValidation - Stage Sequence', () => {
         id: 'stage1',
         type: 'stage',
         parentId: undefined, // Missing parent
-        data: { name: 'Stage 1', order: 0, stageType: 'vorrunde' },
+        data: { name: 'Stage 1', order: 0, category: 'preliminary' },
         position: { x: 0, y: 0 },
       },
     ];
@@ -108,7 +108,7 @@ describe('useFlowValidation - Stage Sequence', () => {
         id: 'stage1',
         type: 'stage',
         parentId: 'game1', // Invalid parent type
-        data: { name: 'Stage 1', order: 0, stageType: 'vorrunde' },
+        data: { name: 'Stage 1', order: 0, category: 'preliminary' },
         position: { x: 0, y: 0 },
       },
     ];

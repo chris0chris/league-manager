@@ -105,7 +105,7 @@ export function importFromScheduleJson(json: unknown): ImportResult {
 
       // Create game node (teams will be assigned in second pass)
       const gameNode = createGameNode(gameId, { x: 0, y: 0 }, {
-        stage: game.stage || 'Vorrunde',
+        stage: game.stage || 'Preliminary',
         standing,
         fieldId,
         official: game.official ? parseTeamReference(game.official) : null,

@@ -74,7 +74,7 @@ describe('timeCalculation - getStageEndTime', () => {
 
     const stage = createStageNode(stageId, fieldId, {
       name: 'Test Stage',
-      stageType: 'vorrunde',
+      category: 'preliminary',
       order: 0,
       startTime: DEFAULT_START_TIME,
       defaultGameDuration: DEFAULT_GAME_DURATION,
@@ -95,7 +95,7 @@ describe('timeCalculation - getStageEndTime', () => {
 
     const stage = createStageNode(stageId, fieldId, {
       name: 'Test Stage',
-      stageType: 'vorrunde',
+      category: 'preliminary',
       order: 0,
       startTime: DEFAULT_START_TIME,
       defaultGameDuration: DEFAULT_GAME_DURATION,
@@ -119,7 +119,7 @@ describe('timeCalculation - getStageEndTime', () => {
 
     const stage = createStageNode(stageId, fieldId, {
       name: 'Test Stage',
-      stageType: 'vorrunde',
+      category: 'preliminary',
       order: 0,
       startTime: DEFAULT_START_TIME,
       defaultGameDuration: DEFAULT_GAME_DURATION,
@@ -146,7 +146,7 @@ describe('timeCalculation - calculateGameTimes', () => {
       const field = createFieldNode(fieldId, { name: 'Feld 1', order: 0 });
       const stage = createStageNode(stageId, fieldId, {
         name: 'Group Stage',
-        stageType: 'vorrunde',
+        category: 'preliminary',
         order: 0,
         startTime: DEFAULT_START_TIME,
         defaultGameDuration: DEFAULT_GAME_DURATION,
@@ -178,7 +178,7 @@ describe('timeCalculation - calculateGameTimes', () => {
       const field = createFieldNode(fieldId, { name: 'Feld 1', order: 0 });
       const stage = createStageNode(stageId, fieldId, {
         name: 'Group Stage',
-        stageType: 'vorrunde',
+        category: 'preliminary',
         order: 0,
         startTime: DEFAULT_START_TIME,
         defaultGameDuration: DEFAULT_GAME_DURATION,
@@ -211,14 +211,14 @@ describe('timeCalculation - calculateGameTimes', () => {
       const stages = [
         createStageNode(stage1Id, field1Id, {
           name: 'Group Stage A',
-          stageType: 'vorrunde',
+          category: 'preliminary',
           order: 0,
           startTime: DEFAULT_START_TIME,
           defaultGameDuration: DEFAULT_GAME_DURATION,
         }),
         createStageNode(stage2Id, field2Id, {
           name: 'Group Stage B',
-          stageType: 'vorrunde',
+          category: 'preliminary',
           order: 0, // Same order = parallel execution
           startTime: DEFAULT_START_TIME,
           defaultGameDuration: DEFAULT_GAME_DURATION,
@@ -266,14 +266,14 @@ describe('timeCalculation - calculateGameTimes', () => {
         // Group stages (order 0, parallel)
         createStageNode(groupStage1Id, field1Id, {
           name: 'Group A',
-          stageType: 'vorrunde',
+          category: 'preliminary',
           order: 0,
           startTime: DEFAULT_START_TIME,
           defaultGameDuration: DEFAULT_GAME_DURATION,
         }),
         createStageNode(groupStage2Id, field2Id, {
           name: 'Group B',
-          stageType: 'vorrunde',
+          category: 'preliminary',
           order: 0,
           startTime: DEFAULT_START_TIME,
           defaultGameDuration: DEFAULT_GAME_DURATION,
@@ -281,13 +281,13 @@ describe('timeCalculation - calculateGameTimes', () => {
         // Playoff stages (order 1, parallel, start after group stages)
         createStageNode(playoffStage1Id, field1Id, {
           name: 'Playoffs',
-          stageType: 'finalrunde',
+          category: 'final',
           order: 1,
           defaultGameDuration: DEFAULT_GAME_DURATION,
         }),
         createStageNode(playoffStage2Id, field2Id, {
           name: 'Playoffs',
-          stageType: 'finalrunde',
+          category: 'final',
           order: 1,
           defaultGameDuration: DEFAULT_GAME_DURATION,
         }),
@@ -326,7 +326,7 @@ describe('timeCalculation - calculateGameTimes', () => {
       const field = createFieldNode('field-1', { name: 'Feld 1', order: 0 });
       const stage = createStageNode('stage-1', 'field-1', {
         name: 'Empty Stage',
-        stageType: 'vorrunde',
+        category: 'preliminary',
         order: 0,
         startTime: DEFAULT_START_TIME,
         defaultGameDuration: DEFAULT_GAME_DURATION,
@@ -344,7 +344,7 @@ describe('timeCalculation - calculateGameTimes', () => {
       const field = createFieldNode(fieldId, { name: 'Feld 1', order: 0 });
       const stage = createStageNode(stageId, fieldId, {
         name: 'Group Stage',
-        stageType: 'vorrunde',
+        category: 'preliminary',
         order: 0,
         // No explicit startTime - should use default '10:00'
         defaultGameDuration: DEFAULT_GAME_DURATION,
@@ -367,7 +367,7 @@ describe('timeCalculation - calculateGameTimes', () => {
       const field = createFieldNode(fieldId, { name: 'Feld 1', order: 0 });
       const stage = createStageNode(stageId, fieldId, {
         name: 'Group Stage',
-        stageType: 'vorrunde',
+        category: 'preliminary',
         order: 0,
         startTime: DEFAULT_START_TIME,
         defaultGameDuration: DEFAULT_GAME_DURATION,

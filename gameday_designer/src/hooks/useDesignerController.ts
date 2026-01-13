@@ -49,6 +49,8 @@ export function useDesignerController() {
     addGlobalTeamGroup,
     assignTeamToGame,
     addBulkGameToGameEdges,
+    addStageToGameEdge,
+    removeEdgeFromSlot,
   } = flowState;
 
   // Validate the current flowchart

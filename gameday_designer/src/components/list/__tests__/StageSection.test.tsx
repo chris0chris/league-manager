@@ -42,8 +42,8 @@ describe('StageSection', () => {
     position: { x: 0, y: 0 },
     data: {
       type: 'stage',
-      name: 'Vorrunde',
-      stageType: 'vorrunde',
+      name: 'Preliminary',
+      category: 'preliminary',
       order: 0,
     },
   };
@@ -56,7 +56,7 @@ describe('StageSection', () => {
     position: { x: 0, y: 0 },
     data: {
       type: 'game',
-      stage: 'Vorrunde',
+      stage: 'Preliminary',
       standing: 'Game 1',
       fieldId: null,
       official: null,
@@ -88,7 +88,7 @@ describe('StageSection', () => {
     );
 
     // Stage name should be visible
-    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+    expect(screen.getByText('Preliminary')).toBeInTheDocument();
 
     // Stage type badge has been removed from design
     // Game count in header has been removed from design
@@ -134,26 +134,26 @@ describe('StageSection', () => {
   });
 
   it('shows correct stage type badge for different stage types', () => {
-    const finalrundeStage: StageNode = {
+    const finalStage: StageNode = {
       ...sampleStage,
       data: {
         ...sampleStage.data,
-        name: 'Finalrunde',
-        stageType: 'finalrunde',
+        name: 'Final',
+        category: 'final',
       },
     };
 
     render(
       <StageSection
         {...createDefaultProps({
-          stage: finalrundeStage,
-          allNodes: [finalrundeStage],
+          stage: finalStage,
+          allNodes: [finalStage],
         })}
       />
     );
 
     // Stage type badge has been removed from design - just verify stage name is shown
-    expect(screen.getByText('Finalrunde')).toBeInTheDocument();
+    expect(screen.getByText('Final')).toBeInTheDocument();
   });
 
   it('allows inline editing of stage name', () => {
@@ -173,7 +173,7 @@ describe('StageSection', () => {
     const editButton = screen.getByTitle(/Click to edit the name of this tournament phase/i);
     fireEvent.click(editButton);
 
-    const input = screen.getByDisplayValue('Vorrunde');
+    const input = screen.getByDisplayValue('Preliminary');
     fireEvent.change(input, { target: { value: 'Neue Vorrunde' } });
     fireEvent.blur(input);
 
@@ -321,12 +321,12 @@ describe('StageSection', () => {
     );
 
     fireEvent.click(screen.getByTitle(/Click to edit the name of this tournament phase/i));
-    const input = screen.getByDisplayValue('Vorrunde');
+    const input = screen.getByDisplayValue('Preliminary');
     fireEvent.change(input, { target: { value: 'New Name' } });
     fireEvent.keyDown(input, { key: 'Escape' });
 
     expect(screen.queryByDisplayValue('New Name')).not.toBeInTheDocument();
-    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+    expect(screen.getByText('Preliminary')).toBeInTheDocument();
   });
 
   it('saves stage name edit with Enter', () => {
@@ -342,7 +342,7 @@ describe('StageSection', () => {
     );
 
     fireEvent.click(screen.getByTitle(/Click to edit the name of this tournament phase/i));
-    const input = screen.getByDisplayValue('Vorrunde');
+    const input = screen.getByDisplayValue('Preliminary');
     fireEvent.change(input, { target: { value: 'New Name' } });
     fireEvent.keyDown(input, { key: 'Enter' });
 
@@ -396,7 +396,7 @@ describe('StageSection', () => {
       />
     );
 
-    const header = screen.getByText('Vorrunde').closest('.stage-section__header');
+    const header = screen.getByText('Preliminary').closest('.stage-section__header');
     
     // Initially expanded by local state if prop is false
     expect(screen.getByText('Game 1')).toBeInTheDocument();

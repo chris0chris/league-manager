@@ -21,7 +21,7 @@ describe('GameSlotEditor', () => {
 
   const defaultGameSlot: GameSlot = {
     id: 'slot-1',
-    stage: 'Vorrunde',
+    stage: 'Preliminary',
     standing: 'Gruppe 1',
     home: { type: 'groupTeam', group: 0, team: 0 },
     away: { type: 'groupTeam', group: 0, team: 1 },
@@ -70,7 +70,7 @@ describe('GameSlotEditor', () => {
     it('displays stage input with current value', () => {
       renderEditor();
       const stageInput = screen.getByLabelText(/stage/i) as HTMLSelectElement;
-      expect(stageInput.value).toBe('Vorrunde');
+      expect(stageInput.value).toBe('Preliminary');
     });
 
     it('displays standing input with current value', () => {
@@ -140,7 +140,7 @@ describe('GameSlotEditor', () => {
       expect(mockOnSave).toHaveBeenCalledTimes(1);
       expect(mockOnSave).toHaveBeenCalledWith(expect.objectContaining({
         id: 'slot-1',
-        stage: 'Vorrunde',
+        stage: 'Preliminary',
         standing: 'Gruppe 1',
       }));
     });
@@ -149,11 +149,11 @@ describe('GameSlotEditor', () => {
       const user = userEvent.setup();
       renderEditor();
 
-      await user.selectOptions(screen.getByLabelText(/stage/i), 'Finalrunde');
+      await user.selectOptions(screen.getByLabelText(/stage/i), 'Final');
       await user.click(screen.getByRole('button', { name: /save/i }));
 
       expect(mockOnSave).toHaveBeenCalledWith(expect.objectContaining({
-        stage: 'Finalrunde',
+        stage: 'Final',
       }));
     });
 
