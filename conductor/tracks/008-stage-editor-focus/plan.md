@@ -1,4 +1,4 @@
-# Plan: Stage Editor Focus & Interaction Fix
+# Plan: Stage Editor Focus & Interaction Fix [checkpoint: 75768d0]
 
 ## Phase 1: Smart Focus Implementation
 - [x] **Task 1: Update StageSection with Smart Blur**
