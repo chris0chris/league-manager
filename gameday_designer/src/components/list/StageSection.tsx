@@ -4,7 +4,7 @@
  * Displays a collapsible stage container with game tables.
  */
 
-import React, { useState, useCallback, useMemo, memo } from 'react';
+import React, { useState, useCallback, useMemo, memo, useRef } from 'react';
 import { Card, Button, Form } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import GameTable from './GameTable';
@@ -67,6 +67,7 @@ const StageSection: React.FC<StageSectionProps> = memo(({
   const [editedName, setEditedName] = useState(stage.data.name);
   const [editedStageType, setEditedStageType] = useState(stage.data.stageType || 'STANDARD');
   const [localExpanded, setLocalExpanded] = useState(true);
+  const editZoneRef = useRef<HTMLDivElement>(null);
   
   // Combine local state with prop
   const isExpanded = isExpandedProp || localExpanded;
@@ -104,7 +105,12 @@ const StageSection: React.FC<StageSectionProps> = memo(({
     [stage.data.name, stage.data.stageType]
   );
 
-  const handleSaveEdit = useCallback(() => {
+  const handleSaveEdit = useCallback((e?: React.FocusEvent) => {
+    // Smart Blur: Only save if focus moves outside the edit zone
+    if (e?.relatedTarget && editZoneRef.current?.contains(e.relatedTarget as Node)) {
+      return;
+    }
+
     setIsEditing(false);
     const updates: Partial<StageNode['data']> = {};
     
@@ -162,7 +168,7 @@ const StageSection: React.FC<StageSectionProps> = memo(({
       className={`stage-section mb-2 ${isHighlighted ? 'element-highlighted' : ''}`}
     >
       <Card.Header
-        className="stage-section__header d-flex align-items-center"
+        className={`stage-section__header d-flex align-items-center ${isEditing ? 'stage-section__header--editing' : ''}`}
         onClick={handleToggleExpand}
         style={{
           cursor: 'pointer',
@@ -185,7 +191,12 @@ const StageSection: React.FC<StageSectionProps> = memo(({
         </div>
 
         {isEditing ? (
-          <>
+          <div 
+            ref={editZoneRef} 
+            className="flex-grow-1 d-flex align-items-center gap-2"
+            onBlur={handleSaveEdit}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="d-flex align-items-center gap-2 me-2">
               <Form.Label htmlFor={`stage-type-${stage.id}`} className="mb-0 text-muted small">{t('ui:label.type')}:</Form.Label>
               <Form.Select
@@ -193,7 +204,6 @@ const StageSection: React.FC<StageSectionProps> = memo(({
                 size="sm"
                 value={editedStageType}
                 onChange={(e) => setEditedStageType(e.target.value as 'STANDARD' | 'RANKING')}
-                onClick={(e) => e.stopPropagation()}
                 style={{ width: '140px' }}
               >
                 <option value="STANDARD">{t('domain:stageTypeStandard')}</option>
@@ -206,9 +216,7 @@ const StageSection: React.FC<StageSectionProps> = memo(({
                 className="form-control form-control-sm"
                 value={editedName}
                 onChange={(e) => setEditedName(e.target.value)}
-                onBlur={handleSaveEdit}
                 onKeyDown={handleKeyPress}
-                onClick={(e) => e.stopPropagation()}
                 autoFocus
                 style={{ maxWidth: '300px' }}
               />
@@ -231,7 +239,7 @@ const StageSection: React.FC<StageSectionProps> = memo(({
                 <i className="bi bi-x-lg"></i>
               </Button>
             </div>
-          </>
+          </div>
         ) : (
           <>
             <div className="me-3 small text-muted">
