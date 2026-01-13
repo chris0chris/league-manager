@@ -110,11 +110,11 @@ export function generateTournament(
             // For now, we assume stage order in template matches stage order in generated list
             // but filtered by the template's own stage definition.
             // Simplified: we look at stages created before this one.
-            const sourceStage = stages.find(s => s.data.order === (mapping.home as any).sourceStageIndex);
+            const sourceStage = stages.find(s => s.data.order === mapping.home.sourceStageIndex);
             if (sourceStage) mapping.home.sourceStageId = sourceStage.id;
           }
           if (mapping.away.type === 'rank' && mapping.away.sourceStageId === undefined) {
-            const sourceStage = stages.find(s => s.data.order === (mapping.away as any).sourceStageIndex);
+            const sourceStage = stages.find(s => s.data.order === mapping.away.sourceStageIndex);
             if (sourceStage) mapping.away.sourceStageId = sourceStage.id;
           }
         });

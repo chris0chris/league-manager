@@ -53,6 +53,8 @@ export interface RankReference {
   place: number;
   stageId: string;
   stageName: string;
+  /** Optional index used during template resolution */
+  sourceStageIndex?: number;
 }
 
 /**

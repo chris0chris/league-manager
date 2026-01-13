@@ -16,7 +16,7 @@ import type {
   GameNodeData,
   HighlightedElement
 } from '../../types/flowchart';
-import { isGameNode, isStageNode, isStageToGameEdge } from '../../types/flowchart';
+import { isGameNode, isStageNode } from '../../types/flowchart';
 import { isRankReference } from '../../types/designer';
 import { findSourceGameForReference, findSourceStageForReference, getGamePath } from '../../utils/edgeAnalysis';
 import { getStageParticipants } from '../../utils/rankingEngine';
@@ -375,7 +375,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
     });
 
     return options;
-  }, [allNodes]);
+  }, [allNodes, games]);
 
   const renderTimeCell = (game: GameNode) => {
     const isEditingTime = editingGameId === game.id && editingField === 'time';
