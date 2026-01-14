@@ -1137,6 +1137,92 @@ describe('useFlowValidation', () => {
     });
   });
 
+  describe('Self-Play Validation', () => {
+    const nodes: FlowNode[] = [
+      { id: 'f1', type: 'field', data: { name: 'F1', order: 0 }, position: { x: 0, y: 0 } },
+      { id: 's1', type: 'stage', parentId: 'f1', data: { name: 'S1', order: 0 }, position: { x: 0, y: 0 } },
+    ];
+
+    it('should detect when same static team ID is assigned to both slots', () => {
+      const gameNodes: FlowNode[] = [
+        ...nodes,
+        {
+          id: 'g1',
+          type: 'game',
+          parentId: 's1',
+          data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't1' },
+          position: { x: 0, y: 0 },
+        },
+      ];
+
+      const { result } = renderHook(() => useFlowValidation(gameNodes, []));
+      const error = result.current.errors.find(e => e.type === 'self_reference');
+      expect(error).toBeDefined();
+      expect(error?.messageKey).toBe('self_play');
+    });
+
+    it('should detect when same dynamic source is assigned to both slots', () => {
+      const gameNodes: FlowNode[] = [
+        ...nodes,
+        { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' }, position: { x: 0, y: 0 } },
+        { id: 'g2', type: 'game', parentId: 's1', data: { standing: 'G2' }, position: { x: 0, y: 0 } },
+      ];
+
+      const edges: FlowEdge[] = [
+        { id: 'e1', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'winner', targetHandle: 'home' } as GameToGameEdge,
+        { id: 'e2', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'winner', targetHandle: 'away' } as GameToGameEdge,
+      ];
+
+      const { result } = renderHook(() => useFlowValidation(gameNodes, edges));
+      const error = result.current.errors.find(e => e.type === 'self_reference');
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('same dynamic source');
+    });
+
+    it('should allow winner vs loser of same game', () => {
+      const gameNodes: FlowNode[] = [
+        ...nodes,
+        { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' }, position: { x: 0, y: 0 } },
+        { id: 'g2', type: 'game', parentId: 's1', data: { standing: 'G2' }, position: { x: 0, y: 0 } },
+      ];
+
+      const edges: FlowEdge[] = [
+        { id: 'e1', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'winner', targetHandle: 'home' } as GameToGameEdge,
+        { id: 'e2', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'loser', targetHandle: 'away' } as GameToGameEdge,
+      ];
+
+      const { result } = renderHook(() => useFlowValidation(gameNodes, edges));
+      const error = result.current.errors.find(e => e.type === 'self_reference');
+      expect(error).toBeUndefined();
+    });
+  });
+
+  describe('Cyclic Stage Reference Validation', () => {
+    it('should detect when a game references its own parent Ranking Stage', () => {
+      const nodes: FlowNode[] = [
+        { id: 'f1', type: 'field', data: { name: 'F1', order: 0 }, position: { x: 0, y: 0 } },
+        { id: 's1', type: 'stage', parentId: 'f1', data: { name: 'S1', order: 0, stageType: 'RANKING' }, position: { x: 0, y: 0 } },
+        { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1' }, position: { x: 0, y: 0 } },
+      ];
+
+      const edges: FlowEdge[] = [
+        {
+          id: 'e1',
+          type: 'stageToGame',
+          source: 's1',
+          target: 'g1',
+          targetHandle: 'home',
+          data: { sourceRank: 1, targetPort: 'home' },
+        } as any,
+      ];
+
+      const { result } = renderHook(() => useFlowValidation(nodes, edges));
+      const error = result.current.errors.find(e => e.id.startsWith('cyclic_stage_ref_'));
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('cannot reference its own ranking');
+    });
+  });
+
   describe('Memoization', () => {
     it('should return same result for same inputs', () => {
       const nodes: FlowNode[] = [

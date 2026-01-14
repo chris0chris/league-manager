@@ -406,4 +406,103 @@ describe('StageSection', () => {
     // Now it should be collapsed
     expect(screen.queryByText('Game 1')).not.toBeInTheDocument();
   });
+
+  describe('Stage Type and Focus refinements', () => {
+    it('shows Ranking Stage badge when stage type is RANKING', () => {
+      const rankingStage: StageNode = {
+        ...sampleStage,
+        data: {
+          ...sampleStage.data,
+          stageType: 'RANKING',
+        },
+      };
+
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: rankingStage,
+            allNodes: [rankingStage],
+          })}
+        />
+      );
+
+      expect(screen.getByText(/Ranking Stage/i)).toBeInTheDocument();
+    });
+
+    it('allows changing stage type in edit mode', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      // Enter edit mode
+      fireEvent.click(screen.getByTitle(/Click to edit the name/i));
+
+      // Select Ranking Stage
+      const typeSelect = screen.getByLabelText(/Phase Type/i);
+      fireEvent.change(typeSelect, { target: { value: 'RANKING' } });
+
+      // Click Save
+      fireEvent.click(screen.getByTitle(/Save/i));
+
+      expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', {
+        stageType: 'RANKING',
+      });
+    });
+
+    it('Smart Blur: does not close edit mode when clicking on type selector', () => {
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+          })}
+        />
+      );
+
+      // Enter edit mode
+      fireEvent.click(screen.getByTitle(/Click to edit the name/i));
+      expect(screen.getByDisplayValue('Preliminary')).toBeInTheDocument();
+
+      // Click on type select - should not close edit mode
+      const typeSelect = screen.getByLabelText(/Phase Type/i);
+      const nameInput = screen.getByDisplayValue('Preliminary');
+      
+      // Simulate blur with relatedTarget being the select
+      fireEvent.blur(nameInput, { relatedTarget: typeSelect });
+      
+      // Should still be in edit mode
+      expect(screen.getByDisplayValue('Preliminary')).toBeInTheDocument();
+    });
+
+    it('Smart Blur: closes edit mode when clicking outside the edit zone', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      // Enter edit mode
+      fireEvent.click(screen.getByTitle(/Click to edit the name/i));
+      const nameInput = screen.getByDisplayValue('Preliminary');
+
+      // Simulate blur with relatedTarget being null (e.g. clicking body)
+      fireEvent.blur(nameInput);
+
+      // Should have exited edit mode
+      expect(screen.queryByDisplayValue('Preliminary')).not.toBeInTheDocument();
+      expect(mockOnUpdate).not.toHaveBeenCalled(); // No change made
+    });
+  });
 });
