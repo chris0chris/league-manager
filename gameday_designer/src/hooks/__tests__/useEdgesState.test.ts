@@ -174,7 +174,9 @@ describe('useEdgesState', () => {
         ...mockGame2,
         data: {
           ...mockGame2.data,
-          homeTeamDynamic: { type: 'winner', matchName: 'Game 1' }
+          homeTeamDynamic: { type: 'winner', matchName: 'Game 1' },
+          awayTeamDynamic: null,
+          homeTeamId: null
         }
       } as unknown as GameNode;
 

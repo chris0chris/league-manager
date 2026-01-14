@@ -70,7 +70,9 @@ export function useEdgesState(
       const homeTeamDynamic = homeEdge ? deriveDynamicRef(homeEdge, currentNodes) : null;
       const awayTeamDynamic = awayEdge ? deriveDynamicRef(awayEdge, currentNodes) : null;
 
-      if (node.data.homeTeamDynamic === homeTeamDynamic && node.data.awayTeamDynamic === awayTeamDynamic) {
+      // Use JSON.stringify for deep comparison of references
+      if (JSON.stringify(node.data.homeTeamDynamic) === JSON.stringify(homeTeamDynamic) && 
+          JSON.stringify(node.data.awayTeamDynamic) === JSON.stringify(awayTeamDynamic)) {
         return node;
       }
 

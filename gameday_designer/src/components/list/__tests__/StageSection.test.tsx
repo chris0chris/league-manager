@@ -504,5 +504,134 @@ describe('StageSection', () => {
       expect(screen.queryByDisplayValue('Preliminary')).not.toBeInTheDocument();
       expect(mockOnUpdate).not.toHaveBeenCalled(); // No change made
     });
+
+    it('handleSaveEdit: saves both name and stage type changes', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      // Enter edit mode
+      fireEvent.click(screen.getByTitle(/Click to edit the name/i));
+
+      // Change name
+      const input = screen.getByDisplayValue('Preliminary');
+      fireEvent.change(input, { target: { value: 'New Name' } });
+
+      // Change type
+      const typeSelect = screen.getByLabelText(/Phase Type/i);
+      fireEvent.change(typeSelect, { target: { value: 'RANKING' } });
+
+      // Click Save
+      fireEvent.click(screen.getByTitle(/Save/i));
+
+      expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', {
+        name: 'New Name',
+        stageType: 'RANKING',
+      });
+    });
+
+    it('handleSaveEdit: does not call onUpdate if nothing changed', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      // Enter edit mode
+      fireEvent.click(screen.getByTitle(/Click to edit the name/i));
+
+      // Click Save without changing anything
+      fireEvent.click(screen.getByTitle(/Save/i));
+
+      expect(mockOnUpdate).not.toHaveBeenCalled();
+      expect(screen.queryByDisplayValue('Preliminary')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Other Header Interactions', () => {
+    it('calls onUpdate when start time is changed', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      const timeInput = screen.getByLabelText(/Start/i);
+      fireEvent.change(timeInput, { target: { value: '10:30' } });
+
+      expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { startTime: '10:30' });
+    });
+
+    it('calls onUpdate when color is changed', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      const colorInput = screen.getByTitle(/Change the accent color for this phase/i);
+      fireEvent.change(colorInput, { target: { value: '#00ff00' } });
+
+      expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { color: '#00ff00' });
+    });
+
+    it('handles adding a game', () => {
+      const mockOnAddGame = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onAddGame: mockOnAddGame,
+          })}
+        />
+      );
+
+      // There are two Add Game buttons (header and empty state body). Pick the one in header.
+      const addButtons = screen.getAllByTitle(/Add a new game to this tournament phase/i);
+      fireEvent.click(addButtons[0]);
+
+      expect(mockOnAddGame).toHaveBeenCalledWith('stage-1');
+    });
+
+    it('handles deleting the stage', () => {
+      const mockOnDelete = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onDelete: mockOnDelete,
+          })}
+        />
+      );
+
+      const deleteButton = screen.getByTitle(/Permanently remove this phase/i);
+      fireEvent.click(deleteButton);
+
+      expect(mockOnDelete).toHaveBeenCalledWith('stage-1');
+    });
   });
 });
