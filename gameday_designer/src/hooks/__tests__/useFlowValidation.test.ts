@@ -1213,7 +1213,7 @@ describe('useFlowValidation', () => {
           target: 'g1',
           targetHandle: 'home',
           data: { sourceRank: 1, targetPort: 'home' },
-        } as any,
+        } as FlowEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges));

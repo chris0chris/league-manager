@@ -80,7 +80,8 @@ npm --prefix gameday_designer/ run test:run
 ## Deployment & Staging
 
 ### 1. Staging Deployments
-- **Trigger**: When a feature is "almost ready", it should be deployed to the staging environment.
+- **Requirement**: Only create deployments (staging or production) if the underlying Pull Request or branch CI checks are successful (**GREEN**).
+- **Trigger**: When a feature is "almost ready" and CI is green, it should be deployed to the staging environment.
 - **Process**: Use the `./container/deploy.sh stage` script to trigger the deployment.
 - **Validation**: All changes MUST be validated on the staging environment before the PR is merged or a production deployment is initiated.
 

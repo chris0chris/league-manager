@@ -7,26 +7,26 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useEdgesState } from '../useEdgesState';
-import type { FlowNode, FlowEdge, GameNode, GameNodeData } from '../../types/flowchart';
+import type { FlowNode, FlowEdge, GameNode, StageNode, StageToGameEdgeData } from '../../types/flowchart';
 import { createGameToGameEdge } from '../../types/flowchart';
 
 describe('useEdgesState', () => {
   const setEdges = vi.fn();
   const setNodes = vi.fn();
 
-  const mockGame1: GameNode = {
+  const mockGame1 = {
     id: 'game-1',
     type: 'game',
     position: { x: 0, y: 0 },
-    data: { standing: 'Game 1' } as any,
-  };
+    data: { standing: 'Game 1' },
+  } as unknown as GameNode;
 
-  const mockGame2: GameNode = {
+  const mockGame2 = {
     id: 'game-2',
     type: 'game',
     position: { x: 0, y: 0 },
-    data: { standing: 'Game 2' } as any,
-  };
+    data: { standing: 'Game 2' },
+  } as unknown as GameNode;
 
   const initialEdges: FlowEdge[] = [
     {
@@ -44,17 +44,17 @@ describe('useEdgesState', () => {
     let currentEdges = initialEds;
     let currentNodes = initialNodes;
 
-    const mockSetEdges: any = (updater: any) => {
+    const mockSetEdges = (updater: FlowEdge[] | ((eds: FlowEdge[]) => FlowEdge[])) => {
       currentEdges = typeof updater === 'function' ? updater(currentEdges) : updater;
       setEdges(currentEdges);
     };
 
-    const mockSetNodes: any = (updater: any) => {
+    const mockSetNodes = (updater: FlowNode[] | ((nds: FlowNode[]) => FlowNode[])) => {
       currentNodes = typeof updater === 'function' ? updater(currentNodes) : updater;
       setNodes(currentNodes);
     };
 
-    const renderResult = renderHook(() => useEdgesState(currentEdges, mockSetEdges, mockSetNodes));
+    const renderResult = renderHook(() => useEdgesState(currentEdges, mockSetEdges as React.Dispatch<React.SetStateAction<FlowEdge[]>>, mockSetNodes as React.Dispatch<React.SetStateAction<FlowNode[]>>));
     
     return {
       ...renderResult,
@@ -74,7 +74,7 @@ describe('useEdgesState', () => {
 
     it('derives loser reference from game-to-game edge', () => {
       const { result } = setupHook([], [mockGame1]);
-      const edge = { ...initialEdges[0], sourceHandle: 'loser' };
+      const edge = { ...initialEdges[0], sourceHandle: 'loser' } as FlowEdge;
       const ref = result.current.deriveDynamicRef(edge, [mockGame1]);
 
       expect(ref).toEqual({ type: 'loser', matchName: 'Game 1' });
@@ -190,7 +190,7 @@ describe('useEdgesState', () => {
         result.current.syncNodesWithEdges([mockGame1, gameWithDynamic], edges);
       });
 
-      // If it returned same node, it means line 56 was hit (the return node branch)
+      // useMemo might still return a new array reference, but we check if the node object itself is the same
       const nodes = getNodes();
       expect(nodes[1]).toBe(gameWithDynamic); 
     });
@@ -203,7 +203,7 @@ describe('useEdgesState', () => {
         type: 'stage',
         position: { x: 0, y: 0 },
         data: { name: 'Group Stage', category: 'preliminary', order: 0, stageType: 'RANKING' },
-      } as any;
+      } as unknown as StageNode;
 
       const { result, getEdges, getNodes } = setupHook([], [mockStage, mockGame1]);
 
@@ -219,7 +219,7 @@ describe('useEdgesState', () => {
       expect(edges[0].source).toBe('stage-1');
       expect(edges[0].target).toBe('game-1');
       expect(edges[0].targetHandle).toBe('home');
-      expect((edges[0].data as { sourceRank: number }).sourceRank).toBe(1);
+      expect((edges[0].data as StageToGameEdgeData).sourceRank).toBe(1);
       expect(edgeId).toBeTruthy();
 
       // Verify target game node was updated with dynamic reference

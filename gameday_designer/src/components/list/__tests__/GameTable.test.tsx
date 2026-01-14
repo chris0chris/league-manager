@@ -3,11 +3,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import GameTable from '../GameTable';
-import type { GameNode, StageNode, FieldNode, GlobalTeam, GlobalTeamGroup, FlowEdge, FlowNode } from '../../../types/flowchart';
+import type { GameNode, StageNode, FieldNode, GlobalTeam, GlobalTeamGroup, FlowEdge } from '../../../types/flowchart';
 import { createFieldNode, createStageNode, createGameNodeInStage } from '../../../types/flowchart';
 
 describe('GameTable', () => {
@@ -35,7 +35,9 @@ describe('GameTable', () => {
     stage1 = createStageNode('stage-1', 'field-1', { name: 'Stage 1', category: 'preliminary', order: 0 });
     stage2 = createStageNode('stage-2', 'field-1', { name: 'Stage 2', category: 'final', order: 1 });
     
+    // game1 is in stage1
     game1 = createGameNodeInStage('game-1', 'stage-1', { standing: 'Quali 1', stage: 'Stage 1' });
+    // game2 is in stage2
     game2 = createGameNodeInStage('game-2', 'stage-2', { 
       standing: 'Game 2', 
       startTime: '10:00', 
@@ -107,8 +109,7 @@ describe('GameTable', () => {
     });
 
     it('saves time on blur', async () => {
-      const { container } = renderTable({ games: [game1] });
-      // Use fireEvent for simpler interaction
+      const { container } = renderTable({ games: [game1], allNodes: [field1, stage1, stage2, game1, game2] });
       fireEvent.click(screen.getByText('Quali 1'));
       const timeCell = screen.getByText('--:--');
       fireEvent.click(timeCell);
@@ -142,6 +143,74 @@ describe('GameTable', () => {
       renderTable({ games: [gameWithOfficial] });
       await user.click(screen.getByRole('checkbox'));
       expect(mockOnUpdate).toHaveBeenCalledWith('game-2', { official: undefined });
+    });
+  });
+
+  describe('Dynamic reference interactions', () => {
+    it('renders and allows clicking game-to-game ref', async () => {
+      const user = userEvent.setup();
+      const gameWithWinner = {
+        ...game2,
+        data: { ...game2.data, homeTeamDynamic: { type: 'winner', matchName: 'Quali 1' } }
+      } as GameNode;
+      const edges = [{
+        id: 'e1', type: 'gameToGame', source: 'game-1', target: 'game-2', sourceHandle: 'winner', targetHandle: 'home', data: { sourcePort: 'winner', targetPort: 'home' }
+      } as FlowEdge];
+
+      renderTable({ games: [gameWithWinner], edges });
+      
+      const refElement = screen.getByText(/Winner of Quali 1/i).closest('div');
+      expect(refElement).toBeInTheDocument();
+      await user.click(refElement!);
+      expect(mockOnDynamicReferenceClick).toHaveBeenCalledWith('game-1');
+    });
+
+    it('renders and allows clicking rank ref', async () => {
+      const user = userEvent.setup();
+      const rankingStage: StageNode = {
+        ...stage1,
+        id: 'stage-ranking',
+        parentId: 'field-1',
+        data: { ...stage1.data, stageType: 'RANKING', name: 'Placement', order: 0 }
+      };
+      
+      // game1 must be IN the rankingStage for participants to be found
+      const gameInRanking = {
+        ...game1,
+        parentId: 'stage-ranking',
+        data: { ...game1.data, homeTeamId: 'team-1', awayTeamId: 'team-2' }
+      };
+
+      const gameWithRank: GameNode = {
+        ...game2,
+        parentId: 'stage-2',
+        data: { 
+          ...game2.data, 
+          stage: 'Stage 2',
+          homeTeamDynamic: { type: 'rank', place: 1, stageId: 'stage-ranking', stageName: 'Placement' } 
+        }
+      };
+      
+      const edges = [{
+        id: 'e1', 
+        type: 'stageToGame', 
+        source: 'stage-ranking', 
+        target: 'game-2', 
+        sourceHandle: 'rank-1', 
+        targetHandle: 'home', 
+        data: { sourceRank: 1, targetPort: 'home' }
+      } as FlowEdge];
+
+      renderTable({ 
+        games: [gameWithRank], 
+        edges, 
+        allNodes: [field1, rankingStage, stage2, gameInRanking, gameWithRank] 
+      });
+      
+      const refElement = screen.getByText(/1. Place from Placement/i).closest('div');
+      expect(refElement).toBeInTheDocument();
+      await user.click(refElement!);
+      expect(mockOnDynamicReferenceClick).toHaveBeenCalledWith('stage-ranking');
     });
   });
 });
