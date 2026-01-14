@@ -137,6 +137,123 @@ describe('useEdgesState', () => {
     });
   });
 
+  describe('addStageToGameEdge', () => {
+    it('creates a stage-to-game edge with rank reference', () => {
+      const mockStage = {
+        id: 'stage-1',
+        type: 'stage',
+        position: { x: 0, y: 0 },
+        data: { name: 'Group Stage', category: 'preliminary', order: 0, stageType: 'RANKING' },
+      } as FlowNode;
+
+      const { result, getEdges, getNodes } = setupHook([], [mockStage, mockGame1]);
+
+      let edgeId = '';
+      act(() => {
+        edgeId = result.current.addStageToGameEdge('stage-1', 1, 'game-1', 'home');
+      });
+
+      // Verify edge was created
+      const edges = getEdges();
+      expect(edges).toHaveLength(1);
+      expect(edges[0].type).toBe('stageToGame');
+      expect(edges[0].source).toBe('stage-1');
+      expect(edges[0].target).toBe('game-1');
+      expect(edges[0].targetHandle).toBe('home');
+      expect((edges[0].data as { sourceRank: number }).sourceRank).toBe(1);
+      expect(edgeId).toBeTruthy();
+
+      // Verify target game node was updated with dynamic reference
+      const nodes = getNodes();
+      const targetGame = nodes.find(n => n.id === 'game-1') as unknown as GameNode;
+      expect(targetGame.data.homeTeamDynamic).toEqual({
+        type: 'rank',
+        place: 1,
+        stageId: 'stage-1',
+        stageName: 'Group Stage'
+      });
+      expect(targetGame.data.homeTeamId).toBeNull();
+    });
+
+    it('creates edge for away slot', () => {
+      const mockStage = {
+        id: 'stage-1',
+        type: 'stage',
+        position: { x: 0, y: 0 },
+        data: { name: 'Group Stage', category: 'preliminary', order: 0, stageType: 'RANKING' },
+      } as FlowNode;
+
+      const { result, getEdges, getNodes } = setupHook([], [mockStage, mockGame1]);
+
+      act(() => {
+        result.current.addStageToGameEdge('stage-1', 2, 'game-1', 'away');
+      });
+
+      const edges = getEdges();
+      expect(edges[0].targetHandle).toBe('away');
+      expect((edges[0].data as { sourceRank: number }).sourceRank).toBe(2);
+
+      const nodes = getNodes();
+      const targetGame = nodes.find(n => n.id === 'game-1') as unknown as GameNode;
+      expect(targetGame.data.awayTeamDynamic).toEqual({
+        type: 'rank',
+        place: 2,
+        stageId: 'stage-1',
+        stageName: 'Group Stage'
+      });
+      expect(targetGame.data.awayTeamId).toBeNull();
+    });
+
+    it('handles different rank positions correctly', () => {
+      const mockStage = {
+        id: 'stage-1',
+        type: 'stage',
+        position: { x: 0, y: 0 },
+        data: { name: 'Playoffs', category: 'final', order: 0, stageType: 'RANKING' },
+      } as FlowNode;
+
+      const { result, getNodes } = setupHook([], [mockStage, mockGame1]);
+
+      act(() => {
+        result.current.addStageToGameEdge('stage-1', 3, 'game-1', 'home');
+      });
+
+      const nodes = getNodes();
+      const targetGame = nodes.find(n => n.id === 'game-1') as unknown as GameNode;
+      expect(targetGame.data.homeTeamDynamic).toEqual({
+        type: 'rank',
+        place: 3,
+        stageId: 'stage-1',
+        stageName: 'Playoffs'
+      });
+    });
+
+    it('clears static team ID when setting rank reference', () => {
+      const gameWithTeam = {
+        ...mockGame1,
+        data: { ...mockGame1.data, homeTeamId: 'team-123' }
+      } as GameNode;
+
+      const mockStage = {
+        id: 'stage-1',
+        type: 'stage',
+        position: { x: 0, y: 0 },
+        data: { name: 'Group Stage', category: 'preliminary', order: 0, stageType: 'RANKING' },
+      } as FlowNode;
+
+      const { result, getNodes } = setupHook([], [mockStage, gameWithTeam]);
+
+      act(() => {
+        result.current.addStageToGameEdge('stage-1', 1, 'game-1', 'home');
+      });
+
+      const nodes = getNodes();
+      const targetGame = nodes.find(n => n.id === 'game-1') as unknown as GameNode;
+      expect(targetGame.data.homeTeamId).toBeNull();
+      expect(targetGame.data.homeTeamDynamic).toBeTruthy();
+    });
+  });
+
   describe('syncNodesWithEdges', () => {
     it('re-synchronizes node data based on current edges', () => {
       const { result, getNodes } = setupHook([], [mockGame1, mockGame2]);
@@ -150,6 +267,120 @@ describe('useEdgesState', () => {
 
       const targetGame = getNodes().find(n => n.id === 'game-2') as unknown as GameNode;
       expect(targetGame.data.homeTeamDynamic?.matchName).toBe('Game 1');
+    });
+
+    it('synchronizes stage-to-game edges with rank references', () => {
+      const mockStage = {
+        id: 'stage-1',
+        type: 'stage',
+        position: { x: 0, y: 0 },
+        data: { name: 'Ranking Stage', category: 'preliminary', order: 0, stageType: 'RANKING' },
+      } as FlowNode;
+
+      const { result, getNodes } = setupHook([], [mockStage, mockGame1]);
+      const edges = [
+        {
+          id: 'e1',
+          type: 'stageToGame',
+          source: 'stage-1',
+          sourceHandle: undefined,
+          target: 'game-1',
+          targetHandle: 'home',
+          data: { sourceRank: 2 }
+        }
+      ] as unknown as FlowEdge[];
+
+      act(() => {
+        result.current.syncNodesWithEdges([mockStage, mockGame1], edges);
+      });
+
+      const targetGame = getNodes().find(n => n.id === 'game-1') as unknown as GameNode;
+      expect(targetGame.data.homeTeamDynamic).toEqual({
+        type: 'rank',
+        place: 2,
+        stageId: 'stage-1',
+        stageName: 'Ranking Stage'
+      });
+    });
+  });
+
+  describe('deriveDynamicRef', () => {
+    it('derives winner reference from game-to-game edge', () => {
+      const { result } = setupHook([], [mockGame1, mockGame2]);
+      const edge = {
+        id: 'e1',
+        type: 'gameToGame',
+        source: 'game-1',
+        sourceHandle: 'winner',
+        target: 'game-2',
+        targetHandle: 'home'
+      } as FlowEdge;
+
+      const ref = result.current.deriveDynamicRef(edge, [mockGame1, mockGame2]);
+      expect(ref).toEqual({
+        type: 'winner',
+        matchName: 'Game 1'
+      });
+    });
+
+    it('derives loser reference from game-to-game edge', () => {
+      const { result } = setupHook([], [mockGame1, mockGame2]);
+      const edge = {
+        id: 'e1',
+        type: 'gameToGame',
+        source: 'game-1',
+        sourceHandle: 'loser',
+        target: 'game-2',
+        targetHandle: 'away'
+      } as FlowEdge;
+
+      const ref = result.current.deriveDynamicRef(edge, [mockGame1, mockGame2]);
+      expect(ref).toEqual({
+        type: 'loser',
+        matchName: 'Game 1'
+      });
+    });
+
+    it('derives rank reference from stage-to-game edge', () => {
+      const mockStage = {
+        id: 'stage-1',
+        type: 'stage',
+        position: { x: 0, y: 0 },
+        data: { name: 'Ranking Stage', category: 'preliminary', order: 0, stageType: 'RANKING' },
+      } as FlowNode;
+
+      const { result } = setupHook([], [mockStage, mockGame1]);
+      const edge = {
+        id: 'e1',
+        type: 'stageToGame',
+        source: 'stage-1',
+        target: 'game-1',
+        targetHandle: 'home',
+        data: { sourceRank: 3 }
+      } as FlowEdge;
+
+      const ref = result.current.deriveDynamicRef(edge, [mockStage, mockGame1]);
+      expect(ref).toEqual({
+        type: 'rank',
+        place: 3,
+        stageId: 'stage-1',
+        stageName: 'Ranking Stage'
+      });
+    });
+
+    it('returns null for missing source node', () => {
+      const { result } = setupHook([], [mockGame1]);
+      const edge = {
+        id: 'e1',
+        type: 'gameToGame',
+        source: 'nonexistent',
+        sourceHandle: 'winner',
+        target: 'game-1',
+        targetHandle: 'home'
+      } as FlowEdge;
+
+      const ref = result.current.deriveDynamicRef(edge, [mockGame1]);
+      expect(ref).toBeNull();
     });
   });
 });
