@@ -19,6 +19,7 @@ import type {
   FieldNodeData,
   StageNodeData,
   StageType,
+  StageCategory,
   TournamentStructure,
 } from '../types/flowchart';
 import {
@@ -44,6 +45,7 @@ export interface AddFieldOptions {
  */
 export interface AddStageOptions {
   name?: string;
+  category?: StageCategory;
   stageType?: StageType;
 }
 
@@ -66,7 +68,7 @@ export function useNodesState(
 
       if (includeStage) {
         const stageId = `stage-${uuidv4()}`;
-        const newStage = createStageNode(stageId, id, { name: 'Vorrunde', stageType: 'vorrunde', order: 0 });
+        const newStage = createStageNode(stageId, id, { name: 'Preliminary', category: 'preliminary', stageType: 'STANDARD', order: 0 });
         setNodes((nds) => [...nds, newField, newStage]);
       } else {
         setNodes((nds) => [...nds, newField]);
@@ -89,21 +91,22 @@ export function useNodesState(
       const existingStages = nodes.filter((n) => isStageNode(n) && n.parentId === fieldId);
       const stageCount = existingStages.length;
 
-      let defaultName = 'Vorrunde';
-      let defaultType: StageType = 'vorrunde';
+      let defaultName = 'Preliminary';
+      let defaultCategory: StageCategory = 'preliminary';
       if (stageCount === 1) {
-        defaultName = 'Finalrunde';
-        defaultType = 'finalrunde';
+        defaultName = 'Final';
+        defaultCategory = 'final';
       } else if (stageCount > 1) {
         defaultName = `Stage ${stageCount + 1}`;
-        defaultType = 'custom';
+        defaultCategory = 'custom';
       }
 
       const name = options?.name ?? defaultName;
-      const stageType = options?.stageType ?? defaultType;
+      const category = options?.category ?? defaultCategory;
+      const stageType = options?.stageType ?? 'STANDARD';
       const position = { x: 20, y: 60 + stageCount * 180 };
 
-      const newStage = createStageNode(id, fieldId, { name, stageType, order: stageCount }, position);
+      const newStage = createStageNode(id, fieldId, { name, category, stageType, order: stageCount }, position);
       setNodes((nds) => [...nds, newStage]);
 
       return newStage;
@@ -159,7 +162,7 @@ export function useNodesState(
       if (selected && isFieldNode(selected)) {
         const fieldId = selected.id;
         const stageId = `stage-${uuidv4()}`;
-        const newStage = createStageNode(stageId, fieldId, { name: 'Vorrunde', stageType: 'vorrunde', order: 0 });
+        const newStage = createStageNode(stageId, fieldId, { name: 'Preliminary', category: 'preliminary', stageType: 'STANDARD', order: 0 });
         setNodes((nds) => [...nds, newStage]);
         return { fieldId, stageId };
       }
@@ -174,7 +177,7 @@ export function useNodesState(
         }
         // Create stage in existing field
         const stageId = `stage-${uuidv4()}`;
-        const newStage = createStageNode(stageId, firstField.id, { name: 'Vorrunde', stageType: 'vorrunde', order: 0 });
+        const newStage = createStageNode(stageId, firstField.id, { name: 'Preliminary', category: 'preliminary', stageType: 'STANDARD', order: 0 });
         setNodes((nds) => [...nds, newStage]);
         return { fieldId: firstField.id, stageId };
       }
@@ -185,7 +188,7 @@ export function useNodesState(
       const fieldCount = nodes.filter(isFieldNode).length;
 
       const newField = createFieldNode(fieldId, { name: `Feld ${fieldCount + 1}`, order: fieldCount });
-      const newStage = createStageNode(stageId, fieldId, { name: 'Vorrunde', stageType: 'vorrunde', order: 0 });
+      const newStage = createStageNode(stageId, fieldId, { name: 'Preliminary', category: 'preliminary', stageType: 'STANDARD', order: 0 });
 
       setNodes((nds) => [...nds, newField, newStage]);
 

@@ -42,8 +42,9 @@ describe('StageSection', () => {
     position: { x: 0, y: 0 },
     data: {
       type: 'stage',
-      name: 'Vorrunde',
-      stageType: 'vorrunde',
+      name: 'Preliminary',
+      category: 'preliminary',
+      stageType: 'STANDARD',
       order: 0,
     },
   };
@@ -56,7 +57,7 @@ describe('StageSection', () => {
     position: { x: 0, y: 0 },
     data: {
       type: 'game',
-      stage: 'Vorrunde',
+      stage: 'Preliminary',
       standing: 'Game 1',
       fieldId: null,
       official: null,
@@ -88,7 +89,7 @@ describe('StageSection', () => {
     );
 
     // Stage name should be visible
-    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+    expect(screen.getByText('Preliminary')).toBeInTheDocument();
 
     // Stage type badge has been removed from design
     // Game count in header has been removed from design
@@ -134,26 +135,26 @@ describe('StageSection', () => {
   });
 
   it('shows correct stage type badge for different stage types', () => {
-    const finalrundeStage: StageNode = {
+    const finalStage: StageNode = {
       ...sampleStage,
       data: {
         ...sampleStage.data,
-        name: 'Finalrunde',
-        stageType: 'finalrunde',
+        name: 'Final',
+        category: 'final',
       },
     };
 
     render(
       <StageSection
         {...createDefaultProps({
-          stage: finalrundeStage,
-          allNodes: [finalrundeStage],
+          stage: finalStage,
+          allNodes: [finalStage],
         })}
       />
     );
 
     // Stage type badge has been removed from design - just verify stage name is shown
-    expect(screen.getByText('Finalrunde')).toBeInTheDocument();
+    expect(screen.getByText('Final')).toBeInTheDocument();
   });
 
   it('allows inline editing of stage name', () => {
@@ -173,7 +174,7 @@ describe('StageSection', () => {
     const editButton = screen.getByTitle(/Click to edit the name of this tournament phase/i);
     fireEvent.click(editButton);
 
-    const input = screen.getByDisplayValue('Vorrunde');
+    const input = screen.getByDisplayValue('Preliminary');
     fireEvent.change(input, { target: { value: 'Neue Vorrunde' } });
     fireEvent.blur(input);
 
@@ -321,12 +322,12 @@ describe('StageSection', () => {
     );
 
     fireEvent.click(screen.getByTitle(/Click to edit the name of this tournament phase/i));
-    const input = screen.getByDisplayValue('Vorrunde');
+    const input = screen.getByDisplayValue('Preliminary');
     fireEvent.change(input, { target: { value: 'New Name' } });
     fireEvent.keyDown(input, { key: 'Escape' });
 
     expect(screen.queryByDisplayValue('New Name')).not.toBeInTheDocument();
-    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+    expect(screen.getByText('Preliminary')).toBeInTheDocument();
   });
 
   it('saves stage name edit with Enter', () => {
@@ -342,7 +343,7 @@ describe('StageSection', () => {
     );
 
     fireEvent.click(screen.getByTitle(/Click to edit the name of this tournament phase/i));
-    const input = screen.getByDisplayValue('Vorrunde');
+    const input = screen.getByDisplayValue('Preliminary');
     fireEvent.change(input, { target: { value: 'New Name' } });
     fireEvent.keyDown(input, { key: 'Enter' });
 
@@ -396,7 +397,7 @@ describe('StageSection', () => {
       />
     );
 
-    const header = screen.getByText('Vorrunde').closest('.stage-section__header');
+    const header = screen.getByText('Preliminary').closest('.stage-section__header');
     
     // Initially expanded by local state if prop is false
     expect(screen.getByText('Game 1')).toBeInTheDocument();
@@ -404,5 +405,233 @@ describe('StageSection', () => {
     fireEvent.click(header!);
     // Now it should be collapsed
     expect(screen.queryByText('Game 1')).not.toBeInTheDocument();
+  });
+
+  describe('Stage Type and Focus refinements', () => {
+    it('shows Ranking Stage badge when stage type is RANKING', () => {
+      const rankingStage: StageNode = {
+        ...sampleStage,
+        data: {
+          ...sampleStage.data,
+          stageType: 'RANKING',
+        },
+      };
+
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: rankingStage,
+            allNodes: [rankingStage],
+          })}
+        />
+      );
+
+      expect(screen.getByText(/Ranking Stage/i)).toBeInTheDocument();
+    });
+
+    it('allows changing stage type in edit mode', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      // Enter edit mode
+      fireEvent.click(screen.getByTitle(/Click to edit the name/i));
+
+      // Select Ranking Stage
+      const typeSelect = screen.getByLabelText(/Phase Type/i);
+      fireEvent.change(typeSelect, { target: { value: 'RANKING' } });
+
+      // Click Save
+      fireEvent.click(screen.getByTitle(/Save/i));
+
+      expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', {
+        stageType: 'RANKING',
+      });
+    });
+
+    it('Smart Blur: does not close edit mode when clicking on type selector', () => {
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+          })}
+        />
+      );
+
+      // Enter edit mode
+      fireEvent.click(screen.getByTitle(/Click to edit the name/i));
+      expect(screen.getByDisplayValue('Preliminary')).toBeInTheDocument();
+
+      // Click on type select - should not close edit mode
+      const typeSelect = screen.getByLabelText(/Phase Type/i);
+      const nameInput = screen.getByDisplayValue('Preliminary');
+      
+      // Simulate blur with relatedTarget being the select
+      fireEvent.blur(nameInput, { relatedTarget: typeSelect });
+      
+      // Should still be in edit mode
+      expect(screen.getByDisplayValue('Preliminary')).toBeInTheDocument();
+    });
+
+    it('Smart Blur: closes edit mode when clicking outside the edit zone', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      // Enter edit mode
+      fireEvent.click(screen.getByTitle(/Click to edit the name/i));
+      const nameInput = screen.getByDisplayValue('Preliminary');
+
+      // Simulate blur with relatedTarget being null (e.g. clicking body)
+      fireEvent.blur(nameInput);
+
+      // Should have exited edit mode
+      expect(screen.queryByDisplayValue('Preliminary')).not.toBeInTheDocument();
+      expect(mockOnUpdate).not.toHaveBeenCalled(); // No change made
+    });
+
+    it('handleSaveEdit: saves both name and stage type changes', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      // Enter edit mode
+      fireEvent.click(screen.getByTitle(/Click to edit the name/i));
+
+      // Change name
+      const input = screen.getByDisplayValue('Preliminary');
+      fireEvent.change(input, { target: { value: 'New Name' } });
+
+      // Change type
+      const typeSelect = screen.getByLabelText(/Phase Type/i);
+      fireEvent.change(typeSelect, { target: { value: 'RANKING' } });
+
+      // Click Save
+      fireEvent.click(screen.getByTitle(/Save/i));
+
+      expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', {
+        name: 'New Name',
+        stageType: 'RANKING',
+      });
+    });
+
+    it('handleSaveEdit: does not call onUpdate if nothing changed', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      // Enter edit mode
+      fireEvent.click(screen.getByTitle(/Click to edit the name/i));
+
+      // Click Save without changing anything
+      fireEvent.click(screen.getByTitle(/Save/i));
+
+      expect(mockOnUpdate).not.toHaveBeenCalled();
+      expect(screen.queryByDisplayValue('Preliminary')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Other Header Interactions', () => {
+    it('calls onUpdate when start time is changed', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      const timeInput = screen.getByLabelText(/Start/i);
+      fireEvent.change(timeInput, { target: { value: '10:30' } });
+
+      expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { startTime: '10:30' });
+    });
+
+    it('calls onUpdate when color is changed', () => {
+      const mockOnUpdate = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onUpdate: mockOnUpdate,
+          })}
+        />
+      );
+
+      const colorInput = screen.getByTitle(/Change the accent color for this phase/i);
+      fireEvent.change(colorInput, { target: { value: '#00ff00' } });
+
+      expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { color: '#00ff00' });
+    });
+
+    it('handles adding a game', () => {
+      const mockOnAddGame = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onAddGame: mockOnAddGame,
+          })}
+        />
+      );
+
+      // There are two Add Game buttons (header and empty state body). Pick the one in header.
+      const addButtons = screen.getAllByTitle(/Add a new game to this tournament phase/i);
+      fireEvent.click(addButtons[0]);
+
+      expect(mockOnAddGame).toHaveBeenCalledWith('stage-1');
+    });
+
+    it('handles deleting the stage', () => {
+      const mockOnDelete = vi.fn();
+      render(
+        <StageSection
+          {...createDefaultProps({
+            stage: sampleStage,
+            allNodes: [sampleStage],
+            onDelete: mockOnDelete,
+          })}
+        />
+      );
+
+      const deleteButton = screen.getByTitle(/Permanently remove this phase/i);
+      fireEvent.click(deleteButton);
+
+      expect(mockOnDelete).toHaveBeenCalledWith('stage-1');
+    });
   });
 });

@@ -35,11 +35,13 @@ import {
 } from './tournamentConstants';
 
 /**
- * Edge specification for game-to-game connections
+ * Edge specification for tournament connections (game-to-game or stage-to-game)
  */
 export interface EdgeSpec {
-  sourceGameId: string;
-  outputType: 'winner' | 'loser';
+  sourceGameId?: string;
+  sourceStageId?: string;
+  sourceRank?: number;
+  outputType: 'winner' | 'loser' | 'rank';
   targetGameId: string;
   targetSlot: 'home' | 'away';
 }
@@ -66,20 +68,36 @@ function createEdgesFromMapping(
     if (!targetGame) return;
 
     // Home slot
-    if (sourceGames[sourceMap.home.sourceIndex]) {
+    if (sourceMap.home.type === 'rank' && sourceMap.home.sourceStageId) {
+      edges.push({
+        sourceStageId: sourceMap.home.sourceStageId,
+        sourceRank: sourceMap.home.sourceIndex + 1, // mapping index is 0-based, rank is 1-indexed
+        outputType: 'rank',
+        targetGameId: targetGame.id,
+        targetSlot: 'home',
+      });
+    } else if (sourceGames[sourceMap.home.sourceIndex]) {
       edges.push({
         sourceGameId: sourceGames[sourceMap.home.sourceIndex].id,
-        outputType: sourceMap.home.type,
+        outputType: sourceMap.home.type as 'winner' | 'loser',
         targetGameId: targetGame.id,
         targetSlot: 'home',
       });
     }
 
     // Away slot
-    if (sourceGames[sourceMap.away.sourceIndex]) {
+    if (sourceMap.away.type === 'rank' && sourceMap.away.sourceStageId) {
+      edges.push({
+        sourceStageId: sourceMap.away.sourceStageId,
+        sourceRank: sourceMap.away.sourceIndex + 1,
+        outputType: 'rank',
+        targetGameId: targetGame.id,
+        targetSlot: 'away',
+      });
+    } else if (sourceGames[sourceMap.away.sourceIndex]) {
       edges.push({
         sourceGameId: sourceGames[sourceMap.away.sourceIndex].id,
-        outputType: sourceMap.away.type,
+        outputType: sourceMap.away.type as 'winner' | 'loser',
         targetGameId: targetGame.id,
         targetSlot: 'away',
       });

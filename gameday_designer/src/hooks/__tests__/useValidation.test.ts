@@ -20,7 +20,7 @@ describe('useValidation', () => {
     overrides: Partial<GameSlot> = {}
   ): GameSlot => ({
     id,
-    stage: 'Vorrunde',
+    stage: 'Preliminary',
     standing,
     home: { type: 'groupTeam', group: 0, team: 0 },
     away: { type: 'groupTeam', group: 0, team: 1 },

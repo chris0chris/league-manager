@@ -23,5 +23,6 @@
   "stage_sequence_time": "Stage \"{{stage2}}\" starts at {{time2}}, which is before preceding stage \"{{stage1}}\" starts ({{time1}})",
   "stage_sequence_type": "Stage \"{{stage2}}\" ({{type2}}) follows \"{{stage1}}\" ({{type1}}), which might be out of order",
   "progression_order": "Progression from stage \"{{sourceStage}}\" to earlier stage \"{{targetStage}}\"",
-  "uneven_game_distribution": "Group \"{{group}}\" has uneven game distribution (min: {{minGames}}, max: {{maxGames}})"
+  "uneven_game_distribution": "Group \"{{group}}\" has uneven game distribution (min: {{minGames}}, max: {{maxGames}})",
+  "self_play": "Game \"{{game}}\": A team cannot play against itself"
 }

@@ -32,6 +32,7 @@ import {
   isStageNode,
   isTeamToGameEdge,
   isGameToGameEdge,
+  isStageToGameEdge,
 } from '../types/flowchart';
 import { formatTeamReference } from '../utils/teamReference';
 import { parseTime } from '../utils/timeCalculation';
@@ -787,25 +788,25 @@ function checkStageSequence(
       const current = stages[i];
       const next = stages[i + 1];
 
-      // 1. Check stageType progression (vorrunde -> finalrunde -> platzierung)
-      const stageTypeOrder: Record<string, number> = {
-        'vorrunde': 0,
-        'finalrunde': 1,
-        'platzierung': 2,
+      // 1. Check category progression (preliminary -> final -> placement)
+      const categoryOrder: Record<string, number> = {
+        'preliminary': 0,
+        'final': 1,
+        'placement': 2,
         'custom': 3
       };
 
-      if (stageTypeOrder[next.data.stageType] < stageTypeOrder[current.data.stageType]) {
+      if (categoryOrder[next.data.category] < categoryOrder[current.data.category]) {
         warnings.push({
           id: `stage_sequence_type_${current.id}_${next.id}`,
           type: 'stage_sequence_type',
-          message: `Stage "${next.data.name}" (${next.data.stageType}) follows "${current.data.name}" (${current.data.stageType}) which might be out of order`,
+          message: `Stage "${next.data.name}" (${next.data.category}) follows "${current.data.name}" (${current.data.category}) which might be out of order`,
           messageKey: 'stage_sequence_type',
           messageParams: {
             stage1: current.data.name,
-            type1: current.data.stageType,
+            type1: current.data.category,
             stage2: next.data.name,
-            type2: next.data.stageType
+            type2: next.data.category
           },
           affectedNodes: [current.id, next.id],
         });
@@ -843,8 +844,46 @@ function checkStageSequence(
 }
 
 /**
+ * Check for cyclic stage references (Ranking Stages).
+ */
+function checkCyclicStageReferences(
+  nodes: FlowNode[],
+  edges: FlowEdge[]
+): FlowValidationError[] {
+  const errors: FlowValidationError[] = [];
+  const stageNodes = nodes.filter(isStageNode);
+
+  for (const edge of edges) {
+    if (!isStageToGameEdge(edge)) continue;
+
+    const sourceStageId = edge.source;
+    const targetGameId = edge.target;
+    
+    // Find target game's parent stage
+    const targetGame = nodes.find(n => n.id === targetGameId);
+    if (!targetGame || !targetGame.parentId) continue;
+
+    if (sourceStageId === targetGame.parentId) {
+      const stage = stageNodes.find(s => s.id === sourceStageId);
+      errors.push({
+        id: `cyclic_stage_ref_${edge.id}`,
+        type: 'circular_dependency',
+        message: `Stage "${stage?.data.name}" cannot reference its own ranking`,
+        messageKey: 'circular_dependency',
+        messageParams: {
+          path: stage?.data.name || sourceStageId
+        },
+        affectedNodes: [sourceStageId, targetGameId],
+      });
+    }
+  }
+
+  return errors;
+}
+
+/**
  * Check for progression integrity (Phase 3).
- * Verifies that winner/loser paths are valid and complete.
+ * Verifies that winner/loser paths and rank paths are valid and complete.
  */
 function checkProgressionIntegrity(
   nodes: FlowNode[],
@@ -865,29 +904,40 @@ function checkProgressionIntegrity(
     }
   }
 
-  // Check each game-to-game edge for logical progression
+  // Check each edge for logical progression
   for (const edge of edges) {
-    if (!isGameToGameEdge(edge)) continue;
+    let sourceStage: FlowNode | undefined;
+    let targetStage: FlowNode | undefined;
+    let sourceName: string = '';
+    let targetName: string = '';
 
-    const sourceStage = nodeToStage.get(edge.source);
-    const targetStage = nodeToStage.get(edge.target);
+    if (isGameToGameEdge(edge)) {
+      sourceStage = nodeToStage.get(edge.source);
+      targetStage = nodeToStage.get(edge.target);
+      const sourceGame = gameNodes.find(n => n.id === edge.source);
+      const targetGame = gameNodes.find(n => n.id === edge.target);
+      sourceName = sourceGame?.data.standing || edge.source;
+      targetName = targetGame?.data.standing || edge.target;
+    } else if (isStageToGameEdge(edge)) {
+      sourceStage = stageNodes.find(s => s.id === edge.source);
+      targetStage = stageNodes.find(s => s.id === (nodes.find(n => n.id === edge.target)?.parentId));
+      const targetGame = gameNodes.find(n => n.id === edge.target);
+      sourceName = sourceStage?.data.name || edge.source;
+      targetName = targetGame?.data.standing || edge.target;
+    }
 
     if (sourceStage && targetStage) {
       // Progression should go to a stage with same or higher order
-      // (Simplified: order 0 is before order 1)
       if (targetStage.data.order < sourceStage.data.order) {
-        const sourceGame = gameNodes.find(n => n.id === edge.source);
-        const targetGame = gameNodes.find(n => n.id === edge.target);
-
         errors.push({
           id: `progression_order_${edge.id}`,
           type: 'progression_order',
-          message: `Progression from stage "${sourceStage.data.name}" to earlier stage "${targetStage.data.name}"`,
+          message: `Progression from "${sourceName}" (${sourceStage.data.name}) to earlier stage "${targetStage.data.name}"`,
           messageKey: 'progression_order',
           messageParams: {
-            sourceGame: sourceGame?.data.standing || edge.source,
+            sourceGame: sourceName,
             sourceStage: sourceStage.data.name,
-            targetGame: targetGame?.data.standing || edge.target,
+            targetGame: targetName,
             targetStage: targetStage.data.name
           },
           affectedNodes: [edge.source, edge.target],
@@ -964,6 +1014,58 @@ function checkUnevenGames(
 }
 
 /**
+ * Check if a game has the same team assigned to both slots (Self-Play).
+ */
+function checkSelfPlay(
+  nodes: FlowNode[],
+  edges: FlowEdge[]
+): FlowValidationError[] {
+  const errors: FlowValidationError[] = [];
+  const gameNodes = nodes.filter(isGameNode);
+
+  for (const node of gameNodes) {
+    const data = node.data as GameNodeData;
+    
+    // 1. Check static IDs
+    if (data.homeTeamId && data.awayTeamId && data.homeTeamId === data.awayTeamId) {
+      errors.push({
+        id: `${node.id}_self_play_static`,
+        type: 'self_reference',
+        message: `Game "${data.standing || node.id}": A team cannot play against itself`,
+        messageKey: 'self_play',
+        messageParams: {
+          game: data.standing || node.id
+        },
+        affectedNodes: [node.id],
+      });
+      continue;
+    }
+
+    // 2. Check dynamic references
+    const homeEdge = edges.find(e => e.target === node.id && e.targetHandle === 'home');
+    const awayEdge = edges.find(e => e.target === node.id && e.targetHandle === 'away');
+
+    if (homeEdge && awayEdge) {
+      // If both are from same source game and same handle (e.g. winner vs winner)
+      if (homeEdge.source === awayEdge.source && homeEdge.sourceHandle === awayEdge.sourceHandle) {
+        errors.push({
+          id: `${node.id}_self_play_dynamic`,
+          type: 'self_reference',
+          message: `Game "${data.standing || node.id}": A team cannot play against itself (same dynamic source)`,
+          messageKey: 'self_play',
+          messageParams: {
+            game: data.standing || node.id
+          },
+          affectedNodes: [node.id],
+        });
+      }
+    }
+  }
+
+  return errors;
+}
+
+/**
  * useFlowValidation hook.
  *
  * Validates the flowchart and returns errors and warnings.
@@ -993,6 +1095,8 @@ export function useFlowValidation(
       ...checkTimeOverlaps(nodes, fields),
       ...checkTeamCapacity(nodes, globalTeams),
       ...checkProgressionIntegrity(nodes, edges),
+      ...checkCyclicStageReferences(nodes, edges),
+      ...checkSelfPlay(nodes, edges),
     ];
 
     const warnings: FlowValidationWarning[] = [

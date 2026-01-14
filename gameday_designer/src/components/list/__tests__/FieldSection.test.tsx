@@ -32,8 +32,8 @@ describe('FieldSection', () => {
     position: { x: 0, y: 0 },
     data: {
       type: 'stage',
-      name: 'Vorrunde',
-      stageType: 'vorrunde',
+      name: 'Preliminary',
+      category: 'preliminary',
       order: 0,
     },
   };
@@ -46,7 +46,7 @@ describe('FieldSection', () => {
     position: { x: 0, y: 0 },
     data: {
       type: 'game',
-      stage: 'Vorrunde',
+      stage: 'Preliminary',
       standing: 'Game 1',
       fieldId: null,
       official: null,
@@ -66,7 +66,6 @@ describe('FieldSection', () => {
         allNodes={[sampleField, sampleStage, sampleGame]}
         edges={[]}
         globalTeams={[]}
-        globalTeamGroups={[]}
         globalTeamGroups={[]}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
@@ -89,7 +88,7 @@ describe('FieldSection', () => {
 
     // Metadata badges (stage count, game count) have been removed from design
     // Just verify the field and stage are rendered
-    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+    expect(screen.getByText('Preliminary')).toBeInTheDocument();
   });
 
   it('shows stages when expanded', () => {
@@ -118,7 +117,7 @@ describe('FieldSection', () => {
     );
 
     // Should be expanded - stage name visible
-    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+    expect(screen.getByText('Preliminary')).toBeInTheDocument();
     // And "Add Stage" button should be visible in the header
     const addButtons = screen.getAllByRole('button', { name: /add stage/i });
     expect(addButtons.length).toBeGreaterThan(0);
@@ -253,14 +252,14 @@ describe('FieldSection', () => {
       ...sampleStage,
       id: 'stage-1',
       parentId: 'field-1',
-      data: { ...sampleStage.data, name: 'Vorrunde', order: 0 },
+      data: { ...sampleStage.data, name: 'Preliminary', order: 0 },
     };
 
     const stage2: StageNode = {
       ...sampleStage,
       id: 'stage-2',
       parentId: 'field-1',
-      data: { ...sampleStage.data, name: 'Finalrunde', order: 1, stageType: 'finalrunde' },
+      data: { ...sampleStage.data, name: 'Final', order: 1, category: 'final' },
     };
 
     render(
@@ -286,8 +285,8 @@ describe('FieldSection', () => {
     );
 
     // Check stage names appear and in correct order
-    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
-    expect(screen.getByText('Finalrunde')).toBeInTheDocument();
+    expect(screen.getByText('Preliminary')).toBeInTheDocument();
+    expect(screen.getByText('Final')).toBeInTheDocument();
 
     // Stage type badges have been removed from design
   });
@@ -452,11 +451,11 @@ describe('FieldSection', () => {
     // Wait, the component says: const isExpanded = isExpandedProp || localExpanded;
     // localExpanded defaults to true.
     
-    expect(screen.getByText('Vorrunde')).toBeInTheDocument();
+    expect(screen.getByText('Preliminary')).toBeInTheDocument();
     
     fireEvent.click(header!);
     // Now it should be collapsed (localExpanded becomes false)
-    expect(screen.queryByText('Vorrunde')).not.toBeInTheDocument();
+    expect(screen.queryByText('Preliminary')).not.toBeInTheDocument();
   });
 
   it('shows big Add Stage button in empty state', () => {

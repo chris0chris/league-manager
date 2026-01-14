@@ -24,7 +24,7 @@ describe('FieldColumn', () => {
 
   const gameSlot1: GameSlot = {
     id: 'slot-1',
-    stage: 'Vorrunde',
+    stage: 'Preliminary',
     standing: 'Gruppe 1',
     home: { type: 'groupTeam', group: 0, team: 0 },
     away: { type: 'groupTeam', group: 0, team: 1 },
@@ -34,7 +34,7 @@ describe('FieldColumn', () => {
 
   const gameSlot2: GameSlot = {
     id: 'slot-2',
-    stage: 'Vorrunde',
+    stage: 'Preliminary',
     standing: 'Gruppe 2',
     home: { type: 'groupTeam', group: 1, team: 0 },
     away: { type: 'groupTeam', group: 1, team: 1 },

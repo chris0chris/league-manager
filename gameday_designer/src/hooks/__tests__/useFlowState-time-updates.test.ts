@@ -466,7 +466,7 @@ describe('useFlowState - Time Calculation and Updates', () => {
         (n) => isStageNode(n) && n.parentId === fieldId
       );
       expect(stage).toBeDefined();
-      expect(stage?.data.name).toBe('Vorrunde'); // First stage defaults to 'Vorrunde'
+      expect(stage?.data.name).toBe('Preliminary'); // First stage defaults to 'Preliminary'
     });
 
     it('should create field without stage when includeStage is false', () => {

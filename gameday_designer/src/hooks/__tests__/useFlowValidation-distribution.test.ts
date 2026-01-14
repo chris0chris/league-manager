@@ -26,7 +26,7 @@ describe('useFlowValidation - Game Distribution', () => {
         id: 'stage1',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 1', order: 0, stageType: 'vorrunde' },
+        data: { name: 'Stage 1', order: 0, category: 'preliminary' },
         position: { x: 0, y: 0 },
       },
       // Team 1 vs Team 2
@@ -75,7 +75,7 @@ describe('useFlowValidation - Game Distribution', () => {
         id: 'stage1',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 1', order: 0, stageType: 'vorrunde' },
+        data: { name: 'Stage 1', order: 0, category: 'preliminary' },
         position: { x: 0, y: 0 },
       },
       {

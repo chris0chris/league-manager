@@ -24,7 +24,7 @@ describe('Flowchart Types', () => {
       it('returns true for game node data', () => {
         const data: GameNodeData = {
           type: 'game',
-          stage: 'Finalrunde',
+          stage: 'Final',
           standing: 'P1',
           fieldId: 'field-1',
           official: { type: 'static', name: 'Officials' },
@@ -46,7 +46,7 @@ describe('Flowchart Types', () => {
           position: { x: 100, y: 100 },
           data: {
             type: 'game',
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             standing: 'HF1',
             fieldId: null,
             official: null,
@@ -88,7 +88,8 @@ describe('Flowchart Types', () => {
           position: { x: 0, y: 0 },
           data: {
             type: 'game',
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
             standing: '',
             fieldId: null,
             official: null,
@@ -112,7 +113,7 @@ describe('Flowchart Types', () => {
 
       it('creates a game node with custom options', () => {
         const node = createGameNode('game-3', { x: 0, y: 0 }, {
-          stage: 'Finalrunde',
+          stage: 'Final',
           standing: 'P1',
           fieldId: 'field-1',
           official: { type: 'static', name: 'Officials' },
@@ -121,7 +122,8 @@ describe('Flowchart Types', () => {
 
         expect(node.data).toEqual({
           type: 'game',
-          stage: 'Finalrunde',
+          stage: 'Final',
+          stageType: 'STANDARD',
           standing: 'P1',
           fieldId: 'field-1',
           official: { type: 'static', name: 'Officials' },
@@ -142,7 +144,7 @@ describe('Flowchart Types', () => {
         });
 
         expect(node.data.standing).toBe('HF1');
-        expect(node.data.stage).toBe('Vorrunde'); // default
+        expect(node.data.stage).toBe('Preliminary'); // default
         expect(node.data.fieldId).toBeNull(); // default
       });
     });
@@ -243,7 +245,7 @@ describe('Flowchart Types', () => {
     it('GameNodeData has required properties', () => {
       const data: GameNodeData = {
         type: 'game',
-        stage: 'Vorrunde',
+        stage: 'Preliminary',
         standing: 'HF1',
         fieldId: null,
         official: null,

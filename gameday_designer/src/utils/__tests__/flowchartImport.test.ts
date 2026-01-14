@@ -17,7 +17,7 @@ describe('Flowchart Import Utility', () => {
           field: 'Feld 1',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 1',
               home: 'Team A',
               away: 'Team B',
@@ -55,21 +55,21 @@ describe('Flowchart Import Utility', () => {
           field: 'Feld 1',
           games: [
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'HF1',
               home: 'Team A',
               away: 'Team B',
               official: '',
             },
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'HF2',
               home: 'Team C',
               away: 'Team D',
               official: '',
             },
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'P1',
               home: 'Gewinner HF1',
               away: 'Gewinner HF2',
@@ -103,21 +103,21 @@ describe('Flowchart Import Utility', () => {
           field: 'Feld 1',
           games: [
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'HF1',
               home: '0_0',
               away: '0_1',
               official: '',
             },
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'HF2',
               home: '0_2',
               away: '0_3',
               official: '',
             },
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'P3',
               home: 'Verlierer HF1',
               away: 'Verlierer HF2',
@@ -144,7 +144,7 @@ describe('Flowchart Import Utility', () => {
           field: 'Feld 1',
           games: [
             {
-              stage: 'Vorrunde',
+              stage: 'Preliminary',
               standing: 'Spiel 1',
               home: '0_0',
               away: '0_1',
@@ -169,7 +169,7 @@ describe('Flowchart Import Utility', () => {
           field: 'Feld 1',
           games: [
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'HF1',
               home: 'P1 Gruppe 1',
               away: 'P2 Gruppe 2',
@@ -198,11 +198,11 @@ describe('Flowchart Import Utility', () => {
       const json = [
         {
           field: 'Feld 1',
-          games: [{ stage: 'Vorrunde', standing: 'Spiel 1', home: '0_0', away: '0_1', official: '' }],
+          games: [{ stage: 'Preliminary', standing: 'Spiel 1', home: '0_0', away: '0_1', official: '' }],
         },
         {
           field: 'Feld 2',
-          games: [{ stage: 'Vorrunde', standing: 'Spiel 2', home: '0_2', away: '0_3', official: '' }],
+          games: [{ stage: 'Preliminary', standing: 'Spiel 2', home: '0_2', away: '0_3', official: '' }],
         },
       ];
 
@@ -219,8 +219,8 @@ describe('Flowchart Import Utility', () => {
         {
           field: 'Feld 1',
           games: [
-            { stage: 'Vorrunde', standing: 'Spiel 1', home: 'Team A', away: 'Team B', official: '' },
-            { stage: 'Vorrunde', standing: 'Spiel 2', home: 'Team A', away: 'Team C', official: '' },
+            { stage: 'Preliminary', standing: 'Spiel 1', home: 'Team A', away: 'Team B', official: '' },
+            { stage: 'Preliminary', standing: 'Spiel 2', home: 'Team A', away: 'Team C', official: '' },
           ],
         },
       ];
@@ -248,7 +248,7 @@ describe('Flowchart Import Utility', () => {
           field: 'Feld 1',
           games: [
             {
-              stage: 'Finalrunde',
+              stage: 'Final',
               standing: 'P1',
               home: 'Gewinner HF1', // HF1 doesn't exist
               away: 'Gewinner HF2', // HF2 doesn't exist
@@ -270,7 +270,7 @@ describe('Flowchart Import Utility', () => {
         {
           field: 'Feld 1',
           games: [
-            { stage: 'Vorrunde', standing: 'Spiel 1', home: '0_0', away: '0_1', official: '' },
+            { stage: 'Preliminary', standing: 'Spiel 1', home: '0_0', away: '0_1', official: '' },
           ],
         },
       ];
@@ -294,7 +294,7 @@ describe('Flowchart Import Utility', () => {
         {
           field: 'Feld 1',
           games: [
-            { stage: 'Vorrunde', standing: 'Spiel 1', home: '0_0', away: '0_1', official: '' },
+            { stage: 'Preliminary', standing: 'Spiel 1', home: '0_0', away: '0_1', official: '' },
           ],
         },
       ];
@@ -333,7 +333,7 @@ describe('Flowchart Import Utility', () => {
         {
           field: 'Feld 1',
           games: [
-            { stage: 'Vorrunde' }, // Missing standing, home, away
+            { stage: 'Preliminary' }, // Missing standing, home, away
           ],
         },
       ];

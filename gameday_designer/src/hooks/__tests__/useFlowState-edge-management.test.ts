@@ -249,7 +249,7 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     });
   });
 
-  describe('removeGameToGameEdge', () => {
+  describe('removeEdgeFromSlot', () => {
     it('removes edge targeting specific game slot', () => {
       const { result } = renderHook(() => useFlowState());
 
@@ -280,7 +280,7 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
 
       // Act: Remove edge
       act(() => {
-        result.current.removeGameToGameEdge(game2Id, 'home');
+        result.current.removeEdgeFromSlot(game2Id, 'home');
       });
 
       // Assert: Edge was removed
@@ -319,7 +319,7 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
 
       // Act: Remove edge
       act(() => {
-        result.current.removeGameToGameEdge(game2Id, 'home');
+        result.current.removeEdgeFromSlot(game2Id, 'home');
       });
 
       // Assert: Dynamic ref was cleared
@@ -359,7 +359,7 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
 
       // Act: Remove edge
       act(() => {
-        result.current.removeGameToGameEdge(game2Id, 'away');
+        result.current.removeEdgeFromSlot(game2Id, 'away');
       });
 
       // Assert: Dynamic ref was cleared
@@ -398,7 +398,7 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
 
       // Act: Remove only home slot edge
       act(() => {
-        result.current.removeGameToGameEdge(game2Id, 'home');
+        result.current.removeEdgeFromSlot(game2Id, 'home');
       });
 
       // Assert: Only away slot edge remains
@@ -432,7 +432,7 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
 
       // Act: Try to remove non-existent edge
       act(() => {
-        result.current.removeGameToGameEdge(game1Id, 'home');
+        result.current.removeEdgeFromSlot(game1Id, 'home');
       });
 
       // Assert: No errors, state unchanged
@@ -476,7 +476,7 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
       // Act: Remove edge and assign static team
       // (This simulates user selecting static team from dropdown)
       act(() => {
-        result.current.removeGameToGameEdge(game2Id, 'home');
+        result.current.removeEdgeFromSlot(game2Id, 'home');
         result.current.assignTeamToGame(game2Id, teamId, 'home');
       });
 

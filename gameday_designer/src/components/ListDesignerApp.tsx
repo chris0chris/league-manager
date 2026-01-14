@@ -42,7 +42,8 @@ const ListDesignerApp: React.FC = () => {
     reorderGlobalTeamGroup,
     getTeamUsage,
     addGameToGameEdge,
-    removeGameToGameEdge,
+    addStageToGameEdge,
+    removeEdgeFromSlot,
     addGameNodeInStage,
     addNotification,
   } = useDesignerController();
@@ -255,7 +256,8 @@ const ListDesignerApp: React.FC = () => {
           highlightedElement={highlightedElement}
           onDynamicReferenceClick={handleDynamicReferenceClick}
           onAddGameToGameEdge={addGameToGameEdge}
-          onRemoveGameToGameEdge={removeGameToGameEdge}
+          onAddStageToGameEdge={addStageToGameEdge}
+          onRemoveEdgeFromSlot={removeEdgeFromSlot}
           expandedFieldIds={expandedFieldIds}
           expandedStageIds={expandedStageIds}
         />

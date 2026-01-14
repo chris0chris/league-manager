@@ -73,6 +73,13 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
     setNodes
   );
 
+  const {
+    addBulkGameToGameEdges,
+    addStageToGameEdge,
+    removeEdgeFromSlot,
+    ...edgesManagerProps
+  } = edgesManager;
+
   // --- Actions ---
 
   const onNodesChange = useCallback(() => {}, []);
@@ -236,8 +243,11 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
     onNodesChange,
     onEdgesChange,
     ...nodesManager,
-    ...edgesManager,
+    ...edgesManagerProps,
     ...teamPoolManager,
+    addBulkGameToGameEdges,
+    addStageToGameEdge,
+    removeEdgeFromSlot,
     addGameNode, // Overrides nodesManager.addGameNode (v1 behavior)
     deleteNode, // Overrides managers
     addField,

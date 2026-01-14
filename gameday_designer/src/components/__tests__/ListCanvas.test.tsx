@@ -325,7 +325,7 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
         data: {
           type: 'stage' as const,
           name: 'Stage 1',
-          stageType: 'vorrunde' as const,
+          category: 'preliminary' as const,
           order: 0,
         },
       };
@@ -338,7 +338,7 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
         data: {
           type: 'stage' as const,
           name: 'Stage 2',
-          stageType: 'finalrunde' as const,
+          category: 'final' as const,
           order: 1,
         },
       };

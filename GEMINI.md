@@ -17,35 +17,34 @@ This file provides a comprehensive instructional context for Gemini (and other A
 
 ---
 
-## Development & Environment Setup
+## Development Workflow & Protocol
 
-### Python Environment
-The project utilizes `uv` for high-performance dependency management.
+### 1. Test-Driven Development (TDD)
+We strictly follow the TDD cycle:
+1.  **RED**: Write a test for the desired functionality and verify that it fails.
+2.  **GREEN**: Implement the minimum code necessary to make the test pass.
+3.  **REFACTOR**: Clean up the code while ensuring the tests remain GREEN.
 
-```bash
-# Sync environment with test dependencies
-uv sync --extra test
+### 2. Branching & Pull Requests
+- **NO Commits to Master**: Direct commits to the `master` branch are strictly forbidden.
+- **Feature Branches**: All work must be performed on a dedicated branch created for the specific task or feature.
+- **Pull Requests**: Every change must receive a Pull Request (PR).
+- **Merging**: Branches are only merged into `master` after explicit user approval.
 
-# Run Django with development settings
-league_manager=dev python manage.py runserver --insecure
-```
-*Note: `--insecure` is required to serve static files locally when `DEBUG=False`.*
-
-### Frontend Environment
-Each React application resides in its own directory with its own `package.json`.
-
-```bash
-# Typical frontend commands (e.g., in gameday_designer/)
-npm install
-npm run start    # Vite dev server
-npm run build    # Production build to static/ directory
-```
+### 3. Documentation & Progress Tracking
+- **`feature-dev/` Directory**: Progress documentation for all features must be maintained in this directory.
+- **Tracking**: All features (excluding minor bugs and quick fixes) must track their progress here.
+- **History Entry**: Once a feature is finished, it must contain a history entry summarizing the implementation.
 
 ---
 
 ## Testing Strategy
 
-### 1. Backend Testing (pytest)
+### 1. Execution
+- **Targeted Runs**: For targeted modifications, tests can be run in isolation (e.g., only the test file corresponding to the changed code) to ensure fast feedback.
+- **Full Suite**: Complex tasks or significant changes require running the full test suite to prevent regressions.
+
+### 2. Backend Testing (pytest)
 Backend tests require a MariaDB instance. The project infrastructure uses an LXC container (`servyy-test`) running a Docker MariaDB.
 
 **Mandatory Environment Variables:**
@@ -66,7 +65,7 @@ export SECRET_KEY=test-secret-key
 pytest
 ```
 
-### 2. Frontend Testing (vitest)
+### 3. Frontend Testing (vitest)
 All modern frontend apps use Vitest.
 ```bash
 npm --prefix gameday_designer/ run test:run
@@ -74,8 +73,14 @@ npm --prefix gameday_designer/ run test:run
 
 ---
 
-## Deployment & Safety Policies
+## Deployment & Staging
 
+### 1. Staging Deployments
+- **Trigger**: When a feature is "almost ready", it should be deployed to the staging environment.
+- **Process**: Use the `./container/deploy.sh stage` script to trigger the deployment.
+- **Validation**: All changes MUST be validated on the staging environment before the PR is merged or a production deployment is initiated.
+
+### 2. Production Safety Policies (Ansible)
 **CRITICAL: Mandatory Deployment Process**
 1. **Develop Fix**: Modify Ansible playbooks in `infrastructure/container`.
 2. **Test First**: Deploy to `servyy-test.lxd` (`10.185.182.207`) using the Ansible test inventory.
@@ -108,16 +113,16 @@ npm --prefix gameday_designer/ run test:run
 ### Coding Style
 - **Python**: Strict Django patterns. Format with `black .`.
 - **TypeScript**: Prefer Functional Components and Hooks. Use `Context API` for new state management (Redux exists in legacy apps).
-- **TDD**: Highly preferred. See `gameday_designer/tests/` for high-quality service-level test examples.
 
 ### Versioning
-Managed via `bump2version`. Synchronized across:
+Managed via `bump2version` (or `bump-my-version`). Synchronized across:
 - `league_manager/__init__.py`
 - Frontend `package.json` files
 - `uv.lock`
+- `pyproject.toml`
 
 ### Key Files for Context
 - `CLAUDE.md`: Detailed agent workflows and deployment safety policies.
-- `feature-dev/`: Contains ADRs, tournament play mode docs, and original requirements.
+- `feature-dev/`: Contains ADRs, tournament play mode docs, and implementation progress.
 - `pytest.ini`: Configures test discovery and DB reuse.
-- `pyproject.toml`: Defines dependencies and `bump2version` logic.
+- `pyproject.toml`: Defines dependencies and versioning logic.

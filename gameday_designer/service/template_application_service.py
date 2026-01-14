@@ -98,10 +98,13 @@ class TemplateApplicationService:
         # Step 3: Create gameinfos from slots
         gameinfos = self._create_gameinfos()
 
-        # Step 4: Create gameresults for each gameinfo
+        # Step 4: Resolve ranking-based references
+        self._resolve_ranking_references()
+
+        # Step 5: Create gameresults for each gameinfo
         self._create_gameresults(gameinfos)
 
-        # Step 5: Store audit trail
+        # Step 6: Store audit trail
         self._create_audit_record()
 
         return ApplicationResult(
@@ -109,6 +112,62 @@ class TemplateApplicationService:
             gameinfos_created=len(gameinfos),
             message=f'Successfully applied template "{self.template.name}" to gameday "{self.gameday.name}". Created {len(gameinfos)} games.',
         )
+
+    def _resolve_ranking_references(self):
+        """
+        Identify Ranking Stages and resolve their outcomes into the team mapping.
+
+        This allows slots referencing "Rank X StageY" to be resolved into concrete team IDs
+        at the time of application.
+        """
+        # 1. Group slots by stage
+        stages_map = {}
+        for slot in self.template.slots.all():
+            if slot.stage not in stages_map:
+                stages_map[slot.stage] = []
+            stages_map[slot.stage].append(slot)
+
+        # 2. For each Ranking Stage, calculate "pseudo-standings" based on the mapping
+        for stage_name, slots in stages_map.items():
+            # Check if this stage is a Ranking Stage
+            # (In our model, stage_type is on the slot level)
+            if any(slot.stage_type == "RANKING" for slot in slots):
+                self._calculate_and_map_rankings(stage_name, slots)
+
+    def _calculate_and_map_rankings(self, stage_name: str, slots: list[TemplateSlot]):
+        """
+        Calculate the ranking for a stage and add to team_mapping.
+
+        Note: Since games haven't been played yet, we "rank" based on the team mapping
+        order (Preliminary rank). In a real gameday, this will be handled by UpdateRules.
+        For static application, we just provide the mapping so the games can be created.
+        """
+        # Extract all unique teams assigned to this stage via mapping
+        participants = set()
+        for slot in slots:
+            home = (
+                f"{slot.home_group}_{slot.home_team}"
+                if slot.home_group is not None
+                else None
+            )
+            away = (
+                f"{slot.away_group}_{slot.away_team}"
+                if slot.away_group is not None
+                else None
+            )
+            if home and home in self.team_mapping:
+                participants.add(self.team_mapping[home])
+            if away and away in self.team_mapping:
+                participants.add(self.team_mapping[away])
+
+        # Sort participants to create a deterministic ranking
+        # (Matches the logic in frontend rankingEngine.ts)
+        ordered_teams = sorted(list(participants))
+
+        # Add to mapping: "Rank X StageName" -> team_id
+        for i, team_id in enumerate(ordered_teams):
+            rank_key = f"Rank {i+1} {stage_name}"
+            self.team_mapping[rank_key] = team_id
 
     def _validate_compatibility(self):
         """
@@ -247,13 +306,23 @@ class TemplateApplicationService:
         Args:
             group: Group index (0-based)
             team: Team index within group (0-based)
-            reference: Reference string (e.g., "Gewinner HF1") for final rounds
+            reference: Reference string (e.g., "Gewinner HF1", "Rank 1 Preliminary") for final rounds
 
         Returns:
             Team object if resolved, None if reference (to be determined later)
         """
         if reference:
-            # This is a final round game, team will be determined later
+            # Check if this is a resolvable rank reference
+            if reference in self.team_mapping:
+                team_id = self.team_mapping[reference]
+                try:
+                    return Team.objects.get(pk=team_id)
+                except Team.DoesNotExist:
+                    raise ApplicationError(
+                        f"Team with ID {team_id} (referenced as {reference}) does not exist"
+                    )
+
+            # This is a final round game (winner/loser), team will be determined later
             # For now, return None (would be handled by update rules in actual game flow)
             return None
 

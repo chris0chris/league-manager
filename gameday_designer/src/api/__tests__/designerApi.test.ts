@@ -493,7 +493,7 @@ describe('DesignerApi', () => {
           {
             field: 1,
             slot_order: 1,
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             standing: 'Gruppe 1',
             home_team: 'Team A',
             away_team: 'Team B',

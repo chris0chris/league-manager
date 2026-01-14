@@ -39,7 +39,7 @@ describe('useNodesState - Manual Time Overrides', () => {
     const field = createFieldNode(fieldId, { name: 'Field 1', order: 0 });
     const stage = createStageNode(stageId, fieldId, {
       name: 'Stage 1',
-      stageType: 'vorrunde',
+      category: 'preliminary',
       order: 0,
       startTime: '10:00',
       defaultGameDuration: 60,
@@ -75,7 +75,7 @@ describe('useNodesState - Manual Time Overrides', () => {
     const field = createFieldNode(fieldId, { name: 'Field 1', order: 0 });
     const stage = createStageNode(stageId, fieldId, {
       name: 'Stage 1',
-      stageType: 'vorrunde',
+      category: 'preliminary',
       order: 0,
       startTime: '10:00',
       defaultGameDuration: 60,
@@ -125,7 +125,7 @@ describe('useNodesState - Manual Time Overrides', () => {
     const field = createFieldNode(fieldId, { name: 'Field 1', order: 0 });
     const stage = createStageNode(stageId, fieldId, {
       name: 'Stage 1',
-      stageType: 'vorrunde',
+      category: 'preliminary',
       order: 0,
       startTime: '10:00',
       defaultGameDuration: 60,

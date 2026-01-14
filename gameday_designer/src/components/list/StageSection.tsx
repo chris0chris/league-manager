@@ -4,7 +4,7 @@
  * Displays a collapsible stage container with game tables.
  */
 
-import React, { useState, useCallback, useMemo, memo } from 'react';
+import React, { useState, useCallback, useMemo, memo, useRef } from 'react';
 import { Card, Button, Form } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import GameTable from './GameTable';
@@ -35,7 +35,8 @@ export interface StageSectionProps {
   onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
   onAddGame: (stageId: string) => void;
   onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
-  onRemoveGameToGameEdge: (targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   isExpanded: boolean;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
@@ -55,15 +56,18 @@ const StageSection: React.FC<StageSectionProps> = memo(({
   onAssignTeam,
   onAddGame,
   onAddGameToGameEdge,
-  onRemoveGameToGameEdge,
+  onAddStageToGameEdge,
+  onRemoveEdgeFromSlot,
   isExpanded: isExpandedProp,
   highlightedSourceGameId,
   onDynamicReferenceClick,
 }) => {
   const { t } = useTypedTranslation(['ui', 'domain']);
-  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(stage.data.name);
+  const [editedStageType, setEditedStageType] = useState(stage.data.stageType || 'STANDARD');
   const [localExpanded, setLocalExpanded] = useState(true);
+  const editZoneRef = useRef<HTMLDivElement>(null);
   
   // Combine local state with prop
   const isExpanded = isExpandedProp || localExpanded;
@@ -94,31 +98,49 @@ const StageSection: React.FC<StageSectionProps> = memo(({
   const handleStartEdit = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      setIsEditingName(true);
+      setIsEditing(true);
       setEditedName(stage.data.name);
+      setEditedStageType(stage.data.stageType || 'STANDARD');
     },
-    [stage.data.name]
+    [stage.data.name, stage.data.stageType]
   );
 
-  const handleSaveName = useCallback(() => {
-    setIsEditingName(false);
+  const handleSaveEdit = useCallback((e?: React.FocusEvent) => {
+    // Smart Blur: Only save if focus moves outside the edit zone
+    if (e?.relatedTarget && editZoneRef.current?.contains(e.relatedTarget as Node)) {
+      return;
+    }
+
+    setIsEditing(false);
+    const updates: Partial<StageNode['data']> = {};
+    
     if (editedName.trim() !== '' && editedName !== stage.data.name) {
-      onUpdate(stage.id, { name: editedName.trim() });
+      updates.name = editedName.trim();
+    }
+    
+    if (editedStageType !== stage.data.stageType) {
+      updates.stageType = editedStageType;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      onUpdate(stage.id, updates);
     } else {
       setEditedName(stage.data.name);
+      setEditedStageType(stage.data.stageType || 'STANDARD');
     }
-  }, [editedName, stage.id, stage.data.name, onUpdate]);
+  }, [editedName, editedStageType, stage.id, stage.data.name, stage.data.stageType, onUpdate]);
 
-  const handleNameKeyPress = useCallback(
+  const handleKeyPress = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
-        handleSaveName();
+        handleSaveEdit();
       } else if (e.key === 'Escape') {
-        setIsEditingName(false);
+        setIsEditing(false);
         setEditedName(stage.data.name);
+        setEditedStageType(stage.data.stageType || 'STANDARD');
       }
     },
-    [handleSaveName, stage.data.name]
+    [handleSaveEdit, stage.data.name, stage.data.stageType]
   );
 
   const handleAddGame = useCallback(
@@ -146,7 +168,7 @@ const StageSection: React.FC<StageSectionProps> = memo(({
       className={`stage-section mb-2 ${isHighlighted ? 'element-highlighted' : ''}`}
     >
       <Card.Header
-        className="stage-section__header d-flex align-items-center"
+        className={`stage-section__header d-flex align-items-center ${isEditing ? 'stage-section__header--editing' : ''}`}
         onClick={handleToggleExpand}
         style={{
           cursor: 'pointer',
@@ -155,7 +177,7 @@ const StageSection: React.FC<StageSectionProps> = memo(({
       >
         <i className={`bi ${isExpanded ? ICONS.EXPANDED : ICONS.COLLAPSED} me-2`}></i>
 
-        <div className="d-flex align-items-center gap-2 me-2">
+        <div className="d-flex align-items-center gap-2 me-3">
           <Form.Label htmlFor={`stage-start-${stage.id}`} className="mb-0 text-muted small">{t('ui:label.start')}:</Form.Label>
           <Form.Control
             id={`stage-start-${stage.id}`}
@@ -168,20 +190,70 @@ const StageSection: React.FC<StageSectionProps> = memo(({
           />
         </div>
 
-        {isEditingName ? (
-          <input
-            type="text"
-            className="form-control form-control-sm me-2 me-auto"
-            value={editedName}
-            onChange={(e) => setEditedName(e.target.value)}
-            onBlur={handleSaveName}
-            onKeyDown={handleNameKeyPress}
+        {isEditing ? (
+          <div 
+            ref={editZoneRef} 
+            className="flex-grow-1 d-flex align-items-center gap-2"
+            onBlur={handleSaveEdit}
             onClick={(e) => e.stopPropagation()}
-            autoFocus
-            style={{ maxWidth: '200px' }}
-          />
+          >
+            <div className="d-flex align-items-center gap-2 me-2">
+              <Form.Label htmlFor={`stage-type-${stage.id}`} className="mb-0 text-muted small">{t('ui:label.type')}:</Form.Label>
+              <Form.Select
+                id={`stage-type-${stage.id}`}
+                size="sm"
+                value={editedStageType}
+                onChange={(e) => setEditedStageType(e.target.value as 'STANDARD' | 'RANKING')}
+                style={{ width: '140px' }}
+              >
+                <option value="STANDARD">{t('domain:stageTypeStandard')}</option>
+                <option value="RANKING">{t('domain:stageTypeRanking')}</option>
+              </Form.Select>
+            </div>
+            <div className="flex-grow-1 d-flex align-items-center gap-2">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                onKeyDown={handleKeyPress}
+                autoFocus
+                style={{ maxWidth: '300px' }}
+              />
+              <Button 
+                size="sm" 
+                variant="outline-success" 
+                onClick={(e) => { e.stopPropagation(); handleSaveEdit(); }}
+                className="p-1"
+                title={t('ui:button.save')}
+              >
+                <i className="bi bi-check-lg"></i>
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline-secondary" 
+                onClick={(e) => { e.stopPropagation(); setIsEditing(false); }}
+                className="p-1"
+                title={t('ui:button.cancel')}
+              >
+                <i className="bi bi-x-lg"></i>
+              </Button>
+            </div>
+          </div>
         ) : (
           <>
+            <div className="me-3 small text-muted">
+              {stage.data.stageType === 'RANKING' ? (
+                <span className="badge bg-info text-dark" style={{ fontSize: '0.85rem' }}>
+                  <i className="bi bi-trophy-fill me-1"></i>
+                  {t('domain:stageTypeRanking')}
+                </span>
+              ) : (
+                <span className="badge bg-light text-dark border" style={{ fontSize: '0.85rem' }}>
+                  {t('domain:stageTypeStandard')}
+                </span>
+              )}
+            </div>
             <strong className="me-2">{stage.data.name}</strong>
             <Button 
               size="sm" 
@@ -266,7 +338,8 @@ const StageSection: React.FC<StageSectionProps> = memo(({
                   selectedNodeId={selectedNodeId}
                   onAssignTeam={onAssignTeam}
                   onAddGameToGameEdge={onAddGameToGameEdge}
-                  onRemoveGameToGameEdge={onRemoveGameToGameEdge}
+                  onAddStageToGameEdge={onAddStageToGameEdge}
+                  onRemoveEdgeFromSlot={onRemoveEdgeFromSlot}
                   highlightedSourceGameId={highlightedSourceGameId}
                   onDynamicReferenceClick={onDynamicReferenceClick}
                 />

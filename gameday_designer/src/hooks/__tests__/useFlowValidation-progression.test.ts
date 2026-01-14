@@ -16,14 +16,14 @@ describe('useFlowValidation - Progression Integrity', () => {
         id: 'stage1', // Vorrunde
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 1', order: 0, stageType: 'vorrunde' },
+        data: { name: 'Stage 1', order: 0, category: 'preliminary' },
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage2', // Finalrunde
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 2', order: 1, stageType: 'finalrunde' },
+        data: { name: 'Stage 2', order: 1, category: 'final' },
         position: { x: 0, y: 0 },
       },
       {

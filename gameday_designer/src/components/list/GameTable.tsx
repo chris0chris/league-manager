@@ -16,8 +16,10 @@ import type {
   GameNodeData,
   HighlightedElement
 } from '../../types/flowchart';
-import { isGameNode } from '../../types/flowchart';
-import { findSourceGameForReference, getGamePath } from '../../utils/edgeAnalysis';
+import { isGameNode, isStageNode } from '../../types/flowchart';
+import { isRankReference } from '../../types/designer';
+import { findSourceGameForReference, findSourceStageForReference, getGamePath } from '../../utils/edgeAnalysis';
+import { getStageParticipants } from '../../utils/rankingEngine';
 import { isValidTimeFormat } from '../../utils/timeCalculation';
 import { ICONS } from '../../utils/iconConstants';
 import './GameTable.css';
@@ -187,7 +189,8 @@ export interface GameTableProps {
   selectedNodeId: string | null;
   onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
   onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
-  onRemoveGameToGameEdge: (targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
 }
@@ -205,7 +208,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
   onAssignTeam,
   onUpdate,
   onAddGameToGameEdge,
-  onRemoveGameToGameEdge,
+  onAddStageToGameEdge,
+  onRemoveEdgeFromSlot,
   highlightedSourceGameId,
   onDynamicReferenceClick,
 }) => {
@@ -313,15 +317,18 @@ const GameTable: React.FC<GameTableProps> = memo(({
   }, [allNodes]);
 
   const handleTeamChange = useCallback((gameId: string, slot: 'home' | 'away', value: string) => {
-    onRemoveGameToGameEdge(gameId, slot);
+    onRemoveEdgeFromSlot(gameId, slot);
     if (!value) return;
     if (value.startsWith('winner:') || value.startsWith('loser:')) {
       const [outputType, sourceGameId] = value.split(':');
       onAddGameToGameEdge(sourceGameId, outputType as 'winner' | 'loser', gameId, slot);
+    } else if (value.startsWith('rank:')) {
+      const [, sourceStageId, place] = value.split(':');
+      onAddStageToGameEdge(sourceStageId, parseInt(place, 10), gameId, slot);
     } else {
       onAssignTeam(gameId, value, slot);
     }
-  }, [onRemoveGameToGameEdge, onAddGameToGameEdge, onAssignTeam]);
+  }, [onRemoveEdgeFromSlot, onAddGameToGameEdge, onAddStageToGameEdge, onAssignTeam]);
 
   const handleOfficialChange = useCallback(
     (gameId: string, value: string) => {
@@ -331,6 +338,44 @@ const GameTable: React.FC<GameTableProps> = memo(({
   );
 
   const teamOptions = useMemo(() => buildGroupedTeamOptions(globalTeams, globalTeamGroups), [globalTeams, globalTeamGroups]);
+
+  const rankingStageOptions = useMemo(() => {
+    // Determine the current stage ID (assume all games in table belong to same stage)
+    const currentStageId = games[0]?.parentId;
+    
+    const rankingStages = allNodes.filter(n => 
+      isStageNode(n) && 
+      n.data.stageType === 'RANKING' &&
+      n.id !== currentStageId // Prevent self-reference
+    ) as StageNode[];
+    const options: TeamOption[] = [];
+
+    rankingStages.forEach(stage => {
+      options.push({ 
+        value: `stage-header-${stage.id}`, 
+        label: `${stage.data.name} (Ranking)`, 
+        color: stage.data.color || '#0d6efd', 
+        isStageHeader: true, 
+        isDisabled: true 
+      });
+
+      // Find all games in this stage
+      const stageGames = allNodes.filter(n => isGameNode(n) && n.parentId === stage.id) as GameNode[];
+      const participants = getStageParticipants(stageGames);
+      
+      // For each participant, add a rank option
+      participants.forEach((_, index) => {
+        const place = index + 1;
+        options.push({
+          value: `rank:${stage.id}:${place}`,
+          label: `🏆 ${place}. Place from ${stage.data.name}`,
+          isTeam: false
+        });
+      });
+    });
+
+    return options;
+  }, [allNodes, games]);
 
   const renderTimeCell = (game: GameNode) => {
     const isEditingTime = editingGameId === game.id && editingField === 'time';
@@ -371,7 +416,10 @@ const GameTable: React.FC<GameTableProps> = memo(({
     const hasOfficial = !!official;
     const eligibleGames = getEligibleSourceGames(game);
     
-    const options = [...teamOptions];
+    const options = [
+      ...teamOptions,
+      ...rankingStageOptions
+    ];
     const gamesByStage = new Map<string, { name: string; games: GameNode[] }>();
     eligibleGames.forEach((sourceGame) => {
       const sourcePath = getGamePath(sourceGame.id, allNodes);
@@ -426,11 +474,20 @@ const GameTable: React.FC<GameTableProps> = memo(({
     
     let currentValue = '';
     if (dynamicRef) {
-      const sourceGame = findSourceGameForReference(game.id, slot, edges, allNodes);
-      if (sourceGame) currentValue = `${dynamicRef.type === 'loser' ? 'loser' : 'winner'}:${sourceGame.id}`;
+      if (isRankReference(dynamicRef)) {
+        const source = findSourceStageForReference(game.id, slot, edges, allNodes);
+        if (source) currentValue = `rank:${source.stage.id}:${source.rank}`;
+      } else {
+        const sourceGame = findSourceGameForReference(game.id, slot, edges, allNodes);
+        if (sourceGame) currentValue = `${dynamicRef.type === 'loser' ? 'loser' : 'winner'}:${sourceGame.id}`;
+      }
     } else if (teamId) currentValue = teamId;
 
-    const options = [{ value: '', label: '-- Select Team --' }, ...teamOptions];
+    const options = [
+      { value: '', label: '-- Select Team --' }, 
+      ...teamOptions,
+      ...rankingStageOptions
+    ];
     const eligibleGames = getEligibleSourceGames(game);
     const gamesByStage = new Map<string, { name: string; games: GameNode[] }>();
     eligibleGames.forEach((sourceGame) => {
@@ -456,8 +513,13 @@ const GameTable: React.FC<GameTableProps> = memo(({
         onClick={(e) => {
           e.stopPropagation();
           if (dynamicRef && onDynamicReferenceClick) {
-            const sourceGame = findSourceGameForReference(game.id, slot, edges, allNodes);
-            if (sourceGame) onDynamicReferenceClick(sourceGame.id);
+            if (isRankReference(dynamicRef)) {
+              const source = findSourceStageForReference(game.id, slot, edges, allNodes);
+              if (source) onDynamicReferenceClick(source.stage.id);
+            } else {
+              const sourceGame = findSourceGameForReference(game.id, slot, edges, allNodes);
+              if (sourceGame) onDynamicReferenceClick(sourceGame.id);
+            }
           }
         }}
         style={{ cursor: dynamicRef ? 'pointer' : 'default' }}

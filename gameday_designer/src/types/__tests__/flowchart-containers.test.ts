@@ -55,19 +55,19 @@ describe('Container Types - Field and Stage', () => {
     it('has required properties', () => {
       const data: StageNodeData = {
         type: 'stage',
-        name: 'Vorrunde',
-        stageType: 'vorrunde',
+        name: 'Preliminary',
+        category: 'preliminary',
+        stageType: 'STANDARD',
         order: 0,
       };
-
       expect(data.type).toBe('stage');
-      expect(data.name).toBe('Vorrunde');
-      expect(data.stageType).toBe('vorrunde');
+      expect(data.name).toBe('Preliminary');
+      expect(data.stageType).toBe('STANDARD');
       expect(data.order).toBe(0);
     });
 
     it('supports all stage types', () => {
-      const stageTypes: StageType[] = ['vorrunde', 'finalrunde', 'platzierung', 'custom'];
+      const stageTypes: StageType[] = ['preliminary', 'final', 'placement', 'custom'];
 
       stageTypes.forEach((stageType) => {
         const data: StageNodeData = {
@@ -95,8 +95,8 @@ describe('Container Types - Field and Stage', () => {
       it('returns false for stage node data', () => {
         const data: StageNodeData = {
           type: 'stage',
-          name: 'Vorrunde',
-          stageType: 'vorrunde',
+          name: 'Preliminary',
+          category: 'preliminary',
           order: 0,
         };
         expect(isFieldNodeData(data)).toBe(false);
@@ -105,7 +105,7 @@ describe('Container Types - Field and Stage', () => {
       it('returns false for game node data', () => {
         const data = {
           type: 'game',
-          stage: 'Vorrunde',
+          stage: 'Preliminary',
           standing: 'HF1',
           fieldId: null,
           official: null,
@@ -119,8 +119,8 @@ describe('Container Types - Field and Stage', () => {
       it('returns true for stage node data', () => {
         const data: StageNodeData = {
           type: 'stage',
-          name: 'Finalrunde',
-          stageType: 'finalrunde',
+          name: 'Final',
+          category: 'final',
           order: 1,
         };
         expect(isStageNodeData(data)).toBe(true);
@@ -169,8 +169,8 @@ describe('Container Types - Field and Stage', () => {
           position: { x: 20, y: 60 },
           data: {
             type: 'stage',
-            name: 'Vorrunde',
-            stageType: 'vorrunde',
+            name: 'Preliminary',
+            category: 'preliminary',
             order: 0,
           },
           style: { width: 300, height: 150 },
@@ -188,8 +188,8 @@ describe('Container Types - Field and Stage', () => {
           position: { x: 20, y: 60 },
           data: {
             type: 'stage',
-            name: 'Finalrunde',
-            stageType: 'finalrunde',
+            name: 'Final',
+            category: 'final',
             order: 0,
           },
           style: { width: 300, height: 150 },
@@ -237,8 +237,8 @@ describe('Container Types - Field and Stage', () => {
           position: { x: 20, y: 60 },
           data: {
             type: 'stage',
-            name: 'Vorrunde',
-            stageType: 'vorrunde',
+            name: 'Preliminary',
+            category: 'preliminary',
             order: 0,
           },
           style: { width: 300, height: 150 },
@@ -253,7 +253,7 @@ describe('Container Types - Field and Stage', () => {
           position: { x: 100, y: 100 },
           data: {
             type: 'game',
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             standing: 'HF1',
             fieldId: null,
             official: null,
@@ -329,8 +329,8 @@ describe('Container Types - Field and Stage', () => {
         expect(node.parentId).toBe('field-1');
         expect(node.position).toEqual({ x: 20, y: 60 });
         expect(node.data.type).toBe('stage');
-        expect(node.data.name).toBe('Vorrunde');
-        expect(node.data.stageType).toBe('vorrunde');
+        expect(node.data.name).toBe('Preliminary');
+        expect(node.data.stageType).toBe('STANDARD');
         expect(node.data.order).toBe(0);
         expect(node.style).toEqual({ width: 300, height: 150 });
         expect(node.extent).toBe('parent');
@@ -341,12 +341,12 @@ describe('Container Types - Field and Stage', () => {
 
       it('creates a stage node with custom name and type', () => {
         const node = createStageNode('stage-2', 'field-1', {
-          name: 'Finalrunde',
-          stageType: 'finalrunde',
+          name: 'Final',
+          category: 'final',
         });
 
-        expect(node.data.name).toBe('Finalrunde');
-        expect(node.data.stageType).toBe('finalrunde');
+        expect(node.data.name).toBe('Final');
+        expect(node.data.stageType).toBe('STANDARD');
       });
 
       it('creates a stage node with custom position', () => {
@@ -361,22 +361,22 @@ describe('Container Types - Field and Stage', () => {
         expect(node.data.order).toBe(2);
       });
 
-      it('creates a platzierung stage', () => {
+      it('creates a placement stage', () => {
         const node = createStageNode('stage-5', 'field-1', {
           name: 'Platzierung',
-          stageType: 'platzierung',
+          category: 'placement',
         });
 
-        expect(node.data.stageType).toBe('platzierung');
+        expect(node.data.stageType).toBe('STANDARD');
       });
 
       it('creates a custom stage', () => {
         const node = createStageNode('stage-6', 'field-1', {
           name: 'Gruppenphase',
-          stageType: 'custom',
+          category: 'custom',
         });
 
-        expect(node.data.stageType).toBe('custom');
+        expect(node.data.stageType).toBe('STANDARD');
         expect(node.data.name).toBe('Gruppenphase');
       });
     });
@@ -454,8 +454,8 @@ describe('Container Types - Field and Stage', () => {
         position: { x: 20, y: 60 },
         data: {
           type: 'stage',
-          name: 'Vorrunde',
-          stageType: 'vorrunde',
+          name: 'Preliminary',
+          category: 'preliminary',
           order: 0,
         },
         style: { width: 300, height: 150 },

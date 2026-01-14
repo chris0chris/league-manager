@@ -42,7 +42,7 @@ describe('Flowchart Export Utility', () => {
       const state: FlowState = {
         nodes: [
           createGameNode('game-1', { x: 0, y: 0 }, {
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             standing: 'Spiel 1',
             fieldId: 'field-1',
             official: { type: 'static', name: 'Officials' },
@@ -65,7 +65,7 @@ describe('Flowchart Export Utility', () => {
         field: 'Feld 1',
         games: [
           {
-            stage: 'Vorrunde',
+            stage: 'Preliminary',
             standing: 'Spiel 1',
             home: '0_0',
             away: '0_1',
@@ -87,21 +87,21 @@ describe('Flowchart Export Utility', () => {
       const state: FlowState = {
         nodes: [
           createGameNode('game-hf1', { x: 0, y: 0 }, {
-            stage: 'Finalrunde',
+            stage: 'Final',
             standing: 'HF1',
             fieldId: 'field-1',
             homeTeamId: 'team-1',
             awayTeamId: 'team-2',
           }),
           createGameNode('game-hf2', { x: 0, y: 0 }, {
-            stage: 'Finalrunde',
+            stage: 'Final',
             standing: 'HF2',
             fieldId: 'field-1',
             homeTeamId: 'team-3',
             awayTeamId: 'team-4',
           }),
           createGameNode('game-final', { x: 0, y: 0 }, {
-            stage: 'Finalrunde',
+            stage: 'Final',
             standing: 'P1',
             fieldId: 'field-1',
             homeTeamDynamic: { type: 'winner', matchName: 'HF1' },

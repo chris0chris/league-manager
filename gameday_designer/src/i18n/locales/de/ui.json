@@ -43,7 +43,8 @@
     "games": "Spiele",
     "teamPool": "Team-Pool",
     "globalTeamPool": "Globaler Team-Pool",
-    "start": "Start"
+    "start": "Start",
+    "type": "Phasentyp"
   },
   "placeholder": {
     "standing": "z.B. Gruppe 1, HF1, P1"

@@ -21,7 +21,7 @@ describe('tournamentGenerator - Timing Integration', () => {
     stages: [
       {
         name: 'Group Stage',
-        stageType: 'vorrunde',
+        category: 'preliminary',
         progressionMode: 'round_robin',
         config: { mode: 'round_robin', teamCount: 2, doubleRound: true }, // 2 games
         fieldAssignment: 0,

@@ -51,7 +51,7 @@ describe('tournamentGenerator', () => {
     stages: [
       {
         name: 'Group Stage',
-        stageType: 'vorrunde',
+        category: 'preliminary',
         progressionMode: 'round_robin',
         config: {
           gamesPerTeam: 2,
@@ -60,7 +60,7 @@ describe('tournamentGenerator', () => {
       },
       {
         name: 'Finals',
-        stageType: 'finalrunde',
+        category: 'final',
         progressionMode: 'placement',
         config: {
           positions: 4,
@@ -163,7 +163,7 @@ describe('tournamentGenerator', () => {
         stages: [
           {
             name: 'Test Stage',
-            stageType: 'vorrunde',
+            category: 'preliminary',
             progressionMode: 'round_robin',
             config: { gamesPerTeam: 2 },
             fieldAssignment: 'all',
@@ -204,7 +204,7 @@ describe('tournamentGenerator', () => {
         stages: [
           {
             name: 'Finals',
-            stageType: 'finalrunde',
+            category: 'final',
             progressionMode: 'placement',
             config: { positions: 2, format: 'single_elimination' },
             fieldAssignment: 0,
@@ -246,14 +246,14 @@ describe('tournamentGenerator', () => {
         stages: [
           {
             name: 'Stage 1',
-            stageType: 'vorrunde',
+            category: 'preliminary',
             progressionMode: 'round_robin',
             config: { gamesPerTeam: 2 },
             fieldAssignment: 'all',
           },
           {
             name: 'Stage 2',
-            stageType: 'finalrunde',
+            category: 'final',
             progressionMode: 'placement',
             config: { positions: 2, format: 'single_elimination' },
             fieldAssignment: 0,
@@ -500,7 +500,7 @@ describe('tournamentGenerator', () => {
       const result = generateTournament(sampleTeams, config);
 
       result.stages.forEach(stage => {
-        expect(['vorrunde', 'finalrunde', 'platzierung']).toContain(stage.data.stageType);
+        expect(['STANDARD', 'RANKING']).toContain(stage.data.stageType);
       });
     });
   });
@@ -555,7 +555,7 @@ describe('tournamentGenerator', () => {
         stages: [
           {
             name: 'Test Stage',
-            stageType: 'vorrunde',
+            category: 'preliminary',
             progressionMode: 'round_robin',
             config: { gamesPerTeam: 2 },
             fieldAssignment: 5, // Out of range for 2 fields

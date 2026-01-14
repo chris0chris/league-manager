@@ -45,6 +45,19 @@ export interface LoserReference {
 }
 
 /**
+ * Team reference for a specific rank in a Ranking Stage.
+ * Example: { type: 'rank', place: 1, stageId: 'stage-123' } represents "1st from Stage A"
+ */
+export interface RankReference {
+  type: 'rank';
+  place: number;
+  stageId: string;
+  stageName: string;
+  /** Optional index used during template resolution */
+  sourceStageIndex?: number;
+}
+
+/**
  * Static team reference using a direct name.
  * Example: { type: 'static', name: 'Team Officials' }
  */
@@ -62,6 +75,7 @@ export type TeamReference =
   | StandingReference
   | WinnerReference
   | LoserReference
+  | RankReference
   | StaticReference;
 
 /**
@@ -71,7 +85,7 @@ export type TeamReference =
 export interface GameSlot {
   /** Unique identifier for the game slot */
   id: string;
-  /** Tournament stage: "Vorrunde", "Finalrunde", or custom */
+  /** Tournament stage: "Preliminary", "Final", or custom */
   stage: string;
   /** Standing/match identifier: e.g., "Gruppe 1", "HF1", "P1", "Spiel 3" */
   standing: string;
@@ -256,6 +270,13 @@ export function isLoserReference(ref: TeamReference): ref is LoserReference {
 }
 
 /**
+ * Type guard to check if a team reference is a RankReference
+ */
+export function isRankReference(ref: TeamReference): ref is RankReference {
+  return ref.type === 'rank';
+}
+
+/**
  * Type guard to check if a team reference is a StaticReference
  */
 export function isStaticReference(ref: TeamReference): ref is StaticReference {
@@ -297,7 +318,7 @@ export function createDefaultTeamReference(): TeamReference {
 export function createDefaultGameSlot(id: string): GameSlot {
   return {
     id,
-    stage: 'Vorrunde',
+    stage: 'Preliminary',
     standing: '',
     home: createDefaultTeamReference(),
     away: createDefaultTeamReference(),
