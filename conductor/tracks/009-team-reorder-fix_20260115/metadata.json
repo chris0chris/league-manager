@@ -1,8 +1,0 @@
-{
-  "track_id": "009-team-reorder-fix_20260115",
-  "type": "bug",
-  "status": "new",
-  "created_at": "2026-01-15T01:15:00Z",
-  "updated_at": "2026-01-15T01:15:00Z",
-  "description": "https://github.com/chris0chris/league-manager/issues/680. this was introduced through one of our recent changes. team down/up buttons must not expand"
-}
