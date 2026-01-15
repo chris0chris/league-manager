@@ -8,3 +8,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] [Track 006: Gameday Designer Ranking & Layout Refinements](tracks/006-refinements/plan.md)
 - [x] [Track 007: Gameday Designer UI/UX Refinements (Round 2)](tracks/007-ui-polish-2/plan.md)
 - [x] [Track 008: Stage Editor Focus & Interaction Fix](tracks/008-stage-editor-focus/plan.md)
+
+---
+
+## [~] Track: Team Reorder Button Interaction Fix (#680)
+*Link: [./conductor/tracks/009-team-reorder-fix_20260115/](./conductor/tracks/009-team-reorder-fix_20260115/)*

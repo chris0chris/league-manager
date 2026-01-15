@@ -213,7 +213,10 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
           </button>
           <button
             className="btn btn-sm btn-outline-secondary btn-adaptive"
-            onClick={() => onReorderGroup(group.id, 'up')}
+            onClick={(e) => {
+              e.stopPropagation();
+              onReorderGroup(group.id, 'up');
+            }}
             disabled={index === 0}
             title={t('ui:tooltip.moveGroupUp')}
           >
@@ -222,7 +225,10 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
           </button>
           <button
             className="btn btn-sm btn-outline-secondary btn-adaptive"
-            onClick={() => onReorderGroup(group.id, 'down')}
+            onClick={(e) => {
+              e.stopPropagation();
+              onReorderGroup(group.id, 'down');
+            }}
             disabled={index === totalGroups - 1}
             title={t('ui:tooltip.moveGroupDown')}
           >
@@ -231,7 +237,10 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
           </button>
           <button
             className="btn btn-sm btn-outline-danger btn-adaptive"
-            onClick={() => onDeleteGroup(group.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteGroup(group.id);
+            }}
             title={t('ui:tooltip.deleteGroup')}
           >
             <i className={`bi ${ICONS.DELETE}`}></i>
@@ -270,7 +279,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                   style={{ backgroundColor: '#fff', fontSize: '0.875rem' }}
                 >
                   {/* Team color */}
-                  <div className="me-2 flex-shrink-0">
+                  <div className="me-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="color"
                       value={team.color || '#6c757d'}
@@ -323,7 +332,10 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                     {/* Reorder up */}
                     <button
                       className="btn btn-sm btn-outline-secondary p-1 btn-adaptive"
-                      onClick={() => onReorderTeam(team.id, 'up')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onReorderTeam(team.id, 'up');
+                      }}
                       disabled={idx === 0}
                       title={t('ui:tooltip.moveTeamUp')}
                       style={{ fontSize: '0.75rem', lineHeight: 1 }}
@@ -335,7 +347,10 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                     {/* Reorder down */}
                     <button
                       className="btn btn-sm btn-outline-secondary p-1 btn-adaptive"
-                      onClick={() => onReorderTeam(team.id, 'down')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onReorderTeam(team.id, 'down');
+                      }}
                       disabled={idx === teams.length - 1}
                       title={t('ui:tooltip.moveTeamDown')}
                       style={{ fontSize: '0.75rem', lineHeight: 1 }}
@@ -345,29 +360,34 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                     </button>
 
                     {/* Move to group dropdown */}
-                    <DropdownButton
-                      id={`move-team-${team.id}`}
-                      title={<i className={`bi ${ICONS.FOLDER}`} title={t('ui:tooltip.moveTeamToGroup')}></i>}
-                      size="sm"
-                      variant="outline-primary"
-                      className="p-0 btn-adaptive"
-                      popperConfig={{ strategy: 'fixed' }}
-                    >
-                      {allGroups.map((g) => (
-                        <Dropdown.Item
-                          key={g.id}
-                          onClick={() => handleMoveTeam(team.id, g.id)}
-                          active={team.groupId === g.id}
-                        >
-                          {g.name}
-                        </Dropdown.Item>
-                      ))}
-                    </DropdownButton>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <DropdownButton
+                        id={`move-team-${team.id}`}
+                        title={<i className={`bi ${ICONS.FOLDER}`} title={t('ui:tooltip.moveTeamToGroup')}></i>}
+                        size="sm"
+                        variant="outline-primary"
+                        className="p-0 btn-adaptive"
+                        popperConfig={{ strategy: 'fixed' }}
+                      >
+                        {allGroups.map((g) => (
+                          <Dropdown.Item
+                            key={g.id}
+                            onClick={() => handleMoveTeam(team.id, g.id)}
+                            active={team.groupId === g.id}
+                          >
+                            {g.name}
+                          </Dropdown.Item>
+                        ))}
+                      </DropdownButton>
+                    </div>
 
                     {/* Delete */}
                     <button
                       className="btn btn-sm btn-outline-danger p-1 btn-adaptive"
-                      onClick={() => onDeleteTeam(team.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteTeam(team.id);
+                      }}
                       title={t('ui:tooltip.deleteTeam')}
                       style={{ fontSize: '0.75rem', lineHeight: 1 }}
                     >
