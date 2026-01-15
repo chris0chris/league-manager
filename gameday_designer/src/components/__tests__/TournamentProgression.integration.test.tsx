@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, act } from '@testing-library/react';
 import ListDesignerApp from '../ListDesignerApp';
 import i18n from '../../i18n/testConfig';
+import type { TournamentGenerationConfig } from '../../types/tournament';
 
 // Mock the controller to avoid deep hook dependencies
 const mockAddBulkGameToGameEdges = vi.fn();
@@ -56,12 +56,12 @@ vi.mock('../../hooks/useDesignerController', () => ({
 }));
 
 // Mock the internal logic of handleGenerateTournament to verify it calls our assignments
-const handleGenerateTournamentMock = async (config: any) => {
+const handleGenerateTournamentMock = async (config: TournamentGenerationConfig & { autoAssignTeams: boolean }) => {
   const structure = { stages: [], games: [], fields: [] };
   mockAddBulkTournament(structure);
   
   if (config.autoAssignTeams) {
-    // In the real hook, this is delayed. We call it directly for the test.
+    // In the real app, this is delayed. We call it directly for the test.
     const mockEdges = [{ sourceGameId: 'g1', outputType: 'winner', targetGameId: 'g2', targetSlot: 'home' }];
     mockAddBulkGameToGameEdges(mockEdges);
   }
@@ -74,7 +74,6 @@ describe('Tournament Progression Integration', () => {
   });
 
   it('should trigger edge creation when tournament is generated', async () => {
-    const user = userEvent.setup();
     render(<ListDesignerApp />);
 
     // We don't even need to open the modal because we mocked the controller's handler
@@ -82,11 +81,18 @@ describe('Tournament Progression Integration', () => {
     const generateButton = screen.getByRole('button', { name: /generate tournament/i });
     expect(generateButton).toBeInTheDocument();
 
-    // Call the handler directly as if the modal submitted
-    await act(async () => {
-      await handleGenerateTournamentMock({ autoAssignTeams: true });
-    });
-
+        // Call the handler directly as if the modal submitted
+        await act(async () => {
+          await handleGenerateTournamentMock({ 
+            autoAssignTeams: true,
+            template: { teamCount: { min: 2 }, stages: [] } as unknown as TournamentGenerationConfig['template'],
+            fieldCount: 1,
+            startTime: '10:00',
+            gameDuration: 70,
+            breakDuration: 10,
+            generateTeams: false,
+          });
+        });
     expect(mockAddBulkTournament).toHaveBeenCalled();
     expect(mockAddBulkGameToGameEdges).toHaveBeenCalled();
     expect(mockAddBulkGameToGameEdges).toHaveBeenCalledWith(
