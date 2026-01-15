@@ -11,6 +11,7 @@
 7. **Verify Before Push:** The full test suite and quality checks must be executed and pass locally before pushing changes to any remote branch.
 8. **Origin-Centric Workflow:** All development branches must be pushed to `origin`, and all Pull Requests must be opened on `origin`.
 9. **Upstream Source:** `upstream` is the source for features and issues. Syncing from `upstream` to `origin` or local branches should only be performed when explicitly commanded.
+10. **Branch-Per-Track:** Every track MUST be implemented in its own dedicated feature branch. Direct commits to `master` are strictly forbidden.
 
 ## Task Workflow
 
@@ -18,56 +19,50 @@ All tasks follow a strict lifecycle:
 
 ### Standard Task Workflow
 
-1. **Select Task:** Choose the next available task from `plan.md` in sequential order
+1. **Select Task:** Choose the next available track from `tracks.md`.
 
-2. **Mark In Progress:** Before beginning work, edit `plan.md` and change the task from `[ ]` to `[~]`
+2. **Create Feature Branch:** Create a new branch for the track (e.g., `git checkout -b feat/010-testing-debt`). All work for this track, including plan updates and implementation, MUST happen on this branch.
 
-3. **Write Failing Tests (Red Phase):**
-   - Create a new test file for the feature or bug fix.
-   - Write one or more unit tests that clearly define the expected behavior and acceptance criteria for the task.
-   - **CRITICAL:** Run the tests and confirm that they fail as expected. This is the "Red" phase of TDD. Do not proceed until you have failing tests.
+3. **Mark In Progress:** Before beginning work, edit the `tracks.md` registry and the track's `plan.md` to change the status from `[ ]` to `[~]`.
 
-4. **Implement to Pass Tests (Green Phase):**
-   - Write the minimum amount of application code necessary to make the failing tests pass.
-   - Run the test suite again and confirm that all tests now pass. This is the "Green" phase.
+4. **Iterate Tasks:** Choose the next available task from `plan.md` in sequential order and follow the TDD cycle:
+   - **Write Failing Tests (Red Phase):**
+     - Create a new test file for the feature or bug fix.
+     - Write one or more unit tests that clearly define the expected behavior and acceptance criteria for the task.
+     - **CRITICAL:** Run the tests and confirm that they fail as expected. This is the "Red" phase of TDD. Do not proceed until you have failing tests.
+   - **Implement to Pass Tests (Green Phase):**
+     - Write the minimum amount of application code necessary to make the failing tests pass.
+     - Run the test suite again and confirm that all tests now pass. This is the "Green" phase.
+   - **Refactor (Optional but Recommended):**
+     - With the safety of passing tests, refactor the implementation code and the test code to improve clarity, remove duplication, and enhance performance without changing the external behavior.
+     - Rerun tests to ensure they still pass after refactoring.
 
-5. **Refactor (Optional but Recommended):**
-   - With the safety of passing tests, refactor the implementation code and the test code to improve clarity, remove duplication, and enhance performance without changing the external behavior.
-   - Rerun tests to ensure they still pass after refactoring.
+5. **Verify Coverage:** Run coverage reports using the project's chosen tools. Target: >80% coverage for new code.
 
-6. **Verify Coverage:** Run coverage reports using the project's chosen tools. For example, in a Python project, this might look like:
-   ```bash
-   pytest --cov=app --cov-report=html
-   ```
-   Target: >80% coverage for new code. The specific tools and commands will vary by language and framework.
-
-7. **Document Deviations:** If implementation differs from tech stack:
+6. **Document Deviations:** If implementation differs from tech stack:
    - **STOP** implementation
    - Update `tech-stack.md` with new design
    - Add dated note explaining the change
    - Resume implementation
 
-8. **Verify Quality and Commit Code Changes:**
-   - **Step 8.1: Run QA Checks:** Execute the project's full suite of quality checks (linting, type-checking, formatting). Use the command identified in the 'Before Committing' section (e.g., `npm run check`).
-   - **Step 8.2: Resolve Issues:** Fix any errors or warnings identified by the checks. **CRITICAL:** All linting and static analysis must pass before proceeding.
-   - **Step 8.3: Stage and Commit:** Stage all code changes related to the task and perform the commit with a clear, concise message.
+7. **Verify Quality and Commit Code Changes:**
+   - **Step 7.1: Run QA Checks:** Execute the project's full suite of quality checks (linting, type-checking, formatting).
+   - **Step 7.2: Resolve Issues:** Fix any errors or warnings identified by the checks. **CRITICAL:** All linting and static analysis must pass before proceeding.
+   - **Step 7.3: Stage and Commit:** Stage all code changes related to the task and perform the commit with a clear, concise message.
 
-9. **Attach Task Summary with Git Notes:**
-   - **Step 9.1: Get Commit Hash:** Obtain the hash of the *just-completed commit* (`git log -1 --format="%H"`).
-   - **Step 9.2: Draft Note Content:** Create a detailed summary for the completed task. This should include the task name, a summary of changes, a list of all created/modified files, and the core "why" for the change.
-   - **Step 9.3: Attach Note:** Use the `git notes` command to attach the summary to the commit.
-     ```bash
-     # The note content from the previous step is passed via the -m flag.
-     git notes add -m "<note content>" <commit_hash>
-     ```
+8. **Attach Task Summary with Git Notes:**
+   - **Step 8.1: Get Commit Hash:** Obtain the hash of the *just-completed commit* (`git log -1 --format="%H"`).
+   - **Step 8.2: Draft Note Content:** Create a detailed summary for the completed task.
+   - **Step 8.3: Attach Note:** Use the `git notes` command to attach the summary to the commit.
 
-10. **Get and Record Task Commit SHA:**
-    - **Step 10.1: Update Plan:** Read `plan.md`, find the line for the completed task, update its status from `[~]` to `[x]`, and append the first 7 characters of the *just-completed commit's* commit hash.
-    - **Step 10.2: Write Plan:** Write the updated content back to `plan.md`.
+9. **Get and Record Task Commit SHA:**
+    - **Step 9.1: Update Plan:** Read `plan.md`, find the line for the completed task, update its status from `[~]` to `[x]`, and append the first 7 characters of the *just-completed commit's* commit hash.
+    - **Step 9.2: Write Plan:** Write the updated content back to `plan.md`.
 
-11. **Commit Plan Update:**
+10. **Commit Plan Update:**
     - **Action:** Stage the modified `plan.md` file.
     - **Action:** Commit this change with a descriptive message (e.g., `conductor(plan): Mark task 'Create user model' as complete`).
+
 
 ### Phase Completion Verification and Checkpointing Protocol
 
