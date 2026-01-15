@@ -15,7 +15,7 @@
   - Created `gameday_designer/src/components/__tests__/TournamentProgression.integration.test.tsx`.
   - Verified that generating a tournament triggers edge creation.
 
-## Phase 3: Verification & Cleanup
+## Phase 3: Verification & Cleanup [checkpoint: 96f1c37]
 - [x] **Task 1: Final Quality Check** f275ffd
   - Run all tests with coverage to ensure the new logic is >90% covered.
 - [x] Task: Conductor - User Manual Verification 'Progression Testing' (Protocol in workflow.md) 0a95ab8

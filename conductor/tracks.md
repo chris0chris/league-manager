@@ -11,4 +11,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] [Track 010: Gameday Designer Testing Debt (Progression Logic)](tracks/010-testing-debt/plan.md)
+- [x] [Track 010: Gameday Designer Testing Debt (Progression Logic)](tracks/010-testing-debt/plan.md)
