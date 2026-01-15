@@ -11,5 +11,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Team Reorder Button Interaction Fix (#680)
-*Link: [./conductor/tracks/009-team-reorder-fix_20260115/](./conductor/tracks/009-team-reorder-fix_20260115/)*
+- [x] [Track: Team Reorder Button Interaction Fix (#680)](./conductor/tracks/009-team-reorder-fix_20260115/)
