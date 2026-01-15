@@ -10,5 +10,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] [Track 008: Stage Editor Focus & Interaction Fix](tracks/008-stage-editor-focus/plan.md)
 
 ---
-
-- [x] [Track: Team Reorder Button Interaction Fix (#680)](./conductor/tracks/009-team-reorder-fix_20260115/)
