@@ -392,5 +392,60 @@ describe('timeCalculation - calculateGameTimes', () => {
       expect(result[1].data.startTime).toBe('15:00'); // Should preserve manual time
       expect(result[2].data.startTime).toBe('16:20'); // Should continue from manual time
     });
+
+    it('should avoid overlapping times when two stages share the same field and order', () => {
+      // Regression test for "6 Teams - 2 Groups of 3" overlap bug
+      const fieldId = 'field-1';
+      
+      const fields = [
+        createFieldNode(fieldId, { name: 'Feld 1', order: 0 }),
+      ];
+
+      // Two stages on the SAME field, SAME order (0)
+      const stage1Id = 'stage-group-A';
+      const stage2Id = 'stage-group-B';
+
+      const stages = [
+        createStageNode(stage1Id, fieldId, {
+          name: 'Group A',
+          category: 'preliminary',
+          order: 0,
+          startTime: DEFAULT_START_TIME,
+          defaultGameDuration: DEFAULT_GAME_DURATION,
+        }),
+        createStageNode(stage2Id, fieldId, {
+          name: 'Group B',
+          category: 'preliminary',
+          order: 0,
+          startTime: DEFAULT_START_TIME,
+          defaultGameDuration: DEFAULT_GAME_DURATION,
+        }),
+      ];
+
+      const games = [
+        createMockGameNode('game-A1', stage1Id, 'Game A1', DEFAULT_GAME_DURATION),
+        createMockGameNode('game-B1', stage2Id, 'Game B1', DEFAULT_GAME_DURATION),
+      ];
+
+      const result = calculateGameTimes(fields, stages, games, DEFAULT_GAME_DURATION, 10);
+
+      const gameA1 = result.find(g => g.id === 'game-A1');
+      const gameB1 = result.find(g => g.id === 'game-B1');
+
+      expect(gameA1?.data.startTime).toBeDefined();
+      expect(gameB1?.data.startTime).toBeDefined();
+      
+      // They should NOT have the same start time if they are on the same field
+      expect(gameA1?.data.startTime).not.toBe(gameB1?.data.startTime);
+      
+      // One should start after the other (10:00 + 50min + 10min = 11:00)
+      // Assuming 50 min duration + 10 min break
+      const startTimes = [gameA1?.data.startTime, gameB1?.data.startTime].sort();
+      expect(startTimes[0]).toBe(DEFAULT_START_TIME);
+      // With default duration 70? No, I passed DEFAULT_GAME_DURATION which is 70 in test context?
+      // createMockGameNode uses DEFAULT_GAME_DURATION.
+      // 10:00 + 70 + 10 = 11:20
+      expect(startTimes[1]).toBe('11:20');
+    });
   });
 });

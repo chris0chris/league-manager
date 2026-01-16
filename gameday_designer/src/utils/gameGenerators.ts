@@ -32,12 +32,14 @@ export function generateRoundRobinGames(
   stageId: string,
   config: RoundRobinConfig,
   duration?: number,
-  breakDuration?: number
+  breakDuration?: number,
+  namePrefix?: string
 ): GameNode[] {
   const { teamCount, doubleRound } = config;
   const games: GameNode[] = [];
   const gameDuration = duration ?? 50;
   const gameBreak = breakDuration ?? 0;
+  const prefix = namePrefix ? `${namePrefix} ` : '';
 
   const pairings = getRoundRobinPairings(teamCount, doubleRound);
 
@@ -47,7 +49,7 @@ export function generateRoundRobinGames(
       gameId,
       stageId,
       {
-        standing: `Game ${index + 1}`,
+        standing: `${prefix}Game ${index + 1}`,
         duration: gameDuration,
         breakAfter: gameBreak,
         manualTime: false,
