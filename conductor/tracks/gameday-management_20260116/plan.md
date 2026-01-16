@@ -3,13 +3,13 @@
 ## Phase 1: Mock API & Data Layer Refinement
 Extend the existing service layer to support Gameday-level CRUD operations.
 
-- [ ] **Task: Define Gameday Interfaces & Types**
-    - [ ] Add `GamedayMetadata` and `Gameday` (full structure) interfaces to `types.ts`.
-- [ ] **Task: Expand Mock Service Layer (TDD)**
-    - [ ] Write tests for `GamedayService` mock endpoints (GET all, GET by ID, POST, PATCH).
-    - [ ] Implement mock storage for multiple gamedays.
-    - [ ] Ensure service signatures match DRF patterns.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Mock API & Data Layer Refinement' (Protocol in workflow.md)
+- [x] **Task: Define Gameday Interfaces & Types** 9493429
+    - [x] Add `GamedayMetadata` and `Gameday` (full structure) interfaces to `types.ts`.
+- [x] **Task: Expand Mock Service Layer (TDD)** 9493429
+    - [x] Write tests for `GamedayService` mock endpoints (GET all, GET by ID, POST, PATCH).
+    - [x] Implement mock storage for multiple gamedays.
+    - [x] Ensure service signatures match DRF patterns.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Mock API & Data Layer Refinement' (Protocol in workflow.md) [checkpoint: c173024]
 
 ## Phase 2: Gameday Dashboard UI
 Implement the landing page for managing gamedays.
