@@ -124,6 +124,41 @@ export interface ApiError {
 }
 
 /**
+ * Gameday metadata for high-level management.
+ * Corresponds to Django Gameday model fields.
+ */
+export interface GamedayMetadata {
+  id: number;
+  name: string;
+  date: string;
+  start: string;
+  format: string;
+  author: number;
+  author_display?: string;
+  address: string;
+  season: number;
+  season_display?: string;
+  league: number;
+  league_display?: string;
+}
+
+/**
+ * Gameday list entry for the dashboard.
+ */
+export interface GamedayListEntry extends GamedayMetadata {
+  status: 'draft' | 'scheduled' | 'completed';
+}
+
+/**
+ * Full Gameday structure including tournament designer data.
+ */
+export interface Gameday extends GamedayMetadata {
+  designer_data?: {
+    fields: any[]; // Matches DesignerState.fields
+  };
+}
+
+/**
  * Request payload for applying a template to a gameday.
  */
 export interface ApplyTemplateRequest {

@@ -49,4 +49,7 @@ export type {
   CloneTemplateRequest,
   TemplatePreview,
   TemplateUsage,
+  GamedayMetadata,
+  GamedayListEntry,
+  Gameday,
 } from './api';
