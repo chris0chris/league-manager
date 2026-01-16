@@ -7,7 +7,7 @@
 3. **Test-Driven Development:** Write unit tests before implementing functionality
 4. **High Code Coverage:** Aim for >80% code coverage for all modules
 5. **User Experience First:** Every decision should prioritize user experience
-6. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools (tests, linters) to ensure single execution.
+6. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools (tests, linters) to ensure single execution. For Git and PR operations, always specify remotes and repos explicitly to avoid interactive prompts (e.g., `git push -u origin <branch>`, `gh pr create --repo dachrisch/leaguesphere`).
 7. **Verify Before Push:** The full test suite and quality checks must be executed and pass locally before pushing changes to any remote branch.
 8. **Origin-Centric Workflow:** All development branches must be pushed to `origin`, and all Pull Requests must be opened on `origin` (`dachrisch/leaguesphere`). Use `gh pr create --repo dachrisch/leaguesphere` to avoid interactive prompts.
 9. **Upstream Source:** `upstream` is the source for features and issues. Syncing from `upstream` to `origin` or local branches should only be performed when explicitly commanded.

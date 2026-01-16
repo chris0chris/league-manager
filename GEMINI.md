@@ -31,7 +31,9 @@ Targeted modifications can be verified using isolated test runs (e.g., only the 
 - **NO Commits to Master**: Direct commits to the `master` branch are strictly forbidden.
 - **Feature Branches**: All work must be performed on a dedicated branch created for the specific task or feature.
 - **Mandatory Local QA**: Before pushing anything to remote, all QA checks must pass locally (Tests, Lint, and Security).
-- **Pull Requests**: Every change must receive a Pull Request (PR). PRs must always be created in **origin** (`dachrisch/leaguesphere`). Use `gh pr create --repo dachrisch/leaguesphere` to avoid interactive prompts.
+- **Pull Requests**: Every change must receive a Pull Request (PR). PRs must always be created in **origin** (`dachrisch/leaguesphere`). 
+- **Non-Interactive PRs**: To avoid interactive prompts, always use:
+  `gh pr create --repo dachrisch/leaguesphere --base master --title "..." --body "..."`
 - **Issues**: Task tracking and issue management are performed on **upstream github**.
 - **Merging**: Branches are only merged into `master` after explicit user approval.
 
