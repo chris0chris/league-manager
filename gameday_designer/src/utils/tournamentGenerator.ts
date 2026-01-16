@@ -302,11 +302,20 @@ function generateGamesForStages(
     let games: GameNode[] = [];
 
     if (stageData.progressionMode === 'round_robin') {
+      // Extract group letter from stage name if present (e.g. "Group Stage A" -> "A")
+      // to prefix games (e.g. "A Game 1") and avoid duplicate standing names
+      let namePrefix: string | undefined;
+      const groupMatch = stageData.name.match(/\s([A-Z])$/);
+      if (groupMatch) {
+        namePrefix = groupMatch[1];
+      }
+
       games = generateRoundRobinGames(
         stage.id,
         stageData.progressionConfig as RoundRobinConfig,
         stageData.defaultGameDuration,
-        stageData.defaultBreakBetweenGames
+        stageData.defaultBreakBetweenGames,
+        namePrefix
       );
     } else if (stageData.progressionMode === 'placement') {
       games = generatePlacementGames(
