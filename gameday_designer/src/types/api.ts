@@ -4,6 +4,8 @@
  * These types match the Django backend API models and responses.
  */
 
+import type { Field } from './designer';
+
 /**
  * Template slot representing a single game in the schedule template.
  * Corresponds to Django TemplateSlot model.
@@ -154,7 +156,7 @@ export interface GamedayListEntry extends GamedayMetadata {
  */
 export interface Gameday extends GamedayMetadata {
   designer_data?: {
-    fields: any[]; // Matches DesignerState.fields
+    fields: Field[]; // Matches DesignerState.fields
   };
 }
 
