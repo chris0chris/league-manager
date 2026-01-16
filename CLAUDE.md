@@ -24,6 +24,20 @@ This project uses specialized Claude Code agents for different development tasks
 
 **Workflow:** Claude Code will automatically delegate tasks to appropriate specialized agents. Each agent has specific expertise and tools to handle their domain effectively.
 
+### Non-Interactive Git Operations
+
+To avoid interactive prompts that stall agent workflows, always use non-interactive commands:
+
+- **Git Push:** Always use `git push -u origin <branch_name>` to set up upstream tracking. This ensures subsequent git operations know which remote to use without prompting.
+- **PR Creation:** Use the GitHub CLI with explicit repository and base branch flags:
+  ```bash
+  gh pr create --repo dachrisch/leaguesphere --base master --title "..." --body "..."
+  ```
+- **PR Merging:** Use non-interactive merge:
+  ```bash
+  gh pr merge <pr_number> --merge --delete-branch
+  ```
+
 ### Deployment Safety & Infrastructure Changes
 
 **CRITICAL POLICY - MANDATORY COMPLIANCE:**
