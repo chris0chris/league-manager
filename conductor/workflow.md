@@ -9,7 +9,7 @@
 5. **User Experience First:** Every decision should prioritize user experience
 6. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools (tests, linters) to ensure single execution.
 7. **Verify Before Push:** The full test suite and quality checks must be executed and pass locally before pushing changes to any remote branch.
-8. **Origin-Centric Workflow:** All development branches must be pushed to `origin`, and all Pull Requests must be opened on `origin`.
+8. **Origin-Centric Workflow:** All development branches must be pushed to `origin`, and all Pull Requests must be opened on `origin` (`dachrisch/leaguesphere`). Use `gh pr create --repo dachrisch/leaguesphere` to avoid interactive prompts.
 9. **Upstream Source:** `upstream` is the source for features and issues. Syncing from `upstream` to `origin` or local branches should only be performed when explicitly commanded.
 10. **Branch-Per-Track:** Every track MUST be implemented in its own dedicated feature branch. Direct commits to `master` are strictly forbidden.
 
@@ -271,7 +271,7 @@ A task is complete when:
 7. Implementation notes added to `plan.md`
 8. Changes committed with proper message
 9. Git note with task summary attached to the commit
-10. Pull Request created on `origin` for the completed track
+10. Pull Request created on `origin` for the completed track (use `gh pr create --repo dachrisch/leaguesphere ...`)
 
 ## Emergency Procedures
 
