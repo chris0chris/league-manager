@@ -1,0 +1,8 @@
+{
+  "track_id": "gameday-management_20260116",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-16T15:05:00Z",
+  "updated_at": "2026-01-16T15:05:00Z",
+  "description": "implement gameday creation and management. the game designer displays a list of game days as cards with basic information. when clicked on a card we will get the currently implemented state where we can create a gameday. it then can be altered and saved. also new gamedays can be created. gamedays are sorted by date and can be searched by a text filter input which will search across names teams and stage names. essentially we are adding a new hierarchie layer above what we currently have"
+}

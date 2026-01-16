@@ -4,14 +4,19 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] [Track 001: Gameday Designer UI/UX Polish](tracks/001-ui-polish/plan.md)
-- [x] [Track 006: Gameday Designer Ranking & Layout Refinements](tracks/006-refinements/plan.md)
-- [x] [Track 007: Gameday Designer UI/UX Refinements (Round 2)](tracks/007-ui-polish-2/plan.md)
-- [x] [Track 008: Stage Editor Focus & Interaction Fix](tracks/008-stage-editor-focus/plan.md)
-- [x] [Track 009: Gameday Designer UI/UX Polish (2026-01-07)](tracks/designer-ui-polish_20260107/plan.md)
+- [x] [Track 001: Gameday Designer UI/UX Polish](archive/001-ui-polish/plan.md)
+- [x] [Track 006: Gameday Designer Ranking & Layout Refinements](archive/006-refinements/plan.md)
+- [x] [Track 007: Gameday Designer UI/UX Refinements (Round 2)](archive/007-ui-polish-2/plan.md)
+- [x] [Track 008: Stage Editor Focus & Interaction Fix](archive/008-stage-editor-focus/plan.md)
+- [x] [Track 009: Gameday Designer UI/UX Polish (2026-01-07)](archive/designer-ui-polish_20260107/plan.md)
 
 ---
 ---
 
 - [x] **Track: Fix Validation Errors on 6 Teams - 2 Groups of 3 Generation**
 *Link: [./archive/fix_generation_errors_20260116/](./archive/fix_generation_errors_20260116/)*
+
+---
+
+- [ ] **Track: Gameday Management & Dashboard**
+*Link: [./tracks/gameday-management_20260116/](./tracks/gameday-management_20260116/)*
