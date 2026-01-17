@@ -17,16 +17,16 @@ This phase establishes the necessary data structures to support game states and 
 ## Phase 2: Backend API Logic
 This phase implements the business logic for state transitions, result updates, and reference resolution.
 
-- [ ] Task: Implement Gameday Publish Endpoint
-    - [ ] Create API endpoint to transition Gameday from Draft to Published.
-    - [ ] Implement validation logic (e.g., all games must have fields and times).
-- [ ] Task: Implement Game Result Endpoint
-    - [ ] Create API endpoint for updating game scores (halftime/final).
-    - [ ] Implement automatic state transition logic (Game -> In Progress/Completed).
-- [ ] Task: Implement Dynamic Reference Resolution Logic
-    - [ ] Create service method to resolve "Winner of Game X" based on current results.
-    - [ ] Update `Gameday` serializer to include resolved team names for downstream games.
-- [ ] Task: TDD - Write tests for API endpoints and resolution logic.
+- [x] Task: Implement Gameday Publish Endpoint 16ba265
+    - [x] Create API endpoint to transition Gameday from Draft to Published.
+    - [x] Implement validation logic (e.g., all games must have fields and times).
+- [x] Task: Implement Game Result Endpoint 16ba265
+    - [x] Create API endpoint for updating game scores (halftime/final).
+    - [x] Implement automatic state transition logic (Game -> In Progress/Completed).
+- [x] Task: Implement Dynamic Reference Resolution Logic 16ba265
+    - [x] Create service method to resolve "Winner of Game X" based on current results.
+    - [x] Update `Gameday` serializer to include resolved team names for downstream games.
+- [x] Task: TDD - Write tests for API endpoints and resolution logic. 16ba265
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Backend API Logic' (Protocol in workflow.md)
 
 ## Phase 3: Frontend - Gameday Lifecycle UI
