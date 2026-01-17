@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "leaguesphere"
-version = "2.17.3-rc.9"
+version = "2.17.3-rc.10"
 requires-python = ">=3.11"
 dependencies = [
     "Django==5.2.10",
@@ -59,7 +59,7 @@ include = [
 ]
 
 [tool.bumpversion]
-current_version = "2.17.3-rc.9"
+current_version = "2.17.3-rc.10"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\-rc\\.(?P<rc_build>\\d+))?"
 serialize = [
     "{major}.{minor}.{patch}-rc.{rc_build}",
