@@ -41,7 +41,8 @@ This phase adds the controls to the Gameday Designer to manage the overall gamed
     - [ ] Disable/Restrict drag-and-drop and editing features when locked.
     - [ ] Add "Unlock" mechanism (with strict confirmation).
 - [ ] Task: TDD - Write tests for lifecycle UI components.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend - Gameday Lifecycle UI' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend - Gameday Lifecycle UI' (Protocol in workflow.md) [checkpoint: 881192e]
+
 
 ## Phase 4: Frontend - Result Entry & Visualization
 This phase enables users to enter scores and see the dynamic flow of the tournament.
