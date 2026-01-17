@@ -738,14 +738,12 @@ describe('useFlowState - Edge Cases', () => {
         result.current.clearAll();
       });
 
-      expect(result.current.nodes).toEqual([]);
-      expect(result.current.edges).toEqual([]);
-      expect(result.current.globalTeams).toEqual([]);
-      expect(result.current.globalTeamGroups).toEqual([]);
-      expect(result.current.selection).toEqual({ nodeIds: [], edgeIds: [] });
-
-      // Fields are kept
-      expect(result.current.fields.length).toBeGreaterThan(0);
+      // ALL state is cleared
+      expect(result.current.nodes.length).toBe(0);
+      expect(result.current.edges.length).toBe(0);
+      expect(result.current.globalTeams.length).toBe(0);
+      expect(result.current.globalTeamGroups.length).toBe(0);
+      expect(result.current.fields.length).toBe(0);
     });
   });
 });

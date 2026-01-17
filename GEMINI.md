@@ -25,15 +25,15 @@ We strictly follow the TDD cycle:
 2.  **GREEN**: Implement the minimum code necessary to make the test pass.
 3.  **REFACTOR**: Clean up the code while ensuring the tests remain GREEN.
 
-Targeted modifications can be verified using isolated test runs (e.g., only the test file corresponding to the changed code). More complex tasks or significant changes require running the full test suite to prevent regressions.
+**Mandatory Internal QA**: Before involving the user or reporting a task as finished, you MUST:
+-   **Run All Tests**: Execute the full test suite (Backend & Frontend) and ensure all pass.
+-   **LINT & FIX**: Run the project's linting commands, fix all errors, and resolve any formatting issues.
+-   **Targeted Tests**: Use isolated test runs during development, but verify the final result with the full suite.
 
 ### 2. Branching & Pull Requests
 - **NO Commits to Master**: Direct commits to the `master` branch are strictly forbidden.
 - **Feature Branches**: All work must be performed on a dedicated branch created for the specific task or feature.
-- **Mandatory Local QA**: Before pushing anything to remote, all QA checks MUST pass locally.
-  - **LINT IS REQUIRED**: You must run the project's linting commands and fix all errors before pushing.
-  - **Tests**: The full test suite (Backend & Frontend) must pass.
-  - **Security**: Basic security checks must be performed.
+- **Mandatory Local QA**: Before pushing anything to remote, all QA checks (Tests, Lint, Security) MUST pass locally.
 - **Pull Requests**: Every change must receive a Pull Request (PR). PRs must always be created in **origin** (`dachrisch/leaguesphere`). 
 - **Non-Interactive PRs**: To avoid interactive prompts, always use:
   `gh pr create --repo dachrisch/leaguesphere --base master --title "..." --body "..."`

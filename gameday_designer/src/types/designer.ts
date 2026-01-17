@@ -195,6 +195,8 @@ export interface Notification {
   title?: string;
   /** Optional callback to undo the action */
   undoAction?: () => void;
+  /** Optional duration in milliseconds (defaults to 5000) */
+  duration?: number;
 }
 
 /**

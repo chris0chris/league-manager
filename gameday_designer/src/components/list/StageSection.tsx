@@ -63,6 +63,7 @@ const StageSection: React.FC<StageSectionProps> = memo(({
   isExpanded: isExpandedProp,
   highlightedSourceGameId,
   onDynamicReferenceClick,
+  onNotify,
   readOnly = false,
 }) => {
   const { t } = useTypedTranslation(['ui', 'domain']);

@@ -123,6 +123,7 @@ describe('ListDesignerApp - Placement Edge Creation', () => {
     removeGameToGameEdge: mockRemoveGameToGameEdge,
     updateMetadata: vi.fn(),
     addNotification: vi.fn(),
+    onNotify: vi.fn(),
     ...overrides,
   });
 

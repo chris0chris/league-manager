@@ -3,15 +3,14 @@
  *
  * Toolbar for the flowchart designer with controls for:
  * - Import/Export JSON
- * - Clear all
- * - Undo/Redo (future)
+ * - Undo/Redo
  *
- * Note: Add buttons have been moved inline to where elements are created
- * (Fields section, Field body, Stage body) for better spatial mapping.
+ * Gameday-level actions (Publish, Clear, Delete) have been moved 
+ * to the GamedayMetadataAccordion component.
  */
 
 import React, { useRef } from 'react';
-import { Button, ButtonGroup, ButtonToolbar, Dropdown, DropdownButton } from 'react-bootstrap';
+import { Button, ButtonGroup, ButtonToolbar } from 'react-bootstrap';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import LanguageSelector from './LanguageSelector';
 import { ICONS } from '../utils/iconConstants';
@@ -26,14 +25,6 @@ export interface FlowToolbarProps {
   onImport: (json: unknown) => void;
   /** Callback to export to JSON */
   onExport: () => void;
-  /** Callback to clear all nodes and edges */
-  onClearAll: () => void;
-  /** Callback to delete the entire gameday */
-  onDeleteGameday?: () => void;
-  /** Callback to publish the schedule */
-  onPublish?: () => void;
-  /** Callback to unlock the schedule for editing */
-  onUnlock?: () => void;
   /** Current gameday status */
   gamedayStatus?: string;
   /** Callback for notifications */
@@ -46,8 +37,6 @@ export interface FlowToolbarProps {
   canUndo?: boolean;
   /** Whether redo is available */
   canRedo?: boolean;
-  /** Whether there are any nodes to clear */
-  hasNodes?: boolean;
   /** Whether export is available (has valid data) */
   canExport?: boolean;
 }
@@ -56,22 +45,16 @@ export interface FlowToolbarProps {
  * FlowToolbar component.
  *
  * Provides global actions for the flowchart designer.
- * Add buttons have been moved inline for better UX.
  */
 const FlowToolbar: React.FC<FlowToolbarProps> = ({
   onImport,
   onExport,
-  onClearAll,
-  onDeleteGameday,
-  onPublish,
-  onUnlock,
   gamedayStatus = 'DRAFT',
   onNotify,
   onUndo,
   onRedo,
   canUndo = false,
   canRedo = false,
-  hasNodes = false,
   canExport = false,
 }) => {
   const { t } = useTypedTranslation(['ui']);
@@ -106,14 +89,6 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
    */
   const handleImportClick = () => {
     fileInputRef.current?.click();
-  };
-
-  const handleClearAll = () => {
-    onClearAll();
-  };
-
-  const handleDeleteGameday = () => {
-    onDeleteGameday?.();
   };
 
   return (
@@ -168,65 +143,6 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             </Button>
           </ButtonGroup>
         )}
-
-        {/* Lifecycle & Actions Dropdown */}
-        <ButtonGroup className="me-2">
-          <DropdownButton
-            variant="outline-primary"
-            title={<span><i className="bi bi-gear-fill me-2"></i>{t('ui:button.actions', 'Actions')}</span>}
-            id="designer-actions-dropdown"
-            className="btn-adaptive"
-          >
-            {gamedayStatus === 'DRAFT' ? (
-              <Dropdown.Item 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onPublish?.();
-                }}
-                className="text-success"
-              >
-                <i className="bi bi-send-fill me-3"></i>
-                {t('ui:button.publishSchedule', 'Publish Schedule')}
-              </Dropdown.Item>
-            ) : (
-              <Dropdown.Item 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onUnlock?.();
-                }}
-                className="text-warning"
-              >
-                <i className="bi bi-unlock-fill me-3"></i>
-                {t('ui:button.unlockSchedule', 'Unlock Schedule')}
-              </Dropdown.Item>
-            )}
-            
-            <Dropdown.Divider />
-            
-            <Dropdown.Item 
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClearAll();
-              }}
-              disabled={!hasNodes || gamedayStatus !== 'DRAFT'}
-              className="text-warning"
-            >
-              <i className={`bi ${ICONS.CLEAR} me-3`}></i>
-              {t('ui:button.clearSchedule', 'Clear Schedule')}
-            </Dropdown.Item>
-            
-            <Dropdown.Item 
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteGameday();
-              }}
-              className="text-danger"
-            >
-              <i className={`bi ${ICONS.TRASH} me-3`}></i>
-              {t('ui:button.deleteGameday', 'Delete Gameday')}
-            </Dropdown.Item>
-          </DropdownButton>
-        </ButtonGroup>
 
         {/* Language selector */}
         <ButtonGroup>

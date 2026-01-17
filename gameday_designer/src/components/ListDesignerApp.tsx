@@ -7,7 +7,7 @@
  * Replaces FlowDesignerApp with a table/list-based UI instead of flowchart.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Container, Row, Col, Button, OverlayTrigger, Popover, ListGroup, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
 import GameResultModal from './modals/GameResultModal';
 import NotificationToast from './NotificationToast';
 import GamedayMetadataAccordion from './GamedayMetadataAccordion';
+import { useFlowState } from '../hooks/useFlowState';
 import { useDesignerController } from '../hooks/useDesignerController';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { ICONS } from '../utils/iconConstants';
@@ -24,7 +25,8 @@ import { gamedayApi } from '../api/gamedayApi';
 import type { 
   FlowValidationError as ValidationError, 
   FlowValidationWarning as ValidationWarning,
-  HighlightedElement
+  HighlightedElement,
+  GamedayMetadata
 } from '../types/flowchart';
 
 import './ListDesignerApp.css';
@@ -38,6 +40,9 @@ const ListDesignerApp: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+
+  const flowState = useFlowState();
+  const controller = useDesignerController(flowState);
 
   const {
     metadata,
@@ -62,7 +67,7 @@ const ListDesignerApp: React.FC = () => {
     importState,
     updateMetadata,
     exportState,
-  } = useDesignerController();
+  } = controller;
 
   const {
     highlightedElement,
@@ -94,26 +99,29 @@ const ListDesignerApp: React.FC = () => {
     setShowTournamentModal,
     dismissNotification,
     addNotification,
-            handlePublish,
-            handleUnlock,
-          } = handlers;
-        
-          // Only lock if we have a valid ID AND status is explicitly NOT DRAFT
-          const isLocked = Boolean(metadata?.id && metadata.id !== 0 && metadata.status && metadata.status !== 'DRAFT');
-        
-          const [showResultModal, setShowResultModal] = useState(false);
+  } = handlers;
+
+  // Only lock if we have a valid status explicitly NOT DRAFT
+  const isLocked = Boolean(metadata?.status && metadata.status !== 'DRAFT');
+
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [activeGameId, setActiveGameId] = useState<string | null>(null);
+
   useEffect(() => {
     if (selectedNode?.type === 'game' && isLocked) {
+      setActiveGameId(selectedNode.id);
       setShowResultModal(true);
     }
   }, [selectedNode, isLocked]);
 
+  const activeGame = activeGameId ? nodes.find(n => n.id === activeGameId && n.type === 'game') : null;
+
   const handleSaveResult = async (resultData: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }) => {
-    if (!selectedNode || selectedNode.type !== 'game') return;
+    if (!activeGameId) return;
     try {
-      const updatedGame = await gamedayApi.updateGameResult(parseInt(selectedNode.id.replace('game-', '')), resultData);
+      const updatedGame = await gamedayApi.updateGameResult(parseInt(activeGameId.replace('game-', '')), resultData);
       // Update local node state
-      handleUpdateNode(selectedNode.id, {
+      handleUpdateNode(activeGameId, {
         halftime_score: updatedGame.halftime_score,
         final_score: updatedGame.final_score,
         status: updatedGame.status,
@@ -130,97 +138,332 @@ const ListDesignerApp: React.FC = () => {
     }
   };
 
-  // Auto-save metadata and designer data
-  const lastSavedStateRef = React.useRef<string>('');
-  const initialLoadRef = React.useRef<boolean>(true);
+  const lastSavedStateRef = useRef<string>('');
+  const initialLoadRef = useRef<boolean>(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const pauseAutoSaveUntilRef = useRef<number>(0);
 
-  useEffect(() => {
-    if (loading) return;
-    
-    // Skip initial load to prevent unnecessary save
-    if (initialLoadRef.current) {
-      if (metadata && metadata.id) {
-        const initialState = exportState();
-        lastSavedStateRef.current = JSON.stringify(initialState);
-        initialLoadRef.current = false;
-      }
-      return;
-    }
+    useEffect(() => {
 
-    const currentState = exportState();
-    const currentStateStr = JSON.stringify(currentState);
-    if (currentStateStr === lastSavedStateRef.current) return;
+      // Definitive block for auto-save during any transition or loading
 
-    const timer = setTimeout(async () => {
-      if (metadata?.id) {
-        try {
-          // Send metadata + designer_data (which contains nodes, edges, fields, globalTeams, globalTeamGroups)
-          await gamedayApi.patchGameday(metadata.id, {
-            ...metadata,
-            designer_data: {
-              ...metadata.designer_data,
-              // We store the full state components in designer_data
-              nodes,
-              edges,
-              fields,
-              globalTeams,
-              globalTeamGroups
-            }
-          });
-          lastSavedStateRef.current = currentStateStr;
-        } catch (error) {
-          console.error('Auto-save failed', error);
-          addNotification('Failed to auto-save changes', 'warning', 'Auto-save');
+      if (loading) return;
+
+      if (isTransitioning) return;
+
+  
+
+      // Temporal lock to allow React state to settle after manual actions
+
+      const now = Date.now();
+
+      if (now < pauseAutoSaveUntilRef.current) return;
+
+      
+
+      // Skip initial load to prevent unnecessary save
+
+      if (initialLoadRef.current) {
+
+        if (metadata && metadata.id) {
+
+          const initialState = exportState();
+
+          lastSavedStateRef.current = JSON.stringify(initialState);
+
+          initialLoadRef.current = false;
+
         }
+
+        return;
+
       }
-    }, 1000); // Debounce for 1 second
 
-    return () => clearTimeout(timer);
-  }, [metadata, nodes, edges, fields, globalTeams, globalTeamGroups, loading, addNotification, exportState]);
+  
 
-  useEffect(() => {
-    if (id) {
-      loadGameday(parseInt(id));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+      const currentState = exportState();
 
-  const loadGameday = async (gamedayId: number) => {
-    setLoading(true);
-    try {
-      const gameday = await gamedayApi.getGameday(gamedayId);
-      if (gameday.designer_data?.nodes) {
-        // Load full state if available
-        importState({
-          metadata: gameday,
-          nodes: gameday.designer_data.nodes || [],
-          edges: gameday.designer_data.edges || [],
-          fields: gameday.designer_data.fields || [],
-          globalTeams: gameday.designer_data.globalTeams || [],
-          globalTeamGroups: gameday.designer_data.globalTeamGroups || []
-        });
-      } else if (gameday.designer_data?.fields) {
-        // Legacy load (only fields)
-        importState({
-          metadata: gameday,
-          nodes: [], 
-          edges: [],
-          fields: gameday.designer_data.fields.map((f) => ({ id: f.id, name: f.name, order: f.order })),
-          globalTeams: [],
-          globalTeamGroups: []
-        });
-      } else {
-        // Just set metadata for new gameday
-        updateMetadata(gameday);
+      const currentStateStr = JSON.stringify(currentState);
+
+      if (currentStateStr === lastSavedStateRef.current) return;
+
+  
+
+      const timer = setTimeout(async () => {
+
+        // Execute the auto-save ONLY if we are still not transitioning and not locked
+
+        if (metadata?.id && !isTransitioning && Date.now() >= pauseAutoSaveUntilRef.current) {
+
+          try {
+
+            await gamedayApi.patchGameday(metadata.id, {
+
+              ...metadata,
+
+              designer_data: {
+
+                ...metadata.designer_data,
+
+                nodes,
+
+                edges,
+
+                fields,
+
+                globalTeams,
+
+                globalTeamGroups
+
+              }
+
+            });
+
+            lastSavedStateRef.current = currentStateStr;
+
+          } catch (error) {
+
+            console.error('Auto-save failed', error);
+
+            addNotification('Failed to auto-save changes', 'warning', 'Auto-save');
+
+          }
+
+        }
+
+      }, 1000); // Debounce for 1 second
+
+  
+
+      return () => clearTimeout(timer);
+
+    }, [metadata, nodes, edges, fields, globalTeams, globalTeamGroups, loading, isTransitioning, addNotification, exportState]);
+
+  
+
+    const handleUpdateMetadataWrapped = useCallback((data: Partial<GamedayMetadata>) => {
+
+      updateMetadata(data);
+
+      // Pause auto-save briefly to let this metadata update settle
+
+      pauseAutoSaveUntilRef.current = Date.now() + 1500;
+
+    }, [updateMetadata]);
+
+  
+
+    const loadGameday = useCallback(async (gamedayId: number) => {
+
+      setLoading(true);
+
+      setIsTransitioning(true);
+
+      try {
+
+        const updatedGameday = await gamedayApi.getGameday(gamedayId);
+
+        if (updatedGameday.designer_data?.nodes) {
+
+          // Load full state if available
+
+          importState({
+
+            metadata: updatedGameday,
+
+            nodes: updatedGameday.designer_data.nodes || [],
+
+            edges: updatedGameday.designer_data.edges || [],
+
+            fields: updatedGameday.designer_data.fields || [],
+
+            globalTeams: updatedGameday.designer_data.globalTeams || [],
+
+            globalTeamGroups: updatedGameday.designer_data.globalTeamGroups || []
+
+          });
+
+        } else if (updatedGameday.designer_data?.fields) {
+
+          // Legacy load (only fields)
+
+          importState({
+
+            metadata: updatedGameday,
+
+            nodes: [], 
+
+            edges: [],
+
+            fields: updatedGameday.designer_data.fields.map((f) => ({ id: f.id, name: f.name, order: f.order })),
+
+            globalTeams: [],
+
+            globalTeamGroups: []
+
+          });
+
+        } else {
+
+          // Just set metadata for new gameday
+
+          updateMetadata(updatedGameday);
+
+        }
+
+        // Critical: mark this state as already saved and pause auto-save
+
+        pauseAutoSaveUntilRef.current = Date.now() + 2000;
+
+        setTimeout(() => {
+
+          lastSavedStateRef.current = JSON.stringify(exportState());
+
+        }, 500);
+
+      } catch (error) {
+
+        console.error('Failed to load gameday', error);
+
+        addNotification('Failed to load gameday.', 'danger', 'Error');
+
+        navigate('/');
+
+      } finally {
+
+        setLoading(false);
+
+        setIsTransitioning(false);
+
       }
-    } catch (error) {
-      console.error('Failed to load gameday', error);
-      addNotification('Failed to load gameday.', 'danger', 'Error');
-      navigate('/');
-    } finally {
-      setLoading(false);
-    }
-  };
+
+    }, [importState, updateMetadata, addNotification, navigate, exportState]);
+
+  
+
+    const hasLoadedRef = useRef(false);
+
+    useEffect(() => {
+
+      if (id && !hasLoadedRef.current) {
+
+        hasLoadedRef.current = true;
+
+        loadGameday(parseInt(id));
+
+      }
+
+    }, [id, loadGameday]);
+
+  
+
+    const handlePublishWrapped = useCallback(async () => {
+
+      setIsTransitioning(true);
+
+      pauseAutoSaveUntilRef.current = Date.now() + 5000; // Extra long pause for publish
+
+      try {
+
+        const updated = await gamedayApi.publish(metadata.id);
+
+        
+
+        // Update local state. 
+
+        // First import nodes/edges/etc.
+
+        if (updated.designer_data) {
+
+          importState(updated.designer_data);
+
+        }
+
+        // Then explicitly update metadata from the top-level response
+
+        // This ensures status is always correct and not shadowed by designer_data
+
+        updateMetadata(updated);
+
+        
+
+        addNotification('Schedule published and locked', 'success', 'Success');
+
+        
+
+        // Update the reference after a short delay to ensure we capture the new state
+
+        setTimeout(() => {
+
+          lastSavedStateRef.current = JSON.stringify(exportState());
+
+        }, 1000);
+
+      } catch (error) {
+
+        console.error('Failed to publish gameday:', error);
+
+        addNotification('Failed to publish schedule', 'danger', 'Error');
+
+      } finally {
+
+        setIsTransitioning(false);
+
+      }
+
+    }, [metadata.id, updateMetadata, importState, addNotification, exportState]);
+
+  
+
+    const handleUnlockWrapped = useCallback(async () => {
+
+      setIsTransitioning(true);
+
+      pauseAutoSaveUntilRef.current = Date.now() + 5000; // Extra long pause for unlock
+
+      try {
+
+        const updated = await gamedayApi.patchGameday(metadata.id, { status: 'DRAFT' });
+
+        
+
+        // Update local state.
+
+        if (updated.designer_data) {
+
+          importState(updated.designer_data);
+
+        }
+
+        updateMetadata(updated);
+
+        
+
+        addNotification('Schedule unlocked for editing', 'warning', 'Success');
+
+        
+
+        // Update the reference after a short delay to ensure we capture the new state
+
+        setTimeout(() => {
+
+          lastSavedStateRef.current = JSON.stringify(exportState());
+
+        }, 1000);
+
+      } catch (error) {
+
+        console.error('Failed to unlock gameday:', error);
+
+        addNotification('Failed to unlock schedule', 'danger', 'Error');
+
+      } finally {
+
+        setIsTransitioning(false);
+
+      }
+
+    }, [metadata.id, updateMetadata, importState, addNotification, exportState]);
 
   /**
    * Helper to translate error/warning message.
@@ -291,13 +534,8 @@ const ListDesignerApp: React.FC = () => {
           <FlowToolbar
             onImport={handleImport}
             onExport={handleExport}
-            onClearAll={handleClearAll}
-            onDeleteGameday={handleDeleteGameday}
-            onPublish={handlePublish}
-            onUnlock={handleUnlock}
             gamedayStatus={metadata?.status}
             onNotify={addNotification}
-            hasNodes={hasNodes}
             canExport={canExport}
           />
         </Col>
@@ -306,7 +544,12 @@ const ListDesignerApp: React.FC = () => {
       {/* Gameday Metadata Accordion */}
       <GamedayMetadataAccordion 
         metadata={metadata} 
-        onUpdate={updateMetadata} 
+        onUpdate={handleUpdateMetadataWrapped} 
+        onPublish={handlePublishWrapped}
+        onUnlock={handleUnlockWrapped}
+        onClearAll={handleClearAll}
+        onDelete={handleDeleteGameday}
+        hasNodes={hasNodes}
         defaultActiveKey={!hasNodes ? '0' : undefined}
         readOnly={isLocked}
       />
@@ -463,12 +706,13 @@ const ListDesignerApp: React.FC = () => {
         show={showResultModal}
         onHide={() => {
           setShowResultModal(false);
+          setActiveGameId(null);
           handleSelectNode(null);
         }}
         onSave={handleSaveResult}
-        game={selectedNode?.type === 'game' ? selectedNode : null}
-        homeTeamName={selectedNode?.type === 'game' ? (selectedNode.data.homeTeamId ? globalTeams.find(t => t.id === selectedNode.data.homeTeamId)?.label || 'Home' : 'Home') : 'Home'}
-        awayTeamName={selectedNode?.type === 'game' ? (selectedNode.data.awayTeamId ? globalTeams.find(t => t.id === selectedNode.data.awayTeamId)?.label || 'Away' : 'Away') : 'Away'}
+        game={activeGame as any}
+        homeTeamName={activeGame ? (activeGame.data.homeTeamId ? globalTeams.find(t => t.id === activeGame.data.homeTeamId)?.label || 'Home' : 'Home') : 'Home'}
+        awayTeamName={activeGame ? (activeGame.data.awayTeamId ? globalTeams.find(t => t.id === activeGame.data.awayTeamId)?.label || 'Away' : 'Away') : 'Away'}
       />
     </Container>
   );

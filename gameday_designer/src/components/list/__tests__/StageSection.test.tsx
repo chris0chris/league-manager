@@ -29,6 +29,7 @@ const createDefaultProps = (overrides: Partial<StageSectionProps> = {}): StageSe
   onDynamicReferenceClick: vi.fn(),
   onAddGameToGameEdge: vi.fn(),
   onRemoveGameToGameEdge: vi.fn(),
+  onNotify: vi.fn(),
   isExpanded: true,
   ...overrides,
 });

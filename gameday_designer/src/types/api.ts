@@ -148,13 +148,14 @@ export interface GamedayMetadata {
   season_display?: string;
   league: number;
   league_display?: string;
+  status: string;
 }
 
 /**
  * Gameday list entry for the dashboard.
  */
 export interface GamedayListEntry extends GamedayMetadata {
-  status: 'draft' | 'scheduled' | 'completed';
+  status: string;
 }
 
 import type { 

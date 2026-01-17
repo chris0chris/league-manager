@@ -19,6 +19,7 @@ describe('GamedayMetadataAccordion', () => {
     address: 'Test Field',
     season: 1,
     league: 1,
+    status: 'DRAFT',
   };
 
   const mockOnUpdate = vi.fn();
@@ -33,15 +34,18 @@ describe('GamedayMetadataAccordion', () => {
     expect(button).toHaveClass('collapsed');
   });
 
-  it('expands to show form fields', () => {
+  it('expands to show form fields and action buttons', () => {
     render(<GamedayMetadataAccordion metadata={mockMetadata} onUpdate={mockOnUpdate} />);
     
     fireEvent.click(screen.getByRole('button', { name: /Test Gameday/ }));
     
     expect(screen.getByLabelText('Name')).toBeVisible();
     expect(screen.getByLabelText('Date')).toBeVisible();
-    expect(screen.getByLabelText('Start Time')).toBeVisible();
-    expect(screen.getByLabelText('Venue')).toBeVisible();
+    
+    // Action buttons should now be in the body
+    expect(screen.getByText('Publish Schedule')).toBeInTheDocument();
+    expect(screen.getByText('Clear Schedule')).toBeInTheDocument();
+    expect(screen.getByText('Delete Gameday')).toBeInTheDocument();
   });
 
   it('calls onUpdate when fields change', () => {

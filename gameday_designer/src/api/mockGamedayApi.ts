@@ -81,7 +81,7 @@ class MockGamedayService {
 
     const results: GamedayListEntry[] = filtered.map(g => ({
       ...g,
-      status: new Date(g.date) < new Date() ? 'completed' : 'scheduled'
+      status: g.status || (new Date(g.date) < new Date() ? 'COMPLETED' : 'DRAFT')
     }));
 
     return {
@@ -114,6 +114,7 @@ class MockGamedayService {
       address: data.address || '',
       season: data.season || 1,
       league: data.league || 1,
+      status: 'DRAFT',
       designer_data: data.designer_data || { fields: [] }
     };
 

@@ -4,7 +4,6 @@
  * Tests cover:
  * - Import/Export functionality
  * - File handling and JSON parsing
- * - Clear all workflow
  * - Undo/Redo controls
  * - Error handling
  * - Button states and interactions
@@ -18,25 +17,20 @@ import FlowToolbar, { type FlowToolbarProps } from '../FlowToolbar';
 const defaultProps: FlowToolbarProps = {
   onImport: vi.fn(),
   onExport: vi.fn(),
-  onClearAll: vi.fn(),
-  hasNodes: false,
+  gamedayStatus: 'DRAFT',
   canExport: false,
 };
 
 describe('FlowToolbar', () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
-  let alertSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-    vi.spyOn(window, 'confirm').mockImplementation(() => true);
   });
 
   afterEach(() => {
     consoleErrorSpy.mockRestore();
-    alertSpy.mockRestore();
   });
 
   describe('Rendering', () => {
@@ -48,20 +42,18 @@ describe('FlowToolbar', () => {
     it('renders Import button', () => {
       render(<FlowToolbar {...defaultProps} />);
       expect(screen.getByTestId('import-button')).toBeInTheDocument();
-      // Label is removed from Import button (icon-only now)
       expect(screen.queryByText('Import')).not.toBeInTheDocument();
     });
 
     it('renders Export button', () => {
       render(<FlowToolbar {...defaultProps} />);
       expect(screen.getByTestId('export-button')).toBeInTheDocument();
-      // Label is removed from Export button (icon-only now)
       expect(screen.queryByText('Export')).not.toBeInTheDocument();
     });
 
-    it('renders Actions dropdown', () => {
+    it('does NOT render Actions dropdown (moved to metadata section)', () => {
       render(<FlowToolbar {...defaultProps} />);
-      expect(screen.getByText('Actions')).toBeInTheDocument();
+      expect(screen.queryByText('Actions')).not.toBeInTheDocument();
     });
 
     it('renders hidden file input', () => {
@@ -106,38 +98,6 @@ describe('FlowToolbar', () => {
 
       await user.click(screen.getByTestId('export-button'));
       expect(onExport).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('Clear All functionality', () => {
-    it('calls onClearAll when Clear Schedule dropdown item is clicked', async () => {
-      const onClearAll = vi.fn();
-      const user = userEvent.setup();
-      render(<FlowToolbar {...defaultProps} onClearAll={onClearAll} hasNodes={true} />);
-
-      // Open dropdown
-      await user.click(screen.getByText('Actions'));
-      
-      // Click Clear Schedule
-      await user.click(screen.getByText('Clear Schedule'));
-      expect(onClearAll).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('Delete Gameday functionality', () => {
-    it('calls onDeleteGameday when Delete Gameday dropdown item is clicked and confirmed', async () => {
-      const onDeleteGameday = vi.fn();
-      const user = userEvent.setup();
-      render(<FlowToolbar {...defaultProps} onDeleteGameday={onDeleteGameday} />);
-
-      // Open dropdown
-      await user.click(screen.getByText('Actions'));
-      
-      // Click Delete Gameday
-      const deleteItem = screen.getByText('Delete Gameday');
-      await user.click(deleteItem);
-      
-      expect(onDeleteGameday).toHaveBeenCalledTimes(1);
     });
   });
 

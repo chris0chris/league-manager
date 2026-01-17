@@ -141,16 +141,22 @@ function useFlowStateInternal(initialState?: Partial<FlowState>) {
   const clearAll = useCallback(() => {
     setNodes([]);
     setEdges([]);
+    setFields([]);
     setGlobalTeams([]);
     setGlobalTeamGroups([]);
     setSelection({ nodeIds: [], edgeIds: [] });
   }, []);
 
   const importState = useCallback((state: FlowState) => {
-    if (state.metadata) setMetadata(state.metadata);
-    setNodes(state.nodes);
-    setEdges(state.edges);
-    setFields(state.fields);
+    if (state.metadata) {
+      setMetadata(prev => ({
+        ...state.metadata,
+        status: state.metadata.status || prev.status || 'DRAFT'
+      }));
+    }
+    setNodes(state.nodes || []);
+    setEdges(state.edges || []);
+    setFields(state.fields || []);
     const migratedTeams = (state.globalTeams || []).map((team: GlobalTeam & { reference?: string }) => {
       if ('reference' in team && !('groupId' in team)) {
         return { id: team.id, label: team.label || 'Team', groupId: null, order: team.order };

@@ -130,6 +130,7 @@ describe('ListDesignerApp', () => {
     removeGameToGameEdge: mockRemoveGameToGameEdge,
     updateMetadata: vi.fn(),
     addNotification: vi.fn(),
+    onNotify: vi.fn(),
     ...overrides,
   });
 
@@ -182,7 +183,7 @@ describe('ListDesignerApp', () => {
 
     it('should render FlowToolbar component', async () => {
       await renderApp();
-      expect(screen.getByText('Actions')).toBeInTheDocument();
+      expect(screen.getByTestId('flow-toolbar')).toBeInTheDocument();
     });
 
     it('should render ListCanvas component', async () => {
@@ -316,6 +317,7 @@ describe('ListDesignerApp', () => {
 
   describe('Import/Export', () => {
     it('should call exportState when export is triggered', async () => {
+      const user = userEvent.setup();
       mockUseFlowState.mockReturnValue(createMockFlowState({
         nodes: [
           { id: 'field1', type: 'field', data: { name: 'Field 1', order: 0 }, position: { x: 0, y: 0 } },
@@ -326,8 +328,10 @@ describe('ListDesignerApp', () => {
       }));
 
       mockExportState.mockReturnValue({
+        metadata: { id: 1, name: 'Test', date: '2026-05-01', start: '10:00', format: '6_2', author: 1, address: '', season: 1, league: 1, status: 'DRAFT' },
         nodes: [],
         edges: [],
+        fields: [],
         globalTeams: [],
         globalTeamGroups: [],
       });
@@ -340,7 +344,9 @@ describe('ListDesignerApp', () => {
 
       await renderApp();
 
-      // Called at least once by auto-save logic on load
+      const exportButton = screen.getByTestId('export-button');
+      await user.click(exportButton);
+
       expect(mockExportState).toHaveBeenCalled();
     });
 

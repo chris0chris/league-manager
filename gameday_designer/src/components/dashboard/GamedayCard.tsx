@@ -17,17 +17,23 @@ interface GamedayCardProps {
 const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick, onDelete }) => {
 
   const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'completed': return 'success';
-      case 'scheduled': return 'primary';
-      default: return 'secondary';
+    switch (status.toUpperCase()) {
+      case 'DRAFT': return 'warning text-dark';
+      case 'PUBLISHED': return 'success';
+      case 'IN_PROGRESS': return 'primary';
+      case 'COMPLETED': return 'secondary';
+      default: return 'light text-muted border';
     }
   };
 
   const getStatusLabel = (status: string) => {
-    // In a real app, these would be translated keys like 'ui:status.draft'
-    // For now, we'll capitalize as per tests
-    return status.charAt(0).toUpperCase() + status.slice(1);
+    switch (status.toUpperCase()) {
+      case 'DRAFT': return 'Draft';
+      case 'PUBLISHED': return 'Published';
+      case 'IN_PROGRESS': return 'In Progress';
+      case 'COMPLETED': return 'Completed';
+      default: return status;
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -58,10 +64,15 @@ const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick, onDelete })
             <div className="d-flex align-items-center">
               <small className="text-muted me-2">{gameday.season_display}</small>
               <button 
-                className="btn btn-sm text-muted btn-destructive-hover"
+                className="btn text-muted btn-destructive-hover delete-button-grow"
                 onClick={handleDelete}
                 title="Delete Gameday"
-                style={{ lineHeight: 1, padding: '2px 5px' }}
+                style={{ 
+                  lineHeight: 1, 
+                  padding: '6px 8px', 
+                  fontSize: '1.1rem',
+                  transition: 'transform 0.2s ease-in-out' 
+                }}
               >
                 <i className="bi bi-trash"></i>
               </button>

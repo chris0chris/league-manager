@@ -68,6 +68,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
   expandedStageIds,
   highlightedSourceGameId,
   onDynamicReferenceClick,
+  onNotify,
   readOnly = false,
 }) => {
   const { t } = useTypedTranslation(['ui']);

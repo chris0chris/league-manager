@@ -37,19 +37,25 @@ describe('GamedayCard', () => {
 
   it('renders status badge correctly', () => {
     const { rerender } = render(
-      <GamedayCard gameday={{ ...mockGameday, status: 'draft' }} onClick={vi.fn()} onDelete={vi.fn()} />
+      <GamedayCard gameday={{ ...mockGameday, status: 'DRAFT' }} onClick={vi.fn()} onDelete={vi.fn()} />
     );
-    expect(screen.getByText('Draft')).toBeInTheDocument();
+    const draftBadge = screen.getByText('Draft');
+    expect(draftBadge).toBeInTheDocument();
+    expect(draftBadge).toHaveClass('bg-warning');
 
     rerender(
-      <GamedayCard gameday={{ ...mockGameday, status: 'scheduled' }} onClick={vi.fn()} onDelete={vi.fn()} />
+      <GamedayCard gameday={{ ...mockGameday, status: 'PUBLISHED' }} onClick={vi.fn()} onDelete={vi.fn()} />
     );
-    expect(screen.getByText('Scheduled')).toBeInTheDocument();
+    const pubBadge = screen.getByText('Published');
+    expect(pubBadge).toBeInTheDocument();
+    expect(pubBadge).toHaveClass('bg-success');
 
     rerender(
-      <GamedayCard gameday={{ ...mockGameday, status: 'completed' }} onClick={vi.fn()} onDelete={vi.fn()} />
+      <GamedayCard gameday={{ ...mockGameday, status: 'COMPLETED' }} onClick={vi.fn()} onDelete={vi.fn()} />
     );
-    expect(screen.getByText('Completed')).toBeInTheDocument();
+    const compBadge = screen.getByText('Completed');
+    expect(compBadge).toBeInTheDocument();
+    expect(compBadge).toHaveClass('bg-secondary');
   });
 
   it('calls onClick handler when card is clicked', () => {

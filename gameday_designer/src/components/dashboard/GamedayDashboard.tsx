@@ -1,17 +1,72 @@
-/**
- * GamedayDashboard Component
- *
- * Main landing page for Gameday Management.
- * Displays a list of gamedays and allows creating new ones.
- */
-
-import React, { useEffect, useState, useRef } from 'react';
-import { Container, Row, Col, Button, Spinner, Form, InputGroup } from 'react-bootstrap';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { Container, Row, Col, Button, Spinner, Form, InputGroup, Card } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import { gamedayApi } from '../../api/gamedayApi';
 import type { GamedayListEntry } from '../../types';
+import type { Notification, NotificationType } from '../../types/designer';
 import GamedayCard from './GamedayCard';
+import NotificationToast from '../NotificationToast';
+import { v4 as uuidv4 } from 'uuid';
+import { ProgressBar } from 'react-bootstrap';
+
+/**
+ * Placeholder component for a gameday card marked for deletion.
+ */
+const GamedayDeletePlaceholder: React.FC<{ 
+  gameday: GamedayListEntry; 
+  onUndo: (id: number) => void;
+  duration: number;
+}> = ({ gameday, onUndo, duration }) => {
+  const [progress, setProgress] = useState(100);
+  const [isHovered, setIsHovered] = useState(false);
+  
+  useEffect(() => {
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      setProgress(Math.max(0, 100 - (elapsed / duration) * 100));
+    }, 50);
+    return () => clearInterval(interval);
+  }, [duration]);
+
+  return (
+    <Col xs={12} sm={6} lg={4} xl={3} className="mb-4">
+      <Card 
+        className="h-100 bg-light border-dashed shadow-sm position-relative overflow-hidden"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <Card.Body className="d-flex flex-column align-items-center justify-content-center text-center p-0">
+          <div style={{ height: '80px' }} className="d-flex align-items-center justify-content-center w-100">
+            {isHovered ? (
+              <Button 
+                variant="outline-primary" 
+                size="sm" 
+                onClick={() => onUndo(gameday.id)} 
+                className="px-4 shadow-sm animate-in"
+              >
+                <i className="bi bi-arrow-counterclockwise me-1"></i>
+                Undo
+              </Button>
+            ) : (
+              <i className="bi bi-trash3 text-muted opacity-25 animate-in" style={{ fontSize: '2.5rem' }}></i>
+            )}
+          </div>
+          
+          <div className="position-absolute bottom-0 start-0 w-100">
+            <ProgressBar 
+              now={progress} 
+              variant="warning" 
+              style={{ height: '4px', borderRadius: 0 }} 
+              className="bg-transparent"
+            />
+          </div>
+        </Card.Body>
+      </Card>
+    </Col>
+  );
+};
 
 const GamedayDashboard: React.FC = () => {
   const { t } = useTypedTranslation(['ui']);
@@ -21,14 +76,15 @@ const GamedayDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
-  const [undoTimers, setUndoTimers] = useState<Record<number, NodeJS.Timeout>>({});
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const timeoutRefs = useRef<Record<number, NodeJS.Timeout>>({});
   const hasTriggeredInitialDelete = useRef(false);
 
   useEffect(() => {
     loadGamedays();
     return () => {
       // Cleanup timers on unmount
-      Object.values(undoTimers).forEach(timer => clearTimeout(timer));
+      Object.values(timeoutRefs.current).forEach(timer => clearTimeout(timer));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
@@ -45,6 +101,22 @@ const GamedayDashboard: React.FC = () => {
       }
     }
   }, [loading, gamedays, location.state, navigate, location.pathname]);
+
+  const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string, undoAction?: () => void, duration?: number) => {
+    const id = uuidv4();
+    setNotifications((prev) => [
+      ...prev,
+      { id, message, type, title, show: true, undoAction, duration }
+    ]);
+  }, []);
+
+  const dismissNotification = useCallback((id: string) => {
+    setNotifications((prev) => prev.map(n => n.id === id ? { ...n, show: false } : n));
+    // Clean up after animation
+    setTimeout(() => {
+      setNotifications((prev) => prev.filter(n => n.id !== id));
+    }, 300);
+  }, []);
 
   const loadGamedays = async () => {
     setLoading(true);
@@ -71,54 +143,64 @@ const GamedayDashboard: React.FC = () => {
     navigate(`/designer/${id}`);
   };
 
-  const handleDelete = (id: number) => {
+  const handleUndo = useCallback((id: number) => {
+    const timer = timeoutRefs.current[id];
+    if (timer) {
+      clearTimeout(timer);
+      delete timeoutRefs.current[id];
+      
+      // Remove from deleted IDs - creating NEW set to ensure React detects change
+      setDeletedIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      
+      // Explicitly trigger a list refresh by updating state with a new array reference
+      setGamedays(prev => [...prev]);
+    }
+  }, []);
+
+  const handleDelete = useCallback((id: number) => {
+    const deleteDuration = 10000;
+
+    // Add to deleted IDs immediately to show placeholder
     setDeletedIds(prev => new Set(prev).add(id));
     
     const timer = setTimeout(async () => {
       try {
         await gamedayApi.deleteGameday(id);
-        // After successful delete, remove from gamedays list and cleanup state
+        // After successful permanent delete, remove from gamedays list and cleanup state
         setGamedays(prev => prev.filter(g => g.id !== id));
         setDeletedIds(prev => {
           const next = new Set(prev);
           next.delete(id);
           return next;
         });
-        setUndoTimers(prev => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { [id]: _, ...rest } = prev;
-          return rest;
-        });
+        delete timeoutRefs.current[id];
       } catch (error) {
-        console.error('Failed to delete gameday', error);
-        // Revert UI on error
+        console.error('Failed to delete gameday permanently', error);
+        // On failure, restore it to the list
         setDeletedIds(prev => {
           const next = new Set(prev);
           next.delete(id);
           return next;
         });
       }
-    }, 10000); // 10 seconds
+    }, deleteDuration);
 
-    setUndoTimers(prev => ({ ...prev, [id]: timer }));
-  };
-
-  const handleUndo = (id: number) => {
-    const timer = undoTimers[id];
-    if (timer) {
-      clearTimeout(timer);
-      setUndoTimers(prev => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { [id]: _, ...rest } = prev;
-        return rest;
-      });
-      setDeletedIds(prev => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-    }
-  };
+    timeoutRefs.current[id] = timer;
+    
+    // Show simplified Toast
+    const gamedayName = gamedays.find(g => g.id === id)?.name || 'Gameday';
+    addNotification(
+      `Gameday "${gamedayName}" will be deleted.`,
+      'warning',
+      'Deletion',
+      undefined, // No undo on toast anymore, it's on the card
+      deleteDuration
+    );
+  }, [gamedays, addNotification, handleUndo, location.state]);
 
   return (
     <Container fluid className="py-4">
@@ -160,17 +242,16 @@ const GamedayDashboard: React.FC = () => {
         <Row>
           {gamedays.length > 0 ? (
             gamedays.map((gameday) => {
-              if (deletedIds.has(gameday.id)) {
+              const isDeleted = deletedIds.has(gameday.id);
+              // Hide deleted gamedays from list (they are shown as placeholder anyway)
+              if (isDeleted) {
                 return (
-                  <Col key={gameday.id} xs={12} sm={6} lg={4} xl={3} className="mb-4">
-                    <div className="h-100 p-3 bg-light rounded border border-dashed d-flex flex-column align-items-center justify-content-center text-center shadow-sm">
-                      <p className="mb-2 text-muted small">Gameday marked for deletion</p>
-                      <Button variant="outline-primary" size="sm" onClick={() => handleUndo(gameday.id)} className="px-3">
-                        <i className="bi bi-arrow-counterclockwise me-1"></i>
-                        Undo
-                      </Button>
-                    </div>
-                  </Col>
+                  <GamedayDeletePlaceholder 
+                    key={gameday.id} 
+                    gameday={gameday} 
+                    onUndo={handleUndo} 
+                    duration={10000}
+                  />
                 );
               }
               return (
@@ -197,6 +278,7 @@ const GamedayDashboard: React.FC = () => {
           )}
         </Row>
       )}
+      <NotificationToast notifications={notifications} onClose={dismissNotification} />
     </Container>
   );
 };

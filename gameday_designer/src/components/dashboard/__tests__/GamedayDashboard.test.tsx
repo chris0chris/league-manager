@@ -20,6 +20,7 @@ vi.mock('../../../api/gamedayApi', () => ({
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  useLocation: () => ({ state: null, pathname: '/' }),
 }));
 
 describe('GamedayDashboard', () => {
@@ -34,7 +35,7 @@ describe('GamedayDashboard', () => {
       address: 'Field 1',
       season: 1,
       league: 1,
-      status: 'scheduled',
+      status: 'PUBLISHED',
     },
     {
       id: 2,
@@ -46,7 +47,7 @@ describe('GamedayDashboard', () => {
       address: 'Field 2',
       season: 1,
       league: 1,
-      status: 'draft',
+      status: 'DRAFT',
     },
   ];
 
