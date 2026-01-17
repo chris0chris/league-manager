@@ -144,6 +144,7 @@ class Gameday(models.Model):
         max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT
     )
     published_at = models.DateTimeField(null=True, blank=True)
+    designer_data = models.JSONField(null=True, blank=True)
 
     objects: QuerySet["Gameday"] = models.Manager()
 
