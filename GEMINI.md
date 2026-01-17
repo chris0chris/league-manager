@@ -46,6 +46,11 @@ Targeted modifications can be verified using isolated test runs (e.g., only the 
 - **History Entry**: Once a feature is finished, it must contain a history entry summarizing the implementation.
 - **Coverage Requirements**: Patch coverage for each PR must be at least **90%** to maintain an overall project coverage of above **80%**.
 
+### 4. Memory Management (MCP)
+- **Persistence**: Use the `save_memory` tool to persist critical session facts, user-specific preferences, or significant architectural insights that should be retained for future sessions.
+- **Conciseness**: Ensure that each saved fact is clear, self-contained, and brief. Avoid saving long or ephemeral context.
+- **Proactivity**: Proactively identify and save information that will streamline future development or improve personalized assistance (e.g., "User prefers SQLite for local backend testing due to LXC connectivity issues").
+
 ---
 
 ## Testing Strategy
