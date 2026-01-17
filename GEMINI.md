@@ -56,6 +56,11 @@ npm run build    # Production build to static/ directory
 - **Conciseness**: Ensure that each saved fact is clear, self-contained, and brief. Avoid saving long or ephemeral context.
 - **Proactivity**: Proactively identify and save information that will streamline future development or improve personalized assistance (e.g., "User prefers SQLite for local backend testing due to LXC connectivity issues").
 
+### 4. Memory Management (MCP)
+- **Persistence**: Use the `save_memory` tool to persist critical session facts, user-specific preferences, or significant architectural insights that should be retained for future sessions.
+- **Conciseness**: Ensure that each saved fact is clear, self-contained, and brief. Avoid saving long or ephemeral context.
+- **Proactivity**: Proactively identify and save information that will streamline future development or improve personalized assistance (e.g., "User prefers SQLite for local backend testing due to LXC connectivity issues").
+
 ---
 
 ## Testing Strategy
