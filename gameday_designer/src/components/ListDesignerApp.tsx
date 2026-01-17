@@ -94,12 +94,13 @@ const ListDesignerApp: React.FC = () => {
     setShowTournamentModal,
     dismissNotification,
     addNotification,
-    handlePublish,
-    handleUnlock,
-  } = handlers;
-
-  const isLocked = metadata?.status !== 'DRAFT';
-  const [showResultModal, setShowResultModal] = useState(false);
+        handlePublish,
+        handleUnlock,
+      } = handlers;
+    
+      const isLocked = metadata?.status !== 'DRAFT' && metadata?.id !== 0;
+    
+      const [showResultModal, setShowResultModal] = useState(false);
 
   useEffect(() => {
     if (selectedNode?.type === 'game' && isLocked) {

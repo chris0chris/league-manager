@@ -47,7 +47,15 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
 
               <div className="d-flex w-100 justify-content-between me-3 align-items-center">
 
-                <span className="fw-bold">{metadata.name || t('ui:placeholder.gamedayName', 'New Gameday')}</span>
+                <div className="d-flex align-items-center gap-2">
+                  <span className="fw-bold">{metadata.name || t('ui:placeholder.gamedayName', 'New Gameday')}</span>
+                  {readOnly && (
+                    <span className="badge bg-light text-muted border small">
+                      <i className="bi bi-lock-fill me-1"></i>
+                      {t('ui:label.readOnly', 'Read-only')}
+                    </span>
+                  )}
+                </div>
 
                 <span className="text-muted small">
 

@@ -7,6 +7,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import FlowToolbar, { type FlowToolbarProps } from '../FlowToolbar';
 
 const defaultProps: FlowToolbarProps = {
@@ -58,12 +59,14 @@ describe('FlowToolbar - Inline Add Button Pattern', () => {
       expect(screen.queryByText('Export')).not.toBeInTheDocument();
     });
 
-    it('renders Clear All button', () => {
+    it('renders Clear Schedule item in dropdown', async () => {
+      const user = userEvent.setup();
       render(<FlowToolbar {...defaultProps} hasNodes={true} />);
 
-      expect(screen.getByTestId('clear-all-button')).toBeInTheDocument();
-      // Label is removed from Clear All button
-      expect(screen.queryByText('Clear All')).not.toBeInTheDocument();
+      // Open dropdown
+      await user.click(screen.getByText('Actions'));
+      
+      expect(screen.getByText('Clear Schedule')).toBeInTheDocument();
     });
 
     it('disables Export when canExport is false', () => {
@@ -80,18 +83,24 @@ describe('FlowToolbar - Inline Add Button Pattern', () => {
       expect(exportButton).not.toBeDisabled();
     });
 
-    it('disables Clear All when hasNodes is false', () => {
+    it('disables Clear Schedule item when hasNodes is false', async () => {
+      const user = userEvent.setup();
       render(<FlowToolbar {...defaultProps} hasNodes={false} />);
 
-      const clearButton = screen.getByTestId('clear-all-button');
-      expect(clearButton).toBeDisabled();
+      await user.click(screen.getByText('Actions'));
+      
+      const clearItem = screen.getByText('Clear Schedule').closest('.dropdown-item');
+      expect(clearItem).toHaveClass('disabled');
     });
 
-    it('enables Clear All when hasNodes is true', () => {
+    it('enables Clear Schedule item when hasNodes is true', async () => {
+      const user = userEvent.setup();
       render(<FlowToolbar {...defaultProps} hasNodes={true} />);
 
-      const clearButton = screen.getByTestId('clear-all-button');
-      expect(clearButton).not.toBeDisabled();
+      await user.click(screen.getByText('Actions'));
+      
+      const clearItem = screen.getByText('Clear Schedule').closest('.dropdown-item');
+      expect(clearItem).not.toHaveClass('disabled');
     });
   });
 });

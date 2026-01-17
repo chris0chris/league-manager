@@ -182,7 +182,7 @@ describe('ListDesignerApp', () => {
 
     it('should render FlowToolbar component', async () => {
       await renderApp();
-      expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
+      expect(screen.getByText('Actions')).toBeInTheDocument();
     });
 
     it('should render ListCanvas component', async () => {

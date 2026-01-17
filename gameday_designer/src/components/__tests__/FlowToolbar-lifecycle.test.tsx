@@ -24,47 +24,47 @@ describe('FlowToolbar - Lifecycle', () => {
     gamedayStatus: 'DRAFT',
   };
 
-  it('renders Publish button when status is DRAFT', () => {
+  it('renders Publish button in Actions dropdown when status is DRAFT', async () => {
     render(
       <Router>
         <FlowToolbar {...defaultProps} />
       </Router>
     );
     
-    const publishButton = screen.getByTestId('publish-button');
-    expect(publishButton).toBeInTheDocument();
-    // Match the fallback text as the mock returns it if provided
-    expect(publishButton).toHaveTextContent('Publish Schedule');
+    // Open dropdown
+    fireEvent.click(screen.getByText('Actions'));
+    
+    const publishItem = screen.getByText('Publish Schedule');
+    expect(publishItem).toBeInTheDocument();
   });
 
-  it('renders Unlock button when status is PUBLISHED', () => {
+  it('renders Unlock button in Actions dropdown when status is PUBLISHED', async () => {
     render(
       <Router>
         <FlowToolbar {...defaultProps} gamedayStatus="PUBLISHED" />
       </Router>
     );
     
-    const unlockButton = screen.getByTestId('unlock-button');
-    expect(unlockButton).toBeInTheDocument();
-    expect(unlockButton).toHaveTextContent('Unlock Schedule');
+    // Open dropdown
+    fireEvent.click(screen.getByText('Actions'));
+    
+    const unlockItem = screen.getByText('Unlock Schedule');
+    expect(unlockItem).toBeInTheDocument();
   });
 
-  it('calls onPublish when publish button is clicked twice (double confirm)', () => {
+  it('calls onPublish when publish item is clicked', () => {
     render(
       <Router>
         <FlowToolbar {...defaultProps} />
       </Router>
     );
     
-    const publishButton = screen.getByTestId('publish-button');
+    // Open dropdown
+    fireEvent.click(screen.getByText('Actions'));
     
-    // First click shows "Confirm"
-    fireEvent.click(publishButton);
-    expect(defaultProps.onPublish).not.toHaveBeenCalled();
-    expect(publishButton).toHaveTextContent('Confirm');
+    const publishItem = screen.getByText('Publish Schedule');
+    fireEvent.click(publishItem);
     
-    // Second click calls onPublish
-    fireEvent.click(publishButton);
     expect(defaultProps.onPublish).toHaveBeenCalled();
   });
 });

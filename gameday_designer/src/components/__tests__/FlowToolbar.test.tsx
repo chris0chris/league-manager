@@ -31,6 +31,7 @@ describe('FlowToolbar', () => {
     vi.clearAllMocks();
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    vi.spyOn(window, 'confirm').mockImplementation(() => true);
   });
 
   afterEach(() => {
@@ -58,18 +59,9 @@ describe('FlowToolbar', () => {
       expect(screen.queryByText('Export')).not.toBeInTheDocument();
     });
 
-    it('renders Clear Schedule button', () => {
+    it('renders Actions dropdown', () => {
       render(<FlowToolbar {...defaultProps} />);
-      expect(screen.getByTestId('clear-all-button')).toBeInTheDocument();
-      // Label is removed from Clear Schedule button (icon-only)
-      expect(screen.queryByText('Clear Schedule')).not.toBeInTheDocument();
-    });
-
-    it('renders Delete Gameday button', () => {
-      render(<FlowToolbar {...defaultProps} />);
-      expect(screen.getByTestId('delete-gameday-button')).toBeInTheDocument();
-      // Label exists but is hidden by default (btn-label-adaptive)
-      expect(screen.getByText('Delete Gameday')).toBeInTheDocument();
+      expect(screen.getByText('Actions')).toBeInTheDocument();
     });
 
     it('renders hidden file input', () => {
@@ -118,36 +110,37 @@ describe('FlowToolbar', () => {
   });
 
   describe('Clear All functionality', () => {
-    it('enables Clear Schedule button when hasNodes is true', () => {
-      render(<FlowToolbar {...defaultProps} hasNodes={true} />);
-      expect(screen.getByTestId('clear-all-button')).not.toBeDisabled();
-    });
-
-    it('calls onClearAll when Clear Schedule button is clicked', async () => {
+    it('calls onClearAll when Clear Schedule dropdown item is clicked', async () => {
       const onClearAll = vi.fn();
       const user = userEvent.setup();
       render(<FlowToolbar {...defaultProps} onClearAll={onClearAll} hasNodes={true} />);
 
-      await user.click(screen.getByTestId('clear-all-button'));
+      // Open dropdown
+      await user.click(screen.getByText('Actions'));
+      
+      // Click Clear Schedule
+      await user.click(screen.getByText('Clear Schedule'));
       expect(onClearAll).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('Delete Gameday functionality', () => {
-    it('requires double click to confirm deletion', async () => {
+    it('requires double click to confirm deletion in dropdown', async () => {
       const onDeleteGameday = vi.fn();
       const user = userEvent.setup();
       render(<FlowToolbar {...defaultProps} onDeleteGameday={onDeleteGameday} />);
 
-      const deleteBtn = screen.getByTestId('delete-gameday-button');
+      // Open dropdown
+      await user.click(screen.getByText('Actions'));
       
-      // First click
-      await user.click(deleteBtn);
+      // First click shows "confirm dele"
+      const deleteItem = screen.getByText('Delete Gameday');
+      await user.click(deleteItem);
       expect(onDeleteGameday).not.toHaveBeenCalled();
       expect(screen.getByText('confirm dele')).toBeInTheDocument();
 
-      // Second click
-      await user.click(deleteBtn);
+      // Second click calls onDeleteGameday
+      await user.click(screen.getByText('confirm dele'));
       expect(onDeleteGameday).toHaveBeenCalledTimes(1);
     });
   });
@@ -163,12 +156,6 @@ describe('FlowToolbar', () => {
       render(<FlowToolbar {...defaultProps} />);
       const exportButton = screen.getByTestId('export-button');
       expect(exportButton).toHaveAttribute('title', 'Export the current tournament schedule to a JSON file');
-    });
-
-    it('has tooltip for Clear Schedule button', () => {
-      render(<FlowToolbar {...defaultProps} />);
-      const clearButton = screen.getByTestId('clear-all-button');
-      expect(clearButton).toHaveAttribute('title', 'Clear Schedule');
     });
 
     it('has tooltip for Undo button when rendered', () => {

@@ -11,7 +11,7 @@
  */
 
 import React, { useRef } from 'react';
-import { Button, ButtonGroup, ButtonToolbar } from 'react-bootstrap';
+import { Button, ButtonGroup, ButtonToolbar, Dropdown, DropdownButton } from 'react-bootstrap';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import LanguageSelector from './LanguageSelector';
 import { ICONS } from '../utils/iconConstants';
@@ -77,8 +77,6 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
   const { t } = useTypedTranslation(['ui']);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showConfirmDelete, setShowConfirmDelete] = React.useState(false);
-  const [showConfirmPublish, setShowConfirmPublish] = React.useState(false);
-  const [showConfirmUnlock, setShowConfirmUnlock] = React.useState(false);
 
   /**
    * Handle file input change for import.
@@ -119,7 +117,9 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
    * Handle clear all.
    */
   const handleClearAll = () => {
-    onClearAll();
+    if (window.confirm('Are you sure you want to clear the entire schedule?')) {
+      onClearAll();
+    }
   };
 
   const handleDeleteGameday = () => {
@@ -128,26 +128,6 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
     } else {
       setShowConfirmDelete(true);
       setTimeout(() => setShowConfirmDelete(false), 3000);
-    }
-  };
-
-  const handlePublishClick = () => {
-    if (showConfirmPublish) {
-      onPublish?.();
-      setShowConfirmPublish(false);
-    } else {
-      setShowConfirmPublish(true);
-      setTimeout(() => setShowConfirmPublish(false), 3000);
-    }
-  };
-
-  const handleUnlockClick = () => {
-    if (showConfirmUnlock) {
-      onUnlock?.();
-      setShowConfirmUnlock(false);
-    } else {
-      setShowConfirmUnlock(true);
-      setTimeout(() => setShowConfirmUnlock(false), 3000);
     }
   };
 
@@ -174,39 +154,6 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
           >
             <i className={`bi ${ICONS.EXPORT}`}></i>
           </Button>
-        </ButtonGroup>
-
-        {/* Lifecycle buttons (Publish/Unlock) */}
-        <ButtonGroup className="me-2">
-          {gamedayStatus === 'DRAFT' ? (
-            <Button
-              variant="outline-success"
-              onClick={handlePublishClick}
-              onMouseLeave={() => setShowConfirmPublish(false)}
-              title={showConfirmPublish ? t('ui:tooltip.confirmPublish') : t('ui:tooltip.publishSchedule')}
-              data-testid="publish-button"
-              className="btn-adaptive"
-            >
-              <i className={`bi ${showConfirmPublish ? 'bi-check-lg' : 'bi-send-fill'} me-2`}></i>
-              <span className="btn-label-adaptive">
-                {showConfirmPublish ? t('ui:button.confirmPublish', 'Confirm') : t('ui:button.publishSchedule', 'Publish Schedule')}
-              </span>
-            </Button>
-          ) : (
-            <Button
-              variant="outline-warning"
-              onClick={handleUnlockClick}
-              onMouseLeave={() => setShowConfirmUnlock(false)}
-              title={showConfirmUnlock ? t('ui:tooltip.confirmUnlock') : t('ui:tooltip.unlockSchedule')}
-              data-testid="unlock-button"
-              className="btn-adaptive"
-            >
-              <i className={`bi ${showConfirmUnlock ? 'bi-unlock-fill' : 'bi-lock-fill'} me-2`}></i>
-              <span className="btn-label-adaptive">
-                {showConfirmUnlock ? t('ui:button.confirmUnlock', 'Confirm') : t('ui:button.unlockSchedule', 'Unlock Schedule')}
-              </span>
-            </Button>
-          )}
         </ButtonGroup>
 
         {/* Undo/Redo buttons */}
@@ -237,37 +184,51 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
           </ButtonGroup>
         )}
 
-        {/* Actions button group */}
+        {/* Lifecycle & Actions Dropdown */}
         <ButtonGroup className="me-2">
-          {/* Clear schedule button */}
-          <Button
-            variant="outline-warning"
-            onClick={handleClearAll}
-            disabled={!hasNodes || gamedayStatus !== 'DRAFT'}
-            title={t('ui:button.clearSchedule', 'Clear Schedule')}
-            data-testid="clear-all-button"
+          <DropdownButton
+            variant="outline-primary"
+            title={<span><i className="bi bi-gear-fill me-2"></i>{t('ui:button.actions', 'Actions')}</span>}
+            id="designer-actions-dropdown"
+            className="btn-adaptive"
           >
-            <i className={`bi ${ICONS.CLEAR}`}></i>
-          </Button>
-
-          {/* Delete gameday button */}
-          <Button
-            variant="outline-danger"
-            onClick={handleDeleteGameday}
-            onMouseLeave={() => setShowConfirmDelete(false)}
-            title={showConfirmDelete ? "Click again to confirm deletion" : t('ui:button.deleteGameday', 'Delete Gameday')}
-            data-testid="delete-gameday-button"
-            className="transition-all d-flex align-items-center btn-destructive-hover btn-adaptive"
-            style={{ width: showConfirmDelete ? '150px' : 'auto' }}
-          >
-            <i className={`bi ${ICONS.TRASH} ${showConfirmDelete ? 'me-2' : ''}`}></i>
-            <span 
-              className="btn-label-adaptive" 
-              style={showConfirmDelete ? { maxWidth: '200px', opacity: 1, marginLeft: '0.25rem', fontWeight: 'bold' } : {}}
+            {gamedayStatus === 'DRAFT' ? (
+              <Dropdown.Item 
+                onClick={onPublish}
+                className="text-success"
+              >
+                <i className="bi bi-send-fill me-2"></i>
+                {t('ui:button.publishSchedule', 'Publish Schedule')}
+              </Dropdown.Item>
+            ) : (
+              <Dropdown.Item 
+                onClick={onUnlock}
+                className="text-warning"
+              >
+                <i className="bi bi-unlock-fill me-2"></i>
+                {t('ui:button.unlockSchedule', 'Unlock Schedule')}
+              </Dropdown.Item>
+            )}
+            
+            <Dropdown.Divider />
+            
+            <Dropdown.Item 
+              onClick={handleClearAll}
+              disabled={!hasNodes || gamedayStatus !== 'DRAFT'}
+              className="text-warning"
             >
+              <i className={`bi ${ICONS.CLEAR} me-2`}></i>
+              {t('ui:button.clearSchedule', 'Clear Schedule')}
+            </Dropdown.Item>
+            
+            <Dropdown.Item 
+              onClick={handleDeleteGameday}
+              className="text-danger"
+            >
+              <i className={`bi ${ICONS.TRASH} me-2`}></i>
               {showConfirmDelete ? 'confirm dele' : t('ui:button.deleteGameday', 'Delete Gameday')}
-            </span>
-          </Button>
+            </Dropdown.Item>
+          </DropdownButton>
         </ButtonGroup>
 
         {/* Language selector */}
