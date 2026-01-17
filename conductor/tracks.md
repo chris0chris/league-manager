@@ -20,3 +20,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Gameday Management & Dashboard**
 *Link: [./tracks/gameday-management_20260116/](./tracks/gameday-management_20260116/)*
+
+---
+
+- [~] **Track: Game State Tracking & Result Management**
+*Link: [./tracks/game-state-tracking_20260117/](./tracks/game-state-tracking_20260117/)*

@@ -276,10 +276,44 @@ const ListDesignerApp: React.FC = () => {
         defaultActiveKey={!hasNodes ? '0' : undefined}
       />
 
-      {/* Status Bar - Validation summary */}
+      {/* Main content */}
+      <div className="list-designer-app__content">
+        <ListCanvas
+          nodes={nodes}
+          edges={edges}
+          globalTeams={globalTeams}
+          globalTeamGroups={globalTeamGroups}
+          onUpdateNode={handleUpdateNode}
+          onDeleteNode={handleDeleteNode}
+          onAddField={handleAddFieldContainer}
+          onAddStage={handleAddStage}
+          onSelectNode={handleSelectNode}
+          selectedNodeId={selectedNode?.id ?? null}
+          onAddGlobalTeam={handleAddGlobalTeam}
+          onUpdateGlobalTeam={handleUpdateGlobalTeam}
+          onDeleteGlobalTeam={handleDeleteGlobalTeam}
+          onReorderGlobalTeam={handleReorderGlobalTeam}
+          onAddGlobalTeamGroup={handleAddGlobalTeamGroup}
+          onUpdateGlobalTeamGroup={updateGlobalTeamGroup}
+          onDeleteGlobalTeamGroup={deleteGlobalTeamGroup}
+          onReorderGlobalTeamGroup={reorderGlobalTeamGroup}
+          getTeamUsage={getTeamUsage}
+          onAssignTeam={handleAssignTeam}
+          onAddGame={addGameNodeInStage}
+          highlightedElement={highlightedElement}
+          onDynamicReferenceClick={handleDynamicReferenceClick}
+          onAddGameToGameEdge={addGameToGameEdge}
+          onAddStageToGameEdge={addStageToGameEdge}
+          onRemoveEdgeFromSlot={removeEdgeFromSlot}
+          expandedFieldIds={expandedFieldIds}
+          expandedStageIds={expandedStageIds}
+        />
+      </div>
+
+      {/* Status Bar - Validation summary (Footer) */}
       <Row className="list-designer-app__status-bar">
         <Col>
-          <div className="d-flex align-items-center gap-3 py-2 px-3 bg-light border-top border-bottom">
+          <div className="d-flex align-items-center gap-3 py-2 px-3 bg-light border-top shadow-sm">
             {validation.isValid && validation.warnings.length === 0 ? (
               <span className="text-success">
                 <i className="bi bi-check-circle-fill me-2"></i>
@@ -291,7 +325,7 @@ const ListDesignerApp: React.FC = () => {
                   <OverlayTrigger
                     trigger="click"
                     rootClose
-                    placement="bottom"
+                    placement="top"
                     overlay={
                       <Popover id="errors-popover">
                         <Popover.Header as="h3">
@@ -328,7 +362,7 @@ const ListDesignerApp: React.FC = () => {
                   <OverlayTrigger
                     trigger="click"
                     rootClose
-                    placement="bottom"
+                    placement="top"
                     overlay={
                       <Popover id="warnings-popover">
                         <Popover.Header as="h3">
@@ -372,40 +406,6 @@ const ListDesignerApp: React.FC = () => {
           </div>
         </Col>
       </Row>
-
-      {/* Main content */}
-      <div className="list-designer-app__content">
-        <ListCanvas
-          nodes={nodes}
-          edges={edges}
-          globalTeams={globalTeams}
-          globalTeamGroups={globalTeamGroups}
-          onUpdateNode={handleUpdateNode}
-          onDeleteNode={handleDeleteNode}
-          onAddField={handleAddFieldContainer}
-          onAddStage={handleAddStage}
-          onSelectNode={handleSelectNode}
-          selectedNodeId={selectedNode?.id ?? null}
-          onAddGlobalTeam={handleAddGlobalTeam}
-          onUpdateGlobalTeam={handleUpdateGlobalTeam}
-          onDeleteGlobalTeam={handleDeleteGlobalTeam}
-          onReorderGlobalTeam={handleReorderGlobalTeam}
-          onAddGlobalTeamGroup={handleAddGlobalTeamGroup}
-          onUpdateGlobalTeamGroup={updateGlobalTeamGroup}
-          onDeleteGlobalTeamGroup={deleteGlobalTeamGroup}
-          onReorderGlobalTeamGroup={reorderGlobalTeamGroup}
-          getTeamUsage={getTeamUsage}
-          onAssignTeam={handleAssignTeam}
-          onAddGame={addGameNodeInStage}
-          highlightedElement={highlightedElement}
-          onDynamicReferenceClick={handleDynamicReferenceClick}
-          onAddGameToGameEdge={addGameToGameEdge}
-          onAddStageToGameEdge={addStageToGameEdge}
-          onRemoveEdgeFromSlot={removeEdgeFromSlot}
-          expandedFieldIds={expandedFieldIds}
-          expandedStageIds={expandedStageIds}
-        />
-      </div>
 
       {/* Tournament Generator Modal */}
       <TournamentGeneratorModal
