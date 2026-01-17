@@ -4,7 +4,13 @@
  * These types match the Django backend API models and responses.
  */
 
-import type { Field } from './designer';
+import type { 
+  FlowNode, 
+  FlowEdge, 
+  FlowField, 
+  GlobalTeam, 
+  GlobalTeamGroup 
+} from './flowchart';
 
 /**
  * Template slot representing a single game in the schedule template.
@@ -151,12 +157,24 @@ export interface GamedayListEntry extends GamedayMetadata {
   status: 'draft' | 'scheduled' | 'completed';
 }
 
+import type { 
+  FlowNode, 
+  FlowEdge, 
+  FlowField, 
+  GlobalTeam, 
+  GlobalTeamGroup 
+} from './flowchart';
+
 /**
  * Full Gameday structure including tournament designer data.
  */
 export interface Gameday extends GamedayMetadata {
   designer_data?: {
-    fields: Field[]; // Matches DesignerState.fields
+    nodes?: FlowNode[];
+    edges?: FlowEdge[];
+    fields?: FlowField[];
+    globalTeams?: GlobalTeam[];
+    globalTeamGroups?: GlobalTeamGroup[];
   };
 }
 

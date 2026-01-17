@@ -30,7 +30,10 @@ Targeted modifications can be verified using isolated test runs (e.g., only the 
 ### 2. Branching & Pull Requests
 - **NO Commits to Master**: Direct commits to the `master` branch are strictly forbidden.
 - **Feature Branches**: All work must be performed on a dedicated branch created for the specific task or feature.
-- **Mandatory Local QA**: Before pushing anything to remote, all QA checks must pass locally (Tests, Lint, and Security).
+- **Mandatory Local QA**: Before pushing anything to remote, all QA checks MUST pass locally.
+  - **LINT IS REQUIRED**: You must run the project's linting commands and fix all errors before pushing.
+  - **Tests**: The full test suite (Backend & Frontend) must pass.
+  - **Security**: Basic security checks must be performed.
 - **Pull Requests**: Every change must receive a Pull Request (PR). PRs must always be created in **origin** (`dachrisch/leaguesphere`). 
 - **Non-Interactive PRs**: To avoid interactive prompts, always use:
   `gh pr create --repo dachrisch/leaguesphere --base master --title "..." --body "..."`

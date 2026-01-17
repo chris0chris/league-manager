@@ -20,7 +20,11 @@ import { useDesignerController } from '../hooks/useDesignerController';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { ICONS } from '../utils/iconConstants';
 import { gamedayApi } from '../api/gamedayApi';
-import type { ValidationError, ValidationWarning } from '../types/designer';
+import type { 
+  FlowValidationError as ValidationError, 
+  FlowValidationWarning as ValidationWarning,
+  HighlightedElement
+} from '../types/flowchart';
 
 import './ListDesignerApp.css';
 
@@ -127,7 +131,7 @@ const ListDesignerApp: React.FC = () => {
               globalTeams,
               globalTeamGroups
             }
-          } as any);
+          });
           lastSavedStateRef.current = currentStateStr;
         } catch (error) {
           console.error('Auto-save failed', error);
@@ -150,26 +154,26 @@ const ListDesignerApp: React.FC = () => {
     setLoading(true);
     try {
       const gameday = await gamedayApi.getGameday(gamedayId);
-      if (gameday.designer_data && (gameday.designer_data as any).nodes) {
+      if (gameday.designer_data?.nodes) {
         // Load full state if available
         importState({
           metadata: gameday,
-          nodes: (gameday.designer_data as any).nodes || [],
-          edges: (gameday.designer_data as any).edges || [],
-          fields: (gameday.designer_data as any).fields || [],
-          globalTeams: (gameday.designer_data as any).globalTeams || [],
-          globalTeamGroups: (gameday.designer_data as any).globalTeamGroups || []
+          nodes: gameday.designer_data.nodes || [],
+          edges: gameday.designer_data.edges || [],
+          fields: gameday.designer_data.fields || [],
+          globalTeams: gameday.designer_data.globalTeams || [],
+          globalTeamGroups: gameday.designer_data.globalTeamGroups || []
         });
-      } else if (gameday.designer_data && (gameday.designer_data as any).fields) {
+      } else if (gameday.designer_data?.fields) {
         // Legacy load (only fields)
         importState({
           metadata: gameday,
           nodes: [], 
           edges: [],
-          fields: (gameday.designer_data as any).fields.map((f: any) => ({ id: f.id, name: f.name, order: f.order })),
+          fields: gameday.designer_data.fields.map((f) => ({ id: f.id, name: f.name, order: f.order })),
           globalTeams: [],
           globalTeamGroups: []
-        } as any);
+        });
       } else {
         // Just set metadata for new gameday
         updateMetadata(gameday);
@@ -188,8 +192,7 @@ const ListDesignerApp: React.FC = () => {
    */
   const getMessage = (item: ValidationError | ValidationWarning) => {
     if (item.messageKey) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return t(`validation:${item.messageKey}` as unknown as any, item.messageParams);
+      return t(`validation:${item.messageKey}` as const, item.messageParams);
     }
     return item.message;
   };
@@ -302,8 +305,7 @@ const ListDesignerApp: React.FC = () => {
                                 variant="danger" 
                                 action
                                 onClick={() => {
-                                  // @ts-expect-error error type mapping
-                                  const nodeId = error.affectedNodes?.[0] || error.affectedSlots?.[0];
+                                  const nodeId = error.affectedNodes?.[0];
                                   if (nodeId) handleHighlightElement(nodeId, getHighlightType(error.type));
                                 }}
                                 className="small"
@@ -340,8 +342,7 @@ const ListDesignerApp: React.FC = () => {
                                 variant="warning" 
                                 action
                                 onClick={() => {
-                                  // @ts-expect-error error type mapping
-                                  const nodeId = warning.affectedNodes?.[0] || warning.affectedSlots?.[0];
+                                  const nodeId = warning.affectedNodes?.[0];
                                   if (nodeId) handleHighlightElement(nodeId, getHighlightType(warning.type));
                                 }}
                                 className="small"
