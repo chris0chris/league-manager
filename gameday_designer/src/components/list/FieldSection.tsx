@@ -42,6 +42,7 @@ export interface FieldSectionProps {
   expandedStageIds: Set<string>;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
+  onNotify?: (message: string, type: import('../../types/designer').NotificationType, title?: string) => void;
   readOnly?: boolean;
 }
 
@@ -271,6 +272,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
                   isExpanded={expandedStageIds.has(stage.id)}
                   highlightedSourceGameId={highlightedSourceGameId}
                   onDynamicReferenceClick={onDynamicReferenceClick}
+                  onNotify={onNotify}
                   readOnly={readOnly}
                 />
               ))}

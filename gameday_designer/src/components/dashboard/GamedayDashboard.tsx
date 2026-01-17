@@ -5,9 +5,9 @@
  * Displays a list of gamedays and allows creating new ones.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Container, Row, Col, Button, Spinner, Form, InputGroup } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import { gamedayApi } from '../../api/gamedayApi';
 import type { GamedayListEntry } from '../../types';
@@ -16,11 +16,13 @@ import GamedayCard from './GamedayCard';
 const GamedayDashboard: React.FC = () => {
   const { t } = useTypedTranslation(['ui']);
   const navigate = useNavigate();
+  const location = useLocation();
   const [gamedays, setGamedays] = useState<GamedayListEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
   const [undoTimers, setUndoTimers] = useState<Record<number, NodeJS.Timeout>>({});
+  const hasTriggeredInitialDelete = useRef(false);
 
   useEffect(() => {
     loadGamedays();
@@ -30,6 +32,19 @@ const GamedayDashboard: React.FC = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
+
+  // Handle pending delete from navigation state
+  useEffect(() => {
+    if (!loading && gamedays.length > 0 && !hasTriggeredInitialDelete.current) {
+      const state = location.state as { pendingDeleteId?: number } | null;
+      if (state?.pendingDeleteId) {
+        handleDelete(state.pendingDeleteId);
+        // Clear location state so it doesn't trigger again on refresh
+        navigate(location.pathname, { replace: true, state: {} });
+        hasTriggeredInitialDelete.current = true;
+      }
+    }
+  }, [loading, gamedays, location.state, navigate, location.pathname]);
 
   const loadGamedays = async () => {
     setLoading(true);

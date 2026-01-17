@@ -193,6 +193,8 @@ export interface Notification {
   show: boolean;
   /** Optional title for the notification */
   title?: string;
+  /** Optional callback to undo the action */
+  undoAction?: () => void;
 }
 
 /**

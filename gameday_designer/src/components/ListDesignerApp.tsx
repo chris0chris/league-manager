@@ -245,14 +245,9 @@ const ListDesignerApp: React.FC = () => {
 
   const handleDeleteGameday = async () => {
     if (metadata?.id) {
-      try {
-        await gamedayApi.deleteGameday(metadata.id);
-        addNotification('Gameday deleted successfully', 'success', 'Delete');
-        navigate('/');
-      } catch (error) {
-        console.error('Failed to delete gameday', error);
-        addNotification('Failed to delete gameday', 'danger', 'Delete Error');
-      }
+      // Redirect to dashboard with pending delete state
+      // The dashboard will handle the 10s undo logic
+      navigate('/', { state: { pendingDeleteId: metadata.id } });
     }
   };
 
@@ -347,6 +342,7 @@ const ListDesignerApp: React.FC = () => {
           onRemoveEdgeFromSlot={removeEdgeFromSlot}
           expandedFieldIds={expandedFieldIds}
           expandedStageIds={expandedStageIds}
+          onNotify={addNotification}
           readOnly={isLocked}
         />
       </div>

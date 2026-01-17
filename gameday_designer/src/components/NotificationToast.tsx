@@ -35,7 +35,22 @@ const NotificationToast: React.FC<NotificationToastProps> = ({ notifications, on
             </strong>
           </Toast.Header>
           <Toast.Body className={notification.type !== 'info' && notification.type !== 'warning' ? 'text-white' : ''}>
-            {notification.message}
+            <div className="d-flex justify-content-between align-items-center">
+              <span>{notification.message}</span>
+              {notification.undoAction && (
+                <button 
+                  className={`btn btn-sm ms-2 ${notification.type === 'success' || notification.type === 'danger' ? 'btn-light' : 'btn-outline-dark'}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    notification.undoAction?.();
+                    onClose(notification.id);
+                  }}
+                >
+                  <i className="bi bi-arrow-counterclockwise me-1"></i>
+                  Undo
+                </button>
+              )}
+            </div>
           </Toast.Body>
         </Toast>
       ))}

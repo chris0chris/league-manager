@@ -66,11 +66,11 @@ export function useDesignerController() {
 
   // --- UI Actions ---
 
-  const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string) => {
+  const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string, undoAction?: () => void) => {
     const id = uuidv4();
     setNotifications((prev) => [
       ...prev,
-      { id, message, type, title, show: true }
+      { id, message, type, title, show: true, undoAction }
     ]);
   }, []);
 
@@ -132,10 +132,11 @@ export function useDesignerController() {
     const state = exportState();
     const errors = validateForExport(state);
     if (errors.length > 0) {
-      const proceed = window.confirm(
-        `The following issues were found:\n\n${errors.join('\n')}\n\nExport anyway?`
+      addNotification(
+        `Export may be incomplete: ${errors.length} validation issues found. Check the validation panel for details.`,
+        'warning',
+        'Export'
       );
-      if (!proceed) return;
     }
     downloadFlowchartAsJson(state);
     addNotification('Schedule exported successfully', 'success', 'Export Success');

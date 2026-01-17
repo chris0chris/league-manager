@@ -45,6 +45,7 @@ export interface ListCanvasProps {
   highlightedElement?: HighlightedElement | null;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
+  onNotify?: (message: string, type: import('../types/designer').NotificationType, title?: string) => void;
   readOnly?: boolean;
 }
 
@@ -235,6 +236,7 @@ const ListCanvas: React.FC<ListCanvasProps> = memo(({
                       highlightedElement={highlightedElement}
                       highlightedSourceGameId={highlightedSourceGameId}
                       onDynamicReferenceClick={onDynamicReferenceClick}
+                      onNotify={onNotify}
                       readOnly={readOnly}
                     />
                   ))}

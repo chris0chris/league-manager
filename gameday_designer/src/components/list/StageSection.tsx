@@ -40,6 +40,7 @@ export interface StageSectionProps {
   isExpanded: boolean;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
+  onNotify?: (message: string, type: import('../../types/designer').NotificationType, title?: string) => void;
   readOnly?: boolean;
 }
 
@@ -355,6 +356,7 @@ const StageSection: React.FC<StageSectionProps> = memo(({
                   onRemoveEdgeFromSlot={onRemoveEdgeFromSlot}
                   highlightedSourceGameId={highlightedSourceGameId}
                   onDynamicReferenceClick={onDynamicReferenceClick}
+                  onNotify={onNotify}
                   readOnly={readOnly}
                 />
               </>

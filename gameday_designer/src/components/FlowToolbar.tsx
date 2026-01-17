@@ -92,11 +92,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
         onImport(json);
       } catch (error) {
         console.error('Failed to parse JSON file:', error);
-        if (onNotify) {
-          onNotify(t('error:invalidScheduleFormat', { errors: 'Invalid JSON' }), 'danger', 'Import Error');
-        } else {
-          alert('Failed to parse JSON file. Please ensure it is valid JSON.');
-        }
+        onNotify?.(t('error:invalidScheduleFormat', { errors: 'Invalid JSON' }), 'danger', 'Import Error');
       }
     };
     reader.readAsText(file);
@@ -113,15 +109,11 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
   };
 
   const handleClearAll = () => {
-    if (window.confirm('Are you sure you want to clear the entire schedule?')) {
-      onClearAll();
-    }
+    onClearAll();
   };
 
   const handleDeleteGameday = () => {
-    if (window.confirm('WARNING: Are you sure you want to PERMANENTLY delete this gameday? This action cannot be undone.')) {
-      onDeleteGameday?.();
-    }
+    onDeleteGameday?.();
   };
 
   return (

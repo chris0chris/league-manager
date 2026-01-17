@@ -193,6 +193,7 @@ export interface GameTableProps {
   onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
+  onNotify?: (message: string, type: import('../../types/designer').NotificationType, title?: string) => void;
   readOnly?: boolean;
 }
 
@@ -262,7 +263,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
           if (isValidTimeFormat(editedValue.trim())) {
             onUpdate(gameId, { startTime: editedValue.trim(), manualTime: true });
           } else {
-            alert('Invalid time format. Use HH:MM (24-hour)');
+            onNotify?.('Invalid time format. Use HH:MM (24-hour)', 'danger', 'Time Format');
             return;
           }
         } else {
