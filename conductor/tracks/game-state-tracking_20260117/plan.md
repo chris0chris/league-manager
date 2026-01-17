@@ -27,7 +27,8 @@ This phase implements the business logic for state transitions, result updates, 
     - [x] Create service method to resolve "Winner of Game X" based on current results.
     - [x] Update `Gameday` serializer to include resolved team names for downstream games.
 - [x] Task: TDD - Write tests for API endpoints and resolution logic. 16ba265
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Backend API Logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Backend API Logic' (Protocol in workflow.md) [checkpoint: dfc6cc6]
+
 
 ## Phase 3: Frontend - Gameday Lifecycle UI
 This phase adds the controls to the Gameday Designer to manage the overall gameday state.
