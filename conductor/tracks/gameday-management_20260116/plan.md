@@ -45,6 +45,7 @@ Add gameday-level property management to the existing Editor.
 - [x] **Task: Integrate Metadata with Flow State (TDD)**
     - [x] Ensure metadata is part of the global state and correctly persisted via the service layer.
     - [x] Open the accordion automatically for newly created gamedays.
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Editor Metadata Integration' (Protocol in workflow.md) [checkpoint: 87c785c]
 
 
 ## Phase 5: Final Polish & Verification
