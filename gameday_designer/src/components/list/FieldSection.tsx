@@ -42,6 +42,7 @@ export interface FieldSectionProps {
   expandedStageIds: Set<string>;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
+  readOnly?: boolean;
 }
 
 const FieldSection: React.FC<FieldSectionProps> = memo(({
@@ -66,6 +67,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
   expandedStageIds,
   highlightedSourceGameId,
   onDynamicReferenceClick,
+  readOnly = false,
 }) => {
   const { t } = useTypedTranslation(['ui']);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -170,32 +172,37 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
         ) : (
           <>
             <strong className="me-2">{field.data.name}</strong>
-            <Button
-              size="sm"
-              variant="link"
-              onClick={handleStartEdit}
-              aria-label={t('ui:tooltip.editFieldName')}
-              className="p-0 me-auto btn-adaptive"
-              style={{ fontSize: '0.875rem' }}
-              title={t('ui:tooltip.editFieldName')}
-            >
-              <i className={`bi ${ICONS.PENCIL_SMALL}`}></i>
-              <span className="btn-label-adaptive">{t('ui:button.edit')}</span>
-            </Button>
+            {!readOnly && (
+              <Button
+                size="sm"
+                variant="link"
+                onClick={handleStartEdit}
+                aria-label={t('ui:tooltip.editFieldName')}
+                className="p-0 me-auto btn-adaptive"
+                style={{ fontSize: '0.875rem' }}
+                title={t('ui:tooltip.editFieldName')}
+              >
+                <i className={`bi ${ICONS.PENCIL_SMALL}`}></i>
+                <span className="btn-label-adaptive">{t('ui:button.edit')}</span>
+              </Button>
+            )}
+            {readOnly && <span className="me-auto" />}
           </>
         )}
 
-        <Button
-          size="sm"
-          variant="outline-primary"
-          onClick={handleAddStage}
-          aria-label={t('ui:button.addStage')}
-          className="me-2 btn-adaptive"
-          title={t('ui:tooltip.addStage')}
-        >
-          <i className={`bi ${ICONS.ADD}`}></i>
-          <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
-        </Button>
+        {!readOnly && (
+          <Button
+            size="sm"
+            variant="outline-primary"
+            onClick={handleAddStage}
+            aria-label={t('ui:button.addStage')}
+            className="me-2 btn-adaptive"
+            title={t('ui:tooltip.addStage')}
+          >
+            <i className={`bi ${ICONS.ADD}`}></i>
+            <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
+          </Button>
+        )}
 
         <input
           type="color"
@@ -205,18 +212,21 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
           title={t('ui:tooltip.fieldColor')}
           className="me-2"
           style={{ width: '28px', height: '28px', border: 'none', borderRadius: '50%', cursor: 'pointer' }}
+          disabled={readOnly}
         />
 
-        <Button 
-          variant="outline-danger" 
-          size="sm" 
-          onClick={handleDelete} 
-          aria-label={t('ui:tooltip.deleteField')}
-          className="btn-adaptive"
-          title={t('ui:tooltip.deleteField')}
-        >
-          <i className={`bi ${ICONS.DELETE}`}></i>
-        </Button>
+        {!readOnly && (
+          <Button 
+            variant="outline-danger" 
+            size="sm" 
+            onClick={handleDelete} 
+            aria-label={t('ui:tooltip.deleteField')}
+            className="btn-adaptive"
+            title={t('ui:tooltip.deleteField')}
+          >
+            <i className={`bi ${ICONS.DELETE}`}></i>
+          </Button>
+        )}
       </Card.Header>
 
       {isExpanded && (
@@ -225,16 +235,18 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
             <div className="text-center py-4">
               <i className={`bi ${ICONS.STAGE} me-2`} style={{ fontSize: '2rem', opacity: 0.3 }}></i>
               <p className="text-muted mb-3">{t('ui:message.noStagesYet')}</p>
-              <Button 
-                variant="outline-primary" 
-                onClick={handleAddStage} 
-                aria-label={t('ui:button.addStage')} 
-                className="btn-adaptive"
-                title={t('ui:tooltip.addStage')}
-              >
-                <i className={`bi ${ICONS.ADD}`}></i>
-                <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
-              </Button>
+              {!readOnly && (
+                <Button 
+                  variant="outline-primary" 
+                  onClick={handleAddStage} 
+                  aria-label={t('ui:button.addStage')} 
+                  className="btn-adaptive"
+                  title={t('ui:tooltip.addStage')}
+                >
+                  <i className={`bi ${ICONS.ADD}`}></i>
+                  <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
+                </Button>
+              )}
             </div>
           ) : (
             <>
@@ -259,6 +271,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
                   isExpanded={expandedStageIds.has(stage.id)}
                   highlightedSourceGameId={highlightedSourceGameId}
                   onDynamicReferenceClick={onDynamicReferenceClick}
+                  readOnly={readOnly}
                 />
               ))}
             </>

@@ -400,6 +400,7 @@ export interface GamedayMetadata {
   season_display?: string;
   league: number;
   league_display?: string;
+  status: string;
 }
 
 // ============================================================================
@@ -855,6 +856,7 @@ export function createEmptyFlowState(): FlowState {
       address: '',
       season: 0,
       league: 0,
+      status: 'DRAFT',
     },
     nodes: [],
     edges: [],

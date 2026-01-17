@@ -193,6 +193,7 @@ export interface GameTableProps {
   onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
+  readOnly?: boolean;
 }
 
 const GameTable: React.FC<GameTableProps> = memo(({
@@ -212,6 +213,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
   onRemoveEdgeFromSlot,
   highlightedSourceGameId,
   onDynamicReferenceClick,
+  readOnly = false,
 }) => {
   const [editingGameId, setEditingGameId] = useState<string | null>(null);
   const [editingField, setEditingField] = useState<'standing' | 'breakAfter' | 'time' | null>(null);
@@ -398,9 +400,9 @@ const GameTable: React.FC<GameTableProps> = memo(({
         ) : (
           <div className="d-flex align-items-center gap-1">
             <span 
-              onClick={(e) => handleStartEdit(e, game, 'time')} 
-              style={{ cursor: 'text' }}
-              title={isManual ? 'Manually set - click to edit' : 'Auto-calculated - click to override'}
+              onClick={(e) => !readOnly && handleStartEdit(e, game, 'time')} 
+              style={{ cursor: readOnly ? 'default' : 'text' }}
+              title={readOnly ? undefined : (isManual ? 'Manually set - click to edit' : 'Auto-calculated - click to override')}
             >
               {timeValue || '--:--'}
             </span>
@@ -444,6 +446,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
         <Form.Check
           type="checkbox"
           checked={hasOfficial}
+          disabled={readOnly}
           onChange={(e) => {
             if (!e.target.checked) handleOfficialChange(game.id, '');
             else if (globalTeams.length > 0) handleOfficialChange(game.id, globalTeams[0].id);
@@ -461,6 +464,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
             styles={{ ...customSelectStyles, control: (provided) => ({ ...provided, minHeight: '31px', fontSize: '0.875rem', borderColor: '#dee2e6', minWidth: '150px' }) }}
             isClearable={false}
             isSearchable={false}
+            isDisabled={readOnly}
           />
         )}
       </div>
@@ -535,6 +539,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
           styles={customSelectStyles}
           isClearable={false}
           isSearchable={false}
+          isDisabled={readOnly}
         />
       </div>
     );
@@ -568,9 +573,9 @@ const GameTable: React.FC<GameTableProps> = memo(({
                   <Form.Control type="text" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'standing')} onKeyDown={(e) => handleKeyPress(e, game.id, 'standing')} autoFocus style={{ fontSize: '0.875rem' }} />
                 ) : (
                   <span 
-                    onClick={(e) => handleStartEdit(e, game, 'standing')} 
-                    style={{ cursor: 'text' }}
-                    title="Click to edit"
+                    onClick={(e) => !readOnly && handleStartEdit(e, game, 'standing')} 
+                    style={{ cursor: readOnly ? 'default' : 'text' }}
+                    title={readOnly ? undefined : "Click to edit"}
                   >
                     {game.data.standing}
                   </span>
@@ -585,22 +590,24 @@ const GameTable: React.FC<GameTableProps> = memo(({
                   <Form.Control type="number" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'breakAfter')} onKeyDown={(e) => handleKeyPress(e, game.id, 'breakAfter')} autoFocus min="0" style={{ fontSize: '0.875rem', width: '80px' }} />
                 ) : (
                   <span 
-                    onClick={(e) => handleStartEdit(e, game, 'breakAfter')} 
-                    style={{ cursor: 'text' }}
-                    title="Click to edit"
+                    onClick={(e) => !readOnly && handleStartEdit(e, game, 'breakAfter')} 
+                    style={{ cursor: readOnly ? 'default' : 'text' }}
+                    title={readOnly ? undefined : "Click to edit"}
                   >
                     {game.data.breakAfter || 0}
                   </span>
                 )}
               </td>
               <td>
-                <button 
-                  className="btn btn-sm btn-outline-danger btn-adaptive" 
-                  onClick={(e) => handleDelete(e, game.id)}
-                  title="Delete game"
-                >
-                  <i className={`bi ${ICONS.DELETE}`} />
-                </button>
+                {!readOnly && (
+                  <button 
+                    className="btn btn-sm btn-outline-danger btn-adaptive" 
+                    onClick={(e) => handleDelete(e, game.id)}
+                    title="Delete game"
+                  >
+                    <i className={`bi ${ICONS.DELETE}`} />
+                  </button>
+                )}
               </td>
             </tr>
           );

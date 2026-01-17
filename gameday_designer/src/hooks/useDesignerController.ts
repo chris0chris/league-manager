@@ -24,10 +24,12 @@ import {
 import type { GlobalTeam, HighlightedElement, Notification, NotificationType } from '../types/flowchart';
 import type { TournamentGenerationConfig } from '../types/tournament';
 import { v4 as uuidv4 } from 'uuid';
+import { gamedayApi } from '../api/gamedayApi';
 
 export function useDesignerController() {
   const flowState = useFlowState();
   const {
+    metadata,
     nodes,
     edges,
     fields,
@@ -198,6 +200,44 @@ export function useDesignerController() {
     [globalTeams, globalTeamGroups, addBulkTournament, addGlobalTeam, addGlobalTeamGroup, updateGlobalTeam, assignTeamsToTournament, addNotification]
   );
 
+  const handlePublish = useCallback(async () => {
+    if (metadata.id === 0) return;
+    try {
+      const updated = await gamedayApi.publish(metadata.id);
+      importState({
+        metadata: updated,
+        nodes,
+        edges,
+        fields,
+        globalTeams,
+        globalTeamGroups,
+      });
+      addNotification('Schedule published and locked', 'success', 'Success');
+    } catch (error) {
+      console.error('Failed to publish gameday:', error);
+      addNotification('Failed to publish schedule', 'danger', 'Error');
+    }
+  }, [metadata.id, nodes, edges, fields, globalTeams, globalTeamGroups, importState, addNotification]);
+
+  const handleUnlock = useCallback(async () => {
+    if (metadata.id === 0) return;
+    try {
+      const updated = await gamedayApi.update(metadata.id, { status: 'DRAFT' });
+      importState({
+        metadata: updated,
+        nodes,
+        edges,
+        fields,
+        globalTeams,
+        globalTeamGroups,
+      });
+      addNotification('Schedule unlocked for editing', 'warning', 'Success');
+    } catch (error) {
+      console.error('Failed to unlock gameday:', error);
+      addNotification('Failed to unlock schedule', 'danger', 'Error');
+    }
+  }, [metadata.id, nodes, edges, fields, globalTeams, globalTeamGroups, importState, addNotification]);
+
   const canExport = useMemo(() => {
     return nodes.some((n) => n.type === 'game') && fields.length > 0;
   }, [nodes, fields]);
@@ -224,6 +264,8 @@ export function useDesignerController() {
       handleDynamicReferenceClick,
       handleImport,
       handleExport,
+      handlePublish,
+      handleUnlock,
       handleClearAll: clearAll,
       handleUpdateNode: updateNode,
       handleUpdateGlobalTeam: updateGlobalTeam,

@@ -13,16 +13,19 @@ interface GamedayMetadataAccordionProps {
   metadata: GamedayMetadata;
   onUpdate: (data: Partial<GamedayMetadata>) => void;
   defaultActiveKey?: string;
+  readOnly?: boolean;
 }
 
 const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({ 
   metadata, 
   onUpdate,
-  defaultActiveKey
+  defaultActiveKey,
+  readOnly = false
 }) => {
   const { t } = useTypedTranslation(['ui']);
 
   const handleChange = (field: keyof GamedayMetadata, value: string) => {
+    if (readOnly) return;
     onUpdate({ [field]: value });
   };
 
@@ -75,6 +78,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                         value={metadata.name}
 
                         onChange={(e) => handleChange('name', e.target.value)}
+                        disabled={readOnly}
 
                       />
 
@@ -95,6 +99,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                         value={metadata.date}
 
                         onChange={(e) => handleChange('date', e.target.value)}
+                        disabled={readOnly}
 
                       />
 
@@ -115,6 +120,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                         value={metadata.start}
 
                         onChange={(e) => handleChange('start', e.target.value)}
+                        disabled={readOnly}
 
                       />
 
@@ -139,6 +145,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                         value={metadata.address}
 
                         onChange={(e) => handleChange('address', e.target.value)}
+                        disabled={readOnly}
 
                       />
 

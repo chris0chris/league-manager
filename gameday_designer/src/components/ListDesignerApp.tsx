@@ -93,7 +93,11 @@ const ListDesignerApp: React.FC = () => {
     setShowTournamentModal,
     dismissNotification,
     addNotification,
+    handlePublish,
+    handleUnlock,
   } = handlers;
+
+  const isLocked = metadata?.status !== 'DRAFT';
 
   // Auto-save metadata and designer data
   const lastSavedStateRef = React.useRef<string>('');
@@ -252,6 +256,7 @@ const ListDesignerApp: React.FC = () => {
             variant="outline-primary"
             onClick={() => setShowTournamentModal(true)}
             className="me-2 btn-adaptive"
+            disabled={isLocked}
             title={t('ui:tooltip.generateTournament')}
           >
             <i className={`bi ${ICONS.TOURNAMENT} me-2`}></i>
@@ -262,6 +267,9 @@ const ListDesignerApp: React.FC = () => {
             onExport={handleExport}
             onClearAll={handleClearAll}
             onDeleteGameday={handleDeleteGameday}
+            onPublish={handlePublish}
+            onUnlock={handleUnlock}
+            gamedayStatus={metadata?.status}
             onNotify={addNotification}
             hasNodes={hasNodes}
             canExport={canExport}
@@ -274,6 +282,7 @@ const ListDesignerApp: React.FC = () => {
         metadata={metadata} 
         onUpdate={updateMetadata} 
         defaultActiveKey={!hasNodes ? '0' : undefined}
+        readOnly={isLocked}
       />
 
       {/* Main content */}

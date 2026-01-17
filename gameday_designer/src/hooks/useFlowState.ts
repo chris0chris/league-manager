@@ -74,6 +74,7 @@ function useFlowStateInternal(initialState?: Partial<FlowState>) {
     address: '',
     season: 0,
     league: 0,
+    status: 'DRAFT',
   });
   const [nodes, setNodes] = useState<FlowNode[]>(initialState?.nodes ?? []);
   const [edges, setEdges] = useState<FlowEdge[]>(initialState?.edges ?? []);

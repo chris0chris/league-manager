@@ -30,6 +30,12 @@ export interface FlowToolbarProps {
   onClearAll: () => void;
   /** Callback to delete the entire gameday */
   onDeleteGameday?: () => void;
+  /** Callback to publish the schedule */
+  onPublish?: () => void;
+  /** Callback to unlock the schedule for editing */
+  onUnlock?: () => void;
+  /** Current gameday status */
+  gamedayStatus?: string;
   /** Callback for notifications */
   onNotify?: (message: string, type: import('../types/designer').NotificationType, title?: string) => void;
   /** Callback for undo action */
@@ -57,6 +63,9 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
   onExport,
   onClearAll,
   onDeleteGameday,
+  onPublish,
+  onUnlock,
+  gamedayStatus = 'DRAFT',
   onNotify,
   onUndo,
   onRedo,
@@ -68,6 +77,8 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
   const { t } = useTypedTranslation(['ui']);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showConfirmDelete, setShowConfirmDelete] = React.useState(false);
+  const [showConfirmPublish, setShowConfirmPublish] = React.useState(false);
+  const [showConfirmUnlock, setShowConfirmUnlock] = React.useState(false);
 
   /**
    * Handle file input change for import.
@@ -120,6 +131,26 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
     }
   };
 
+  const handlePublishClick = () => {
+    if (showConfirmPublish) {
+      onPublish?.();
+      setShowConfirmPublish(false);
+    } else {
+      setShowConfirmPublish(true);
+      setTimeout(() => setShowConfirmPublish(false), 3000);
+    }
+  };
+
+  const handleUnlockClick = () => {
+    if (showConfirmUnlock) {
+      onUnlock?.();
+      setShowConfirmUnlock(false);
+    } else {
+      setShowConfirmUnlock(true);
+      setTimeout(() => setShowConfirmUnlock(false), 3000);
+    }
+  };
+
   return (
     <div className="flow-toolbar" data-testid="flow-toolbar">
       <ButtonToolbar>
@@ -130,6 +161,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             onClick={handleImportClick}
             title={t('ui:tooltip.importFromJson')}
             data-testid="import-button"
+            disabled={gamedayStatus !== 'DRAFT'}
           >
             <i className={`bi ${ICONS.IMPORT}`}></i>
           </Button>
@@ -144,13 +176,46 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
           </Button>
         </ButtonGroup>
 
+        {/* Lifecycle buttons (Publish/Unlock) */}
+        <ButtonGroup className="me-2">
+          {gamedayStatus === 'DRAFT' ? (
+            <Button
+              variant="outline-success"
+              onClick={handlePublishClick}
+              onMouseLeave={() => setShowConfirmPublish(false)}
+              title={showConfirmPublish ? t('ui:tooltip.confirmPublish') : t('ui:tooltip.publishSchedule')}
+              data-testid="publish-button"
+              className="btn-adaptive"
+            >
+              <i className={`bi ${showConfirmPublish ? 'bi-check-lg' : 'bi-send-fill'} me-2`}></i>
+              <span className="btn-label-adaptive">
+                {showConfirmPublish ? t('ui:button.confirmPublish', 'Confirm') : t('ui:button.publishSchedule', 'Publish Schedule')}
+              </span>
+            </Button>
+          ) : (
+            <Button
+              variant="outline-warning"
+              onClick={handleUnlockClick}
+              onMouseLeave={() => setShowConfirmUnlock(false)}
+              title={showConfirmUnlock ? t('ui:tooltip.confirmUnlock') : t('ui:tooltip.unlockSchedule')}
+              data-testid="unlock-button"
+              className="btn-adaptive"
+            >
+              <i className={`bi ${showConfirmUnlock ? 'bi-unlock-fill' : 'bi-lock-fill'} me-2`}></i>
+              <span className="btn-label-adaptive">
+                {showConfirmUnlock ? t('ui:button.confirmUnlock', 'Confirm') : t('ui:button.unlockSchedule', 'Unlock Schedule')}
+              </span>
+            </Button>
+          )}
+        </ButtonGroup>
+
         {/* Undo/Redo buttons */}
         {(onUndo || onRedo) && (
           <ButtonGroup className="me-2">
             <Button
               variant="outline-secondary"
               onClick={onUndo}
-              disabled={!canUndo}
+              disabled={!canUndo || gamedayStatus !== 'DRAFT'}
               title={t('ui:tooltip.undo')}
               data-testid="undo-button"
               className="btn-adaptive"
@@ -161,7 +226,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             <Button
               variant="outline-secondary"
               onClick={onRedo}
-              disabled={!canRedo}
+              disabled={!canRedo || gamedayStatus !== 'DRAFT'}
               title={t('ui:tooltip.redo')}
               data-testid="redo-button"
               className="btn-adaptive"
@@ -178,7 +243,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
           <Button
             variant="outline-warning"
             onClick={handleClearAll}
-            disabled={!hasNodes}
+            disabled={!hasNodes || gamedayStatus !== 'DRAFT'}
             title={t('ui:button.clearSchedule', 'Clear Schedule')}
             data-testid="clear-all-button"
           >

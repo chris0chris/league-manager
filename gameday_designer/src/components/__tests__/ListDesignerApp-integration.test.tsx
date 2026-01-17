@@ -41,6 +41,7 @@ vi.mock('../../api/gamedayApi', () => ({
       address: 'Test Field',
       season: 1,
       league: 1,
+      status: 'DRAFT',
     }),
   },
 }));
@@ -121,6 +122,7 @@ describe('ListDesignerApp - Integration Tests', () => {
       address: 'Test Field',
       season: 1,
       league: 1,
+      status: 'DRAFT',
     },
     nodes: [],
     edges: [],
