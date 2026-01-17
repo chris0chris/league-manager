@@ -76,7 +76,6 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
 }) => {
   const { t } = useTypedTranslation(['ui']);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showConfirmDelete, setShowConfirmDelete] = React.useState(false);
 
   /**
    * Handle file input change for import.
@@ -113,9 +112,6 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
     fileInputRef.current?.click();
   };
 
-  /**
-   * Handle clear all.
-   */
   const handleClearAll = () => {
     if (window.confirm('Are you sure you want to clear the entire schedule?')) {
       onClearAll();
@@ -123,11 +119,8 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
   };
 
   const handleDeleteGameday = () => {
-    if (showConfirmDelete) {
+    if (window.confirm('WARNING: Are you sure you want to PERMANENTLY delete this gameday? This action cannot be undone.')) {
       onDeleteGameday?.();
-    } else {
-      setShowConfirmDelete(true);
-      setTimeout(() => setShowConfirmDelete(false), 3000);
     }
   };
 
@@ -194,18 +187,24 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
           >
             {gamedayStatus === 'DRAFT' ? (
               <Dropdown.Item 
-                onClick={onPublish}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPublish?.();
+                }}
                 className="text-success"
               >
-                <i className="bi bi-send-fill me-2"></i>
+                <i className="bi bi-send-fill me-3"></i>
                 {t('ui:button.publishSchedule', 'Publish Schedule')}
               </Dropdown.Item>
             ) : (
               <Dropdown.Item 
-                onClick={onUnlock}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUnlock?.();
+                }}
                 className="text-warning"
               >
-                <i className="bi bi-unlock-fill me-2"></i>
+                <i className="bi bi-unlock-fill me-3"></i>
                 {t('ui:button.unlockSchedule', 'Unlock Schedule')}
               </Dropdown.Item>
             )}
@@ -213,20 +212,26 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             <Dropdown.Divider />
             
             <Dropdown.Item 
-              onClick={handleClearAll}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClearAll();
+              }}
               disabled={!hasNodes || gamedayStatus !== 'DRAFT'}
               className="text-warning"
             >
-              <i className={`bi ${ICONS.CLEAR} me-2`}></i>
+              <i className={`bi ${ICONS.CLEAR} me-3`}></i>
               {t('ui:button.clearSchedule', 'Clear Schedule')}
             </Dropdown.Item>
             
             <Dropdown.Item 
-              onClick={handleDeleteGameday}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteGameday();
+              }}
               className="text-danger"
             >
-              <i className={`bi ${ICONS.TRASH} me-2`}></i>
-              {showConfirmDelete ? 'confirm dele' : t('ui:button.deleteGameday', 'Delete Gameday')}
+              <i className={`bi ${ICONS.TRASH} me-3`}></i>
+              {t('ui:button.deleteGameday', 'Delete Gameday')}
             </Dropdown.Item>
           </DropdownButton>
         </ButtonGroup>

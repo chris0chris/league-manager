@@ -125,7 +125,7 @@ describe('FlowToolbar', () => {
   });
 
   describe('Delete Gameday functionality', () => {
-    it('requires double click to confirm deletion in dropdown', async () => {
+    it('calls onDeleteGameday when Delete Gameday dropdown item is clicked and confirmed', async () => {
       const onDeleteGameday = vi.fn();
       const user = userEvent.setup();
       render(<FlowToolbar {...defaultProps} onDeleteGameday={onDeleteGameday} />);
@@ -133,14 +133,10 @@ describe('FlowToolbar', () => {
       // Open dropdown
       await user.click(screen.getByText('Actions'));
       
-      // First click shows "confirm dele"
+      // Click Delete Gameday
       const deleteItem = screen.getByText('Delete Gameday');
       await user.click(deleteItem);
-      expect(onDeleteGameday).not.toHaveBeenCalled();
-      expect(screen.getByText('confirm dele')).toBeInTheDocument();
-
-      // Second click calls onDeleteGameday
-      await user.click(screen.getByText('confirm dele'));
+      
       expect(onDeleteGameday).toHaveBeenCalledTimes(1);
     });
   });
