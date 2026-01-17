@@ -14,16 +14,16 @@ Extend the existing service layer to support Gameday-level CRUD operations.
 ## Phase 2: Gameday Dashboard UI
 Implement the landing page for managing gamedays.
 
-- [ ] **Task: Implement GamedayCard Component (TDD)**
-    - [ ] Create a presentation component for gameday details (Name, Date, Status, Season).
-    - [ ] Write tests for status-based styling and data rendering.
-- [ ] **Task: Create GamedayDashboard View (TDD)**
-    - [ ] Implement the main container for the list view.
-    - [ ] Integrate `GamedayService` to fetch and display cards.
-    - [ ] Implement the "Create New Gameday" trigger.
-- [ ] **Task: Update Routing Logic**
+- [x] **Task: Implement GamedayCard Component (TDD)**
+    - [x] Create a presentation component for gameday details (Name, Date, Status, Season).
+    - [x] Write tests for status-based styling and data rendering.
+- [x] **Task: Create GamedayDashboard View (TDD)**
+    - [x] Implement the main container for the list view.
+    - [x] Integrate `GamedayService` to fetch and display cards.
+    - [x] Implement the "Create New Gameday" trigger.
+- [~] **Task: Update Routing Logic**
     - [ ] Refactor `App.tsx` or `main.tsx` to handle `/` (Dashboard) and `/designer/:id` (Editor) routes.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Gameday Dashboard UI' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Gameday Dashboard UI' (Protocol in workflow.md) [checkpoint: 480bcb8]
 
 ## Phase 3: Advanced Search & Filtering
 Implement the wildcard and "dork" style search logic.
