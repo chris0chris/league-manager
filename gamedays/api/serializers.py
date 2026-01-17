@@ -5,11 +5,18 @@ from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
 
 
 class GamedaySerializer(ModelSerializer):
+    designer_data = SerializerMethodField()
+
     class Meta:
         model = Gameday
         fields = "__all__"
         read_only_fields = ["author"]
         extra_kwargs = {"start": {"format": "%H:%M"}}
+
+    def get_designer_data(self, obj: Gameday):
+        from gamedays.service.gameday_service import GamedayService
+
+        return GamedayService(obj.pk).get_resolved_designer_data()
 
 
 class GamedayInfoSerializer(Serializer):
@@ -29,7 +36,15 @@ class GameOfficialSerializer(ModelSerializer):
 class GameinfoSerializer(ModelSerializer):
     class Meta:
         model = Gameinfo
-        fields = ["status", "gameStarted", "gameHalftime", "gameFinished"]
+        fields = [
+            "status",
+            "gameStarted",
+            "gameHalftime",
+            "gameFinished",
+            "halftime_score",
+            "final_score",
+            "is_locked",
+        ]
         extra_kwargs = {
             "gameStarted": {"format": "%H:%M"},
             "gameHalftime": {"format": "%H:%M"},
