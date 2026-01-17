@@ -14,6 +14,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ListCanvas from './ListCanvas';
 import FlowToolbar from './FlowToolbar';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
+import GameResultModal from './modals/GameResultModal';
 import NotificationToast from './NotificationToast';
 import GamedayMetadataAccordion from './GamedayMetadataAccordion';
 import { useDesignerController } from '../hooks/useDesignerController';
@@ -98,6 +99,35 @@ const ListDesignerApp: React.FC = () => {
   } = handlers;
 
   const isLocked = metadata?.status !== 'DRAFT';
+  const [showResultModal, setShowResultModal] = useState(false);
+
+  useEffect(() => {
+    if (selectedNode?.type === 'game' && isLocked) {
+      setShowResultModal(true);
+    }
+  }, [selectedNode, isLocked]);
+
+  const handleSaveResult = async (resultData: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }) => {
+    if (!selectedNode || selectedNode.type !== 'game') return;
+    try {
+      const updatedGame = await gamedayApi.updateGameResult(parseInt(selectedNode.id.replace('game-', '')), resultData);
+      // Update local node state
+      handleUpdateNode(selectedNode.id, {
+        halftime_score: updatedGame.halftime_score,
+        final_score: updatedGame.final_score,
+        status: updatedGame.status,
+      });
+      addNotification('Game result saved', 'success', 'Success');
+      // If gameday status changed, we should reload metadata
+      if (metadata && metadata.id) {
+        const updatedGameday = await gamedayApi.getGameday(metadata.id);
+        updateMetadata(updatedGameday);
+      }
+    } catch (error) {
+      console.error('Failed to save game result', error);
+      addNotification('Failed to save game result', 'danger', 'Error');
+    }
+  };
 
   // Auto-save metadata and designer data
   const lastSavedStateRef = React.useRef<string>('');
@@ -428,6 +458,19 @@ const ListDesignerApp: React.FC = () => {
       <NotificationToast 
         notifications={notifications} 
         onClose={dismissNotification} 
+      />
+
+      {/* Game Result Modal */}
+      <GameResultModal
+        show={showResultModal}
+        onHide={() => {
+          setShowResultModal(false);
+          handleSelectNode(null);
+        }}
+        onSave={handleSaveResult}
+        game={selectedNode?.type === 'game' ? selectedNode : null}
+        homeTeamName={selectedNode?.type === 'game' ? (selectedNode.data.homeTeamId ? globalTeams.find(t => t.id === selectedNode.data.homeTeamId)?.label || 'Home' : 'Home') : 'Home'}
+        awayTeamName={selectedNode?.type === 'game' ? (selectedNode.data.awayTeamId ? globalTeams.find(t => t.id === selectedNode.data.awayTeamId)?.label || 'Away' : 'Away') : 'Away'}
       />
     </Container>
   );

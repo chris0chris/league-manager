@@ -146,6 +146,32 @@ class GamedayApi {
     if (this.isDev && !this.forceClient) return mockGamedayService.delete(id);
     await this.client.delete(`/${id}/`);
   }
+
+  /**
+   * Publish a gameday.
+   *
+   * @param id - Gameday ID
+   */
+  async publish(id: number): Promise<Gameday> {
+    if (this.isDev && !this.forceClient) return mockGamedayService.update(id, { status: 'PUBLISHED' });
+    const response = await this.client.post<Gameday>(`/${id}/publish/`);
+    return response.data;
+  }
+
+  /**
+   * Update game result.
+   */
+  async updateGameResult(gameId: number, data: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }): Promise<any> {
+    // In dev we just return the data since we don't have a mock for this yet
+    if (this.isDev && !this.forceClient) return { ...data, status: data.final_score ? 'COMPLETED' : 'IN_PROGRESS' };
+    const response = await axios.patch(`/api/gamedays/gameinfo/${gameId}/result/`, data, {
+      headers: {
+        'Authorization': `Token ${localStorage.getItem('authToken')}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  }
 }
 
 /**

@@ -475,6 +475,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
     const data = game.data as GameNodeData;
     const dynamicRef = slot === 'home' ? data.homeTeamDynamic : data.awayTeamDynamic;
     const teamId = slot === 'home' ? data.homeTeamId : data.awayTeamId;
+    const resolvedName = slot === 'home' ? (data as any).resolvedHomeTeam : (data as any).resolvedAwayTeam;
     
     let currentValue = '';
     if (dynamicRef) {
@@ -511,6 +512,36 @@ const GameTable: React.FC<GameTableProps> = memo(({
         options.push({ value: `loser:${sourceGame.id}`, label: `💔 Loser of ${sourceGame.data.standing} (${stageData.name})`, isTeam: false });
       });
     });
+
+    if (readOnly && dynamicRef) {
+      return (
+        <div 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onDynamicReferenceClick) {
+              if (isRankReference(dynamicRef)) {
+                const source = findSourceStageForReference(game.id, slot, edges, allNodes);
+                if (source) onDynamicReferenceClick(source.stage.id);
+              } else {
+                const sourceGame = findSourceGameForReference(game.id, slot, edges, allNodes);
+                if (sourceGame) onDynamicReferenceClick(sourceGame.id);
+              }
+            }
+          }}
+          style={{ cursor: 'pointer' }}
+          className="d-flex flex-column"
+        >
+          <span className="small text-muted mb-1">
+            {dynamicRef.type === 'winner' ? 'Winner' : 'Loser'} {dynamicRef.matchName}
+          </span>
+          {resolvedName ? (
+            <strong className="text-primary">{resolvedName}</strong>
+          ) : (
+            <span className="text-muted italic">TBD</span>
+          )}
+        </div>
+      );
+    }
 
     return (
       <div 
@@ -551,11 +582,23 @@ const GameTable: React.FC<GameTableProps> = memo(({
 
   return (
     <Table striped bordered hover size="sm">
-      <thead><tr><th>Standing</th><th>Time</th><th>Home</th><th>Away</th><th>Official</th><th>Break After</th><th>Actions</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Standing</th>
+          <th>Time</th>
+          <th>Home</th>
+          <th>Away</th>
+          {readOnly && <th>Score</th>}
+          <th>Official</th>
+          <th>Break After</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
       <tbody>
         {games.map((game) => {
           const isHighlighted = highlightedElement?.id === game.id && highlightedElement?.type === 'game';
           const isSourceHighlighted = highlightedSourceGameId === game.id;
+          const score = game.data.final_score ? `${game.data.final_score.home}:${game.data.final_score.away}` : (game.data.halftime_score ? `(${game.data.halftime_score.home}:${game.data.halftime_score.away})` : '--:--');
 
           return (
             <tr 
@@ -584,6 +627,13 @@ const GameTable: React.FC<GameTableProps> = memo(({
               {renderTimeCell(game)}
               <td>{renderTeamCell(game, 'home')}</td>
               <td>{renderTeamCell(game, 'away')}</td>
+              {readOnly && (
+                <td className="text-center fw-bold">
+                  <span className={game.data.final_score ? 'text-dark' : 'text-muted italic small'}>
+                    {score}
+                  </span>
+                </td>
+              )}
               <td>{renderOfficialCell(game)}</td>
               <td onClick={(e) => e.stopPropagation()}>
                 {editingGameId === game.id && editingField === 'breakAfter' ? (
@@ -599,7 +649,20 @@ const GameTable: React.FC<GameTableProps> = memo(({
                 )}
               </td>
               <td>
-                {!readOnly && (
+                {readOnly ? (
+                  <button 
+                    className="btn btn-sm btn-outline-success btn-adaptive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // We'll handle this in ListDesignerApp
+                      onSelectNode(game.id);
+                    }}
+                    title="Enter result"
+                  >
+                    <i className="bi bi-pencil-square me-2" />
+                    <span className="btn-label-adaptive">Result</span>
+                  </button>
+                ) : (
                   <button 
                     className="btn btn-sm btn-outline-danger btn-adaptive" 
                     onClick={(e) => handleDelete(e, game.id)}
