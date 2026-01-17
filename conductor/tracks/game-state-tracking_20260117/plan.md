@@ -11,7 +11,8 @@ This phase establishes the necessary data structures to support game states and 
     - [x] Add `status` field to `Gameday` model (Draft, Published, In Progress, Completed).
     - [x] Add `published_at` timestamp.
 - [x] Task: TDD - Write tests for model updates and state transitions. 027fe9a
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Database & Model Updates' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Database & Model Updates' (Protocol in workflow.md) [checkpoint: 522aeba]
+
 
 ## Phase 2: Backend API Logic
 This phase implements the business logic for state transitions, result updates, and reference resolution.
