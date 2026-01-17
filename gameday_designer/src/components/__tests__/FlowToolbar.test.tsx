@@ -144,7 +144,7 @@ describe('FlowToolbar', () => {
       // First click
       await user.click(deleteBtn);
       expect(onDeleteGameday).not.toHaveBeenCalled();
-      expect(screen.getByText('Confirm Delete')).toBeInTheDocument();
+      expect(screen.getByText('confirm dele')).toBeInTheDocument();
 
       // Second click
       await user.click(deleteBtn);

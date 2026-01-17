@@ -200,7 +200,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
               className="btn-label-adaptive" 
               style={showConfirmDelete ? { maxWidth: '200px', opacity: 1, marginLeft: '0.25rem', fontWeight: 'bold' } : {}}
             >
-              {showConfirmDelete ? 'Confirm Delete' : t('ui:button.deleteGameday', 'Delete Gameday')}
+              {showConfirmDelete ? 'confirm dele' : t('ui:button.deleteGameday', 'Delete Gameday')}
             </span>
           </Button>
         </ButtonGroup>
