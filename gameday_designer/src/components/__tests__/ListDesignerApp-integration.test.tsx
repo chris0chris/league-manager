@@ -43,6 +43,11 @@ vi.mock('../../api/gamedayApi', () => ({
       league: 1,
       status: 'DRAFT',
     }),
+    publish: vi.fn(),
+    update: vi.fn(),
+    patchGameday: vi.fn(),
+    deleteGameday: vi.fn(),
+    updateGameResult: vi.fn(),
   },
 }));
 
@@ -126,7 +131,7 @@ describe('ListDesignerApp - Integration Tests', () => {
     },
     nodes: [],
     edges: [],
-    fields: [],
+    fields: overrides.fields || [],
     globalTeams: [],
     globalTeamGroups: [],
     selectedNode: null,

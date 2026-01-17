@@ -346,6 +346,7 @@ const ListDesignerApp: React.FC = () => {
           onRemoveEdgeFromSlot={removeEdgeFromSlot}
           expandedFieldIds={expandedFieldIds}
           expandedStageIds={expandedStageIds}
+          readOnly={isLocked}
         />
       </div>
 
