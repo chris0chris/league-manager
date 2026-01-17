@@ -6,6 +6,7 @@
  */
 
 import type { Gameday, GamedayListEntry, PaginatedResponse } from '../types';
+import { matchGameday } from '../utils/searchEngine';
 
 const STORAGE_KEY = 'leaguesphere_gamedays';
 
@@ -72,12 +73,7 @@ class MockGamedayService {
     let filtered = [...this.gamedays];
     
     if (params?.search) {
-      const query = params.search.toLowerCase();
-      filtered = filtered.filter(g => 
-        g.name.toLowerCase().includes(query) || 
-        g.address.toLowerCase().includes(query) ||
-        g.league_display?.toLowerCase().includes(query)
-      );
+      filtered = filtered.filter(g => matchGameday(g, params.search!));
     }
 
     // Sort by date descending

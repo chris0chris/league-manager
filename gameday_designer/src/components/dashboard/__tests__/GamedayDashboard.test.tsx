@@ -107,4 +107,15 @@ describe('GamedayDashboard', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/designer/3');
     });
   });
+
+  it('filters gamedays when searching', async () => {
+    render(<GamedayDashboard />);
+
+    const searchInput = screen.getByPlaceholderText(/search gamedays/i);
+    fireEvent.change(searchInput, { target: { value: 'season:2026' } });
+
+    await waitFor(() => {
+      expect(gamedayApi.listGamedays).toHaveBeenCalledWith({ search: 'season:2026' });
+    });
+  });
 });
