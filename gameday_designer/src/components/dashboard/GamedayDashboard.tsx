@@ -22,6 +22,7 @@ const GamedayDashboard: React.FC = () => {
 
   useEffect(() => {
     loadGamedays();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   const loadGamedays = async () => {
@@ -75,6 +76,9 @@ const GamedayDashboard: React.FC = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </InputGroup>
+          <Form.Text className="text-muted">
+            Tip: Use <code>season:2026</code> or <code>status:draft</code> for precise filtering.
+          </Form.Text>
         </Col>
       </Row>
 

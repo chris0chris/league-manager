@@ -7,16 +7,19 @@
  * Replaces FlowDesignerApp with a table/list-based UI instead of flowchart.
  */
 
-import React from 'react';
-import { Container, Row, Col, Button, OverlayTrigger, Popover, ListGroup } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Container, Row, Col, Button, OverlayTrigger, Popover, ListGroup, Spinner } from 'react-bootstrap';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import ListCanvas from './ListCanvas';
 import FlowToolbar from './FlowToolbar';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
 import NotificationToast from './NotificationToast';
+import GamedayMetadataAccordion from './GamedayMetadataAccordion';
 import { useDesignerController } from '../hooks/useDesignerController';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { ICONS } from '../utils/iconConstants';
+import { gamedayApi } from '../api/gamedayApi';
 import type { ValidationError, ValidationWarning } from '../types/designer';
 
 import './ListDesignerApp.css';
@@ -27,7 +30,12 @@ import './ListDesignerApp.css';
  */
 const ListDesignerApp: React.FC = () => {
   const { t } = useTypedTranslation(['ui', 'validation']);
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
   const {
+    metadata,
     nodes,
     edges,
     globalTeams,
@@ -46,7 +54,43 @@ const ListDesignerApp: React.FC = () => {
     removeEdgeFromSlot,
     addGameNodeInStage,
     addNotification,
+    importState,
+    updateMetadata,
   } = useDesignerController();
+
+  useEffect(() => {
+    if (id) {
+      loadGameday(parseInt(id));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const loadGameday = async (gamedayId: number) => {
+    setLoading(true);
+    try {
+      const gameday = await gamedayApi.getGameday(gamedayId);
+      if (gameday.designer_data) {
+        importState({
+          metadata: gameday,
+          nodes: [], 
+          edges: [],
+          fields: gameday.designer_data.fields.map(f => ({ id: f.id, name: f.name, order: f.order })),
+          globalTeams: [],
+          globalTeamGroups: []
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as unknown as any);
+      } else {
+        // Just set metadata for new gameday
+        updateMetadata(gameday);
+      }
+    } catch (error) {
+      console.error('Failed to load gameday', error);
+      addNotification('Failed to load gameday.', 'danger', 'Error');
+      navigate('/');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /**
    * Helper to translate error/warning message.
@@ -54,7 +98,7 @@ const ListDesignerApp: React.FC = () => {
   const getMessage = (item: ValidationError | ValidationWarning) => {
     if (item.messageKey) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return t(`validation:${item.messageKey}` as any, item.messageParams);
+      return t(`validation:${item.messageKey}` as unknown as any, item.messageParams);
     }
     return item.message;
   };
@@ -101,14 +145,32 @@ const ListDesignerApp: React.FC = () => {
     dismissNotification,
   } = handlers;
 
+  if (loading) {
+    return (
+      <Container className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" variant="primary" />
+      </Container>
+    );
+  }
+
   return (
     <Container fluid className="list-designer-app">
       {/* Combined Header and Toolbar */}
       <Row className="list-designer-app__header align-items-center mb-3">
         <Col className="d-flex align-items-center">
+          <Button 
+            variant="link" 
+            onClick={() => navigate('/')} 
+            className="p-0 me-3 text-dark"
+            title="Back to Dashboard"
+          >
+            <i className="bi bi-arrow-left fs-4"></i>
+          </Button>
           <div className="me-auto">
             <h1 className="h4 mb-0">Gameday Designer</h1>
-            <p className="text-muted small mb-0">List-based editor for tournament schedules</p>
+            <p className="text-muted small mb-0">
+              {metadata?.name || 'Untitled Gameday'} - {metadata?.date}
+            </p>
           </div>
           <Button
             variant="outline-primary"
@@ -129,6 +191,13 @@ const ListDesignerApp: React.FC = () => {
           />
         </Col>
       </Row>
+
+      {/* Gameday Metadata Accordion */}
+      <GamedayMetadataAccordion 
+        metadata={metadata} 
+        onUpdate={updateMetadata} 
+        defaultActiveKey={!hasNodes ? '0' : undefined}
+      />
 
       {/* Status Bar - Validation summary */}
       <Row className="list-designer-app__status-bar">

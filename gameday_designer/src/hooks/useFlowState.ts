@@ -12,6 +12,7 @@ import type {
   SelectionState,
   GlobalTeam,
   GlobalTeamGroup,
+  GamedayMetadata,
 } from '../types/flowchart';
 import {
   createFlowField,
@@ -48,12 +49,32 @@ function calculateNewNodePosition(
 }
 
 /**
+ * Return type for the useFlowState hook.
+ */
+export type UseFlowStateReturn = ReturnType<typeof useFlowStateInternal>;
+
+/**
  * useFlowState hook.
  *
  * Orchestrates specialized hooks for managing the complete state of the flowchart designer.
  */
 export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateReturn {
+  return useFlowStateInternal(initialState);
+}
+
+function useFlowStateInternal(initialState?: Partial<FlowState>) {
   // --- Core State ---
+  const [metadata, setMetadata] = useState<GamedayMetadata>(initialState?.metadata ?? {
+    id: 0,
+    name: '',
+    date: new Date().toISOString().split('T')[0],
+    start: '10:00',
+    format: '6_2',
+    author: 0,
+    address: '',
+    season: 0,
+    league: 0,
+  });
   const [nodes, setNodes] = useState<FlowNode[]>(initialState?.nodes ?? []);
   const [edges, setEdges] = useState<FlowEdge[]>(initialState?.edges ?? []);
   const [fields, setFields] = useState<FlowField[]>(initialState?.fields ?? []);
@@ -81,6 +102,10 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
   } = edgesManager;
 
   // --- Actions ---
+
+  const updateMetadata = useCallback((data: Partial<GamedayMetadata>) => {
+    setMetadata((prev) => ({ ...prev, ...data }));
+  }, []);
 
   const onNodesChange = useCallback(() => {}, []);
   const onEdgesChange = useCallback(() => {}, []);
@@ -121,6 +146,7 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
   }, []);
 
   const importState = useCallback((state: FlowState) => {
+    if (state.metadata) setMetadata(state.metadata);
     setNodes(state.nodes);
     setEdges(state.edges);
     setFields(state.fields);
@@ -136,12 +162,13 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
   }, []);
 
   const exportState = useCallback((): FlowState => ({
+    metadata,
     nodes,
     edges,
     fields,
     globalTeams,
     globalTeamGroups,
-  }), [nodes, edges, fields, globalTeams, globalTeamGroups]);
+  }), [metadata, nodes, edges, fields, globalTeams, globalTeamGroups]);
 
   /**
    * Legacy addGameNode that doesn't enforce hierarchy.
@@ -233,6 +260,7 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
   }, [nodes]);
 
   return {
+    metadata,
     nodes,
     edges,
     fields,
@@ -254,6 +282,7 @@ export function useFlowState(initialState?: Partial<FlowState>): UseFlowStateRet
     updateField,
     deleteField,
     selectNode,
+    updateMetadata,
     setSelection,
     clearAll,
     importState,

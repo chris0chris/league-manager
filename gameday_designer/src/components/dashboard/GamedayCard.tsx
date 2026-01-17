@@ -7,7 +7,6 @@
 import React from 'react';
 import { Card, Badge, Col } from 'react-bootstrap';
 import type { GamedayListEntry } from '../../types';
-import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 
 interface GamedayCardProps {
   gameday: GamedayListEntry;
@@ -15,7 +14,6 @@ interface GamedayCardProps {
 }
 
 const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick }) => {
-  const { t } = useTypedTranslation(['ui']);
 
   const getStatusVariant = (status: string) => {
     switch (status) {

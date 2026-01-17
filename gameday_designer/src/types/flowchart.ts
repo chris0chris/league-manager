@@ -381,6 +381,28 @@ export interface FlowField {
 }
 
 // ============================================================================
+// Gameday Metadata
+// ============================================================================
+
+/**
+ * Gameday metadata for high-level management.
+ */
+export interface GamedayMetadata {
+  id: number;
+  name: string;
+  date: string;
+  start: string;
+  format: string;
+  author: number;
+  author_display?: string;
+  address: string;
+  season: number;
+  season_display?: string;
+  league: number;
+  league_display?: string;
+}
+
+// ============================================================================
 // Flow State
 // ============================================================================
 
@@ -388,6 +410,8 @@ export interface FlowField {
  * Complete state of the flowchart designer.
  */
 export interface FlowState {
+  /** Gameday metadata */
+  metadata?: GamedayMetadata;
   /** All nodes in the graph */
   nodes: FlowNode[];
   /** All edges connecting nodes */
@@ -821,6 +845,17 @@ export function createFlowField(
  */
 export function createEmptyFlowState(): FlowState {
   return {
+    metadata: {
+      id: 0,
+      name: '',
+      date: new Date().toISOString().split('T')[0],
+      start: '10:00',
+      format: '6_2',
+      author: 0,
+      address: '',
+      season: 0,
+      league: 0,
+    },
     nodes: [],
     edges: [],
     fields: [],

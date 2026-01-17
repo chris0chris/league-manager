@@ -21,8 +21,8 @@ Implement the landing page for managing gamedays.
     - [x] Implement the main container for the list view.
     - [x] Integrate `GamedayService` to fetch and display cards.
     - [x] Implement the "Create New Gameday" trigger.
-- [~] **Task: Update Routing Logic**
-    - [ ] Refactor `App.tsx` or `main.tsx` to handle `/` (Dashboard) and `/designer/:id` (Editor) routes.
+- [x] **Task: Update Routing Logic**
+    - [x] Refactor `App.tsx` or `main.tsx` to handle `/` (Dashboard) and `/designer/:id` (Editor) routes.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Gameday Dashboard UI' (Protocol in workflow.md) [checkpoint: 480bcb8]
 
 ## Phase 3: Advanced Search & Filtering
@@ -39,13 +39,17 @@ Implement the wildcard and "dork" style search logic.
 ## Phase 4: Editor Metadata Integration
 Add gameday-level property management to the existing Editor.
 
-- [~] **Task: Create GamedayMetadataAccordion Component (TDD)**
-    - [ ] Implement the accordion-style header with form fields (Name, Date, Season, Venue).
-    - [ ] Write tests for form state and validation.
+- [x] **Task: Create GamedayMetadataAccordion Component (TDD)**
+    - [x] Implement the accordion-style header with form fields (Name, Date, Season, Venue).
+    - [x] Write tests for form state and validation.
+- [x] **Task: Integrate Metadata with Flow State (TDD)**
+    - [x] Ensure metadata is part of the global state and correctly persisted via the service layer.
+    - [x] Open the accordion automatically for newly created gamedays.
+
 
 ## Phase 5: Final Polish & Verification
-- [ ] **Task: Ensure Responsive Card Layout**
-    - [ ] Audit dashboard responsiveness for mobile/tablet.
-- [ ] **Task: Final TDD Verification**
-    - [ ] Run the full Vitest suite to ensure no regressions in existing Designer logic.
-- [ ] Task: Conductor - User Manual Verification 'Phase 5: Final Polish & Verification' (Protocol in workflow.md)
+- [x] **Task: Ensure Responsive Card Layout**
+    - [x] Audit dashboard responsiveness for mobile/tablet.
+- [x] **Task: Final TDD Verification**
+    - [x] Run the full Vitest suite to ensure no regressions in existing Designer logic.
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Final Polish & Verification' (Protocol in workflow.md) [checkpoint: 5f1a2b3]

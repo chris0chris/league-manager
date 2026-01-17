@@ -39,6 +39,7 @@ export function useDesignerController() {
     updateNode,
     deleteNode,
     selectNode,
+    updateMetadata,
     clearAll,
     importState,
     exportState,
@@ -206,6 +207,7 @@ export function useDesignerController() {
     ...flowState,
     validation,
     notifications,
+    updateMetadata,
     ui: {
       highlightedElement,
       expandedFieldIds,

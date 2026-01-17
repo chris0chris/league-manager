@@ -13,10 +13,37 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import ListDesignerApp from '../ListDesignerApp';
 import i18n from '../../i18n/testConfig';
-import type { FlowchartState } from '../../types/flowchart';
+
+// Mock react-router-dom
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>();
+  return {
+    ...actual,
+    useParams: () => ({ id: '1' }),
+    useNavigate: () => vi.fn(),
+  };
+});
+
+// Mock gamedayApi
+vi.mock('../../api/gamedayApi', () => ({
+  gamedayApi: {
+    getGameday: vi.fn().mockResolvedValue({
+      id: 1,
+      name: 'Test Gameday',
+      date: '2026-05-01',
+      start: '10:00',
+      format: '6_2',
+      author: 1,
+      address: 'Test Field',
+      season: 1,
+      league: 1,
+    }),
+  },
+}));
 
 // Mock useFlowState hook
 const mockUseFlowState = vi.fn();
@@ -83,42 +110,58 @@ describe('ListDesignerApp - Integration Tests', () => {
   const mockAddBulkGameToGameEdges = vi.fn();
   const mockRemoveGameToGameEdge = vi.fn();
 
+  const createMockFlowState = (overrides = {}) => ({
+    metadata: {
+      id: 1,
+      name: 'Test Gameday',
+      date: '2026-05-01',
+      start: '10:00',
+      format: '6_2',
+      author: 1,
+      address: 'Test Field',
+      season: 1,
+      league: 1,
+    },
+    nodes: [],
+    edges: [],
+    fields: [],
+    globalTeams: [],
+    globalTeamGroups: [],
+    selectedNode: null,
+    addFieldNode: mockAddFieldNode,
+    addStageNode: mockAddStageNode,
+    addGameNodeInStage: mockAddGameNodeInStage,
+    addBulkTournament: mockAddBulkTournament,
+    updateNode: mockUpdateNode,
+    deleteNode: mockDeleteNode,
+    selectNode: mockSelectNode,
+    clearAll: mockClearAll,
+    importState: mockImportState,
+    exportState: mockExportState,
+    addGlobalTeam: mockAddGlobalTeam,
+    updateGlobalTeam: mockUpdateGlobalTeam,
+    deleteGlobalTeam: mockDeleteGlobalTeam,
+    reorderGlobalTeam: mockReorderGlobalTeam,
+    addGlobalTeamGroup: mockAddGlobalTeamGroup,
+    updateGlobalTeamGroup: mockUpdateGlobalTeamGroup,
+    deleteGlobalTeamGroup: mockDeleteGlobalTeamGroup,
+    reorderGlobalTeamGroup: mockReorderGlobalTeamGroup,
+    getTeamUsage: mockGetTeamUsage,
+    assignTeamToGame: mockAssignTeamToGame,
+    addGameToGameEdge: mockAddGameToGameEdge,
+    addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
+    removeGameToGameEdge: mockRemoveGameToGameEdge,
+    updateMetadata: vi.fn(),
+    addNotification: vi.fn(),
+    ...overrides,
+  });
+
   beforeEach(async () => {
     await i18n.changeLanguage('en');
     vi.clearAllMocks();
 
     // Default mock implementations
-    mockUseFlowState.mockReturnValue({
-      nodes: [],
-      edges: [],
-      fields: [],
-      globalTeams: [],
-      globalTeamGroups: [],
-      selectedNode: null,
-      addFieldNode: mockAddFieldNode,
-      addStageNode: mockAddStageNode,
-      addGameNodeInStage: mockAddGameNodeInStage,
-      addBulkTournament: mockAddBulkTournament,
-      updateNode: mockUpdateNode,
-      deleteNode: mockDeleteNode,
-      selectNode: mockSelectNode,
-      clearAll: mockClearAll,
-      importState: mockImportState,
-      exportState: mockExportState,
-      addGlobalTeam: mockAddGlobalTeam,
-      updateGlobalTeam: mockUpdateGlobalTeam,
-      deleteGlobalTeam: mockDeleteGlobalTeam,
-      reorderGlobalTeam: mockReorderGlobalTeam,
-      addGlobalTeamGroup: mockAddGlobalTeamGroup,
-      updateGlobalTeamGroup: mockUpdateGlobalTeamGroup,
-      deleteGlobalTeamGroup: mockDeleteGlobalTeamGroup,
-      reorderGlobalTeamGroup: mockReorderGlobalTeamGroup,
-      getTeamUsage: mockGetTeamUsage,
-      assignTeamToGame: mockAssignTeamToGame,
-      addGameToGameEdge: mockAddGameToGameEdge,
-      addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
-      removeGameToGameEdge: mockRemoveGameToGameEdge,
-    });
+    mockUseFlowState.mockReturnValue(createMockFlowState());
 
     mockUseFlowValidation.mockReturnValue({
       isValid: true,
@@ -136,9 +179,23 @@ describe('ListDesignerApp - Integration Tests', () => {
     vi.clearAllTimers();
   });
 
+  const renderApp = async () => {
+    // Ensure real timers for loading
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const isFake = vi.getMockedSystemTime() !== null || (vi as unknown as any).isFakeTimers?.();
+    if (isFake) vi.useRealTimers();
+    
+    render(<MemoryRouter initialEntries={['/designer/1']}><ListDesignerApp /></MemoryRouter>);
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Gameday Designer')).toBeInTheDocument());
+    
+    if (isFake) vi.useFakeTimers();
+  };
+
   describe('Export Workflow', () => {
-    it('should export state when canExport is true', () => {
-      const mockState: FlowchartState = {
+    it('should export state when canExport is true', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mockState: any = {
         nodes: [
           { id: 'field1', type: 'field', data: { name: 'Field 1', order: 0 }, position: { x: 0, y: 0 } },
           { id: 'game1', type: 'game', parentId: 'stage1', data: { standing: 'Game 1' }, position: { x: 0, y: 0 } },
@@ -148,49 +205,24 @@ describe('ListDesignerApp - Integration Tests', () => {
         globalTeamGroups: [],
       };
 
-      mockUseFlowState.mockReturnValue({
+      mockUseFlowState.mockReturnValue(createMockFlowState({
         nodes: mockState.nodes,
         edges: mockState.edges,
         fields: [{ id: 'field1', name: 'Field 1', order: 0 }],
-        globalTeams: [],
-        globalTeamGroups: [],
-        selectedNode: null,
-        exportState: mockExportState,
-        addFieldNode: mockAddFieldNode,
-        addStageNode: mockAddStageNode,
-        addGameNodeInStage: mockAddGameNodeInStage,
-        addBulkTournament: mockAddBulkTournament,
-        updateNode: mockUpdateNode,
-        deleteNode: mockDeleteNode,
-        selectNode: mockSelectNode,
-        clearAll: mockClearAll,
-        importState: mockImportState,
-        addGlobalTeam: mockAddGlobalTeam,
-        updateGlobalTeam: mockUpdateGlobalTeam,
-        deleteGlobalTeam: mockDeleteGlobalTeam,
-        reorderGlobalTeam: mockReorderGlobalTeam,
-        addGlobalTeamGroup: mockAddGlobalTeamGroup,
-        updateGlobalTeamGroup: mockUpdateGlobalTeamGroup,
-        deleteGlobalTeamGroup: mockDeleteGlobalTeamGroup,
-        reorderGlobalTeamGroup: mockReorderGlobalTeamGroup,
-        getTeamUsage: mockGetTeamUsage,
-        assignTeamToGame: mockAssignTeamToGame,
-        addGameToGameEdge: mockAddGameToGameEdge,
-        addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
-        removeGameToGameEdge: mockRemoveGameToGameEdge,
-      });
+      }));
 
       mockExportState.mockReturnValue(mockState);
       mockValidateForExport.mockReturnValue([]);
 
-      const { container } = render(<ListDesignerApp />);
+      await renderApp();
 
       // canExport should be true (has games and fields)
-      expect(container.querySelector('.list-designer-app')).toBeInTheDocument();
+      expect(screen.getByTestId('export-button')).not.toBeDisabled();
     });
 
-    it('should show confirmation when export validation has errors', () => {
-      const mockState: FlowchartState = {
+    it('should show confirmation when export validation has errors', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mockState: any = {
         nodes: [
           { id: 'field1', type: 'field', data: { name: 'Field 1', order: 0 }, position: { x: 0, y: 0 } },
           { id: 'game1', type: 'game', parentId: 'stage1', data: { standing: 'Game 1' }, position: { x: 0, y: 0 } },
@@ -200,89 +232,37 @@ describe('ListDesignerApp - Integration Tests', () => {
         globalTeamGroups: [],
       };
 
-      mockUseFlowState.mockReturnValue({
+      mockUseFlowState.mockReturnValue(createMockFlowState({
         nodes: mockState.nodes,
         edges: mockState.edges,
         fields: [{ id: 'field1', name: 'Field 1', order: 0 }],
-        globalTeams: [],
-        globalTeamGroups: [],
-        selectedNode: null,
-        exportState: mockExportState,
-        addFieldNode: mockAddFieldNode,
-        addStageNode: mockAddStageNode,
-        addGameNodeInStage: mockAddGameNodeInStage,
-        addBulkTournament: mockAddBulkTournament,
-        updateNode: mockUpdateNode,
-        deleteNode: mockDeleteNode,
-        selectNode: mockSelectNode,
-        clearAll: mockClearAll,
-        importState: mockImportState,
-        addGlobalTeam: mockAddGlobalTeam,
-        updateGlobalTeam: mockUpdateGlobalTeam,
-        deleteGlobalTeam: mockDeleteGlobalTeam,
-        reorderGlobalTeam: mockReorderGlobalTeam,
-        addGlobalTeamGroup: mockAddGlobalTeamGroup,
-        updateGlobalTeamGroup: mockUpdateGlobalTeamGroup,
-        deleteGlobalTeamGroup: mockDeleteGlobalTeamGroup,
-        reorderGlobalTeamGroup: mockReorderGlobalTeamGroup,
-        getTeamUsage: mockGetTeamUsage,
-        assignTeamToGame: mockAssignTeamToGame,
-        addGameToGameEdge: mockAddGameToGameEdge,
-        addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
-        removeGameToGameEdge: mockRemoveGameToGameEdge,
-      });
+      }));
 
       mockExportState.mockReturnValue(mockState);
       mockValidateForExport.mockReturnValue(['Missing game times']);
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       // Validation errors should be available
       expect(mockValidateForExport).toBeDefined();
     });
 
-    it('should not allow export when no games or fields exist', () => {
-      mockUseFlowState.mockReturnValue({
+    it('should not allow export when no games or fields exist', async () => {
+      mockUseFlowState.mockReturnValue(createMockFlowState({
         nodes: [],
         edges: [],
         fields: [],
-        globalTeams: [],
-        globalTeamGroups: [],
-        selectedNode: null,
-        exportState: mockExportState,
-        addFieldNode: mockAddFieldNode,
-        addStageNode: mockAddStageNode,
-        addGameNodeInStage: mockAddGameNodeInStage,
-        addBulkTournament: mockAddBulkTournament,
-        updateNode: mockUpdateNode,
-        deleteNode: mockDeleteNode,
-        selectNode: mockSelectNode,
-        clearAll: mockClearAll,
-        importState: mockImportState,
-        addGlobalTeam: mockAddGlobalTeam,
-        updateGlobalTeam: mockUpdateGlobalTeam,
-        deleteGlobalTeam: mockDeleteGlobalTeam,
-        reorderGlobalTeam: mockReorderGlobalTeam,
-        addGlobalTeamGroup: mockAddGlobalTeamGroup,
-        updateGlobalTeamGroup: mockUpdateGlobalTeamGroup,
-        deleteGlobalTeamGroup: mockDeleteGlobalTeamGroup,
-        reorderGlobalTeamGroup: mockReorderGlobalTeamGroup,
-        getTeamUsage: mockGetTeamUsage,
-        assignTeamToGame: mockAssignTeamToGame,
-        addGameToGameEdge: mockAddGameToGameEdge,
-        addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
-        removeGameToGameEdge: mockRemoveGameToGameEdge,
-      });
+      }));
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       // canExport should be false (tested via FlowToolbar)
-      expect(mockExportState).toBeDefined();
+      expect(screen.getByTestId('export-button')).toBeDisabled();
     });
   });
 
   describe('Import Workflow', () => {
-    it('should call importState when valid JSON is imported', () => {
+    it('should call importState when valid JSON is imported', async () => {
       const validJson = {
         nodes: [
           { id: 'field1', type: 'field', data: { name: 'Field 1', order: 0 }, position: { x: 0, y: 0 } },
@@ -300,23 +280,23 @@ describe('ListDesignerApp - Integration Tests', () => {
         warnings: [],
       });
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       // Import function should be available
       expect(mockImportState).toBeDefined();
       expect(mockValidateScheduleJson).toBeDefined();
     });
 
-    it('should show alert when JSON validation fails', () => {
+    it('should show alert when JSON validation fails', async () => {
       mockValidateScheduleJson.mockReturnValue(['Missing nodes array', 'Missing edges array']);
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       // Validation should fail
       expect(mockValidateScheduleJson).toBeDefined();
     });
 
-    it('should show alert when import fails', () => {
+    it('should show alert when import fails', async () => {
       mockValidateScheduleJson.mockReturnValue([]);
       mockImportFromScheduleJson.mockReturnValue({
         success: false,
@@ -325,13 +305,13 @@ describe('ListDesignerApp - Integration Tests', () => {
         warnings: [],
       });
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       // Import should be available
       expect(mockImportFromScheduleJson).toBeDefined();
     });
 
-    it('should log warnings when import succeeds with warnings', () => {
+    it('should log warnings when import succeeds with warnings', async () => {
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const validJson = {
@@ -349,7 +329,7 @@ describe('ListDesignerApp - Integration Tests', () => {
         warnings: ['Legacy format detected'],
       });
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       // Warnings should be logged
       expect(mockImportFromScheduleJson).toBeDefined();
@@ -369,41 +349,14 @@ describe('ListDesignerApp - Integration Tests', () => {
         { id: 'game2', type: 'game', parentId: 'stage1', data: { standing: 'Game 2', homeTeamDynamic: { type: 'winner', sourceGameId: 'game1' } }, position: { x: 0, y: 0 } },
       ];
 
-      mockUseFlowState.mockReturnValue({
+      mockUseFlowState.mockReturnValue(createMockFlowState({
         nodes: mockNodes,
-        edges: [],
         fields: [{ id: 'field1', name: 'Field 1', order: 0 }],
-        globalTeams: [],
-        globalTeamGroups: [],
-        selectedNode: null,
-        addFieldNode: mockAddFieldNode,
-        addStageNode: mockAddStageNode,
-        addGameNodeInStage: mockAddGameNodeInStage,
-        addBulkTournament: mockAddBulkTournament,
-        updateNode: mockUpdateNode,
-        deleteNode: mockDeleteNode,
-        selectNode: mockSelectNode,
-        clearAll: mockClearAll,
-        importState: mockImportState,
-        exportState: mockExportState,
-        addGlobalTeam: mockAddGlobalTeam,
-        updateGlobalTeam: mockUpdateGlobalTeam,
-        deleteGlobalTeam: mockDeleteGlobalTeam,
-        reorderGlobalTeam: mockReorderGlobalTeam,
-        addGlobalTeamGroup: mockAddGlobalTeamGroup,
-        updateGlobalTeamGroup: mockUpdateGlobalTeamGroup,
-        deleteGlobalTeamGroup: mockDeleteGlobalTeamGroup,
-        reorderGlobalTeamGroup: mockReorderGlobalTeamGroup,
-        getTeamUsage: mockGetTeamUsage,
-        assignTeamToGame: mockAssignTeamToGame,
-        addGameToGameEdge: mockAddGameToGameEdge,
-        addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
-        removeGameToGameEdge: mockRemoveGameToGameEdge,
-      });
+      }));
 
       mockScrollToGameWithExpansion.mockResolvedValue(undefined);
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       // Verify scrollToGameWithExpansion is available
       expect(mockScrollToGameWithExpansion).toBeDefined();
@@ -420,39 +373,12 @@ describe('ListDesignerApp - Integration Tests', () => {
         { id: 'game1', type: 'game', parentId: 'stage1', data: { standing: 'Game 1' }, position: { x: 0, y: 0 } },
       ];
 
-      mockUseFlowState.mockReturnValue({
+      mockUseFlowState.mockReturnValue(createMockFlowState({
         nodes: mockNodes,
-        edges: [],
         fields: [{ id: 'field1', name: 'Field 1', order: 0 }],
-        globalTeams: [],
-        globalTeamGroups: [],
-        selectedNode: null,
-        addFieldNode: mockAddFieldNode,
-        addStageNode: mockAddStageNode,
-        addGameNodeInStage: mockAddGameNodeInStage,
-        addBulkTournament: mockAddBulkTournament,
-        updateNode: mockUpdateNode,
-        deleteNode: mockDeleteNode,
-        selectNode: mockSelectNode,
-        clearAll: mockClearAll,
-        importState: mockImportState,
-        exportState: mockExportState,
-        addGlobalTeam: mockAddGlobalTeam,
-        updateGlobalTeam: mockUpdateGlobalTeam,
-        deleteGlobalTeam: mockDeleteGlobalTeam,
-        reorderGlobalTeam: mockReorderGlobalTeam,
-        addGlobalTeamGroup: mockAddGlobalTeamGroup,
-        updateGlobalTeamGroup: mockUpdateGlobalTeamGroup,
-        deleteGlobalTeamGroup: mockDeleteGlobalTeamGroup,
-        reorderGlobalTeamGroup: mockReorderGlobalTeamGroup,
-        getTeamUsage: mockGetTeamUsage,
-        assignTeamToGame: mockAssignTeamToGame,
-        addGameToGameEdge: mockAddGameToGameEdge,
-        addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
-        removeGameToGameEdge: mockRemoveGameToGameEdge,
-      });
+      }));
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       // Auto-clear timeout should be set
       expect(true).toBe(true);
@@ -480,39 +406,9 @@ describe('ListDesignerApp - Integration Tests', () => {
 
       mockGenerateTournament.mockReturnValue(mockStructure);
 
-      mockUseFlowState.mockReturnValue({
-        nodes: [],
-        edges: [],
-        fields: [],
-        globalTeams: [],
-        globalTeamGroups: [],
-        selectedNode: null,
-        addFieldNode: mockAddFieldNode,
-        addStageNode: mockAddStageNode,
-        addGameNodeInStage: mockAddGameNodeInStage,
-        addBulkTournament: mockAddBulkTournament,
-        updateNode: mockUpdateNode,
-        deleteNode: mockDeleteNode,
-        selectNode: mockSelectNode,
-        clearAll: mockClearAll,
-        importState: mockImportState,
-        exportState: mockExportState,
-        addGlobalTeam: mockAddGlobalTeam,
-        updateGlobalTeam: mockUpdateGlobalTeam,
-        deleteGlobalTeam: mockDeleteGlobalTeam,
-        reorderGlobalTeam: mockReorderGlobalTeam,
-        addGlobalTeamGroup: mockAddGlobalTeamGroup,
-        updateGlobalTeamGroup: mockUpdateGlobalTeamGroup,
-        deleteGlobalTeamGroup: mockDeleteGlobalTeamGroup,
-        reorderGlobalTeamGroup: mockReorderGlobalTeamGroup,
-        getTeamUsage: mockGetTeamUsage,
-        assignTeamToGame: mockAssignTeamToGame,
-        addGameToGameEdge: mockAddGameToGameEdge,
-        addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
-        removeGameToGameEdge: mockRemoveGameToGameEdge,
-      });
+      mockUseFlowState.mockReturnValue(createMockFlowState());
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       const generateButton = screen.getByRole('button', { name: /generate tournament/i });
       await user.click(generateButton);
@@ -525,87 +421,29 @@ describe('ListDesignerApp - Integration Tests', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
-    it('should use existing team group when generating teams', () => {
+    it('should use existing team group when generating teams', async () => {
       const existingGroup = { id: 'existing-group', name: 'Existing Group', order: 0 };
 
-      mockUseFlowState.mockReturnValue({
-        nodes: [],
-        edges: [],
-        fields: [],
-        globalTeams: [],
+      mockUseFlowState.mockReturnValue(createMockFlowState({
         globalTeamGroups: [existingGroup],
-        selectedNode: null,
-        addFieldNode: mockAddFieldNode,
-        addStageNode: mockAddStageNode,
-        addGameNodeInStage: mockAddGameNodeInStage,
-        addBulkTournament: mockAddBulkTournament,
-        updateNode: mockUpdateNode,
-        deleteNode: mockDeleteNode,
-        selectNode: mockSelectNode,
-        clearAll: mockClearAll,
-        importState: mockImportState,
-        exportState: mockExportState,
-        addGlobalTeam: mockAddGlobalTeam,
-        updateGlobalTeam: mockUpdateGlobalTeam,
-        deleteGlobalTeam: mockDeleteGlobalTeam,
-        reorderGlobalTeam: mockReorderGlobalTeam,
-        addGlobalTeamGroup: mockAddGlobalTeamGroup,
-        updateGlobalTeamGroup: mockUpdateGlobalTeamGroup,
-        deleteGlobalTeamGroup: mockDeleteGlobalTeamGroup,
-        reorderGlobalTeamGroup: mockReorderGlobalTeamGroup,
-        getTeamUsage: mockGetTeamUsage,
-        assignTeamToGame: mockAssignTeamToGame,
-        addGameToGameEdge: mockAddGameToGameEdge,
-        addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
-        removeGameToGameEdge: mockRemoveGameToGameEdge,
-      });
+      }));
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       // Should use existing group
       expect(mockAddGlobalTeamGroup).toBeDefined();
     });
 
-    it('should handle tournament generation errors gracefully', () => {
+    it('should handle tournament generation errors gracefully', async () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       mockGenerateTournament.mockImplementation(() => {
         throw new Error('Tournament generation failed');
       });
 
-      mockUseFlowState.mockReturnValue({
-        nodes: [],
-        edges: [],
-        fields: [],
-        globalTeams: [],
-        globalTeamGroups: [],
-        selectedNode: null,
-        addFieldNode: mockAddFieldNode,
-        addStageNode: mockAddStageNode,
-        addGameNodeInStage: mockAddGameNodeInStage,
-        addBulkTournament: mockAddBulkTournament,
-        updateNode: mockUpdateNode,
-        deleteNode: mockDeleteNode,
-        selectNode: mockSelectNode,
-        clearAll: mockClearAll,
-        importState: mockImportState,
-        exportState: mockExportState,
-        addGlobalTeam: mockAddGlobalTeam,
-        updateGlobalTeam: mockUpdateGlobalTeam,
-        deleteGlobalTeam: mockDeleteGlobalTeam,
-        reorderGlobalTeam: mockReorderGlobalTeam,
-        addGlobalTeamGroup: mockAddGlobalTeamGroup,
-        updateGlobalTeamGroup: mockUpdateGlobalTeamGroup,
-        deleteGlobalTeamGroup: mockDeleteGlobalTeamGroup,
-        reorderGlobalTeamGroup: mockReorderGlobalTeamGroup,
-        getTeamUsage: mockGetTeamUsage,
-        assignTeamToGame: mockAssignTeamToGame,
-        addGameToGameEdge: mockAddGameToGameEdge,
-        addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
-        removeGameToGameEdge: mockRemoveGameToGameEdge,
-      });
+      mockUseFlowState.mockReturnValue(createMockFlowState());
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       // Error handling should be in place
       expect(consoleErrorSpy).toBeDefined();
@@ -615,8 +453,8 @@ describe('ListDesignerApp - Integration Tests', () => {
   });
 
   describe('Team Color Assignment', () => {
-    it('should assign distinct colors to generated teams', () => {
-      render(<ListDesignerApp />);
+    it('should assign distinct colors to generated teams', async () => {
+      await renderApp();
 
       // getTeamColor should assign distinct colors based on index
       // This is tested implicitly through tournament generation
@@ -625,15 +463,15 @@ describe('ListDesignerApp - Integration Tests', () => {
   });
 
   describe('Field and Stage Expansion', () => {
-    it('should expand field when expandField is called', () => {
-      render(<ListDesignerApp />);
+    it('should expand field when expandField is called', async () => {
+      await renderApp();
 
       // expandField callback should be available
       expect(true).toBe(true);
     });
 
-    it('should expand stage when expandStage is called', () => {
-      render(<ListDesignerApp />);
+    it('should expand stage when expandStage is called', async () => {
+      await renderApp();
 
       // expandStage callback should be available
       expect(true).toBe(true);
@@ -641,66 +479,66 @@ describe('ListDesignerApp - Integration Tests', () => {
   });
 
   describe('Callback Handlers', () => {
-    it('should handle addGlobalTeam callback', () => {
+    it('should handle addGlobalTeam callback', async () => {
       const mockTeam = { id: 'team1', label: 'Team 1', groupId: 'group1', order: 0 };
       mockAddGlobalTeam.mockReturnValue(mockTeam);
 
-      render(<ListDesignerApp />);
+      await renderApp();
 
       // Callback should be available
       expect(mockAddGlobalTeam).toBeDefined();
     });
 
-    it('should handle updateGlobalTeam callback', () => {
-      render(<ListDesignerApp />);
+    it('should handle updateGlobalTeam callback', async () => {
+      await renderApp();
 
       expect(mockUpdateGlobalTeam).toBeDefined();
     });
 
-    it('should handle deleteGlobalTeam callback', () => {
-      render(<ListDesignerApp />);
+    it('should handle deleteGlobalTeam callback', async () => {
+      await renderApp();
 
       expect(mockDeleteGlobalTeam).toBeDefined();
     });
 
-    it('should handle reorderGlobalTeam callback', () => {
-      render(<ListDesignerApp />);
+    it('should handle reorderGlobalTeam callback', async () => {
+      await renderApp();
 
       expect(mockReorderGlobalTeam).toBeDefined();
     });
 
-    it('should handle assignTeamToGame callback', () => {
-      render(<ListDesignerApp />);
+    it('should handle assignTeamToGame callback', async () => {
+      await renderApp();
 
       expect(mockAssignTeamToGame).toBeDefined();
     });
 
-    it('should handle updateNode callback', () => {
-      render(<ListDesignerApp />);
+    it('should handle updateNode callback', async () => {
+      await renderApp();
 
       expect(mockUpdateNode).toBeDefined();
     });
 
-    it('should handle deleteNode callback', () => {
-      render(<ListDesignerApp />);
+    it('should handle deleteNode callback', async () => {
+      await renderApp();
 
       expect(mockDeleteNode).toBeDefined();
     });
 
-    it('should handle selectNode callback', () => {
-      render(<ListDesignerApp />);
+    it('should handle selectNode callback', async () => {
+      await renderApp();
 
       expect(mockSelectNode).toBeDefined();
     });
 
-    it('should handle addFieldContainer callback', () => {
-      render(<ListDesignerApp />);
+    it('should handle addFieldContainer callback', async () => {
+      await renderApp();
 
       expect(mockAddFieldNode).toBeDefined();
     });
 
-    it('should handle addStage callback', () => {
-      render(<ListDesignerApp />);
+    it('should handle addStage callback', async () => {
+      await renderApp();
 
       expect(mockAddStageNode).toBeDefined();
     });

@@ -1,11 +1,38 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import ListDesignerApp from '../ListDesignerApp';
 import { useDesignerController } from '../../hooks/useDesignerController';
 import type { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
 
 // Mock the hook
 vi.mock('../../hooks/useDesignerController');
+
+// Mock react-router-dom
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>();
+  return {
+    ...actual,
+    useParams: () => ({ id: '1' }),
+    useNavigate: () => vi.fn(),
+  };
+});
+
+vi.mock('../../api/gamedayApi', () => ({
+  gamedayApi: {
+    getGameday: vi.fn().mockResolvedValue({
+      id: 1,
+      name: 'Test Gameday',
+      date: '2026-05-01',
+      start: '10:00',
+      format: '6_2',
+      author: 1,
+      address: 'Test Field',
+      season: 1,
+      league: 1,
+    }),
+  },
+}));
 
 describe('ListDesignerApp Coverage', () => {
   const mockHandlers = {
@@ -31,6 +58,7 @@ describe('ListDesignerApp Coverage', () => {
   };
 
   const defaultMockReturn = {
+    metadata: { id: 1, name: "Test Gameday", date: "2026-05-01", start: "10:00", format: "6_2", author: 1, address: "Test Field", season: 1, league: 1 },
     nodes: [] as FlowNode[],
     edges: [] as FlowEdge[],
     globalTeams: [] as GlobalTeam[],
@@ -38,6 +66,7 @@ describe('ListDesignerApp Coverage', () => {
     selectedNode: null,
     validation: { isValid: true, errors: [], warnings: [] },
     notifications: [],
+    updateMetadata: vi.fn(),
     ui: {
       highlightedElement: null,
       expandedFieldIds: new Set(),
@@ -55,11 +84,18 @@ describe('ListDesignerApp Coverage', () => {
     removeGameToGameEdge: vi.fn(),
     addGameNodeInStage: vi.fn(),
     addNotification: vi.fn(),
+    importState: vi.fn(),
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
+
+  const renderApp = async () => {
+    render(<MemoryRouter initialEntries={['/designer/1']}><ListDesignerApp /></MemoryRouter>);
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Gameday Designer')).toBeInTheDocument());
+  };
 
   it('handles clicking on error in popover', async () => {
     const mockValidation = {
@@ -75,7 +111,7 @@ describe('ListDesignerApp Coverage', () => {
       validation: mockValidation,
     });
 
-    render(<ListDesignerApp />);
+    await renderApp();
 
     // Click on error summary to open popover
     const errorSummary = screen.getByText(/1 error/i);
@@ -104,7 +140,7 @@ describe('ListDesignerApp Coverage', () => {
       validation: mockValidation,
     });
 
-    render(<ListDesignerApp />);
+    await renderApp();
 
     // Click on warning summary to open popover
     const warningSummary = screen.getByText(/1 warning/i);
@@ -136,7 +172,7 @@ describe('ListDesignerApp Coverage', () => {
       validation: mockValidation,
     });
 
-    render(<ListDesignerApp />);
+    await renderApp();
 
     fireEvent.click(screen.getByText(/4 errors/i));
 
