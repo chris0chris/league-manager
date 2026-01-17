@@ -57,7 +57,8 @@ This phase enables users to enter scores and see the dynamic flow of the tournam
     - [ ] Update `GameNode` to display resolved team names (e.g., "Winner G1 (Team Alpha)") alongside placeholders.
     - [ ] Ensure real-time updates when results change.
 - [ ] Task: TDD - Write tests for result entry and node updates.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Frontend - Result Entry & Visualization' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Frontend - Result Entry & Visualization' (Protocol in workflow.md) [checkpoint: a3ca8ca]
+
 
 ## Phase 5: Final Polish & Integration
 - [ ] Task: End-to-End Testing
