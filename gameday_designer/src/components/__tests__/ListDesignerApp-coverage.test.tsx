@@ -85,6 +85,14 @@ describe('ListDesignerApp Coverage', () => {
     addGameNodeInStage: vi.fn(),
     addNotification: vi.fn(),
     importState: vi.fn(),
+    exportState: vi.fn().mockReturnValue({
+      metadata: {},
+      nodes: [],
+      edges: [],
+      fields: [],
+      globalTeams: [],
+      globalTeamGroups: []
+    }),
   };
 
   beforeEach(() => {

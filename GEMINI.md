@@ -47,35 +47,58 @@ Targeted modifications can be verified using isolated test runs (e.g., only the 
 
 ## Testing Strategy
 
-### 1. Execution
-- **Targeted Runs**: For targeted modifications, tests can be run in isolation (e.g., only the test file corresponding to the changed code) to ensure fast feedback.
-- **Full Suite**: Complex tasks or significant changes require running the full test suite to prevent regressions.
+### 1. Pre-flight Checklist (Always check these first)
+- [ ] **LXC Container**: Ensure `servyy-test` is running (`lxc list`).
+- [ ] **Database IP**: The IP changes! Always verify with `lxc list servyy-test`.
+- [ ] **Environment Variables**: Must be exported in the CURRENT shell session.
+- [ ] **Migrations**: Run `python manage.py migrate` if any models changed.
+- [ ] **Dependencies**: Run `uv sync --extra test` if any python imports fail.
 
 ### 2. Backend Testing (pytest)
-Backend tests require a MariaDB instance. The project infrastructure uses an LXC container (`servyy-test`) running a Docker MariaDB.
+Backend tests require a MariaDB instance in the `servyy-test` LXC container.
 
-**Mandatory Environment Variables:**
+**Mandatory Setup Command:**
 ```bash
-export MYSQL_HOST=10.185.182.207
+# 1. Spin up/Reset DB
+cd container && ./spinup_test_db.sh && cd ..
+
+# 2. Get current IP (e.g. 10.185.182.62)
+lxc list servyy-test
+
+# 3. Export all variables (Update IP if needed)
+export MYSQL_HOST=10.185.182.62
 export MYSQL_DB_NAME=test_db
 export MYSQL_USER=user
 export MYSQL_PWD=user
 export SECRET_KEY=test-secret-key
-```
+export league_manager=dev
 
-**Execution:**
-```bash
-# Reset/Start test DB (in container/ directory)
-./spinup_test_db.sh
-
-# Run tests
+# 4. Migrate and Test
+python manage.py migrate
 pytest
 ```
 
+**Troubleshooting DB Connection:**
+If you get `OperationalError: (2003, "Can't connect to MySQL server")`:
+1. Re-run `./container/spinup_test_db.sh`.
+2. Check `lxc list` to see if the IP address has changed.
+3. Ensure no local firewall is blocking the connection.
+
 ### 3. Frontend Testing (vitest)
-All modern frontend apps use Vitest.
+Run tests for the specific app you are working on, or all of them to ensure no regressions.
+
 ```bash
+# Gameday Designer
 npm --prefix gameday_designer/ run test:run
+
+# Passcheck
+npm --prefix passcheck/ run test:run
+
+# Liveticker
+npm --prefix liveticker/ run test:run
+
+# Scorecard
+npm --prefix scorecard/ run test:run
 ```
 
 ---

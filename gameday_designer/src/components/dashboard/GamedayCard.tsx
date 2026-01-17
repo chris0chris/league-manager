@@ -11,9 +11,10 @@ import type { GamedayListEntry } from '../../types';
 interface GamedayCardProps {
   gameday: GamedayListEntry;
   onClick: (id: number) => void;
+  onDelete: (id: number) => void;
 }
 
-const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick }) => {
+const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick, onDelete }) => {
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -34,10 +35,15 @@ const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick }) => {
     return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(gameday.id);
+  };
+
   return (
     <Col xs={12} sm={6} lg={4} xl={3} className="mb-4">
       <Card 
-        className="h-100 shadow-sm cursor-pointer hover-lift" 
+        className="h-100 shadow-sm cursor-pointer hover-lift position-relative" 
         onClick={() => onClick(gameday.id)}
         role="button"
         style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
@@ -49,36 +55,41 @@ const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick }) => {
             <Badge bg={getStatusVariant(gameday.status)}>
               {getStatusLabel(gameday.status)}
             </Badge>
-            <small className="text-muted">{gameday.season_display}</small>
+            <div className="d-flex align-items-center">
+              <small className="text-muted me-2">{gameday.season_display}</small>
+              <button 
+                className="btn btn-sm text-muted btn-destructive-hover"
+                onClick={handleDelete}
+                title="Delete Gameday"
+                style={{ lineHeight: 1, padding: '2px 5px' }}
+              >
+                <i className="bi bi-trash"></i>
+              </button>
+            </div>
           </div>
           
           <Card.Title className="text-truncate" title={gameday.name}>
             {gameday.name}
           </Card.Title>
           
-          <div className="mt-3">
-            <div className="d-flex align-items-center mb-1 text-muted">
-              <i className="bi bi-calendar-event me-2"></i>
-              <span>{formatDate(gameday.date)}</span>
-            </div>
+          <div className="mt-3 text-muted small">
+            <span>{formatDate(gameday.date)}</span>
             {gameday.league_display && (
-              <div className="d-flex align-items-center text-muted">
-                <i className="bi bi-trophy me-2"></i>
+              <>
+                <span className="mx-2">•</span>
                 <span>{gameday.league_display}</span>
-              </div>
+              </>
+            )}
+            {gameday.address && (
+              <>
+                <span className="mx-2">•</span>
+                <span className="text-truncate" title={gameday.address}>
+                  {gameday.address}
+                </span>
+              </>
             )}
           </div>
         </Card.Body>
-        <Card.Footer className="bg-transparent border-top-0 pt-0">
-          <small className="text-muted">
-            {gameday.address && (
-              <span className="text-truncate d-block" title={gameday.address}>
-                <i className="bi bi-geo-alt me-1"></i>
-                {gameday.address}
-              </span>
-            )}
-          </small>
-        </Card.Footer>
       </Card>
     </Col>
   );

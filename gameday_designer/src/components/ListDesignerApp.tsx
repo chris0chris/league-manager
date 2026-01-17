@@ -38,6 +38,7 @@ const ListDesignerApp: React.FC = () => {
     metadata,
     nodes,
     edges,
+    fields,
     globalTeams,
     globalTeamGroups,
     selectedNode,
@@ -53,10 +54,90 @@ const ListDesignerApp: React.FC = () => {
     addStageToGameEdge,
     removeEdgeFromSlot,
     addGameNodeInStage,
-    addNotification,
     importState,
     updateMetadata,
+    exportState,
   } = useDesignerController();
+
+  const {
+    highlightedElement,
+    expandedFieldIds,
+    expandedStageIds,
+    showTournamentModal,
+    canExport,
+    hasNodes,
+  } = ui;
+
+  const {
+    handleHighlightElement,
+    handleDynamicReferenceClick,
+    handleImport,
+    handleExport,
+    handleClearAll,
+    handleUpdateNode,
+    handleDeleteNode,
+    handleAddFieldContainer,
+    handleAddStage,
+    handleSelectNode,
+    handleAddGlobalTeam,
+    handleUpdateGlobalTeam,
+    handleDeleteGlobalTeam,
+    handleReorderGlobalTeam,
+    handleAddGlobalTeamGroup,
+    handleAssignTeam,
+    handleGenerateTournament,
+    setShowTournamentModal,
+    dismissNotification,
+    addNotification,
+  } = handlers;
+
+  // Auto-save metadata and designer data
+  const lastSavedStateRef = React.useRef<string>('');
+  const initialLoadRef = React.useRef<boolean>(true);
+
+  useEffect(() => {
+    if (loading) return;
+    
+    // Skip initial load to prevent unnecessary save
+    if (initialLoadRef.current) {
+      if (metadata && metadata.id) {
+        const initialState = exportState();
+        lastSavedStateRef.current = JSON.stringify(initialState);
+        initialLoadRef.current = false;
+      }
+      return;
+    }
+
+    const currentState = exportState();
+    const currentStateStr = JSON.stringify(currentState);
+    if (currentStateStr === lastSavedStateRef.current) return;
+
+    const timer = setTimeout(async () => {
+      if (metadata?.id) {
+        try {
+          // Send metadata + designer_data (which contains nodes, edges, fields, globalTeams, globalTeamGroups)
+          await gamedayApi.patchGameday(metadata.id, {
+            ...metadata,
+            designer_data: {
+              ...metadata.designer_data,
+              // We store the full state components in designer_data
+              nodes,
+              edges,
+              fields,
+              globalTeams,
+              globalTeamGroups
+            }
+          } as any);
+          lastSavedStateRef.current = currentStateStr;
+        } catch (error) {
+          console.error('Auto-save failed', error);
+          addNotification('Failed to auto-save changes', 'warning', 'Auto-save');
+        }
+      }
+    }, 1000); // Debounce for 1 second
+
+    return () => clearTimeout(timer);
+  }, [metadata, nodes, edges, fields, globalTeams, globalTeamGroups, loading, addNotification, exportState]);
 
   useEffect(() => {
     if (id) {
@@ -69,16 +150,26 @@ const ListDesignerApp: React.FC = () => {
     setLoading(true);
     try {
       const gameday = await gamedayApi.getGameday(gamedayId);
-      if (gameday.designer_data) {
+      if (gameday.designer_data && (gameday.designer_data as any).nodes) {
+        // Load full state if available
+        importState({
+          metadata: gameday,
+          nodes: (gameday.designer_data as any).nodes || [],
+          edges: (gameday.designer_data as any).edges || [],
+          fields: (gameday.designer_data as any).fields || [],
+          globalTeams: (gameday.designer_data as any).globalTeams || [],
+          globalTeamGroups: (gameday.designer_data as any).globalTeamGroups || []
+        });
+      } else if (gameday.designer_data && (gameday.designer_data as any).fields) {
+        // Legacy load (only fields)
         importState({
           metadata: gameday,
           nodes: [], 
           edges: [],
-          fields: gameday.designer_data.fields.map(f => ({ id: f.id, name: f.name, order: f.order })),
+          fields: (gameday.designer_data as any).fields.map((f: any) => ({ id: f.id, name: f.name, order: f.order })),
           globalTeams: [],
           globalTeamGroups: []
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as unknown as any);
+        } as any);
       } else {
         // Just set metadata for new gameday
         updateMetadata(gameday);
@@ -114,36 +205,18 @@ const ListDesignerApp: React.FC = () => {
     return 'game';
   };
 
-  const {
-    highlightedElement,
-    expandedFieldIds,
-    expandedStageIds,
-    showTournamentModal,
-    canExport,
-    hasNodes,
-  } = ui;
-
-  const {
-    handleHighlightElement,
-    handleDynamicReferenceClick,
-    handleImport,
-    handleExport,
-    handleClearAll,
-    handleUpdateNode,
-    handleDeleteNode,
-    handleAddFieldContainer,
-    handleAddStage,
-    handleSelectNode,
-    handleAddGlobalTeam,
-    handleUpdateGlobalTeam,
-    handleDeleteGlobalTeam,
-    handleReorderGlobalTeam,
-    handleAddGlobalTeamGroup,
-    handleAssignTeam,
-    handleGenerateTournament,
-    setShowTournamentModal,
-    dismissNotification,
-  } = handlers;
+  const handleDeleteGameday = async () => {
+    if (metadata?.id) {
+      try {
+        await gamedayApi.deleteGameday(metadata.id);
+        addNotification('Gameday deleted successfully', 'success', 'Delete');
+        navigate('/');
+      } catch (error) {
+        console.error('Failed to delete gameday', error);
+        addNotification('Failed to delete gameday', 'danger', 'Delete Error');
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -185,6 +258,7 @@ const ListDesignerApp: React.FC = () => {
             onImport={handleImport}
             onExport={handleExport}
             onClearAll={handleClearAll}
+            onDeleteGameday={handleDeleteGameday}
             onNotify={addNotification}
             hasNodes={hasNodes}
             canExport={canExport}

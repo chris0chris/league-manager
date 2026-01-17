@@ -239,6 +239,7 @@ export function useDesignerController() {
       handleAddFieldContainer: () => addFieldNode({}, true),
       handleAddStage: (fieldId: string) => addStageNode(fieldId),
       dismissNotification,
+      addNotification,
     }
   };
 }

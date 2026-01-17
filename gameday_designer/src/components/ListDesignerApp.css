@@ -103,3 +103,15 @@
   position: relative;
   border-width: 2px !important;
 }
+
+.btn-destructive-hover {
+  transition: all 0.2s ease;
+  border: 1px solid #dee2e6 !important;
+  background-color: transparent !important;
+}
+
+.btn-destructive-hover:hover {
+  color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  background-color: rgba(220, 53, 69, 0.05) !important;
+}

@@ -338,7 +338,8 @@ describe('ListDesignerApp', () => {
 
       await renderApp();
 
-      expect(mockExportState).not.toHaveBeenCalled();
+      // Called at least once by auto-save logic on load
+      expect(mockExportState).toHaveBeenCalled();
     });
 
     it('should call clearAll when clear is triggered', async () => {

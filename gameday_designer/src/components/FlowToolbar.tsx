@@ -28,6 +28,8 @@ export interface FlowToolbarProps {
   onExport: () => void;
   /** Callback to clear all nodes and edges */
   onClearAll: () => void;
+  /** Callback to delete the entire gameday */
+  onDeleteGameday?: () => void;
   /** Callback for notifications */
   onNotify?: (message: string, type: import('../types/designer').NotificationType, title?: string) => void;
   /** Callback for undo action */
@@ -54,6 +56,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
   onImport,
   onExport,
   onClearAll,
+  onDeleteGameday,
   onNotify,
   onUndo,
   onRedo,
@@ -64,6 +67,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
 }) => {
   const { t } = useTypedTranslation(['ui']);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showConfirmDelete, setShowConfirmDelete] = React.useState(false);
 
   /**
    * Handle file input change for import.
@@ -107,6 +111,15 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
     onClearAll();
   };
 
+  const handleDeleteGameday = () => {
+    if (showConfirmDelete) {
+      onDeleteGameday?.();
+    } else {
+      setShowConfirmDelete(true);
+      setTimeout(() => setShowConfirmDelete(false), 3000);
+    }
+  };
+
   return (
     <div className="flow-toolbar" data-testid="flow-toolbar">
       <ButtonToolbar>
@@ -142,7 +155,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
               data-testid="undo-button"
               className="btn-adaptive"
             >
-              <i className={`bi ${ICONS.CLEAR} me-2`}></i>
+              <i className={`bi bi-arrow-counterclockwise me-2`}></i>
               <span className="btn-label-adaptive">{t('ui:button.undo')}</span>
             </Button>
             <Button
@@ -159,16 +172,36 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
           </ButtonGroup>
         )}
 
-        {/* Clear all button */}
+        {/* Actions button group */}
         <ButtonGroup className="me-2">
+          {/* Clear schedule button */}
           <Button
-            variant="outline-danger"
+            variant="outline-warning"
             onClick={handleClearAll}
             disabled={!hasNodes}
-            title={t('ui:tooltip.clearAllNodesAndEdges')}
+            title={t('ui:button.clearSchedule', 'Clear Schedule')}
             data-testid="clear-all-button"
           >
-            <i className={`bi ${ICONS.DELETE}`}></i>
+            <i className={`bi ${ICONS.CLEAR}`}></i>
+          </Button>
+
+          {/* Delete gameday button */}
+          <Button
+            variant="outline-danger"
+            onClick={handleDeleteGameday}
+            onMouseLeave={() => setShowConfirmDelete(false)}
+            title={showConfirmDelete ? "Click again to confirm deletion" : t('ui:button.deleteGameday', 'Delete Gameday')}
+            data-testid="delete-gameday-button"
+            className="transition-all d-flex align-items-center btn-destructive-hover btn-adaptive"
+            style={{ width: showConfirmDelete ? '150px' : 'auto' }}
+          >
+            <i className={`bi ${ICONS.TRASH} ${showConfirmDelete ? 'me-2' : ''}`}></i>
+            <span 
+              className="btn-label-adaptive" 
+              style={showConfirmDelete ? { maxWidth: '200px', opacity: 1, marginLeft: '0.25rem', fontWeight: 'bold' } : {}}
+            >
+              {showConfirmDelete ? 'Confirm Delete' : t('ui:button.deleteGameday', 'Delete Gameday')}
+            </span>
           </Button>
         </ButtonGroup>
 

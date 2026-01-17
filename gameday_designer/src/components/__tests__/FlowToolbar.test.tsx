@@ -58,11 +58,18 @@ describe('FlowToolbar', () => {
       expect(screen.queryByText('Export')).not.toBeInTheDocument();
     });
 
-    it('renders Clear All button', () => {
+    it('renders Clear Schedule button', () => {
       render(<FlowToolbar {...defaultProps} />);
       expect(screen.getByTestId('clear-all-button')).toBeInTheDocument();
-      // Label is removed from Clear All button
-      expect(screen.queryByText('Clear All')).not.toBeInTheDocument();
+      // Label is removed from Clear Schedule button (icon-only)
+      expect(screen.queryByText('Clear Schedule')).not.toBeInTheDocument();
+    });
+
+    it('renders Delete Gameday button', () => {
+      render(<FlowToolbar {...defaultProps} />);
+      expect(screen.getByTestId('delete-gameday-button')).toBeInTheDocument();
+      // Label exists but is hidden by default (btn-label-adaptive)
+      expect(screen.getByText('Delete Gameday')).toBeInTheDocument();
     });
 
     it('renders hidden file input', () => {
@@ -111,18 +118,37 @@ describe('FlowToolbar', () => {
   });
 
   describe('Clear All functionality', () => {
-    it('enables Clear All button when hasNodes is true', () => {
+    it('enables Clear Schedule button when hasNodes is true', () => {
       render(<FlowToolbar {...defaultProps} hasNodes={true} />);
       expect(screen.getByTestId('clear-all-button')).not.toBeDisabled();
     });
 
-    it('calls onClearAll when Clear All button is clicked', async () => {
+    it('calls onClearAll when Clear Schedule button is clicked', async () => {
       const onClearAll = vi.fn();
       const user = userEvent.setup();
       render(<FlowToolbar {...defaultProps} onClearAll={onClearAll} hasNodes={true} />);
 
       await user.click(screen.getByTestId('clear-all-button'));
       expect(onClearAll).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Delete Gameday functionality', () => {
+    it('requires double click to confirm deletion', async () => {
+      const onDeleteGameday = vi.fn();
+      const user = userEvent.setup();
+      render(<FlowToolbar {...defaultProps} onDeleteGameday={onDeleteGameday} />);
+
+      const deleteBtn = screen.getByTestId('delete-gameday-button');
+      
+      // First click
+      await user.click(deleteBtn);
+      expect(onDeleteGameday).not.toHaveBeenCalled();
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument();
+
+      // Second click
+      await user.click(deleteBtn);
+      expect(onDeleteGameday).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -139,10 +165,10 @@ describe('FlowToolbar', () => {
       expect(exportButton).toHaveAttribute('title', 'Export the current tournament schedule to a JSON file');
     });
 
-    it('has tooltip for Clear All button', () => {
+    it('has tooltip for Clear Schedule button', () => {
       render(<FlowToolbar {...defaultProps} />);
       const clearButton = screen.getByTestId('clear-all-button');
-      expect(clearButton).toHaveAttribute('title', 'Permanently clear all fields, stages, games, and teams');
+      expect(clearButton).toHaveAttribute('title', 'Clear Schedule');
     });
 
     it('has tooltip for Undo button when rendered', () => {

@@ -83,6 +83,14 @@ vi.mock('../../hooks/useDesignerController', () => ({
     addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
     updateMetadata: vi.fn(),
     importState: vi.fn(),
+    exportState: vi.fn().mockReturnValue({
+      metadata: {},
+      nodes: [],
+      edges: [],
+      fields: [],
+      globalTeams: [],
+      globalTeamGroups: []
+    }),
   }),
 }));
 

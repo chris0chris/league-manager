@@ -26,37 +26,50 @@ describe('GamedayCard', () => {
   };
 
   it('renders gameday information correctly', () => {
-    render(<GamedayCard gameday={mockGameday} onClick={vi.fn()} />);
+    render(<GamedayCard gameday={mockGameday} onClick={vi.fn()} onDelete={vi.fn()} />);
 
     expect(screen.getByText('DFFL Gameday 1')).toBeInTheDocument();
     expect(screen.getByText('13.04.2026')).toBeInTheDocument(); // German format
     expect(screen.getByText('Season 2026')).toBeInTheDocument();
     expect(screen.getByText('DFFL')).toBeInTheDocument();
+    expect(screen.getByText('Sportpark Mitte')).toBeInTheDocument();
   });
 
   it('renders status badge correctly', () => {
     const { rerender } = render(
-      <GamedayCard gameday={{ ...mockGameday, status: 'draft' }} onClick={vi.fn()} />
+      <GamedayCard gameday={{ ...mockGameday, status: 'draft' }} onClick={vi.fn()} onDelete={vi.fn()} />
     );
     expect(screen.getByText('Draft')).toBeInTheDocument();
 
     rerender(
-      <GamedayCard gameday={{ ...mockGameday, status: 'scheduled' }} onClick={vi.fn()} />
+      <GamedayCard gameday={{ ...mockGameday, status: 'scheduled' }} onClick={vi.fn()} onDelete={vi.fn()} />
     );
     expect(screen.getByText('Scheduled')).toBeInTheDocument();
 
     rerender(
-      <GamedayCard gameday={{ ...mockGameday, status: 'completed' }} onClick={vi.fn()} />
+      <GamedayCard gameday={{ ...mockGameday, status: 'completed' }} onClick={vi.fn()} onDelete={vi.fn()} />
     );
     expect(screen.getByText('Completed')).toBeInTheDocument();
   });
 
-  it('calls onClick handler when clicked', () => {
+  it('calls onClick handler when card is clicked', () => {
     const handleClick = vi.fn();
-    render(<GamedayCard gameday={mockGameday} onClick={handleClick} />);
+    render(<GamedayCard gameday={mockGameday} onClick={handleClick} onDelete={vi.fn()} />);
 
-    fireEvent.click(screen.getByRole('button', { hidden: true })); // Card body or container
+    // The card has role="button", we can find it by its title content
+    fireEvent.click(screen.getByText('DFFL Gameday 1')); 
     expect(handleClick).toHaveBeenCalledTimes(1);
     expect(handleClick).toHaveBeenCalledWith(1);
+  });
+
+  it('calls onDelete handler when delete button is clicked', () => {
+    const handleDelete = vi.fn();
+    render(<GamedayCard gameday={mockGameday} onClick={vi.fn()} onDelete={handleDelete} />);
+
+    const deleteBtn = screen.getByTitle('Delete Gameday');
+    
+    fireEvent.click(deleteBtn);
+    expect(handleDelete).toHaveBeenCalledTimes(1);
+    expect(handleDelete).toHaveBeenCalledWith(1);
   });
 });
