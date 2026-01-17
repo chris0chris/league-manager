@@ -20,7 +20,7 @@ interface GamedayMetadataAccordionProps {
   onUnlock?: () => void;
   onClearAll?: () => void;
   onDelete?: () => void;
-  hasNodes?: boolean;
+  hasData?: boolean;
   defaultActiveKey?: string;
   readOnly?: boolean;
 }
@@ -32,7 +32,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   onUnlock,
   onClearAll,
   onDelete,
-  hasNodes = false,
+  hasData = false,
   defaultActiveKey,
   readOnly = false
 }) => {
@@ -172,7 +172,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                     variant="outline-warning" 
                     size="sm"
                     onClick={onClearAll}
-                    disabled={!hasNodes || metadata.status !== 'DRAFT'}
+                    disabled={!hasData || metadata.status !== 'DRAFT'}
                     className="px-3"
                   >
                     <i className={`bi ${ICONS.CLEAR} me-2`}></i>

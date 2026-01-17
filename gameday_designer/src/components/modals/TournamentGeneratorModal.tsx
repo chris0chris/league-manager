@@ -61,6 +61,8 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
   const [generateTeams, setGenerateTeams] = useState<boolean>(false);
   const [autoAssignTeams, setAutoAssignTeams] = useState<boolean>(true);
 
+  const hasTeams = teams.length > 0;
+
   /**
    * Reset form to default values
    */
@@ -82,6 +84,13 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
       // We only want to reset when 'show' changes to false
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [show]);
+
+    // Ensure generateTeams is false if pool has teams
+    useEffect(() => {
+      if (hasTeams) {
+        setGenerateTeams(false);
+      }
+    }, [hasTeams]);
   
       // Validation
       const isDurationValid = gameDuration >= 15 && gameDuration <= 180;
@@ -245,10 +254,20 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                   <Form.Check
                     type="checkbox"
                     id="generate-teams"
-                    label={t('modal:tournamentGenerator.generateTeams', {
-                      count: selectedTemplate.teamCount.exact || selectedTemplate.teamCount.min
-                    })}
+                    label={
+                      <>
+                        {t('modal:tournamentGenerator.generateTeams', {
+                          count: selectedTemplate.teamCount.exact || selectedTemplate.teamCount.min
+                        })}
+                        {hasTeams && (
+                          <span className="text-muted small ms-2">
+                            ({t('modal:tournamentGenerator.generateTeamsDisabledHint', 'Disable manual teams first')})
+                          </span>
+                        )}
+                      </>
+                    }
                     checked={generateTeams}
+                    disabled={hasTeams}
                     onChange={(e) => setGenerateTeams(e.target.checked)}
                   />
                   <Form.Check

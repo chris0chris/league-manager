@@ -75,7 +75,7 @@ const ListDesignerApp: React.FC = () => {
     expandedStageIds,
     showTournamentModal,
     canExport,
-    hasNodes,
+    hasData,
   } = ui;
 
   const {
@@ -549,8 +549,8 @@ const ListDesignerApp: React.FC = () => {
         onUnlock={handleUnlockWrapped}
         onClearAll={handleClearAll}
         onDelete={handleDeleteGameday}
-        hasNodes={hasNodes}
-        defaultActiveKey={!hasNodes ? '0' : undefined}
+        hasData={hasData}
+        defaultActiveKey={!hasData ? '0' : undefined}
         readOnly={isLocked}
       />
 

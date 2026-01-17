@@ -253,7 +253,7 @@ export function useDesignerController(flowState: UseFlowStateReturn) {
       expandedStageIds,
       showTournamentModal,
       canExport,
-      hasNodes: nodes.length > 0,
+      hasData: nodes.length > 0 || globalTeams.length > 0 || fields.length > 0,
     },
     // Handlers
     handlers: {
