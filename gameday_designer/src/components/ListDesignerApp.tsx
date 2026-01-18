@@ -28,7 +28,8 @@ import type {
   FlowValidationError as ValidationError, 
   FlowValidationWarning as ValidationWarning,
   HighlightedElement,
-  GamedayMetadata
+  GamedayMetadata,
+  GameNode
 } from '../types/flowchart';
 
 import './ListDesignerApp.css';
@@ -772,7 +773,7 @@ const ListDesignerApp: React.FC = () => {
           handleSelectNode(null);
         }}
         onSave={handleSaveResult}
-        game={activeGame as any}
+        game={activeGame as GameNode}
         homeTeamName={activeGame ? (activeGame.data.homeTeamId ? globalTeams.find(t => t.id === activeGame.data.homeTeamId)?.label || 'Home' : 'Home') : 'Home'}
         awayTeamName={activeGame ? (activeGame.data.awayTeamId ? globalTeams.find(t => t.id === activeGame.data.awayTeamId)?.label || 'Away' : 'Away') : 'Away'}
       />

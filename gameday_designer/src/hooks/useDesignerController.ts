@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { useFlowState } from './useFlowState';
 import { useFlowValidation } from './useFlowValidation';
 import { downloadFlowchartAsJson, validateForExport } from '../utils/flowchartExport';
 import { importFromScheduleJson, validateScheduleJson } from '../utils/flowchartImport';
@@ -24,11 +23,9 @@ import {
 import type { GlobalTeam, HighlightedElement, Notification, NotificationType } from '../types/flowchart';
 import type { TournamentGenerationConfig } from '../types/tournament';
 import { v4 as uuidv4 } from 'uuid';
-import { gamedayApi } from '../api/gamedayApi';
 
 export function useDesignerController(flowState: UseFlowStateReturn) {
   const {
-    metadata,
     nodes,
     edges,
     fields,
@@ -199,43 +196,6 @@ export function useDesignerController(flowState: UseFlowStateReturn) {
     },
     [globalTeams, globalTeamGroups, addBulkTournament, addGlobalTeam, addGlobalTeamGroup, updateGlobalTeam, assignTeamsToTournament, addNotification]
   );
-
-  const handlePublish = useCallback(async () => {
-    if (metadata.id === 0) return;
-    try {
-      const updated = await gamedayApi.publish(metadata.id);
-      console.log('DEBUG: publish response status:', updated.status);
-      // Always update metadata first to ensure status change is reflected
-      updateMetadata(updated);
-      
-      // Then import full state if available
-      if (updated.designer_data) {
-        importState(updated.designer_data);
-      }
-      addNotification('Schedule published and locked', 'success', 'Success');
-    } catch (error) {
-      console.error('Failed to publish gameday:', error);
-      addNotification('Failed to publish schedule', 'danger', 'Error');
-    }
-  }, [metadata.id, importState, updateMetadata, addNotification]);
-
-  const handleUnlock = useCallback(async () => {
-    if (metadata.id === 0) return;
-    try {
-      const updated = await gamedayApi.patchGameday(metadata.id, { status: 'DRAFT' });
-      console.log('DEBUG: unlock response status:', updated.status);
-      // Always update metadata first to ensure status change is reflected
-      updateMetadata(updated);
-
-      if (updated.designer_data) {
-        importState(updated.designer_data);
-      }
-      addNotification('Schedule unlocked for editing', 'warning', 'Success');
-    } catch (error) {
-      console.error('Failed to unlock gameday:', error);
-      addNotification('Failed to unlock schedule', 'danger', 'Error');
-    }
-  }, [metadata.id, importState, updateMetadata, addNotification]);
 
   const canExport = useMemo(() => {
     return nodes.some((n) => n.type === 'game') && fields.length > 0;

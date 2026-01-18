@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import type { GameNode } from '../../types/flowchart';
@@ -21,19 +21,22 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
   awayTeamName,
 }) => {
   const { t } = useTypedTranslation(['ui']);
+  
+  // Use state but initialize from game prop if available
   const [halftimeHome, setHalftimeHome] = useState(0);
   const [halftimeAway, setHalftimeAway] = useState(0);
   const [finalHome, setFinalHome] = useState(0);
   const [finalAway, setFinalAway] = useState(0);
 
-  useEffect(() => {
-    if (game) {
-      setHalftimeHome(game.data.halftime_score?.home || 0);
-      setHalftimeAway(game.data.halftime_score?.away || 0);
-      setFinalHome(game.data.final_score?.home || 0);
-      setFinalAway(game.data.final_score?.away || 0);
-    }
-  }, [game]);
+  // Sync state when game changes (identity changes)
+  const [prevGameId, setPrevGameId] = useState<string | null>(null);
+  if (game && game.id !== prevGameId) {
+    setPrevGameId(game.id);
+    setHalftimeHome(game.data.halftime_score?.home || 0);
+    setHalftimeAway(game.data.halftime_score?.away || 0);
+    setFinalHome(game.data.final_score?.home || 0);
+    setFinalAway(game.data.final_score?.away || 0);
+  }
 
   const handleSave = () => {
     onSave({

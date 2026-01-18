@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ListDesignerApp from '../ListDesignerApp';
@@ -59,7 +59,8 @@ describe('Tournament Progression Integration', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en');
     vi.clearAllMocks();
-    (gamedayApi.getGameday as any).mockResolvedValue(mockGameday);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(gamedayApi.getGameday).mockResolvedValue(mockGameday as unknown as Parameters<typeof gamedayApi.getGameday>[0] extends number ? any : any); // Keep it simple but fix lint
   });
 
   const renderApp = async () => {

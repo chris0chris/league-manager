@@ -61,9 +61,9 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     vi.clearAllMocks();
     
     // Default GET response
-    (gamedayApi.getGameday as any).mockResolvedValue(mockGameday);
+    vi.mocked(gamedayApi.getGameday).mockResolvedValue(mockGameday);
     // Mock patch to return what it received
-    (gamedayApi.patchGameday as any).mockImplementation((id, data) => Promise.resolve({ ...mockGameday, ...data }));
+    vi.mocked(gamedayApi.patchGameday).mockImplementation((_, data) => Promise.resolve({ ...mockGameday, ...data }));
   });
 
   afterEach(() => {
@@ -186,7 +186,8 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
       edges: []
     };
 
-    (gamedayApi.publish as any).mockImplementation(async (id: number) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    vi.mocked(gamedayApi.publish).mockImplementation(async (_) => {
       mockGameday.status = 'PUBLISHED';
       return { 
         ...mockGameday, 
@@ -228,7 +229,7 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     await user.type(halftimeHomeInput, '7');
     
     const saveResultBtn = within(modal).getByRole('button', { name: /Save/i });
-    (gamedayApi.updateGameResult as any).mockResolvedValue({
+    vi.mocked(gamedayApi.updateGameResult).mockResolvedValue({
       halftime_score: { home: 7, away: 0 },
       final_score: { home: 7, away: 0 },
       status: 'IN_PROGRESS'
@@ -237,16 +238,15 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     await user.click(saveResultBtn);
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 
-    // --- 7. DATA INTEGRITY (Unlock & Clear All) ---
-    (gamedayApi.patchGameday as any).mockImplementation(async (id: number, data: any) => {
-      if (data.status) mockGameday.status = data.status;
-      return { 
-        ...mockGameday, 
-        ...data,
-        designer_data: fullDesignerData
-      };
-    });
-    
+        // --- 7. DATA INTEGRITY (Unlock & Clear All) ---
+        vi.mocked(gamedayApi.patchGameday).mockImplementation(async (_, data: Partial<typeof mockGameday>) => {
+          if (data.status) mockGameday.status = data.status;
+          return {
+            ...mockGameday,
+            ...data,
+            designer_data: fullDesignerData
+          };
+        });    
     const unlockBtnAction = await screen.findByRole('button', { name: /Unlock Schedule/i });
     await user.click(unlockBtnAction);
     await waitFor(() => expect(screen.getAllByText(/DRAFT|Draft|Entwurf/i)[0]).toBeInTheDocument());

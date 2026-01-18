@@ -480,7 +480,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
     const data = game.data as GameNodeData;
     const dynamicRef = slot === 'home' ? data.homeTeamDynamic : data.awayTeamDynamic;
     const teamId = slot === 'home' ? data.homeTeamId : data.awayTeamId;
-    const resolvedName = slot === 'home' ? (data as any).resolvedHomeTeam : (data as any).resolvedAwayTeam;
+    const resolvedName = slot === 'home' ? data.resolvedHomeTeam : data.resolvedAwayTeam;
     
     let currentValue = '';
     if (dynamicRef) {

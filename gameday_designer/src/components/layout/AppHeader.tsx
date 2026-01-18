@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Navbar, Nav, Button } from 'react-bootstrap';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import LanguageSelector from '../LanguageSelector';
 import { useGamedayContext } from '../../context/GamedayContext';
@@ -15,7 +15,6 @@ const AppHeader: React.FC = () => {
   const { gamedayName } = useGamedayContext();
   const navigate = useNavigate();
   const location = useLocation();
-  const { id } = useParams<{ id: string }>();
 
   const isEditor = location.pathname.includes('/designer/');
   const pageTitle = isEditor 

@@ -105,7 +105,8 @@ describe('GamedayDashboard', () => {
 
   it('creates new gameday and navigates to editor', async () => {
     const newGameday = { id: 3, name: 'New Gameday' };
-    (gamedayApi.createGameday as any).mockResolvedValue(newGameday);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(gamedayApi.createGameday).mockResolvedValue(newGameday as unknown as Parameters<typeof gamedayApi.createGameday>[0] extends any ? any : any);
     
     await renderDashboard();
     fireEvent.click(screen.getByRole('button', { name: /Create Gameday/i }));

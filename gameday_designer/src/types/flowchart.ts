@@ -123,6 +123,11 @@ export interface GameNodeData {
   /** Dynamic away team reference from GameToGameEdge (overrides awayTeamId) */
   awayTeamDynamic: TeamReference | null;
 
+  /** Resolved home team label from backend (read-only) */
+  resolvedHomeTeam?: string;
+  /** Resolved away team label from backend (read-only) */
+  resolvedAwayTeam?: string;
+
   // Time scheduling (Phase 1)
   /** Calculated start time (HH:MM, 24-hour). Auto-calculated or manual. */
   startTime?: string;

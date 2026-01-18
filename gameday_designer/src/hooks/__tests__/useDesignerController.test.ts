@@ -36,7 +36,7 @@ vi.mock('../../utils/teamAssignment', () => ({
 }));
 
 // Mock window functions
-const mockConfirm = vi.spyOn(window, 'confirm').mockImplementation(() => true);
+vi.spyOn(window, 'confirm').mockImplementation(() => true);
 
 describe('useDesignerController', () => {
   beforeEach(() => {

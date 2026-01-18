@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import GameResultModal from '../GameResultModal';
+import type { GameNode } from '../../../types/flowchart';
 
 // Mock translation hook
 vi.mock('../../../i18n/useTypedTranslation', () => ({
@@ -23,7 +24,7 @@ describe('GameResultModal', () => {
     show: true,
     onHide: vi.fn(),
     onSave: vi.fn(),
-    game: mockGame as any,
+    game: mockGame as unknown as GameNode,
     homeTeamName: 'Team Alpha',
     awayTeamName: 'Team Beta',
   };

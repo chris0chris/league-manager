@@ -1,8 +1,8 @@
 
-import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
-import type { FlowNode, FlowEdge, GlobalTeam } from '../../types/flowchart';
+import type { FlowNode } from '../../types/flowchart';
+import { describe, it, expect } from 'vitest';
 
 describe('useFlowValidation - New Warnings', () => {
   describe('No Teams Warning', () => {

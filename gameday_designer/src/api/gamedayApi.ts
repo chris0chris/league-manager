@@ -161,7 +161,7 @@ class GamedayApi {
   /**
    * Update game result.
    */
-  async updateGameResult(gameId: number, data: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }): Promise<any> {
+  async updateGameResult(gameId: number, data: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }): Promise<unknown> {
     // In dev we just return the data since we don't have a mock for this yet
     if (this.isDev && !this.forceClient) return { ...data, status: data.final_score ? 'COMPLETED' : 'IN_PROGRESS' };
     const response = await axios.patch(`/api/gamedays/gameinfo/${gameId}/result/`, data, {

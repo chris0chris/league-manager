@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Container, Row, Col, Button, Spinner, Form, InputGroup, Card } from 'react-bootstrap';
+import { Container, Row, Col, Button, Form, Spinner } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import { gamedayApi } from '../../api/gamedayApi';
@@ -195,9 +195,10 @@ const GamedayDashboard: React.FC = () => {
 
   useEffect(() => {
     loadGamedays();
+    const currentTimeouts = timeoutRefs.current;
     return () => {
       // Cleanup timers on unmount
-      Object.values(timeoutRefs.current).forEach(timer => clearTimeout(timer));
+      Object.values(currentTimeouts).forEach(timer => clearTimeout(timer));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);

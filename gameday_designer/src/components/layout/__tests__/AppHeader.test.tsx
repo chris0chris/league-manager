@@ -15,7 +15,7 @@ describe('AppHeader', () => {
     await i18n.changeLanguage('en');
   });
 
-  const renderHeader = (path = '/', gamedayName = '') => {
+  const renderHeader = (path = '/') => {
     return render(
       <MemoryRouter initialEntries={[path]}>
         <GamedayProvider>
@@ -48,7 +48,7 @@ describe('AppHeader', () => {
   });
 
   it('shows back button only when in designer', () => {
-    const { rerender } = renderHeader('/');
+    renderHeader('/');
     expect(screen.queryByTitle(/Back to Dashboard/i)).not.toBeInTheDocument();
 
     renderHeader('/designer/1');
