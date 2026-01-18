@@ -28,5 +28,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: add new warning: no teams, no games, teams without games, unsused fields**
+- [x] **Track: add new warning: no teams, no games, teams without games, unsused fields**
 *Link: [./tracks/gameday_warnings_20260118/](./tracks/gameday_warnings_20260118/)*
