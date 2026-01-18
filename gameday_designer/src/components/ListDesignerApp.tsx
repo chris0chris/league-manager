@@ -14,6 +14,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ListCanvas from './ListCanvas';
 import FlowToolbar from './FlowToolbar';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
+import PublishConfirmationModal from './modals/PublishConfirmationModal';
 import GameResultModal from './modals/GameResultModal';
 import NotificationToast from './NotificationToast';
 import GamedayMetadataAccordion from './GamedayMetadataAccordion';
@@ -101,47 +102,91 @@ const ListDesignerApp: React.FC = () => {
     addNotification,
   } = handlers;
 
-  // Only lock if we have a valid status explicitly NOT DRAFT
-  const isLocked = Boolean(metadata?.status && metadata.status !== 'DRAFT');
+    // Only lock if we have a valid status explicitly NOT DRAFT
 
-  const [showResultModal, setShowResultModal] = useState(false);
-  const [activeGameId, setActiveGameId] = useState<string | null>(null);
+    const isLocked = Boolean(metadata?.status && metadata.status !== 'DRAFT');
 
-  useEffect(() => {
-    if (selectedNode?.type === 'game' && isLocked) {
-      setActiveGameId(selectedNode.id);
-      setShowResultModal(true);
-    }
-  }, [selectedNode, isLocked]);
+  
 
-  const activeGame = activeGameId ? nodes.find(n => n.id === activeGameId && n.type === 'game') : null;
+    const [showResultModal, setShowResultModal] = useState(false);
 
-  const handleSaveResult = async (resultData: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }) => {
-    if (!activeGameId) return;
-    try {
-      const updatedGame = await gamedayApi.updateGameResult(parseInt(activeGameId.replace('game-', '')), resultData);
-      // Update local node state
-      handleUpdateNode(activeGameId, {
-        halftime_score: updatedGame.halftime_score,
-        final_score: updatedGame.final_score,
-        status: updatedGame.status,
-      });
-      addNotification('Game result saved', 'success', 'Success');
-      // If gameday status changed, we should reload metadata
-      if (metadata && metadata.id) {
-        const updatedGameday = await gamedayApi.getGameday(metadata.id);
-        updateMetadata(updatedGameday);
+    const [showPublishModal, setShowPublishModal] = useState(false);
+
+    const [activeGameId, setActiveGameId] = useState<string | null>(null);
+
+  
+
+    useEffect(() => {
+
+      if (selectedNode?.type === 'game' && isLocked) {
+
+        setActiveGameId(selectedNode.id);
+
+        setShowResultModal(true);
+
       }
-    } catch (error) {
-      console.error('Failed to save game result', error);
-      addNotification('Failed to save game result', 'danger', 'Error');
-    }
-  };
 
-  const lastSavedStateRef = useRef<string>('');
-  const initialLoadRef = useRef<boolean>(true);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const pauseAutoSaveUntilRef = useRef<number>(0);
+    }, [selectedNode, isLocked]);
+
+  
+
+    const activeGame = activeGameId ? nodes.find(n => n.id === activeGameId && n.type === 'game') : null;
+
+  
+
+    const handleSaveResult = async (resultData: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }) => {
+
+      if (!activeGameId) return;
+
+      try {
+
+        const updatedGame = await gamedayApi.updateGameResult(parseInt(activeGameId.replace('game-', '')), resultData);
+
+        // Update local node state
+
+        handleUpdateNode(activeGameId, {
+
+          halftime_score: updatedGame.halftime_score,
+
+          final_score: updatedGame.final_score,
+
+          status: updatedGame.status,
+
+        });
+
+        addNotification('Game result saved', 'success', 'Success');
+
+        // If gameday status changed, we should reload metadata
+
+        if (metadata && metadata.id) {
+
+          const updatedGameday = await gamedayApi.getGameday(metadata.id);
+
+          updateMetadata(updatedGameday);
+
+        }
+
+      } catch (error) {
+
+        console.error('Failed to save game result', error);
+
+        addNotification('Failed to save game result', 'danger', 'Error');
+
+      }
+
+    };
+
+  
+
+    const lastSavedStateRef = useRef<string>('');
+
+    const initialLoadRef = useRef<boolean>(true);
+
+    const [isTransitioning, setIsTransitioning] = useState(false);
+
+    const pauseAutoSaveUntilRef = useRef<number>(0);
+
+  
 
     useEffect(() => {
 
@@ -358,6 +403,16 @@ const ListDesignerApp: React.FC = () => {
   
 
     const handlePublishWrapped = useCallback(async () => {
+
+      setShowPublishModal(true);
+
+    }, []);
+
+  
+
+    const handleConfirmPublish = useCallback(async () => {
+
+      setShowPublishModal(false);
 
       setIsTransitioning(true);
 
@@ -693,6 +748,15 @@ const ListDesignerApp: React.FC = () => {
         onHide={() => setShowTournamentModal(false)}
         teams={globalTeams}
         onGenerate={handleGenerateTournament}
+      />
+
+      {/* Publish Confirmation Modal */}
+      <PublishConfirmationModal
+        show={showPublishModal}
+        onHide={() => setShowPublishModal(false)}
+        onConfirm={handleConfirmPublish}
+        validation={validation}
+        onHighlight={handleHighlightElement}
       />
 
       {/* Global Notifications */}

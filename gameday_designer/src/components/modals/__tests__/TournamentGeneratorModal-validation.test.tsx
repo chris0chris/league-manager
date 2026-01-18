@@ -52,7 +52,7 @@ describe('TournamentGeneratorModal - Validation', () => {
       <TournamentGeneratorModal
         show={true}
         onHide={mockOnHide}
-        teams={mockTeams}
+        teams={[]} // Use empty to allow toggling
         onGenerate={mockOnGenerate}
       />
     );

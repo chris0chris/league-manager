@@ -138,6 +138,10 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     
     await waitFor(() => expect(screen.getByText(/Team 1/i)).toBeInTheDocument());
 
+    // Add a second team
+    await user.click(addTeamBtn);
+    await waitFor(() => expect(screen.getByText(/Team 2/i)).toBeInTheDocument());
+
     // --- 4. GAME MANAGEMENT (Create/Update/Assign) ---
     const updatedStageSection = screen.getByText('Opening Round').closest('.stage-section')!;
     const addGameBtn = within(updatedStageSection).getAllByRole('button', { name: /add game/i })[0];
@@ -145,18 +149,25 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     
     await waitFor(() => expect(screen.getByText(/Game 1/i)).toBeInTheDocument());
     
-    // Assign Team to Game
+    // Assign Teams to Game
     const gameRow = screen.getByText(/Game 1/i).closest('tr')!;
     const teamCombos = within(gameRow).getAllByRole('combobox');
-    await user.click(teamCombos[0]); // Home slot
-    const teamOptions = await screen.findAllByText(/Team 1/i);
-    // Select the one from the dropdown portal
-    await user.click(teamOptions[teamOptions.length - 1]);
+    
+    // Home slot
+    await user.click(teamCombos[0]);
+    const team1Options = await screen.findAllByText(/Team 1/i);
+    await user.click(team1Options[team1Options.length - 1]);
+
+    // Away slot
+    await user.click(teamCombos[1]);
+    const team2Options = await screen.findAllByText(/Team 2/i);
+    await user.click(team2Options[team2Options.length - 1]);
     
     // Verify assignment worked (check team usage count)
     await waitFor(() => {
-      const usageBadge = screen.getByTitle(/Number of games this team is assigned to/i);
-      expect(usageBadge).toHaveTextContent('1');
+      const usageBadges = screen.getAllByTitle(/Number of games this team is assigned to/i);
+      expect(usageBadges[0]).toHaveTextContent('1');
+      expect(usageBadges[1]).toHaveTextContent('1');
     });
 
     // --- 5. LIFECYCLE (Publish/Unlock) ---
@@ -185,8 +196,16 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     
     await user.click(publishBtn);
     
-    // Wait for the Unlock button to appear, which only happens in non-DRAFT states
-    const unlockBtn = await screen.findByText(/Unlock Schedule/i, undefined, { timeout: 10000 });
+    // Confirm in modal
+    const confirmBtn = await screen.findByRole('button', { name: /Publish Now|Publish Anyway/i });
+    await user.click(confirmBtn);
+    
+    // Wait for modal to disappear
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    
+    // Wait for the Unlock button to appear in the accordion body
+    const accordionBody = screen.getByText(mockGameday.name).closest('.accordion-item')!;
+    const unlockBtn = await within(accordionBody).findByRole('button', { name: /Unlock Schedule/i }, { timeout: 10000 });
     expect(unlockBtn).toBeInTheDocument();
     
     // Confirm state change via badge
@@ -240,4 +259,41 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
       expect(screen.getByText(/0 Games/i)).toBeInTheDocument();
     }, { timeout: 5000 });
   }, 30000);
+
+  it('blocks publishing when there are validation errors', async () => {
+    const { user } = await renderApp();
+    
+    // Add a field to enable publish button (needs some data)
+    const fieldsCard = screen.getByText('Fields').closest('.card')!;
+    const addFieldBtn = within(fieldsCard).getAllByRole('button', { name: /add field/i })[0];
+    await user.click(addFieldBtn);
+
+    // Mock validation errors
+    vi.mocked(gamedayApi.getGameday).mockResolvedValueOnce({
+      ...mockGameday,
+      designer_data: {
+        nodes: [{ id: 'game-1', type: 'game', data: { standing: 'Game 1' }, position: { x: 0, y: 0 } }],
+        fields: [{ id: 'field-1', name: 'Field 1', order: 0 }],
+        globalTeams: [],
+        globalTeamGroups: [],
+        edges: []
+      }
+    });
+
+    // We can't easily mock the useFlowValidation return directly here because it's a real hook,
+    // but we can trigger a state that causes errors (e.g. game with no teams)
+    const addGameBtn = (await screen.findAllByRole('button', { name: /add game/i }))[0];
+    await user.click(addGameBtn);
+
+    // Click publish
+    const publishBtn = screen.getAllByRole('button', { name: /Publish/i })[0];
+    await user.click(publishBtn);
+
+    // Verify modal shows error and button is disabled
+    const modal = await screen.findByRole('dialog');
+    expect(within(modal).getByText(/Blocking Errors Found/i)).toBeInTheDocument();
+    
+    const confirmBtn = within(modal).getByRole('button', { name: /Publish Now/i });
+    expect(confirmBtn).toBeDisabled();
+  });
 });
