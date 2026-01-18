@@ -21,12 +21,12 @@ import type { FlowNode, FlowEdge, GameToGameEdge, TeamToGameEdge } from '../../t
 
 describe('useFlowValidation', () => {
   describe('Valid Flowchart', () => {
-    it('should return valid for empty flowchart', () => {
+    it('should return valid for empty flowchart with warnings', () => {
       const { result } = renderHook(() => useFlowValidation([], []));
 
       expect(result.current.isValid).toBe(true);
       expect(result.current.errors).toHaveLength(0);
-      expect(result.current.warnings).toHaveLength(0);
+      expect(result.current.warnings).toHaveLength(2); // no_teams and no_games
     });
 
     it('should return valid for complete game with team assignments', () => {
@@ -353,9 +353,9 @@ describe('useFlowValidation', () => {
           data: {
             standing: 'Game 1',
             homeTeamId: null,
-                          homeTeamId: null,
-                          homeTeamDynamic: { type: 'winner', matchName: 'Game 2' },
-                          awayTeamId: null,            fieldId: 'field1',
+            homeTeamDynamic: { type: 'winner', matchName: 'Game 2' },
+            awayTeamId: null,
+            fieldId: 'field1',
             official: null,
             startTime: null,
           },
@@ -368,9 +368,9 @@ describe('useFlowValidation', () => {
           data: {
             standing: 'Game 2',
             homeTeamId: null,
-                          homeTeamId: null,
-                          homeTeamDynamic: { type: 'winner', matchName: 'Game 1' },
-                          awayTeamId: null,            fieldId: 'field1',
+            homeTeamDynamic: { type: 'winner', matchName: 'Game 1' },
+            awayTeamId: null,
+            fieldId: 'field1',
             official: null,
             startTime: null,
           },

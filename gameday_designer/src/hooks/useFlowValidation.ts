@@ -1066,6 +1066,171 @@ function checkSelfPlay(
 }
 
 /**
+ * Check if the global team pool is empty.
+ */
+function checkNoTeams(globalTeams: GlobalTeam[]): FlowValidationWarning[] {
+  if (globalTeams.length === 0) {
+    return [
+      {
+        id: 'no_teams_in_pool',
+        type: 'no_teams',
+        message: 'No teams have been added to the team pool',
+        messageKey: 'no_teams',
+        messageParams: {},
+        affectedNodes: [],
+      },
+    ];
+  }
+  return [];
+}
+
+/**
+ * Check if there are no games in the schedule.
+ */
+function checkNoGames(nodes: FlowNode[]): FlowValidationWarning[] {
+  const gameNodes = nodes.filter(isGameNode);
+  if (gameNodes.length === 0) {
+    return [
+      {
+        id: 'no_games_in_schedule',
+        type: 'no_games',
+        message: 'No games have been added to the schedule',
+        messageKey: 'no_games',
+        messageParams: {},
+        affectedNodes: [],
+      },
+    ];
+  }
+  return [];
+}
+
+/**
+ * Check for teams in the pool that are not assigned to any game.
+ */
+function checkTeamsWithoutGames(
+  nodes: FlowNode[],
+  globalTeams: GlobalTeam[]
+): FlowValidationWarning[] {
+  const warnings: FlowValidationWarning[] = [];
+  const gameNodes = nodes.filter(isGameNode);
+
+  const assignedTeamIds = new Set<string>();
+  for (const node of gameNodes) {
+    const data = node.data as GameNodeData;
+    if (data.homeTeamId) assignedTeamIds.add(data.homeTeamId);
+    if (data.awayTeamId) assignedTeamIds.add(data.awayTeamId);
+  }
+
+  for (const team of globalTeams) {
+    if (!assignedTeamIds.has(team.id)) {
+      warnings.push({
+        id: `unused_team_${team.id}`,
+        type: 'team_without_games',
+        message: `Team "${team.label}" is not assigned to any game`,
+        messageKey: 'team_without_games',
+        messageParams: {
+          team: team.label,
+        },
+        affectedNodes: [],
+      });
+    }
+  }
+
+  return warnings;
+}
+
+/**
+ * Check for fields with no games assigned, only if other fields have games.
+ */
+function checkUnusedFields(nodes: FlowNode[]): FlowValidationWarning[] {
+  const warnings: FlowValidationWarning[] = [];
+  const fieldNodes = nodes.filter(isFieldNode);
+  const gameNodes = nodes.filter(isGameNode);
+  const stageNodes = nodes.filter(isStageNode);
+
+  if (gameNodes.length === 0) return [];
+
+  // Helper to find field ID for a game
+  const getFieldId = (node: FlowNode): string | null => {
+    const data = node.data as GameNodeData;
+    if (data.fieldId) return data.fieldId;
+    if (node.parentId) {
+      const parentStage = stageNodes.find((s) => s.id === node.parentId);
+      if (parentStage && parentStage.parentId) return parentStage.parentId;
+    }
+    return null;
+  };
+
+  const activeFieldIds = new Set<string>();
+  for (const node of gameNodes) {
+    const fieldId = getFieldId(node);
+    if (fieldId) activeFieldIds.add(fieldId);
+  }
+
+  for (const fieldNode of fieldNodes) {
+    if (!activeFieldIds.has(fieldNode.id)) {
+      warnings.push({
+        id: `unused_field_${fieldNode.id}`,
+        type: 'unused_field',
+        message: `Field "${fieldNode.data.name}" has no games assigned`,
+        messageKey: 'unused_field',
+        messageParams: {
+          field: fieldNode.data.name,
+        },
+        affectedNodes: [fieldNode.id],
+      });
+    }
+  }
+
+  return warnings;
+}
+
+/**
+ * Check for broken dynamic progressions (invalid matchName references).
+ */
+function checkBrokenDynamicProgressions(nodes: FlowNode[]): FlowValidationWarning[] {
+  const warnings: FlowValidationWarning[] = [];
+  const gameNodes = nodes.filter(isGameNode);
+  const stageNodes = nodes.filter(isStageNode);
+
+  const allStandings = new Set<string>();
+  for (const node of gameNodes) {
+    const data = node.data as GameNodeData;
+    if (data.standing) allStandings.add(data.standing);
+  }
+  for (const node of stageNodes) {
+    const data = node.data;
+    if (data.name) allStandings.add(data.name);
+  }
+
+  for (const node of gameNodes) {
+    const data = node.data as GameNodeData;
+
+    const checkRef = (ref: { type: string; matchName?: string } | null, slot: string) => {
+      if (ref && ref.matchName && !allStandings.has(ref.matchName)) {
+        warnings.push({
+          id: `${node.id}_broken_${slot}`,
+          type: 'broken_progression',
+          message: `Game "${data.standing || node.id}" references non-existent standing "${ref.matchName}" for ${slot}`,
+          messageKey: 'broken_progression',
+          messageParams: {
+            game: data.standing || node.id,
+            target: ref.matchName,
+            slot,
+          },
+          affectedNodes: [node.id],
+        });
+      }
+    };
+
+    checkRef(data.homeTeamDynamic || null, 'home');
+    checkRef(data.awayTeamDynamic || null, 'away');
+  }
+
+  return warnings;
+}
+
+/**
  * useFlowValidation hook.
  *
  * Validates the flowchart and returns errors and warnings.
@@ -1105,6 +1270,11 @@ export function useFlowValidation(
       ...checkUnassignedFields(nodes),
       ...checkStageSequence(nodes),
       ...checkUnevenGames(nodes, globalTeams, globalTeamGroups),
+      ...checkNoTeams(globalTeams),
+      ...checkNoGames(nodes),
+      ...checkTeamsWithoutGames(nodes, globalTeams),
+      ...checkUnusedFields(nodes),
+      ...checkBrokenDynamicProgressions(nodes),
     ];
 
     return {

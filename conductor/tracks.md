@@ -25,3 +25,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Game State Tracking & Result Management**
 *Link: [./tracks/game-state-tracking_20260117/](./tracks/game-state-tracking_20260117/)*
+
+---
+
+- [~] **Track: add new warning: no teams, no games, teams without games, unsused fields**
+*Link: [./tracks/gameday_warnings_20260118/](./tracks/gameday_warnings_20260118/)*
