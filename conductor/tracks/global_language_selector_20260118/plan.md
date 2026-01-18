@@ -14,27 +14,27 @@ Set up the new layout structure and extract shared components.
     - [x] Verify `LanguageSelector.tsx` is ready for global usage.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Refactoring' (Protocol in workflow.md)
 
-## Phase 2: Header Logic & State Integration
+## Phase 2: Header Logic & State Integration [checkpoint: 588d19f]
 Implement dynamic content and connect the header to the application state.
 
-- [x] Task: Implement Dynamic Header Content
+- [x] Task: Implement Dynamic Header Content [588d19f]
     - [x] Use `useLocation` and `useParams` in `AppHeader` to determine the current view.
     - [x] Implement logic to display the Gameday name in the header when in the Editor view (fetching from `metadata` if necessary).
     - [x] Add the "Back to Dashboard" button to the header, visible only in the Editor view.
-- [x] Task: Integrate User Profile
+- [x] Task: Integrate User Profile [588d19f]
     - [x] Implement `UserProfile` component to display current user information (utilizing existing auth context/APIs).
-- [x] Task: Update Localization
+- [x] Task: Update Localization [588d19f]
     - [x] Add header-related keys to `gameday_designer/src/i18n/locales/en/ui.json` and `de/ui.json`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Header Logic & State Integration' (Protocol in workflow.md)
 
-## Phase 3: Application Integration & Cleanup
+## Phase 3: Application Integration & Cleanup [checkpoint: 588d19f]
 Apply the new layout globally and remove redundant UI elements.
 
-- [x] Task: Update App Routing
+- [x] Task: Update App Routing [588d19f]
     - [x] Modify `gameday_designer/src/App.tsx` to wrap all routes within `MainLayout`.
-- [x] Task: Clean Up Dashboard UI
+- [x] Task: Clean Up Dashboard UI [588d19f]
     - [x] Remove the redundant header/title row from `gameday_designer/src/components/dashboard/GamedayDashboard.tsx`.
-- [x] Task: Clean Up Editor UI
+- [x] Task: Clean Up Editor UI [588d19f]
     - [x] Remove the redundant header/title row and "Back" button from `gameday_designer/src/components/ListDesignerApp.tsx`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Application Integration & Cleanup' (Protocol in workflow.md)
 
