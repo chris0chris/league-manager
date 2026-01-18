@@ -28,11 +28,18 @@ fi
 case "$1" in
     major|minor|patch)
         # Production deployment - bump stable version
-        (cd ..;bump-my-version bump "$1") && git push && git push --tags
+        # If running from container/ directory, go to root
+        if [ -d "../league_manager" ]; then
+            cd ..
+        fi
+        bump-my-version bump "$1" && git push && git push --tags
         ;;
     stage)
         # Staging deployment - create/increment RC version
-        cd ..
+        # If running from container/ directory, go to root
+        if [ -d "../league_manager" ]; then
+            cd ..
+        fi
 
         # Read current version
         CURRENT_VERSION=$(grep "__version__" league_manager/__init__.py | cut -d'"' -f2)
