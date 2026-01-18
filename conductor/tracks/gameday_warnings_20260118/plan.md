@@ -2,17 +2,17 @@
 
 This plan outlines the steps to introduce new confirmable warnings to the Gameday Designer's validation system, ensuring a safer and more guided tournament creation process.
 
-## Phase 1: Validation Logic Expansion (TDD)
+## Phase 1: Validation Logic Expansion (TDD) [checkpoint: b67f30a]
 Focus on implementing the core logic for detecting the new warning scenarios in the frontend validation service.
 
-- [x] Task: Write Failing Tests for New Warnings
+- [x] Task: Write Failing Tests for New Warnings [b67f30a]
     - [x] Create test cases in `gameday_designer/src/hooks/__tests__/useFlowValidation.test.ts` for:
         - [x] No teams in global pool.
         - [x] No games in any stage.
         - [x] Teams in pool with zero games (home/away).
         - [x] Fields with zero games (Staged Field Check).
         - [x] Broken dynamic progressions (referencing non-existent standings).
-- [x] Task: Implement Validation Logic
+- [x] Task: Implement Validation Logic [b67f30a]
     - [x] Update `gameday_designer/src/hooks/useFlowValidation.ts` to implement:
         - [x] `checkNoTeams`: Warn if `globalTeams` is empty.
         - [x] `checkNoGames`: Warn if no game nodes exist.
@@ -20,10 +20,10 @@ Focus on implementing the core logic for detecting the new warning scenarios in 
         - [x] `checkUnusedFields`: Warn if a field is empty but others are not.
         - [x] `checkBrokenDynamicProgressions`: Detect invalid standing references.
     - [x] Integrate these new checks into the `useFlowValidation` hook.
-- [x] Task: Verify Tests and Refactor
+- [x] Task: Verify Tests and Refactor [b67f30a]
     - [x] Run tests to ensure they pass: `npm run test:run` in `gameday_designer/`.
     - [x] Refactor logic for clarity and performance if necessary.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Validation Logic Expansion' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Validation Logic Expansion' (Protocol in workflow.md)
 
 ## Phase 2: Internationalization & UI Integration
 Add localized messages and ensure the UI correctly displays and interacts with the new warnings.
