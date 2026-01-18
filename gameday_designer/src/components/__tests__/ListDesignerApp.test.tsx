@@ -17,8 +17,9 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ListDesignerApp from '../ListDesignerApp';
+import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 
 // Mock react-router-dom
@@ -153,9 +154,16 @@ describe('ListDesignerApp', () => {
   });
 
   const renderApp = async () => {
-    render(<MemoryRouter initialEntries={['/designer/1']}><ListDesignerApp /></MemoryRouter>);
+    render(
+      <MemoryRouter initialEntries={['/designer/1']}>
+        <GamedayProvider>
+          <Routes>
+            <Route path="/designer/:id" element={<ListDesignerApp />} />
+          </Routes>
+        </GamedayProvider>
+      </MemoryRouter>
+    );
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
-    await waitFor(() => expect(screen.getByText('Gameday Designer')).toBeInTheDocument());
   };
 
   describe('Initial Rendering', () => {
@@ -165,12 +173,12 @@ describe('ListDesignerApp', () => {
       expect(container).toBeInTheDocument();
     });
 
-    it('should render application title', async () => {
+    it('should render application container', async () => {
       await renderApp();
-      expect(screen.getByText('Gameday Designer')).toBeInTheDocument();
+      expect(document.querySelector('.list-designer-app')).toBeInTheDocument();
     });
 
-    it('should render application subtitle', async () => {
+    it('should render application metadata in accordion', async () => {
       await renderApp();
       expect(screen.getAllByText(/Test Gameday/)[0]).toBeInTheDocument();
     });
@@ -272,10 +280,10 @@ describe('ListDesignerApp', () => {
 
       await renderApp();
 
-      expect(screen.getByText(/1 fields/i)).toBeInTheDocument();
-      expect(screen.getByText(/1 stages/i)).toBeInTheDocument();
-      expect(screen.getByText(/2 teams/i)).toBeInTheDocument();
-      expect(screen.getByText(/2 games/i)).toBeInTheDocument();
+      expect(screen.getByText(/1\s+Fields/i)).toBeInTheDocument();
+      expect(screen.getByText(/1\s+Stages/i)).toBeInTheDocument();
+      expect(screen.getByText(/2\s+Teams/i)).toBeInTheDocument();
+      expect(screen.getByText(/2\s+Games/i)).toBeInTheDocument();
     });
   });
 
@@ -470,10 +478,10 @@ describe('ListDesignerApp', () => {
     it('should render correctly with no data', async () => {
       await renderApp();
 
-      expect(screen.getByText(/0 fields/i)).toBeInTheDocument();
-      expect(screen.getByText(/0 stages/i)).toBeInTheDocument();
-      expect(screen.getByText(/0 teams/i)).toBeInTheDocument();
-      expect(screen.getByText(/0 games/i)).toBeInTheDocument();
+      expect(screen.getByText(/0\s+Fields/i)).toBeInTheDocument();
+      expect(screen.getByText(/0\s+Stages/i)).toBeInTheDocument();
+      expect(screen.getByText(/0\s+Teams/i)).toBeInTheDocument();
+      expect(screen.getByText(/0\s+Games/i)).toBeInTheDocument();
     });
 
     it('should show "Valid" status when empty', async () => {

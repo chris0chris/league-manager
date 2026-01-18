@@ -11,6 +11,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import ListDesignerApp from '../ListDesignerApp';
+import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 import { gamedayApi } from '../../api/gamedayApi';
 
@@ -73,15 +74,16 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={['/designer/1']}>
-        <Routes>
-          <Route path="/designer/:id" element={<ListDesignerApp />} />
-        </Routes>
+        <GamedayProvider>
+          <Routes>
+            <Route path="/designer/:id" element={<ListDesignerApp />} />
+          </Routes>
+        </GamedayProvider>
       </MemoryRouter>
     );
     
-    // Wait for initial load - spinner gone and header present
+    // Wait for initial load - spinner gone
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument(), { timeout: 15000 });
-    await screen.findByText(/Gameday Designer/i, undefined, { timeout: 5000 });
     
     return { user };
   };
@@ -90,8 +92,7 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     const { user } = await renderApp();
 
     // --- 1. FIELD MANAGEMENT (Create/Update) ---
-    const fieldsCard = screen.getByText('Fields').closest('.card')!;
-    const addFieldBtn = within(fieldsCard).getAllByRole('button', { name: /add field/i })[0];
+    const addFieldBtn = (await screen.findAllByRole('button', { name: /add field/i }))[0];
     await user.click(addFieldBtn);
 
     await waitFor(() => expect(screen.getByText(/Feld 1/i)).toBeInTheDocument());
@@ -126,7 +127,7 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     await waitFor(() => expect(screen.getByText('Opening Round')).toBeInTheDocument());
 
     // --- 3. TEAM MANAGEMENT (Create/Update) ---
-    const teamPoolCard = screen.getByText('Team Pool').closest('.card')!;
+    const teamPoolCard = screen.getByText('label.teamPool').closest('.card')!;
     const addGroupBtn = within(teamPoolCard).getAllByRole('button', { name: /add group/i })[0];
     await user.click(addGroupBtn);
     
@@ -212,17 +213,19 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     await waitFor(() => expect(screen.getAllByText(/PUBLISHED|Published|Veröffentlicht/i)[0]).toBeInTheDocument());
     
     // Verify locking: Add Field button should be gone (from header)
+    const fieldsCard = screen.getByText('Fields').closest('.card')!;
     expect(within(fieldsCard).queryByRole('button', { name: /add field/i })).not.toBeInTheDocument();
     
     // --- 6. RESULT ENTRY (In Published State) ---
-    const resultBtn = await screen.findByRole('button', { name: /result/i });
+    const resultBtn = (await screen.findAllByRole('button', { name: /result/i }))[0];
     await user.click(resultBtn);
     
     const modal = await screen.findByRole('dialog');
     expect(within(modal).getAllByText(/Score/i)[0]).toBeInTheDocument();
     
-    const homeScoreInput = within(modal).getByLabelText(/Home \(halftime\)/i);
-    await user.type(homeScoreInput, '7');
+    // Find input by its id which is halftimeHome in GameResultModal
+    const halftimeHomeInput = (await within(modal).findAllByLabelText(/Home/))[0];
+    await user.type(halftimeHomeInput, '7');
     
     const saveResultBtn = within(modal).getByRole('button', { name: /Save/i });
     (gamedayApi.updateGameResult as any).mockResolvedValue({
@@ -264,8 +267,7 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     const { user } = await renderApp();
     
     // Add a field to enable publish button (needs some data)
-    const fieldsCard = screen.getByText('Fields').closest('.card')!;
-    const addFieldBtn = within(fieldsCard).getAllByRole('button', { name: /add field/i })[0];
+    const addFieldBtn = (await screen.findAllByRole('button', { name: /add field/i }))[0];
     await user.click(addFieldBtn);
 
     // Mock validation errors

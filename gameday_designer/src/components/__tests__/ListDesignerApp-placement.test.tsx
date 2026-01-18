@@ -12,8 +12,9 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ListDesignerApp from '../ListDesignerApp';
+import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 
 // Mock react-router-dom
@@ -144,9 +145,16 @@ describe('ListDesignerApp - Placement Edge Creation', () => {
   });
 
   const renderApp = async () => {
-    render(<MemoryRouter initialEntries={['/designer/1']}><ListDesignerApp /></MemoryRouter>);
+    render(
+      <MemoryRouter initialEntries={['/designer/1']}>
+        <GamedayProvider>
+          <Routes>
+            <Route path="/designer/:id" element={<ListDesignerApp />} />
+          </Routes>
+        </GamedayProvider>
+      </MemoryRouter>
+    );
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
-    await waitFor(() => expect(screen.getByText('Gameday Designer')).toBeInTheDocument());
   };
 
   describe('createPlacementEdges - 4-team Single Elimination', () => {

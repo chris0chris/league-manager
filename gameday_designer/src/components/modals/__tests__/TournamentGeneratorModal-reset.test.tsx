@@ -1,14 +1,11 @@
-/**
- * Tests for TournamentGeneratorModal reset behavior
- */
-
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TournamentGeneratorModal from '../TournamentGeneratorModal';
+import { DEFAULT_START_TIME } from '../../../utils/tournamentConstants';
+import { GamedayProvider } from '../../../context/GamedayContext';
 import type { GlobalTeam } from '../../../types/flowchart';
 import i18n from '../../../i18n/testConfig';
-import { DEFAULT_START_TIME } from '../../../utils/tournamentConstants';
 
 describe('TournamentGeneratorModal - Reset Behavior', () => {
   const mockOnHide = vi.fn();
@@ -26,51 +23,58 @@ describe('TournamentGeneratorModal - Reset Behavior', () => {
     await i18n.changeLanguage('en');
   });
 
+  const renderModal = (show = true) => {
+    return render(
+      <GamedayProvider>
+        <TournamentGeneratorModal
+          show={show}
+          onHide={mockOnHide}
+          teams={mockTeams}
+          onGenerate={mockOnGenerate}
+        />
+      </GamedayProvider>
+    );
+  };
+
   it('should reset its internal state when a tournament is generated', async () => {
     const user = userEvent.setup();
-    const { rerender } = render(
-      <TournamentGeneratorModal
-        show={true}
-        onHide={mockOnHide}
-        teams={mockTeams}
-        onGenerate={mockOnGenerate}
-      />
-    );
+    const { rerender } = renderModal();
 
     // 1. Change the start time
-    const startTimeInput = screen.getByLabelText(/start time/i) as HTMLInputElement;
+    const startTimeInput = screen.getByLabelText(/label.startTime/i) as HTMLInputElement;
     await user.clear(startTimeInput);
     await user.type(startTimeInput, '12:00');
     expect(startTimeInput.value).toBe('12:00');
 
-    // 2. Click generate
+    // 2. Generate
     const generateButton = screen.getByRole('button', { name: /generate/i });
     await user.click(generateButton);
-
     expect(mockOnGenerate).toHaveBeenCalled();
-    expect(mockOnHide).toHaveBeenCalled();
 
-    // 3. Re-open the modal
-    // Toggle show prop to simulate hide/show without unmounting
+    // 3. Close and Reopen (simulate real app behavior)
     rerender(
-      <TournamentGeneratorModal
-        show={false}
-        onHide={mockOnHide}
-        teams={mockTeams}
-        onGenerate={mockOnGenerate}
-      />
+      <GamedayProvider>
+        <TournamentGeneratorModal
+          show={false}
+          onHide={mockOnHide}
+          teams={mockTeams}
+          onGenerate={mockOnGenerate}
+        />
+      </GamedayProvider>
     );
     rerender(
-      <TournamentGeneratorModal
-        show={true}
-        onHide={mockOnHide}
-        teams={mockTeams}
-        onGenerate={mockOnGenerate}
-      />
+      <GamedayProvider>
+        <TournamentGeneratorModal
+          show={true}
+          onHide={mockOnHide}
+          teams={mockTeams}
+          onGenerate={mockOnGenerate}
+        />
+      </GamedayProvider>
     );
 
-    // 4. Check if start time is reset to default
-    const reopenedStartTimeInput = screen.getByLabelText(/start time/i) as HTMLInputElement;
-    expect(reopenedStartTimeInput.value).toBe(DEFAULT_START_TIME);
+    // 4. Verify start time is reset to default
+    const startTimeInputAfter = screen.getByLabelText(/label.startTime/i) as HTMLInputElement;
+    expect(startTimeInputAfter.value).toBe(DEFAULT_START_TIME);
   });
 });

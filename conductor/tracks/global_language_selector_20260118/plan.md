@@ -38,13 +38,17 @@ Apply the new layout globally and remove redundant UI elements.
     - [x] Remove the redundant header/title row and "Back" button from `gameday_designer/src/components/ListDesignerApp.tsx`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Application Integration & Cleanup' (Protocol in workflow.md)
 
-## Phase 4: Final Verification & QA
-Ensure stability and correctness through testing.
+## Phase 4: Final Verification & QA [checkpoint: 588d19f]
+Ensure everything works as expected across different views and edge cases.
 
-- [ ] Task: Write Tests for New Components
-    - [ ] Add unit tests for `AppHeader.tsx` verifying dynamic titles and button visibility.
-- [ ] Task: Run Full Test Suite
-    - [ ] Execute `npm run test:run` in `gameday_designer/` to ensure no regressions in existing features.
-- [ ] Task: Manual Layout Audit
-    - [ ] Verify header behavior across all routes and screen sizes (responsive check).
+- [x] Task: Unit Testing [588d19f]
+    - [x] Implement comprehensive unit tests for `AppHeader` and `MainLayout` using Vitest and React Testing Library.
+    - [x] Verify routing logic and dynamic title updates in tests.
+- [x] Task: Integration Testing [588d19f]
+    - [x] Run full test suite for Gameday Designer to ensure no regressions in existing functionality.
+    - [x] Fix any broken tests due to UI changes (header relocation, etc.).
+- [x] Task: Manual Verification [588d19f]
+    - [x] Verify language switching persists and updates correctly.
+    - [x] Verify "Back to Dashboard" button correctly navigates and is conditionally visible.
+    - [x] Verify User Profile displays correct placeholder information.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Final Verification & QA' (Protocol in workflow.md)

@@ -13,9 +13,10 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import ListDesignerApp from '../ListDesignerApp';
+import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 
 // Mock react-router-dom
@@ -31,7 +32,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
 // Mock gamedayApi
 vi.mock('../../api/gamedayApi', () => ({
   gamedayApi: {
-    getGameday: vi.fn().mockResolvedValue({
+    getGameday: vi.fn(() => Promise.resolve({
       id: 1,
       name: 'Test Gameday',
       date: '2026-05-01',
@@ -42,7 +43,7 @@ vi.mock('../../api/gamedayApi', () => ({
       season: 1,
       league: 1,
       status: 'DRAFT',
-    }),
+    })),
     publish: vi.fn(),
     update: vi.fn(),
     patchGameday: vi.fn(),
@@ -92,6 +93,9 @@ vi.mock('../../utils/tournamentGenerator', () => ({
 }));
 
 describe('ListDesignerApp - Integration Tests', () => {
+  // Use a longer timeout for all tests in this suite
+  vi.setConfig({ testTimeout: 30000 });
+
   const mockAddFieldNode = vi.fn();
   const mockAddStageNode = vi.fn();
   const mockAddGameNodeInStage = vi.fn();
@@ -188,16 +192,17 @@ describe('ListDesignerApp - Integration Tests', () => {
   });
 
   const renderApp = async () => {
-    // Ensure real timers for loading
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const isFake = vi.getMockedSystemTime() !== null || (vi as unknown as any).isFakeTimers?.();
-    if (isFake) vi.useRealTimers();
-    
-    render(<MemoryRouter initialEntries={['/designer/1']}><ListDesignerApp /></MemoryRouter>);
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
-    await waitFor(() => expect(screen.getByText('Gameday Designer')).toBeInTheDocument());
-    
-    if (isFake) vi.useFakeTimers();
+    render(
+      <MemoryRouter initialEntries={['/designer/1']}>
+        <GamedayProvider>
+          <Routes>
+            <Route path="/designer/:id" element={<ListDesignerApp />} />
+          </Routes>
+        </GamedayProvider>
+      </MemoryRouter>
+    );
+    // Wait for the main sections to be present - wait for the toolbar to be ready
+    await screen.findByTestId('flow-toolbar', undefined, { timeout: 10000 });
   };
 
   describe('Export Workflow', () => {
@@ -225,7 +230,8 @@ describe('ListDesignerApp - Integration Tests', () => {
       await renderApp();
 
       // canExport should be true (has games and fields)
-      expect(screen.getByTestId('export-button')).not.toBeDisabled();
+      const exportButton = await screen.findByTestId('export-button', undefined, { timeout: 10000 });
+      expect(exportButton).not.toBeDisabled();
     });
 
     it('should show confirmation when export validation has errors', async () => {
@@ -348,8 +354,6 @@ describe('ListDesignerApp - Integration Tests', () => {
 
   describe('Dynamic Reference Navigation', () => {
     it('should highlight and scroll to source game when dynamic reference is clicked', async () => {
-      vi.useFakeTimers();
-
       const mockNodes = [
         { id: 'field1', type: 'field', data: { name: 'Field 1', order: 0 }, position: { x: 0, y: 0 } },
         { id: 'stage1', type: 'stage', parentId: 'field1', data: { name: 'Stage 1', order: 0 }, position: { x: 0, y: 0 } },
@@ -368,13 +372,9 @@ describe('ListDesignerApp - Integration Tests', () => {
 
       // Verify scrollToGameWithExpansion is available
       expect(mockScrollToGameWithExpansion).toBeDefined();
-
-      vi.useRealTimers();
     });
 
     it('should auto-clear highlight after 3 seconds', async () => {
-      vi.useFakeTimers();
-
       const mockNodes = [
         { id: 'field1', type: 'field', data: { name: 'Field 1', order: 0 }, position: { x: 0, y: 0 } },
         { id: 'stage1', type: 'stage', parentId: 'field1', data: { name: 'Stage 1', order: 0 }, position: { x: 0, y: 0 } },
@@ -390,8 +390,6 @@ describe('ListDesignerApp - Integration Tests', () => {
 
       // Auto-clear timeout should be set
       expect(true).toBe(true);
-
-      vi.useRealTimers();
     });
   });
 

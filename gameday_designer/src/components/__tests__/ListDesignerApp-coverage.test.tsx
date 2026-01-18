@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ListDesignerApp from '../ListDesignerApp';
+import { GamedayProvider } from '../../context/GamedayContext';
+import i18n from '../../i18n/testConfig';
 import { useDesignerController } from '../../hooks/useDesignerController';
 import type { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
 
@@ -95,14 +97,22 @@ describe('ListDesignerApp Coverage', () => {
     }),
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
     vi.clearAllMocks();
   });
 
   const renderApp = async () => {
-    render(<MemoryRouter initialEntries={['/designer/1']}><ListDesignerApp /></MemoryRouter>);
+    render(
+      <MemoryRouter initialEntries={['/designer/1']}>
+        <GamedayProvider>
+          <Routes>
+            <Route path="/designer/:id" element={<ListDesignerApp />} />
+          </Routes>
+        </GamedayProvider>
+      </MemoryRouter>
+    );
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
-    await waitFor(() => expect(screen.getByText('Gameday Designer')).toBeInTheDocument());
   };
 
   it('handles clicking on error in popover', async () => {

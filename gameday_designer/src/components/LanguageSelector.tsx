@@ -19,7 +19,7 @@ const LanguageSelector: React.FC = () => {
     i18n.changeLanguage(lng);
   };
 
-  const currentLanguage = i18n.language === 'de' ? 'DE' : 'EN';
+  const currentLanguage = i18n.language.startsWith('de') ? 'DE' : 'EN';
 
   return (
     <Dropdown as={ButtonGroup}>
@@ -30,15 +30,15 @@ const LanguageSelector: React.FC = () => {
       <Dropdown.Menu align="end">
         <Dropdown.Item
           onClick={() => changeLanguage('de')}
-          active={i18n.language === 'de'}
+          active={i18n.language.startsWith('de')}
         >
-          🇩🇪 {t('label.german')}
+          🇩🇪 {t('ui:label.german')}
         </Dropdown.Item>
         <Dropdown.Item
           onClick={() => changeLanguage('en')}
-          active={i18n.language === 'en'}
+          active={i18n.language.startsWith('en')}
         >
-          🇬🇧 {t('label.english')}
+          🇬🇧 {t('ui:label.english')}
         </Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>

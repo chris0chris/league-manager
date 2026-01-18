@@ -3,9 +3,12 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import GamedayDashboard from '../GamedayDashboard';
+import { GamedayProvider } from '../../../context/GamedayContext';
+import i18n from '../../../i18n/testConfig';
 import { gamedayApi } from '../../../api/gamedayApi';
 import type { GamedayListEntry, PaginatedResponse } from '../../../types';
 
@@ -14,14 +17,19 @@ vi.mock('../../../api/gamedayApi', () => ({
   gamedayApi: {
     listGamedays: vi.fn(),
     createGameday: vi.fn(),
+    deleteGameday: vi.fn().mockResolvedValue({}),
   },
 }));
 
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', () => ({
-  useNavigate: () => mockNavigate,
-  useLocation: () => ({ state: null, pathname: '/' }),
-}));
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>();
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useLocation: () => ({ state: null, pathname: '/' }),
+  };
+});
 
 describe('GamedayDashboard', () => {
   const mockGamedays: GamedayListEntry[] = [
@@ -58,19 +66,27 @@ describe('GamedayDashboard', () => {
     results: mockGamedays,
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
     vi.clearAllMocks();
     (gamedayApi.listGamedays as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
   });
 
-  const renderDashboard = async () => {
-    render(<GamedayDashboard />);
+  const renderDashboard = async (initialEntries = ['/']) => {
+    render(
+      <MemoryRouter initialEntries={initialEntries}>
+        <GamedayProvider>
+          <GamedayDashboard />
+        </GamedayProvider>
+      </MemoryRouter>
+    );
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
   };
 
-  it('renders dashboard title and create button', async () => {
+  it('renders dashboard subtitle and create button', async () => {
     await renderDashboard();
-    expect(screen.getByText(/Gameday Management/i)).toBeInTheDocument();
+    // Subtitle is still there
+    expect(screen.getByText(/manage your flag football tournament schedules/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Create Gameday/i })).toBeInTheDocument();
   });
 
@@ -82,10 +98,9 @@ describe('GamedayDashboard', () => {
 
   it('navigates to editor when clicking a card', async () => {
     await renderDashboard();
-    expect(screen.getByText('Gameday 1')).toBeInTheDocument();
-    
-    fireEvent.click(screen.getByText('Gameday 1').closest('.card')!);
-    // navigate is mocked, we could check if it was called
+    const card = screen.getByText('Gameday 1').closest('.card');
+    fireEvent.click(card!);
+    expect(mockNavigate).toHaveBeenCalledWith('/designer/1');
   });
 
   it('creates new gameday and navigates to editor', async () => {
@@ -97,11 +112,12 @@ describe('GamedayDashboard', () => {
     
     await waitFor(() => {
       expect(gamedayApi.createGameday).toHaveBeenCalled();
+      expect(mockNavigate).toHaveBeenCalledWith('/designer/3');
     });
   });
 
   it('filters gamedays when searching', async () => {
-    render(<GamedayDashboard />);
+    await renderDashboard();
 
     const searchInput = screen.getByPlaceholderText(/search gamedays/i);
     fireEvent.change(searchInput, { target: { value: 'season:2026' } });

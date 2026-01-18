@@ -1,17 +1,11 @@
-/**
- * Integration Test for Tournament Progression
- *
- * Verifies that generating a tournament correctly triggers the creation
- * of winner/loser edges for playoff stages.
- */
-
-import React from 'react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ListDesignerApp from '../ListDesignerApp';
+import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
-import type { TournamentGenerationConfig } from '../../types/tournament';
+import { gamedayApi } from '../../api/gamedayApi';
 
 // Mock react-router-dom
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -26,111 +20,126 @@ vi.mock('react-router-dom', async (importOriginal) => {
 // Mock gamedayApi
 vi.mock('../../api/gamedayApi', () => ({
   gamedayApi: {
-    getGameday: vi.fn().mockResolvedValue({
-      id: 1,
-      name: 'Test Gameday',
-      date: '2026-05-01',
-      start: '10:00',
-      format: '6_2',
-      author: 1,
-      address: 'Test Field',
-      season: 1,
-      league: 1,
-    }),
+    getGameday: vi.fn(),
+    publish: vi.fn(),
+    patchGameday: vi.fn(),
+    deleteGameday: vi.fn(),
+    updateGameResult: vi.fn(),
   },
 }));
 
-// Mock the controller to avoid deep hook dependencies
-const mockAddBulkGameToGameEdges = vi.fn();
-const mockAddBulkTournament = vi.fn();
-const mockAssignTeamToGame = vi.fn();
-
-vi.mock('../../hooks/useDesignerController', () => ({
-  useDesignerController: () => ({
-    metadata: { id: 1, name: "Test Gameday", date: "2026-05-01", start: "10:00", format: "6_2", author: 1, address: "Test Field", season: 1, league: 1 },
-    nodes: [],
-    edges: [],
-    fields: [],
-    globalTeams: [],
-    globalTeamGroups: [],
-    selectedNode: null,
-    validation: { isValid: true, errors: [], warnings: [] },
-    notifications: [],
-    ui: {
-      highlightedElement: null,
-      expandedFieldIds: new Set(),
-      expandedStageIds: new Set(),
-      showTournamentModal: false,
-      canExport: true,
-      hasNodes: false,
-    },
-    handlers: {
-      handleGenerateTournament: handleGenerateTournamentMock,
-      setShowTournamentModal: vi.fn(),
-    },
-    // Required props for ListCanvas
-    updateGlobalTeamGroup: vi.fn(),
-    deleteGlobalTeamGroup: vi.fn(),
-    reorderGlobalTeamGroup: vi.fn(),
-    getTeamUsage: vi.fn(() => []),
-    addGameToGameEdge: vi.fn(),
-    addStageToGameEdge: vi.fn(),
-    removeEdgeFromSlot: vi.fn(),
-    addGameNodeInStage: vi.fn(),
-    addNotification: vi.fn(),
-    addBulkTournament: mockAddBulkTournament,
-    assignTeamToGame: mockAssignTeamToGame,
-    addBulkGameToGameEdges: mockAddBulkGameToGameEdges,
-    updateMetadata: vi.fn(),
-    importState: vi.fn(),
-    exportState: vi.fn().mockReturnValue({
-      metadata: {},
+describe('Tournament Progression Integration', () => {
+  const mockGameday = {
+    id: 1,
+    name: 'Progression Test',
+    date: '2026-06-01',
+    start: '10:00',
+    format: '6_2',
+    author: 1,
+    address: 'Field',
+    season: 1,
+    league: 1,
+    status: 'DRAFT',
+    designer_data: {
       nodes: [],
       edges: [],
       fields: [],
-      globalTeams: [],
-      globalTeamGroups: []
-    }),
-  }),
-}));
+      globalTeams: [
+        { id: 't1', label: 'Team 1', color: '#000', order: 0, groupId: 'g1' },
+        { id: 't2', label: 'Team 2', color: '#000', order: 1, groupId: 'g1' },
+        { id: 't3', label: 'Team 3', color: '#000', order: 2, groupId: 'g1' },
+        { id: 't4', label: 'Team 4', color: '#000', order: 3, groupId: 'g1' },
+        { id: 't5', label: 'Team 5', color: '#000', order: 4, groupId: 'g1' },
+        { id: 't6', label: 'Team 6', color: '#000', order: 5, groupId: 'g1' },
+      ],
+      globalTeamGroups: [{ id: 'g1', name: 'Group 1', order: 0 }],
+    }
+  };
 
-// Mock the internal logic of handleGenerateTournament to verify it calls our assignments
-const handleGenerateTournamentMock = async (config: TournamentGenerationConfig & { autoAssignTeams: boolean }) => {
-  const structure = { stages: [], games: [], fields: [] };
-  mockAddBulkTournament(structure);
-  
-  if (config.autoAssignTeams) {
-    // In the real app, this is delayed. We call it directly for the test.
-    const mockEdges = [{ sourceGameId: 'g1', outputType: 'winner', targetGameId: 'g2', targetSlot: 'home' }];
-    mockAddBulkGameToGameEdges(mockEdges);
-  }
-};
-
-describe('Tournament Progression Integration', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en');
     vi.clearAllMocks();
+    (gamedayApi.getGameday as any).mockResolvedValue(mockGameday);
   });
 
   const renderApp = async () => {
-    render(<MemoryRouter initialEntries={['/designer/1']}><ListDesignerApp /></MemoryRouter>);
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={['/designer/1']}>
+        <GamedayProvider>
+          <Routes>
+            <Route path="/designer/:id" element={<ListDesignerApp />} />
+          </Routes>
+        </GamedayProvider>
+      </MemoryRouter>
+    );
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
-    await waitFor(() => expect(screen.getByText('Gameday Designer')).toBeInTheDocument());
+    return { user };
   };
 
-  it('should trigger edge creation when tournament is generated', async () => {
-    await renderApp();
-    
-    // We don't even need to open the modal because we mocked the controller's handler
-    // But let's verify the integration flow
-    const generateButton = screen.getByRole('button', { name: /generate tournament/i });
-    expect(generateButton).toBeInTheDocument();
-    
-    // Direct call to handler to verify integration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await handleGenerateTournamentMock({ autoAssignTeams: true } as unknown as any);
-    
-    expect(mockAddBulkTournament).toHaveBeenCalled();
-    expect(mockAddBulkGameToGameEdges).toHaveBeenCalled();
-  });
+    it('should trigger edge creation when tournament is generated', async () => {
+
+      const { user } = await renderApp();
+
+  
+
+      // 1. Open Modal
+
+      const generateBtn = (await screen.findAllByRole('button', { name: /generate tournament/i }))[0];
+
+      await user.click(generateBtn);
+
+  
+
+      // 2. Select Template (F6-2-2 is default)
+
+      const modal = await screen.findByRole('dialog');
+
+      
+
+      // 3. Generate
+
+      const confirmBtn = within(modal).getByRole('button', { name: /generate tournament/i });
+
+      await user.click(confirmBtn);
+
+  
+
+          // 4. Verify edges exist in the footer statistics
+
+  
+
+          // Wait for auto-calculated edges to be processed by the hook
+
+  
+
+          await waitFor(() => {
+
+  
+
+            // 6 team template has many games and edges
+
+  
+
+            // Statistics footer uses translated label
+
+  
+
+            const statusBar = document.querySelector('.list-designer-app__status-bar');
+
+  
+
+            expect(statusBar?.textContent).toMatch(/[1-9]\d* Games/i);
+
+  
+
+          }, { timeout: 10000 });
+
+  
+
+      
+
+    }, 30000);
+
+  
 });
