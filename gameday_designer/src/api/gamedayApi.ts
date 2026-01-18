@@ -26,6 +26,9 @@ class GamedayApi {
       headers: {
         'Content-Type': 'application/json',
       },
+      xsrfCookieName: 'csrftoken',
+      xsrfHeaderName: 'X-CSRFToken',
+      withCredentials: true,
     });
 
     // Add auth token if available
@@ -43,7 +46,7 @@ class GamedayApi {
       (error: AxiosError) => {
         if (error.response?.status === 401) {
           // Handle unauthorized - redirect to login
-          window.location.href = '/accounts/login/';
+          window.location.href = '/login/';
         }
         return Promise.reject(error);
       }
