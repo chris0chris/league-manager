@@ -1,10 +1,10 @@
 import json
 from collections import OrderedDict
 from datetime import datetime
-from http import HTTPStatus
 
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView
@@ -12,7 +12,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import viewsets
 
 from gamedays.api.serializers import (
     GamedaySerializer,
@@ -62,7 +61,7 @@ class GamedayViewSet(viewsets.ModelViewSet):
         if gameday.status != Gameday.STATUS_DRAFT:
             return Response(
                 {"detail": "Gameday is already published or completed."},
-                status=HTTPStatus.BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         from django.utils import timezone
@@ -107,7 +106,7 @@ class GameOfficialCreateOrUpdateView(RetrieveUpdateAPIView):
         try:
             officials = GameOfficial.objects.filter(gameinfo_id=game_id)
             serializer = GameOfficialSerializer(instance=officials, many=True)
-            return Response(serializer.data, status=HTTPStatus.OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except GameOfficial.DoesNotExist:
             raise NotFound(detail=f"No officials found for gameId {game_id}")
 
@@ -123,8 +122,8 @@ class GameOfficialCreateOrUpdateView(RetrieveUpdateAPIView):
                 serializer.save()
                 response_data.append(serializer.data)
             else:
-                return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
-        return Response(response_data, status=HTTPStatus.OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class GamedayScheduleView(APIView):
@@ -157,7 +156,7 @@ class GamedayPublishAPIView(APIView):
         if gameday.status != Gameday.STATUS_DRAFT:
             return Response(
                 {"detail": "Gameday is already published or completed."},
-                status=HTTPStatus.BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         from django.utils import timezone
@@ -171,7 +170,7 @@ class GamedayPublishAPIView(APIView):
             status=Gameinfo.STATUS_PUBLISHED
         )
 
-        return Response(GamedaySerializer(gameday).data, status=HTTPStatus.OK)
+        return Response(GamedaySerializer(gameday).data, status=status.HTTP_200_OK)
 
 
 class GameResultUpdateAPIView(APIView):
@@ -205,4 +204,5 @@ class GameResultUpdateAPIView(APIView):
             gameday.status = Gameday.STATUS_COMPLETED
             gameday.save()
 
-        return Response(GameinfoSerializer(game).data, status=HTTPStatus.OK)
+        return Response(GameinfoSerializer(game).data, status=status.HTTP_200_OK)
+
