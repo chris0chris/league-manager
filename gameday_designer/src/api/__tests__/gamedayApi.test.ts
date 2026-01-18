@@ -29,6 +29,11 @@ const mockAxiosInstance = vi.hoisted(() => ({
 vi.mock('axios', () => ({
   default: {
     create: vi.fn(() => mockAxiosInstance),
+    defaults: {
+      xsrfCookieName: '',
+      xsrfHeaderName: '',
+      withCredentials: false
+    }
   },
 }));
 

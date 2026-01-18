@@ -13,6 +13,11 @@ import type {
 } from '../types';
 import { mockGamedayService } from './mockGamedayApi';
 
+// Set global defaults for CSRF handling
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
+
 /**
  * API client class for Gameday management operations.
  */
@@ -26,6 +31,7 @@ class GamedayApi {
       headers: {
         'Content-Type': 'application/json',
       },
+      // Redundant but safe
       xsrfCookieName: 'csrftoken',
       xsrfHeaderName: 'X-CSRFToken',
       withCredentials: true,
@@ -167,12 +173,7 @@ class GamedayApi {
   async updateGameResult(gameId: number, data: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }): Promise<unknown> {
     // In dev we just return the data since we don't have a mock for this yet
     if (this.isDev && !this.forceClient) return { ...data, status: data.final_score ? 'COMPLETED' : 'IN_PROGRESS' };
-    const response = await axios.patch(`/api/gamedays/gameinfo/${gameId}/result/`, data, {
-      headers: {
-        'Authorization': `Token ${localStorage.getItem('authToken')}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await this.client.patch(`/gameinfo/${gameId}/result/`, data);
     return response.data;
   }
 }
