@@ -18,7 +18,8 @@ class GamedayViewSetTest(APITestCase):
             start='10:00',
             season=self.season,
             league=self.league,
-            status='DRAFT'
+            status='DRAFT',
+            author=self.user
         )
         self.gameday2 = Gameday.objects.create(
             name='Another Gameday',
@@ -26,7 +27,8 @@ class GamedayViewSetTest(APITestCase):
             start='11:00',
             season=self.season,
             league=self.league,
-            status='PUBLISHED'
+            status='PUBLISHED',
+            author=self.user
         )
 
     def test_list_gamedays_plural(self):

@@ -39,6 +39,9 @@ class GamedayViewSet(viewsets.ModelViewSet):
             return GamedayListSerializer
         return GamedaySerializer
 
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
     def get_queryset(self):
         queryset = Gameday.objects.all().select_related("season", "league", "author").order_by("-date")
         search = self.request.query_params.get("search", "")
