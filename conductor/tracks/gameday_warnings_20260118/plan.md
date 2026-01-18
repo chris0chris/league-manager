@@ -25,14 +25,14 @@ Focus on implementing the core logic for detecting the new warning scenarios in 
     - [x] Refactor logic for clarity and performance if necessary.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Validation Logic Expansion' (Protocol in workflow.md)
 
-## Phase 2: Internationalization & UI Integration
+## Phase 2: Internationalization & UI Integration [checkpoint: 8bc8014]
 Add localized messages and ensure the UI correctly displays and interacts with the new warnings.
 
-- [x] Task: Localize Warning Messages
+- [x] Task: Localize Warning Messages [8bc8014]
     - [x] Update `gameday_designer/src/i18n/locales/en/validation.json` with new keys:
         - [x] `no_teams`, `no_games`, `team_without_games`, `unused_field`, `broken_progression`.
     - [x] Update `gameday_designer/src/i18n/locales/de/validation.json` with corresponding German translations.
-- [x] Task: Update UI Highlighting Logic
+- [x] Task: Update UI Highlighting Logic [8bc8014]
     - [x] Update `getHighlightType` in `gameday_designer/src/components/ListDesignerApp.tsx` to handle the new warning types.
     - [x] Ensure clicking these warnings in the `PublishConfirmationModal` or status bar highlights the relevant areas.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Internationalization & UI Integration' (Protocol in workflow.md)
