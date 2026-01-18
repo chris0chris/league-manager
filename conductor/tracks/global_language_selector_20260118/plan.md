@@ -2,14 +2,14 @@
 
 This plan outlines the steps to implement a unified application layout and a persistent global header for the Gameday Designer, improving navigation and consolidating global settings like language selection.
 
-## Phase 1: Foundation & Refactoring
+## Phase 1: Foundation & Refactoring [checkpoint: 4b1bd45]
 Set up the new layout structure and extract shared components.
 
-- [x] Task: Create Layout Components
+- [x] Task: Create Layout Components [4b1bd45]
     - [x] Create directory `gameday_designer/src/components/layout/`.
     - [x] Implement `AppHeader.tsx` with basic structure (Title, Spacer, LanguageSelector, UserProfile).
     - [x] Implement `MainLayout.tsx` using `AppHeader` and `Outlet` from `react-router-dom`.
-- [x] Task: Relocate Language Selector
+- [x] Task: Relocate Language Selector [4b1bd45]
     - [x] Remove `LanguageSelector` import and usage from `gameday_designer/src/components/FlowToolbar.tsx`.
     - [x] Verify `LanguageSelector.tsx` is ready for global usage.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Refactoring' (Protocol in workflow.md)
