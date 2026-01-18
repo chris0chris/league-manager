@@ -18,6 +18,7 @@ const GamedayDeletePlaceholder: React.FC<{
   onUndo: (id: number) => void;
   duration: number;
 }> = ({ gameday, onUndo, duration }) => {
+  const { t } = useTypedTranslation(['ui']);
   const [progress, setProgress] = useState(100);
   const [isHovered, setIsHovered] = useState(false);
   
@@ -47,7 +48,7 @@ const GamedayDeletePlaceholder: React.FC<{
                 className="px-4 shadow-sm animate-in"
               >
                 <i className="bi bi-arrow-counterclockwise me-1"></i>
-                Undo
+                {t('ui:label.undo')}
               </Button>
             ) : (
               <i className="bi bi-trash3 text-muted opacity-25 animate-in" style={{ fontSize: '2.5rem' }}></i>
@@ -74,33 +75,11 @@ const GamedayDashboard: React.FC = () => {
   const location = useLocation();
   const [gamedays, setGamedays] = useState<GamedayListEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const timeoutRefs = useRef<Record<number, NodeJS.Timeout>>({});
   const hasTriggeredInitialDelete = useRef(false);
-
-  useEffect(() => {
-    loadGamedays();
-    return () => {
-      // Cleanup timers on unmount
-      Object.values(timeoutRefs.current).forEach(timer => clearTimeout(timer));
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
-
-  // Handle pending delete from navigation state
-  useEffect(() => {
-    if (!loading && gamedays.length > 0 && !hasTriggeredInitialDelete.current) {
-      const state = location.state as { pendingDeleteId?: number } | null;
-      if (state?.pendingDeleteId) {
-        handleDelete(state.pendingDeleteId);
-        // Clear location state so it doesn't trigger again on refresh
-        navigate(location.pathname, { replace: true, state: {} });
-        hasTriggeredInitialDelete.current = true;
-      }
-    }
-  }, [loading, gamedays, location.state, navigate, location.pathname]);
 
   const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string, undoAction?: () => void, duration?: number) => {
     const id = uuidv4();
@@ -121,10 +100,11 @@ const GamedayDashboard: React.FC = () => {
   const loadGamedays = async () => {
     setLoading(true);
     try {
-      const response = await gamedayApi.listGamedays({ search });
+      const response = await gamedayApi.listGamedays({ search: searchTerm });
       setGamedays(response.results);
     } catch (error) {
       console.error('Failed to load gamedays', error);
+      addNotification(t('ui:notification.loadGamedaysFailed'), 'danger', t('ui:notification.title.error'));
     } finally {
       setLoading(false);
     }
@@ -132,10 +112,20 @@ const GamedayDashboard: React.FC = () => {
 
   const handleCreateGameday = async () => {
     try {
-      const newGameday = await gamedayApi.createGameday({});
+      const newGameday = await gamedayApi.createGameday({
+        name: t('ui:placeholder.gamedayName'),
+        date: new Date().toISOString().split('T')[0],
+        start: '10:00',
+        format: '6_2',
+        author: 1, // TODO: Use actual user ID
+        address: '',
+        season: 1, // TODO: Use actual season ID
+        league: 1, // TODO: Use actual league ID
+      });
       navigate(`/designer/${newGameday.id}`);
     } catch (error) {
       console.error('Failed to create gameday', error);
+      addNotification(t('ui:notification.createGamedayFailed'), 'danger', t('ui:notification.title.error'));
     }
   };
 
@@ -180,6 +170,7 @@ const GamedayDashboard: React.FC = () => {
         delete timeoutRefs.current[id];
       } catch (error) {
         console.error('Failed to delete gameday permanently', error);
+        addNotification(t('ui:notification.deleteGamedayPermanentlyFailed'), 'danger', t('ui:notification.title.error'));
         // On failure, restore it to the list
         setDeletedIds(prev => {
           const next = new Set(prev);
@@ -192,44 +183,67 @@ const GamedayDashboard: React.FC = () => {
     timeoutRefs.current[id] = timer;
     
     // Show simplified Toast
-    const gamedayName = gamedays.find(g => g.id === id)?.name || 'Gameday';
+    const gamedayName = gamedays.find(g => g.id === id)?.name || t('ui:message.gameday');
     addNotification(
-      `Gameday "${gamedayName}" will be deleted.`,
+      t('ui:notification.gamedayDeleted', { name: gamedayName }),
       'warning',
-      'Deletion',
+      t('ui:notification.title.deletion'),
       undefined, // No undo on toast anymore, it's on the card
       deleteDuration
     );
-  }, [gamedays, addNotification, handleUndo, location.state]);
+  }, [gamedays, addNotification, t]);
+
+  useEffect(() => {
+    loadGamedays();
+    return () => {
+      // Cleanup timers on unmount
+      Object.values(timeoutRefs.current).forEach(timer => clearTimeout(timer));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
+
+  // Handle pending delete from navigation state
+  useEffect(() => {
+    if (!loading && gamedays.length > 0 && !hasTriggeredInitialDelete.current) {
+      const state = location.state as { pendingDeleteId?: number } | null;
+      if (state?.pendingDeleteId) {
+        handleDelete(state.pendingDeleteId);
+        // Clear location state so it doesn't trigger again on refresh
+        navigate(location.pathname, { replace: true, state: {} });
+        hasTriggeredInitialDelete.current = true;
+      }
+    }
+  }, [loading, gamedays, location.state, navigate, location.pathname, handleDelete]);
 
   return (
     <Container fluid className="py-4">
-      <Row className="mb-4 align-items-center">
+      <Row className="mb-5 align-items-center">
         <Col>
-          <h1 className="h3 mb-0">Gameday Management</h1>
+          <h1 className="display-5 fw-bold mb-0">{t('ui:button.gamedayManagement')}</h1>
+          <p className="text-muted lead">{t('ui:message.dashboardSubtitle')}</p>
         </Col>
         <Col xs="auto">
           <Button variant="primary" onClick={handleCreateGameday}>
             <i className="bi bi-plus-lg me-2"></i>
-            {t('ui:button.createGameday', 'Create Gameday')}
+            {t('ui:button.createGameday')}
           </Button>
         </Col>
       </Row>
 
       <Row className="mb-4">
         <Col md={6} lg={4}>
-          <InputGroup>
-            <InputGroup.Text>
-              <i className="bi bi-search"></i>
-            </InputGroup.Text>
+          <Form.Group className="position-relative">
             <Form.Control
-              placeholder={t('ui:placeholder.searchGamedays', 'Search gamedays...')}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              type="text"
+              placeholder={t('ui:placeholder.searchGamedays')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="ps-5"
             />
-          </InputGroup>
+            <i className="bi bi-search position-absolute top-50 translate-middle-y ms-3 text-muted"></i>
+          </Form.Group>
           <Form.Text className="text-muted">
-            Tip: Use <code>season:2026</code> or <code>status:draft</code> for precise filtering.
+            {t('ui:message.filteringTip')}
           </Form.Text>
         </Col>
       </Row>
@@ -267,11 +281,11 @@ const GamedayDashboard: React.FC = () => {
             <Col>
               <div className="text-center py-5 text-muted bg-light rounded border border-dashed">
                 <i className="bi bi-calendar-x display-1 mb-3 d-block text-secondary opacity-25"></i>
-                <h2 className="h4 mb-3">No gamedays found</h2>
-                <p className="mb-4">Get started by creating your first tournament gameday.</p>
+                <h2 className="h4 mb-3">{t('ui:message.noGamedaysFound')}</h2>
+                <p className="mb-4">{t('ui:message.getStartedMessage')}</p>
                 <Button variant="primary" size="lg" onClick={handleCreateGameday} className="px-5 shadow-sm">
                   <i className="bi bi-plus-lg me-2"></i>
-                  {t('ui:button.createGameday', 'Create Gameday')}
+                  {t('ui:button.createGameday')}
                 </Button>
               </div>
             </Col>

@@ -18,6 +18,19 @@
     "previewStages_one": "{{count}} Phase",
     "previewStages_other": "{{count}} Phasen",
     "previewFirstGame": "Erstes Spiel um {{time}}",
-    "previewGameDuration": "Standard-Spieldauer: {{duration}} Minuten"
+    "previewGameDuration": "Standard-Spieldauer: {{duration}} Minuten",
+    "durationValidation": "Die Dauer muss zwischen 15 und 180 Minuten liegen.",
+    "generateTeamsDisabledHint": "Zuerst manuelle Teams entfernen"
+  },
+  "publishConfirmation": {
+    "title": "Spielplan veröffentlichen",
+    "description": "Das Veröffentlichen des Spielplans sperrt dessen Struktur. Ergebnisse können eingegeben werden, aber Spiele und Teams können nicht mehr hinzugefügt oder entfernt werden.",
+    "errorsTitle": "Blockierende Fehler gefunden",
+    "errorsDescription": "Die folgenden Probleme müssen behoben werden, bevor der Spielplan veröffentlicht werden kann:",
+    "warningsTitle": "Warnungen gefunden",
+    "warningsDescription": "Der Spielplan weist einige potenzielle Probleme auf. Sie können trotzdem veröffentlichen, aber bitte überprüfen Sie diese Punkte:",
+    "ready": "Der Spielplan ist gültig und bereit zur Veröffentlichung.",
+    "confirmWithWarnings": "Trotzdem veröffentlichen",
+    "confirm": "Jetzt veröffentlichen"
   }
 }

@@ -40,10 +40,10 @@ describe('GameResultModal', () => {
   it('calls onSave with updated scores', () => {
     render(<GameResultModal {...defaultProps} />);
     
-    const homeHalftimeInput = screen.getByLabelText(/Team Alpha \(halftime\)/i);
+    const homeHalftimeInput = screen.getByLabelText(/Team Alpha.*ui:label.halftime/i);
     fireEvent.change(homeHalftimeInput, { target: { value: '14' } });
     
-    const saveButton = screen.getByText('ui:button.save');
+    const saveButton = screen.getByRole('button', { name: /ui:button.save/i });
     fireEvent.click(saveButton);
     
     expect(defaultProps.onSave).toHaveBeenCalledWith({

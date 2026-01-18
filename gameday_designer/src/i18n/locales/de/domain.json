@@ -17,5 +17,11 @@
   "teamPool": "Team-Pool",
   "globalTeamPool": "Globaler Team-Pool",
   "stageTypeStandard": "Standard-Phase",
-  "stageTypeRanking": "Ranking-Phase"
+  "stageTypeRanking": "Platzierungs-Phase",
+  "status": {
+    "draft": "Entwurf",
+    "published": "Veröffentlicht",
+    "in_progress": "In Bearbeitung",
+    "completed": "Abgeschlossen"
+  }
 }

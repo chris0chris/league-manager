@@ -18,7 +18,16 @@
     "moveUp": "Nach oben",
     "moveDown": "Nach unten",
     "delete": "Löschen",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "publishSchedule": "Spielplan veröffentlichen",
+    "unlockSchedule": "Spielplan freischalten",
+    "clearSchedule": "Spielplan leeren",
+    "deleteGameday": "Spieltag löschen",
+    "createGameday": "Spieltag erstellen",
+    "gamedayManagement": "Spieltags-Management",
+    "gamedayDesigner": "Spieltags-Designer",
+    "result": "Ergebnis",
+    "backToDashboard": "Zurück zum Dashboard"
   },
   "label": {
     "language": "Sprache",
@@ -26,10 +35,14 @@
     "english": "Englisch",
     "stage": "Phase",
     "standing": "Platzierung",
+    "time": "Zeit",
     "home": "Heim",
     "away": "Gast",
+    "score": "Ergebnis",
     "official": "Schiedsrichter",
-    "breakAfter": "Pause danach (Minuten)",
+    "breakAfter": "Pause danach",
+    "breakAfterMinutes": "Pause danach (Minuten)",
+    "actions": "Aktionen",
     "validation": "Validierung",
     "tournamentFormat": "Turnierformat",
     "numberOfFields": "Anzahl der Felder",
@@ -44,10 +57,22 @@
     "teamPool": "Team-Pool",
     "globalTeamPool": "Globaler Team-Pool",
     "start": "Start",
-    "type": "Phasentyp"
+    "type": "Phasentyp",
+    "readOnly": "Schreibgeschützt",
+    "halftimeScore": "Halbzeitstand",
+    "finalScore": "Endstand",
+    "halftime": "Halbzeit",
+    "final": "Endstand",
+    "undo": "Rückgängig",
+    "winner": "Sieger",
+    "loser": "Verlierer",
+    "tbd": "TBD",
+    "selectTeam": "-- Team wählen --"
   },
   "placeholder": {
-    "standing": "z.B. Gruppe 1, HF1, P1"
+    "standing": "z.B. Gruppe 1, HF1, P1",
+    "gamedayName": "Neuer Spieltag",
+    "searchGamedays": "Spieltage suchen..."
   },
   "message": {
     "noTeamsYet": "Noch keine Teams",
@@ -59,10 +84,22 @@
     "noGroupsYet": "Noch keine Gruppen",
     "createFirstField": "Erstellen Sie Ihr erstes Feld, um Spiele zu organisieren",
     "createFirstGroup": "Erstellen Sie Ihre erste Team-Gruppe, um Teams zu organisieren",
-    "doubleClickToEdit": "Doppelklick zum Bearbeiten"
+    "doubleClickToEdit": "Doppelklick zum Bearbeiten",
+    "doubleClickToEditTeam": "Doppelklick zum Bearbeiten des Teamnamens",
+    "gameday": "Spieltag",
+    "dashboardSubtitle": "Erstellen und verwalten Sie Ihre Flag-Football-Turnierpläne",
+    "filteringTip": "Tipp: Verwenden Sie season:2026 oder status:draft für präzises Filtern.",
+    "noGamedaysFound": "Keine Spieltage gefunden",
+    "getStartedMessage": "Beginnen Sie, indem Sie Ihren ersten Spieltag erstellen.",
+    "winnerOf": "Sieger von {{match}}",
+    "loserOf": "Verlierer von {{match}}",
+    "placeFrom": "{{place}}. Platz aus {{stage}}",
+    "ungrouped": "Ungruppiert",
+    "assignedGamesCount": "Anzahl der Spiele, denen dieses Team zugewiesen ist"
   },
   "tooltip": {
     "addTeamToGroup": "Ein neues Team zu dieser Gruppe hinzufügen",
+    "addFirstTeamToGroup": "Erstes Team zu dieser Gruppe hinzufügen",
     "moveGroupUp": "Diese Teamgruppe um eine Position nach oben verschieben",
     "moveGroupDown": "Diese Teamgruppe um eine Position nach unten verschieben",
     "deleteGroup": "Diese Teamgruppe und alle ihre Teams dauerhaft entfernen",
@@ -86,6 +123,34 @@
     "addGroup": "Eine neue Teamgruppe erstellen, um Ihre Teams zu organisieren",
     "addStage": "Eine neue Turnierphase (z.B. Vorrunde, Playoffs) zu diesem Feld hinzufügen",
     "addGame": "Ein neues Spiel zu dieser Turnierphase hinzufügen",
-    "generateTournament": "Automatisch eine Turnierstruktur basierend auf einer Vorlage generieren"
+    "generateTournament": "Automatisch eine Turnierstruktur basierend auf einer Vorlage generieren",
+    "clickToEdit": "Klicken zum Bearbeiten",
+    "enterResult": "Ergebnis eingeben",
+    "deleteGame": "Spiel löschen",
+    "autoTimeHint": "Automatisch berechnet - Klicken zum Überschreiben",
+    "manualTimeHint": "Manuell gesetzt - Klicken zum Bearbeiten"
+  },
+  "notification": {
+    "gameResultSaved": "Spielergebnis gespeichert",
+    "saveResultFailed": "Spielergebnis konnte nicht gespeichert werden",
+    "autoSaveFailed": "Änderungen konnten nicht automatisch gespeichert werden",
+    "loadGamedayFailed": "Spieltag konnte nicht geladen werden",
+    "loadGamedaysFailed": "Spieltage konnten nicht geladen werden",
+    "createGamedayFailed": "Spieltag konnte nicht erstellt werden",
+    "deleteGamedayPermanentlyFailed": "Spieltag konnte nicht endgültig gelöscht werden",
+    "gamedayDeleted": "Spieltag \"{{name}}\" gelöscht",
+    "publishSuccess": "Spielplan veröffentlicht und gesperrt",
+    "publishFailed": "Spielplan konnte nicht veröffentlicht werden",
+    "unlockSuccess": "Spielplan zur Bearbeitung freigeschaltet",
+    "unlockFailed": "Spielplan konnte nicht freigeschaltet werden",
+    "invalidTimeFormat": "Ungültiges Zeitformat. Verwenden Sie HH:MM (24-Stunden)",
+    "title": {
+      "success": "Erfolg",
+      "error": "Fehler",
+      "autoSave": "Auto-Speichern",
+      "importError": "Import-Fehler",
+      "deletion": "Löschen",
+      "timeFormat": "Zeitformat"
+    }
   }
 }

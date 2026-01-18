@@ -81,6 +81,7 @@ describe('FieldSection', () => {
         onNotify={vi.fn()}
         isExpanded={true}
         expandedStageIds={new Set()}
+        readOnly={false}
       />
     );
 

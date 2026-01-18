@@ -46,15 +46,15 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
-        <Modal.Title>{t('ui:title.enterGameResult', 'Enter Game Result')}: {game?.data.standing}</Modal.Title>
+        <Modal.Title>{t('ui:title.enterGameResult')}: {game?.data.standing}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
-          <h6 className="text-uppercase text-muted small mb-3">{t('ui:label.halftimeScore', 'Halftime Score')}</h6>
+          <h6 className="text-uppercase text-muted small mb-3">{t('ui:label.halftimeScore')}</h6>
           <Row className="mb-4 align-items-center">
             <Col>
               <Form.Group controlId="halftimeHome">
-                <Form.Label className="small">{homeTeamName} (halftime)</Form.Label>
+                <Form.Label className="small">{homeTeamName} ({t('ui:label.halftime')})</Form.Label>
                 <Form.Control
                   type="number"
                   min="0"
@@ -66,7 +66,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
             <Col xs="auto" className="pt-4">:</Col>
             <Col>
               <Form.Group controlId="halftimeAway">
-                <Form.Label className="small">{awayTeamName} (halftime)</Form.Label>
+                <Form.Label className="small">{awayTeamName} ({t('ui:label.halftime')})</Form.Label>
                 <Form.Control
                   type="number"
                   min="0"
@@ -77,11 +77,11 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
             </Col>
           </Row>
 
-          <h6 className="text-uppercase text-muted small mb-3">{t('ui:label.finalScore', 'Final Score')}</h6>
+          <h6 className="text-uppercase text-muted small mb-3">{t('ui:label.finalScore')}</h6>
           <Row className="mb-3 align-items-center">
             <Col>
               <Form.Group controlId="finalHome">
-                <Form.Label className="small">{homeTeamName} (final)</Form.Label>
+                <Form.Label className="small">{homeTeamName} ({t('ui:label.final')})</Form.Label>
                 <Form.Control
                   type="number"
                   min="0"
@@ -93,7 +93,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
             <Col xs="auto" className="pt-4">:</Col>
             <Col>
               <Form.Group controlId="finalAway">
-                <Form.Label className="small">{awayTeamName} (final)</Form.Label>
+                <Form.Label className="small">{awayTeamName} ({t('ui:label.final')})</Form.Label>
                 <Form.Control
                   type="number"
                   min="0"
@@ -106,8 +106,8 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>{t('ui:button.cancel', 'Cancel')}</Button>
-        <Button variant="primary" onClick={handleSave}>{t('ui:button.save', 'Save')}</Button>
+        <Button variant="secondary" onClick={onHide}>{t('ui:button.cancel')}</Button>
+        <Button variant="primary" onClick={handleSave}>{t('ui:button.save')}</Button>
       </Modal.Footer>
     </Modal>
   );

@@ -267,7 +267,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                 <button
                   className="btn btn-outline-primary btn-adaptive"
                   onClick={() => onAddTeam(group.id)}
-                  title="Add your first team to this group"
+                  title={t('ui:tooltip.addFirstTeamToGroup')}
                 >
                   <i className={`bi ${ICONS.ADD}`}></i>
                   <span className="btn-label-adaptive">{t('ui:button.addTeam')}</span>
@@ -294,7 +294,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                       type="color"
                       value={team.color || '#6c757d'}
                       onChange={(e) => !readOnly && onUpdateTeam(team.id, { color: e.target.value })}
-                      title={readOnly ? undefined : "Change the color badge for this team"}
+                      title={readOnly ? undefined : t('ui:tooltip.teamColor')}
                       style={{
                         width: '24px',
                         height: '24px',
@@ -323,7 +323,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                       <span
                         onDoubleClick={() => !readOnly && handleStartEditTeam(team)}
                         style={{ cursor: readOnly ? 'default' : 'text' }}
-                        title={readOnly ? undefined : "Double-click to edit team label"}
+                        title={readOnly ? undefined : t('ui:message.doubleClickToEditTeam')}
                         className="text-truncate d-block"
                       >
                         {team.label}
@@ -333,7 +333,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
 
                   {/* Usage count */}
                   <div className="me-2 flex-shrink-0">
-                    <small className="text-muted" title="Number of games this team is assigned to">
+                    <small className="text-muted" title={t('ui:message.assignedGamesCount')}>
                       <strong>{usages.length}</strong>
                     </small>
                   </div>

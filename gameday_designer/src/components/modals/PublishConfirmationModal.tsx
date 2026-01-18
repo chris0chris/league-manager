@@ -56,23 +56,23 @@ const PublishConfirmationModal: React.FC<PublishConfirmationModalProps> = ({
       <Modal.Header closeButton>
         <Modal.Title>
           <i className="bi bi-send-fill me-2"></i>
-          {t('modal:publishConfirmation.title', 'Publish Schedule')}
+          {t('modal:publishConfirmation.title')}
         </Modal.Title>
       </Modal.Header>
       
       <Modal.Body>
         <p className="mb-4">
-          {t('modal:publishConfirmation.description', 'Publishing the schedule will lock its structure. Results can be entered, but games and teams cannot be added or removed.')}
+          {t('modal:publishConfirmation.description')}
         </p>
 
         {!isValid && (
           <Alert variant="danger" className="mb-4">
             <Alert.Heading className="h6">
               <i className="bi bi-x-circle-fill me-2"></i>
-              {t('modal:publishConfirmation.errorsTitle', 'Blocking Errors Found')}
+              {t('modal:publishConfirmation.errorsTitle')}
             </Alert.Heading>
             <p className="small mb-2">
-              {t('modal:publishConfirmation.errorsDescription', 'The following issues must be resolved before the schedule can be published:')}
+              {t('modal:publishConfirmation.errorsDescription')}
             </p>
             <ListGroup variant="flush" className="bg-transparent">
               {errors.map(err => (
@@ -94,10 +94,10 @@ const PublishConfirmationModal: React.FC<PublishConfirmationModalProps> = ({
           <Alert variant="warning" className="mb-0">
             <Alert.Heading className="h6">
               <i className="bi bi-exclamation-triangle-fill me-2"></i>
-              {t('modal:publishConfirmation.warningsTitle', 'Warnings Found')}
+              {t('modal:publishConfirmation.warningsTitle')}
             </Alert.Heading>
             <p className="small mb-2">
-              {t('modal:publishConfirmation.warningsDescription', 'The schedule has some potential issues. You can still publish, but please review these items:')}
+              {t('modal:publishConfirmation.warningsDescription')}
             </p>
             <ListGroup variant="flush" className="bg-transparent">
               {warnings.map(warn => (
@@ -118,14 +118,14 @@ const PublishConfirmationModal: React.FC<PublishConfirmationModalProps> = ({
         {isValid && warnings.length === 0 && (
           <Alert variant="success" className="mb-0 border-0">
             <i className="bi bi-check-circle-fill me-2"></i>
-            {t('modal:publishConfirmation.ready', 'The schedule is valid and ready to be published.')}
+            {t('modal:publishConfirmation.ready')}
           </Alert>
         )}
       </Modal.Body>
 
       <Modal.Footer className="bg-light">
         <Button variant="secondary" onClick={onHide}>
-          {t('ui:button.cancel', 'Cancel')}
+          {t('ui:button.cancel')}
         </Button>
         <Button 
           variant={isValid ? "success" : "outline-danger"} 
@@ -133,8 +133,8 @@ const PublishConfirmationModal: React.FC<PublishConfirmationModalProps> = ({
           disabled={!isValid}
         >
           {warnings.length > 0 
-            ? t('modal:publishConfirmation.confirmWithWarnings', 'Publish Anyway') 
-            : t('modal:publishConfirmation.confirm', 'Publish Now')}
+            ? t('modal:publishConfirmation.confirmWithWarnings') 
+            : t('modal:publishConfirmation.confirm')}
         </Button>
       </Modal.Footer>
     </Modal>

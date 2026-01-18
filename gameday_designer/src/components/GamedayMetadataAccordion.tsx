@@ -76,12 +76,12 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
           <Accordion.Header className={`header-status-${statusColor.toLowerCase()}`}>
             <div className="d-flex w-100 justify-content-between me-3 align-items-center">
               <div className="d-flex align-items-center gap-2">
-                <span className="fw-bold">{metadata.name || t('ui:placeholder.gamedayName', 'New Gameday')}</span>
+                <span className="fw-bold">{metadata.name || t('ui:placeholder.gamedayName')}</span>
                 {getStatusBadge(metadata.status)}
                 {readOnly && metadata.status === 'DRAFT' && (
                   <span className="badge bg-light text-muted border small">
                     <i className="bi bi-lock-fill me-1"></i>
-                    {t('ui:label.readOnly', 'Read-only')}
+                    {t('ui:label.readOnly')}
                   </span>
                 )}
               </div>
@@ -154,7 +154,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                       className="px-3"
                     >
                       <i className="bi bi-send-fill me-2"></i>
-                      {t('ui:button.publishSchedule', 'Publish Schedule')}
+                      {t('ui:button.publishSchedule')}
                     </Button>
                   ) : (
                     <Button 
@@ -164,7 +164,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                       className="px-3"
                     >
                       <i className="bi bi-unlock-fill me-2"></i>
-                      {t('ui:button.unlockSchedule', 'Unlock Schedule')}
+                      {t('ui:button.unlockSchedule')}
                     </Button>
                   )}
                   
@@ -176,7 +176,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                     className="px-3"
                   >
                     <i className={`bi ${ICONS.CLEAR} me-2`}></i>
-                    {t('ui:button.clearSchedule', 'Clear Schedule')}
+                    {t('ui:button.clearSchedule')}
                   </Button>
                 </div>
 
@@ -187,7 +187,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                   className="px-3"
                 >
                   <i className={`bi ${ICONS.TRASH} me-2`}></i>
-                  {t('ui:button.deleteGameday', 'Delete Gameday')}
+                  {t('ui:button.deleteGameday')}
                 </Button>
               </div>
             </Form>

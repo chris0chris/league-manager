@@ -31,6 +31,7 @@ const createDefaultProps = (overrides: Partial<StageSectionProps> = {}): StageSe
   onRemoveGameToGameEdge: vi.fn(),
   onNotify: vi.fn(),
   isExpanded: true,
+  readOnly: false,
   ...overrides,
 });
 

@@ -231,7 +231,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                         isInvalid={!isDurationValid}
                       />
                       <Form.Control.Feedback type="invalid">
-                        Duration must be between 15 and 180 minutes.
+                        {t('modal:tournamentGenerator.durationValidation')}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -261,7 +261,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                         })}
                         {hasTeams && (
                           <span className="text-muted small ms-2">
-                            ({t('modal:tournamentGenerator.generateTeamsDisabledHint', 'Disable manual teams first')})
+                            ({t('modal:tournamentGenerator.generateTeamsDisabledHint')})
                           </span>
                         )}
                       </>
@@ -308,7 +308,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                     })}
                   </li>
                   <li>
-                    {t('ui:label.breakDuration')}: {breakDuration} min
+                    {t('ui:label.breakDuration')}: {breakDuration} {t('domain:minutes')}
                   </li>
                 </ul>
               </Alert>

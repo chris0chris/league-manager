@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { Card, Badge, Col } from 'react-bootstrap';
+import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import type { GamedayListEntry } from '../../types';
 
 interface GamedayCardProps {
@@ -15,6 +16,7 @@ interface GamedayCardProps {
 }
 
 const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick, onDelete }) => {
+  const { t } = useTypedTranslation(['ui', 'domain']);
 
   const getStatusVariant = (status: string) => {
     switch (status.toUpperCase()) {
@@ -27,13 +29,7 @@ const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick, onDelete })
   };
 
   const getStatusLabel = (status: string) => {
-    switch (status.toUpperCase()) {
-      case 'DRAFT': return 'Draft';
-      case 'PUBLISHED': return 'Published';
-      case 'IN_PROGRESS': return 'In Progress';
-      case 'COMPLETED': return 'Completed';
-      default: return status;
-    }
+    return t(`domain:status.${(status || 'DRAFT').toLowerCase()}`, status);
   };
 
   const formatDate = (dateString: string) => {
@@ -66,7 +62,7 @@ const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick, onDelete })
               <button 
                 className="btn text-muted btn-destructive-hover delete-button-grow"
                 onClick={handleDelete}
-                title="Delete Gameday"
+                title={t('ui:button.deleteGameday')}
                 style={{ 
                   lineHeight: 1, 
                   padding: '6px 8px', 
