@@ -140,3 +140,12 @@ class ConcatOfficialsNames(Func):
     function = "GROUP_CONCAT"
     template = "%(function)s(%(expressions)s SEPARATOR ', ')"
     output_field = CharField()
+
+    def as_sqlite(self, compiler, connection, **extra_context):
+        return super().as_sql(
+            compiler,
+            connection,
+            template="%(function)s(%(expressions)s)",
+            **extra_context,
+        )
+

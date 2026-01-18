@@ -12,7 +12,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import viewsets, filters
+from rest_framework import viewsets
 
 from gamedays.api.serializers import (
     GamedaySerializer,
