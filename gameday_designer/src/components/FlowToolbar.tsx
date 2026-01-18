@@ -12,7 +12,6 @@
 import React, { useRef } from 'react';
 import { Button, ButtonGroup, ButtonToolbar } from 'react-bootstrap';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
-import LanguageSelector from './LanguageSelector';
 import { ICONS } from '../utils/iconConstants';
 
 import './FlowToolbar.css';
@@ -143,11 +142,6 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             </Button>
           </ButtonGroup>
         )}
-
-        {/* Language selector */}
-        <ButtonGroup>
-          <LanguageSelector />
-        </ButtonGroup>
       </ButtonToolbar>
 
       {/* Hidden file input for import */}
