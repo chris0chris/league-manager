@@ -33,5 +33,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: language selector must be globally**
+- [x] `global_language_selector_20260118`: Unified application layout and global header [finished: 2026-01-18]
 *Link: [./tracks/global_language_selector_20260118/](./tracks/global_language_selector_20260118/)*
