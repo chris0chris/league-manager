@@ -191,7 +191,7 @@ class GamedayService:
 
     def get_qualify_table(self):
         qualify_table = self.gmw.get_qualify_table()
-        if qualify_table == "":
+        if isinstance(qualify_table, str) and qualify_table == "":
             return EmptyQualifyTable
         qualify_table = qualify_table[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
         qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
