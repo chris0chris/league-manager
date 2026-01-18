@@ -140,6 +140,11 @@ class EmptyGamedayService:
     def get_defense_player_statistic_table():
         return EmptyDefenseStatisticTable
 
+    @staticmethod
+    def get_resolved_designer_data(gameday_pk):
+        gameday = Gameday.objects.get(pk=gameday_pk)
+        return gameday.designer_data or {"nodes": [], "edges": []}
+
 
 class GamedayService:
     @classmethod
@@ -186,7 +191,7 @@ class GamedayService:
 
     def get_qualify_table(self):
         qualify_table = self.gmw.get_qualify_table()
-        if qualify_table is "":
+        if qualify_table == "":
             return EmptyQualifyTable
         qualify_table = qualify_table[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
         qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
@@ -232,7 +237,7 @@ class GamedayService:
     def get_defense_player_statistic_table(self):
         return self.gmw.get_defense_statistic_table()
 
-    def get_resolved_designer_data(self):
+    def get_resolved_designer_data(self, gameday_pk=None):
         gameday = Gameday.objects.get(pk=self.gameday_pk)
         data = gameday.designer_data or {"nodes": [], "edges": []}
 

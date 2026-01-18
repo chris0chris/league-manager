@@ -16,7 +16,7 @@ class GamedaySerializer(ModelSerializer):
     def get_designer_data(self, obj: Gameday):
         from gamedays.service.gameday_service import GamedayService
 
-        return GamedayService(obj.pk).get_resolved_designer_data()
+        return GamedayService.create(obj.pk).get_resolved_designer_data(obj.pk)
 
 
 class GamedayInfoSerializer(Serializer):

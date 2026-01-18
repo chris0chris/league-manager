@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
 from gamedays.api.game_views import (
     GameLogAPIView,
@@ -17,6 +18,7 @@ from gamedays.api.views import (
     GameOfficialCreateOrUpdateView,
     GamedayPublishAPIView,
     GameResultUpdateAPIView,
+    GamedayViewSet,
 )
 from gamedays.constants import (
     API_GAMEDAY_WHISTLEGAMES,
@@ -30,7 +32,11 @@ from gamedays.constants import (
     API_GAME_SETUP,
 )
 
+router = DefaultRouter()
+router.register(r"gamedays", GamedayViewSet, basename="gameday")
+
 urlpatterns = [
+    path("", include(router.urls)),
     path("gameday/list/", GamedayListAPIView.as_view(), name=API_GAMEDAY_LIST),
     path(
         "gameinfo/<int:pk>/",

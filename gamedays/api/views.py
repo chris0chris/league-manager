@@ -5,11 +5,14 @@ from http import HTTPStatus
 
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import viewsets, filters
 
 from gamedays.api.serializers import (
     GamedaySerializer,
@@ -18,6 +21,56 @@ from gamedays.api.serializers import (
 )
 from gamedays.models import Gameday, Gameinfo, GameOfficial
 from gamedays.service.gameday_service import GamedayService
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 100
+    page_size_query_param = "page_size"
+    max_page_size = 1000
+
+
+class GamedayViewSet(viewsets.ModelViewSet):
+    serializer_class = GamedaySerializer
+    pagination_class = StandardResultsSetPagination
+    queryset = Gameday.objects.all()
+
+    def get_queryset(self):
+        queryset = Gameday.objects.all().order_by("-date")
+        search = self.request.query_params.get("search", "")
+        if search:
+            if ":" in search:
+                key, value = search.split(":", 1)
+                key = key.lower().strip()
+                value = value.strip()
+                if key == "season":
+                    queryset = queryset.filter(season__name__icontains=value)
+                elif key == "status":
+                    queryset = queryset.filter(status__iexact=value)
+            else:
+                queryset = queryset.filter(name__icontains=search)
+        return queryset
+
+    @action(detail=True, methods=["post"])
+    def publish(self, request, pk=None):
+        gameday = self.get_object()
+        if gameday.status != Gameday.STATUS_DRAFT:
+            return Response(
+                {"detail": "Gameday is already published or completed."},
+                status=HTTPStatus.BAD_REQUEST,
+            )
+
+        from django.utils import timezone
+
+        gameday.status = Gameday.STATUS_PUBLISHED
+        gameday.published_at = timezone.now()
+        gameday.save()
+
+        # Update all associated games
+        Gameinfo.objects.filter(gameday=gameday).update(
+            status=Gameinfo.STATUS_PUBLISHED
+        )
+
+        return Response(self.get_serializer(gameday).data)
 
 
 class GamedayListAPIView(ListAPIView):
