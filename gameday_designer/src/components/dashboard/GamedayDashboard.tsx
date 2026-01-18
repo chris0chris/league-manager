@@ -216,11 +216,10 @@ const GamedayDashboard: React.FC = () => {
   }, [loading, gamedays, location.state, navigate, location.pathname, handleDelete]);
 
   return (
-    <Container fluid className="py-4">
-      <Row className="mb-5 align-items-center">
+    <Container fluid className="py-2">
+      <Row className="mb-4 align-items-center">
         <Col>
-          <h1 className="display-5 fw-bold mb-0">{t('ui:button.gamedayManagement')}</h1>
-          <p className="text-muted lead">{t('ui:message.dashboardSubtitle')}</p>
+          <p className="text-muted lead mb-0">{t('ui:message.dashboardSubtitle')}</p>
         </Col>
         <Col xs="auto">
           <Button variant="primary" onClick={handleCreateGameday}>

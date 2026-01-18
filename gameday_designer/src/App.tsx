@@ -12,6 +12,8 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ListDesignerApp from './components/ListDesignerApp';
 import GamedayDashboard from './components/dashboard/GamedayDashboard';
+import MainLayout from './components/layout/MainLayout';
+import { GamedayProvider } from './context/GamedayContext';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -24,10 +26,14 @@ const App: React.FC = () => {
 
   return (
     <BrowserRouter basename={basename} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Routes>
-        <Route path="/" element={<GamedayDashboard />} />
-        <Route path="/designer/:id" element={<ListDesignerApp />} />
-      </Routes>
+      <GamedayProvider>
+        <Routes>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<GamedayDashboard />} />
+            <Route path="/designer/:id" element={<ListDesignerApp />} />
+          </Route>
+        </Routes>
+      </GamedayProvider>
     </BrowserRouter>
   );
 };

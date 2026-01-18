@@ -3,18 +3,16 @@ import { Container, Navbar, Nav, Button } from 'react-bootstrap';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import LanguageSelector from '../LanguageSelector';
-
-interface AppHeaderProps {
-  gamedayName?: string;
-}
+import { useGamedayContext } from '../../context/GamedayContext';
 
 /**
  * Global App Header for Gameday Designer.
  * 
  * Displays: [App Title] - [Page Title] ... [Language] [UserProfile]
  */
-const AppHeader: React.FC<AppHeaderProps> = ({ gamedayName }) => {
+const AppHeader: React.FC = () => {
   const { t } = useTypedTranslation(['ui']);
+  const { gamedayName } = useGamedayContext();
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();

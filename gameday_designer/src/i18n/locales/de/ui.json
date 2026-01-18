@@ -30,6 +30,8 @@
     "backToDashboard": "Zurück zum Dashboard"
   },
   "label": {
+    "dashboard": "Dashboard",
+    "back": "Zurück",
     "language": "Sprache",
     "german": "Deutsch",
     "english": "Englisch",

@@ -17,25 +17,25 @@ Set up the new layout structure and extract shared components.
 ## Phase 2: Header Logic & State Integration
 Implement dynamic content and connect the header to the application state.
 
-- [ ] Task: Implement Dynamic Header Content
-    - [ ] Use `useLocation` and `useParams` in `AppHeader` to determine the current view.
-    - [ ] Implement logic to display the Gameday name in the header when in the Editor view (fetching from `metadata` if necessary).
-    - [ ] Add the "Back to Dashboard" button to the header, visible only in the Editor view.
-- [ ] Task: Integrate User Profile
-    - [ ] Implement `UserProfile` component to display current user information (utilizing existing auth context/APIs).
-- [ ] Task: Update Localization
-    - [ ] Add header-related keys to `gameday_designer/src/i18n/locales/en/ui.json` and `de/ui.json`.
+- [x] Task: Implement Dynamic Header Content
+    - [x] Use `useLocation` and `useParams` in `AppHeader` to determine the current view.
+    - [x] Implement logic to display the Gameday name in the header when in the Editor view (fetching from `metadata` if necessary).
+    - [x] Add the "Back to Dashboard" button to the header, visible only in the Editor view.
+- [x] Task: Integrate User Profile
+    - [x] Implement `UserProfile` component to display current user information (utilizing existing auth context/APIs).
+- [x] Task: Update Localization
+    - [x] Add header-related keys to `gameday_designer/src/i18n/locales/en/ui.json` and `de/ui.json`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Header Logic & State Integration' (Protocol in workflow.md)
 
 ## Phase 3: Application Integration & Cleanup
 Apply the new layout globally and remove redundant UI elements.
 
-- [ ] Task: Update App Routing
-    - [ ] Modify `gameday_designer/src/App.tsx` to wrap all routes within `MainLayout`.
-- [ ] Task: Clean Up Dashboard UI
-    - [ ] Remove the redundant header/title row from `gameday_designer/src/components/dashboard/GamedayDashboard.tsx`.
-- [ ] Task: Clean Up Editor UI
-    - [ ] Remove the redundant header/title row and "Back" button from `gameday_designer/src/components/ListDesignerApp.tsx`.
+- [x] Task: Update App Routing
+    - [x] Modify `gameday_designer/src/App.tsx` to wrap all routes within `MainLayout`.
+- [x] Task: Clean Up Dashboard UI
+    - [x] Remove the redundant header/title row from `gameday_designer/src/components/dashboard/GamedayDashboard.tsx`.
+- [x] Task: Clean Up Editor UI
+    - [x] Remove the redundant header/title row and "Back" button from `gameday_designer/src/components/ListDesignerApp.tsx`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Application Integration & Cleanup' (Protocol in workflow.md)
 
 ## Phase 4: Final Verification & QA

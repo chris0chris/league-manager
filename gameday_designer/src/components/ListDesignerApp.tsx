@@ -21,6 +21,7 @@ import GamedayMetadataAccordion from './GamedayMetadataAccordion';
 import { useFlowState } from '../hooks/useFlowState';
 import { useDesignerController } from '../hooks/useDesignerController';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
+import { useGamedayContext } from '../context/GamedayContext';
 import { ICONS } from '../utils/iconConstants';
 import { gamedayApi } from '../api/gamedayApi';
 import type { 
@@ -40,6 +41,7 @@ const ListDesignerApp: React.FC = () => {
   const { t } = useTypedTranslation(['ui', 'validation']);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { setGamedayName } = useGamedayContext();
   const [loading, setLoading] = useState(true);
 
   const flowState = useFlowState();
@@ -106,7 +108,17 @@ const ListDesignerApp: React.FC = () => {
 
     const isLocked = Boolean(metadata?.status && metadata.status !== 'DRAFT');
 
-  
+    // Sync gameday name with global header
+    useEffect(() => {
+      if (metadata?.name) {
+        setGamedayName(metadata.name);
+      } else {
+        setGamedayName('');
+      }
+      
+      // Cleanup when leaving editor
+      return () => setGamedayName('');
+    }, [metadata?.name, setGamedayName]);
 
     const [showResultModal, setShowResultModal] = useState(false);
 
@@ -558,24 +570,10 @@ const ListDesignerApp: React.FC = () => {
   }
 
   return (
-    <Container fluid className="list-designer-app">
-      {/* Combined Header and Toolbar */}
+    <Container fluid className="list-designer-app pt-2">
+      {/* Toolbar actions relocated to global header or kept below it */}
       <Row className="list-designer-app__header align-items-center mb-3">
-        <Col className="d-flex align-items-center">
-          <Button 
-            variant="link" 
-            onClick={() => navigate('/')} 
-            className="p-0 me-3 text-dark"
-            title={t('ui:button.backToDashboard')}
-          >
-            <i className="bi bi-arrow-left fs-4"></i>
-          </Button>
-          <div className="me-auto">
-            <h1 className="h4 mb-0">{t('ui:button.gamedayDesigner')}</h1>
-            <p className="text-muted small mb-0">
-              {metadata?.name || t('ui:placeholder.gamedayName')} - {metadata?.date}
-            </p>
-          </div>
+        <Col className="d-flex align-items-center justify-content-end">
           <Button
             variant="outline-primary"
             onClick={() => setShowTournamentModal(true)}
