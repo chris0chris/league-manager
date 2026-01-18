@@ -37,13 +37,13 @@ Add localized messages and ensure the UI correctly displays and interacts with t
     - [x] Ensure clicking these warnings in the `PublishConfirmationModal` or status bar highlights the relevant areas.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Internationalization & UI Integration' (Protocol in workflow.md)
 
-## Phase 3: Final Verification & QA
+## Phase 3: Final Verification & QA [checkpoint: 546d846]
 Perform full system verification and ensure the publish workflow behaves as expected.
 
-- [x] Task: Full Test Suite Execution [8bc8014]
+- [x] Task: Full Test Suite Execution [546d846]
     - [x] Run all frontend tests: `npm run test:run` in `gameday_designer/`.
     - [x] Verify that no existing validations (errors or warnings) were regressed.
-- [x] Task: Manual Publish Workflow Test [8bc8014]
+- [x] Task: Manual Publish Workflow Test [546d846]
     - [x] Verify that "No Teams" and "No Games" appear as warnings in `PublishConfirmationModal`.
     - [x] Verify that "Publish Anyway" is enabled for these warnings.
     - [x] Verify highlighting for unused fields and teams.
