@@ -16,6 +16,7 @@ from rest_framework import viewsets
 
 from gamedays.api.serializers import (
     GamedaySerializer,
+    GamedayListSerializer,
     GameinfoSerializer,
     GameOfficialSerializer,
 )
@@ -34,8 +35,13 @@ class GamedayViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     queryset = Gameday.objects.all()
 
+    def get_serializer_class(self):
+        if self.action == "list":
+            return GamedayListSerializer
+        return GamedaySerializer
+
     def get_queryset(self):
-        queryset = Gameday.objects.all().select_related("season", "league").order_by("-date")
+        queryset = Gameday.objects.all().select_related("season", "league", "author").order_by("-date")
         search = self.request.query_params.get("search", "")
         if search:
             if ":" in search:

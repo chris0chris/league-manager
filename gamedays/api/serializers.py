@@ -19,6 +19,25 @@ class GamedaySerializer(ModelSerializer):
         return GamedayService.create(obj.pk).get_resolved_designer_data(obj.pk)
 
 
+class GamedayListSerializer(ModelSerializer):
+    class Meta:
+        model = Gameday
+        fields = [
+            "id",
+            "name",
+            "season",
+            "league",
+            "date",
+            "start",
+            "format",
+            "author",
+            "address",
+            "status",
+        ]
+        read_only_fields = ["author"]
+        extra_kwargs = {"start": {"format": "%H:%M"}}
+
+
 class GamedayInfoSerializer(Serializer):
     id = IntegerField()
     name = SerializerMethodField()
