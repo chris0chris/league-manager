@@ -67,3 +67,18 @@ class GamedayViewSetTest(APITestCase):
         self.gameday1.refresh_from_db()
         assert self.gameday1.status == 'PUBLISHED'
         assert self.gameday1.published_at is not None
+
+    def test_create_gameday(self):
+        url = '/api/gamedays/'
+        data = {
+            'name': 'New API Gameday',
+            'date': '2026-05-01',
+            'start': '09:00',
+            'season': self.season.id,
+            'league': self.league.id,
+            'format': '6_2'
+        }
+        response = self.client.post(url, data)
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Gameday.objects.filter(name='New API Gameday').exists()
+
