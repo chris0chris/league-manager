@@ -40,11 +40,11 @@ Add localized messages and ensure the UI correctly displays and interacts with t
 ## Phase 3: Final Verification & QA
 Perform full system verification and ensure the publish workflow behaves as expected.
 
-- [ ] Task: Full Test Suite Execution
-    - [ ] Run all frontend tests: `npm run test:run` in `gameday_designer/`.
-    - [ ] Verify that no existing validations (errors or warnings) were regressed.
-- [ ] Task: Manual Publish Workflow Test
-    - [ ] Verify that "No Teams" and "No Games" appear as warnings in `PublishConfirmationModal`.
-    - [ ] Verify that "Publish Anyway" is enabled for these warnings.
-    - [ ] Verify highlighting for unused fields and teams.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Final Verification & QA' (Protocol in workflow.md)
+- [x] Task: Full Test Suite Execution [8bc8014]
+    - [x] Run all frontend tests: `npm run test:run` in `gameday_designer/`.
+    - [x] Verify that no existing validations (errors or warnings) were regressed.
+- [x] Task: Manual Publish Workflow Test [8bc8014]
+    - [x] Verify that "No Teams" and "No Games" appear as warnings in `PublishConfirmationModal`.
+    - [x] Verify that "Publish Anyway" is enabled for these warnings.
+    - [x] Verify highlighting for unused fields and teams.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Final Verification & QA' (Protocol in workflow.md)

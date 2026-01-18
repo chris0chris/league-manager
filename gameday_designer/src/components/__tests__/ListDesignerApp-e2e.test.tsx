@@ -293,7 +293,7 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     const modal = await screen.findByRole('dialog');
     expect(within(modal).getByText(/Blocking Errors Found/i)).toBeInTheDocument();
     
-    const confirmBtn = within(modal).getByRole('button', { name: /Publish Now/i });
+    const confirmBtn = within(modal).getByRole('button', { name: /Publish (Now|Anyway)/i });
     expect(confirmBtn).toBeDisabled();
   });
 });
