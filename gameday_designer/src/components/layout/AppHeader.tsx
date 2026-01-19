@@ -24,24 +24,13 @@ const AppHeader: React.FC = () => {
   return (
     <Navbar bg="dark" variant="dark" expand="lg" className="mb-2 shadow-sm">
       <Container fluid>
-        <Navbar.Brand 
-          onClick={() => navigate('/')} 
-          style={{ cursor: 'pointer' }}
-          className="d-flex align-items-center"
-        >
-          <i className="bi bi-calendar3-event me-2"></i>
-          <span className="fw-bold">{t('ui:button.gamedayDesigner')}</span>
-          <span className="mx-2 text-muted">|</span>
-          <span className="text-light opacity-75">{pageTitle}</span>
-        </Navbar.Brand>
-
-        <Nav className="me-auto">
+        <Nav className="me-2">
           {isEditor && (
             <Button 
               variant="outline-light" 
               size="sm" 
               onClick={() => navigate('/')}
-              className="ms-2 d-flex align-items-center"
+              className="d-flex align-items-center"
               title={t('ui:button.backToDashboard')}
             >
               <i className="bi bi-arrow-left me-1"></i>
@@ -49,6 +38,17 @@ const AppHeader: React.FC = () => {
             </Button>
           )}
         </Nav>
+
+        <Navbar.Brand 
+          onClick={() => navigate('/')} 
+          style={{ cursor: 'pointer' }}
+          className="d-flex align-items-center me-auto"
+        >
+          <i className="bi bi-calendar3-event me-2"></i>
+          <span className="fw-bold">{t('ui:button.gamedayDesigner')}</span>
+          <span className="mx-2 text-muted">|</span>
+          <span className="text-light opacity-75">{pageTitle}</span>
+        </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="header-navbar-nav" />
         <Navbar.Collapse id="header-navbar-nav" className="justify-content-end">

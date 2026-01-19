@@ -3,10 +3,10 @@
  */
 
 .list-designer-app {
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .list-designer-app__header {
@@ -19,7 +19,7 @@
 .list-designer-app__content {
   flex: 1;
   min-height: 0;
-  overflow: visible;
+  overflow-y: auto;
   margin: 0;
 }
 

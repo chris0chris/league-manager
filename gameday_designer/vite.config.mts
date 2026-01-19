@@ -10,9 +10,9 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       output: {
-        entryFileNames: 'gameday_designer.js',
-        chunkFileNames: 'gameday_designer.js',
-        assetFileNames: 'gameday_designer.[ext]',
+        entryFileNames: '[name].js',
+        chunkFileNames: '[name].js',
+        assetFileNames: '[name].[ext]',
         manualChunks: undefined,
       },
     },

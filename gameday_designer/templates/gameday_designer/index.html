@@ -2,26 +2,52 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'gameday_designer/js/gameday_designer.css' %}">
+    <link rel="stylesheet" href="{% static 'gameday_designer/js/index.css' %}">
     <style>
-        /* Allow natural scrolling */
-        html, body {
-            height: auto;
-            overflow: auto !important;
+        /* Lock body height to viewport and use flex layout */
+        html {
+            height: 100%;
+        }
+        body {
+            height: 100%;
+            overflow: hidden !important;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Adjust main container for fixed navbar */
+        /* Make main container fill remaining space */
         main.container {
+            flex: 1;
             max-width: 100%;
             padding: 0;
-            margin-top: 70px; /* Restore original margin */
-            min-height: calc(100vh - 70px - 100px);
+            margin-top: 70px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Make content area fill available space */
+        main.container > div {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Designer container fills the content area */
         #gameday-designer {
-            width: 100%;
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
+
+        /* Ensure footer stays at the very bottom without margin-top */
+        .footer {
+            flex-shrink: 0;
+            margin-top: 0 !important;
+        }
+    </style>
 
         /* Make footer sticky at bottom */
         .footer {
@@ -38,5 +64,5 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script type="module" src="{% static 'gameday_designer/js/gameday_designer.js' %}"></script>
+    <script type="module" src="{% static 'gameday_designer/js/index.js' %}"></script>
 {% endblock %}
