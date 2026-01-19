@@ -7,30 +7,21 @@
  * Replaces FlowDesignerApp with a table/list-based UI instead of flowchart.
  */
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Container, Row, Col, Button, OverlayTrigger, Popover, ListGroup, Spinner } from 'react-bootstrap';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
+import { Container, Spinner } from 'react-bootstrap';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import ListCanvas from './ListCanvas';
-import FlowToolbar from './FlowToolbar';
+import GamedayMetadataAccordion from './GamedayMetadataAccordion';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
 import PublishConfirmationModal from './modals/PublishConfirmationModal';
-import GameResultModal from './modals/GameResultModal';
 import NotificationToast from './NotificationToast';
-import GamedayMetadataAccordion from './GamedayMetadataAccordion';
+import GameResultModal from './modals/GameResultModal';
+import { gamedayApi } from '../api/gamedayApi';
 import { useFlowState } from '../hooks/useFlowState';
 import { useDesignerController } from '../hooks/useDesignerController';
-import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { useGamedayContext } from '../context/GamedayContext';
-import { ICONS } from '../utils/iconConstants';
-import { gamedayApi } from '../api/gamedayApi';
-import type { 
-  FlowValidationError as ValidationError, 
-  FlowValidationWarning as ValidationWarning,
-  HighlightedElement,
-  GamedayMetadata,
-  GameNode
-} from '../types/flowchart';
+import type { FlowValidationError as ValidationError, FlowValidationWarning as ValidationWarning, GameNode } from '../types/flowchart';
 
 import './ListDesignerApp.css';
 
@@ -385,27 +376,6 @@ const ListDesignerApp: React.FC = () => {
       setIsTransitioning(false);
     }
   }, [metadata.id, updateMetadata, importState, addNotification, exportState, t]);
-
-  /**
-   * Helper to translate error/warning message.
-   */
-  const getMessage = (item: ValidationError | ValidationWarning) => {
-    if (item.messageKey) {
-      return t(`validation:${item.messageKey}` as const, item.messageParams);
-    }
-    return item.message;
-  };
-
-  /**
-   * Helper to determine highlight type from error type.
-   */
-  const getHighlightType = (errorType: string): HighlightedElement['type'] => {
-    if (errorType === 'field_overlap' || errorType === 'team_overlap' || errorType === 'no_games' || errorType === 'broken_progression') return 'game';
-    if (errorType.includes('stage')) return 'stage';
-    if (errorType.includes('field')) return 'field';
-    if (errorType.includes('team')) return 'team';
-    return 'game';
-  };
 
   const handleDeleteGameday = async () => {
     if (metadata?.id) {
