@@ -36,7 +36,7 @@ test = [
     "django-debug-toolbar==6.1.0",
     "WebTest==3.0.7",
     "bump2version==1.0.1",
-    "black==25.12.0",
+    "black==26.1.0",
     "types-factory_boy==0.4.1",
 ]
 prod = [
