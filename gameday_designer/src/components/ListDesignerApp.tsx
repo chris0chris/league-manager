@@ -566,9 +566,9 @@ const ListDesignerApp: React.FC = () => {
   }
 
   return (
-    <Container fluid className="list-designer-app pt-0">
+    <Container fluid className="list-designer-app pt-2">
       {/* Toolbar actions relocated to global header or kept below it */}
-      <Row className="list-designer-app__header align-items-center mb-2">
+      <Row className="list-designer-app__header align-items-center mb-3">
         <Col className="d-flex align-items-center justify-content-end">
           <Button
             variant="outline-primary"

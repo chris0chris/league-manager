@@ -71,7 +71,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
 
   return (
     <div style={{ maxWidth: '800px' }} className="gameday-metadata-accordion">
-      <Accordion defaultActiveKey={defaultActiveKey} className="mb-2">
+      <Accordion defaultActiveKey={defaultActiveKey} className="mb-3">
         <Accordion.Item eventKey="0" className="border-0 shadow-sm">
           <Accordion.Header className={`header-status-${statusColor.toLowerCase()}`}>
             <div className="d-flex w-100 justify-content-between me-3 align-items-center">
@@ -93,7 +93,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
           </Accordion.Header>
           <Accordion.Body>
             <Form>
-              <Row className="mb-2">
+              <Row className="mb-3">
                 <Col md={6}>
                   <Form.Group controlId="gamedayName">
                     <Form.Label>{t('ui:label.name', 'Name')}</Form.Label>
@@ -128,7 +128,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                   </Form.Group>
                 </Col>
               </Row>
-              <Row className="mb-3">
+              <Row className="mb-4">
                 <Col md={12}>
                   <Form.Group controlId="gamedayVenue">
                     <Form.Label>{t('ui:label.venue', 'Venue')}</Form.Label>
