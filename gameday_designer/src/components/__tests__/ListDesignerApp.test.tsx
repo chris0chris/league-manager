@@ -7,8 +7,7 @@ import AppHeader from '../layout/AppHeader';
 import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 import { useDesignerController } from '../../hooks/useDesignerController';
-import { gamedayApi } from '../../api/gamedayApi';
-import type { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
+import type { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup, FieldNode } from '../../types/flowchart';
 
 // Mock the hook
 vi.mock('../../hooks/useDesignerController');
@@ -76,7 +75,7 @@ describe('ListDesignerApp', () => {
     metadata: { id: 1, name: "Test Gameday", date: "2026-05-01", start: "10:00", format: "6_2", author: 1, address: "Test Field", season: 1, league: 1, status: 'DRAFT' },
     nodes: [] as FlowNode[],
     edges: [] as FlowEdge[],
-    fields: [] as any[],
+    fields: [] as FieldNode[],
     globalTeams: [] as GlobalTeam[],
     globalTeamGroups: [] as GlobalTeamGroup[],
     selectedNode: null,

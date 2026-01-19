@@ -7,7 +7,7 @@
  * Replaces FlowDesignerApp with a table/list-based UI instead of flowchart.
  */
 
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Spinner } from 'react-bootstrap';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
@@ -21,7 +21,7 @@ import { gamedayApi } from '../api/gamedayApi';
 import { useFlowState } from '../hooks/useFlowState';
 import { useDesignerController } from '../hooks/useDesignerController';
 import { useGamedayContext } from '../context/GamedayContext';
-import type { FlowValidationError as ValidationError, FlowValidationWarning as ValidationWarning, GameNode } from '../types/flowchart';
+import type { GameNode } from '../types/flowchart';
 
 import './ListDesignerApp.css';
 

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { NotificationType } from '../types/designer';
 
 interface GamedayContextType {
   gamedayName: string;
@@ -9,7 +10,7 @@ interface GamedayContextType {
     onImport: (json: unknown) => void;
     onExport: () => void;
     gamedayStatus?: string;
-    onNotify: (message: string, type: any, title?: string) => void;
+    onNotify: (message: string, type: NotificationType, title?: string) => void;
     canExport: boolean;
   } | null;
   setToolbarProps: (props: GamedayContextType['toolbarProps']) => void;
