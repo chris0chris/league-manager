@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { Accordion, Form, Row, Col, Button } from 'react-bootstrap';
+import { Accordion, Form, Row, Col, Button, OverlayTrigger, Popover, ListGroup } from 'react-bootstrap';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
-import type { GamedayMetadata } from '../types';
+import type { GamedayMetadata, FlowValidationError as ValidationError, FlowValidationWarning as ValidationWarning, HighlightedElement } from '../types/flowchart';
 import { ICONS } from '../utils/iconConstants';
 
 import './GamedayMetadataAccordion.css';
@@ -24,10 +24,16 @@ interface GamedayMetadataAccordionProps {
   activeKey?: string | null;
   onSelect?: (key: string | null) => void;
   readOnly?: boolean;
+  validation?: {
+    isValid: boolean;
+    errors: ValidationError[];
+    warnings: ValidationWarning[];
+  };
+  onHighlight?: (id: string, type: HighlightedElement['type']) => void;
 }
 
-const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({ 
-  metadata, 
+const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
+  metadata,
   onUpdate,
   onPublish,
   onUnlock,
@@ -36,9 +42,11 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   hasData = false,
   activeKey,
   onSelect,
-  readOnly = false
+  readOnly = false,
+  validation,
+  onHighlight
 }) => {
-  const { t } = useTypedTranslation(['ui', 'domain']);
+  const { t } = useTypedTranslation(['ui', 'domain', 'validation']);
 
   const handleChange = (field: keyof GamedayMetadata, value: string) => {
     if (readOnly) return;
@@ -69,6 +77,21 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
     );
   };
 
+  const getMessage = (item: ValidationError | ValidationWarning) => {
+    if (item.messageKey) {
+      return t(`validation:${item.messageKey}` as const, item.messageParams);
+    }
+    return item.message;
+  };
+
+  const getHighlightType = (errorType: string): HighlightedElement['type'] => {
+    if (errorType === 'field_overlap' || errorType === 'team_overlap' || errorType === 'no_games' || errorType === 'broken_progression') return 'game';
+    if (errorType.includes('stage')) return 'stage';
+    if (errorType.includes('field')) return 'field';
+    if (errorType.includes('team')) return 'team';
+    return 'game';
+  };
+
   const statusColor = getStatusColor(metadata.status);
 
   return (
@@ -97,7 +120,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
               </span>
             </div>
           </Accordion.Header>
-          <Accordion.Body style={{ maxHeight: '300px', overflowY: 'auto' }}>
+          <Accordion.Body>
             <Form>
               <Row className="mb-3">
                 <Col md={6}>
@@ -147,6 +170,96 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                   </Form.Group>
                 </Col>
               </Row>
+
+              {validation && (
+                <div className="mb-3">
+                  <div className="d-flex align-items-center gap-3 py-2 px-3 bg-light border rounded shadow-sm small">
+                    {validation.isValid && validation.warnings.length === 0 ? (
+                      <span className="text-success">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        {t('validation:scheduleValid')}
+                      </span>
+                    ) : (
+                      <>
+                        {validation.errors.length > 0 && (
+                          <OverlayTrigger
+                            trigger="click"
+                            rootClose
+                            placement="top"
+                            overlay={
+                              <Popover id="errors-popover">
+                                <Popover.Header as="h3">
+                                  {t('validation:errorCount', { count: validation.errors.length })}
+                                </Popover.Header>
+                                <Popover.Body className="p-0">
+                                  <ListGroup variant="flush">
+                                    {validation.errors.map((error) => (
+                                      <ListGroup.Item 
+                                        key={error.id} 
+                                        variant="danger" 
+                                        action
+                                        onClick={() => {
+                                          const nodeId = error.affectedNodes?.[0];
+                                          if (nodeId && onHighlight) onHighlight(nodeId, getHighlightType(error.type));
+                                        }}
+                                        className="small"
+                                      >
+                                        {getMessage(error)}
+                                      </ListGroup.Item>
+                                    ))}
+                                  </ListGroup>
+                                </Popover.Body>
+                              </Popover>
+                            }
+                          >
+                            <span className="text-danger" style={{ cursor: 'pointer' }}>
+                              <i className="bi bi-x-circle-fill me-1"></i>
+                              {t('validation:errorCount', { count: validation.errors.length })}
+                            </span>
+                          </OverlayTrigger>
+                        )}
+                        {validation.warnings.length > 0 && (
+                          <OverlayTrigger
+                            trigger="click"
+                            rootClose
+                            placement="top"
+                            overlay={
+                              <Popover id="warnings-popover">
+                                <Popover.Header as="h3">
+                                  {t('validation:warningCount', { count: validation.warnings.length })}
+                                </Popover.Header>
+                                <Popover.Body className="p-0">
+                                  <ListGroup variant="flush">
+                                    {validation.warnings.map((warning) => (
+                                      <ListGroup.Item 
+                                        key={warning.id} 
+                                        variant="warning" 
+                                        action
+                                        onClick={() => {
+                                          const nodeId = warning.affectedNodes?.[0];
+                                          if (nodeId && onHighlight) onHighlight(nodeId, getHighlightType(warning.type));
+                                        }}
+                                        className="small"
+                                      >
+                                        {getMessage(warning)}
+                                      </ListGroup.Item>
+                                    ))}
+                                  </ListGroup>
+                                </Popover.Body>
+                              </Popover>
+                            }
+                          >
+                            <span className="text-warning" style={{ cursor: 'pointer' }}>
+                              <i className="bi bi-exclamation-triangle-fill me-1"></i>
+                              {t('validation:warningCount', { count: validation.warnings.length })}
+                            </span>
+                          </OverlayTrigger>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <hr />
 

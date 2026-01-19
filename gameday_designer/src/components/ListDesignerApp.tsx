@@ -623,6 +623,8 @@ const ListDesignerApp: React.FC = () => {
         activeKey={metadataActiveKey}
         onSelect={setMetadataActiveKey}
         readOnly={isLocked}
+        validation={validation}
+        onHighlight={handleHighlightElement}
       />
 
       {/* Main content */}
@@ -660,103 +662,6 @@ const ListDesignerApp: React.FC = () => {
           readOnly={isLocked}
         />
       </div>
-
-      {/* Status Bar - Validation summary (Footer) */}
-      <Row className="list-designer-app__status-bar">
-        <Col>
-          <div className="d-flex align-items-center gap-3 py-2 px-3 bg-light border-top shadow-sm">
-            {validation.isValid && validation.warnings.length === 0 ? (
-              <span className="text-success">
-                <i className="bi bi-check-circle-fill me-2"></i>
-                {t('validation:scheduleValid')}
-              </span>
-            ) : (
-              <>
-                {validation.errors.length > 0 && (
-                  <OverlayTrigger
-                    trigger="click"
-                    rootClose
-                    placement="top"
-                    overlay={
-                      <Popover id="errors-popover">
-                        <Popover.Header as="h3">
-                          {t('validation:errorCount', { count: validation.errors.length })}
-                        </Popover.Header>
-                        <Popover.Body className="p-0">
-                          <ListGroup variant="flush">
-                            {validation.errors.map((error) => (
-                              <ListGroup.Item 
-                                key={error.id} 
-                                variant="danger" 
-                                action
-                                onClick={() => {
-                                  const nodeId = error.affectedNodes?.[0];
-                                  if (nodeId) handleHighlightElement(nodeId, getHighlightType(error.type));
-                                }}
-                                className="small"
-                              >
-                                {getMessage(error)}
-                              </ListGroup.Item>
-                            ))}
-                          </ListGroup>
-                        </Popover.Body>
-                      </Popover>
-                    }
-                  >
-                    <span className="text-danger" style={{ cursor: 'pointer' }}>
-                      <i className="bi bi-x-circle-fill me-1"></i>
-                      {t('validation:errorCount', { count: validation.errors.length })}
-                    </span>
-                  </OverlayTrigger>
-                )}
-                {validation.warnings.length > 0 && (
-                  <OverlayTrigger
-                    trigger="click"
-                    rootClose
-                    placement="top"
-                    overlay={
-                      <Popover id="warnings-popover">
-                        <Popover.Header as="h3">
-                          {t('validation:warningCount', { count: validation.warnings.length })}
-                        </Popover.Header>
-                        <Popover.Body className="p-0">
-                          <ListGroup variant="flush">
-                            {validation.warnings.map((warning) => (
-                              <ListGroup.Item 
-                                key={warning.id} 
-                                variant="warning" 
-                                action
-                                onClick={() => {
-                                  const nodeId = warning.affectedNodes?.[0];
-                                  if (nodeId) handleHighlightElement(nodeId, getHighlightType(warning.type));
-                                }}
-                                className="small"
-                              >
-                                {getMessage(warning)}
-                              </ListGroup.Item>
-                            ))}
-                          </ListGroup>
-                        </Popover.Body>
-                      </Popover>
-                    }
-                  >
-                    <span className="text-warning" style={{ cursor: 'pointer' }}>
-                      <i className="bi bi-exclamation-triangle-fill me-1"></i>
-                      {t('validation:warningCount', { count: validation.warnings.length })}
-                    </span>
-                  </OverlayTrigger>
-                )}
-              </>
-            )}
-            <span className="text-muted small ms-auto">
-              {nodes.filter((n) => n.type === 'field').length} {t('ui:label.fields')} |{' '}
-              {nodes.filter((n) => n.type === 'stage').length} {t('ui:label.stages')} |{' '}
-              {globalTeams.length} {t('ui:label.teams')} |{' '}
-              {nodes.filter((n) => n.type === 'game').length} {t('ui:label.games')}
-            </span>
-          </div>
-        </Col>
-      </Row>
 
       {/* Tournament Generator Modal */}
       <TournamentGeneratorModal
