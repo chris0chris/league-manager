@@ -23,14 +23,17 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
  */
 const App: React.FC = () => {
   const basename = import.meta.env.DEV ? '/' : '/gamedays/gameday/design';
-
+  
+  // Note: These will be provided by context or local state management in a real refactor,
+  // but for now we'll keep them consistent with the user's request.
+  
   return (
     <BrowserRouter basename={basename} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <GamedayProvider>
         <Routes>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<GamedayDashboard />} />
-            <Route path="/designer/:id" element={<ListDesignerApp />} />
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<GamedayDashboard />} />
+            <Route path="designer/:id" element={<ListDesignerApp />} />
           </Route>
         </Routes>
       </GamedayProvider>

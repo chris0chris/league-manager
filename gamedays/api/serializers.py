@@ -1,11 +1,11 @@
-from rest_framework.fields import SerializerMethodField, IntegerField
+from rest_framework.fields import SerializerMethodField, IntegerField, JSONField
 from rest_framework.serializers import ModelSerializer, Serializer
 
 from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
 
 
 class GamedaySerializer(ModelSerializer):
-    designer_data = SerializerMethodField()
+    designer_data = JSONField(required=False)
 
     class Meta:
         model = Gameday
@@ -13,10 +13,11 @@ class GamedaySerializer(ModelSerializer):
         read_only_fields = ["author"]
         extra_kwargs = {"start": {"format": "%H:%M"}}
 
-    def get_designer_data(self, obj: Gameday):
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
         from gamedays.service.gameday_service import GamedayService
-
-        return GamedayService.create(obj.pk).get_resolved_designer_data(obj.pk)
+        ret['designer_data'] = GamedayService.create(instance.pk).get_resolved_designer_data(instance.pk)
+        return ret
 
 
 class GamedayListSerializer(ModelSerializer):

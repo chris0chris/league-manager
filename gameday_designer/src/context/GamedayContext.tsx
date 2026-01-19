@@ -3,15 +3,39 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface GamedayContextType {
   gamedayName: string;
   setGamedayName: (name: string) => void;
+  onGenerateTournament: (() => void) | null;
+  setOnGenerateTournament: (handler: (() => void) | null) => void;
+  toolbarProps: {
+    onImport: (json: unknown) => void;
+    onExport: () => void;
+    gamedayStatus?: string;
+    onNotify: (message: string, type: any, title?: string) => void;
+    canExport: boolean;
+  } | null;
+  setToolbarProps: (props: GamedayContextType['toolbarProps']) => void;
+  isLocked: boolean;
+  setIsLocked: (isLocked: boolean) => void;
 }
 
 const GamedayContext = createContext<GamedayContextType | undefined>(undefined);
 
 export const GamedayProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [gamedayName, setGamedayName] = useState('');
+  const [onGenerateTournament, setOnGenerateTournament] = useState<(() => void) | null>(null);
+  const [toolbarProps, setToolbarProps] = useState<GamedayContextType['toolbarProps']>(null);
+  const [isLocked, setIsLocked] = useState(false);
 
   return (
-    <GamedayContext.Provider value={{ gamedayName, setGamedayName }}>
+    <GamedayContext.Provider value={{ 
+      gamedayName, 
+      setGamedayName,
+      onGenerateTournament,
+      setOnGenerateTournament,
+      toolbarProps,
+      setToolbarProps,
+      isLocked,
+      setIsLocked
+    }}>
       {children}
     </GamedayContext.Provider>
   );

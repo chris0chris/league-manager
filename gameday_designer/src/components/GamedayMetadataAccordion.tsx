@@ -95,7 +95,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   const statusColor = getStatusColor(metadata.status);
 
   return (
-    <div style={{ maxWidth: '800px' }} className="gameday-metadata-accordion">
+    <div style={{ maxWidth: '1000px', width: '100%' }} className="gameday-metadata-accordion mx-auto">
       <Accordion 
         activeKey={activeKey} 
         onSelect={(key) => onSelect?.(key as string | null)}
@@ -103,21 +103,57 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
       >
         <Accordion.Item eventKey="0" className="border-0 shadow-sm">
           <Accordion.Header className={`header-status-${statusColor.toLowerCase()}`}>
-            <div className="d-flex w-100 justify-content-between me-3 align-items-center">
+            <div className="d-flex w-100 justify-content-between me-3 align-items-center flex-wrap gap-2">
               <div className="d-flex align-items-center gap-2">
-                <span className="fw-bold">{metadata.name || t('ui:placeholder.gamedayName')}</span>
+                <span className="fw-bold me-2">{metadata.name || t('ui:placeholder.gamedayName')}</span>
                 {getStatusBadge(metadata.status)}
-                {readOnly && metadata.status === 'DRAFT' && (
-                  <span className="badge bg-light text-muted border small">
-                    <i className="bi bi-lock-fill me-1"></i>
-                    {t('ui:label.readOnly')}
-                  </span>
+                
+                {/* Validation Badges - Always Visible */}
+                {validation && (
+                  <div className="d-flex gap-1 ms-2">
+                    {validation.errors.length > 0 && (
+                      <span className="badge bg-danger">
+                        <i className="bi bi-x-circle-fill me-1"></i>
+                        {validation.errors.length}
+                      </span>
+                    )}
+                    {validation.warnings.length > 0 && (
+                      <span className="badge bg-warning text-dark">
+                        <i className="bi bi-exclamation-triangle-fill me-1"></i>
+                        {validation.warnings.length}
+                      </span>
+                    )}
+                    {validation.isValid && validation.warnings.length === 0 && (
+                      <span className="badge bg-success">
+                        <i className="bi bi-check-circle-fill"></i>
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
 
-              <span className="text-muted small">
-                {formatDate(metadata.date)}
-              </span>
+              <div className="d-flex align-items-center gap-3">
+                {/* Publish Button - Always Visible in Header for Drafts */}
+                {metadata.status === 'DRAFT' && !readOnly && (
+                  <Button 
+                    variant="success" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onPublish?.();
+                    }}
+                    className="rounded-pill py-0 px-3 border-0 shadow-sm fw-bold d-flex align-items-center"
+                    style={{ fontSize: '0.7rem', height: '22px' }}
+                  >
+                    <i className="bi bi-send-fill me-1"></i>
+                    {t('ui:button.publishSchedule')}
+                  </Button>
+                )}
+
+                <span className="text-muted small">
+                  {formatDate(metadata.date)}
+                </span>
+              </div>
             </div>
           </Accordion.Header>
           <Accordion.Body>
@@ -171,111 +207,11 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                 </Col>
               </Row>
 
-              {validation && (
-                <div className="mb-3">
-                  <div className="d-flex align-items-center gap-3 py-2 px-3 bg-light border rounded shadow-sm small">
-                    {validation.isValid && validation.warnings.length === 0 ? (
-                      <span className="text-success">
-                        <i className="bi bi-check-circle-fill me-2"></i>
-                        {t('validation:scheduleValid')}
-                      </span>
-                    ) : (
-                      <>
-                        {validation.errors.length > 0 && (
-                          <OverlayTrigger
-                            trigger="click"
-                            rootClose
-                            placement="top"
-                            overlay={
-                              <Popover id="errors-popover">
-                                <Popover.Header as="h3">
-                                  {t('validation:errorCount', { count: validation.errors.length })}
-                                </Popover.Header>
-                                <Popover.Body className="p-0">
-                                  <ListGroup variant="flush">
-                                    {validation.errors.map((error) => (
-                                      <ListGroup.Item 
-                                        key={error.id} 
-                                        variant="danger" 
-                                        action
-                                        onClick={() => {
-                                          const nodeId = error.affectedNodes?.[0];
-                                          if (nodeId && onHighlight) onHighlight(nodeId, getHighlightType(error.type));
-                                        }}
-                                        className="small"
-                                      >
-                                        {getMessage(error)}
-                                      </ListGroup.Item>
-                                    ))}
-                                  </ListGroup>
-                                </Popover.Body>
-                              </Popover>
-                            }
-                          >
-                            <span className="text-danger" style={{ cursor: 'pointer' }}>
-                              <i className="bi bi-x-circle-fill me-1"></i>
-                              {t('validation:errorCount', { count: validation.errors.length })}
-                            </span>
-                          </OverlayTrigger>
-                        )}
-                        {validation.warnings.length > 0 && (
-                          <OverlayTrigger
-                            trigger="click"
-                            rootClose
-                            placement="top"
-                            overlay={
-                              <Popover id="warnings-popover">
-                                <Popover.Header as="h3">
-                                  {t('validation:warningCount', { count: validation.warnings.length })}
-                                </Popover.Header>
-                                <Popover.Body className="p-0">
-                                  <ListGroup variant="flush">
-                                    {validation.warnings.map((warning) => (
-                                      <ListGroup.Item 
-                                        key={warning.id} 
-                                        variant="warning" 
-                                        action
-                                        onClick={() => {
-                                          const nodeId = warning.affectedNodes?.[0];
-                                          if (nodeId && onHighlight) onHighlight(nodeId, getHighlightType(warning.type));
-                                        }}
-                                        className="small"
-                                      >
-                                        {getMessage(warning)}
-                                      </ListGroup.Item>
-                                    ))}
-                                  </ListGroup>
-                                </Popover.Body>
-                              </Popover>
-                            }
-                          >
-                            <span className="text-warning" style={{ cursor: 'pointer' }}>
-                              <i className="bi bi-exclamation-triangle-fill me-1"></i>
-                              {t('validation:warningCount', { count: validation.warnings.length })}
-                            </span>
-                          </OverlayTrigger>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-
               <hr />
 
               <div className="d-flex justify-content-between align-items-center mt-3">
                 <div className="d-flex gap-2">
-                  {metadata.status === 'DRAFT' ? (
-                    <Button 
-                      variant="success" 
-                      size="sm"
-                      onClick={onPublish}
-                      className="px-3"
-                    >
-                      <i className="bi bi-send-fill me-2"></i>
-                      {t('ui:button.publishSchedule')}
-                    </Button>
-                  ) : (
+                  {metadata.status !== 'DRAFT' && (
                     <Button 
                       variant="warning" 
                       size="sm"

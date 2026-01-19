@@ -42,7 +42,12 @@ const ListDesignerApp: React.FC = () => {
   const { t } = useTypedTranslation(['ui', 'validation']);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setGamedayName } = useGamedayContext();
+  const { 
+    setGamedayName, 
+    setOnGenerateTournament, 
+    setToolbarProps, 
+    setIsLocked: setGlobalIsLocked 
+  } = useGamedayContext();
   const [loading, setLoading] = useState(true);
 
   // Lock body scroll when designer is active to ensure internal scrolling works
@@ -51,7 +56,22 @@ const ListDesignerApp: React.FC = () => {
     return () => document.body.classList.remove('designer-active');
   }, []);
 
-  const flowState = useFlowState();
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [activeGameId, setActiveGameId] = useState<string | null>(null);
+  const [metadataActiveKey, setMetadataActiveKey] = useState<string | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const lastSavedStateRef = useRef<string>('');
+  const initialLoadRef = useRef<boolean>(true);
+  const pauseAutoSaveUntilRef = useRef<number>(0);
+  const [saveTrigger, setSaveTrigger] = useState(0);
+
+  const triggerAutoSave = useCallback(() => {
+    setSaveTrigger(prev => prev + 1);
+  }, []);
+
+  const flowState = useFlowState(undefined, triggerAutoSave);
   const controller = useDesignerController(flowState);
 
   const {
@@ -80,15 +100,6 @@ const ListDesignerApp: React.FC = () => {
   } = controller;
 
   const {
-    highlightedElement,
-    expandedFieldIds,
-    expandedStageIds,
-    showTournamentModal,
-    canExport,
-    hasData,
-  } = ui;
-
-  const {
     handleHighlightElement,
     handleDynamicReferenceClick,
     handleImport,
@@ -111,443 +122,269 @@ const ListDesignerApp: React.FC = () => {
     addNotification,
   } = handlers;
 
-    // Only lock if we have a valid status explicitly NOT DRAFT
+  const {
+    highlightedElement,
+    expandedFieldIds,
+    expandedStageIds,
+    showTournamentModal,
+    canExport,
+    hasData,
+  } = ui;
 
-    const isLocked = Boolean(metadata?.status && metadata.status !== 'DRAFT');
+  const isLocked = Boolean(metadata?.status && metadata.status !== 'DRAFT');
 
-    // Sync gameday name with global header
-    useEffect(() => {
-      if (metadata?.name) {
-        setGamedayName(metadata.name);
+  // Sync global context with editor state
+  useEffect(() => {
+    setOnGenerateTournament(() => () => setShowTournamentModal(true));
+    setToolbarProps({
+      onImport: handleImport,
+      onExport: handleExport,
+      gamedayStatus: metadata?.status,
+      onNotify: addNotification,
+      canExport
+    });
+    setGlobalIsLocked(isLocked);
+
+    return () => {
+      setOnGenerateTournament(null);
+      setToolbarProps(null);
+      setGlobalIsLocked(false);
+    };
+  }, [
+    isLocked, 
+    metadata?.status, 
+    canExport, 
+    handleImport, 
+    handleExport, 
+    addNotification, 
+    setShowTournamentModal, 
+    setOnGenerateTournament, 
+    setToolbarProps, 
+    setGlobalIsLocked
+  ]);
+
+  const activeGame = activeGameId ? nodes.find(n => n.id === activeGameId && n.type === 'game') : null;
+
+  const handleSaveResult = async (resultData: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }) => {
+    if (!activeGameId) return;
+    try {
+      const updatedGame = await gamedayApi.updateGameResult(parseInt(activeGameId.replace('game-', '')), resultData);
+      // Update local node state
+      handleUpdateNode(activeGameId, {
+        halftime_score: updatedGame.halftime_score,
+        final_score: updatedGame.final_score,
+        status: updatedGame.status,
+      });
+      addNotification(t('ui:notification.gameResultSaved'), 'success', t('ui:notification.title.success'));
+      // If gameday status changed, we should reload metadata
+      if (metadata && metadata.id) {
+        const updatedGameday = await gamedayApi.getGameday(metadata.id);
+        updateMetadata(updatedGameday);
+      }
+    } catch (error) {
+      console.error('Failed to save game result', error);
+      addNotification(t('ui:notification.saveResultFailed'), 'danger', t('ui:notification.title.error'));
+    }
+  };
+
+  // Sync gameday name with global header
+  useEffect(() => {
+    if (metadata?.name) {
+      setGamedayName(metadata.name);
+    } else {
+      setGamedayName('');
+    }
+    
+    // Cleanup when leaving editor
+    return () => setGamedayName('');
+  }, [metadata?.name, setGamedayName]);
+
+  // Automatically expand metadata if gameday has no data
+  useEffect(() => {
+    if (!hasData && !loading) {
+      setMetadataActiveKey('0');
+    }
+  }, [hasData, loading]);
+
+  // Handle scroll to collapse metadata
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const scrollTop = e.currentTarget.scrollTop;
+    if (scrollTop > 50 && metadataActiveKey === '0') {
+      setMetadataActiveKey(null);
+    }
+  }, [metadataActiveKey]);
+
+  // Auto-save logic
+  useEffect(() => {
+    if (loading || isTransitioning) return;
+    if (Date.now() < pauseAutoSaveUntilRef.current) return;
+
+    const currentState = exportState();
+    const currentStateStr = JSON.stringify(currentState);
+
+    // Skip initial load
+    if (initialLoadRef.current) {
+      if (metadata && metadata.id) {
+        lastSavedStateRef.current = currentStateStr;
+        initialLoadRef.current = false;
+      }
+      return;
+    }
+
+    if (currentStateStr === lastSavedStateRef.current) return;
+
+    const timer = setTimeout(async () => {
+      if (metadata?.id && !isTransitioning && Date.now() >= pauseAutoSaveUntilRef.current) {
+        try {
+          // Only send fields that exist in the backend model to avoid validation errors
+          const { 
+            name, date, start, format, address, season, league, status 
+          } = metadata;
+
+          await gamedayApi.patchGameday(metadata.id, {
+            name, date, start, format, address, season, league, status,
+            designer_data: {
+              ...metadata.designer_data,
+              nodes,
+              edges,
+              fields,
+              globalTeams,
+              globalTeamGroups
+            }
+          });
+          lastSavedStateRef.current = currentStateStr;
+        } catch (error) {
+          console.error('Auto-save failed', error);
+          addNotification(t('ui:notification.autoSaveFailed'), 'warning', t('ui:notification.title.autoSave'));
+        }
+      }
+    }, 1500); // 1.5s debounce
+
+    return () => clearTimeout(timer);
+  }, [metadata, nodes, edges, fields, globalTeams, globalTeamGroups, loading, isTransitioning, addNotification, exportState, t, saveTrigger]);
+
+  useEffect(() => {
+    if (selectedNode?.type === 'game' && isLocked) {
+      setActiveGameId(selectedNode.id);
+      setShowResultModal(true);
+    }
+  }, [selectedNode, isLocked]);
+
+  const handleUpdateMetadataWrapped = useCallback((data: Partial<GamedayMetadata>) => {
+    updateMetadata(data);
+  }, [updateMetadata]);
+
+  const loadGameday = useCallback(async (gamedayId: number) => {
+    setLoading(true);
+    setIsTransitioning(true);
+    try {
+      const updatedGameday = await gamedayApi.getGameday(gamedayId);
+      if (updatedGameday.designer_data?.nodes) {
+        // Load full state if available
+        importState({
+          metadata: updatedGameday,
+          nodes: updatedGameday.designer_data.nodes || [],
+          edges: updatedGameday.designer_data.edges || [],
+          fields: updatedGameday.designer_data.fields || [],
+          globalTeams: updatedGameday.designer_data.globalTeams || [],
+          globalTeamGroups: updatedGameday.designer_data.globalTeamGroups || []
+        });
+      } else if (updatedGameday.designer_data?.fields) {
+        // Legacy load (only fields)
+        importState({
+          metadata: updatedGameday,
+          nodes: [], 
+          edges: [],
+          fields: updatedGameday.designer_data.fields.map((f) => ({ id: f.id, name: f.name, order: f.order })),
+          globalTeams: [],
+          globalTeamGroups: []
+        });
       } else {
-        setGamedayName('');
+        // Just set metadata for new gameday
+        updateMetadata(updatedGameday);
       }
+      // Critical: mark this state as already saved and pause auto-save
+      pauseAutoSaveUntilRef.current = Date.now() + 2000;
+      setTimeout(() => {
+        lastSavedStateRef.current = JSON.stringify(exportState());
+      }, 500);
+    } catch (error) {
+      console.error('Failed to load gameday', error);
+      addNotification(t('ui:notification.loadGamedayFailed'), 'danger', t('ui:notification.title.error'));
+      navigate('/');
+    } finally {
+      setLoading(false);
+      setIsTransitioning(false);
+    }
+  }, [importState, updateMetadata, addNotification, navigate, exportState, t]);
+
+  const hasLoadedRef = useRef(false);
+  useEffect(() => {
+    if (id && !hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      loadGameday(parseInt(id));
+    }
+  }, [id, loadGameday]);
+
+  const handlePublishWrapped = useCallback(async () => {
+    setShowPublishModal(true);
+  }, []);
+
+  const handleConfirmPublish = useCallback(async () => {
+    setShowPublishModal(false);
+    setIsTransitioning(true);
+    pauseAutoSaveUntilRef.current = Date.now() + 5000; // Extra long pause for publish
+    try {
+      const updated = await gamedayApi.publish(metadata.id);
       
-      // Cleanup when leaving editor
-      return () => setGamedayName('');
-    }, [metadata?.name, setGamedayName]);
-
-    const [showResultModal, setShowResultModal] = useState(false);
-
-    const [showPublishModal, setShowPublishModal] = useState(false);
-
-    const [activeGameId, setActiveGameId] = useState<string | null>(null);
-
-    const [metadataActiveKey, setMetadataActiveKey] = useState<string | null>(null);
-
-    // Automatically expand metadata if gameday has no data
-    useEffect(() => {
-      if (!hasData && !loading) {
-        setMetadataActiveKey('0');
+      // Update local state. 
+      // First import nodes/edges/etc.
+      if (updated.designer_data) {
+        importState(updated.designer_data);
       }
-    }, [hasData, loading]);
+      // Then explicitly update metadata from the top-level response
+      // This ensures status is always correct and not shadowed by designer_data
+      updateMetadata(updated);
+      
+      addNotification(t('ui:notification.publishSuccess'), 'success', t('ui:notification.title.success'));
+      
+      // Update the reference after a short delay to ensure we capture the new state
+      setTimeout(() => {
+        lastSavedStateRef.current = JSON.stringify(exportState());
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to publish gameday:', error);
+      addNotification(t('ui:notification.publishFailed'), 'danger', t('ui:notification.title.error'));
+    } finally {
+      setIsTransitioning(false);
+    }
+  }, [metadata.id, updateMetadata, importState, addNotification, exportState, t]);
 
-    // Handle scroll to collapse metadata
-    const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-      const scrollTop = e.currentTarget.scrollTop;
-      if (scrollTop > 50 && metadataActiveKey === '0') {
-        setMetadataActiveKey(null);
+  const handleUnlockWrapped = useCallback(async () => {
+    setIsTransitioning(true);
+    pauseAutoSaveUntilRef.current = Date.now() + 5000; // Extra long pause for unlock
+    try {
+      const updated = await gamedayApi.patchGameday(metadata.id, { status: 'DRAFT' });
+      
+      // Update local state.
+      if (updated.designer_data) {
+        importState(updated.designer_data);
       }
-    }, [metadataActiveKey]);
-
-    useEffect(() => {
-
-      if (selectedNode?.type === 'game' && isLocked) {
-
-        setActiveGameId(selectedNode.id);
-
-        setShowResultModal(true);
-
-      }
-
-    }, [selectedNode, isLocked]);
-
-  
-
-    const activeGame = activeGameId ? nodes.find(n => n.id === activeGameId && n.type === 'game') : null;
-
-  
-
-    const handleSaveResult = async (resultData: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }) => {
-
-      if (!activeGameId) return;
-
-      try {
-
-        const updatedGame = await gamedayApi.updateGameResult(parseInt(activeGameId.replace('game-', '')), resultData);
-
-        // Update local node state
-
-              handleUpdateNode(activeGameId, {
-
-                halftime_score: updatedGame.halftime_score,
-
-                final_score: updatedGame.final_score,
-
-                status: updatedGame.status,
-
-              });
-
-              addNotification(t('ui:notification.gameResultSaved'), 'success', t('ui:notification.title.success'));
-
-              // If gameday status changed, we should reload metadata
-
-              if (metadata && metadata.id) {
-
-                const updatedGameday = await gamedayApi.getGameday(metadata.id);
-
-                updateMetadata(updatedGameday);
-
-              }
-
-            } catch (error) {
-
-              console.error('Failed to save game result', error);
-
-              addNotification(t('ui:notification.saveResultFailed'), 'danger', t('ui:notification.title.error'));
-
-            }
-
-          };
-
-        
-
-          const lastSavedStateRef = useRef<string>('');
-
-          const initialLoadRef = useRef<boolean>(true);
-
-          const [isTransitioning, setIsTransitioning] = useState(false);
-
-          const pauseAutoSaveUntilRef = useRef<number>(0);
-
-        
-
-          useEffect(() => {
-
-            // Definitive block for auto-save during any transition or loading
-
-            if (loading) return;
-
-            if (isTransitioning) return;
-
-        
-
-            // Temporal lock to allow React state to settle after manual actions
-
-            const now = Date.now();
-
-            if (now < pauseAutoSaveUntilRef.current) return;
-
-            
-
-            // Skip initial load to prevent unnecessary save
-
-            if (initialLoadRef.current) {
-
-              if (metadata && metadata.id) {
-
-                const initialState = exportState();
-
-                lastSavedStateRef.current = JSON.stringify(initialState);
-
-                initialLoadRef.current = false;
-
-              }
-
-              return;
-
-            }
-
-        
-
-            const currentState = exportState();
-
-            const currentStateStr = JSON.stringify(currentState);
-
-            if (currentStateStr === lastSavedStateRef.current) return;
-
-        
-
-            const timer = setTimeout(async () => {
-
-              // Execute the auto-save ONLY if we are still not transitioning and not locked
-
-              if (metadata?.id && !isTransitioning && Date.now() >= pauseAutoSaveUntilRef.current) {
-
-                try {
-
-                  // Only send fields that exist in the backend model to avoid validation errors
-                  const { 
-                    name, date, start, format, address, season, league, status 
-                  } = metadata;
-
-                  await gamedayApi.patchGameday(metadata.id, {
-                    name, date, start, format, address, season, league, status,
-                    designer_data: {
-                      ...metadata.designer_data,
-                      nodes,
-                      edges,
-                      fields,
-                      globalTeams,
-                      globalTeamGroups
-                    }
-                  });
-
-                  lastSavedStateRef.current = currentStateStr;
-
-                } catch (error) {
-
-                  console.error('Auto-save failed', error);
-
-                  addNotification(t('ui:notification.autoSaveFailed'), 'warning', t('ui:notification.title.autoSave'));
-
-                }
-
-              }
-
-            }, 1000); // Debounce for 1 second
-
-        
-
-            return () => clearTimeout(timer);
-
-          }, [metadata, nodes, edges, fields, globalTeams, globalTeamGroups, loading, isTransitioning, addNotification, exportState, t]);
-
-        
-
-                    const handleUpdateMetadataWrapped = useCallback((data: Partial<GamedayMetadata>) => {
-
-        
-
-                      updateMetadata(data);
-
-        
-
-                    }, [updateMetadata]);
-
-        
-
-          const loadGameday = useCallback(async (gamedayId: number) => {
-
-            setLoading(true);
-
-            setIsTransitioning(true);
-
-            try {
-
-              const updatedGameday = await gamedayApi.getGameday(gamedayId);
-
-              if (updatedGameday.designer_data?.nodes) {
-
-                // Load full state if available
-
-                importState({
-
-                  metadata: updatedGameday,
-
-                  nodes: updatedGameday.designer_data.nodes || [],
-
-                  edges: updatedGameday.designer_data.edges || [],
-
-                  fields: updatedGameday.designer_data.fields || [],
-
-                  globalTeams: updatedGameday.designer_data.globalTeams || [],
-
-                  globalTeamGroups: updatedGameday.designer_data.globalTeamGroups || []
-
-                });
-
-              } else if (updatedGameday.designer_data?.fields) {
-
-                // Legacy load (only fields)
-
-                importState({
-
-                  metadata: updatedGameday,
-
-                  nodes: [], 
-
-                  edges: [],
-
-                  fields: updatedGameday.designer_data.fields.map((f) => ({ id: f.id, name: f.name, order: f.order })),
-
-                  globalTeams: [],
-
-                  globalTeamGroups: []
-
-                });
-
-              } else {
-
-                // Just set metadata for new gameday
-
-                updateMetadata(updatedGameday);
-
-              }
-
-              // Critical: mark this state as already saved and pause auto-save
-
-              pauseAutoSaveUntilRef.current = Date.now() + 2000;
-
-              setTimeout(() => {
-
-                lastSavedStateRef.current = JSON.stringify(exportState());
-
-              }, 500);
-
-            } catch (error) {
-
-              console.error('Failed to load gameday', error);
-
-              addNotification(t('ui:notification.loadGamedayFailed'), 'danger', t('ui:notification.title.error'));
-
-              navigate('/');
-
-            } finally {
-
-              setLoading(false);
-
-              setIsTransitioning(false);
-
-            }
-
-          }, [importState, updateMetadata, addNotification, navigate, exportState, t]);
-
-        
-
-          const hasLoadedRef = useRef(false);
-
-          useEffect(() => {
-
-            if (id && !hasLoadedRef.current) {
-
-              hasLoadedRef.current = true;
-
-              loadGameday(parseInt(id));
-
-            }
-
-          }, [id, loadGameday]);
-
-        
-
-          const handlePublishWrapped = useCallback(async () => {
-
-            setShowPublishModal(true);
-
-          }, []);
-
-        
-
-          const handleConfirmPublish = useCallback(async () => {
-
-            setShowPublishModal(false);
-
-            setIsTransitioning(true);
-
-            pauseAutoSaveUntilRef.current = Date.now() + 5000; // Extra long pause for publish
-
-            try {
-
-              const updated = await gamedayApi.publish(metadata.id);
-
-              
-
-              // Update local state. 
-
-              // First import nodes/edges/etc.
-
-              if (updated.designer_data) {
-
-                importState(updated.designer_data);
-
-              }
-
-              // Then explicitly update metadata from the top-level response
-
-              // This ensures status is always correct and not shadowed by designer_data
-
-              updateMetadata(updated);
-
-              
-
-              addNotification(t('ui:notification.publishSuccess'), 'success', t('ui:notification.title.success'));
-
-              
-
-              // Update the reference after a short delay to ensure we capture the new state
-
-              setTimeout(() => {
-
-                lastSavedStateRef.current = JSON.stringify(exportState());
-
-              }, 1000);
-
-            } catch (error) {
-
-              console.error('Failed to publish gameday:', error);
-
-              addNotification(t('ui:notification.publishFailed'), 'danger', t('ui:notification.title.error'));
-
-            } finally {
-
-              setIsTransitioning(false);
-
-            }
-
-          }, [metadata.id, updateMetadata, importState, addNotification, exportState, t]);
-
-        
-
-          const handleUnlockWrapped = useCallback(async () => {
-
-            setIsTransitioning(true);
-
-            pauseAutoSaveUntilRef.current = Date.now() + 5000; // Extra long pause for unlock
-
-            try {
-
-              const updated = await gamedayApi.patchGameday(metadata.id, { status: 'DRAFT' });
-
-              
-
-              // Update local state.
-
-              if (updated.designer_data) {
-
-                importState(updated.designer_data);
-
-              }
-
-              updateMetadata(updated);
-
-              
-
-              addNotification(t('ui:notification.unlockSuccess'), 'warning', t('ui:notification.title.success'));
-
-              
-
-              // Update the reference after a short delay to ensure we capture the new state
-
-              setTimeout(() => {
-
-                lastSavedStateRef.current = JSON.stringify(exportState());
-
-              }, 1000);
-
-            } catch (error) {
-
-              console.error('Failed to unlock gameday:', error);
-
-              addNotification(t('ui:notification.unlockFailed'), 'danger', t('ui:notification.title.error'));
-
-            } finally {
-
-              setIsTransitioning(false);
-
-            }
-
-          }, [metadata.id, updateMetadata, importState, addNotification, exportState, t]);
+      updateMetadata(updated);
+      
+      addNotification(t('ui:notification.unlockSuccess'), 'warning', t('ui:notification.title.success'));
+      
+      // Update the reference after a short delay to ensure we capture the new state
+      setTimeout(() => {
+        lastSavedStateRef.current = JSON.stringify(exportState());
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to unlock gameday:', error);
+      addNotification(t('ui:notification.unlockFailed'), 'danger', t('ui:notification.title.error'));
+    } finally {
+      setIsTransitioning(false);
+    }
+  }, [metadata.id, updateMetadata, importState, addNotification, exportState, t]);
 
   /**
    * Helper to translate error/warning message.
@@ -588,29 +425,6 @@ const ListDesignerApp: React.FC = () => {
 
   return (
     <div className="list-designer-app pt-2 h-100 overflow-hidden d-flex flex-column container-fluid">
-      {/* Toolbar actions relocated to global header or kept below it */}
-      <Row className="list-designer-app__header align-items-center mb-3">
-        <Col className="d-flex align-items-center justify-content-end">
-          <Button
-            variant="outline-primary"
-            onClick={() => setShowTournamentModal(true)}
-            className="me-2 btn-adaptive"
-            disabled={isLocked}
-            title={t('ui:tooltip.generateTournament')}
-          >
-            <i className={`bi ${ICONS.TOURNAMENT} me-2`}></i>
-            <span className="btn-label-adaptive">{t('ui:button.generateTournament')}</span>
-          </Button>
-          <FlowToolbar
-            onImport={handleImport}
-            onExport={handleExport}
-            gamedayStatus={metadata?.status}
-            onNotify={addNotification}
-            canExport={canExport}
-          />
-        </Col>
-      </Row>
-
       {/* Gameday Metadata Accordion */}
       <GamedayMetadataAccordion 
         metadata={metadata} 
