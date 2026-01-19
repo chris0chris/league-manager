@@ -24,31 +24,36 @@ const AppHeader: React.FC = () => {
   return (
     <Navbar bg="dark" variant="dark" expand="lg" className="mb-2 shadow-sm">
       <Container fluid>
-        <Nav className="me-2">
-          {isEditor && (
-            <Button 
-              variant="outline-light" 
-              size="sm" 
-              onClick={() => navigate('/')}
-              className="d-flex align-items-center"
-              title={t('ui:button.backToDashboard')}
-            >
-              <i className="bi bi-arrow-left me-1"></i>
-              {t('ui:label.back')}
-            </Button>
-          )}
-        </Nav>
+        <div className="d-flex align-items-center">
+          <Navbar.Brand 
+            onClick={() => navigate('/')} 
+            style={{ cursor: 'pointer' }}
+            className="d-flex align-items-center me-0"
+          >
+            <i className="bi bi-calendar3-event me-2"></i>
+            <span className="fw-bold">{t('ui:button.gamedayDesigner')}</span>
+          </Navbar.Brand>
 
-        <Navbar.Brand 
-          onClick={() => navigate('/')} 
-          style={{ cursor: 'pointer' }}
-          className="d-flex align-items-center me-auto"
-        >
-          <i className="bi bi-calendar3-event me-2"></i>
-          <span className="fw-bold">{t('ui:button.gamedayDesigner')}</span>
-          <span className="mx-2 text-muted">|</span>
-          <span className="text-light opacity-75">{pageTitle}</span>
-        </Navbar.Brand>
+          {isEditor && (
+            <div className="d-flex align-items-center ms-3">
+              <Button 
+                variant="outline-light" 
+                size="sm" 
+                onClick={() => navigate('/')}
+                className="d-flex align-items-center me-3"
+                style={{ fontSize: '0.8rem', padding: '0.15rem 0.5rem' }}
+                title={t('ui:button.backToDashboard')}
+              >
+                <i className="bi bi-arrow-left me-1"></i>
+                {t('ui:label.back')}
+              </Button>
+              <span className="mx-2 text-muted">|</span>
+              <span className="text-light opacity-75">{pageTitle}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="me-auto" />
 
         <Navbar.Toggle aria-controls="header-navbar-nav" />
         <Navbar.Collapse id="header-navbar-nav" className="justify-content-end">
