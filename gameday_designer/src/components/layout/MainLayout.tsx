@@ -8,9 +8,9 @@ import AppHeader from './AppHeader';
  */
 const MainLayout: React.FC = () => {
   return (
-    <div className="main-layout d-flex flex-column h-100">
+    <div className="main-layout d-flex flex-column h-100 overflow-hidden">
       <AppHeader />
-      <main className="flex-grow-1 overflow-hidden" style={{ minHeight: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <main className="flex-grow-1 overflow-hidden h-100 d-flex flex-column">
         <Outlet />
       </main>
     </div>

@@ -217,81 +217,85 @@ const GamedayDashboard: React.FC = () => {
   }, [loading, gamedays, location.state, navigate, location.pathname, handleDelete]);
 
   return (
-    <Container fluid className="py-2">
-      <Row className="mb-4 align-items-center">
-        <Col>
-          <p className="text-muted lead mb-0">{t('ui:message.dashboardSubtitle')}</p>
-        </Col>
-        <Col xs="auto">
-          <Button variant="primary" onClick={handleCreateGameday}>
-            <i className="bi bi-plus-lg me-2"></i>
-            {t('ui:button.createGameday')}
-          </Button>
-        </Col>
-      </Row>
+    <Container fluid className="py-2 h-100 d-flex flex-column overflow-hidden">
+      <div className="flex-shrink-0">
+        <Row className="mb-4 align-items-center">
+          <Col>
+            <p className="text-muted lead mb-0">{t('ui:message.dashboardSubtitle')}</p>
+          </Col>
+          <Col xs="auto">
+            <Button variant="primary" onClick={handleCreateGameday}>
+              <i className="bi bi-plus-lg me-2"></i>
+              {t('ui:button.createGameday')}
+            </Button>
+          </Col>
+        </Row>
 
-      <Row className="mb-4">
-        <Col md={6} lg={4}>
-          <Form.Group className="position-relative">
-            <Form.Control
-              type="text"
-              placeholder={t('ui:placeholder.searchGamedays')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="ps-5"
-            />
-            <i className="bi bi-search position-absolute top-50 translate-middle-y ms-3 text-muted"></i>
-          </Form.Group>
-          <Form.Text className="text-muted">
-            {t('ui:message.filteringTip')}
-          </Form.Text>
-        </Col>
-      </Row>
+        <Row className="mb-4">
+          <Col md={6} lg={4}>
+            <Form.Group className="position-relative">
+              <Form.Control
+                type="text"
+                placeholder={t('ui:placeholder.searchGamedays')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="ps-5"
+              />
+              <i className="bi bi-search position-absolute top-50 translate-middle-y ms-3 text-muted"></i>
+            </Form.Group>
+            <Form.Text className="text-muted">
+              {t('ui:message.filteringTip')}
+            </Form.Text>
+          </Col>
+        </Row>
+      </div>
 
-      {loading ? (
-        <div className="d-flex justify-content-center py-5">
-          <Spinner animation="border" variant="primary" />
-        </div>
-      ) : (
-        <Row>
-          {gamedays.length > 0 ? (
-            gamedays.map((gameday) => {
-              const isDeleted = deletedIds.has(gameday.id);
-              // Hide deleted gamedays from list (they are shown as placeholder anyway)
-              if (isDeleted) {
+      <div className="flex-grow-1 overflow-auto">
+        {loading ? (
+          <div className="d-flex justify-content-center py-5">
+            <Spinner animation="border" variant="primary" />
+          </div>
+        ) : (
+          <Row className="mx-0">
+            {gamedays.length > 0 ? (
+              gamedays.map((gameday) => {
+                const isDeleted = deletedIds.has(gameday.id);
+                // Hide deleted gamedays from list (they are shown as placeholder anyway)
+                if (isDeleted) {
+                  return (
+                    <GamedayDeletePlaceholder 
+                      key={gameday.id} 
+                      gameday={gameday} 
+                      onUndo={handleUndo} 
+                      duration={10000}
+                    />
+                  );
+                }
                 return (
-                  <GamedayDeletePlaceholder 
+                  <GamedayCard 
                     key={gameday.id} 
                     gameday={gameday} 
-                    onUndo={handleUndo} 
-                    duration={10000}
+                    onClick={handleCardClick}
+                    onDelete={handleDelete}
                   />
                 );
-              }
-              return (
-                <GamedayCard 
-                  key={gameday.id} 
-                  gameday={gameday} 
-                  onClick={handleCardClick}
-                  onDelete={handleDelete}
-                />
-              );
-            })
-          ) : (
-            <Col>
-              <div className="text-center py-5 text-muted bg-light rounded border border-dashed">
-                <i className="bi bi-calendar-x display-1 mb-3 d-block text-secondary opacity-25"></i>
-                <h2 className="h4 mb-3">{t('ui:message.noGamedaysFound')}</h2>
-                <p className="mb-4">{t('ui:message.getStartedMessage')}</p>
-                <Button variant="primary" size="lg" onClick={handleCreateGameday} className="px-5 shadow-sm">
-                  <i className="bi bi-plus-lg me-2"></i>
-                  {t('ui:button.createGameday')}
-                </Button>
-              </div>
-            </Col>
-          )}
-        </Row>
-      )}
+              })
+            ) : (
+              <Col>
+                <div className="text-center py-5 text-muted bg-light rounded border border-dashed">
+                  <i className="bi bi-calendar-x display-1 mb-3 d-block text-secondary opacity-25"></i>
+                  <h2 className="h4 mb-3">{t('ui:message.noGamedaysFound')}</h2>
+                  <p className="mb-4">{t('ui:message.getStartedMessage')}</p>
+                  <Button variant="primary" size="lg" onClick={handleCreateGameday} className="px-5 shadow-sm">
+                    <i className="bi bi-plus-lg me-2"></i>
+                    {t('ui:button.createGameday')}
+                  </Button>
+                </div>
+              </Col>
+            )}
+          </Row>
+        )}
+      </div>
       <NotificationToast notifications={notifications} onClose={dismissNotification} />
     </Container>
   );

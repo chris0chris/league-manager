@@ -6,50 +6,33 @@
     <style>
         /* Lock body height to viewport and use flex layout */
         html {
-            height: 100%;
+            height: 100vh;
         }
         body {
-            height: 100%;
-            overflow-y: auto;
+            height: 100vh;
+            overflow: hidden !important;
             display: flex;
             flex-direction: column;
         }
 
-        /* Make main container fill remaining space */
+        /* Make main container fill remaining space exactly */
         main.container {
             flex: 1;
             max-width: 100%;
             padding: 0;
             margin-top: 70px;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-        }
-
-        /* Allow natural scrolling on dashboard */
-        body:not(.designer-active) main.container {
-            overflow: visible;
-        }
-
-        /* Lock height when designer is active */
-        body.designer-active main.container {
-            overflow: hidden !important;
-            flex: 1;
-            height: 0; /* Let flex-grow handle it but prevent it from growing based on content */
+            height: 0; /* Force flex child to respect parent container */
         }
 
         /* Make content area fill available space */
         main.container > div {
             flex: 1;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-        }
-
-        body:not(.designer-active) main.container > div {
-            overflow: visible;
-        }
-
-        body.designer-active main.container > div {
-            overflow: hidden;
             height: 100%;
         }
 
@@ -59,6 +42,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
 
         /* Ensure footer stays at the very bottom without margin-top */

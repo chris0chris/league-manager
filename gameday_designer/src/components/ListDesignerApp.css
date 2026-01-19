@@ -22,7 +22,7 @@ body.designer-active {
 
 .list-designer-app__content {
   flex: 1;
-  min-height: 0;
+  min-height: 200px;
   overflow-y: auto;
   margin: 0;
 }

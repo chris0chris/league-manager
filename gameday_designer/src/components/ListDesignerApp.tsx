@@ -133,7 +133,22 @@ const ListDesignerApp: React.FC = () => {
 
     const [activeGameId, setActiveGameId] = useState<string | null>(null);
 
-  
+    const [metadataActiveKey, setMetadataActiveKey] = useState<string | null>(null);
+
+    // Automatically expand metadata if gameday has no data
+    useEffect(() => {
+      if (!hasData && !loading) {
+        setMetadataActiveKey('0');
+      }
+    }, [hasData, loading]);
+
+    // Handle scroll to collapse metadata
+    const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+      const scrollTop = e.currentTarget.scrollTop;
+      if (scrollTop > 50 && metadataActiveKey === '0') {
+        setMetadataActiveKey(null);
+      }
+    }, [metadataActiveKey]);
 
     useEffect(() => {
 
@@ -605,12 +620,13 @@ const ListDesignerApp: React.FC = () => {
         onClearAll={handleClearAll}
         onDelete={handleDeleteGameday}
         hasData={hasData}
-        defaultActiveKey={!hasData ? '0' : undefined}
+        activeKey={metadataActiveKey}
+        onSelect={setMetadataActiveKey}
         readOnly={isLocked}
       />
 
       {/* Main content */}
-      <div className="list-designer-app__content">
+      <div className="list-designer-app__content" onScroll={handleScroll}>
         <ListCanvas
           nodes={nodes}
           edges={edges}

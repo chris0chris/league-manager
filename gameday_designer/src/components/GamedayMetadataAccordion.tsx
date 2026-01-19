@@ -21,7 +21,8 @@ interface GamedayMetadataAccordionProps {
   onClearAll?: () => void;
   onDelete?: () => void;
   hasData?: boolean;
-  defaultActiveKey?: string;
+  activeKey?: string | null;
+  onSelect?: (key: string | null) => void;
   readOnly?: boolean;
 }
 
@@ -33,7 +34,8 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   onClearAll,
   onDelete,
   hasData = false,
-  defaultActiveKey,
+  activeKey,
+  onSelect,
   readOnly = false
 }) => {
   const { t } = useTypedTranslation(['ui', 'domain']);
@@ -71,7 +73,11 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
 
   return (
     <div style={{ maxWidth: '800px' }} className="gameday-metadata-accordion">
-      <Accordion defaultActiveKey={defaultActiveKey} className="mb-3">
+      <Accordion 
+        activeKey={activeKey} 
+        onSelect={(key) => onSelect?.(key as string | null)}
+        className="mb-3"
+      >
         <Accordion.Item eventKey="0" className="border-0 shadow-sm">
           <Accordion.Header className={`header-status-${statusColor.toLowerCase()}`}>
             <div className="d-flex w-100 justify-content-between me-3 align-items-center">
@@ -91,7 +97,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
               </span>
             </div>
           </Accordion.Header>
-          <Accordion.Body>
+          <Accordion.Body style={{ maxHeight: '300px', overflowY: 'auto' }}>
             <Form>
               <Row className="mb-3">
                 <Col md={6}>
