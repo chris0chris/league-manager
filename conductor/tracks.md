@@ -35,8 +35,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] `global_language_selector_20260118`: Unified application layout and global header [finished: 2026-01-18]
 *Link: [./tracks/global_language_selector_20260118/](./tracks/global_language_selector_20260118/)*
-
----
-
-- [x] **Track: Gameday Data Protection & Migration**
-*Link: [./tracks/gameday-data-protection_20260120/](./tracks/gameday-data-protection_20260120/)*
