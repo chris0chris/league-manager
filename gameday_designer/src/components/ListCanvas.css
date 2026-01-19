@@ -3,17 +3,16 @@
  */
 
 .list-canvas {
-  height: 100%;
+  height: auto;
   padding: 1rem;
   background-color: transparent;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
 .list-canvas__content {
   flex: 1;
-  overflow: hidden;
+  display: flex;
   align-items: start; /* Prevent columns from stretching to equal heights */
 }
 

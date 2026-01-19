@@ -116,8 +116,8 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
   }, [onAddGlobalTeamGroup]);
 
   return (
-    <Container fluid className="list-canvas h-100">
-      <Row className="list-canvas__content h-100 g-3">
+    <div className="list-canvas px-3">
+      <Row className="list-canvas__content g-3">
         <Col md={isTeamPoolExpanded ? 3 : 'auto'} className={`teams-column ${!isTeamPoolExpanded ? 'teams-column--collapsed' : ''}`}>
           <Card
             className={`team-pool-card ${!isTeamPoolExpanded ? 'team-pool-card--collapsed' : ''}`}
@@ -249,7 +249,7 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
           </Card>
         </Col>
       </Row>
-    </Container>
+    </div>
   );
 });
 

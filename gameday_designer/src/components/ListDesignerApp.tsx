@@ -45,6 +45,12 @@ const ListDesignerApp: React.FC = () => {
   const { setGamedayName } = useGamedayContext();
   const [loading, setLoading] = useState(true);
 
+  // Lock body scroll when designer is active to ensure internal scrolling works
+  useEffect(() => {
+    document.body.classList.add('designer-active');
+    return () => document.body.classList.remove('designer-active');
+  }, []);
+
   const flowState = useFlowState();
   const controller = useDesignerController(flowState);
 
@@ -566,7 +572,7 @@ const ListDesignerApp: React.FC = () => {
   }
 
   return (
-    <Container fluid className="list-designer-app pt-2">
+    <div className="list-designer-app pt-2 h-100 overflow-hidden d-flex flex-column container-fluid">
       {/* Toolbar actions relocated to global header or kept below it */}
       <Row className="list-designer-app__header align-items-center mb-3">
         <Col className="d-flex align-items-center justify-content-end">
@@ -772,7 +778,7 @@ const ListDesignerApp: React.FC = () => {
         homeTeamName={activeGame ? (activeGame.data.homeTeamId ? globalTeams.find(t => t.id === activeGame.data.homeTeamId)?.label || 'Home' : 'Home') : 'Home'}
         awayTeamName={activeGame ? (activeGame.data.awayTeamId ? globalTeams.find(t => t.id === activeGame.data.awayTeamId)?.label || 'Away' : 'Away') : 'Away'}
       />
-    </Container>
+    </div>
   );
 };
 
