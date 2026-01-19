@@ -140,6 +140,7 @@
     "loadGamedaysFailed": "Spieltage konnten nicht geladen werden",
     "createGamedayFailed": "Spieltag konnte nicht erstellt werden",
     "deleteGamedayPermanentlyFailed": "Spieltag konnte nicht endgültig gelöscht werden",
+    "publishedGamedayDeleteBlocked": "Veröffentlichte Spieltage können nicht gelöscht werden. Bitte den Spielplan zuerst freischalten.",
     "gamedayDeleted": "Spieltag \"{{name}}\" gelöscht",
     "publishSuccess": "Spielplan veröffentlicht und gesperrt",
     "publishFailed": "Spielplan konnte nicht veröffentlicht werden",

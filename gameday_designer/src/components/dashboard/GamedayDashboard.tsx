@@ -81,11 +81,11 @@ const GamedayDashboard: React.FC = () => {
   const timeoutRefs = useRef<Record<number, NodeJS.Timeout>>({});
   const hasTriggeredInitialDelete = useRef(false);
 
-  const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string, undoAction?: () => void, duration?: number) => {
+  const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string, undoAction?: () => void, duration?: number, undoLabel?: string) => {
     const id = uuidv4();
     setNotifications((prev) => [
       ...prev,
-      { id, message, type, title, show: true, undoAction, duration }
+      { id, message, type, title, show: true, undoAction, duration, undoLabel }
     ]);
   }, []);
 
@@ -152,6 +152,19 @@ const GamedayDashboard: React.FC = () => {
   }, []);
 
   const handleDelete = useCallback((id: number) => {
+    const gameday = gamedays.find(g => g.id === id);
+    if (gameday && gameday.status !== 'DRAFT') {
+      addNotification(
+        t('ui:notification.publishedGamedayDeleteBlocked'),
+        'info',
+        t('ui:notification.title.deletion'),
+        () => navigate(`/designer/${id}`),
+        undefined,
+        t('ui:button.unlockSchedule')
+      );
+      return;
+    }
+
     const deleteDuration = 10000;
 
     // Add to deleted IDs immediately to show placeholder

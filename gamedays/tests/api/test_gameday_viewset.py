@@ -84,3 +84,17 @@ class GamedayViewSetTest(APITestCase):
         assert response.status_code == status.HTTP_201_CREATED
         assert Gameday.objects.filter(name='New API Gameday').exists()
 
+    def test_delete_draft_gameday_allowed(self):
+        url = f'/api/gamedays/{self.gameday1.id}/'
+        response = self.client.delete(url)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not Gameday.objects.filter(id=self.gameday1.id).exists()
+
+    def test_delete_published_gameday_blocked(self):
+        # self.gameday2 is PUBLISHED
+        url = f'/api/gamedays/{self.gameday2.id}/'
+        response = self.client.delete(url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert Gameday.objects.filter(id=self.gameday2.id).exists()
+        assert response.data['detail'] == "Published gamedays cannot be deleted. Please unlock the gameday first."
+

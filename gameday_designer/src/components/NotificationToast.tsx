@@ -59,8 +59,12 @@ const ToastWithProgress: React.FC<{ notification: Notification; onClose: (id: st
                                               onClose(notification.id);
                                             }}
                                           >
-                                            <i className="bi bi-arrow-counterclockwise me-1"></i>
-                                            Undo
+                                            {notification.undoLabel ? (
+                                              <i className="bi bi-arrow-right me-1"></i>
+                                            ) : (
+                                              <i className="bi bi-arrow-counterclockwise me-1"></i>
+                                            )}
+                                            {notification.undoLabel || 'Undo'}
                                           </button>
                                         )}          </div>
           {notification.undoAction && (

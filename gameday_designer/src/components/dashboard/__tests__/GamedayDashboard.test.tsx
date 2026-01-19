@@ -127,4 +127,38 @@ describe('GamedayDashboard', () => {
       expect(gamedayApi.listGamedays).toHaveBeenCalledWith({ search: 'season:2026' });
     });
   });
+
+  it('prevents deletion of published gamedays and shows info toast', async () => {
+    await renderDashboard();
+    
+    // Gameday 1 is PUBLISHED
+    const card1 = screen.getByText('Gameday 1').closest('.card');
+    const deleteBtn = screen.getAllByTitle(/delete gameday/i)[0]; // Finds by translation title
+    expect(deleteBtn).toBeInTheDocument();
+    
+    fireEvent.click(deleteBtn);
+    
+    // Deletion should NOT be called
+    expect(gamedayApi.deleteGameday).not.toHaveBeenCalled();
+    
+    // Toast should show info message
+    expect(screen.getByText(/published gamedays cannot be deleted/i)).toBeInTheDocument();
+    // Should have a link to unlock
+    expect(screen.getByRole('button', { name: /unlock schedule/i })).toBeInTheDocument();
+  });
+
+  it('allows deletion of draft gamedays', async () => {
+    await renderDashboard();
+    
+    // Gameday 2 is DRAFT
+    const deleteBtn = screen.getAllByTitle(/delete gameday/i)[1];
+    
+    fireEvent.click(deleteBtn);
+    
+    // Should show "Deleted" undo toast
+    await waitFor(() => {
+      // Flexible matcher for "Gameday \"Gameday 2\" deleted"
+      expect(screen.getByText((content) => content.includes('deleted') && content.includes('Gameday 2'))).toBeInTheDocument();
+    });
+  });
 });

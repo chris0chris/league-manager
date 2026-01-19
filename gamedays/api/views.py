@@ -42,6 +42,15 @@ class GamedayViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.status != Gameday.STATUS_DRAFT:
+            return Response(
+                {"detail": "Published gamedays cannot be deleted. Please unlock the gameday first."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
+
     def get_queryset(self):
         queryset = Gameday.objects.all().select_related("season", "league", "author").order_by("-date")
         search = self.request.query_params.get("search", "")

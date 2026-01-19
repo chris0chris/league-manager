@@ -112,6 +112,7 @@
     "loadGamedaysFailed": "Failed to load gamedays",
     "createGamedayFailed": "Failed to create gameday",
     "deleteGamedayPermanentlyFailed": "Failed to delete gameday permanently",
+    "publishedGamedayDeleteBlocked": "Published gamedays cannot be deleted. Please unlock the gameday first.",
     "gamedayDeleted": "Gameday \"{{name}}\" deleted",
     "publishSuccess": "Schedule published and locked",
     "publishFailed": "Failed to publish schedule",
