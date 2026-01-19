@@ -33,7 +33,7 @@ We strictly follow the TDD cycle:
 ### 2. Branching & Pull Requests
 - **NO Commits to Master**: Direct commits to the `master` branch are strictly forbidden.
 - **Feature Branches**: All work must be performed on a dedicated branch created for the specific task or feature.
-- **Mandatory Local QA**: Before pushing anything to remote, all QA checks (Tests, Lint, Security) MUST pass locally.
+- **Mandatory Local QA**: Before pushing anything to remote, all QA checks (Tests, Lint, Security) MUST pass locally. **LINTING IS MANDATORY BEFORE EVERY PUSH.**
 - **Pull Requests**: Every change must receive a Pull Request (PR). PRs must always be created in **origin** (`dachrisch/leaguesphere`). 
 - **Non-Interactive PRs**: To avoid interactive prompts, always use:
   `gh pr create --repo dachrisch/leaguesphere --base master --title "..." --body "..."`

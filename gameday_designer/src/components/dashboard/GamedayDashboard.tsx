@@ -204,7 +204,7 @@ const GamedayDashboard: React.FC = () => {
       undefined, // No undo on toast anymore, it's on the card
       deleteDuration
     );
-  }, [gamedays, addNotification, t]);
+  }, [gamedays, addNotification, t, navigate]);
 
   useEffect(() => {
     loadGamedays();

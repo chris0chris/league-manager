@@ -132,7 +132,6 @@ describe('GamedayDashboard', () => {
     await renderDashboard();
     
     // Gameday 1 is PUBLISHED
-    const card1 = screen.getByText('Gameday 1').closest('.card');
     const deleteBtn = screen.getAllByTitle(/delete gameday/i)[0]; // Finds by translation title
     expect(deleteBtn).toBeInTheDocument();
     
