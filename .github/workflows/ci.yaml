@@ -108,6 +108,18 @@ jobs:
       local_image_name: frontend
       version: "${{ github.ref_name }}"
 
+  # Run database migrations for staging
+  run-migrations-staging:
+    needs:
+      - build-backend-image
+      - deploy-backend-staging
+    secrets: inherit
+    uses: ./.github/workflows/part_run_migrations.yaml
+    with:
+      artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
+      image_name: backend
+      environment_name: stage
+
   # Single approval step for production
   approve-production:
     if: "!contains(github.ref_name, '-rc.')"
@@ -116,6 +128,7 @@ jobs:
     needs:
       - deploy-backend-staging
       - deploy-frontend-staging
+      - run-migrations-staging
     steps:
       - name: 📢 Approve Production Deployment
         run: echo "🚀 Production deployment approved"
@@ -158,3 +171,4 @@ jobs:
     with:
       artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
       image_name: backend
+      environment_name: prod

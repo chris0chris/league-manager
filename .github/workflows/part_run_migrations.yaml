@@ -12,6 +12,11 @@ on:
         default: backend
         description: The name of the Docker image
         type: string
+      environment_name:
+        required: false
+        default: stage
+        description: The GitHub environment to use
+        type: string
     secrets:
       MYSQL_HOST:
         required: true
@@ -32,7 +37,7 @@ permissions:
 jobs:
   run-migrations:
     runs-on: ubuntu-latest
-    environment: prod
+    environment: ${{ inputs.environment_name }}
     steps:
       - name: 📥 Download Docker image artifact
         uses: actions/download-artifact@v7
