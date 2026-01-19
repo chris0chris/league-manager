@@ -4,37 +4,23 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'gameday_designer/js/gameday_designer.css' %}">
     <style>
-        /* Make body and html take full height without overflow */
+        /* Allow natural scrolling */
         html, body {
-            height: 100%;
-            overflow: hidden;
+            height: auto;
+            overflow: auto !important;
         }
 
-        /* Make main container fill available space */
+        /* Adjust main container for fixed navbar */
         main.container {
-            height: calc(100vh - 149px); /* Subtract navbar (70px) and footer (79px) */
             max-width: 100%;
             padding: 0;
-            margin-top: 70px; /* Push below navbar */
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Make content area fill available space */
-        main.container > div {
-            flex: 1;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            margin-top: 56px; /* standard bootstrap navbar height */
+            min-height: calc(100vh - 56px - 100px); /* viewport minus nav and estimated footer */
         }
 
         /* Designer container fills the content area */
         #gameday-designer {
-            flex: 1;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            width: 100%;
         }
 
         /* Make footer sticky at bottom */
