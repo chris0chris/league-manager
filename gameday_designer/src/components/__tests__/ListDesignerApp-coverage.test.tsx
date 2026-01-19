@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ListDesignerApp from '../ListDesignerApp';
+import AppHeader from '../layout/AppHeader';
 import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 import { useDesignerController } from '../../hooks/useDesignerController';
@@ -17,9 +18,16 @@ vi.mock('react-router-dom', async (importOriginal) => {
     ...actual,
     useParams: () => ({ id: '1' }),
     useNavigate: () => vi.fn(),
+    useLocation: () => ({ pathname: '/designer/1' }),
   };
 });
 
+// Mock LanguageSelector
+vi.mock('../LanguageSelector', () => ({
+  default: () => <div data-testid="language-selector">LanguageSelector</div>,
+}));
+
+// Mock GamedayApi
 vi.mock('../../api/gamedayApi', () => ({
   gamedayApi: {
     getGameday: vi.fn().mockResolvedValue({
@@ -32,7 +40,9 @@ vi.mock('../../api/gamedayApi', () => ({
       address: 'Test Field',
       season: 1,
       league: 1,
+      status: 'DRAFT',
     }),
+    patchGameday: vi.fn().mockResolvedValue({}),
   },
 }));
 
@@ -57,12 +67,14 @@ describe('ListDesignerApp Coverage', () => {
     handleGenerateTournament: vi.fn(),
     setShowTournamentModal: vi.fn(),
     dismissNotification: vi.fn(),
+    addNotification: vi.fn(),
   };
 
   const defaultMockReturn = {
-    metadata: { id: 1, name: "Test Gameday", date: "2026-05-01", start: "10:00", format: "6_2", author: 1, address: "Test Field", season: 1, league: 1 },
+    metadata: { id: 1, name: "Test Gameday", date: "2026-05-01", start: "10:00", format: "6_2", author: 1, address: "Test Field", season: 1, league: 1, status: 'DRAFT' },
     nodes: [] as FlowNode[],
     edges: [] as FlowEdge[],
+    fields: [] as any[],
     globalTeams: [] as GlobalTeam[],
     globalTeamGroups: [] as GlobalTeamGroup[],
     selectedNode: null,
@@ -75,7 +87,7 @@ describe('ListDesignerApp Coverage', () => {
       expandedStageIds: new Set(),
       showTournamentModal: false,
       canExport: false,
-      hasNodes: false,
+      hasData: false,
     },
     handlers: mockHandlers,
     updateGlobalTeamGroup: vi.fn(),
@@ -83,9 +95,9 @@ describe('ListDesignerApp Coverage', () => {
     reorderGlobalTeamGroup: vi.fn(),
     getTeamUsage: vi.fn(),
     addGameToGameEdge: vi.fn(),
-    removeGameToGameEdge: vi.fn(),
+    addStageToGameEdge: vi.fn(),
+    removeEdgeFromSlot: vi.fn(),
     addGameNodeInStage: vi.fn(),
-    addNotification: vi.fn(),
     importState: vi.fn(),
     exportState: vi.fn().mockReturnValue({
       metadata: {},
@@ -100,19 +112,22 @@ describe('ListDesignerApp Coverage', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en');
     vi.clearAllMocks();
+    (useDesignerController as Mock).mockReturnValue(defaultMockReturn);
   });
 
   const renderApp = async () => {
     render(
       <MemoryRouter initialEntries={['/designer/1']}>
         <GamedayProvider>
+          <AppHeader />
           <Routes>
             <Route path="/designer/:id" element={<ListDesignerApp />} />
           </Routes>
         </GamedayProvider>
       </MemoryRouter>
     );
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument(), { timeout: 15000 });
+    await screen.findByTestId('gameday-metadata-header');
   };
 
   it('handles clicking on error in popover', async () => {
@@ -131,9 +146,9 @@ describe('ListDesignerApp Coverage', () => {
 
     await renderApp();
 
-    // Click on error summary to open popover
-    const errorSummary = screen.getByText(/1 error/i);
-    fireEvent.click(errorSummary);
+    // Click on error badge
+    const badges = screen.getByTestId('validation-badges');
+    fireEvent.click(within(badges).getByText('1'));
 
     // Click on the error item in popover
     await waitFor(() => {
@@ -160,9 +175,9 @@ describe('ListDesignerApp Coverage', () => {
 
     await renderApp();
 
-    // Click on warning summary to open popover
-    const warningSummary = screen.getByText(/1 warning/i);
-    fireEvent.click(warningSummary);
+    // Click on warning badge
+    const badges = screen.getByTestId('validation-badges');
+    fireEvent.click(within(badges).getByText('1'));
 
     // Click on the warning item in popover
     await waitFor(() => {
@@ -192,7 +207,8 @@ describe('ListDesignerApp Coverage', () => {
 
     await renderApp();
 
-    fireEvent.click(screen.getByText(/4 errors/i));
+    const badges = screen.getByTestId('validation-badges');
+    fireEvent.click(within(badges).getByText('4'));
 
     await waitFor(() => {
       fireEvent.click(screen.getByText('Team overlap'));

@@ -37,6 +37,33 @@ router.register(r"gamedays", GamedayViewSet, basename="gameday")
 
 urlpatterns = [
     path("", include(router.urls)),
+    path(
+        "gamedays/",
+        include(
+            [
+                path(
+                    "gameinfo/<int:pk>/result/",
+                    GameResultUpdateAPIView.as_view(),
+                    name="api-gamedays-game-result",
+                ),
+                path(
+                    "game/<int:pk>/setup",
+                    GameSetupCreateOrUpdateView.as_view(),
+                    name="api-gamedays-game-setup",
+                ),
+                path(
+                    "<int:pk>/publish/",
+                    GamedayPublishAPIView.as_view(),
+                    name="api-gamedays-publish",
+                ),
+                path(
+                    "<int:pk>/details",
+                    GamedayScheduleView.as_view(),
+                    name="api-gamedays-schedule",
+                ),
+            ]
+        ),
+    ),
     path("gameday/list/", GamedayListAPIView.as_view(), name=API_GAMEDAY_LIST),
     path(
         "gameinfo/<int:pk>/",

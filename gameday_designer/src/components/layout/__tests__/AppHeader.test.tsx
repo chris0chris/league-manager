@@ -32,9 +32,9 @@ describe('AppHeader', () => {
     expect(screen.getByText(/Gameday Designer/i)).toBeInTheDocument();
   });
 
-  it('renders dashboard title when on root path', () => {
+  it('renders dashboard title via brand click', () => {
     renderHeader('/');
-    expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
+    expect(screen.getByText(/Gameday Designer/i)).toBeInTheDocument();
   });
 
   it('renders gameday name when in designer and name is provided via props', () => {

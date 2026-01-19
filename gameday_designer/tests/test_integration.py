@@ -19,7 +19,7 @@ class TestGamedayDesignerIntegration(WebTest):
         # Check for React root element
         assert 'id="gameday-designer"' in response.text
         # Check if the JS bundle is referenced
-        assert 'gameday_designer.js' in response.text
+        assert 'index.js' in response.text
 
     def test_api_session_auth_integration(self):
         self.app.set_user(self.user)

@@ -5,6 +5,7 @@ from http import HTTPStatus
 from unittest.mock import patch, MagicMock
 
 import pytest
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.test import TestCase, Client

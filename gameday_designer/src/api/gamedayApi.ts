@@ -52,7 +52,7 @@ class GamedayApi {
       (error: AxiosError) => {
         if (error.response?.status === 401) {
           // Handle unauthorized - redirect to login
-          window.location.href = '/login/';
+          window.location.href = '/accounts/login/';
         }
         return Promise.reject(error);
       }

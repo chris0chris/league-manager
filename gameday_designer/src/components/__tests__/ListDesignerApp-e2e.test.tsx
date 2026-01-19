@@ -11,6 +11,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import ListDesignerApp from '../ListDesignerApp';
+import AppHeader from '../layout/AppHeader';
 import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 import { gamedayApi } from '../../api/gamedayApi';
@@ -20,9 +21,16 @@ vi.mock('react-router-dom', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-router-dom')>();
   return {
     ...actual,
+    useParams: () => ({ id: '1' }),
     useNavigate: () => vi.fn(),
+    useLocation: () => ({ pathname: '/designer/1' }),
   };
 });
+
+// Mock LanguageSelector
+vi.mock('../LanguageSelector', () => ({
+  default: () => <div data-testid="language-selector">LanguageSelector</div>,
+}));
 
 // Mock gamedayApi
 vi.mock('../../api/gamedayApi', () => ({
@@ -75,6 +83,7 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     render(
       <MemoryRouter initialEntries={['/designer/1']}>
         <GamedayProvider>
+          <AppHeader />
           <Routes>
             <Route path="/designer/:id" element={<ListDesignerApp />} />
           </Routes>
@@ -172,7 +181,7 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     });
 
     // --- 5. LIFECYCLE (Publish/Unlock) ---
-    const publishBtn = screen.getAllByRole('button', { name: /Publish/i })[0];
+    const publishBtn = await screen.findByTestId('publish-schedule-button');
     
     const fullDesignerData = {
       nodes: [
@@ -206,7 +215,7 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     
     // Wait for the Unlock button to appear in the accordion body
-    const accordionBody = screen.getByText(mockGameday.name).closest('.accordion-item')!;
+    const accordionBody = screen.getByTestId('gameday-metadata-header').closest('.accordion-item')!;
     const unlockBtn = await within(accordionBody).findByRole('button', { name: /Unlock Schedule/i }, { timeout: 10000 });
     expect(unlockBtn).toBeInTheDocument();
     
@@ -254,12 +263,10 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     const clearBtn = screen.getByText(/Clear Schedule/i);
     await user.click(clearBtn);
     
-    // Verify statistics in footer
+    // Verify statistics (no longer in footer, just check elements are gone)
     await waitFor(() => {
-      expect(screen.getByText(/0 Fields/i)).toBeInTheDocument();
-      expect(screen.getByText(/0 Stages/i)).toBeInTheDocument();
-      expect(screen.getByText(/0 Teams/i)).toBeInTheDocument();
-      expect(screen.getByText(/0 Games/i)).toBeInTheDocument();
+      expect(screen.queryByText(/Main Stadium/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Opening Round/i)).not.toBeInTheDocument();
     }, { timeout: 5000 });
   }, 30000);
 
@@ -288,14 +295,14 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     await user.click(addGameBtn);
 
     // Click publish
-    const publishBtn = screen.getAllByRole('button', { name: /Publish/i })[0];
+    const publishBtn = await screen.findByTestId('publish-schedule-button');
     await user.click(publishBtn);
 
     // Verify modal shows error and button is disabled
     const modal = await screen.findByRole('dialog');
     expect(within(modal).getByText(/Blocking Errors Found/i)).toBeInTheDocument();
     
-    const confirmBtn = within(modal).getByRole('button', { name: /Publish (Now|Anyway)/i });
+    const confirmBtn = within(modal).getByRole('button', { name: /Publish Now|Publish Anyway/i });
     expect(confirmBtn).toBeDisabled();
   });
 });

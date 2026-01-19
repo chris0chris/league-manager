@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ListDesignerApp from '../ListDesignerApp';
+import AppHeader from '../layout/AppHeader';
 import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 import { gamedayApi } from '../../api/gamedayApi';
@@ -68,79 +69,40 @@ describe('Tournament Progression Integration', () => {
     render(
       <MemoryRouter initialEntries={['/designer/1']}>
         <GamedayProvider>
+          <AppHeader />
           <Routes>
             <Route path="/designer/:id" element={<ListDesignerApp />} />
           </Routes>
         </GamedayProvider>
       </MemoryRouter>
     );
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+    // Wait for initial load - spinner gone
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument(), { timeout: 15000 });
     return { user };
   };
 
-    it('should trigger edge creation when tournament is generated', async () => {
+  it('should trigger edge creation when tournament is generated', async () => {
+    const { user } = await renderApp();
 
-      const { user } = await renderApp();
+    // 1. Open Modal
+    const generateBtn = (await screen.findAllByRole('button', { name: /generate tournament/i }))[0];
+    await user.click(generateBtn);
 
-  
+    // 2. Select Template (F6-2-2 is default)
+    const modal = await screen.findByRole('dialog');
+    
+    // 3. Generate
+    const confirmBtn = within(modal).getByRole('button', { name: /generate tournament/i });
+    await user.click(confirmBtn);
 
-      // 1. Open Modal
-
-      const generateBtn = (await screen.findAllByRole('button', { name: /generate tournament/i }))[0];
-
-      await user.click(generateBtn);
-
-  
-
-      // 2. Select Template (F6-2-2 is default)
-
-      const modal = await screen.findByRole('dialog');
-
-      
-
-      // 3. Generate
-
-      const confirmBtn = within(modal).getByRole('button', { name: /generate tournament/i });
-
-      await user.click(confirmBtn);
-
-  
-
-          // 4. Verify edges exist in the footer statistics
-
-  
-
-          // Wait for auto-calculated edges to be processed by the hook
-
-  
-
-          await waitFor(() => {
-
-  
-
-            // 6 team template has many games and edges
-
-  
-
-            // Statistics footer uses translated label
-
-  
-
-            const statusBar = document.querySelector('.list-designer-app__status-bar');
-
-  
-
-            expect(statusBar?.textContent).toMatch(/[1-9]\d* Games/i);
-
-  
-
-          }, { timeout: 10000 });
-
-  
-
-      
-
-    }, 30000);
+    // 4. Verify games were created in the UI
+    await waitFor(() => {
+      // 6 team template creates many games (e.g. Group Stage, Final, etc)
+      // Check for presence of game rows in the canvas
+      const gameRows = document.querySelectorAll('tr[id^="game-"]');
+      expect(gameRows.length).toBeGreaterThan(0);
+    }, { timeout: 10000 });
+  }, 30000);
 
   
 });
