@@ -22,7 +22,7 @@ const AppHeader: React.FC = () => {
     : t('ui:label.dashboard');
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" className="mb-4 shadow-sm">
+    <Navbar bg="dark" variant="dark" expand="lg" className="mb-2 shadow-sm">
       <Container fluid>
         <Navbar.Brand 
           onClick={() => navigate('/')} 

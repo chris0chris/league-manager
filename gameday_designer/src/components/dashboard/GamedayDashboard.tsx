@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Container, Row, Col, Button, Form, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Button, Form, Spinner, Card } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import { gamedayApi } from '../../api/gamedayApi';

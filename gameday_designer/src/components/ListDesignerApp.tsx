@@ -255,26 +255,21 @@ const ListDesignerApp: React.FC = () => {
 
                 try {
 
+                  // Only send fields that exist in the backend model to avoid validation errors
+                  const { 
+                    name, date, start, format, address, season, league, status 
+                  } = metadata;
+
                   await gamedayApi.patchGameday(metadata.id, {
-
-                    ...metadata,
-
+                    name, date, start, format, address, season, league, status,
                     designer_data: {
-
                       ...metadata.designer_data,
-
                       nodes,
-
                       edges,
-
                       fields,
-
                       globalTeams,
-
                       globalTeamGroups
-
                     }
-
                   });
 
                   lastSavedStateRef.current = currentStateStr;
@@ -299,15 +294,15 @@ const ListDesignerApp: React.FC = () => {
 
         
 
-          const handleUpdateMetadataWrapped = useCallback((data: Partial<GamedayMetadata>) => {
+                    const handleUpdateMetadataWrapped = useCallback((data: Partial<GamedayMetadata>) => {
 
-            updateMetadata(data);
+        
 
-            // Pause auto-save briefly to let this metadata update settle
+                      updateMetadata(data);
 
-            pauseAutoSaveUntilRef.current = Date.now() + 1500;
+        
 
-          }, [updateMetadata]);
+                    }, [updateMetadata]);
 
         
 
@@ -571,9 +566,9 @@ const ListDesignerApp: React.FC = () => {
   }
 
   return (
-    <Container fluid className="list-designer-app pt-2">
+    <Container fluid className="list-designer-app pt-0">
       {/* Toolbar actions relocated to global header or kept below it */}
-      <Row className="list-designer-app__header align-items-center mb-3">
+      <Row className="list-designer-app__header align-items-center mb-2">
         <Col className="d-flex align-items-center justify-content-end">
           <Button
             variant="outline-primary"

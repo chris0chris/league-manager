@@ -3,29 +3,23 @@
  */
 
 .list-designer-app {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .list-designer-app__header {
   flex-shrink: 0;
-  padding: 1rem;
+  padding: 0.5rem 1rem;
   background-color: #ffffff;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.list-designer-app__toolbar {
-  flex-shrink: 0;
-  background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
 }
 
 .list-designer-app__content {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   margin: 0;
 }
 
