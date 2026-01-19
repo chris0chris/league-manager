@@ -14,7 +14,7 @@ LeagueSphere is a sophisticated flag football league management system designed 
 - **Enhanced Fan Experience:** Deliver real-time gameday updates and accessible league data to players and fans.
 
 ## Key Features
-- **Gameday Creation & Designer:** A hierarchical tool (Field > Stage > Game) for creating and tracking gamedays. Features include template-based tournament generation with flexible progression mapping, dedicated Ranking Stages for intermediate standings aggregation, automatic time calculation with manual overrides, integrated team pool management, and an interactive validation system with real-time error and warning highlighting. Includes a comprehensive lifecycle management system (Draft, Published, In Progress, Completed) with real-time result entry and dynamic reference resolution.
+- **Gameday Creation & Designer:** A hierarchical tool (Field > Stage > Game) for creating and tracking gamedays. Features include template-based tournament generation with flexible progression mapping, dedicated Ranking Stages for intermediate standings aggregation, automatic time calculation with manual overrides, integrated team pool management, and an interactive validation system with real-time error and warning highlighting. Includes a comprehensive lifecycle management system (Draft, Published, In Progress, Completed) with real-time result entry, dynamic reference resolution, and strict data protection for non-draft states.
 - **Passcheck (Eligibility Verification):** A digital system to enforce complex eligibility rules and manage player lists for gamedays.
 - **Liveticker & Scorecard:** Real-time game monitoring and efficient, mobile-friendly scoring tools for officials.
 - **Automated Standings Calculation:** Real-time calculation and presentation of league tables based on verified game results.
@@ -22,7 +22,7 @@ LeagueSphere is a sophisticated flag football league management system designed 
 ## User Experience (UX)
 - **Functional & Robust:** Prioritize data integrity and system reliability for critical gameday operations.
 - **Efficient & Streamlined:** Minimize friction for common tasks, particularly for field officials and managers.
-- **Guided & Validated:** Implement strict business rules to prevent scheduling conflicts and eligibility errors, supplemented by soft warnings for potential configuration issues.
+- **Guided & Validated:** Implement strict business rules to prevent scheduling conflicts and eligibility errors, supplemented by soft warnings for potential configuration issues. Structural locking prevents accidental modification or deletion of published tournament data.
 
 ## Short-term Priorities
 - Implement new features specifically aimed at further simplifying the day-to-day management of leagues and team schedules.
