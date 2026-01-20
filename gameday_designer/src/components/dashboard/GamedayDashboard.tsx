@@ -79,7 +79,12 @@ const GamedayDashboard: React.FC = () => {
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const timeoutRefs = useRef<Record<number, NodeJS.Timeout>>({});
+  const gamedaysRef = useRef<GamedayListEntry[]>([]);
   const hasTriggeredInitialDelete = useRef(false);
+
+  useEffect(() => {
+    gamedaysRef.current = gamedays;
+  }, [gamedays]);
 
   const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string, undoAction?: () => void, duration?: number, undoLabel?: string) => {
     const id = uuidv4();
@@ -151,15 +156,14 @@ const GamedayDashboard: React.FC = () => {
     }
   }, []);
 
-  const handleDelete = useCallback((id: number) => {
-    const gameday = gamedays.find(g => g.id === id);
-    if (gameday && gameday.status !== 'DRAFT') {
+  const handleDelete = useCallback((id: number, status?: string) => {
+    if (status && status.toUpperCase() !== 'DRAFT') {
       addNotification(
         t('ui:notification.publishedGamedayDeleteBlocked'),
         'info',
         t('ui:notification.title.deletion'),
         () => navigate(`/designer/${id}`),
-        undefined,
+        30000,
         t('ui:button.unlockSchedule')
       );
       return;
@@ -221,7 +225,8 @@ const GamedayDashboard: React.FC = () => {
     if (!loading && gamedays.length > 0 && !hasTriggeredInitialDelete.current) {
       const state = location.state as { pendingDeleteId?: number } | null;
       if (state?.pendingDeleteId) {
-        handleDelete(state.pendingDeleteId);
+        const gameday = gamedays.find(g => g.id === state.pendingDeleteId);
+        handleDelete(state.pendingDeleteId, gameday?.status);
         // Clear location state so it doesn't trigger again on refresh
         navigate(location.pathname, { replace: true, state: {} });
         hasTriggeredInitialDelete.current = true;

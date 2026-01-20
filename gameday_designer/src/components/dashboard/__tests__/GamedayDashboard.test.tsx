@@ -141,7 +141,9 @@ describe('GamedayDashboard', () => {
     expect(gamedayApi.deleteGameday).not.toHaveBeenCalled();
     
     // Toast should show info message
-    expect(screen.getByText(/published gamedays cannot be deleted/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/published gamedays cannot be deleted/i)).toBeInTheDocument();
+    });
     // Should have a link to unlock
     expect(screen.getByRole('button', { name: /unlock schedule/i })).toBeInTheDocument();
   });

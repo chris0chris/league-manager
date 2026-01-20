@@ -12,7 +12,7 @@ import type { GamedayListEntry } from '../../types';
 interface GamedayCardProps {
   gameday: GamedayListEntry;
   onClick: (id: number) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: number, status: string) => void;
 }
 
 const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick, onDelete }) => {
@@ -39,7 +39,7 @@ const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick, onDelete })
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onDelete(gameday.id);
+    onDelete(gameday.id, gameday.status);
   };
 
   return (
