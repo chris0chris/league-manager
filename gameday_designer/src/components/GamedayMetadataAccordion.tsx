@@ -137,6 +137,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                     {validation.errors.length > 0 && (
                       <OverlayTrigger
                         trigger={['hover', 'focus']}
+                        delay={{ show: 250, hide: 400 }}
                         placement="bottom"
                         overlay={
                           <Popover id="error-popover" style={{ pointerEvents: 'auto' }}>
@@ -175,6 +176,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                     {validation.warnings.length > 0 && (
                       <OverlayTrigger
                         trigger={['hover', 'focus']}
+                        delay={{ show: 250, hide: 400 }}
                         placement="bottom"
                         overlay={
                           <Popover id="warning-popover" style={{ pointerEvents: 'auto' }}>
