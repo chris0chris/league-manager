@@ -182,7 +182,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
 
                     <Overlay
                       show={showValidationPopover && (validation.errors.length > 0 || validation.warnings.length > 0)}
-                      target={validationBadgeRef.current}
+                      target={validationBadgeRef}
                       placement="bottom"
                     >
                       {(props) => (
