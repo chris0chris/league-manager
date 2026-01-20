@@ -136,11 +136,10 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                   <div className="d-flex gap-1 ms-2" data-testid="validation-badges">
                     {validation.errors.length > 0 && (
                       <OverlayTrigger
-                        trigger="click"
-                        rootClose
+                        trigger={['hover', 'focus']}
                         placement="bottom"
                         overlay={
-                          <Popover id="error-popover">
+                          <Popover id="error-popover" style={{ pointerEvents: 'auto' }}>
                             <Popover.Header as="h3" className="text-danger">{t('validation:label.errors', 'Errors')}</Popover.Header>
                             <Popover.Body className="p-0">
                               <ListGroup variant="flush">
@@ -148,7 +147,10 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                                   <ListGroup.Item 
                                     key={idx} 
                                     action 
-                                    onClick={() => onHighlight?.(error.affectedNodes?.[0], getHighlightType(error.type))}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onHighlight?.(error.affectedNodes?.[0], getHighlightType(error.type));
+                                    }}
                                     className="d-flex align-items-start border-0"
                                   >
                                     <i className="bi bi-exclamation-circle-fill text-danger me-2 mt-1"></i>
@@ -172,11 +174,10 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                     )}
                     {validation.warnings.length > 0 && (
                       <OverlayTrigger
-                        trigger="click"
-                        rootClose
+                        trigger={['hover', 'focus']}
                         placement="bottom"
                         overlay={
-                          <Popover id="warning-popover">
+                          <Popover id="warning-popover" style={{ pointerEvents: 'auto' }}>
                             <Popover.Header as="h3" className="text-warning">{t('validation:label.warnings', 'Warnings')}</Popover.Header>
                             <Popover.Body className="p-0">
                               <ListGroup variant="flush">
@@ -184,7 +185,10 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                                   <ListGroup.Item 
                                     key={idx} 
                                     action 
-                                    onClick={() => onHighlight?.(warning.affectedNodes?.[0], getHighlightType(warning.type))}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onHighlight?.(warning.affectedNodes?.[0], getHighlightType(warning.type));
+                                    }}
                                     className="d-flex align-items-start border-0"
                                   >
                                     <i className="bi bi-exclamation-triangle-fill text-warning me-2 mt-1"></i>
