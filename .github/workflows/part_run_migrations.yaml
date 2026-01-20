@@ -14,7 +14,7 @@ on:
         type: string
       environment_name:
         required: false
-        default: stage
+        default: staging
         description: The GitHub environment to use
         type: string
     secrets:

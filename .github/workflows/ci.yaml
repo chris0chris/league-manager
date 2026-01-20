@@ -118,7 +118,7 @@ jobs:
     with:
       artifact_name: ${{ needs.build-backend-image.outputs.artifact_name }}
       image_name: backend
-      environment_name: stage
+      environment_name: staging
 
   # Single approval step for production
   approve-production:
