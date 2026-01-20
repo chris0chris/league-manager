@@ -146,9 +146,9 @@ describe('ListDesignerApp Coverage', () => {
 
     await renderApp();
 
-    // Hover on error badge
+    // Hover on validation badges container
     const badges = screen.getByTestId('validation-badges');
-    fireEvent.mouseEnter(within(badges).getByText('1'));
+    fireEvent.mouseEnter(badges);
 
     // Click on the error item in popover
     await waitFor(() => {
@@ -175,9 +175,9 @@ describe('ListDesignerApp Coverage', () => {
 
     await renderApp();
 
-    // Hover on warning badge
+    // Hover on validation badges container
     const badges = screen.getByTestId('validation-badges');
-    fireEvent.mouseEnter(within(badges).getByText('1'));
+    fireEvent.mouseEnter(badges);
 
     // Click on the warning item in popover
     await waitFor(() => {
@@ -208,7 +208,7 @@ describe('ListDesignerApp Coverage', () => {
     await renderApp();
 
     const badges = screen.getByTestId('validation-badges');
-    fireEvent.mouseEnter(within(badges).getByText('4'));
+    fireEvent.mouseEnter(badges);
 
     await waitFor(() => {
       fireEvent.click(screen.getByText('Team overlap'));

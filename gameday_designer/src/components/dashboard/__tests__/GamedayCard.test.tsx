@@ -76,6 +76,6 @@ describe('GamedayCard', () => {
     
     fireEvent.click(deleteBtn);
     expect(handleDelete).toHaveBeenCalledTimes(1);
-    expect(handleDelete).toHaveBeenCalledWith(1);
+    expect(handleDelete).toHaveBeenCalledWith(1, mockGameday.status);
   });
 });
