@@ -5,8 +5,8 @@
  * Now includes gameday-level action buttons directly in the body.
  */
 
-import React from 'react';
-import { Accordion, Form, Row, Col, Button, OverlayTrigger, Popover, ListGroup } from 'react-bootstrap';
+import React, { useState, useRef } from 'react';
+import { Accordion, Form, Row, Col, Button, Overlay, Popover, ListGroup } from 'react-bootstrap';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import type { GamedayMetadata, FlowValidationError as ValidationError, FlowValidationWarning as ValidationWarning, HighlightedElement } from '../types/flowchart';
 import { ICONS } from '../utils/iconConstants';
@@ -47,6 +47,28 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   onHighlight
 }) => {
   const { t } = useTypedTranslation(['ui', 'domain', 'validation']);
+
+  const [showErrorPopover, setShowErrorPopover] = useState(false);
+  const [showWarningPopover, setShowWarningPopover] = useState(false);
+  const errorBadgeRef = useRef<HTMLSpanElement>(null);
+  const warningBadgeRef = useRef<HTMLSpanElement>(null);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = (type: 'error' | 'warning') => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    if (type === 'error') setShowErrorPopover(true);
+    else setShowWarningPopover(true);
+  };
+
+  const handleMouseLeave = (type: 'error' | 'warning') => {
+    hideTimeoutRef.current = setTimeout(() => {
+      if (type === 'error') setShowErrorPopover(false);
+      else setShowWarningPopover(false);
+    }, 300); // 300ms buffer to move mouse into popover
+  };
 
   const handleChange = (field: keyof GamedayMetadata, value: string) => {
     if (readOnly) return;
@@ -135,82 +157,104 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                 {validation && (
                   <div className="d-flex gap-1 ms-2" data-testid="validation-badges">
                     {validation.errors.length > 0 && (
-                      <OverlayTrigger
-                        trigger={['hover', 'focus']}
-                        delay={{ show: 0, hide: 1000 }}
-                        placement="bottom"
-                        overlay={
-                          <Popover id="error-popover" style={{ pointerEvents: 'auto' }}>
-                            <Popover.Header as="h3" className="text-danger">{t('validation:label.errors', 'Errors')}</Popover.Header>
-                            <Popover.Body className="p-0">
-                              <ListGroup variant="flush">
-                                {validation.errors.map((error, idx) => (
-                                  <ListGroup.Item 
-                                    key={idx} 
-                                    action 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onHighlight?.(error.affectedNodes?.[0], getHighlightType(error.type));
-                                    }}
-                                    className="d-flex align-items-start border-0"
-                                  >
-                                    <i className="bi bi-exclamation-circle-fill text-danger me-2 mt-1"></i>
-                                    <div>{getMessage(error)}</div>
-                                  </ListGroup.Item>
-                                ))}
-                              </ListGroup>
-                            </Popover.Body>
-                          </Popover>
-                        }
-                      >
+                      <>
                         <span 
+                          ref={errorBadgeRef}
                           className="badge bg-danger" 
                           style={{ cursor: 'pointer' }}
+                          onMouseEnter={() => handleMouseEnter('error')}
+                          onMouseLeave={() => handleMouseLeave('error')}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <i className="bi bi-x-circle-fill me-1"></i>
                           {validation.errors.length}
                         </span>
-                      </OverlayTrigger>
+                        <Overlay
+                          show={showErrorPopover}
+                          target={errorBadgeRef.current}
+                          placement="bottom"
+                        >
+                          {(props) => (
+                            <Popover 
+                              {...props} 
+                              id="error-popover" 
+                              style={{ ...props.style, pointerEvents: 'auto', zIndex: 1060 }}
+                              onMouseEnter={() => handleMouseEnter('error')}
+                              onMouseLeave={() => handleMouseLeave('error')}
+                            >
+                              <Popover.Header as="h3" className="text-danger">{t('validation:label.errors', 'Errors')}</Popover.Header>
+                              <Popover.Body className="p-0">
+                                <ListGroup variant="flush">
+                                  {validation.errors.map((error, idx) => (
+                                    <ListGroup.Item 
+                                      key={idx} 
+                                      action 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onHighlight?.(error.affectedNodes?.[0], getHighlightType(error.type));
+                                      }}
+                                      className="d-flex align-items-start border-0"
+                                    >
+                                      <i className="bi bi-exclamation-circle-fill text-danger me-2 mt-1"></i>
+                                      <div>{getMessage(error)}</div>
+                                    </ListGroup.Item>
+                                  ))}
+                                </ListGroup>
+                              </Popover.Body>
+                            </Popover>
+                          )}
+                        </Overlay>
+                      </>
                     )}
                     {validation.warnings.length > 0 && (
-                      <OverlayTrigger
-                        trigger={['hover', 'focus']}
-                        delay={{ show: 0, hide: 1000 }}
-                        placement="bottom"
-                        overlay={
-                          <Popover id="warning-popover" style={{ pointerEvents: 'auto' }}>
-                            <Popover.Header as="h3" className="text-warning">{t('validation:label.warnings', 'Warnings')}</Popover.Header>
-                            <Popover.Body className="p-0">
-                              <ListGroup variant="flush">
-                                {validation.warnings.map((warning, idx) => (
-                                  <ListGroup.Item 
-                                    key={idx} 
-                                    action 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onHighlight?.(warning.affectedNodes?.[0], getHighlightType(warning.type));
-                                    }}
-                                    className="d-flex align-items-start border-0"
-                                  >
-                                    <i className="bi bi-exclamation-triangle-fill text-warning me-2 mt-1"></i>
-                                    <div>{getMessage(warning)}</div>
-                                  </ListGroup.Item>
-                                ))}
-                              </ListGroup>
-                            </Popover.Body>
-                          </Popover>
-                        }
-                      >
+                      <>
                         <span 
+                          ref={warningBadgeRef}
                           className="badge bg-warning text-dark"
                           style={{ cursor: 'pointer' }}
+                          onMouseEnter={() => handleMouseEnter('warning')}
+                          onMouseLeave={() => handleMouseLeave('warning')}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <i className="bi bi-exclamation-triangle-fill me-1"></i>
                           {validation.warnings.length}
                         </span>
-                      </OverlayTrigger>
+                        <Overlay
+                          show={showWarningPopover}
+                          target={warningBadgeRef.current}
+                          placement="bottom"
+                        >
+                          {(props) => (
+                            <Popover 
+                              {...props} 
+                              id="warning-popover" 
+                              style={{ ...props.style, pointerEvents: 'auto', zIndex: 1060 }}
+                              onMouseEnter={() => handleMouseEnter('warning')}
+                              onMouseLeave={() => handleMouseLeave('warning')}
+                            >
+                              <Popover.Header as="h3" className="text-warning">{t('validation:label.warnings', 'Warnings')}</Popover.Header>
+                              <Popover.Body className="p-0">
+                                <ListGroup variant="flush">
+                                  {validation.warnings.map((warning, idx) => (
+                                    <ListGroup.Item 
+                                      key={idx} 
+                                      action 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onHighlight?.(warning.affectedNodes?.[0], getHighlightType(warning.type));
+                                      }}
+                                      className="d-flex align-items-start border-0"
+                                    >
+                                      <i className="bi bi-exclamation-triangle-fill text-warning me-2 mt-1"></i>
+                                      <div>{getMessage(warning)}</div>
+                                    </ListGroup.Item>
+                                  ))}
+                                </ListGroup>
+                              </Popover.Body>
+                            </Popover>
+                          )}
+                        </Overlay>
+                      </>
                     )}
                     {validation.isValid && validation.warnings.length === 0 && (
                       <span className="badge bg-success">
