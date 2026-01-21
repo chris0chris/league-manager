@@ -23,6 +23,12 @@
   "stage_sequence_time": "Stage \"{{stage2}}\" starts at {{time2}}, which is before preceding stage \"{{stage1}}\" starts ({{time1}})",
   "stage_sequence_type": "Stage \"{{stage2}}\" ({{type2}}) follows \"{{stage1}}\" ({{type1}}), which might be out of order",
   "progression_order": "Progression from stage \"{{sourceStage}}\" to earlier stage \"{{targetStage}}\"",
-  "uneven_game_distribution": "Group \"{{group}}\" has uneven game distribution (min: {{minGames}}, max: {{maxGames}})",
-  "self_play": "Game \"{{game}}\": A team cannot play against itself"
-}
+    "uneven_game_distribution": "Group \"{{group}}\" has uneven game distribution (min: {{minGames}}, max: {{maxGames}})",
+    "self_play": "Game \"{{game}}\": A team cannot play against itself",
+    "no_teams": "No teams have been added to the team pool",
+    "no_games": "No games have been added to the schedule",
+    "team_without_games": "Team \"{{team}}\" is not assigned to any game",
+    "unused_field": "Field \"{{field}}\" has no games assigned",
+    "broken_progression": "Game \"{{game}}\" references non-existent standing \"{{target}}\" for {{slot}}"
+  }
+  

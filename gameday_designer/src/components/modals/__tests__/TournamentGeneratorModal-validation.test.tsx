@@ -44,7 +44,8 @@ describe('TournamentGeneratorModal - Validation', () => {
     const alerts = screen.getAllByRole('alert');
     const warningAlert = alerts.find(a => a.className.includes('alert-warning'));
     expect(warningAlert).toBeDefined();
-    expect(warningAlert?.textContent).toMatch(/insufficientTeams/i);
+    // In test environment, it returns the raw key if not loaded, or the translated text if loaded
+    expect(warningAlert?.textContent).toMatch(/insufficientTeams|Not enough teams/i);
   });
 
   it('should enable generate button when team count is insufficient but generateTeams is true', async () => {
@@ -52,7 +53,7 @@ describe('TournamentGeneratorModal - Validation', () => {
       <TournamentGeneratorModal
         show={true}
         onHide={mockOnHide}
-        teams={mockTeams}
+        teams={[]} // Use empty to allow toggling
         onGenerate={mockOnGenerate}
       />
     );

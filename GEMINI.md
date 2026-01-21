@@ -25,13 +25,18 @@ We strictly follow the TDD cycle:
 2.  **GREEN**: Implement the minimum code necessary to make the test pass.
 3.  **REFACTOR**: Clean up the code while ensuring the tests remain GREEN.
 
-Targeted modifications can be verified using isolated test runs (e.g., only the test file corresponding to the changed code). More complex tasks or significant changes require running the full test suite to prevent regressions.
+**Mandatory Internal QA**: Before involving the user or reporting a task as finished, you MUST:
+-   **Run All Tests**: Execute the full test suite (Backend & Frontend) and ensure all pass.
+-   **LINT & FIX**: Run the project's linting commands, fix all errors, and resolve any formatting issues.
+-   **Targeted Tests**: Use isolated test runs during development, but verify the final result with the full suite.
 
 ### 2. Branching & Pull Requests
 - **NO Commits to Master**: Direct commits to the `master` branch are strictly forbidden.
 - **Feature Branches**: All work must be performed on a dedicated branch created for the specific task or feature.
-- **Mandatory Local QA**: Before pushing anything to remote, all QA checks must pass locally (Tests, Lint, and Security).
-- **Pull Requests**: Every change must receive a Pull Request (PR). PRs must always be created in **origin**.
+- **Mandatory Local QA**: Before pushing anything to remote, all QA checks (Tests, Lint, Security) MUST pass locally. **LINTING IS MANDATORY BEFORE EVERY PUSH.**
+- **Pull Requests**: Every change must receive a Pull Request (PR). PRs must always be created in **origin** (`dachrisch/leaguesphere`). 
+- **Non-Interactive PRs**: To avoid interactive prompts, always use:
+  `gh pr create --repo dachrisch/leaguesphere --base master --title "..." --body "..."`
 - **Issues**: Task tracking and issue management are performed on **upstream github**.
 - **Merging**: Branches are only merged into `master` after explicit user approval.
 
@@ -41,39 +46,67 @@ Targeted modifications can be verified using isolated test runs (e.g., only the 
 - **History Entry**: Once a feature is finished, it must contain a history entry summarizing the implementation.
 - **Coverage Requirements**: Patch coverage for each PR must be at least **90%** to maintain an overall project coverage of above **80%**.
 
+### 4. Memory Management (MCP)
+- **Persistence**: Use the `save_memory` tool to persist critical session facts, user-specific preferences, or significant architectural insights that should be retained for future sessions.
+- **Conciseness**: Ensure that each saved fact is clear, self-contained, and brief. Avoid saving long or ephemeral context.
+- **Proactivity**: Proactively identify and save information that will streamline future development or improve personalized assistance (e.g., "User prefers SQLite for local backend testing due to LXC connectivity issues").
+
 ---
 
 ## Testing Strategy
 
-### 1. Execution
-- **Targeted Runs**: For targeted modifications, tests can be run in isolation (e.g., only the test file corresponding to the changed code) to ensure fast feedback.
-- **Full Suite**: Complex tasks or significant changes require running the full test suite to prevent regressions.
+### 1. Pre-flight Checklist (Always check these first)
+- [ ] **LXC Container**: Ensure `servyy-test` is running (`lxc list`).
+- [ ] **Database IP**: The IP changes! Always verify with `lxc list servyy-test`.
+- [ ] **Environment Variables**: Must be exported in the CURRENT shell session.
+- [ ] **Migrations**: Run `python manage.py migrate` if any models changed.
+- [ ] **Dependencies**: Run `uv sync --extra test` if any python imports fail.
 
 ### 2. Backend Testing (pytest)
-Backend tests require a MariaDB instance. The project infrastructure uses an LXC container (`servyy-test`) running a Docker MariaDB.
+Backend tests require a MariaDB instance in the `servyy-test` LXC container.
 
-**Mandatory Environment Variables:**
+**Mandatory Setup Command:**
 ```bash
-export MYSQL_HOST=10.185.182.207
+# 1. Spin up/Reset DB
+cd container && ./spinup_test_db.sh && cd ..
+
+# 2. Get current IP (e.g. 10.185.182.62)
+lxc list servyy-test
+
+# 3. Export all variables (Update IP if needed)
+export MYSQL_HOST=10.185.182.62
 export MYSQL_DB_NAME=test_db
 export MYSQL_USER=user
 export MYSQL_PWD=user
 export SECRET_KEY=test-secret-key
-```
+export league_manager=dev
 
-**Execution:**
-```bash
-# Reset/Start test DB (in container/ directory)
-./spinup_test_db.sh
-
-# Run tests
+# 4. Migrate and Test
+python manage.py migrate
 pytest
 ```
 
+**Troubleshooting DB Connection:**
+If you get `OperationalError: (2003, "Can't connect to MySQL server")`:
+1. Re-run `./container/spinup_test_db.sh`.
+2. Check `lxc list` to see if the IP address has changed.
+3. Ensure no local firewall is blocking the connection.
+
 ### 3. Frontend Testing (vitest)
-All modern frontend apps use Vitest.
+Run tests for the specific app you are working on, or all of them to ensure no regressions.
+
 ```bash
+# Gameday Designer
 npm --prefix gameday_designer/ run test:run
+
+# Passcheck
+npm --prefix passcheck/ run test:run
+
+# Liveticker
+npm --prefix liveticker/ run test:run
+
+# Scorecard
+npm --prefix scorecard/ run test:run
 ```
 
 ---

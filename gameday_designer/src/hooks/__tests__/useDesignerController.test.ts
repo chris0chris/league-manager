@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useDesignerController } from '../useDesignerController';
+import { useFlowState } from '../useFlowState';
 import * as flowchartExport from '../../utils/flowchartExport';
 import * as flowchartImport from '../../utils/flowchartImport';
 import * as scrollHelpers from '../../utils/scrollHelpers';
@@ -35,7 +36,7 @@ vi.mock('../../utils/teamAssignment', () => ({
 }));
 
 // Mock window functions
-const mockConfirm = vi.spyOn(window, 'confirm').mockImplementation(() => true);
+vi.spyOn(window, 'confirm').mockImplementation(() => true);
 
 describe('useDesignerController', () => {
   beforeEach(() => {
@@ -44,7 +45,10 @@ describe('useDesignerController', () => {
 
   describe('UI State', () => {
     it('initializes with default UI state', () => {
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       expect(result.current.ui.showTournamentModal).toBe(false);
       expect(result.current.ui.highlightedElement).toBeNull();
       expect(result.current.ui.expandedFieldIds.size).toBe(0);
@@ -52,7 +56,10 @@ describe('useDesignerController', () => {
     });
 
     it('manages tournament modal visibility', () => {
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       
       act(() => {
         result.current.handlers.setShowTournamentModal(true);
@@ -61,7 +68,10 @@ describe('useDesignerController', () => {
     });
 
     it('can expand fields and stages', () => {
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       
       act(() => {
         result.current.handlers.expandField('field-1');
@@ -76,7 +86,10 @@ describe('useDesignerController', () => {
   describe('Dynamic Reference Navigation', () => {
     it('handles dynamic reference clicks with scroll and highlight', async () => {
       vi.useFakeTimers();
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       
       let promise: Promise<void>;
       await act(async () => {
@@ -98,7 +111,10 @@ describe('useDesignerController', () => {
 
   describe('Import/Export', () => {
     it('handles successful export', () => {
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       
       act(() => {
         result.current.handlers.handleExport();
@@ -107,33 +123,42 @@ describe('useDesignerController', () => {
       expect(flowchartExport.downloadFlowchartAsJson).toHaveBeenCalled();
     });
 
-    it('shows confirmation if export validation fails', () => {
+    it('shows warning notification if export validation has issues', () => {
       vi.mocked(flowchartExport.validateForExport).mockReturnValueOnce(['Error 1']);
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       
       act(() => {
         result.current.handlers.handleExport();
       });
       
-      expect(mockConfirm).toHaveBeenCalled();
+      expect(result.current.notifications).toHaveLength(2); // One warning, one success (as it doesn't block now)
+      expect(result.current.notifications.some(n => n.type === 'warning')).toBe(true);
       expect(flowchartExport.downloadFlowchartAsJson).toHaveBeenCalled();
     });
 
-    it('cancels export if user does not confirm', () => {
+    it('always downloads even with warnings (non-blocking notification pattern)', () => {
       vi.mocked(flowchartExport.validateForExport).mockReturnValueOnce(['Error 1']);
-      mockConfirm.mockReturnValueOnce(false);
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       
       act(() => {
         result.current.handlers.handleExport();
       });
       
-      expect(flowchartExport.downloadFlowchartAsJson).not.toHaveBeenCalled();
+      expect(flowchartExport.downloadFlowchartAsJson).toHaveBeenCalled();
     });
 
     it('handles invalid JSON import', () => {
       vi.mocked(flowchartImport.validateScheduleJson).mockReturnValueOnce(['Invalid JSON']);
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       
       act(() => {
         result.current.handlers.handleImport({});
@@ -149,7 +174,10 @@ describe('useDesignerController', () => {
         success: false, 
         errors: ['Import Error'] 
       });
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       
       act(() => {
         result.current.handlers.handleImport({});
@@ -183,7 +211,10 @@ describe('useDesignerController', () => {
     } as TournamentStructure;
 
     it('generates tournament without teams', async () => {
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       vi.mocked(tournamentGenerator.generateTournament).mockReturnValueOnce(mockStructure);
       
       await act(async () => {
@@ -196,7 +227,10 @@ describe('useDesignerController', () => {
 
     it('generates teams and assigns them if requested', async () => {
       vi.useFakeTimers();
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       const mockTeams = [{ id: 'team-1', label: 'Team 1', color: '#ff0000' }];
       
       vi.mocked(tournamentGenerator.generateTournament).mockReturnValue(mockStructure);
@@ -226,7 +260,10 @@ describe('useDesignerController', () => {
         throw new Error('Gen failed');
       });
       
-      const { result } = renderHook(() => useDesignerController());
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        return useDesignerController(flowState);
+      });
       
       await act(async () => {
         await result.current.handlers.handleGenerateTournament(mockConfig);

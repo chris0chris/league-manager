@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { useFlowState } from './useFlowState';
 import { useFlowValidation } from './useFlowValidation';
 import { downloadFlowchartAsJson, validateForExport } from '../utils/flowchartExport';
 import { importFromScheduleJson, validateScheduleJson } from '../utils/flowchartImport';
@@ -25,8 +24,7 @@ import type { GlobalTeam, HighlightedElement, Notification, NotificationType } f
 import type { TournamentGenerationConfig } from '../types/tournament';
 import { v4 as uuidv4 } from 'uuid';
 
-export function useDesignerController() {
-  const flowState = useFlowState();
+export function useDesignerController(flowState: UseFlowStateReturn) {
   const {
     nodes,
     edges,
@@ -39,6 +37,7 @@ export function useDesignerController() {
     updateNode,
     deleteNode,
     selectNode,
+    updateMetadata,
     clearAll,
     importState,
     exportState,
@@ -63,11 +62,11 @@ export function useDesignerController() {
 
   // --- UI Actions ---
 
-  const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string) => {
+  const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string, undoAction?: () => void, duration?: number) => {
     const id = uuidv4();
     setNotifications((prev) => [
       ...prev,
-      { id, message, type, title, show: true }
+      { id, message, type, title, show: true, undoAction, duration }
     ]);
   }, []);
 
@@ -129,10 +128,11 @@ export function useDesignerController() {
     const state = exportState();
     const errors = validateForExport(state);
     if (errors.length > 0) {
-      const proceed = window.confirm(
-        `The following issues were found:\n\n${errors.join('\n')}\n\nExport anyway?`
+      addNotification(
+        `Export may be incomplete: ${errors.length} validation issues found. Check the validation panel for details.`,
+        'warning',
+        'Export'
       );
-      if (!proceed) return;
     }
     downloadFlowchartAsJson(state);
     addNotification('Schedule exported successfully', 'success', 'Export Success');
@@ -206,13 +206,14 @@ export function useDesignerController() {
     ...flowState,
     validation,
     notifications,
+    updateMetadata,
     ui: {
       highlightedElement,
       expandedFieldIds,
       expandedStageIds,
       showTournamentModal,
       canExport,
-      hasNodes: nodes.length > 0,
+      hasData: nodes.length > 0 || globalTeams.length > 0 || fields.length > 0,
     },
     // Handlers
     handlers: {
@@ -237,6 +238,7 @@ export function useDesignerController() {
       handleAddFieldContainer: () => addFieldNode({}, true),
       handleAddStage: (fieldId: string) => addStageNode(fieldId),
       dismissNotification,
+      addNotification,
     }
   };
 }

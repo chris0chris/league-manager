@@ -5,6 +5,7 @@ from http import HTTPStatus
 from unittest.mock import patch, MagicMock
 
 import pytest
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.test import TestCase, Client
@@ -151,6 +152,8 @@ class TestGameCountOfficials(WebTest):
     @patch.object(MoodleService, "get_all_users_for_course")
     @pytest.mark.skipif("CIRCLECI" in os.environ, reason="CIRCLECI will reveal secrets")
     def test_all_entries_will_be_checked(self, moodle_service_mock: MagicMock):
+        if settings.MOODLE_URL is None or settings.MOODLE_URL == "None":
+            pytest.skip("MOODLE_URL is not configured")
         user = DBSetup().create_new_user("some staff user", is_staff=True)
         self.app.set_user(user)
         DbSetupOfficials().create_officials_full_setup()

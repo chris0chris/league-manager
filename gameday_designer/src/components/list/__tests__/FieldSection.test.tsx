@@ -78,8 +78,10 @@ describe('FieldSection', () => {
         onDynamicReferenceClick={vi.fn()}
         onAddGameToGameEdge={vi.fn()}
         onRemoveGameToGameEdge={vi.fn()}
+        onNotify={vi.fn()}
         isExpanded={true}
         expandedStageIds={new Set()}
+        readOnly={false}
       />
     );
 
@@ -111,6 +113,7 @@ describe('FieldSection', () => {
         onDynamicReferenceClick={vi.fn()}
         onAddGameToGameEdge={vi.fn()}
         onRemoveGameToGameEdge={vi.fn()}
+        onNotify={vi.fn()}
         isExpanded={true}
         expandedStageIds={new Set()}
       />
@@ -141,6 +144,7 @@ describe('FieldSection', () => {
         onDynamicReferenceClick={vi.fn()}
         onAddGameToGameEdge={vi.fn()}
         onRemoveGameToGameEdge={vi.fn()}
+        onNotify={vi.fn()}
         isExpanded={true}
         expandedStageIds={new Set()}
       />
@@ -173,6 +177,7 @@ describe('FieldSection', () => {
         onDynamicReferenceClick={vi.fn()}
         onAddGameToGameEdge={vi.fn()}
         onRemoveGameToGameEdge={vi.fn()}
+        onNotify={vi.fn()}
         isExpanded={true}
         expandedStageIds={new Set()}
       />
@@ -203,6 +208,7 @@ describe('FieldSection', () => {
         onDynamicReferenceClick={vi.fn()}
         onAddGameToGameEdge={vi.fn()}
         onRemoveGameToGameEdge={vi.fn()}
+        onNotify={vi.fn()}
         isExpanded={true}
         expandedStageIds={new Set()}
       />
@@ -236,6 +242,7 @@ describe('FieldSection', () => {
         onDynamicReferenceClick={vi.fn()}
         onAddGameToGameEdge={vi.fn()}
         onRemoveGameToGameEdge={vi.fn()}
+        onNotify={vi.fn()}
         isExpanded={true}
         expandedStageIds={new Set()}
       />
@@ -279,6 +286,7 @@ describe('FieldSection', () => {
         onDynamicReferenceClick={vi.fn()}
         onAddGameToGameEdge={vi.fn()}
         onRemoveGameToGameEdge={vi.fn()}
+        onNotify={vi.fn()}
         isExpanded={true}
         expandedStageIds={new Set()}
       />

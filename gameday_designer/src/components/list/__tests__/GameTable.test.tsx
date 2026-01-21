@@ -7,6 +7,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import GameTable from '../GameTable';
+import { GamedayProvider } from '../../../context/GamedayContext';
+import i18n from '../../../i18n/testConfig';
 import type { GameNode, StageNode, FieldNode, GlobalTeam, GlobalTeamGroup, FlowEdge } from '../../../types/flowchart';
 import { createFieldNode, createStageNode, createGameNodeInStage } from '../../../types/flowchart';
 
@@ -28,7 +30,8 @@ describe('GameTable', () => {
   let mockOnRemoveEdgeFromSlot: ReturnType<typeof vi.fn>;
   let mockOnDynamicReferenceClick: ReturnType<typeof vi.fn>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
     vi.clearAllMocks();
 
     field1 = createFieldNode('field-1', { name: 'Field 1', order: 0 });
@@ -60,31 +63,33 @@ describe('GameTable', () => {
 
   const renderTable = (props = {}) => {
     return render(
-      <GameTable
-        games={[game2]}
-        edges={[]}
-        allNodes={[field1, stage1, stage2, game1, game2]}
-        globalTeams={[team1]}
-        globalTeamGroups={[teamGroup1]}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onSelectNode={mockOnSelectNode}
-        selectedNodeId={null}
-        onAssignTeam={mockOnAssignTeam}
-        onAddGameToGameEdge={mockOnAddGameToGameEdge}
-        onAddStageToGameEdge={mockOnAddStageToGameEdge}
-        onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
-        onDynamicReferenceClick={mockOnDynamicReferenceClick}
-        {...props}
-      />
+      <GamedayProvider>
+        <GameTable
+          games={[game2]}
+          edges={[]}
+          allNodes={[field1, stage1, stage2, game1, game2]}
+          globalTeams={[team1]}
+          globalTeamGroups={[teamGroup1]}
+          onUpdate={mockOnUpdate}
+          onDelete={mockOnDelete}
+          onSelectNode={mockOnSelectNode}
+          selectedNodeId={null}
+          onAssignTeam={mockOnAssignTeam}
+          onAddGameToGameEdge={mockOnAddGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
+          onDynamicReferenceClick={mockOnDynamicReferenceClick}
+          {...props}
+        />
+      </GamedayProvider>
     );
   };
 
   it('renders table headers', () => {
     renderTable();
-    expect(screen.getByText('Standing')).toBeInTheDocument();
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('Away')).toBeInTheDocument();
+    expect(screen.getByText(/label.standing/i)).toBeInTheDocument();
+    expect(screen.getByText(/label.home/i)).toBeInTheDocument();
+    expect(screen.getByText(/label.away/i)).toBeInTheDocument();
   });
 
   describe('Inline editing', () => {

@@ -18,5 +18,20 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Gameday Management & Dashboard**
+- [x] **Track: Gameday Management & Dashboard**
 *Link: [./tracks/gameday-management_20260116/](./tracks/gameday-management_20260116/)*
+
+---
+
+- [x] **Track: Game State Tracking & Result Management**
+*Link: [./tracks/game-state-tracking_20260117/](./tracks/game-state-tracking_20260117/)*
+
+---
+
+- [x] **Track: add new warning: no teams, no games, teams without games, unsused fields**
+*Link: [./tracks/gameday_warnings_20260118/](./tracks/gameday_warnings_20260118/)*
+
+---
+
+- [x] `global_language_selector_20260118`: Unified application layout and global header [finished: 2026-01-18]
+*Link: [./tracks/global_language_selector_20260118/](./tracks/global_language_selector_20260118/)*

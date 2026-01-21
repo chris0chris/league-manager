@@ -147,7 +147,7 @@ describe('TournamentGeneratorModal - Core Functionality', () => {
         <TournamentGeneratorModal
           show={true}
           onHide={mockOnHide}
-          teams={mockTeams}
+          teams={[]} // MUST BE EMPTY to allow toggling
           onGenerate={mockOnGenerate}
         />
       );

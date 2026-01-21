@@ -1,0 +1,37 @@
+/**
+ * GamedayMetadataAccordion Styles
+ */
+
+.gameday-metadata-accordion .accordion-header .accordion-button {
+  transition: background-color 0.2s;
+}
+
+.gameday-metadata-accordion .header-status-warning .accordion-button {
+  background-color: #fff3cd !important;
+  color: #664d03;
+}
+
+.gameday-metadata-accordion .header-status-success .accordion-button {
+  background-color: #d1e7dd !important;
+  color: #0f5132;
+}
+
+.gameday-metadata-accordion .header-status-primary .accordion-button {
+  background-color: #cfe2ff !important;
+  color: #084298;
+}
+
+.gameday-metadata-accordion .header-status-secondary .accordion-button {
+  background-color: #e2e3e5 !important;
+  color: #41464b;
+}
+
+.gameday-metadata-accordion .header-status-light .accordion-button {
+  background-color: #f8f9fa !important;
+}
+
+/* Ensure the focus ring matches the theme but doesn't look like a button inside a button */
+.gameday-metadata-accordion .accordion-button:focus {
+  box-shadow: none;
+  border-color: rgba(0,0,0,.125);
+}

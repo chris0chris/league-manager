@@ -140,6 +140,11 @@ class EmptyGamedayService:
     def get_defense_player_statistic_table():
         return EmptyDefenseStatisticTable
 
+    @staticmethod
+    def get_resolved_designer_data(gameday_pk):
+        gameday = Gameday.objects.get(pk=gameday_pk)
+        return gameday.designer_data or {"nodes": [], "edges": []}
+
 
 class GamedayService:
     @classmethod
@@ -186,7 +191,7 @@ class GamedayService:
 
     def get_qualify_table(self):
         qualify_table = self.gmw.get_qualify_table()
-        if qualify_table is "":
+        if isinstance(qualify_table, str) and qualify_table == "":
             return EmptyQualifyTable
         qualify_table = qualify_table[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
         qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
@@ -231,6 +236,61 @@ class GamedayService:
 
     def get_defense_player_statistic_table(self):
         return self.gmw.get_defense_statistic_table()
+
+    def get_resolved_designer_data(self, gameday_pk=None):
+        gameday = Gameday.objects.get(pk=self.gameday_pk)
+        data = gameday.designer_data or {"nodes": [], "edges": []}
+
+        # Cache results for this gameday to avoid repeated queries
+        from gamedays.models import Gameresult
+
+        results = Gameresult.objects.filter(gameinfo__gameday=gameday)
+        games = Gameinfo.objects.filter(gameday=gameday)
+
+        def resolve_team(ref):
+            if not ref or not isinstance(ref, dict):
+                return None
+            target_match = ref.get("matchName")
+            ref_type = ref.get("type")  # 'winner' or 'loser'
+
+            target_game = games.filter(standing=target_match).first()
+            if not target_game or target_game.status != Gameinfo.STATUS_COMPLETED:
+                return None
+
+            game_results = results.filter(gameinfo=target_game).order_by("isHome")
+            if len(game_results) < 2:
+                return None
+
+            home = game_results.filter(isHome=True).first()
+            away = game_results.filter(isHome=False).first()
+
+            if not home or not away:
+                return None
+
+            home_score = target_game.final_score.get("home", 0)
+            away_score = target_game.final_score.get("away", 0)
+
+            winner = home if home_score > away_score else away
+            loser = away if home_score > away_score else home
+
+            if home_score == away_score:
+                return "Tie"
+
+            resolved_team = winner if ref_type == "winner" else loser
+            return resolved_team.team.name
+
+        for node in data.get("nodes", []):
+            if node.get("type") == "game":
+                node_data = node.get("data", {})
+                home_ref = node_data.get("homeTeamDynamic")
+                away_ref = node_data.get("awayTeamDynamic")
+
+                if home_ref:
+                    node_data["resolvedHomeTeam"] = resolve_team(home_ref)
+                if away_ref:
+                    node_data["resolvedAwayTeam"] = resolve_team(away_ref)
+
+        return data
 
     @staticmethod
     def update_format(gameday, data):

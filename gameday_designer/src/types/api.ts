@@ -4,6 +4,14 @@
  * These types match the Django backend API models and responses.
  */
 
+import type { 
+  FlowNode, 
+  FlowEdge, 
+  FlowField, 
+  GlobalTeam, 
+  GlobalTeamGroup 
+} from './flowchart';
+
 /**
  * Template slot representing a single game in the schedule template.
  * Corresponds to Django TemplateSlot model.
@@ -121,6 +129,54 @@ export interface PaginatedResponse<T> {
 export interface ApiError {
   detail?: string;
   [key: string]: unknown;
+}
+
+/**
+ * Gameday metadata for high-level management.
+ * Corresponds to Django Gameday model fields.
+ */
+export interface GamedayMetadata {
+  id: number;
+  name: string;
+  date: string;
+  start: string;
+  format: string;
+  author: number;
+  author_display?: string;
+  address: string;
+  season: number;
+  season_display?: string;
+  league: number;
+  league_display?: string;
+  status: string;
+}
+
+/**
+ * Gameday list entry for the dashboard.
+ */
+export interface GamedayListEntry extends GamedayMetadata {
+  status: string;
+}
+
+import type { 
+  FlowNode, 
+  FlowEdge, 
+  FlowField, 
+  GlobalTeam, 
+  GlobalTeamGroup 
+} from './flowchart';
+
+/**
+ * Full Gameday structure including tournament designer data.
+ */
+export interface Gameday extends GamedayMetadata {
+  designer_data?: {
+    nodes?: FlowNode[];
+    edges?: FlowEdge[];
+    fields?: FlowField[];
+    globalTeams?: GlobalTeam[];
+    globalTeamGroups?: GlobalTeamGroup[];
+  };
 }
 
 /**

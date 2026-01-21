@@ -210,6 +210,18 @@ describe('Flowchart Types', () => {
         const state = createEmptyFlowState();
 
         expect(state).toEqual({
+          metadata: {
+            id: 0,
+            name: '',
+            date: new Date().toISOString().split('T')[0],
+            start: '10:00',
+            format: '6_2',
+            author: 0,
+            address: '',
+            season: 0,
+            league: 0,
+            status: 'DRAFT',
+          },
           nodes: [],
           edges: [],
           fields: [],

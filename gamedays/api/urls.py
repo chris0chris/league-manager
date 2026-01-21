@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
 from gamedays.api.game_views import (
     GameLogAPIView,
@@ -15,6 +16,9 @@ from gamedays.api.views import (
     GamedayRetrieveUpdate,
     GamedayScheduleView,
     GameOfficialCreateOrUpdateView,
+    GamedayPublishAPIView,
+    GameResultUpdateAPIView,
+    GamedayViewSet,
 )
 from gamedays.constants import (
     API_GAMEDAY_WHISTLEGAMES,
@@ -28,7 +32,38 @@ from gamedays.constants import (
     API_GAME_SETUP,
 )
 
+router = DefaultRouter()
+router.register(r"gamedays", GamedayViewSet, basename="gameday")
+
 urlpatterns = [
+    path("", include(router.urls)),
+    path(
+        "gamedays/",
+        include(
+            [
+                path(
+                    "gameinfo/<int:pk>/result/",
+                    GameResultUpdateAPIView.as_view(),
+                    name="api-gamedays-game-result",
+                ),
+                path(
+                    "game/<int:pk>/setup",
+                    GameSetupCreateOrUpdateView.as_view(),
+                    name="api-gamedays-game-setup",
+                ),
+                path(
+                    "<int:pk>/publish/",
+                    GamedayPublishAPIView.as_view(),
+                    name="api-gamedays-publish",
+                ),
+                path(
+                    "<int:pk>/details",
+                    GamedayScheduleView.as_view(),
+                    name="api-gamedays-schedule",
+                ),
+            ]
+        ),
+    ),
     path("gameday/list/", GamedayListAPIView.as_view(), name=API_GAMEDAY_LIST),
     path(
         "gameinfo/<int:pk>/",
@@ -36,9 +71,19 @@ urlpatterns = [
         name="api-gameinfo-retrieve-update",
     ),
     path(
+        "gameinfo/<int:pk>/result/",
+        GameResultUpdateAPIView.as_view(),
+        name="api-game-result",
+    ),
+    path(
         "gameday/<int:pk>/",
         GamedayRetrieveUpdate.as_view(),
         name="api-gameday-retrieve-update",
+    ),
+    path(
+        "gameday/<int:pk>/publish/",
+        GamedayPublishAPIView.as_view(),
+        name="api-gameday-publish",
     ),
     path(
         "gameday/<int:pk>/details",

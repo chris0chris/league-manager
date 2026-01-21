@@ -61,6 +61,8 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
   const [generateTeams, setGenerateTeams] = useState<boolean>(false);
   const [autoAssignTeams, setAutoAssignTeams] = useState<boolean>(true);
 
+  const hasTeams = teams.length > 0;
+
   /**
    * Reset form to default values
    */
@@ -82,6 +84,13 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
       // We only want to reset when 'show' changes to false
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [show]);
+
+    // Ensure generateTeams is false if pool has teams
+    useEffect(() => {
+      if (hasTeams) {
+        setGenerateTeams(false);
+      }
+    }, [hasTeams]);
   
       // Validation
       const isDurationValid = gameDuration >= 15 && gameDuration <= 180;
@@ -222,7 +231,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                         isInvalid={!isDurationValid}
                       />
                       <Form.Control.Feedback type="invalid">
-                        Duration must be between 15 and 180 minutes.
+                        {t('modal:tournamentGenerator.durationValidation')}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -245,10 +254,20 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                   <Form.Check
                     type="checkbox"
                     id="generate-teams"
-                    label={t('modal:tournamentGenerator.generateTeams', {
-                      count: selectedTemplate.teamCount.exact || selectedTemplate.teamCount.min
-                    })}
+                    label={
+                      <>
+                        {t('modal:tournamentGenerator.generateTeams', {
+                          count: selectedTemplate.teamCount.exact || selectedTemplate.teamCount.min
+                        })}
+                        {hasTeams && (
+                          <span className="text-muted small ms-2">
+                            ({t('modal:tournamentGenerator.generateTeamsDisabledHint')})
+                          </span>
+                        )}
+                      </>
+                    }
                     checked={generateTeams}
+                    disabled={hasTeams}
                     onChange={(e) => setGenerateTeams(e.target.checked)}
                   />
                   <Form.Check
@@ -289,7 +308,7 @@ const TournamentGeneratorModal: React.FC<TournamentGeneratorModalProps> = ({
                     })}
                   </li>
                   <li>
-                    {t('ui:label.breakDuration')}: {breakDuration} min
+                    {t('ui:label.breakDuration')}: {breakDuration} {t('domain:minutes')}
                   </li>
                 </ul>
               </Alert>

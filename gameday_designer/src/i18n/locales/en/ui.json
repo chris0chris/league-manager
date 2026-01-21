@@ -18,35 +18,35 @@
     "moveUp": "Move up",
     "moveDown": "Move down",
     "delete": "Delete",
-    "edit": "Edit"
+    "edit": "Edit",
+    "publishSchedule": "Publish Schedule",
+    "unlockSchedule": "Unlock Schedule",
+    "clearSchedule": "Clear Schedule",
+    "deleteGameday": "Delete Gameday",
+    "createGameday": "Create Gameday",
+    "gamedayManagement": "Gameday Management",
+    "gamedayDesigner": "Gameday Designer",
+    "result": "Result",
+    "backToDashboard": "Back to Dashboard"
   },
   "label": {
-    "language": "Language",
-    "german": "German",
-    "english": "English",
-    "stage": "Stage",
-    "standing": "Standing",
-    "home": "Home",
-    "away": "Away",
-    "official": "Official",
-    "breakAfter": "Break After (minutes)",
-    "validation": "Validation",
-    "tournamentFormat": "Tournament Format",
-    "numberOfFields": "Number of Fields",
-    "startTime": "Start Time",
-    "gameDuration": "Game Duration (min)",
-    "preview": "Preview",
+    "dashboard": "Dashboard",
+    "back": "Back",
     "fields": "Fields",
     "stages": "Stages",
     "teams": "Teams",
     "games": "Games",
-    "teamPool": "Team Pool",
-    "globalTeamPool": "Global Team Pool",
-    "start": "Start",
-    "type": "Phase Type"
+    "german": "Deutsch",
+    "english": "English",
+    "undo": "Undo"
+  },
+  "title": {
+    "enterGameResult": "Enter Game Result"
   },
   "placeholder": {
-    "standing": "e.g., Group 1, HF1, P1"
+    "standing": "e.g., Group 1, HF1, P1",
+    "gamedayName": "New Gameday",
+    "searchGamedays": "Search gamedays..."
   },
   "message": {
     "noTeamsYet": "No teams yet",
@@ -58,10 +58,22 @@
     "noGroupsYet": "No groups yet",
     "createFirstField": "Create your first field to organize games",
     "createFirstGroup": "Create your first team group to organize teams",
-    "doubleClickToEdit": "Double-click to edit"
+    "doubleClickToEdit": "Double-click to edit",
+    "doubleClickToEditTeam": "Double-click to edit team label",
+    "gameday": "Gameday",
+    "dashboardSubtitle": "Create and manage your flag football tournament schedules",
+    "filteringTip": "Tip: Use season:2026 or status:draft for precise filtering.",
+    "noGamedaysFound": "No gamedays found",
+    "getStartedMessage": "Get started by creating your first tournament gameday.",
+    "winnerOf": "Winner of {{match}}",
+    "loserOf": "Loser of {{match}}",
+    "placeFrom": "{{place}}. Place from {{stage}}",
+    "ungrouped": "Ungrouped",
+    "assignedGamesCount": "Number of games this team is assigned to"
   },
   "tooltip": {
     "addTeamToGroup": "Add a new team to this group",
+    "addFirstTeamToGroup": "Add your first team to this group",
     "moveGroupUp": "Move this team group one position up",
     "moveGroupDown": "Move this team group one position down",
     "deleteGroup": "Permanently remove this team group and all its teams",
@@ -85,6 +97,35 @@
     "addGroup": "Create a new team group to organize your teams",
     "addStage": "Add a new tournament phase (e.g., Round Robin, Playoffs) to this field",
     "addGame": "Add a new game to this tournament phase",
-    "generateTournament": "Automatically generate a tournament structure based on a template"
+    "generateTournament": "Automatically generate a tournament structure based on a template",
+    "clickToEdit": "Click to edit",
+    "enterResult": "Enter result",
+    "deleteGame": "Delete game",
+    "autoTimeHint": "Auto-calculated - click to override",
+    "manualTimeHint": "Manually set - click to edit"
+  },
+  "notification": {
+    "gameResultSaved": "Game result saved",
+    "saveResultFailed": "Failed to save game result",
+    "autoSaveFailed": "Failed to auto-save changes",
+    "loadGamedayFailed": "Failed to load gameday",
+    "loadGamedaysFailed": "Failed to load gamedays",
+    "createGamedayFailed": "Failed to create gameday",
+    "deleteGamedayPermanentlyFailed": "Failed to delete gameday permanently",
+    "publishedGamedayDeleteBlocked": "Published gamedays cannot be deleted. Please unlock the gameday first.",
+    "gamedayDeleted": "Gameday \"{{name}}\" deleted",
+    "publishSuccess": "Schedule published and locked",
+    "publishFailed": "Failed to publish schedule",
+    "unlockSuccess": "Schedule unlocked for editing",
+    "unlockFailed": "Failed to unlock schedule",
+    "invalidTimeFormat": "Invalid time format. Use HH:MM (24-hour)",
+    "title": {
+      "success": "Success",
+      "error": "Error",
+      "autoSave": "Auto-save",
+      "importError": "Import Error",
+      "deletion": "Deletion",
+      "timeFormat": "Time Format"
+    }
   }
 }

@@ -7,6 +7,7 @@
 import React, { useState, useCallback, memo, useMemo } from 'react';
 import { Table, Form } from 'react-bootstrap';
 import Select, { components, StylesConfig, GroupBase } from 'react-select';
+import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import type { 
   GameNode, 
   FlowEdge, 
@@ -112,7 +113,8 @@ const CustomSingleValue = memo((props: { data: TeamOption; children?: React.Reac
  */
 function buildGroupedTeamOptions(
   teams: GlobalTeam[],
-  groups: GlobalTeamGroup[]
+  groups: GlobalTeamGroup[],
+  t: (key: string) => string
 ): TeamOption[] {
   const options: TeamOption[] = [];
   const sortedGroups = [...groups].sort((a, b) => a.order - b.order);
@@ -149,7 +151,7 @@ function buildGroupedTeamOptions(
   if (ungroupedTeams.length > 0) {
     options.push({
       value: 'group-header-ungrouped',
-      label: 'Ungrouped',
+      label: t('ui:message.ungrouped'),
       color: '#adb5bd',
       isStageHeader: true,
       isDisabled: true
@@ -193,6 +195,8 @@ export interface GameTableProps {
   onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
+  onNotify?: (message: string, type: import('../../types/designer').NotificationType, title?: string) => void;
+  readOnly?: boolean;
 }
 
 const GameTable: React.FC<GameTableProps> = memo(({
@@ -212,7 +216,10 @@ const GameTable: React.FC<GameTableProps> = memo(({
   onRemoveEdgeFromSlot,
   highlightedSourceGameId,
   onDynamicReferenceClick,
+  onNotify,
+  readOnly = false,
 }) => {
+  const { t } = useTypedTranslation(['ui', 'domain', 'error']);
   const [editingGameId, setEditingGameId] = useState<string | null>(null);
   const [editingField, setEditingField] = useState<'standing' | 'breakAfter' | 'time' | null>(null);
   const [editedValue, setEditedValue] = useState<string>('');
@@ -260,7 +267,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
           if (isValidTimeFormat(editedValue.trim())) {
             onUpdate(gameId, { startTime: editedValue.trim(), manualTime: true });
           } else {
-            alert('Invalid time format. Use HH:MM (24-hour)');
+            onNotify?.(t('ui:notification.invalidTimeFormat'), 'danger', t('ui:notification.title.timeFormat'));
             return;
           }
         } else {
@@ -270,7 +277,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
       setEditingGameId(null);
       setEditingField(null);
     },
-    [editedValue, onUpdate]
+    [editedValue, onUpdate, onNotify, t]
   );
 
   const handleCancelEdit = useCallback(() => {
@@ -337,7 +344,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
     [onUpdate]
   );
 
-  const teamOptions = useMemo(() => buildGroupedTeamOptions(globalTeams, globalTeamGroups), [globalTeams, globalTeamGroups]);
+  const teamOptions = useMemo(() => buildGroupedTeamOptions(globalTeams, globalTeamGroups, t), [globalTeams, globalTeamGroups, t]);
 
   const rankingStageOptions = useMemo(() => {
     // Determine the current stage ID (assume all games in table belong to same stage)
@@ -353,7 +360,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
     rankingStages.forEach(stage => {
       options.push({ 
         value: `stage-header-${stage.id}`, 
-        label: `${stage.data.name} (Ranking)`, 
+        label: `${stage.data.name} (${t('ui:label.ranking')})`, 
         color: stage.data.color || '#0d6efd', 
         isStageHeader: true, 
         isDisabled: true 
@@ -368,14 +375,14 @@ const GameTable: React.FC<GameTableProps> = memo(({
         const place = index + 1;
         options.push({
           value: `rank:${stage.id}:${place}`,
-          label: `🏆 ${place}. Place from ${stage.data.name}`,
+          label: `🏆 ${t('ui:message.placeFrom', { place, stage: stage.data.name })}`,
           isTeam: false
         });
       });
     });
 
     return options;
-  }, [allNodes, games]);
+  }, [allNodes, games, t]);
 
   const renderTimeCell = (game: GameNode) => {
     const isEditingTime = editingGameId === game.id && editingField === 'time';
@@ -398,9 +405,9 @@ const GameTable: React.FC<GameTableProps> = memo(({
         ) : (
           <div className="d-flex align-items-center gap-1">
             <span 
-              onClick={(e) => handleStartEdit(e, game, 'time')} 
-              style={{ cursor: 'text' }}
-              title={isManual ? 'Manually set - click to edit' : 'Auto-calculated - click to override'}
+              onClick={(e) => !readOnly && handleStartEdit(e, game, 'time')} 
+              style={{ cursor: readOnly ? 'default' : 'text' }}
+              title={readOnly ? undefined : (isManual ? t('ui:tooltip.manualTimeHint') : t('ui:tooltip.autoTimeHint'))}
             >
               {timeValue || '--:--'}
             </span>
@@ -434,8 +441,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
       const stageNode = allNodes.find(n => n.id === stageId);
       options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as import('../../types/flowchart').StageNodeData)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
       stageData.games.forEach((sourceGame) => {
-        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ Winner of ${sourceGame.data.standing} (${stageData.name})`, isTeam: false });
-        options.push({ value: `loser:${sourceGame.id}`, label: `💔 Loser of ${sourceGame.data.standing} (${stageData.name})`, isTeam: false });
+        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ ${t('ui:message.winnerOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
+        options.push({ value: `loser:${sourceGame.id}`, label: `💔 ${t('ui:message.loserOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
       });
     });
 
@@ -444,6 +451,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
         <Form.Check
           type="checkbox"
           checked={hasOfficial}
+          disabled={readOnly}
           onChange={(e) => {
             if (!e.target.checked) handleOfficialChange(game.id, '');
             else if (globalTeams.length > 0) handleOfficialChange(game.id, globalTeams[0].id);
@@ -461,6 +469,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
             styles={{ ...customSelectStyles, control: (provided) => ({ ...provided, minHeight: '31px', fontSize: '0.875rem', borderColor: '#dee2e6', minWidth: '150px' }) }}
             isClearable={false}
             isSearchable={false}
+            isDisabled={readOnly}
           />
         )}
       </div>
@@ -471,6 +480,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
     const data = game.data as GameNodeData;
     const dynamicRef = slot === 'home' ? data.homeTeamDynamic : data.awayTeamDynamic;
     const teamId = slot === 'home' ? data.homeTeamId : data.awayTeamId;
+    const resolvedName = slot === 'home' ? data.resolvedHomeTeam : data.resolvedAwayTeam;
     
     let currentValue = '';
     if (dynamicRef) {
@@ -484,7 +494,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
     } else if (teamId) currentValue = teamId;
 
     const options = [
-      { value: '', label: '-- Select Team --' }, 
+      { value: '', label: t('ui:label.selectTeam') }, 
       ...teamOptions,
       ...rankingStageOptions
     ];
@@ -503,10 +513,40 @@ const GameTable: React.FC<GameTableProps> = memo(({
       const stageNode = allNodes.find(n => n.id === stageId);
       options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as import('../../types/flowchart').StageNodeData)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
       stageData.games.forEach((sourceGame) => {
-        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ Winner of ${sourceGame.data.standing} (${stageData.name})`, isTeam: false });
-        options.push({ value: `loser:${sourceGame.id}`, label: `💔 Loser of ${sourceGame.data.standing} (${stageData.name})`, isTeam: false });
+        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ ${t('ui:message.winnerOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
+        options.push({ value: `loser:${sourceGame.id}`, label: `💔 ${t('ui:message.loserOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
       });
     });
+
+    if (readOnly && dynamicRef) {
+      return (
+        <div 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onDynamicReferenceClick) {
+              if (isRankReference(dynamicRef)) {
+                const source = findSourceStageForReference(game.id, slot, edges, allNodes);
+                if (source) onDynamicReferenceClick(source.stage.id);
+              } else {
+                const sourceGame = findSourceGameForReference(game.id, slot, edges, allNodes);
+                if (sourceGame) onDynamicReferenceClick(sourceGame.id);
+              }
+            }
+          }}
+          style={{ cursor: 'pointer' }}
+          className="d-flex flex-column"
+        >
+          <span className="small text-muted mb-1">
+            {dynamicRef.type === 'winner' ? t('ui:label.winner') : t('ui:label.loser')} {dynamicRef.matchName}
+          </span>
+          {resolvedName ? (
+            <strong className="text-primary">{resolvedName}</strong>
+          ) : (
+            <span className="text-muted italic">{t('ui:label.tbd')}</span>
+          )}
+        </div>
+      );
+    }
 
     return (
       <div 
@@ -535,22 +575,35 @@ const GameTable: React.FC<GameTableProps> = memo(({
           styles={customSelectStyles}
           isClearable={false}
           isSearchable={false}
+          isDisabled={readOnly}
         />
       </div>
     );
   };
 
   if (games.length === 0) {
-    return <div className="text-muted text-center py-2"><i className={`bi ${ICONS.TOURNAMENT} me-2`} />No games in this stage.</div>;
+    return <div className="text-muted text-center py-2"><i className={`bi ${ICONS.TOURNAMENT} me-2`} />{t('ui:message.noGamesInStage')}</div>;
   }
 
   return (
     <Table striped bordered hover size="sm">
-      <thead><tr><th>Standing</th><th>Time</th><th>Home</th><th>Away</th><th>Official</th><th>Break After</th><th>Actions</th></tr></thead>
+      <thead>
+        <tr>
+          <th>{t('ui:label.standing')}</th>
+          <th>{t('ui:label.time')}</th>
+          <th>{t('ui:label.home')}</th>
+          <th>{t('ui:label.away')}</th>
+          {readOnly && <th>{t('ui:label.score')}</th>}
+          <th>{t('ui:label.official')}</th>
+          <th>{t('ui:label.breakAfter')}</th>
+          <th>{t('ui:label.actions')}</th>
+        </tr>
+      </thead>
       <tbody>
         {games.map((game) => {
           const isHighlighted = highlightedElement?.id === game.id && highlightedElement?.type === 'game';
           const isSourceHighlighted = highlightedSourceGameId === game.id;
+          const score = game.data.final_score ? `${game.data.final_score.home}:${game.data.final_score.away}` : (game.data.halftime_score ? `(${game.data.halftime_score.home}:${game.data.halftime_score.away})` : '--:--');
 
           return (
             <tr 
@@ -568,9 +621,9 @@ const GameTable: React.FC<GameTableProps> = memo(({
                   <Form.Control type="text" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'standing')} onKeyDown={(e) => handleKeyPress(e, game.id, 'standing')} autoFocus style={{ fontSize: '0.875rem' }} />
                 ) : (
                   <span 
-                    onClick={(e) => handleStartEdit(e, game, 'standing')} 
-                    style={{ cursor: 'text' }}
-                    title="Click to edit"
+                    onClick={(e) => !readOnly && handleStartEdit(e, game, 'standing')} 
+                    style={{ cursor: readOnly ? 'default' : 'text' }}
+                    title={readOnly ? undefined : t('ui:tooltip.clickToEdit')}
                   >
                     {game.data.standing}
                   </span>
@@ -579,28 +632,50 @@ const GameTable: React.FC<GameTableProps> = memo(({
               {renderTimeCell(game)}
               <td>{renderTeamCell(game, 'home')}</td>
               <td>{renderTeamCell(game, 'away')}</td>
+              {readOnly && (
+                <td className="text-center fw-bold">
+                  <span className={game.data.final_score ? 'text-dark' : 'text-muted italic small'}>
+                    {score}
+                  </span>
+                </td>
+              )}
               <td>{renderOfficialCell(game)}</td>
               <td onClick={(e) => e.stopPropagation()}>
                 {editingGameId === game.id && editingField === 'breakAfter' ? (
                   <Form.Control type="number" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'breakAfter')} onKeyDown={(e) => handleKeyPress(e, game.id, 'breakAfter')} autoFocus min="0" style={{ fontSize: '0.875rem', width: '80px' }} />
                 ) : (
                   <span 
-                    onClick={(e) => handleStartEdit(e, game, 'breakAfter')} 
-                    style={{ cursor: 'text' }}
-                    title="Click to edit"
+                    onClick={(e) => !readOnly && handleStartEdit(e, game, 'breakAfter')} 
+                    style={{ cursor: readOnly ? 'default' : 'text' }}
+                    title={readOnly ? undefined : t('ui:tooltip.clickToEdit')}
                   >
                     {game.data.breakAfter || 0}
                   </span>
                 )}
               </td>
               <td>
-                <button 
-                  className="btn btn-sm btn-outline-danger btn-adaptive" 
-                  onClick={(e) => handleDelete(e, game.id)}
-                  title="Delete game"
-                >
-                  <i className={`bi ${ICONS.DELETE}`} />
-                </button>
+                {readOnly ? (
+                  <button 
+                    className="btn btn-sm btn-outline-success btn-adaptive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // We'll handle this in ListDesignerApp
+                      onSelectNode(game.id);
+                    }}
+                    title={t('ui:tooltip.enterResult')}
+                  >
+                    <i className="bi bi-pencil-square me-2" />
+                    <span className="btn-label-adaptive">{t('ui:button.result')}</span>
+                  </button>
+                ) : (
+                  <button 
+                    className="btn btn-sm btn-outline-danger btn-adaptive" 
+                    onClick={(e) => handleDelete(e, game.id)}
+                    title={t('ui:tooltip.deleteGame')}
+                  >
+                    <i className={`bi ${ICONS.DELETE}`} />
+                  </button>
+                )}
               </td>
             </tr>
           );

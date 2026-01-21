@@ -75,7 +75,7 @@ describe('LanguageSelector', () => {
       await user.click(button);
 
       await waitFor(() => {
-        expect(screen.getByText(/German/i)).toBeVisible();
+        expect(screen.getByText(/Deutsch/i)).toBeVisible();
       });
     });
 
@@ -86,7 +86,7 @@ describe('LanguageSelector', () => {
       await user.click(screen.getByRole('button'));
 
       await waitFor(() => {
-        const germanOption = screen.getByText(/German/i);
+        const germanOption = screen.getByText(/Deutsch/i);
         expect(germanOption).toBeInTheDocument();
         expect(germanOption.textContent).toContain('🇩🇪');
       });
@@ -123,7 +123,7 @@ describe('LanguageSelector', () => {
       await user.click(screen.getByRole('button'));
 
       // Click German option
-      const germanOption = await screen.findByText(/German/i);
+      const germanOption = await screen.findByText(/Deutsch/i);
       await user.click(germanOption);
 
       // Verify language changed
@@ -159,7 +159,7 @@ describe('LanguageSelector', () => {
 
       // Open dropdown and switch to German
       await user.click(screen.getByRole('button'));
-      const germanOption = await screen.findByText(/German/i);
+      const germanOption = await screen.findByText(/Deutsch/i);
       await user.click(germanOption);
 
       // Wait for language to change
@@ -180,7 +180,7 @@ describe('LanguageSelector', () => {
 
       // Open dropdown and switch to German
       await user.click(screen.getByRole('button'));
-      const germanOption = await screen.findByText(/German/i);
+      const germanOption = await screen.findByText(/Deutsch/i);
       await user.click(germanOption);
 
       // Wait for change to be persisted
@@ -254,7 +254,7 @@ describe('LanguageSelector', () => {
       }
 
       // Find and click German option
-      const germanOption = await screen.findByText(/German/i);
+      const germanOption = await screen.findByText(/Deutsch/i);
       await user.click(germanOption);
 
       await waitFor(() => {
@@ -282,7 +282,7 @@ describe('LanguageSelector', () => {
       if (toggleButton) {
         // Switch to German
         await user.click(toggleButton);
-        const germanOption = await screen.findByText(/German/i);
+        const germanOption = await screen.findByText(/Deutsch/i);
         await user.click(germanOption);
 
         await waitFor(() => expect(i18n.language).toBe('de'));
@@ -317,7 +317,7 @@ describe('LanguageSelector', () => {
 
       // Should still be able to switch to German
       await user.click(screen.getByRole('button'));
-      const germanOption = await screen.findByText(/German/i);
+      const germanOption = await screen.findByText(/Deutsch/i);
       await user.click(germanOption);
 
       await waitFor(() => {
@@ -338,7 +338,7 @@ describe('LanguageSelector', () => {
 
       // Verify labels are from i18n (ui:label.german, ui:label.english)
       await waitFor(() => {
-        expect(screen.getByText(/German/i)).toBeInTheDocument();
+        expect(screen.getByText(/Deutsch/i)).toBeInTheDocument();
         expect(screen.getByText(/English/i)).toBeInTheDocument();
       });
     });

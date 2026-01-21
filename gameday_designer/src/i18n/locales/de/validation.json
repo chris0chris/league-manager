@@ -21,6 +21,12 @@
   "stage_sequence_time": "Phase \"{{stage2}}\" beginnt um {{time2}}, was vor der vorangehenden Phase \"{{stage1}}\" liegt ({{time1}})",
   "stage_sequence_type": "Phase \"{{stage2}}\" ({{type2}}) folgt auf \"{{stage1}}\" ({{type1}}), was möglicherweise falsch sortiert ist",
   "progression_order": "Progression von Phase \"{{sourceStage}}\" zur zeitlich früheren Phase \"{{targetStage}}\"",
-  "uneven_game_distribution": "Gruppe \"{{group}}\" hat eine ungleiche Spielverteilung (Min: {{minGames}}, Max: {{maxGames}})",
-  "self_play": "Spiel \"{{game}}\": Ein Team kann nicht gegen sich selbst spielen"
-}
+    "uneven_game_distribution": "Gruppe \"{{group}}\" hat eine ungleiche Spielverteilung (Min: {{minGames}}, Max: {{maxGames}})",
+    "self_play": "Spiel \"{{game}}\": Ein Team kann nicht gegen sich selbst spielen",
+    "no_teams": "Es wurden keine Teams zum Pool hinzugefügt",
+    "no_games": "Es wurden keine Spiele zum Zeitplan hinzugefügt",
+    "team_without_games": "Team \"{{team}}\" ist keinem Spiel zugewiesen",
+    "unused_field": "Feld \"{{field}}\" hat keine zugewiesenen Spiele",
+    "broken_progression": "Spiel \"{{game}}\" referenziert nicht existierende Platzierung \"{{target}}\" für {{slot}}"
+  }
+  

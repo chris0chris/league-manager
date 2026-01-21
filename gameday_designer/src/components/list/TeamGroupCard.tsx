@@ -44,6 +44,8 @@ export interface TeamGroupCardProps {
   index: number;
   /** Total number of groups (for reorder controls) */
   totalGroups: number;
+  /** Whether the designer is in read-only mode */
+  readOnly?: boolean;
 }
 
 /**
@@ -64,6 +66,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
   getTeamUsage,
   index,
   totalGroups,
+  readOnly = false,
 }) => {
   const { t } = useTypedTranslation(['ui']);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -187,11 +190,12 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
           ) : (
             <strong
               onDoubleClick={(e) => {
+                if (readOnly) return;
                 e.stopPropagation();
                 handleStartEditGroupName();
               }}
-              style={{ cursor: 'text' }}
-              title={t('ui:message.doubleClickToEdit')}
+              style={{ cursor: readOnly ? 'default' : 'text' }}
+              title={readOnly ? undefined : t('ui:message.doubleClickToEdit')}
             >
               {group.name}
             </strong>
@@ -200,51 +204,55 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
 
         {/* Group actions */}
         <div className="d-flex gap-1 ms-auto" onClick={(e) => e.stopPropagation()}>
-          <button
-            className="btn btn-sm btn-outline-primary btn-adaptive"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddTeam(group.id);
-            }}
-            title={t('ui:tooltip.addTeamToGroup')}
-          >
-            <i className={`bi ${ICONS.ADD} me-2`}></i>
-            <span className="btn-label-adaptive">{t('ui:button.addTeam')}</span>
-          </button>
-          <button
-            className="btn btn-sm btn-outline-secondary btn-adaptive"
-            onClick={(e) => {
-              e.stopPropagation();
-              onReorderGroup(group.id, 'up');
-            }}
-            disabled={index === 0}
-            title={t('ui:tooltip.moveGroupUp')}
-          >
-            <i className={`bi ${ICONS.REORDER_UP} me-2`}></i>
-            <span className="btn-label-adaptive">{t('ui:button.up')}</span>
-          </button>
-          <button
-            className="btn btn-sm btn-outline-secondary btn-adaptive"
-            onClick={(e) => {
-              e.stopPropagation();
-              onReorderGroup(group.id, 'down');
-            }}
-            disabled={index === totalGroups - 1}
-            title={t('ui:tooltip.moveGroupDown')}
-          >
-            <i className={`bi ${ICONS.REORDER_DOWN} me-2`}></i>
-            <span className="btn-label-adaptive">{t('ui:button.down')}</span>
-          </button>
-          <button
-            className="btn btn-sm btn-outline-danger btn-adaptive"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteGroup(group.id);
-            }}
-            title={t('ui:tooltip.deleteGroup')}
-          >
-            <i className={`bi ${ICONS.DELETE}`}></i>
-          </button>
+          {!readOnly && (
+            <>
+              <button
+                className="btn btn-sm btn-outline-primary btn-adaptive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddTeam(group.id);
+                }}
+                title={t('ui:tooltip.addTeamToGroup')}
+              >
+                <i className={`bi ${ICONS.ADD} me-2`}></i>
+                <span className="btn-label-adaptive">{t('ui:button.addTeam')}</span>
+              </button>
+              <button
+                className="btn btn-sm btn-outline-secondary btn-adaptive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReorderGroup(group.id, 'up');
+                }}
+                disabled={index === 0}
+                title={t('ui:tooltip.moveGroupUp')}
+              >
+                <i className={`bi ${ICONS.REORDER_UP} me-2`}></i>
+                <span className="btn-label-adaptive">{t('ui:button.up')}</span>
+              </button>
+              <button
+                className="btn btn-sm btn-outline-secondary btn-adaptive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReorderGroup(group.id, 'down');
+                }}
+                disabled={index === totalGroups - 1}
+                title={t('ui:tooltip.moveGroupDown')}
+              >
+                <i className={`bi ${ICONS.REORDER_DOWN} me-2`}></i>
+                <span className="btn-label-adaptive">{t('ui:button.down')}</span>
+              </button>
+              <button
+                className="btn btn-sm btn-outline-danger btn-adaptive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteGroup(group.id);
+                }}
+                title={t('ui:tooltip.deleteGroup')}
+              >
+                <i className={`bi ${ICONS.DELETE}`}></i>
+              </button>
+            </>
+          )}
         </div>
       </Card.Header>
 
@@ -255,14 +263,16 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
             <div className="text-center py-3">
               <i className={`bi ${ICONS.TEAM} me-2`} style={{ fontSize: '2rem', opacity: 0.3 }}></i>
               <p className="text-muted mb-3">{t('ui:message.noTeamsInGroup')}</p>
-              <button
-                className="btn btn-outline-primary btn-adaptive"
-                onClick={() => onAddTeam(group.id)}
-                title="Add your first team to this group"
-              >
-                <i className={`bi ${ICONS.ADD}`}></i>
-                <span className="btn-label-adaptive">{t('ui:button.addTeam')}</span>
-              </button>
+              {!readOnly && (
+                <button
+                  className="btn btn-outline-primary btn-adaptive"
+                  onClick={() => onAddTeam(group.id)}
+                  title={t('ui:tooltip.addFirstTeamToGroup')}
+                >
+                  <i className={`bi ${ICONS.ADD}`}></i>
+                  <span className="btn-label-adaptive">{t('ui:button.addTeam')}</span>
+                </button>
+              )}
             </div>
           ) : (
             <>
@@ -283,15 +293,16 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                     <input
                       type="color"
                       value={team.color || '#6c757d'}
-                      onChange={(e) => onUpdateTeam(team.id, { color: e.target.value })}
-                      title="Change the color badge for this team"
+                      onChange={(e) => !readOnly && onUpdateTeam(team.id, { color: e.target.value })}
+                      title={readOnly ? undefined : t('ui:tooltip.teamColor')}
                       style={{
                         width: '24px',
                         height: '24px',
                         border: 'none',
                         borderRadius: '50%',
-                        cursor: 'pointer'
+                        cursor: readOnly ? 'default' : 'pointer'
                       }}
+                      disabled={readOnly}
                     />
                   </div>
 
@@ -310,9 +321,9 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                       />
                     ) : (
                       <span
-                        onDoubleClick={() => handleStartEditTeam(team)}
-                        style={{ cursor: 'text' }}
-                        title="Double-click to edit team label"
+                        onDoubleClick={() => !readOnly && handleStartEditTeam(team)}
+                        style={{ cursor: readOnly ? 'default' : 'text' }}
+                        title={readOnly ? undefined : t('ui:message.doubleClickToEditTeam')}
                         className="text-truncate d-block"
                       >
                         {team.label}
@@ -322,78 +333,80 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
 
                   {/* Usage count */}
                   <div className="me-2 flex-shrink-0">
-                    <small className="text-muted" title="Number of games this team is assigned to">
+                    <small className="text-muted" title={t('ui:message.assignedGamesCount')}>
                       <strong>{usages.length}</strong>
                     </small>
                   </div>
 
                   {/* Actions */}
-                  <div className="d-flex gap-1 flex-shrink-0">
-                    {/* Reorder up */}
-                    <button
-                      className="btn btn-sm btn-outline-secondary p-1 btn-adaptive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onReorderTeam(team.id, 'up');
-                      }}
-                      disabled={idx === 0}
-                      title={t('ui:tooltip.moveTeamUp')}
-                      style={{ fontSize: '0.75rem', lineHeight: 1 }}
-                    >
-                      <i className={`bi ${ICONS.REORDER_UP} me-2`}></i>
-                      <span className="btn-label-adaptive">{t('ui:button.up')}</span>
-                    </button>
-
-                    {/* Reorder down */}
-                    <button
-                      className="btn btn-sm btn-outline-secondary p-1 btn-adaptive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onReorderTeam(team.id, 'down');
-                      }}
-                      disabled={idx === teams.length - 1}
-                      title={t('ui:tooltip.moveTeamDown')}
-                      style={{ fontSize: '0.75rem', lineHeight: 1 }}
-                    >
-                      <i className={`bi ${ICONS.REORDER_DOWN} me-2`}></i>
-                      <span className="btn-label-adaptive">{t('ui:button.down')}</span>
-                    </button>
-
-                    {/* Move to group dropdown */}
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <DropdownButton
-                        id={`move-team-${team.id}`}
-                        title={<i className={`bi ${ICONS.FOLDER}`} title={t('ui:tooltip.moveTeamToGroup')}></i>}
-                        size="sm"
-                        variant="outline-primary"
-                        className="p-0 btn-adaptive"
-                        popperConfig={{ strategy: 'fixed' }}
+                  {!readOnly && (
+                    <div className="d-flex gap-1 flex-shrink-0">
+                      {/* Reorder up */}
+                      <button
+                        className="btn btn-sm btn-outline-secondary p-1 btn-adaptive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onReorderTeam(team.id, 'up');
+                        }}
+                        disabled={idx === 0}
+                        title={t('ui:tooltip.moveTeamUp')}
+                        style={{ fontSize: '0.75rem', lineHeight: 1 }}
                       >
-                        {allGroups.map((g) => (
-                          <Dropdown.Item
-                            key={g.id}
-                            onClick={() => handleMoveTeam(team.id, g.id)}
-                            active={team.groupId === g.id}
-                          >
-                            {g.name}
-                          </Dropdown.Item>
-                        ))}
-                      </DropdownButton>
-                    </div>
+                        <i className={`bi ${ICONS.REORDER_UP} me-2`}></i>
+                        <span className="btn-label-adaptive">{t('ui:button.up')}</span>
+                      </button>
 
-                    {/* Delete */}
-                    <button
-                      className="btn btn-sm btn-outline-danger p-1 btn-adaptive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteTeam(team.id);
-                      }}
-                      title={t('ui:tooltip.deleteTeam')}
-                      style={{ fontSize: '0.75rem', lineHeight: 1 }}
-                    >
-                      <i className={`bi ${ICONS.DELETE}`}></i>
-                    </button>
-                  </div>
+                      {/* Reorder down */}
+                      <button
+                        className="btn btn-sm btn-outline-secondary p-1 btn-adaptive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onReorderTeam(team.id, 'down');
+                        }}
+                        disabled={idx === teams.length - 1}
+                        title={t('ui:tooltip.moveTeamDown')}
+                        style={{ fontSize: '0.75rem', lineHeight: 1 }}
+                      >
+                        <i className={`bi ${ICONS.REORDER_DOWN} me-2`}></i>
+                        <span className="btn-label-adaptive">{t('ui:button.down')}</span>
+                      </button>
+
+                      {/* Move to group dropdown */}
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <DropdownButton
+                          id={`move-team-${team.id}`}
+                          title={<i className={`bi ${ICONS.FOLDER}`} title={t('ui:tooltip.moveTeamToGroup')}></i>}
+                          size="sm"
+                          variant="outline-primary"
+                          className="p-0 btn-adaptive"
+                          popperConfig={{ strategy: 'fixed' }}
+                        >
+                          {allGroups.map((g) => (
+                            <Dropdown.Item
+                              key={g.id}
+                              onClick={() => handleMoveTeam(team.id, g.id)}
+                              active={team.groupId === g.id}
+                            >
+                              {g.name}
+                            </Dropdown.Item>
+                          ))}
+                        </DropdownButton>
+                      </div>
+
+                      {/* Delete */}
+                      <button
+                        className="btn btn-sm btn-outline-danger p-1 btn-adaptive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteTeam(team.id);
+                        }}
+                        title={t('ui:tooltip.deleteTeam')}
+                        style={{ fontSize: '0.75rem', lineHeight: 1 }}
+                      >
+                        <i className={`bi ${ICONS.DELETE}`}></i>
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}

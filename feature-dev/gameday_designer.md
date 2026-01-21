@@ -33,3 +33,12 @@ Drag & Drop Pool Assignment — Visually assign teams to Pool A/B for Pools→Pl
 Visual Tournament Flow — See the decision tree: Pools → Semifinals → Finals
 Auto Schedule Generation — Generates proper round-robin pairings and bracket structures
 Export to JSON — Download your schedule for external use
+
+## History
+- **2026-01-21**: Phase 1 Implementation - Gameday Management & Dashboard
+  - Implemented centralized Gameday Dashboard with card-based listing.
+  - Added Gameday lifecycle management (DRAFT, PUBLISHED, IN_PROGRESS, COMPLETED).
+  - Implemented non-blocking deletion with a 10-second undo window.
+  - Added real-time auto-save with visual status indicators.
+  - Achieved >90% test coverage for all designer components.
+  - Integrated with backend API for gameday publishing and result management.
