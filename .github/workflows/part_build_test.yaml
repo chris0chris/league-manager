@@ -60,7 +60,7 @@ jobs:
         # secrets not directly accessible https://stackoverflow.com/questions/72925899/github-actions-detect-if-secret-exists
         env:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
-        if: ${{ env.codecov_token != '' }}
+        if: env.codecov_token != ''
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -68,7 +68,7 @@ jobs:
         # secrets not directly accessible https://stackoverflow.com/questions/72925899/github-actions-detect-if-secret-exists
         env:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
-        if: success() || failure() && ${{ env.codecov_token != '' }} # always run even if the previous step fails
+        if: (success() || failure()) && env.codecov_token != '' # always run even if the previous step fails
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

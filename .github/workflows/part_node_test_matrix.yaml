@@ -40,7 +40,7 @@ jobs:
       - name: 📊 Upload Coverage to Codecov
         env:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
-        if: ${{ env.codecov_token != '' }}
+        if: env.codecov_token != ''
         uses: codecov/codecov-action@v5
         with:
           directory: ${{ matrix.project }}/coverage
