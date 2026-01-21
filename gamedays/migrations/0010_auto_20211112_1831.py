@@ -5,18 +5,18 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('gamedays', '0009_auto_20211105_1341'),
+        ("gamedays", "0009_auto_20211105_1341"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='gameofficial',
-            old_name='offical',
-            new_name='official',
+            model_name="gameofficial",
+            old_name="offical",
+            new_name="official",
         ),
         migrations.AlterField(
-            model_name='gameofficial',
-            name='name',
+            model_name="gameofficial",
+            name="name",
             field=models.CharField(blank=True, max_length=100, null=True),
         ),
     ]

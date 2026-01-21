@@ -3,17 +3,15 @@
  *
  * Toolbar for the flowchart designer with controls for:
  * - Import/Export JSON
- * - Clear all
- * - Undo/Redo (future)
+ * - Undo/Redo
  *
- * Note: Add buttons have been moved inline to where elements are created
- * (Fields section, Field body, Stage body) for better spatial mapping.
+ * Gameday-level actions (Publish, Clear, Delete) have been moved 
+ * to the GamedayMetadataAccordion component.
  */
 
 import React, { useRef } from 'react';
 import { Button, ButtonGroup, ButtonToolbar } from 'react-bootstrap';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
-import LanguageSelector from './LanguageSelector';
 import { ICONS } from '../utils/iconConstants';
 
 import './FlowToolbar.css';
@@ -26,8 +24,8 @@ export interface FlowToolbarProps {
   onImport: (json: unknown) => void;
   /** Callback to export to JSON */
   onExport: () => void;
-  /** Callback to clear all nodes and edges */
-  onClearAll: () => void;
+  /** Current gameday status */
+  gamedayStatus?: string;
   /** Callback for notifications */
   onNotify?: (message: string, type: import('../types/designer').NotificationType, title?: string) => void;
   /** Callback for undo action */
@@ -38,8 +36,6 @@ export interface FlowToolbarProps {
   canUndo?: boolean;
   /** Whether redo is available */
   canRedo?: boolean;
-  /** Whether there are any nodes to clear */
-  hasNodes?: boolean;
   /** Whether export is available (has valid data) */
   canExport?: boolean;
 }
@@ -48,18 +44,16 @@ export interface FlowToolbarProps {
  * FlowToolbar component.
  *
  * Provides global actions for the flowchart designer.
- * Add buttons have been moved inline for better UX.
  */
 const FlowToolbar: React.FC<FlowToolbarProps> = ({
   onImport,
   onExport,
-  onClearAll,
+  gamedayStatus = 'DRAFT',
   onNotify,
   onUndo,
   onRedo,
   canUndo = false,
   canRedo = false,
-  hasNodes = false,
   canExport = false,
 }) => {
   const { t } = useTypedTranslation(['ui']);
@@ -80,11 +74,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
         onImport(json);
       } catch (error) {
         console.error('Failed to parse JSON file:', error);
-        if (onNotify) {
-          onNotify(t('error:invalidScheduleFormat', { errors: 'Invalid JSON' }), 'danger', 'Import Error');
-        } else {
-          alert('Failed to parse JSON file. Please ensure it is valid JSON.');
-        }
+        onNotify?.(t('error:invalidScheduleFormat', { errors: 'Invalid JSON' }), 'danger', t('ui:notification.title.importError'));
       }
     };
     reader.readAsText(file);
@@ -100,13 +90,6 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
     fileInputRef.current?.click();
   };
 
-  /**
-   * Handle clear all.
-   */
-  const handleClearAll = () => {
-    onClearAll();
-  };
-
   return (
     <div className="flow-toolbar" data-testid="flow-toolbar">
       <ButtonToolbar>
@@ -117,6 +100,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             onClick={handleImportClick}
             title={t('ui:tooltip.importFromJson')}
             data-testid="import-button"
+            disabled={gamedayStatus !== 'DRAFT'}
           >
             <i className={`bi ${ICONS.IMPORT}`}></i>
           </Button>
@@ -137,18 +121,18 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             <Button
               variant="outline-secondary"
               onClick={onUndo}
-              disabled={!canUndo}
+              disabled={!canUndo || gamedayStatus !== 'DRAFT'}
               title={t('ui:tooltip.undo')}
               data-testid="undo-button"
               className="btn-adaptive"
             >
-              <i className={`bi ${ICONS.CLEAR} me-2`}></i>
+              <i className={`bi bi-arrow-counterclockwise me-2`}></i>
               <span className="btn-label-adaptive">{t('ui:button.undo')}</span>
             </Button>
             <Button
               variant="outline-secondary"
               onClick={onRedo}
-              disabled={!canRedo}
+              disabled={!canRedo || gamedayStatus !== 'DRAFT'}
               title={t('ui:tooltip.redo')}
               data-testid="redo-button"
               className="btn-adaptive"
@@ -158,24 +142,6 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
             </Button>
           </ButtonGroup>
         )}
-
-        {/* Clear all button */}
-        <ButtonGroup className="me-2">
-          <Button
-            variant="outline-danger"
-            onClick={handleClearAll}
-            disabled={!hasNodes}
-            title={t('ui:tooltip.clearAllNodesAndEdges')}
-            data-testid="clear-all-button"
-          >
-            <i className={`bi ${ICONS.DELETE}`}></i>
-          </Button>
-        </ButtonGroup>
-
-        {/* Language selector */}
-        <ButtonGroup>
-          <LanguageSelector />
-        </ButtonGroup>
       </ButtonToolbar>
 
       {/* Hidden file input for import */}

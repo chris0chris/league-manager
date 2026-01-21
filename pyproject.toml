@@ -4,19 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "leaguesphere"
-version = "2.17.1"
+version = "2.17.3-rc.38"
 requires-python = ">=3.11"
 dependencies = [
     "Django==5.2.10",
     "django-crispy-forms==2.5",
     "crispy-bootstrap5==2025.6",
-    "numpy==2.4.0",
+    "numpy==2.4.1",
     "pandas==2.3.3",
     "django-pandas==0.6.7",
     "djangorestframework==3.16.1",
     "django-autocomplete-light==3.12.1",
     "django-formtools==2.5.1",
-    "Markdown==3.10",
+    "Markdown==3.10.1",
     "django-cors-headers==4.9.0",
     "Pillow==12.1.0",
     "django-rest-knox==5.0.2",
@@ -33,10 +33,10 @@ test = [
     "pytest-django==4.11.1",
     "pytest-cov==7.0.0",
     "factory-boy==3.3.3",
-    "django-debug-toolbar==6.1.0",
+    "django-debug-toolbar==6.2.0",
     "WebTest==3.0.7",
     "bump2version==1.0.1",
-    "black==25.12.0",
+    "black==26.1.0",
     "types-factory_boy==0.4.1",
 ]
 prod = [
@@ -59,7 +59,7 @@ include = [
 ]
 
 [tool.bumpversion]
-current_version = "2.17.1"
+current_version = "2.17.3-rc.38"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\-rc\\.(?P<rc_build>\\d+))?"
 serialize = [
     "{major}.{minor}.{patch}-rc.{rc_build}",
@@ -81,7 +81,6 @@ moveable_tags = []
 commit_args = ""
 setup_hooks = []
 pre_commit_hooks = []
-post_commit_hooks = ["uv lock", "git add uv.lock", "git commit --amend --no-edit"]
 
 [tool.bumpversion.parts.release]
 optional_value = "stable"
@@ -104,9 +103,14 @@ filename = "passcheck/package.json"
 filename = "scorecard/package.json"
 
 [[tool.bumpversion.files]]
+filename = "gameday_designer/package.json"
+
+[[tool.bumpversion.files]]
 filename = "pyproject.toml"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "uv.lock"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'

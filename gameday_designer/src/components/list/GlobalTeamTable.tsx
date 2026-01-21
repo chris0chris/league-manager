@@ -15,7 +15,7 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
-import type { GlobalTeam, GlobalTeamGroup, FlowNode } from '../../types/flowchart';
+import type { GlobalTeam, GlobalTeamGroup, FlowNode, HighlightedElement } from '../../types/flowchart';
 import TeamGroupCard from './TeamGroupCard';
 import { ICONS } from '../../utils/iconConstants';
 import './GlobalTeamTable.css';
@@ -25,6 +25,8 @@ export interface GlobalTeamTableProps {
   teams: GlobalTeam[];
   /** All global team groups */
   groups: GlobalTeamGroup[];
+  /** Currently highlighted element */
+  highlightedElement?: HighlightedElement | null;
   /** Callback to add a new group */
   onAddGroup: () => void;
   /** Callback to update group data */
@@ -45,6 +47,8 @@ export interface GlobalTeamTableProps {
   getTeamUsage: (teamId: string) => { gameId: string; slot: 'home' | 'away' }[];
   /** All nodes (for resolving game names) */
   allNodes: FlowNode[];
+  /** Whether the designer is in read-only mode */
+  readOnly?: boolean;
 }
 
 /**
@@ -53,6 +57,7 @@ export interface GlobalTeamTableProps {
 const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
   teams,
   groups,
+  highlightedElement,
   onAddGroup,
   onUpdateGroup,
   onDeleteGroup,
@@ -62,6 +67,7 @@ const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
   onDelete,
   onReorder,
   getTeamUsage,
+  readOnly = false,
   // allNodes - unused for now but kept in props for future use
 }) => {
   const { t } = useTypedTranslation(['ui']);
@@ -218,15 +224,17 @@ const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
           <i className={`bi ${ICONS.TEAM}`} style={{ fontSize: '4rem', opacity: 0.3 }}></i>
           <h3 className="mt-3">{t('ui:message.noGroupsYet')}</h3>
           <p className="text-muted mb-3">{t('ui:message.createFirstGroup')}</p>
-          <Button
-            variant="outline-primary"
-            onClick={onAddGroup}
-            className="btn-adaptive"
-            title={t('ui:tooltip.addGroup')}
-          >
-            <i className={`bi ${ICONS.ADD}`}></i>
-            <span className="btn-label-adaptive">{t('ui:button.addGroup')}</span>
-          </Button>
+          {!readOnly && (
+            <Button
+              variant="outline-primary"
+              onClick={onAddGroup}
+              className="btn-adaptive"
+              title={t('ui:tooltip.addGroup')}
+            >
+              <i className={`bi ${ICONS.ADD}`}></i>
+              <span className="btn-label-adaptive">{t('ui:button.addGroup')}</span>
+            </Button>
+          )}
         </div>
       ) : (
         /* CSS Grid layout for groups */
@@ -240,6 +248,7 @@ const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
                 group={group}
                 teams={teamsInGroup}
                 allGroups={sortedGroups}
+                highlightedElement={highlightedElement}
                 onUpdateGroup={onUpdateGroup}
                 onDeleteGroup={onDeleteGroup}
                 onReorderGroup={onReorderGroup}
@@ -250,6 +259,7 @@ const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
                 getTeamUsage={getTeamUsage}
                 index={index}
                 totalGroups={sortedGroups.length}
+                readOnly={readOnly}
               />
             );
           })}

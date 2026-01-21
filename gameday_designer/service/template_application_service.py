@@ -6,6 +6,7 @@ Implements atomic transaction for data integrity.
 
 This is the GREEN phase of TDD - implementing service to make tests pass.
 """
+
 from dataclasses import dataclass, field
 from typing import Dict, Optional, Set, Tuple
 import datetime
@@ -20,6 +21,7 @@ from gameday_designer.service.time_service import TimeService
 
 class ApplicationError(Exception):
     """Exception raised when template application fails."""
+
     pass
 
 
@@ -33,6 +35,7 @@ class ApplicationResult:
         gameinfos_created: Number of Gameinfo objects created
         message: Human-readable status message
     """
+
     success: bool
     gameinfos_created: int = 0
     message: str = ""
@@ -59,7 +62,7 @@ class TemplateApplicationService:
         template: ScheduleTemplate,
         gameday: Gameday,
         team_mapping: Dict[str, int],
-        applied_by: Optional[User] = None
+        applied_by: Optional[User] = None,
     ):
         """
         Initialize application service.
@@ -95,17 +98,76 @@ class TemplateApplicationService:
         # Step 3: Create gameinfos from slots
         gameinfos = self._create_gameinfos()
 
-        # Step 4: Create gameresults for each gameinfo
+        # Step 4: Resolve ranking-based references
+        self._resolve_ranking_references()
+
+        # Step 5: Create gameresults for each gameinfo
         self._create_gameresults(gameinfos)
 
-        # Step 5: Store audit trail
+        # Step 6: Store audit trail
         self._create_audit_record()
 
         return ApplicationResult(
             success=True,
             gameinfos_created=len(gameinfos),
-            message=f'Successfully applied template "{self.template.name}" to gameday "{self.gameday.name}". Created {len(gameinfos)} games.'
+            message=f'Successfully applied template "{self.template.name}" to gameday "{self.gameday.name}". Created {len(gameinfos)} games.',
         )
+
+    def _resolve_ranking_references(self):
+        """
+        Identify Ranking Stages and resolve their outcomes into the team mapping.
+
+        This allows slots referencing "Rank X StageY" to be resolved into concrete team IDs
+        at the time of application.
+        """
+        # 1. Group slots by stage
+        stages_map = {}
+        for slot in self.template.slots.all():
+            if slot.stage not in stages_map:
+                stages_map[slot.stage] = []
+            stages_map[slot.stage].append(slot)
+
+        # 2. For each Ranking Stage, calculate "pseudo-standings" based on the mapping
+        for stage_name, slots in stages_map.items():
+            # Check if this stage is a Ranking Stage
+            # (In our model, stage_type is on the slot level)
+            if any(slot.stage_type == "RANKING" for slot in slots):
+                self._calculate_and_map_rankings(stage_name, slots)
+
+    def _calculate_and_map_rankings(self, stage_name: str, slots: list[TemplateSlot]):
+        """
+        Calculate the ranking for a stage and add to team_mapping.
+
+        Note: Since games haven't been played yet, we "rank" based on the team mapping
+        order (Preliminary rank). In a real gameday, this will be handled by UpdateRules.
+        For static application, we just provide the mapping so the games can be created.
+        """
+        # Extract all unique teams assigned to this stage via mapping
+        participants = set()
+        for slot in slots:
+            home = (
+                f"{slot.home_group}_{slot.home_team}"
+                if slot.home_group is not None
+                else None
+            )
+            away = (
+                f"{slot.away_group}_{slot.away_team}"
+                if slot.away_group is not None
+                else None
+            )
+            if home and home in self.team_mapping:
+                participants.add(self.team_mapping[home])
+            if away and away in self.team_mapping:
+                participants.add(self.team_mapping[away])
+
+        # Sort participants to create a deterministic ranking
+        # (Matches the logic in frontend rankingEngine.ts)
+        ordered_teams = sorted(list(participants))
+
+        # Add to mapping: "Rank X StageName" -> team_id
+        for i, team_id in enumerate(ordered_teams):
+            rank_key = f"Rank {i+1} {stage_name}"
+            self.team_mapping[rank_key] = team_id
 
     def _validate_compatibility(self):
         """
@@ -129,14 +191,14 @@ class TemplateApplicationService:
         # We don't have num_fields on Gameday model, so we infer from format
         # Format is like "6_2" where 2 is number of fields
         try:
-            gameday_fields = int(self.gameday.format.split('_')[1])
+            gameday_fields = int(self.gameday.format.split("_")[1])
         except (ValueError, IndexError):
             # If we can't parse, assume it's okay (backward compatibility)
             gameday_fields = max_field_used
 
         if max_field_used > gameday_fields:
             raise ApplicationError(
-                f'Template requires field {max_field_used} but gameday only has {gameday_fields} fields'
+                f"Template requires field {max_field_used} but gameday only has {gameday_fields} fields"
             )
 
         # Get required team placeholders from slots
@@ -155,7 +217,7 @@ class TemplateApplicationService:
         for placeholder, team_id in self.team_mapping.items():
             if not Team.objects.filter(pk=team_id).exists():
                 raise ApplicationError(
-                    f'Team with ID {team_id} (for placeholder {placeholder}) does not exist'
+                    f"Team with ID {team_id} (for placeholder {placeholder}) does not exist"
                 )
 
     def _get_required_team_placeholders(self) -> Set[str]:
@@ -171,15 +233,15 @@ class TemplateApplicationService:
         for slot in slots:
             # Add home team placeholder (if not a reference)
             if slot.home_group is not None and slot.home_team is not None:
-                placeholders.add(f'{slot.home_group}_{slot.home_team}')
+                placeholders.add(f"{slot.home_group}_{slot.home_team}")
 
             # Add away team placeholder
             if slot.away_group is not None and slot.away_team is not None:
-                placeholders.add(f'{slot.away_group}_{slot.away_team}')
+                placeholders.add(f"{slot.away_group}_{slot.away_team}")
 
             # Add official team placeholder
             if slot.official_group is not None and slot.official_team is not None:
-                placeholders.add(f'{slot.official_group}_{slot.official_team}')
+                placeholders.add(f"{slot.official_group}_{slot.official_team}")
 
         return placeholders
 
@@ -200,27 +262,25 @@ class TemplateApplicationService:
             List of created Gameinfo objects
         """
         gameinfos = []
-        
+
         # Process each field independently for time calculation
         for field_num in range(1, self.template.num_fields + 1):
-            slots = list(self.template.slots.filter(field=field_num).order_by('slot_order'))
+            slots = list(
+                self.template.slots.filter(field=field_num).order_by("slot_order")
+            )
             if not slots:
                 continue
-                
+
             # Convert model objects to simple dicts for TimeService
-            slot_data = [{'break_after': s.break_after} for s in slots]
+            slot_data = [{"break_after": s.break_after} for s in slots]
             start_times = TimeService.calculate_game_times(
-                self.gameday.start,
-                self.template.game_duration,
-                slot_data
+                self.gameday.start, self.template.game_duration, slot_data
             )
-            
+
             for slot, scheduled in zip(slots, start_times):
                 # Resolve official team
                 official_team = self._resolve_team_placeholder(
-                    slot.official_group,
-                    slot.official_team,
-                    slot.official_reference
+                    slot.official_group, slot.official_team, slot.official_reference
                 )
 
                 # Create Gameinfo
@@ -231,17 +291,14 @@ class TemplateApplicationService:
                     stage=slot.stage,
                     standing=slot.standing,
                     officials=official_team,
-                    status='Geplant',
+                    status="Geplant",
                 )
                 gameinfos.append(gameinfo)
 
         return gameinfos
 
     def _resolve_team_placeholder(
-        self,
-        group: Optional[int],
-        team: Optional[int],
-        reference: Optional[str]
+        self, group: Optional[int], team: Optional[int], reference: Optional[str]
     ) -> Optional[Team]:
         """
         Resolve team from placeholder or reference.
@@ -249,18 +306,28 @@ class TemplateApplicationService:
         Args:
             group: Group index (0-based)
             team: Team index within group (0-based)
-            reference: Reference string (e.g., "Gewinner HF1") for final rounds
+            reference: Reference string (e.g., "Gewinner HF1", "Rank 1 Preliminary") for final rounds
 
         Returns:
             Team object if resolved, None if reference (to be determined later)
         """
         if reference:
-            # This is a final round game, team will be determined later
+            # Check if this is a resolvable rank reference
+            if reference in self.team_mapping:
+                team_id = self.team_mapping[reference]
+                try:
+                    return Team.objects.get(pk=team_id)
+                except Team.DoesNotExist:
+                    raise ApplicationError(
+                        f"Team with ID {team_id} (referenced as {reference}) does not exist"
+                    )
+
+            # This is a final round game (winner/loser), team will be determined later
             # For now, return None (would be handled by update rules in actual game flow)
             return None
 
         if group is not None and team is not None:
-            placeholder = f'{group}_{team}'
+            placeholder = f"{group}_{team}"
             team_id = self.team_mapping.get(placeholder)
 
             if team_id:
@@ -268,7 +335,7 @@ class TemplateApplicationService:
                     return Team.objects.get(pk=team_id)
                 except Team.DoesNotExist:
                     raise ApplicationError(
-                        f'Team with ID {team_id} (placeholder {placeholder}) does not exist'
+                        f"Team with ID {team_id} (placeholder {placeholder}) does not exist"
                     )
 
         return None
@@ -282,21 +349,17 @@ class TemplateApplicationService:
         Args:
             gameinfos: List of Gameinfo objects
         """
-        slots = self.template.slots.all().order_by('field', 'slot_order')
+        slots = self.template.slots.all().order_by("field", "slot_order")
 
         for gameinfo, slot in zip(gameinfos, slots):
             # Resolve home team
             home_team = self._resolve_team_placeholder(
-                slot.home_group,
-                slot.home_team,
-                slot.home_reference
+                slot.home_group, slot.home_team, slot.home_reference
             )
 
             # Resolve away team
             away_team = self._resolve_team_placeholder(
-                slot.away_group,
-                slot.away_team,
-                slot.away_reference
+                slot.away_group, slot.away_team, slot.away_reference
             )
 
             # Create home Gameresult

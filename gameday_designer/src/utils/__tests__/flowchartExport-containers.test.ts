@@ -21,7 +21,7 @@ describe('Flowchart Export - Container Hierarchy', () => {
   describe('exportToScheduleJson with container hierarchy', () => {
     it('derives field from game parent chain (game -> stage -> field)', () => {
       const field = createFieldNode('field-1', { name: 'Main Field' });
-      const stage = createStageNode('stage-1', 'field-1', { name: 'Vorrunde' });
+      const stage = createStageNode('stage-1', 'field-1', { name: 'Preliminary' });
       const game = createGameNodeInStage('game-1', 'stage-1', {
         standing: 'HF1',
         homeTeamId: 'team-1',
@@ -49,12 +49,12 @@ describe('Flowchart Export - Container Hierarchy', () => {
       expect(result.data).toHaveLength(1);
       expect(result.data![0].field).toBe('Main Field');
       expect(result.data![0].games).toHaveLength(1);
-      expect(result.data![0].games[0].stage).toBe('Vorrunde');
+      expect(result.data![0].games[0].stage).toBe('Preliminary');
     });
 
     it('derives stage name from parent stage node', () => {
       const field = createFieldNode('field-1', { name: 'Field A' });
-      const stage = createStageNode('stage-1', 'field-1', { name: 'Finalrunde', stageType: 'finalrunde' });
+      const stage = createStageNode('stage-1', 'field-1', { name: 'Final', category: 'final' });
       const game = createGameNodeInStage('game-1', 'stage-1', {
         standing: 'Finale',
         homeTeamId: 'team-1',
@@ -78,14 +78,14 @@ describe('Flowchart Export - Container Hierarchy', () => {
       const result = exportToScheduleJson(state);
 
       expect(result.success).toBe(true);
-      expect(result.data![0].games[0].stage).toBe('Finalrunde');
+      expect(result.data![0].games[0].stage).toBe('Final');
     });
 
     it('groups games by their container field', () => {
       const field1 = createFieldNode('field-1', { name: 'Feld 1' });
       const field2 = createFieldNode('field-2', { name: 'Feld 2' });
-      const stage1 = createStageNode('stage-1', 'field-1', { name: 'Vorrunde' });
-      const stage2 = createStageNode('stage-2', 'field-2', { name: 'Vorrunde' });
+      const stage1 = createStageNode('stage-1', 'field-1', { name: 'Preliminary' });
+      const stage2 = createStageNode('stage-2', 'field-2', { name: 'Preliminary' });
 
       const game1 = createGameNodeInStage('game-1', 'stage-1', {
         standing: 'G1',
@@ -133,8 +133,8 @@ describe('Flowchart Export - Container Hierarchy', () => {
 
     it('handles multiple stages in the same field', () => {
       const field = createFieldNode('field-1', { name: 'Main Field' });
-      const vorrunde = createStageNode('stage-vr', 'field-1', { name: 'Vorrunde', stageType: 'vorrunde' });
-      const finalrunde = createStageNode('stage-fr', 'field-1', { name: 'Finalrunde', stageType: 'finalrunde' });
+      const preliminary = createStageNode('stage-vr', 'field-1', { name: 'Preliminary', category: 'preliminary' });
+      const final = createStageNode('stage-fr', 'field-1', { name: 'Final', category: 'final' });
 
       const gameVr = createGameNodeInStage('game-vr', 'stage-vr', {
         standing: 'VR1',
@@ -154,7 +154,7 @@ describe('Flowchart Export - Container Hierarchy', () => {
       ];
 
       const state: FlowState = {
-        nodes: [field, vorrunde, finalrunde, gameVr, gameFr],
+        nodes: [field, preliminary, final, gameVr, gameFr],
         edges: [],
         fields: [],
         globalTeams: teams,
@@ -172,10 +172,10 @@ describe('Flowchart Export - Container Hierarchy', () => {
       const frGame = result.data![0].games.find((g) => g.standing === 'Finale');
 
       expect(vrGame).toBeDefined();
-      expect(vrGame!.stage).toBe('Vorrunde');
+      expect(vrGame!.stage).toBe('Preliminary');
 
       expect(frGame).toBeDefined();
-      expect(frGame!.stage).toBe('Finalrunde');
+      expect(frGame!.stage).toBe('Final');
     });
 
     it('falls back to legacy FlowField when container hierarchy not present', () => {
@@ -192,7 +192,7 @@ describe('Flowchart Export - Container Hierarchy', () => {
         position: { x: 100, y: 100 },
         data: {
           type: 'game' as const,
-          stage: 'Vorrunde',
+          stage: 'Preliminary',
           standing: 'VR1',
           fieldId: 'legacy-field-1',
           official: null,
@@ -271,7 +271,7 @@ describe('Flowchart Export - Container Hierarchy', () => {
         position: { x: 100, y: 100 },
         data: {
           type: 'game' as const,
-          stage: 'Vorrunde',
+          stage: 'Preliminary',
           standing: 'HF1',
           fieldId: null,
           official: null,

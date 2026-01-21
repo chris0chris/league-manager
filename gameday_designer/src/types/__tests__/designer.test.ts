@@ -135,7 +135,7 @@ describe('Factory Functions', () => {
     it('uses Vorrunde as default stage', () => {
       const slot = createDefaultGameSlot('test-id');
 
-      expect(slot.stage).toBe('Vorrunde');
+      expect(slot.stage).toBe('Preliminary');
     });
 
     it('has empty standing', () => {

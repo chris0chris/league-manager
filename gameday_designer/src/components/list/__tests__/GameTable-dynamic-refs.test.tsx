@@ -37,8 +37,8 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
   beforeEach(() => {
     // Create field with two stages (stage 1 has lower order)
     field1 = createFieldNode('field-1', { name: 'Field 1', order: 0 });
-    stage1 = createStageNode('stage-1', 'field-1', { name: 'Vorrunde', stageType: 'vorrunde', order: 0 });
-    stage2 = createStageNode('stage-2', 'field-1', { name: 'Finalrunde', stageType: 'finalrunde', order: 1 });
+    stage1 = createStageNode('stage-1', 'field-1', { name: 'Preliminary', category: 'preliminary', order: 0 });
+    stage2 = createStageNode('stage-2', 'field-1', { name: 'Final', category: 'final', order: 1 });
 
     // Create games in different stages
     game1 = createGameNodeInStage('game-1', 'stage-1', { standing: 'Game 1' });

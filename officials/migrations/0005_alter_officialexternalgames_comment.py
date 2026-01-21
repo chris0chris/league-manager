@@ -5,13 +5,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('officials', '0004_officialexternalgames'),
+        ("officials", "0004_officialexternalgames"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='officialexternalgames',
-            name='comment',
+            model_name="officialexternalgames",
+            name="comment",
             field=models.CharField(default=None, max_length=100, null=True),
         ),
     ]

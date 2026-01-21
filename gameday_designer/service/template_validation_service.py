@@ -4,6 +4,7 @@ Template Validation Service.
 Mirrors frontend useFlowValidation.ts logic to ensure data integrity
 of tournament schedule templates.
 """
+
 import re
 from dataclasses import dataclass
 from typing import List, Set, Dict, Optional, Tuple
@@ -15,6 +16,7 @@ from gameday_designer.models import ScheduleTemplate, TemplateSlot
 @dataclass
 class ValidationIssue:
     """Represents a validation error or warning."""
+
     id: str
     type: str
     message: str
@@ -34,20 +36,20 @@ class TemplateValidationService:
     def validate(self) -> Tuple[bool, List[ValidationIssue], List[ValidationIssue]]:
         """
         Perform all validations.
-        
+
         Returns:
             Tuple of (is_valid, errors, warnings)
         """
         self.errors = []
         self.warnings = []
-        
+
         slots = list(self.template.slots.all())
-        
+
         self._check_incomplete_inputs(slots)
         self._check_circular_dependencies(slots)
         self._check_official_playing(slots)
         self._check_duplicate_standings(slots)
-        
+
         return len(self.errors) == 0, self.errors, self.warnings
 
     def _check_incomplete_inputs(self, slots: List[TemplateSlot]):
@@ -56,17 +58,19 @@ class TemplateValidationService:
             missing = []
             # In template, a team is 'missing' if BOTH direct assignment and reference are None
             if slot.home_group is None and not slot.home_reference:
-                missing.append('home')
+                missing.append("home")
             if slot.away_group is None and not slot.away_reference:
-                missing.append('away')
-                
+                missing.append("away")
+
             if missing:
-                self.errors.append(ValidationIssue(
-                    id=f"{slot.id}_incomplete",
-                    type='incomplete_game_inputs',
-                    message=f"Game '{slot.standing}' is missing {' and '.join(missing)} team connection",
-                    affected_slots=[slot.id]
-                ))
+                self.errors.append(
+                    ValidationIssue(
+                        id=f"{slot.id}_incomplete",
+                        type="incomplete_game_inputs",
+                        message=f"Game '{slot.standing}' is missing {' and '.join(missing)} team connection",
+                        affected_slots=[slot.id],
+                    )
+                )
 
     def _extract_standing_from_ref(self, reference: str) -> Optional[str]:
         """
@@ -76,7 +80,7 @@ class TemplateValidationService:
         if not reference:
             return None
         # Pattern matches 'Gewinner ' or 'Verlierer ' followed by the standing name
-        match = re.search(r'(?:Gewinner|Verlierer)\s+(.+)$', reference)
+        match = re.search(r"(?:Gewinner|Verlierer)\s+(.+)$", reference)
         if match:
             return match.group(1).strip()
         return None
@@ -85,7 +89,7 @@ class TemplateValidationService:
         """Check for circular dependencies in winner/loser progressions."""
         # Map standing names to slots for easy lookup
         standing_to_slot = {s.standing: s for s in slots if s.standing}
-        
+
         # Build adjacency list: standing -> list of standings that depend on it
         # Actually, simpler to think: target depends on source
         adj = {s.standing: [] for s in slots if s.standing}
@@ -94,7 +98,7 @@ class TemplateValidationService:
             ref_home = self._extract_standing_from_ref(slot.home_reference)
             if ref_home and ref_home in adj:
                 adj[ref_home].append(slot.standing)
-            
+
             # Away reference
             ref_away = self._extract_standing_from_ref(slot.away_reference)
             if ref_away and ref_away in adj:
@@ -103,11 +107,11 @@ class TemplateValidationService:
         # Cycle detection using DFS
         visited = set()
         path_stack = []
-        
+
         def find_cycle(u):
             visited.add(u)
             path_stack.append(u)
-            
+
             for v in adj.get(u, []):
                 if v in path_stack:
                     # Found cycle
@@ -117,7 +121,7 @@ class TemplateValidationService:
                     res = find_cycle(v)
                     if res:
                         return res
-            
+
             path_stack.pop()
             return None
 
@@ -130,12 +134,14 @@ class TemplateValidationService:
                     if cycle_key not in reported_cycles:
                         reported_cycles.add(cycle_key)
                         affected_ids = [standing_to_slot[name].id for name in cycle]
-                        self.errors.append(ValidationIssue(
-                            id=f"circular_{cycle_key}",
-                            type='circular_dependency',
-                            message=f"Circular dependency detected: {' -> '.join(cycle)} -> {cycle[0]}",
-                            affected_slots=affected_ids
-                        ))
+                        self.errors.append(
+                            ValidationIssue(
+                                id=f"circular_{cycle_key}",
+                                type="circular_dependency",
+                                message=f"Circular dependency detected: {' -> '.join(cycle)} -> {cycle[0]}",
+                                affected_slots=affected_ids,
+                            )
+                        )
 
     def _check_official_playing(self, slots: List[TemplateSlot]):
         """Check if official team is also playing in the same game."""
@@ -143,22 +149,32 @@ class TemplateValidationService:
             # Only check if official is explicitly assigned by group/team (placeholders)
             if slot.official_group is not None:
                 # Home
-                if slot.home_group == slot.official_group and slot.home_team == slot.official_team:
-                    self.errors.append(ValidationIssue(
-                        id=f"{slot.id}_official_home",
-                        type='official_playing',
-                        message=f"Game '{slot.standing}': Official team cannot play in this game",
-                        affected_slots=[slot.id]
-                    ))
+                if (
+                    slot.home_group == slot.official_group
+                    and slot.home_team == slot.official_team
+                ):
+                    self.errors.append(
+                        ValidationIssue(
+                            id=f"{slot.id}_official_home",
+                            type="official_playing",
+                            message=f"Game '{slot.standing}': Official team cannot play in this game",
+                            affected_slots=[slot.id],
+                        )
+                    )
                     continue
                 # Away
-                if slot.away_group == slot.official_group and slot.away_team == slot.official_team:
-                    self.errors.append(ValidationIssue(
-                        id=f"{slot.id}_official_away",
-                        type='official_playing',
-                        message=f"Game '{slot.standing}': Official team cannot play in this game",
-                        affected_slots=[slot.id]
-                    ))
+                if (
+                    slot.away_group == slot.official_group
+                    and slot.away_team == slot.official_team
+                ):
+                    self.errors.append(
+                        ValidationIssue(
+                            id=f"{slot.id}_official_away",
+                            type="official_playing",
+                            message=f"Game '{slot.standing}': Official team cannot play in this game",
+                            affected_slots=[slot.id],
+                        )
+                    )
 
     def _check_duplicate_standings(self, slots: List[TemplateSlot]):
         """Check for duplicate standing names."""
@@ -168,12 +184,14 @@ class TemplateValidationService:
                 if slot.standing not in counts:
                     counts[slot.standing] = []
                 counts[slot.standing].append(slot.id)
-                
+
         for standing, ids in counts.items():
             if len(ids) > 1:
-                self.warnings.append(ValidationIssue(
-                    id=f"duplicate_{standing}",
-                    type='duplicate_standing',
-                    message=f"Standing '{standing}' is used by {len(ids)} games",
-                    affected_slots=ids
-                ))
+                self.warnings.append(
+                    ValidationIssue(
+                        id=f"duplicate_{standing}",
+                        type="duplicate_standing",
+                        message=f"Standing '{standing}' is used by {len(ids)} games",
+                        affected_slots=ids,
+                    )
+                )

@@ -67,6 +67,8 @@ describe('useFlowState - Global Team Pool', () => {
 
       act(() => {
         team1Id = result.current.addGlobalTeam('Team 1', groupId).id;
+      });
+      act(() => {
         team2Id = result.current.addGlobalTeam('Team 2', groupId).id;
       });
 
@@ -104,6 +106,8 @@ describe('useFlowState - Global Team Pool', () => {
 
       act(() => {
         team1Id = result.current.addGlobalTeam('Team 1', group1Id).id;
+      });
+      act(() => {
         team2Id = result.current.addGlobalTeam('Team 2', group2Id).id;
       });
 

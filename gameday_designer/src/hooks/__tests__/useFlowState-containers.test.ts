@@ -90,7 +90,7 @@ describe('useFlowState - Container Operations', () => {
       const stage = result.current.nodes.find(isStageNode);
       expect(stage).toBeDefined();
       expect(stage?.parentId).toBe(fieldId);
-      expect(stage?.data.name).toBe('Vorrunde');
+      expect(stage?.data.name).toBe('Preliminary');
     });
 
     it('creates stage with custom name and type', () => {
@@ -102,12 +102,12 @@ describe('useFlowState - Container Operations', () => {
       });
 
       act(() => {
-        result.current.addStageNode(fieldId, { name: 'Finalrunde', stageType: 'finalrunde' });
+        result.current.addStageNode(fieldId, { name: 'Final', category: 'final', stageType: 'STANDARD' });
       });
 
       const stage = result.current.nodes.find(isStageNode);
-      expect(stage?.data.name).toBe('Finalrunde');
-      expect(stage?.data.stageType).toBe('finalrunde');
+      expect(stage?.data.name).toBe('Final');
+      expect(stage?.data.stageType).toBe('STANDARD');
     });
 
     it('creates second stage with Finalrunde as default', () => {
@@ -128,8 +128,8 @@ describe('useFlowState - Container Operations', () => {
 
       const stages = result.current.nodes.filter(isStageNode);
       expect(stages).toHaveLength(2);
-      expect(stages[0].data.name).toBe('Vorrunde');
-      expect(stages[1].data.name).toBe('Finalrunde');
+      expect(stages[0].data.name).toBe('Preliminary');
+      expect(stages[1].data.name).toBe('Final');
     });
 
     it('returns null if field does not exist', () => {
@@ -388,7 +388,7 @@ describe('useFlowState - Container Operations', () => {
       });
 
       act(() => {
-        stageId = result.current.addStageNode(fieldId, { name: 'Finalrunde', stageType: 'finalrunde' })!.id;
+        stageId = result.current.addStageNode(fieldId, { name: 'Final', category: 'final' })!.id;
       });
 
       act(() => {
@@ -398,7 +398,7 @@ describe('useFlowState - Container Operations', () => {
       const stage = result.current.getGameStage(gameId);
       expect(stage).toBeDefined();
       expect(stage?.id).toBe(stageId);
-      expect(stage?.data.name).toBe('Finalrunde');
+      expect(stage?.data.name).toBe('Final');
     });
 
     it('returns null for game without parent stage', () => {
@@ -424,14 +424,14 @@ describe('useFlowState - Container Operations', () => {
       });
 
       act(() => {
-        result.current.addStageNode(fieldId, { name: 'Vorrunde' });
-        result.current.addStageNode(fieldId, { name: 'Finalrunde' });
+        result.current.addStageNode(fieldId, { name: 'Preliminary' });
+        result.current.addStageNode(fieldId, { name: 'Final' });
       });
 
       const stages = result.current.getFieldStages(fieldId);
       expect(stages).toHaveLength(2);
-      expect(stages[0].data.name).toBe('Vorrunde');
-      expect(stages[1].data.name).toBe('Finalrunde');
+      expect(stages[0].data.name).toBe('Preliminary');
+      expect(stages[1].data.name).toBe('Final');
     });
 
     it('returns empty array for field with no stages', () => {

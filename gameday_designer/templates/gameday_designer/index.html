@@ -2,23 +2,29 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'gameday_designer/js/gameday_designer.css' %}">
+    <link rel="stylesheet" href="{% static 'gameday_designer/js/index.css' %}">
     <style>
-        /* Make body and html take full height without overflow */
-        html, body {
-            height: 100%;
-            overflow: hidden;
+        /* Lock body height to viewport and use flex layout */
+        html {
+            height: 100vh;
+        }
+        body {
+            height: 100vh;
+            overflow: hidden !important;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Make main container fill available space */
+        /* Make main container fill remaining space exactly */
         main.container {
-            height: calc(100vh - 149px); /* Subtract navbar (70px) and footer (79px) */
+            flex: 1;
             max-width: 100%;
             padding: 0;
-            margin-top: 70px; /* Push below navbar */
+            margin-top: 70px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            height: 0; /* Force flex child to respect parent container */
         }
 
         /* Make content area fill available space */
@@ -27,6 +33,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
 
         /* Designer container fills the content area */
@@ -35,13 +42,15 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
 
-        /* Make footer sticky at bottom */
+        /* Ensure footer stays at the very bottom without margin-top */
         .footer {
             position: sticky;
             bottom: 0;
             z-index: 1000;
+            flex-shrink: 0;
             margin-top: 0 !important;
         }
     </style>
@@ -52,5 +61,5 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script type="module" src="{% static 'gameday_designer/js/gameday_designer.js' %}"></script>
+    <script type="module" src="{% static 'gameday_designer/js/index.js' %}"></script>
 {% endblock %}

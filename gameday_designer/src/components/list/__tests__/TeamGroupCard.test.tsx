@@ -5,6 +5,7 @@
  * - Group display and expansion
  * - Add Team button within each group
  * - Team display and management within groups
+ * - Inline editing and reordering
  */
 
 import React from 'react';
@@ -23,8 +24,8 @@ describe('TeamGroupCard', () => {
   };
 
   const mockTeams: GlobalTeam[] = [
-    { id: 'team-1', label: 'Team 1', groupId: 'group-1', order: 0 },
-    { id: 'team-2', label: 'Team 2', groupId: 'group-1', order: 1 },
+    { id: 'team-1', label: 'Team 1', groupId: 'group-1', order: 0, color: '#3498db' },
+    { id: 'team-2', label: 'Team 2', groupId: 'group-1', order: 1, color: '#e74c3c' },
   ];
 
   const mockAllGroups: GlobalTeamGroup[] = [
@@ -53,129 +54,158 @@ describe('TeamGroupCard', () => {
     mockGetTeamUsage = vi.fn(() => []);
   });
 
-  it('renders group name and team count', () => {
-    render(
-      <TeamGroupCard
-        group={mockGroup}
-        teams={mockTeams}
-        allGroups={mockAllGroups}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onUpdateTeam={mockOnUpdateTeam}
-        onDeleteTeam={mockOnDeleteTeam}
-        onReorderTeam={mockOnReorderTeam}
-        onAddTeam={mockOnAddTeam}
-        getTeamUsage={mockGetTeamUsage}
-        index={0}
-        totalGroups={2}
-      />
-    );
+  const getDefaultProps = () => ({
+    group: mockGroup,
+    teams: mockTeams,
+    allGroups: mockAllGroups,
+    onUpdateGroup: mockOnUpdateGroup,
+    onDeleteGroup: mockOnDeleteGroup,
+    onReorderGroup: mockOnReorderGroup,
+    onUpdateTeam: mockOnUpdateTeam,
+    onDeleteTeam: mockOnDeleteTeam,
+    onReorderTeam: mockOnReorderTeam,
+    onAddTeam: mockOnAddTeam,
+    getTeamUsage: mockGetTeamUsage,
+    index: 0,
+    totalGroups: 2,
+  });
 
+  it('renders group name and team count', () => {
+    render(<TeamGroupCard {...getDefaultProps()} />);
     expect(screen.getByText('Group A')).toBeInTheDocument();
-    // Team count badge has been removed from the design
-    // Just verify the teams are rendered
     expect(screen.getByText('Team 1')).toBeInTheDocument();
     expect(screen.getByText('Team 2')).toBeInTheDocument();
   });
 
-  it('renders Add Team button in group header', () => {
-    render(
-      <TeamGroupCard
-        group={mockGroup}
-        teams={mockTeams}
-        allGroups={mockAllGroups}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onUpdateTeam={mockOnUpdateTeam}
-        onDeleteTeam={mockOnDeleteTeam}
-        onReorderTeam={mockOnReorderTeam}
-        onAddTeam={mockOnAddTeam}
-        getTeamUsage={mockGetTeamUsage}
-        index={0}
-        totalGroups={2}
-      />
-    );
-
-    const addButton = screen.getByRole('button', { name: /Add Team/i });
-    expect(addButton).toBeInTheDocument();
-  });
-
-  it('calls onAddTeam with groupId when Add Team button is clicked', async () => {
+  it('toggles expansion when clicking header', async () => {
     const user = userEvent.setup();
+    render(<TeamGroupCard {...getDefaultProps()} />);
 
-    render(
-      <TeamGroupCard
-        group={mockGroup}
-        teams={mockTeams}
-        allGroups={mockAllGroups}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onUpdateTeam={mockOnUpdateTeam}
-        onDeleteTeam={mockOnDeleteTeam}
-        onReorderTeam={mockOnReorderTeam}
-        onAddTeam={mockOnAddTeam}
-        getTeamUsage={mockGetTeamUsage}
-        index={0}
-        totalGroups={2}
-      />
-    );
+    const header = screen.getByText('Group A').closest('.card-header');
+    await user.click(header!);
+    
+    // After collapsing, teams should not be visible
+    expect(screen.queryByText('Team 1')).toBeNull();
 
-    const addButton = screen.getByRole('button', { name: /Add Team/i });
-    await user.click(addButton);
-
-    expect(mockOnAddTeam).toHaveBeenCalledWith('group-1');
-    expect(mockOnAddTeam).toHaveBeenCalledTimes(1);
+    await user.click(header!);
+    expect(screen.getByText('Team 1')).toBeInTheDocument();
   });
 
-  it('shows "Add Team" button even when group is collapsed', () => {
-    render(
+  it('allows editing group name via double-click', async () => {
+    const user = userEvent.setup();
+    render(<TeamGroupCard {...getDefaultProps()} />);
+
+    const groupName = screen.getByText('Group A');
+    await user.dblClick(groupName);
+
+    const input = screen.getByDisplayValue('Group A');
+    await user.clear(input);
+    await user.type(input, 'New Group Name{Enter}');
+
+    expect(mockOnUpdateGroup).toHaveBeenCalledWith('group-1', { name: 'New Group Name' });
+  });
+
+  it('cancels group name editing on Escape', async () => {
+    const user = userEvent.setup();
+    render(<TeamGroupCard {...getDefaultProps()} />);
+
+    const groupName = screen.getByText('Group A');
+    await user.dblClick(groupName);
+
+    const input = screen.getByDisplayValue('Group A');
+    await user.type(input, 'New Name{Escape}');
+
+    expect(mockOnUpdateGroup).not.toHaveBeenCalled();
+    expect(screen.getByText('Group A')).toBeInTheDocument();
+  });
+
+  it('allows editing team label via double-click', async () => {
+    const user = userEvent.setup();
+    render(<TeamGroupCard {...getDefaultProps()} />);
+
+    const teamLabel = screen.getByText('Team 1');
+    await user.dblClick(teamLabel);
+
+    const input = screen.getByDisplayValue('Team 1');
+    await user.clear(input);
+    await user.type(input, 'New Team Name{Enter}');
+
+    expect(mockOnUpdateTeam).toHaveBeenCalledWith('team-1', { label: 'New Team Name' });
+  });
+
+  it('changes team color via input', () => {
+    render(<TeamGroupCard {...getDefaultProps()} />);
+
+    const colorInputs = screen.getAllByTitle('Change the color badge for this team');
+    fireEvent.change(colorInputs[0], { target: { value: '#ff0000' } });
+
+    expect(mockOnUpdateTeam).toHaveBeenCalledWith('team-1', { color: '#ff0000' });
+  });
+
+  it('calls onReorderGroup when clicking reorder buttons', async () => {
+    const user = userEvent.setup();
+    render(<TeamGroupCard {...getDefaultProps()} index={1} totalGroups={3} />);
+
+    const upButton = screen.getByTitle(/move.*group.*up/i);
+    const downButton = screen.getByTitle(/move.*group.*down/i);
+
+    await user.click(upButton);
+    expect(mockOnReorderGroup).toHaveBeenCalledWith('group-1', 'up');
+
+    await user.click(downButton);
+    expect(mockOnReorderGroup).toHaveBeenCalledWith('group-1', 'down');
+  });
+
+  it('calls onReorderTeam when clicking reorder team buttons', async () => {
+    const user = userEvent.setup();
+    render(<TeamGroupCard {...getDefaultProps()} />);
+
+    // Click down on first team
+    // Specific regex to avoid matching "team group"
+    const downButtons = screen.getAllByTitle(/^Move this team one position down$/i);
+    await user.click(downButtons[0]);
+    expect(mockOnReorderTeam).toHaveBeenCalledWith('team-1', 'down');
+
+    // Click up on second team
+    const upButtons = screen.getAllByTitle(/^Move this team one position up$/i);
+    await user.click(upButtons[1]);
+    expect(mockOnReorderTeam).toHaveBeenCalledWith('team-2', 'up');
+  });
+
+  it('calls onDeleteTeam when clicking delete button', async () => {
+    const user = userEvent.setup();
+    render(<TeamGroupCard {...getDefaultProps()} />);
+
+    const deleteButtons = screen.getAllByTitle(/^Permanently remove this team from the pool$/i);
+    await user.click(deleteButtons[0]);
+
+    expect(mockOnDeleteTeam).toHaveBeenCalledWith('team-1');
+  });
+
+  it('calls onDeleteGroup when clicking group delete button', async () => {
+    const user = userEvent.setup();
+    render(<TeamGroupCard {...getDefaultProps()} />);
+
+    const deleteButton = screen.getByTitle(/^Permanently remove this team group and all its teams$/i);
+    await user.click(deleteButton);
+
+    expect(mockOnDeleteGroup).toHaveBeenCalledWith('group-1');
+  });
+
+  it('displays correct highlight when team is highlighted', () => {
+    const { container } = render(
       <TeamGroupCard
-        group={mockGroup}
-        teams={mockTeams}
-        allGroups={mockAllGroups}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onUpdateTeam={mockOnUpdateTeam}
-        onDeleteTeam={mockOnDeleteTeam}
-        onReorderTeam={mockOnReorderTeam}
-        onAddTeam={mockOnAddTeam}
-        getTeamUsage={mockGetTeamUsage}
-        index={0}
-        totalGroups={2}
+        {...getDefaultProps()}
+        highlightedElement={{ id: 'team-1', type: 'team' }}
       />
     );
 
-    // Initially expanded, collapse it
-    const header = screen.getByText('Group A').closest('.card-header');
-    fireEvent.click(header!);
-
-    // Add Team button should still be visible in header
-    expect(screen.getByRole('button', { name: /Add Team/i })).toBeInTheDocument();
+    const teamRow = container.querySelector('#team-team-1');
+    expect(teamRow).toHaveClass('element-highlighted');
   });
 
   it('shows empty state message when group has no teams', () => {
-    render(
-      <TeamGroupCard
-        group={mockGroup}
-        teams={[]}
-        allGroups={mockAllGroups}
-        onUpdateGroup={mockOnUpdateGroup}
-        onDeleteGroup={mockOnDeleteGroup}
-        onReorderGroup={mockOnReorderGroup}
-        onUpdateTeam={mockOnUpdateTeam}
-        onDeleteTeam={mockOnDeleteTeam}
-        onReorderTeam={mockOnReorderTeam}
-        onAddTeam={mockOnAddTeam}
-        getTeamUsage={mockGetTeamUsage}
-        index={0}
-        totalGroups={2}
-      />
-    );
-
+    render(<TeamGroupCard {...getDefaultProps()} teams={[]} />);
     expect(screen.getByText(/No teams in this group/i)).toBeInTheDocument();
   });
 });

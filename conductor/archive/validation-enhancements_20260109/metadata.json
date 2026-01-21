@@ -1,0 +1,8 @@
+{
+  "track_id": "validation-enhancements_20260109",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-09T14:45:00Z",
+  "updated_at": "2026-01-09T14:45:00Z",
+  "description": "Update validation bar in gameday_designer: first, make it i18n like all the other entries. 2. errors must be clickable and highlight the selected team/game/etc. when clicked. 3. validation must take stage & game into account, not just game"
+}

@@ -45,6 +45,19 @@ export interface LoserReference {
 }
 
 /**
+ * Team reference for a specific rank in a Ranking Stage.
+ * Example: { type: 'rank', place: 1, stageId: 'stage-123' } represents "1st from Stage A"
+ */
+export interface RankReference {
+  type: 'rank';
+  place: number;
+  stageId: string;
+  stageName: string;
+  /** Optional index used during template resolution */
+  sourceStageIndex?: number;
+}
+
+/**
  * Static team reference using a direct name.
  * Example: { type: 'static', name: 'Team Officials' }
  */
@@ -62,6 +75,7 @@ export type TeamReference =
   | StandingReference
   | WinnerReference
   | LoserReference
+  | RankReference
   | StaticReference;
 
 /**
@@ -71,7 +85,7 @@ export type TeamReference =
 export interface GameSlot {
   /** Unique identifier for the game slot */
   id: string;
-  /** Tournament stage: "Vorrunde", "Finalrunde", or custom */
+  /** Tournament stage: "Preliminary", "Final", or custom */
   stage: string;
   /** Standing/match identifier: e.g., "Gruppe 1", "HF1", "P1", "Spiel 3" */
   standing: string;
@@ -122,6 +136,10 @@ export interface ValidationError {
   type: ValidationErrorType;
   /** Human-readable error message */
   message: string;
+  /** Translation key for the error message */
+  messageKey?: string;
+  /** Parameters for the translation key */
+  messageParams?: Record<string, unknown>;
   /** IDs of affected game slots */
   affectedSlots: string[];
 }
@@ -136,6 +154,10 @@ export interface ValidationWarning {
   type: ValidationWarningType;
   /** Human-readable warning message */
   message: string;
+  /** Translation key for the warning message */
+  messageKey?: string;
+  /** Parameters for the translation key */
+  messageParams?: Record<string, unknown>;
   /** IDs of affected game slots */
   affectedSlots: string[];
 }
@@ -171,6 +193,12 @@ export interface Notification {
   show: boolean;
   /** Optional title for the notification */
   title?: string;
+  /** Optional callback to undo the action */
+  undoAction?: () => void;
+  /** Optional label for the undo button (defaults to "Undo") */
+  undoLabel?: string;
+  /** Optional duration in milliseconds (defaults to 5000) */
+  duration?: number;
 }
 
 /**
@@ -248,6 +276,13 @@ export function isLoserReference(ref: TeamReference): ref is LoserReference {
 }
 
 /**
+ * Type guard to check if a team reference is a RankReference
+ */
+export function isRankReference(ref: TeamReference): ref is RankReference {
+  return ref.type === 'rank';
+}
+
+/**
  * Type guard to check if a team reference is a StaticReference
  */
 export function isStaticReference(ref: TeamReference): ref is StaticReference {
@@ -289,7 +324,7 @@ export function createDefaultTeamReference(): TeamReference {
 export function createDefaultGameSlot(id: string): GameSlot {
   return {
     id,
-    stage: 'Vorrunde',
+    stage: 'Preliminary',
     standing: '',
     home: createDefaultTeamReference(),
     away: createDefaultTeamReference(),

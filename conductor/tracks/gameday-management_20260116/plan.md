@@ -1,0 +1,56 @@
+# Plan: Gameday Management & Dashboard
+
+## Phase 1: Mock API & Data Layer Refinement
+Extend the existing service layer to support Gameday-level CRUD operations.
+
+- [x] **Task: Define Gameday Interfaces & Types** 9493429
+    - [x] Add `GamedayMetadata` and `Gameday` (full structure) interfaces to `types.ts`.
+- [x] **Task: Expand Mock Service Layer (TDD)** 9493429
+    - [x] Write tests for `GamedayService` mock endpoints (GET all, GET by ID, POST, PATCH).
+    - [x] Implement mock storage for multiple gamedays.
+    - [x] Ensure service signatures match DRF patterns.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Mock API & Data Layer Refinement' (Protocol in workflow.md) [checkpoint: c173024]
+
+## Phase 2: Gameday Dashboard UI
+Implement the landing page for managing gamedays.
+
+- [x] **Task: Implement GamedayCard Component (TDD)**
+    - [x] Create a presentation component for gameday details (Name, Date, Status, Season).
+    - [x] Write tests for status-based styling and data rendering.
+- [x] **Task: Create GamedayDashboard View (TDD)**
+    - [x] Implement the main container for the list view.
+    - [x] Integrate `GamedayService` to fetch and display cards.
+    - [x] Implement the "Create New Gameday" trigger.
+- [x] **Task: Update Routing Logic**
+    - [x] Refactor `App.tsx` or `main.tsx` to handle `/` (Dashboard) and `/designer/:id` (Editor) routes.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Gameday Dashboard UI' (Protocol in workflow.md) [checkpoint: 480bcb8]
+
+## Phase 3: Advanced Search & Filtering
+Implement the wildcard and "dork" style search logic.
+
+- [x] **Task: Implement Search Engine Utility (TDD)**
+    - [x] Write a utility function that parses strings for dorks (e.g., `key:value`) and performs wildcard matching.
+    - [x] Write comprehensive unit tests for various search patterns.
+- [x] **Task: Integrate Search with Dashboard (TDD)**
+    - [x] Add the search input component to the Dashboard.
+    - [x] Connect the search utility to the displayed gameday list.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Advanced Search & Filtering' (Protocol in workflow.md) [checkpoint: 3f151ae]
+
+## Phase 4: Editor Metadata Integration
+Add gameday-level property management to the existing Editor.
+
+- [x] **Task: Create GamedayMetadataAccordion Component (TDD)**
+    - [x] Implement the accordion-style header with form fields (Name, Date, Season, Venue).
+    - [x] Write tests for form state and validation.
+- [x] **Task: Integrate Metadata with Flow State (TDD)**
+    - [x] Ensure metadata is part of the global state and correctly persisted via the service layer.
+    - [x] Open the accordion automatically for newly created gamedays.
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Editor Metadata Integration' (Protocol in workflow.md) [checkpoint: 87c785c]
+
+
+## Phase 5: Final Polish & Verification
+- [x] **Task: Ensure Responsive Card Layout**
+    - [x] Audit dashboard responsiveness for mobile/tablet.
+- [x] **Task: Final TDD Verification**
+    - [x] Run the full Vitest suite to ensure no regressions in existing Designer logic.
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Final Polish & Verification' (Protocol in workflow.md) [checkpoint: 5f1a2b3]

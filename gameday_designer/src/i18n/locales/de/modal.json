@@ -1,7 +1,7 @@
 {
   "clearAll": {
     "title": "Alles löschen",
-    "message": "Sind Sie sicher, dass Sie alle Felder, Etappen, Spiele, Teams und Gruppen löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    "message": "Sind Sie sicher, dass Sie alle Felder, Phasen, Spiele, Teams und Gruppen löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "editGame": {
     "title": "Spiel bearbeiten"
@@ -11,12 +11,26 @@
     "noTemplates": "Keine Turniervorlagen verfügbar.",
     "generateTeams": "{{count}} Teams automatisch generieren",
     "autoAssignTeams": "Teams automatisch Spielen zuweisen",
+    "insufficientTeams": "Nicht genügend Teams im Pool. Dieses Format benötigt mindestens {{min}} Teams, oder wählen Sie 'Teams automatisch generieren'.",
     "previewTitle": "Vorschau:",
     "previewFields_one": "{{count}} Feld",
     "previewFields_other": "{{count}} Felder",
-    "previewStages_one": "{{count}} Etappe",
-    "previewStages_other": "{{count}} Etappen",
+    "previewStages_one": "{{count}} Phase",
+    "previewStages_other": "{{count}} Phasen",
     "previewFirstGame": "Erstes Spiel um {{time}}",
-    "previewGameDuration": "Standard-Spieldauer: {{duration}} Minuten"
+    "previewGameDuration": "Standard-Spieldauer: {{duration}} Minuten",
+    "durationValidation": "Die Dauer muss zwischen 15 und 180 Minuten liegen.",
+    "generateTeamsDisabledHint": "Zuerst manuelle Teams entfernen"
+  },
+  "publishConfirmation": {
+    "title": "Spielplan veröffentlichen",
+    "description": "Das Veröffentlichen des Spielplans sperrt dessen Struktur. Ergebnisse können eingegeben werden, aber Spiele und Teams können nicht mehr hinzugefügt oder entfernt werden.",
+    "errorsTitle": "Blockierende Fehler gefunden",
+    "errorsDescription": "Die folgenden Probleme müssen behoben werden, bevor der Spielplan veröffentlicht werden kann:",
+    "warningsTitle": "Warnungen gefunden",
+    "warningsDescription": "Der Spielplan weist einige potenzielle Probleme auf. Sie können trotzdem veröffentlichen, aber bitte überprüfen Sie diese Punkte:",
+    "ready": "Der Spielplan ist gültig und bereit zur Veröffentlichung.",
+    "confirmWithWarnings": "Trotzdem veröffentlichen",
+    "confirm": "Jetzt veröffentlichen"
   }
 }

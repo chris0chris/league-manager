@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from gamedays.models import Gameresult, TeamLog
 from gamedays.service.utils import AsJsonEncoder
 
-EXCLUDED_EVENTS = ['Strafe', 'Spielzeit', 'Auszeit', 'First Down']
+EXCLUDED_EVENTS = ["Strafe", "Spielzeit", "Auszeit", "First Down"]
 
 
 class GameLogCreator(object):
@@ -22,31 +22,36 @@ class GameLogCreator(object):
             teamlog = TeamLog()
             teamlog.gameinfo = self.gameinfo
             teamlog.team = self.team
-            teamlog.sequence = sequence if entry.get('name') not in EXCLUDED_EVENTS else 0
-            teamlog.cop = entry.get('name') in ['Turnover', 'Interception']
-            teamlog.event = entry.get('name')
-            teamlog.input = entry.get('input')
-            teamlog.player = entry.get('player') if entry.get('player') != '' else None
-            teamlog.value = self._getValue(entry.get('name')) if teamlog.player is not None else 0
+            teamlog.sequence = (
+                sequence if entry.get("name") not in EXCLUDED_EVENTS else 0
+            )
+            teamlog.cop = entry.get("name") in ["Turnover", "Interception"]
+            teamlog.event = entry.get("name")
+            teamlog.input = entry.get("input")
+            teamlog.player = entry.get("player") if entry.get("player") != "" else None
+            teamlog.value = (
+                self._getValue(entry.get("name")) if teamlog.player is not None else 0
+            )
             teamlog.half = self.half
             teamlog.author = self.user
             teamlog.save()
         return GameLog(self.gameinfo)
 
     def _getSequence(self):
-        entryWithLatestSequence: TeamLog = TeamLog.objects.filter(gameinfo=self.gameinfo).order_by(
-            '-sequence').first()
+        entryWithLatestSequence: TeamLog = (
+            TeamLog.objects.filter(gameinfo=self.gameinfo).order_by("-sequence").first()
+        )
         if entryWithLatestSequence:
             return entryWithLatestSequence.sequence + 1
         return 1
 
     def _getValue(self, name):
         # ToDo deleteMe ... info should come via API request
-        if name == 'Touchdown':
+        if name == "Touchdown":
             return 6
-        if name in ('Overtime', '1-Extra-Punkt', 'Safety (+1)'):
+        if name in ("Overtime", "1-Extra-Punkt", "Safety (+1)"):
             return 1
-        if name in ('2-Extra-Punkte', 'Safety (+2)'):
+        if name in ("2-Extra-Punkte", "Safety (+2)"):
             return 2
         return 0
 
@@ -73,14 +78,30 @@ class GameLog(object):
         self.gamelog.is_first_half = self.is_firsthalf()
         self.gamelog.home.score = self.get_home_score()
         self.gamelog.away.score = self.get_away_score()
-        self.gamelog.home.firsthalf.score = self._calc_score(self.get_entries_home_firsthalf())
-        self.gamelog.home.firsthalf.entries = self.create_entries_for_half(self.get_entries_home_firsthalf())
-        self.gamelog.away.firsthalf.score = self._calc_score(self.get_entries_away_firsthalf())
-        self.gamelog.away.firsthalf.entries = self.create_entries_for_half(self.get_entries_away_firsthalf())
-        self.gamelog.home.secondhalf.score = self._calc_score(self.get_entries_home_secondhalf())
-        self.gamelog.home.secondhalf.entries = self.create_entries_for_half(self.get_entries_home_secondhalf())
-        self.gamelog.away.secondhalf.score = self._calc_score(self.get_entries_away_secondhalf())
-        self.gamelog.away.secondhalf.entries = self.create_entries_for_half(self.get_entries_away_secondhalf())
+        self.gamelog.home.firsthalf.score = self._calc_score(
+            self.get_entries_home_firsthalf()
+        )
+        self.gamelog.home.firsthalf.entries = self.create_entries_for_half(
+            self.get_entries_home_firsthalf()
+        )
+        self.gamelog.away.firsthalf.score = self._calc_score(
+            self.get_entries_away_firsthalf()
+        )
+        self.gamelog.away.firsthalf.entries = self.create_entries_for_half(
+            self.get_entries_away_firsthalf()
+        )
+        self.gamelog.home.secondhalf.score = self._calc_score(
+            self.get_entries_home_secondhalf()
+        )
+        self.gamelog.home.secondhalf.entries = self.create_entries_for_half(
+            self.get_entries_home_secondhalf()
+        )
+        self.gamelog.away.secondhalf.score = self._calc_score(
+            self.get_entries_away_secondhalf()
+        )
+        self.gamelog.away.secondhalf.entries = self.create_entries_for_half(
+            self.get_entries_away_secondhalf()
+        )
         return json.dumps(self.gamelog, cls=(AsJsonEncoder))
 
     def get_home_team(self):
@@ -92,30 +113,41 @@ class GameLog(object):
     def get_entries_home_firsthalf(self):
         if self.home_firsthalf_entries:
             return self.home_firsthalf_entries
-        self.home_firsthalf_entries = self._get_entries_for_team_and_half(team=self.gamelog.home.name, half=1)
+        self.home_firsthalf_entries = self._get_entries_for_team_and_half(
+            team=self.gamelog.home.name, half=1
+        )
         return self.home_firsthalf_entries
 
     def get_entries_away_firsthalf(self):
         if self.away_firsthalf_entries:
             return self.away_firsthalf_entries
-        self.away_firsthalf_entries = self._get_entries_for_team_and_half(team=self.gamelog.away.name, half=1)
+        self.away_firsthalf_entries = self._get_entries_for_team_and_half(
+            team=self.gamelog.away.name, half=1
+        )
         return self.away_firsthalf_entries
 
     def get_entries_home_secondhalf(self):
         if self.home_secondhalf_entries:
             return self.home_secondhalf_entries
-        self.home_secondhalf_entries = self._get_entries_for_team_and_half(team=self.gamelog.home.name, half=2)
+        self.home_secondhalf_entries = self._get_entries_for_team_and_half(
+            team=self.gamelog.home.name, half=2
+        )
         return self.home_secondhalf_entries
 
     def get_entries_away_secondhalf(self):
         if self.away_secondhalf_entries:
             return self.away_secondhalf_entries
-        self.away_secondhalf_entries = self._get_entries_for_team_and_half(team=self.gamelog.away.name, half=2)
+        self.away_secondhalf_entries = self._get_entries_for_team_and_half(
+            team=self.gamelog.away.name, half=2
+        )
         return self.away_secondhalf_entries
 
     def _get_entries_for_team_and_half(self, team, half):
-        return TeamLog.objects.filter(gameinfo=self.gameinfo, team__name=team, half=half) \
-            .exclude(event__in=EXCLUDED_EVENTS).order_by('-sequence')
+        return (
+            TeamLog.objects.filter(gameinfo=self.gameinfo, team__name=team, half=half)
+            .exclude(event__in=EXCLUDED_EVENTS)
+            .order_by("-sequence")
+        )
 
     def get_home_score(self):
         return self.get_home_firsthalf_score() + self.get_home_secondhalf_score()
@@ -136,28 +168,28 @@ class GameLog(object):
         entry: TeamLog
         for entry in half_entries:
             if result.get(entry.sequence) is None:
-                result[entry.sequence] = {
-                    'sequence': entry.sequence
-                }
+                result[entry.sequence] = {"sequence": entry.sequence}
             if entry.cop:
-                result[entry.sequence].update({
-                    'cop': entry.cop,
-                    'name': entry.event,
-                })
+                result[entry.sequence].update(
+                    {
+                        "cop": entry.cop,
+                        "name": entry.event,
+                    }
+                )
             else:
-                if entry.event == 'Touchdown':
-                    key = 'td'
-                elif entry.event == '1-Extra-Punkt':
-                    key = 'pat1'
-                elif entry.event == '2-Extra-Punkte':
-                    key = 'pat2'
-                elif entry.event == 'Overtime':
-                    key = 'OT'
+                if entry.event == "Touchdown":
+                    key = "td"
+                elif entry.event == "1-Extra-Punkt":
+                    key = "pat1"
+                elif entry.event == "2-Extra-Punkte":
+                    key = "pat2"
+                elif entry.event == "Overtime":
+                    key = "OT"
                 else:
                     key = entry.event
                 result[entry.sequence].update({key: entry.player})
             if entry.isDeleted:
-                result[entry.sequence].update({'isDeleted': True})
+                result[entry.sequence].update({"isDeleted": True})
         return list(result.values())
 
     def is_firsthalf(self):
@@ -176,7 +208,9 @@ class GameLog(object):
         return self._calc_score(self.get_entries_away_secondhalf())
 
     def mark_entries_as_deleted(self, sequence):
-        TeamLog.objects.filter(gameinfo=self.gameinfo, sequence=sequence).update(isDeleted=True)
+        TeamLog.objects.filter(gameinfo=self.gameinfo, sequence=sequence).update(
+            isDeleted=True
+        )
 
 
 class Half(object):
@@ -196,7 +230,12 @@ class Team(object):
         self.secondhalf = Half()
 
     def as_json(self):
-        return dict(name=self.name, score=self.score, firsthalf=self.firsthalf, secondhalf=self.secondhalf)
+        return dict(
+            name=self.name,
+            score=self.score,
+            firsthalf=self.firsthalf,
+            secondhalf=self.secondhalf,
+        )
 
 
 class GameLogObject(object):
@@ -207,4 +246,9 @@ class GameLogObject(object):
         self.is_first_half = True
 
     def as_json(self):
-        return dict(gameId=self.gameId, isFirstHalf=self.is_first_half, home=self.home, away=self.away)
+        return dict(
+            gameId=self.gameId,
+            isFirstHalf=self.is_first_half,
+            home=self.home,
+            away=self.away,
+        )

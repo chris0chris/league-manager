@@ -11,14 +11,17 @@ import {
   FieldNode,
   StageNode,
   GameNode,
-  GameToGameEdge,
+  FlowEdge,
   GlobalTeam,
   RoundRobinConfig,
   PlacementConfig,
+  createGameToGameEdge,
+  createStageToGameEdge,
 } from '../types/flowchart';
 import { createFieldNode, createStageNode } from '../types/flowchart';
 import { generateRoundRobinGames, generatePlacementGames } from './gameGenerators';
 import { calculateGameTimes } from './timeCalculation';
+import { createPlacementEdges } from './bracketEdgeGenerator';
 
 /**
  * Complete tournament structure
@@ -27,7 +30,7 @@ export interface TournamentStructure {
   fields: FieldNode[];
   stages: StageNode[];
   games: GameNode[];
-  edges: GameToGameEdge[];
+  edges: FlowEdge[];
 }
 
 /**
@@ -55,10 +58,10 @@ export function generateTournament(
   const fields = createFields(fieldCount);
 
   // 2. Create stages and assign to fields
-  const finalGameDuration = gameDuration || template.timing.defaultGameDuration;
-  const finalBreakDuration = breakDuration || template.timing.defaultBreakBetweenGames;
+  const finalGameDuration = gameDuration ?? template.timing.defaultGameDuration;
+  const finalBreakDuration = breakDuration ?? template.timing.defaultBreakBetweenGames;
   
-  let stages = createStages(template, fields, startTime, finalGameDuration);
+  let stages = createStages(template, fields, startTime, finalGameDuration, finalBreakDuration);
 
   // 3. Generate games for each stage
   let games = generateGamesForStages(stages);
@@ -87,9 +90,65 @@ export function generateTournament(
     return stage;
   });
 
-  // 5. Create progression edges (winner/loser flows)
-  // MVP: Manual edge creation via UI
-  const edges: GameToGameEdge[] = [];
+  // 5. Create progression edges (winner/loser/rank flows)
+  const edges: FlowEdge[] = [];
+  
+  stages.forEach(stage => {
+    const stageData = stage.data;
+    if (stageData.progressionMode === 'placement' || stageData.progressionMapping) {
+      // Find source games (from all previously generated games)
+      const targetGames = games.filter(g => g.parentId === stage.id);
+      
+      // Resolve sourceStageIndex to actual stage ID if present in mapping
+      let resolvedMapping = stageData.progressionMapping;
+      if (resolvedMapping) {
+        resolvedMapping = { ...resolvedMapping };
+        Object.keys(resolvedMapping).forEach(standing => {
+          const mapping = resolvedMapping![standing];
+          if (mapping.home.type === 'rank' && mapping.home.sourceStageId === undefined) {
+            // This is a template reference using sourceIndex as stage index
+            // For now, we assume stage order in template matches stage order in generated list
+            // but filtered by the template's own stage definition.
+            // Simplified: we look at stages created before this one.
+            const sourceStage = stages.find(s => s.data.order === mapping.home.sourceStageIndex);
+            if (sourceStage) mapping.home.sourceStageId = sourceStage.id;
+          }
+          if (mapping.away.type === 'rank' && mapping.away.sourceStageId === undefined) {
+            const sourceStage = stages.find(s => s.data.order === mapping.away.sourceStageIndex);
+            if (sourceStage) mapping.away.sourceStageId = sourceStage.id;
+          }
+        });
+      }
+
+      const edgeSpecs = createPlacementEdges(
+        targetGames,
+        games, 
+        stageData.progressionConfig,
+        resolvedMapping
+      );
+
+      edgeSpecs.forEach(spec => {
+        const edgeId = `edge-${uuidv4()}`;
+        if (spec.outputType === 'rank' && spec.sourceStageId) {
+          edges.push(createStageToGameEdge(
+            edgeId,
+            spec.sourceStageId,
+            spec.sourceRank!,
+            spec.targetGameId,
+            spec.targetSlot
+          ));
+        } else if (spec.sourceGameId) {
+          edges.push(createGameToGameEdge(
+            edgeId,
+            spec.sourceGameId,
+            spec.outputType as 'winner' | 'loser',
+            spec.targetGameId,
+            spec.targetSlot
+          ));
+        }
+      });
+    }
+  });
 
   return { fields, stages, games, edges };
 }
@@ -140,7 +199,8 @@ function createStages(
   template: TournamentTemplate,
   fields: FieldNode[],
   startTime: string,
-  gameDuration: number
+  gameDuration: number,
+  breakDuration: number
 ): StageNode[] {
   const stages: StageNode[] = [];
   let stageOrderCounter = 0;
@@ -158,16 +218,36 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          defaultBreakBetweenGames: breakDuration,
+          progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
       }
       stageOrderCounter++;
     } else if (stageTemplate.fieldAssignment === 'split') {
-      // Split groups across fields (Group A → Field 1, Group B → Field 2)
-      for (let i = 0; i < fields.length; i++) {
+      // Split teams into multiple groups (Group A, Group B, etc.)
+      // Distribute groups across available fields
+      
+      let groupCount = stageTemplate.splitCount;
+      
+      // Calculate groupCount if not explicitly provided
+      if (groupCount === undefined && stageTemplate.progressionMode === 'round_robin') {
+        const totalTeams = template.teamCount.exact || template.teamCount.min;
+        const teamsPerGroup = (stageTemplate.config as RoundRobinConfig).teamCount;
+        if (teamsPerGroup > 0) {
+          groupCount = Math.floor(totalTeams / teamsPerGroup);
+        }
+      }
+      
+      // Fallback to field count if calculation failed or not RR
+      const finalGroupCount = groupCount || fields.length;
+
+      for (let i = 0; i < finalGroupCount; i++) {
         const stageId = `stage-${uuidv4()}`;
         const groupLabel = String.fromCharCode(65 + i); // A, B, C...
-        const stage = createStageNode(stageId, fields[i].id, {
+        const fieldIndex = i % fields.length;
+        
+        const stage = createStageNode(stageId, fields[fieldIndex].id, {
           name: `${stageTemplate.name} ${groupLabel}`,
           stageType: stageTemplate.stageType,
           order: stageOrderCounter,
@@ -175,6 +255,8 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          defaultBreakBetweenGames: breakDuration,
+          progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
       }
@@ -192,6 +274,8 @@ function createStages(
           progressionConfig: stageTemplate.config,
           startTime: startTime,
           defaultGameDuration: gameDuration,
+          defaultBreakBetweenGames: breakDuration,
+          progressionMapping: stageTemplate.progressionMapping,
         });
         stages.push(stage);
       }
@@ -218,14 +302,27 @@ function generateGamesForStages(
     let games: GameNode[] = [];
 
     if (stageData.progressionMode === 'round_robin') {
+      // Extract group letter from stage name if present (e.g. "Group Stage A" -> "A")
+      // to prefix games (e.g. "A Game 1") and avoid duplicate standing names
+      let namePrefix: string | undefined;
+      const groupMatch = stageData.name.match(/\s([A-Z])$/);
+      if (groupMatch) {
+        namePrefix = groupMatch[1];
+      }
+
       games = generateRoundRobinGames(
         stage.id,
-        stageData.progressionConfig as RoundRobinConfig
+        stageData.progressionConfig as RoundRobinConfig,
+        stageData.defaultGameDuration,
+        stageData.defaultBreakBetweenGames,
+        namePrefix
       );
     } else if (stageData.progressionMode === 'placement') {
       games = generatePlacementGames(
         stage.id,
-        stageData.progressionConfig as PlacementConfig
+        stageData.progressionConfig as PlacementConfig,
+        stageData.defaultGameDuration,
+        stageData.defaultBreakBetweenGames
       );
     }
     // 'manual' mode generates no games automatically

@@ -28,6 +28,17 @@ const ValidationPanel: React.FC<ValidationPanelProps> = ({
   const { isValid, errors, warnings } = result;
 
   /**
+   * Helper to translate error/warning message.
+   */
+  const getMessage = (item: ValidationError | ValidationWarning) => {
+    if (item.messageKey) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return t(`validation:${item.messageKey}` as any, item.messageParams);
+    }
+    return item.message;
+  };
+
+  /**
    * Handle clicking on an error/warning to navigate.
    */
   const handleItemClick = (affectedSlots: string[]) => {
@@ -47,7 +58,7 @@ const ValidationPanel: React.FC<ValidationPanelProps> = ({
       onClick={() => handleItemClick(error.affectedSlots)}
       className="d-flex justify-content-between align-items-center"
     >
-      <span>{error.message}</span>
+      <span>{getMessage(error)}</span>
       <Badge bg="danger" pill>
         {error.affectedSlots.length}
       </Badge>
@@ -65,7 +76,7 @@ const ValidationPanel: React.FC<ValidationPanelProps> = ({
       onClick={() => handleItemClick(warning.affectedSlots)}
       className="d-flex justify-content-between align-items-center"
     >
-      <span>{warning.message}</span>
+      <span>{getMessage(warning)}</span>
       <Badge bg="warning" text="dark" pill>
         {warning.affectedSlots.length}
       </Badge>

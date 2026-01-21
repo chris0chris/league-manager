@@ -8,7 +8,15 @@ import React, { useState, useCallback, memo, useMemo } from 'react';
 import { Card, Button } from 'react-bootstrap';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import StageSection from './StageSection';
-import type { FieldNode, StageNode, FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
+import type { 
+  FieldNode, 
+  StageNode, 
+  FlowNode, 
+  FlowEdge, 
+  GlobalTeam, 
+  GlobalTeamGroup,
+  HighlightedElement
+} from '../../types/flowchart';
 import { ICONS } from '../../utils/iconConstants';
 import './FieldSection.css';
 
@@ -19,6 +27,7 @@ export interface FieldSectionProps {
   edges: FlowEdge[];
   globalTeams: GlobalTeam[];
   globalTeamGroups: GlobalTeamGroup[];
+  highlightedElement?: HighlightedElement | null;
   onUpdate: (nodeId: string, data: Partial<FieldNode['data']>) => void;
   onDelete: (nodeId: string) => void;
   onAddStage: (fieldId: string) => void;
@@ -27,9 +36,14 @@ export interface FieldSectionProps {
   onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
   onAddGame: (stageId: string) => void;
   onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
-  onRemoveGameToGameEdge: (targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   isExpanded: boolean;
   expandedStageIds: Set<string>;
+  highlightedSourceGameId?: string | null;
+  onDynamicReferenceClick: (sourceGameId: string) => void;
+  onNotify?: (message: string, type: import('../../types/designer').NotificationType, title?: string) => void;
+  readOnly?: boolean;
 }
 
 const FieldSection: React.FC<FieldSectionProps> = memo(({
@@ -39,6 +53,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
   edges,
   globalTeams,
   globalTeamGroups,
+  highlightedElement,
   onUpdate,
   onDelete,
   onAddStage,
@@ -47,9 +62,14 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
   onAssignTeam,
   onAddGame,
   onAddGameToGameEdge,
-  onRemoveGameToGameEdge,
+  onAddStageToGameEdge,
+  onRemoveEdgeFromSlot,
   isExpanded: isExpandedProp,
   expandedStageIds,
+  highlightedSourceGameId,
+  onDynamicReferenceClick,
+  onNotify,
+  readOnly = false,
 }) => {
   const { t } = useTypedTranslation(['ui']);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -65,6 +85,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
   );
 
   const isSelected = selectedNodeId === field.id;
+  const isHighlighted = highlightedElement?.id === field.id && highlightedElement?.type === 'field';
 
   const handleToggleExpand = useCallback(() => {
     setLocalExpanded((prev) => !prev);
@@ -124,7 +145,8 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
 
   return (
     <Card
-      className={`field-section mb-3 ${isSelected ? 'selected' : ''}`}
+      id={`field-${field.id}`}
+      className={`field-section mb-3 ${isSelected ? 'selected' : ''} ${isHighlighted ? 'element-highlighted' : ''}`}
       onClick={handleSelectField}
     >
       <Card.Header
@@ -152,32 +174,37 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
         ) : (
           <>
             <strong className="me-2">{field.data.name}</strong>
-            <Button
-              size="sm"
-              variant="link"
-              onClick={handleStartEdit}
-              aria-label={t('ui:tooltip.editFieldName')}
-              className="p-0 me-auto btn-adaptive"
-              style={{ fontSize: '0.875rem' }}
-              title={t('ui:tooltip.editFieldName')}
-            >
-              <i className={`bi ${ICONS.PENCIL_SMALL}`}></i>
-              <span className="btn-label-adaptive">{t('ui:button.edit')}</span>
-            </Button>
+            {!readOnly && (
+              <Button
+                size="sm"
+                variant="link"
+                onClick={handleStartEdit}
+                aria-label={t('ui:tooltip.editFieldName')}
+                className="p-0 me-auto btn-adaptive"
+                style={{ fontSize: '0.875rem' }}
+                title={t('ui:tooltip.editFieldName')}
+              >
+                <i className={`bi ${ICONS.PENCIL_SMALL}`}></i>
+                <span className="btn-label-adaptive">{t('ui:button.edit')}</span>
+              </Button>
+            )}
+            {readOnly && <span className="me-auto" />}
           </>
         )}
 
-        <Button
-          size="sm"
-          variant="outline-primary"
-          onClick={handleAddStage}
-          aria-label={t('ui:button.addStage')}
-          className="me-2 btn-adaptive"
-          title={t('ui:tooltip.addStage')}
-        >
-          <i className={`bi ${ICONS.ADD}`}></i>
-          <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
-        </Button>
+        {!readOnly && (
+          <Button
+            size="sm"
+            variant="outline-primary"
+            onClick={handleAddStage}
+            aria-label={t('ui:button.addStage')}
+            className="me-2 btn-adaptive"
+            title={t('ui:tooltip.addStage')}
+          >
+            <i className={`bi ${ICONS.ADD}`}></i>
+            <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
+          </Button>
+        )}
 
         <input
           type="color"
@@ -187,18 +214,21 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
           title={t('ui:tooltip.fieldColor')}
           className="me-2"
           style={{ width: '28px', height: '28px', border: 'none', borderRadius: '50%', cursor: 'pointer' }}
+          disabled={readOnly}
         />
 
-        <Button 
-          variant="outline-danger" 
-          size="sm" 
-          onClick={handleDelete} 
-          aria-label={t('ui:tooltip.deleteField')}
-          className="btn-adaptive"
-          title={t('ui:tooltip.deleteField')}
-        >
-          <i className={`bi ${ICONS.DELETE}`}></i>
-        </Button>
+        {!readOnly && (
+          <Button 
+            variant="outline-danger" 
+            size="sm" 
+            onClick={handleDelete} 
+            aria-label={t('ui:tooltip.deleteField')}
+            className="btn-adaptive"
+            title={t('ui:tooltip.deleteField')}
+          >
+            <i className={`bi ${ICONS.DELETE}`}></i>
+          </Button>
+        )}
       </Card.Header>
 
       {isExpanded && (
@@ -207,16 +237,18 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
             <div className="text-center py-4">
               <i className={`bi ${ICONS.STAGE} me-2`} style={{ fontSize: '2rem', opacity: 0.3 }}></i>
               <p className="text-muted mb-3">{t('ui:message.noStagesYet')}</p>
-              <Button 
-                variant="outline-primary" 
-                onClick={handleAddStage} 
-                aria-label={t('ui:button.addStage')} 
-                className="btn-adaptive"
-                title={t('ui:tooltip.addStage')}
-              >
-                <i className={`bi ${ICONS.ADD}`}></i>
-                <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
-              </Button>
+              {!readOnly && (
+                <Button 
+                  variant="outline-primary" 
+                  onClick={handleAddStage} 
+                  aria-label={t('ui:button.addStage')} 
+                  className="btn-adaptive"
+                  title={t('ui:tooltip.addStage')}
+                >
+                  <i className={`bi ${ICONS.ADD}`}></i>
+                  <span className="btn-label-adaptive">{t('ui:button.addStage')}</span>
+                </Button>
+              )}
             </div>
           ) : (
             <>
@@ -228,6 +260,7 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
                   edges={edges}
                   globalTeams={globalTeams}
                   globalTeamGroups={globalTeamGroups}
+                  highlightedElement={highlightedElement}
                   onUpdate={onUpdate}
                   onDelete={onDelete}
                   onSelectNode={onSelectNode}
@@ -235,8 +268,13 @@ const FieldSection: React.FC<FieldSectionProps> = memo(({
                   onAssignTeam={onAssignTeam}
                   onAddGame={onAddGame}
                   onAddGameToGameEdge={onAddGameToGameEdge}
-                  onRemoveGameToGameEdge={onRemoveGameToGameEdge}
+                  onAddStageToGameEdge={onAddStageToGameEdge}
+                  onRemoveEdgeFromSlot={onRemoveEdgeFromSlot}
                   isExpanded={expandedStageIds.has(stage.id)}
+                  highlightedSourceGameId={highlightedSourceGameId}
+                  onDynamicReferenceClick={onDynamicReferenceClick}
+                  onNotify={onNotify}
+                  readOnly={readOnly}
                 />
               ))}
             </>

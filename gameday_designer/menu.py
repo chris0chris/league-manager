@@ -37,6 +37,6 @@ class Gameday_designerMenuOrgaEntry(BaseMenu):
         return [
             MenuItem.create(
                 name='<span class="badge bg-warning text-dark me-1" style="font-size: 0.65em; vertical-align: middle;">BETA</span> Spieltag designen',
-                url='gameday_designer_app:index',  # Reverses to /gamedays/gameday/design/
+                url="gameday_designer_app:index",  # Reverses to /gamedays/gameday/design/
             ),
         ]

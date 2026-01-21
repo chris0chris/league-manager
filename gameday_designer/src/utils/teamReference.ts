@@ -37,6 +37,8 @@ export function formatTeamReference(ref: TeamReference): string {
       return `Gewinner ${ref.matchName}`;
     case 'loser':
       return `Verlierer ${ref.matchName}`;
+    case 'rank':
+      return `Rank ${ref.place} ${ref.stageName}`;
     case 'static':
       return ref.name;
   }
@@ -47,6 +49,7 @@ const GROUP_TEAM_PATTERN = /^(\d+)_(\d+)$/;
 const STANDING_PATTERN = /^P(\d+)\s+(.+)$/;
 const WINNER_PATTERN = /^Gewinner\s+(.+)$/;
 const LOSER_PATTERN = /^Verlierer\s+(.+)$/;
+const RANK_PATTERN = /^Rank\s+(\d+)\s+(.+)$/;
 
 /**
  * Parses a team reference string into a TeamReference object.
@@ -56,7 +59,8 @@ const LOSER_PATTERN = /^Verlierer\s+(.+)$/;
  * 2. Standing format: "PX GroupName" where X is an integer
  * 3. Winner format: "Gewinner MatchName"
  * 4. Loser format: "Verlierer MatchName"
- * 5. Static: Any other string (fallback)
+ * 5. Rank format: "Rank X StageName"
+ * 6. Static: Any other string (fallback)
  *
  * @param str - The string to parse
  * @returns The parsed TeamReference object
@@ -66,6 +70,7 @@ const LOSER_PATTERN = /^Verlierer\s+(.+)$/;
  * parseTeamReference("P2 Gruppe 1"); // { type: 'standing', place: 2, groupName: 'Gruppe 1' }
  * parseTeamReference("Gewinner HF1"); // { type: 'winner', matchName: 'HF1' }
  * parseTeamReference("Verlierer Spiel 3"); // { type: 'loser', matchName: 'Spiel 3' }
+ * parseTeamReference("Rank 1 Preliminary"); // { type: 'rank', place: 1, stageName: 'Preliminary', stageId: '' }
  * parseTeamReference("Team Officials"); // { type: 'static', name: 'Team Officials' }
  */
 export function parseTeamReference(str: string): TeamReference {
@@ -104,6 +109,17 @@ export function parseTeamReference(str: string): TeamReference {
     return {
       type: 'loser',
       matchName: loserMatch[1],
+    };
+  }
+
+  // Try rank format: "Rank 1 Preliminary", etc.
+  const rankMatch = str.match(RANK_PATTERN);
+  if (rankMatch) {
+    return {
+      type: 'rank',
+      place: parseInt(rankMatch[1], 10),
+      stageName: rankMatch[2],
+      stageId: '', // Note: stageId cannot be recovered from string format alone
     };
   }
 

@@ -28,6 +28,10 @@
   background-color: #d4e9ff; /* Slightly darker on hover */
 }
 
+.stage-section__header--editing {
+  background-color: rgba(13, 110, 253, 0.08) !important;
+}
+
 .stage-section__body {
   padding: 0.75rem;
 }

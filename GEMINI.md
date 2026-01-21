@@ -17,65 +17,109 @@ This file provides a comprehensive instructional context for Gemini (and other A
 
 ---
 
-## Development & Environment Setup
+## Development Workflow & Protocol
 
-### Python Environment
-The project utilizes `uv` for high-performance dependency management.
+### 1. Test-Driven Development (TDD)
+We strictly follow the TDD cycle:
+1.  **RED**: Write a test for the desired functionality and verify that it fails.
+2.  **GREEN**: Implement the minimum code necessary to make the test pass.
+3.  **REFACTOR**: Clean up the code while ensuring the tests remain GREEN.
 
-```bash
-# Sync environment with test dependencies
-uv sync --extra test
+**Mandatory Internal QA**: Before involving the user or reporting a task as finished, you MUST:
+-   **Run All Tests**: Execute the full test suite (Backend & Frontend) and ensure all pass.
+-   **LINT & FIX**: Run the project's linting commands, fix all errors, and resolve any formatting issues.
+-   **Targeted Tests**: Use isolated test runs during development, but verify the final result with the full suite.
 
-# Run Django with development settings
-league_manager=dev python manage.py runserver --insecure
-```
-*Note: `--insecure` is required to serve static files locally when `DEBUG=False`.*
+### 2. Branching & Pull Requests
+- **NO Commits to Master**: Direct commits to the `master` branch are strictly forbidden.
+- **Feature Branches**: All work must be performed on a dedicated branch created for the specific task or feature.
+- **Mandatory Local QA**: Before pushing anything to remote, all QA checks (Tests, Lint, Security) MUST pass locally. **LINTING IS MANDATORY BEFORE EVERY PUSH.**
+- **Pull Requests**: Every change must receive a Pull Request (PR). PRs must always be created in **origin** (`dachrisch/leaguesphere`). 
+- **Non-Interactive PRs**: To avoid interactive prompts, always use:
+  `gh pr create --repo dachrisch/leaguesphere --base master --title "..." --body "..."`
+- **Issues**: Task tracking and issue management are performed on **upstream github**.
+- **Merging**: Branches are only merged into `master` after explicit user approval.
 
-### Frontend Environment
-Each React application resides in its own directory with its own `package.json`.
+### 3. Documentation & Progress Tracking
+- **`feature-dev/` Directory**: Progress documentation for all features must be maintained in this directory.
+- **Tracking**: All features (excluding minor bugs and quick fixes) must track their progress here.
+- **History Entry**: Once a feature is finished, it must contain a history entry summarizing the implementation.
+- **Coverage Requirements**: Patch coverage for each PR must be at least **90%** to maintain an overall project coverage of above **80%**.
 
-```bash
-# Typical frontend commands (e.g., in gameday_designer/)
-npm install
-npm run start    # Vite dev server
-npm run build    # Production build to static/ directory
-```
+### 4. Memory Management (MCP)
+- **Persistence**: Use the `save_memory` tool to persist critical session facts, user-specific preferences, or significant architectural insights that should be retained for future sessions.
+- **Conciseness**: Ensure that each saved fact is clear, self-contained, and brief. Avoid saving long or ephemeral context.
+- **Proactivity**: Proactively identify and save information that will streamline future development or improve personalized assistance (e.g., "User prefers SQLite for local backend testing due to LXC connectivity issues").
 
 ---
 
 ## Testing Strategy
 
-### 1. Backend Testing (pytest)
-Backend tests require a MariaDB instance. The project infrastructure uses an LXC container (`servyy-test`) running a Docker MariaDB.
+### 1. Pre-flight Checklist (Always check these first)
+- [ ] **LXC Container**: Ensure `servyy-test` is running (`lxc list`).
+- [ ] **Database IP**: The IP changes! Always verify with `lxc list servyy-test`.
+- [ ] **Environment Variables**: Must be exported in the CURRENT shell session.
+- [ ] **Migrations**: Run `python manage.py migrate` if any models changed.
+- [ ] **Dependencies**: Run `uv sync --extra test` if any python imports fail.
 
-**Mandatory Environment Variables:**
+### 2. Backend Testing (pytest)
+Backend tests require a MariaDB instance in the `servyy-test` LXC container.
+
+**Mandatory Setup Command:**
 ```bash
-export MYSQL_HOST=10.185.182.207
+# 1. Spin up/Reset DB
+cd container && ./spinup_test_db.sh && cd ..
+
+# 2. Get current IP (e.g. 10.185.182.62)
+lxc list servyy-test
+
+# 3. Export all variables (Update IP if needed)
+export MYSQL_HOST=10.185.182.62
 export MYSQL_DB_NAME=test_db
 export MYSQL_USER=user
 export MYSQL_PWD=user
 export SECRET_KEY=test-secret-key
-```
+export league_manager=dev
 
-**Execution:**
-```bash
-# Reset/Start test DB (in container/ directory)
-./spinup_test_db.sh
-
-# Run tests
+# 4. Migrate and Test
+python manage.py migrate
 pytest
 ```
 
-### 2. Frontend Testing (vitest)
-All modern frontend apps use Vitest.
+**Troubleshooting DB Connection:**
+If you get `OperationalError: (2003, "Can't connect to MySQL server")`:
+1. Re-run `./container/spinup_test_db.sh`.
+2. Check `lxc list` to see if the IP address has changed.
+3. Ensure no local firewall is blocking the connection.
+
+### 3. Frontend Testing (vitest)
+Run tests for the specific app you are working on, or all of them to ensure no regressions.
+
 ```bash
+# Gameday Designer
 npm --prefix gameday_designer/ run test:run
+
+# Passcheck
+npm --prefix passcheck/ run test:run
+
+# Liveticker
+npm --prefix liveticker/ run test:run
+
+# Scorecard
+npm --prefix scorecard/ run test:run
 ```
 
 ---
 
-## Deployment & Safety Policies
+## Deployment & Staging
 
+### 1. Staging Deployments
+- **Requirement**: Only create deployments (staging or production) if the underlying Pull Request or branch CI checks are successful (**GREEN**).
+- **Trigger**: When a feature is "almost ready" and CI is green, it should be deployed to the staging environment.
+- **Process**: Use the `./container/deploy.sh stage` script to trigger the deployment.
+- **Validation**: All changes MUST be validated on the staging environment before the PR is merged or a production deployment is initiated.
+
+### 2. Production Safety Policies (Ansible)
 **CRITICAL: Mandatory Deployment Process**
 1. **Develop Fix**: Modify Ansible playbooks in `infrastructure/container`.
 2. **Test First**: Deploy to `servyy-test.lxd` (`10.185.182.207`) using the Ansible test inventory.
@@ -108,16 +152,16 @@ npm --prefix gameday_designer/ run test:run
 ### Coding Style
 - **Python**: Strict Django patterns. Format with `black .`.
 - **TypeScript**: Prefer Functional Components and Hooks. Use `Context API` for new state management (Redux exists in legacy apps).
-- **TDD**: Highly preferred. See `gameday_designer/tests/` for high-quality service-level test examples.
 
 ### Versioning
-Managed via `bump2version`. Synchronized across:
+Managed via `bump2version` (or `bump-my-version`). Synchronized across:
 - `league_manager/__init__.py`
 - Frontend `package.json` files
 - `uv.lock`
+- `pyproject.toml`
 
 ### Key Files for Context
 - `CLAUDE.md`: Detailed agent workflows and deployment safety policies.
-- `feature-dev/`: Contains ADRs, tournament play mode docs, and original requirements.
+- `feature-dev/`: Contains ADRs, tournament play mode docs, and implementation progress.
 - `pytest.ini`: Configures test discovery and DB reuse.
-- `pyproject.toml`: Defines dependencies and `bump2version` logic.
+- `pyproject.toml`: Defines dependencies and versioning logic.

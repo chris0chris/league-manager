@@ -13,33 +13,37 @@ from passcheck.tests.setup_factories.db_setup_passcheck import DbSetupPasscheck
 class TestTransferService(TestCase):
     def test_initialize_transfer(self):
         _, female, _, _ = DbSetupPasscheck.create_playerlist_for_team()
-        transferred_team = DBSetup().create_teams(name="Transferred_Team", number_teams=1)[0]
+        transferred_team = DBSetup().create_teams(
+            name="Transferred_Team", number_teams=1
+        )[0]
         user = User.objects.first()
         transfer_service = TransferService(female, transferred_team, user=user)
-        transfer_service.handle_transfer('pending')
+        transfer_service.handle_transfer("pending")
         transferred_playerlist = PlayerlistTransfer.objects.all()
         assert transferred_playerlist.count() == 1
         player_to_transfer: PlayerlistTransfer = transferred_playerlist.last()
         assert player_to_transfer.current_team == female
         assert player_to_transfer.new_team == transferred_team
-        assert player_to_transfer.status == 'pending'
+        assert player_to_transfer.status == "pending"
         assert player_to_transfer.approved_by is None
         assert player_to_transfer.approval_date is None
 
     def test_approve_transfer(self):
         _, female, _, _ = DbSetupPasscheck.create_playerlist_for_team()
-        transferred_team = DBSetup().create_teams(name="Transferred_Team", number_teams=1)[0]
+        transferred_team = DBSetup().create_teams(
+            name="Transferred_Team", number_teams=1
+        )[0]
         user = User.objects.first()
         PlayerlistTransfer.objects.create(
             current_team=female,
             new_team=transferred_team,
         )
         transfer_service = TransferService(female, transferred_team, user=user)
-        transfer_service.handle_transfer('approved')
+        transfer_service.handle_transfer("approved")
         player_to_transfer = PlayerlistTransfer.objects.first()
         assert player_to_transfer.current_team == female
         assert player_to_transfer.new_team == transferred_team
-        assert player_to_transfer.status == 'approved'
+        assert player_to_transfer.status == "approved"
         today = timezone.now().date()
         assert player_to_transfer.approval_date.date() == today
         assert Playerlist.objects.get(pk=female.pk).left_on == today
@@ -52,18 +56,20 @@ class TestTransferService(TestCase):
 
     def test_reject_transfer(self):
         _, female, _, _ = DbSetupPasscheck.create_playerlist_for_team()
-        transferred_team = DBSetup().create_teams(name="Transferred_Team", number_teams=1)[0]
+        transferred_team = DBSetup().create_teams(
+            name="Transferred_Team", number_teams=1
+        )[0]
         user = User.objects.first()
         PlayerlistTransfer.objects.create(
             current_team=female,
             new_team=transferred_team,
         )
         transfer_service = TransferService(female, transferred_team, user=user)
-        transfer_service.handle_transfer('rejected')
+        transfer_service.handle_transfer("rejected")
         player_to_transfer = PlayerlistTransfer.objects.first()
         assert player_to_transfer.current_team == female
         assert player_to_transfer.new_team == transferred_team
-        assert player_to_transfer.status == 'rejected'
+        assert player_to_transfer.status == "rejected"
         today = timezone.now().date()
         assert player_to_transfer.approval_date.date() == today
         assert Playerlist.objects.get(pk=female.pk).left_on is None

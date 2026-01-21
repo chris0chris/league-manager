@@ -1,0 +1,11 @@
+{
+  "tools": {
+    "core": [
+      "fileRead",
+      "fileWrite",
+      "grep",
+      "terminal",
+      "webSearch"
+    ]
+  }
+}

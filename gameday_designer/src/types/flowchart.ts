@@ -100,8 +100,10 @@ export interface TeamNodeData {
 export interface GameNodeData {
   /** Node type discriminator */
   type: 'game';
-  /** Tournament stage: "Vorrunde", "Finalrunde", or custom */
+  /** Tournament stage: "Preliminary", "Final", or custom */
   stage: string;
+  /** Stage type discriminator: "STANDARD" or "RANKING" */
+  stageType: 'STANDARD' | 'RANKING';
   /** Standing/match identifier: e.g., "HF1", "P1", "Spiel 3" */
   standing: string;
   /** Assigned field ID (null if unassigned) - deprecated in v2, use parentId hierarchy */
@@ -121,6 +123,11 @@ export interface GameNodeData {
   /** Dynamic away team reference from GameToGameEdge (overrides awayTeamId) */
   awayTeamDynamic: TeamReference | null;
 
+  /** Resolved home team label from backend (read-only) */
+  resolvedHomeTeam?: string;
+  /** Resolved away team label from backend (read-only) */
+  resolvedAwayTeam?: string;
+
   // Time scheduling (Phase 1)
   /** Calculated start time (HH:MM, 24-hour). Auto-calculated or manual. */
   startTime?: string;
@@ -135,9 +142,14 @@ export interface GameNodeData {
 // ============================================================================
 
 /**
- * Stage type enumeration for ordering stages within a field.
+ * Stage category enumeration for ordering stages within a field.
  */
-export type StageType = 'vorrunde' | 'finalrunde' | 'platzierung' | 'custom';
+export type StageCategory = 'preliminary' | 'final' | 'placement' | 'custom';
+
+/**
+ * Stage type discriminator for ranking logic.
+ */
+export type StageType = 'STANDARD' | 'RANKING';
 
 /**
  * Progression mode for game generation templates (Phase 2).
@@ -206,9 +218,11 @@ export interface FieldNodeData {
 export interface StageNodeData {
   /** Node type discriminator */
   type: 'stage';
-  /** Display name (e.g., "Vorrunde", "Finalrunde") */
+  /** Display name (e.g., "Preliminary", "Final") */
   name: string;
   /** Stage category for ordering */
+  category: StageCategory;
+  /** Stage type discriminator for ranking logic */
   stageType: StageType;
   /** Order within parent field */
   order: number;
@@ -220,12 +234,19 @@ export interface StageNodeData {
   startTime?: string;
   /** Default game duration for stage in minutes (default 50) */
   defaultGameDuration?: number;
+  /** Default break between games in minutes (default 0) */
+  defaultBreakBetweenGames?: number;
 
   // Progression types (Phase 2)
   /** Progression mode for game generation */
   progressionMode?: ProgressionMode;
   /** Configuration for progression mode */
   progressionConfig?: ProgressionConfig;
+  /** Optional mapping for progression from source games */
+  progressionMapping?: Record<string, {
+    home: { sourceIndex: number; type: 'winner' | 'loser' };
+    away: { sourceIndex: number; type: 'winner' | 'loser' };
+  }>;
 }
 
 // ============================================================================
@@ -277,6 +298,12 @@ export type GameOutputHandle = 'winner' | 'loser';
 export type TeamOutputHandle = 'output';
 
 /**
+ * Handle IDs for stage node connections (Ranking Stages).
+ * Format: rank-1, rank-2, etc.
+ */
+export type RankOutputHandle = `rank-${number}`;
+
+/**
  * Data for an edge connecting a team to a game input.
  */
 export interface TeamToGameEdgeData {
@@ -290,6 +317,16 @@ export interface TeamToGameEdgeData {
 export interface GameToGameEdgeData {
   /** Source port on the source game node */
   sourcePort: GameOutputHandle;
+  /** Target port on the target game node */
+  targetPort: GameInputHandle;
+}
+
+/**
+ * Data for an edge connecting a stage rank to a game input.
+ */
+export interface StageToGameEdgeData {
+  /** Source rank on the source stage node (1-indexed) */
+  sourceRank: number;
   /** Target port on the target game node */
   targetPort: GameInputHandle;
 }
@@ -316,9 +353,19 @@ export interface GameToGameEdge extends Edge {
 }
 
 /**
+ * Edge connecting a stage node (Ranking Stage) to a game node.
+ */
+export interface StageToGameEdge extends Edge {
+  type: 'stageToGame';
+  sourceHandle: RankOutputHandle;
+  targetHandle: GameInputHandle;
+  data: StageToGameEdgeData;
+}
+
+/**
  * Union type for all edge types used in the designer.
  */
-export type FlowEdge = GameToGameEdge;
+export type FlowEdge = GameToGameEdge | StageToGameEdge;
 
 // ============================================================================
 // Field Types (Simplified from slot-based approach)
@@ -339,6 +386,29 @@ export interface FlowField {
 }
 
 // ============================================================================
+// Gameday Metadata
+// ============================================================================
+
+/**
+ * Gameday metadata for high-level management.
+ */
+export interface GamedayMetadata {
+  id: number;
+  name: string;
+  date: string;
+  start: string;
+  format: string;
+  author: number;
+  author_display?: string;
+  address: string;
+  season: number;
+  season_display?: string;
+  league: number;
+  league_display?: string;
+  status: string;
+}
+
+// ============================================================================
 // Flow State
 // ============================================================================
 
@@ -346,6 +416,8 @@ export interface FlowField {
  * Complete state of the flowchart designer.
  */
 export interface FlowState {
+  /** Gameday metadata */
+  metadata?: GamedayMetadata;
   /** All nodes in the graph */
   nodes: FlowNode[];
   /** All edges connecting nodes */
@@ -359,8 +431,18 @@ export interface FlowState {
 }
 
 // ============================================================================
-// Selection State
+// Selection and Highlighting State
 // ============================================================================
+
+/**
+ * Represents an element that is currently visually highlighted.
+ */
+export interface HighlightedElement {
+  /** ID of the element to highlight */
+  id: string;
+  /** Type of the element (for context-aware styling) */
+  type: 'game' | 'stage' | 'field' | 'team';
+}
 
 /**
  * Represents what is currently selected in the canvas.
@@ -386,7 +468,11 @@ export type FlowValidationErrorType =
   | 'self_reference'
   | 'stage_outside_field'
   | 'team_outside_container'
-  | 'game_outside_container';
+  | 'game_outside_container'
+  | 'field_overlap'
+  | 'team_overlap'
+  | 'progression_incomplete'
+  | 'progression_order';
 
 /**
  * Validation warning types for the flowchart approach.
@@ -394,7 +480,10 @@ export type FlowValidationErrorType =
 export type FlowValidationWarningType =
   | 'duplicate_standing'
   | 'orphaned_team'
-  | 'unassigned_field';
+  | 'unassigned_field'
+  | 'stage_time_conflict'
+  | 'stage_sequence_type'
+  | 'uneven_game_distribution';
 
 /**
  * Validation error for the flowchart.
@@ -406,6 +495,10 @@ export interface FlowValidationError {
   type: FlowValidationErrorType;
   /** Human-readable error message */
   message: string;
+  /** Translation key for the error message */
+  messageKey?: string;
+  /** Parameters for the translation key */
+  messageParams?: Record<string, unknown>;
   /** IDs of affected nodes */
   affectedNodes: string[];
 }
@@ -420,6 +513,10 @@ export interface FlowValidationWarning {
   type: FlowValidationWarningType;
   /** Human-readable warning message */
   message: string;
+  /** Translation key for the warning message */
+  messageKey?: string;
+  /** Parameters for the translation key */
+  messageParams?: Record<string, unknown>;
   /** IDs of affected nodes */
   affectedNodes: string[];
 }
@@ -517,6 +614,13 @@ export function isGameToGameEdge(edge: FlowEdge): edge is GameToGameEdge {
   return edge.type === 'gameToGame';
 }
 
+/**
+ * Type guard to check if an edge is a StageToGameEdge.
+ */
+export function isStageToGameEdge(edge: FlowEdge): edge is StageToGameEdge {
+  return edge.type === 'stageToGame';
+}
+
 // ============================================================================
 // Factory Functions
 // ============================================================================
@@ -537,7 +641,8 @@ export function createGameNode(
     position,
     data: {
       type: 'game',
-      stage: options.stage ?? 'Vorrunde',
+      stage: options.stage ?? 'Preliminary',
+      stageType: options.stageType ?? 'STANDARD',
       standing: options.standing ?? '',
       fieldId: options.fieldId ?? null,
       official: options.official ?? null,
@@ -608,16 +713,19 @@ export function createStageNode(
     position,
     data: {
       type: 'stage',
-      name: options?.name ?? 'Vorrunde',
-      stageType: options?.stageType ?? 'vorrunde',
+      name: options?.name ?? 'Preliminary',
+      category: options?.category ?? 'preliminary',
+      stageType: options?.stageType ?? 'STANDARD',
       order: options?.order ?? 0,
       color: options?.color,
       // Time scheduling fields (Phase 1)
       startTime: options?.startTime,
       defaultGameDuration: options?.defaultGameDuration ?? DEFAULT_GAME_DURATION,
+      defaultBreakBetweenGames: options?.defaultBreakBetweenGames ?? 0,
       // Progression fields (Phase 2)
       progressionMode: options?.progressionMode ?? 'manual',
       progressionConfig: options?.progressionConfig ?? { mode: 'manual' },
+      progressionMapping: options?.progressionMapping,
     },
     style: { width: 300, height: 150 },
     extent: 'parent',
@@ -648,7 +756,8 @@ export function createGameNodeInStage(
     position,
     data: {
       type: 'game',
-      stage: options?.stage ?? 'Vorrunde',
+      stage: options?.stage ?? 'Preliminary',
+      stageType: options?.stageType ?? 'STANDARD',
       standing: options?.standing ?? '',
       fieldId: options?.fieldId ?? null,
       official: options?.official ?? null,
@@ -699,6 +808,30 @@ export function createGameToGameEdge(
 }
 
 /**
+ * Creates a new stage-to-game edge.
+ */
+export function createStageToGameEdge(
+  id: string,
+  sourceStageId: string,
+  sourceRank: number,
+  targetGameId: string,
+  targetPort: GameInputHandle
+): StageToGameEdge {
+  return {
+    id,
+    type: 'stageToGame',
+    source: sourceStageId,
+    target: targetGameId,
+    sourceHandle: `rank-${sourceRank}`,
+    targetHandle: targetPort,
+    data: {
+      sourceRank,
+      targetPort,
+    },
+  };
+}
+
+/**
  * Creates a new field with default values.
  */
 export function createFlowField(
@@ -718,6 +851,18 @@ export function createFlowField(
  */
 export function createEmptyFlowState(): FlowState {
   return {
+    metadata: {
+      id: 0,
+      name: '',
+      date: new Date().toISOString().split('T')[0],
+      start: '10:00',
+      format: '6_2',
+      author: 0,
+      address: '',
+      season: 0,
+      league: 0,
+      status: 'DRAFT',
+    },
     nodes: [],
     edges: [],
     fields: [],

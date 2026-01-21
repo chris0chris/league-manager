@@ -51,7 +51,7 @@ class LeagueSphereSitemap(Sitemap):
         Returns:
             str: 'https' protocol
         """
-        return 'https'
+        return "https"
 
 
 class StaticViewSitemap(LeagueSphereSitemap):

@@ -6,11 +6,10 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { useFlowState } from './useFlowState';
 import { useFlowValidation } from './useFlowValidation';
 import { downloadFlowchartAsJson, validateForExport } from '../utils/flowchartExport';
 import { importFromScheduleJson, validateScheduleJson } from '../utils/flowchartImport';
-import { scrollToGameWithExpansion } from '../utils/scrollHelpers';
+import { scrollToElementWithExpansion } from '../utils/scrollHelpers';
 import { generateTournament, TournamentStructure } from '../utils/tournamentGenerator';
 import {
   generateTeamsForTournament,
@@ -21,12 +20,11 @@ import {
   TOURNAMENT_GENERATION_STATE_DELAY,
   DEFAULT_TOURNAMENT_GROUP_NAME,
 } from '../utils/tournamentConstants';
-import type { GlobalTeam, Notification, NotificationType } from '../types/flowchart';
+import type { GlobalTeam, HighlightedElement, Notification, NotificationType } from '../types/flowchart';
 import type { TournamentGenerationConfig } from '../types/tournament';
 import { v4 as uuidv4 } from 'uuid';
 
-export function useDesignerController() {
-  const flowState = useFlowState();
+export function useDesignerController(flowState: UseFlowStateReturn) {
   const {
     nodes,
     edges,
@@ -39,6 +37,7 @@ export function useDesignerController() {
     updateNode,
     deleteNode,
     selectNode,
+    updateMetadata,
     clearAll,
     importState,
     exportState,
@@ -52,10 +51,10 @@ export function useDesignerController() {
   } = flowState;
 
   // Validate the current flowchart
-  const validation = useFlowValidation(nodes, edges);
+  const validation = useFlowValidation(nodes, edges, fields, globalTeams, globalTeamGroups);
 
   // --- UI State ---
-  const [highlightedSourceGameId, setHighlightedSourceGameId] = useState<string | null>(null);
+  const [highlightedElement, setHighlightedElement] = useState<HighlightedElement | null>(null);
   const [expandedFieldIds, setExpandedFieldIds] = useState<Set<string>>(new Set());
   const [expandedStageIds, setExpandedStageIds] = useState<Set<string>>(new Set());
   const [showTournamentModal, setShowTournamentModal] = useState(false);
@@ -63,11 +62,11 @@ export function useDesignerController() {
 
   // --- UI Actions ---
 
-  const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string) => {
+  const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string, undoAction?: () => void, duration?: number) => {
     const id = uuidv4();
     setNotifications((prev) => [
       ...prev,
-      { id, message, type, title, show: true }
+      { id, message, type, title, show: true, undoAction, duration }
     ]);
   }, []);
 
@@ -87,15 +86,22 @@ export function useDesignerController() {
     setExpandedStageIds((prev) => new Set([...prev, stageId]));
   }, []);
 
-  const handleDynamicReferenceClick = useCallback(
-    async (sourceGameId: string) => {
-      setHighlightedSourceGameId(sourceGameId);
-      await scrollToGameWithExpansion(sourceGameId, nodes, expandField, expandStage, true);
+  const handleHighlightElement = useCallback(
+    async (id: string, type: HighlightedElement['type']) => {
+      setHighlightedElement({ id, type });
+      await scrollToElementWithExpansion(id, type, nodes, expandField, expandStage, true);
       setTimeout(() => {
-        setHighlightedSourceGameId(null);
+        setHighlightedElement(null);
       }, HIGHLIGHT_AUTO_CLEAR_DELAY);
     },
     [nodes, expandField, expandStage]
+  );
+
+  const handleDynamicReferenceClick = useCallback(
+    (sourceGameId: string) => {
+      handleHighlightElement(sourceGameId, 'game');
+    },
+    [handleHighlightElement]
   );
 
   const handleImport = useCallback(
@@ -122,10 +128,11 @@ export function useDesignerController() {
     const state = exportState();
     const errors = validateForExport(state);
     if (errors.length > 0) {
-      const proceed = window.confirm(
-        `The following issues were found:\n\n${errors.join('\n')}\n\nExport anyway?`
+      addNotification(
+        `Export may be incomplete: ${errors.length} validation issues found. Check the validation panel for details.`,
+        'warning',
+        'Export'
       );
-      if (!proceed) return;
     }
     downloadFlowchartAsJson(state);
     addNotification('Schedule exported successfully', 'success', 'Export Success');
@@ -199,18 +206,20 @@ export function useDesignerController() {
     ...flowState,
     validation,
     notifications,
+    updateMetadata,
     ui: {
-      highlightedSourceGameId,
+      highlightedElement,
       expandedFieldIds,
       expandedStageIds,
       showTournamentModal,
       canExport,
-      hasNodes: nodes.length > 0,
+      hasData: nodes.length > 0 || globalTeams.length > 0 || fields.length > 0,
     },
     // Handlers
     handlers: {
       expandField,
       expandStage,
+      handleHighlightElement,
       handleDynamicReferenceClick,
       handleImport,
       handleExport,
@@ -229,6 +238,7 @@ export function useDesignerController() {
       handleAddFieldContainer: () => addFieldNode({}, true),
       handleAddStage: (fieldId: string) => addStageNode(fieldId),
       dismissNotification,
+      addNotification,
     }
   };
 }

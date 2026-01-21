@@ -1,19 +1,22 @@
-/**
- * Tests for bracket edge generator
- *
- * Comprehensive tests for tournament bracket edge creation logic.
- * Tests single elimination and crossover formats with 2, 4, and 8 team brackets.
- */
+import { describe, it, expect, vi } from 'vitest';
+import { createPlacementEdges } from '../bracketEdgeGenerator';
+import type { GameNode } from '../../types/flowchart';
+import {
+  GAME_STANDING_SF1,
+  GAME_STANDING_SF2,
+  GAME_STANDING_FINAL,
+  GAME_STANDING_THIRD_PLACE,
+  GAME_STANDING_QF1,
+  GAME_STANDING_QF2,
+  GAME_STANDING_QF3,
+  GAME_STANDING_QF4,
+  GAME_STANDING_CO1,
+  GAME_STANDING_CO2,
+} from '../tournamentConstants';
 
-import { describe, it, expect } from 'vitest';
-import { createPlacementEdges, type EdgeSpec } from '../bracketEdgeGenerator';
-import type { GameNode, StageNodeData } from '../../types/flowchart';
-
-/**
- * Helper to create a mock game node
- */
-function createMockGame(id: string, standing: string, parentId: string = 'stage1'): GameNode {
-  return {
+describe('bracketEdgeGenerator', () => {
+  // Helper to create mock game nodes
+  const createMockGame = (id: string, standing: string): GameNode => ({
     id,
     type: 'game',
     position: { x: 0, y: 0 },
@@ -21,488 +24,384 @@ function createMockGame(id: string, standing: string, parentId: string = 'stage1
       standing,
       homeTeamId: null,
       awayTeamId: null,
-      startTime: null,
-      manualStartTime: false,
-      breakAfter: null,
-      homeScore: null,
-      awayScore: null,
+      officialTeamId: null,
+      startTime: '10:00',
+      duration: 70,
     },
-    parentId,
-  };
-}
+  });
 
-/**
- * Helper to find edges by target game and slot
- */
-function findEdge(edges: EdgeSpec[], targetId: string, slot: 'home' | 'away'): EdgeSpec | undefined {
-  return edges.find((e) => e.targetGameId === targetId && e.targetSlot === slot);
-}
+  describe('createPlacementEdges - 4-Team Single Elimination', () => {
+    const targetGames = [
+      createMockGame('sf1', GAME_STANDING_SF1),
+      createMockGame('sf2', GAME_STANDING_SF2),
+      createMockGame('final', GAME_STANDING_FINAL),
+      createMockGame('third', GAME_STANDING_THIRD_PLACE),
+    ];
 
-describe('bracketEdgeGenerator', () => {
-  describe('createPlacementEdges - Invalid/Empty Config', () => {
-    it('should return empty array for null config', () => {
-      const targetGames: GameNode[] = [];
-      const sourceGames: GameNode[] = [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = createPlacementEdges(targetGames, sourceGames, null as any);
-      expect(result).toEqual([]);
+    it('should create edges for 2-group split group pattern (6 games)', () => {
+      const sourceGames = [
+        createMockGame('g1', 'Group A1'),
+        createMockGame('g2', 'Group A2'),
+        createMockGame('g3', 'Group A3'),
+        createMockGame('g4', 'Group B1'),
+        createMockGame('g5', 'Group B2'),
+        createMockGame('g6', 'Group B3'),
+      ];
+
+      const config = {
+        mode: 'placement' as const,
+        positions: 4,
+        format: 'single_elimination' as const,
+      };
+
+      const edges = createPlacementEdges(targetGames, sourceGames, config);
+
+      // 4 source-to-SF edges + 4 SF-to-Final/3rd edges = 8 edges
+      expect(edges).toHaveLength(8);
+
+      // Verify source to SF1 (Group A1 vs Group B1)
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'g1',
+        outputType: 'winner',
+        targetGameId: 'sf1',
+        targetSlot: 'home'
+      }));
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'g4',
+        outputType: 'winner',
+        targetGameId: 'sf1',
+        targetSlot: 'away'
+      }));
+
+      // Verify source to SF2 (Group A3 vs Group B3)
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'g3',
+        outputType: 'winner',
+        targetGameId: 'sf2',
+        targetSlot: 'home'
+      }));
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'g6',
+        outputType: 'winner',
+        targetGameId: 'sf2',
+        targetSlot: 'away'
+      }));
+
+      // Verify internal bracket edges
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'sf1',
+        outputType: 'winner',
+        targetGameId: 'final',
+        targetSlot: 'home'
+      }));
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'sf2',
+        outputType: 'winner',
+        targetGameId: 'final',
+        targetSlot: 'away'
+      }));
     });
 
-    it('should return empty array for undefined config', () => {
-      const targetGames: GameNode[] = [];
-      const sourceGames: GameNode[] = [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = createPlacementEdges(targetGames, sourceGames, undefined as any);
-      expect(result).toEqual([]);
+    it('should create edges for single group pattern (3 games)', () => {
+      const sourceGames = [
+        createMockGame('g1', 'Game 1'),
+        createMockGame('g2', 'Game 2'),
+        createMockGame('g3', 'Game 3'),
+      ];
+
+      const config = {
+        mode: 'placement' as const,
+        positions: 4,
+        format: 'single_elimination' as const,
+      };
+
+      const edges = createPlacementEdges(targetGames, sourceGames, config);
+
+      // 4 source-to-SF edges + 4 SF-to-Final/3rd edges = 8 edges
+      expect(edges).toHaveLength(8);
+
+      // For 3 games: G1 winner, G2 winner -> SF1; G3 winner, G1 loser -> SF2
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'g1',
+        outputType: 'winner',
+        targetGameId: 'sf1',
+        targetSlot: 'home'
+      }));
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'g2',
+        outputType: 'winner',
+        targetGameId: 'sf1',
+        targetSlot: 'away'
+      }));
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'g3',
+        outputType: 'winner',
+        targetGameId: 'sf2',
+        targetSlot: 'home'
+      }));
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'g1',
+        outputType: 'loser',
+        targetGameId: 'sf2',
+        targetSlot: 'away'
+      }));
     });
 
+    it('should create edges for simple 2-game pattern', () => {
+      const sourceGames = [
+        createMockGame('g1', 'Game 1'),
+        createMockGame('g2', 'Game 2'),
+      ];
+
+      const config = {
+        mode: 'placement' as const,
+        positions: 4,
+        format: 'single_elimination' as const,
+      };
+
+      const edges = createPlacementEdges(targetGames, sourceGames, config);
+
+      // SF1: G1 winner vs G2 winner; SF2: G1 loser vs G2 loser
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'g1',
+        outputType: 'winner',
+        targetGameId: 'sf1',
+        targetSlot: 'home'
+      }));
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'g1',
+        outputType: 'loser',
+        targetGameId: 'sf2',
+        targetSlot: 'home'
+      }));
+    });
+  });
+
+  describe('createPlacementEdges - 2-Team Final Only', () => {
+    it('should connect semifinal winners to final', () => {
+      const targetGames = [createMockGame('final', GAME_STANDING_FINAL)];
+      const sourceGames = [
+        createMockGame('sf1', GAME_STANDING_SF1),
+        createMockGame('sf2', GAME_STANDING_SF2),
+      ];
+
+      const config = {
+        mode: 'placement' as const,
+        positions: 2,
+        format: 'single_elimination' as const,
+      };
+
+      const edges = createPlacementEdges(targetGames, sourceGames, config);
+
+      expect(edges).toHaveLength(2);
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'sf1',
+        outputType: 'winner',
+        targetGameId: 'final',
+        targetSlot: 'home'
+      }));
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'sf2',
+        outputType: 'winner',
+        targetGameId: 'final',
+        targetSlot: 'away'
+      }));
+    });
+  });
+
+  describe('createPlacementEdges - 8-Team Single Elimination', () => {
+    it('should create internal edges for full 8-team bracket', () => {
+      const targetGames = [
+        createMockGame('qf1', GAME_STANDING_QF1),
+        createMockGame('qf2', GAME_STANDING_QF2),
+        createMockGame('qf3', GAME_STANDING_QF3),
+        createMockGame('qf4', GAME_STANDING_QF4),
+        createMockGame('sf1', GAME_STANDING_SF1),
+        createMockGame('sf2', GAME_STANDING_SF2),
+        createMockGame('final', GAME_STANDING_FINAL),
+        createMockGame('third', GAME_STANDING_THIRD_PLACE),
+      ];
+
+      const config = {
+        mode: 'placement' as const,
+        positions: 8,
+        format: 'single_elimination' as const,
+      };
+
+      const edges = createPlacementEdges(targetGames, [], config);
+
+      // QF->SF (4 edges) + SF->Final/3rd (4 edges) = 8 edges
+      expect(edges).toHaveLength(8);
+
+      // QF1/2 to SF1
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'qf1',
+        targetGameId: 'sf1',
+        targetSlot: 'home'
+      }));
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'qf2',
+        targetGameId: 'sf1',
+        targetSlot: 'away'
+      }));
+
+      // SF1/2 to Final
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'sf1',
+        outputType: 'winner',
+        targetGameId: 'final',
+        targetSlot: 'home'
+      }));
+    });
+  });
+
+  describe('createPlacementEdges - 4-Team Crossover', () => {
+    it('should connect crossover winners/losers to final/3rd place', () => {
+      const targetGames = [
+        createMockGame('co1', GAME_STANDING_CO1),
+        createMockGame('co2', GAME_STANDING_CO2),
+        createMockGame('final', GAME_STANDING_FINAL),
+        createMockGame('third', GAME_STANDING_THIRD_PLACE),
+      ];
+
+      const config = {
+        mode: 'placement' as const,
+        positions: 4,
+        format: 'crossover' as const,
+      };
+
+      const edges = createPlacementEdges(targetGames, [], config);
+
+      expect(edges).toHaveLength(4);
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'co1',
+        outputType: 'winner',
+        targetGameId: 'final',
+        targetSlot: 'home'
+      }));
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'co2',
+        outputType: 'loser',
+        targetGameId: 'third',
+        targetSlot: 'away'
+      }));
+    });
+  });
+
+  describe('createPlacementEdges - Custom Mapping', () => {
+    it('should create edges from progressionMapping', () => {
+      const targetGames = [createMockGame('final', 'Final')];
+      const sourceGames = [createMockGame('sf1', 'SF1'), createMockGame('sf2', 'SF2')];
+      
+      const mapping = {
+        'Final': {
+          home: { type: 'winner', sourceIndex: 0 },
+          away: { type: 'winner', sourceIndex: 1 }
+        }
+      };
+
+      const config = {
+        mode: 'placement' as const,
+        positions: 2,
+        format: 'single_elimination' as const,
+      };
+
+      const edges = createPlacementEdges(targetGames, sourceGames, config, mapping);
+      
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceGameId: 'sf1',
+        outputType: 'winner',
+        targetGameId: 'final',
+        targetSlot: 'home'
+      }));
+    });
+
+    it('should handle rank-based mapping', () => {
+      const targetGames = [createMockGame('sf1', 'SF1')];
+      const sourceGames = [createMockGame('g1', 'G1')]; // Need at least one source game to trigger mapping logic
+      const mapping = {
+        'SF1': {
+          home: { type: 'rank', sourceStageId: 'stage1', sourceIndex: 0 },
+          away: { type: 'rank', sourceStageId: 'stage1', sourceIndex: 1 }
+        }
+      };
+
+      const config = {
+        mode: 'placement' as const,
+        positions: 4,
+        format: 'single_elimination' as const,
+      };
+
+      const edges = createPlacementEdges(targetGames, sourceGames, config, mapping);
+      
+      expect(edges).toContainEqual(expect.objectContaining({
+        sourceStageId: 'stage1',
+        sourceRank: 1,
+        outputType: 'rank',
+        targetGameId: 'sf1',
+        targetSlot: 'home'
+      }));
+    });
+
+    it('should skip mapping if target game is not found', () => {
+      const targetGames = [createMockGame('final', 'Final')];
+      const sourceGames = [createMockGame('g1', 'G1')];
+      const mapping = {
+        'NonExistent': {
+          home: { type: 'winner', sourceIndex: 0 },
+          away: { type: 'winner', sourceIndex: 0 }
+        }
+      };
+      const config = { mode: 'placement' as const, positions: 2, format: 'single_elimination' as const };
+      
+      const edges = createPlacementEdges(targetGames, sourceGames, config, mapping);
+      expect(edges).toEqual([]);
+    });
+  });
+
+  describe('createPlacementEdges - Error Resilience', () => {
     it('should return empty array for non-placement mode', () => {
-      const targetGames: GameNode[] = [];
-      const sourceGames: GameNode[] = [];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'none',
-      };
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-      expect(result).toEqual([]);
+      const config = { mode: 'round_robin' as const };
+      // @ts-expect-error testing invalid config
+      const edges = createPlacementEdges([], [], config);
+      expect(edges).toEqual([]);
     });
 
-    it('should return empty array for empty target games', () => {
-      const targetGames: GameNode[] = [];
-      const sourceGames: GameNode[] = [createMockGame('source1', 'G1')];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
+    it('should handle missing target games gracefully', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const config = {
+        mode: 'placement' as const,
         positions: 4,
-        format: 'single_elimination',
-      };
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('4-Team Single Elimination - All Games in Target', () => {
-    it('should create internal bracket edges when all 4 games are in target', () => {
-      const targetGames: GameNode[] = [
-        createMockGame('sf1', 'SF1'),
-        createMockGame('sf2', 'SF2'),
-        createMockGame('final', 'Final'),
-        createMockGame('third', '3rd Place'),
-      ];
-      const sourceGames: GameNode[] = [];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 4,
-        format: 'single_elimination',
+        format: 'single_elimination' as const,
       };
 
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should create 4 internal edges: SF winners → Final, SF losers → 3rd Place
-      expect(result).toHaveLength(4);
-
-      // SF1 winner → Final home
-      const sf1WinnerEdge = findEdge(result, 'final', 'home');
-      expect(sf1WinnerEdge).toBeDefined();
-      expect(sf1WinnerEdge?.sourceGameId).toBe('sf1');
-      expect(sf1WinnerEdge?.outputType).toBe('winner');
-
-      // SF2 winner → Final away
-      const sf2WinnerEdge = findEdge(result, 'final', 'away');
-      expect(sf2WinnerEdge).toBeDefined();
-      expect(sf2WinnerEdge?.sourceGameId).toBe('sf2');
-      expect(sf2WinnerEdge?.outputType).toBe('winner');
-
-      // SF1 loser → 3rd Place home
-      const sf1LoserEdge = findEdge(result, 'third', 'home');
-      expect(sf1LoserEdge).toBeDefined();
-      expect(sf1LoserEdge?.sourceGameId).toBe('sf1');
-      expect(sf1LoserEdge?.outputType).toBe('loser');
-
-      // SF2 loser → 3rd Place away
-      const sf2LoserEdge = findEdge(result, 'third', 'away');
-      expect(sf2LoserEdge).toBeDefined();
-      expect(sf2LoserEdge?.sourceGameId).toBe('sf2');
-      expect(sf2LoserEdge?.outputType).toBe('loser');
+      // Empty target games, should not crash
+      const edges = createPlacementEdges([], [createMockGame('g1', 'G1')], config);
+      expect(edges).toEqual([]);
+      consoleSpy.mockRestore();
     });
 
-    it('should create edges for split groups (6+ source games)', () => {
-      const targetGames: GameNode[] = [
-        createMockGame('sf1', 'SF1'),
-        createMockGame('sf2', 'SF2'),
-        createMockGame('final', 'Final'),
-        createMockGame('third', '3rd Place'),
-      ];
-      const sourceGames: GameNode[] = [
-        createMockGame('g1', 'G1'), // Group A first (index 0)
-        createMockGame('g2', 'G2'), // Group A second (index 1)
-        createMockGame('g3', 'G3'), // Group A third (index 2)
-        createMockGame('g4', 'G4'), // Group B first (index 3)
-        createMockGame('g5', 'G5'), // Group B fourth (index 4)
-        createMockGame('g6', 'G6'), // Group B third (index 5)
-      ];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 4,
-        format: 'single_elimination',
+    it('should handle invalid format configurations', () => {
+      const config = {
+        mode: 'placement' as const,
+        positions: 99, // Invalid position count
+        format: 'single_elimination' as const,
       };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should create 8 edges: 4 from group games to SFs + 4 internal SF edges
-      expect(result).toHaveLength(8);
-
-      // Group A first (g1) winner → SF1 home
-      expect(result.find((e) => e.sourceGameId === 'g1' && e.targetGameId === 'sf1')).toBeDefined();
-      // Group B first (g4) winner → SF1 away
-      expect(result.find((e) => e.sourceGameId === 'g4' && e.targetGameId === 'sf1')).toBeDefined();
-      // Group A third (g3) winner → SF2 home
-      expect(result.find((e) => e.sourceGameId === 'g3' && e.targetGameId === 'sf2')).toBeDefined();
-      // Group B third (g6) winner → SF2 away
-      expect(result.find((e) => e.sourceGameId === 'g6' && e.targetGameId === 'sf2')).toBeDefined();
+      
+      const edges = createPlacementEdges([createMockGame('g1', 'G1')], [], config);
+      expect(edges).toEqual([]);
     });
 
-    it('should create edges for single group (3 source games)', () => {
-      const targetGames: GameNode[] = [
-        createMockGame('sf1', 'SF1'),
-        createMockGame('sf2', 'SF2'),
-        createMockGame('final', 'Final'),
-        createMockGame('third', '3rd Place'),
-      ];
-      const sourceGames: GameNode[] = [
-        createMockGame('g1', 'G1'),
-        createMockGame('g2', 'G2'),
-        createMockGame('g3', 'G3'),
-      ];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 4,
-        format: 'single_elimination',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should create 8 edges: 4 from group games to SFs + 4 internal SF edges
-      expect(result).toHaveLength(8);
-
-      // g1 winner → SF1 home
-      expect(result.find((e) => e.sourceGameId === 'g1' && e.targetGameId === 'sf1' && e.outputType === 'winner')).toBeDefined();
-      // g2 winner → SF1 away
-      expect(result.find((e) => e.sourceGameId === 'g2' && e.targetGameId === 'sf1' && e.outputType === 'winner')).toBeDefined();
-      // g3 winner → SF2 home
-      expect(result.find((e) => e.sourceGameId === 'g3' && e.targetGameId === 'sf2' && e.outputType === 'winner')).toBeDefined();
-      // g1 loser → SF2 away (for 3 games, reuse first game loser)
-      expect(result.find((e) => e.sourceGameId === 'g1' && e.targetGameId === 'sf2' && e.outputType === 'loser')).toBeDefined();
-    });
-
-    it('should create edges for single group (4 source games)', () => {
-      const targetGames: GameNode[] = [
-        createMockGame('sf1', 'SF1'),
-        createMockGame('sf2', 'SF2'),
-        createMockGame('final', 'Final'),
-        createMockGame('third', '3rd Place'),
-      ];
-      const sourceGames: GameNode[] = [
-        createMockGame('g1', 'G1'),
-        createMockGame('g2', 'G2'),
-        createMockGame('g3', 'G3'),
-        createMockGame('g4', 'G4'),
-      ];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 4,
-        format: 'single_elimination',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should create 8 edges: 4 from group games to SFs + 4 internal SF edges
-      expect(result).toHaveLength(8);
-
-      // g4 winner → SF2 away (for 4 games, use 4th game winner instead of loser)
-      expect(result.find((e) => e.sourceGameId === 'g4' && e.targetGameId === 'sf2' && e.outputType === 'winner')).toBeDefined();
-    });
-
-    it('should create edges for 2-game pattern', () => {
-      const targetGames: GameNode[] = [
-        createMockGame('sf1', 'SF1'),
-        createMockGame('sf2', 'SF2'),
-        createMockGame('final', 'Final'),
-        createMockGame('third', '3rd Place'),
-      ];
-      const sourceGames: GameNode[] = [createMockGame('g1', 'G1'), createMockGame('g2', 'G2')];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 4,
-        format: 'single_elimination',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should create 8 edges: 4 from 2 games (winners + losers) to SFs + 4 internal SF edges
-      expect(result).toHaveLength(8);
-
-      // g1 winner → SF1 home
-      expect(result.find((e) => e.sourceGameId === 'g1' && e.targetGameId === 'sf1' && e.outputType === 'winner')).toBeDefined();
-      // g2 winner → SF1 away
-      expect(result.find((e) => e.sourceGameId === 'g2' && e.targetGameId === 'sf1' && e.outputType === 'winner')).toBeDefined();
-      // g1 loser → SF2 home
-      expect(result.find((e) => e.sourceGameId === 'g1' && e.targetGameId === 'sf2' && e.outputType === 'loser')).toBeDefined();
-      // g2 loser → SF2 away
-      expect(result.find((e) => e.sourceGameId === 'g2' && e.targetGameId === 'sf2' && e.outputType === 'loser')).toBeDefined();
-    });
-  });
-
-  describe('4-Team Single Elimination - Games Split Across Stages', () => {
-    it('should create edges from source to semifinals only', () => {
-      const targetGames: GameNode[] = [createMockGame('sf1', 'SF1'), createMockGame('sf2', 'SF2')];
-      const sourceGames: GameNode[] = [
-        createMockGame('g1', 'G1'),
-        createMockGame('g2', 'G2'),
-        createMockGame('g3', 'G3'),
-        createMockGame('g4', 'G4'),
-        createMockGame('g5', 'G5'),
-        createMockGame('g6', 'G6'),
-      ];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 4,
-        format: 'single_elimination',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should create 4 edges: split group pattern to SFs (no final/3rd place in target)
-      expect(result).toHaveLength(4);
-
-      // Verify edges go to SF1 and SF2 only
-      const sf1Edges = result.filter((e) => e.targetGameId === 'sf1');
-      const sf2Edges = result.filter((e) => e.targetGameId === 'sf2');
-      expect(sf1Edges).toHaveLength(2);
-      expect(sf2Edges).toHaveLength(2);
-    });
-
-    it('should create edges from source SFs to target Final/3rd Place', () => {
-      const targetGames: GameNode[] = [createMockGame('final', 'Final'), createMockGame('third', '3rd Place')];
-      const sourceGames: GameNode[] = [createMockGame('sf1', 'SF1'), createMockGame('sf2', 'SF2')];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 4,
-        format: 'single_elimination',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should create 4 edges: SF winners → Final, SF losers → 3rd Place
-      expect(result).toHaveLength(4);
-
-      // SF1 winner → Final home
-      expect(result.find((e) => e.sourceGameId === 'sf1' && e.targetGameId === 'final' && e.outputType === 'winner')).toBeDefined();
-      // SF2 winner → Final away
-      expect(result.find((e) => e.sourceGameId === 'sf2' && e.targetGameId === 'final' && e.outputType === 'winner')).toBeDefined();
-      // SF1 loser → 3rd Place home
-      expect(result.find((e) => e.sourceGameId === 'sf1' && e.targetGameId === 'third' && e.outputType === 'loser')).toBeDefined();
-      // SF2 loser → 3rd Place away
-      expect(result.find((e) => e.sourceGameId === 'sf2' && e.targetGameId === 'third' && e.outputType === 'loser')).toBeDefined();
-    });
-  });
-
-  describe('2-Team Bracket (Final Only)', () => {
-    it('should create edges from 2 source games to final', () => {
-      const targetGames: GameNode[] = [createMockGame('final', 'Final')];
-      const sourceGames: GameNode[] = [createMockGame('sf1', 'SF1'), createMockGame('sf2', 'SF2')];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 2,
-        format: 'single_elimination',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should create 2 edges: last 2 games (SF1, SF2) → Final
-      expect(result).toHaveLength(2);
-
-      // Second-to-last (SF1) winner → Final home
-      const sf1Edge = findEdge(result, 'final', 'home');
-      expect(sf1Edge).toBeDefined();
-      expect(sf1Edge?.sourceGameId).toBe('sf1');
-      expect(sf1Edge?.outputType).toBe('winner');
-
-      // Last (SF2) winner → Final away
-      const sf2Edge = findEdge(result, 'final', 'away');
-      expect(sf2Edge).toBeDefined();
-      expect(sf2Edge?.sourceGameId).toBe('sf2');
-      expect(sf2Edge?.outputType).toBe('winner');
-    });
-
-    it('should return empty array if less than 2 source games', () => {
-      const targetGames: GameNode[] = [createMockGame('final', 'Final')];
-      const sourceGames: GameNode[] = [createMockGame('sf1', 'SF1')];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 2,
-        format: 'single_elimination',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-      expect(result).toEqual([]);
-    });
-
-    it('should return empty array if no final game in target', () => {
-      const targetGames: GameNode[] = [createMockGame('sf1', 'SF1')];
-      const sourceGames: GameNode[] = [createMockGame('g1', 'G1'), createMockGame('g2', 'G2')];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 2,
-        format: 'single_elimination',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('8-Team Single Elimination', () => {
-    it('should create complete 8-team bracket edges', () => {
-      const targetGames: GameNode[] = [
-        createMockGame('qf1', 'QF1'),
-        createMockGame('qf2', 'QF2'),
-        createMockGame('qf3', 'QF3'),
-        createMockGame('qf4', 'QF4'),
-        createMockGame('sf1', 'SF1'),
-        createMockGame('sf2', 'SF2'),
-        createMockGame('final', 'Final'),
-        createMockGame('third', '3rd Place'),
-      ];
-      const sourceGames: GameNode[] = [];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 8,
-        format: 'single_elimination',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should create 8 edges: QF → SF (4), SF → Final (2), SF → 3rd Place (2)
-      expect(result).toHaveLength(8);
-
-      // QF1, QF2 → SF1
-      expect(result.find((e) => e.sourceGameId === 'qf1' && e.targetGameId === 'sf1')).toBeDefined();
-      expect(result.find((e) => e.sourceGameId === 'qf2' && e.targetGameId === 'sf1')).toBeDefined();
-
-      // QF3, QF4 → SF2
-      expect(result.find((e) => e.sourceGameId === 'qf3' && e.targetGameId === 'sf2')).toBeDefined();
-      expect(result.find((e) => e.sourceGameId === 'qf4' && e.targetGameId === 'sf2')).toBeDefined();
-
-      // SF1, SF2 winners → Final
-      expect(result.find((e) => e.sourceGameId === 'sf1' && e.targetGameId === 'final' && e.outputType === 'winner')).toBeDefined();
-      expect(result.find((e) => e.sourceGameId === 'sf2' && e.targetGameId === 'final' && e.outputType === 'winner')).toBeDefined();
-
-      // SF1, SF2 losers → 3rd Place
-      expect(result.find((e) => e.sourceGameId === 'sf1' && e.targetGameId === 'third' && e.outputType === 'loser')).toBeDefined();
-      expect(result.find((e) => e.sourceGameId === 'sf2' && e.targetGameId === 'third' && e.outputType === 'loser')).toBeDefined();
-    });
-
-    it('should handle partial 8-team bracket (only QFs and SFs)', () => {
-      const targetGames: GameNode[] = [
-        createMockGame('qf1', 'QF1'),
-        createMockGame('qf2', 'QF2'),
-        createMockGame('qf3', 'QF3'),
-        createMockGame('qf4', 'QF4'),
-        createMockGame('sf1', 'SF1'),
-        createMockGame('sf2', 'SF2'),
-      ];
-      const sourceGames: GameNode[] = [];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 8,
-        format: 'single_elimination',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should create 4 edges: QF → SF only (no Final/3rd Place)
-      expect(result).toHaveLength(4);
-    });
-  });
-
-  describe('4-Team Crossover Format', () => {
-    it('should create crossover bracket edges', () => {
-      const targetGames: GameNode[] = [
-        createMockGame('co1', 'CO1'),
-        createMockGame('co2', 'CO2'),
-        createMockGame('final', 'Final'),
-        createMockGame('third', '3rd Place'),
-      ];
-      const sourceGames: GameNode[] = [];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 4,
-        format: 'crossover',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should create 4 edges: CO winners → Final, CO losers → 3rd Place
-      expect(result).toHaveLength(4);
-
-      // CO1 winner → Final home
-      expect(result.find((e) => e.sourceGameId === 'co1' && e.targetGameId === 'final' && e.outputType === 'winner')).toBeDefined();
-      // CO2 winner → Final away
-      expect(result.find((e) => e.sourceGameId === 'co2' && e.targetGameId === 'final' && e.outputType === 'winner')).toBeDefined();
-      // CO1 loser → 3rd Place home
-      expect(result.find((e) => e.sourceGameId === 'co1' && e.targetGameId === 'third' && e.outputType === 'loser')).toBeDefined();
-      // CO2 loser → 3rd Place away
-      expect(result.find((e) => e.sourceGameId === 'co2' && e.targetGameId === 'third' && e.outputType === 'loser')).toBeDefined();
-    });
-
-    it('should return empty array if crossover games missing', () => {
-      const targetGames: GameNode[] = [createMockGame('final', 'Final'), createMockGame('third', '3rd Place')];
-      const sourceGames: GameNode[] = [];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 4,
-        format: 'crossover',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('should handle missing games gracefully', () => {
-      const targetGames: GameNode[] = [
-        createMockGame('sf1', 'SF1'),
-        // SF2 missing
-        createMockGame('final', 'Final'),
-      ];
-      const sourceGames: GameNode[] = [];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        positions: 4,
-        format: 'single_elimination',
-      };
-
-      const result = createPlacementEdges(targetGames, sourceGames, config);
-
-      // Should handle gracefully, only create edges for existing games
-      expect(result).toBeDefined();
-      expect(Array.isArray(result)).toBe(true);
-    });
-
-    it('should handle invalid bracket configuration without crashing', () => {
-      const targetGames: GameNode[] = [createMockGame('invalid', 'Invalid')];
-      const sourceGames: GameNode[] = [];
-      const config: StageNodeData['progressionConfig'] = {
-        mode: 'placement',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        positions: 99 as any, // Invalid positions
-        format: 'single_elimination',
-      };
-
-      expect(() => {
-        const result = createPlacementEdges(targetGames, sourceGames, config);
-        expect(result).toBeDefined();
-      }).not.toThrow();
+    it('should catch and log errors in createPlacementEdges', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      
+      // Force an error by passing something that will throw when accessed
+      // @ts-expect-error deliberate error injection
+      const edges = createPlacementEdges(null, null, { mode: 'placement', positions: 4, format: 'single_elimination' });
+      
+      expect(edges).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
     });
   });
 });

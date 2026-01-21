@@ -7,14 +7,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gamedays', '0005_auto_20210320_1503'),
+        ("gamedays", "0005_auto_20210320_1503"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='teamlog',
-            name='team',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
-                                    to='gamedays.team'),
+            model_name="teamlog",
+            name="team",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="gamedays.team",
+            ),
         ),
     ]
