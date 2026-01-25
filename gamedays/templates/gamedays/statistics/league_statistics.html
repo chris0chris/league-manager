@@ -1,5 +1,148 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Liga Statistiken</h2>
-{% endfor %}
+    <div class="d-flex justify-content-between align-items-center me-2">
+        <a href="{% url season_year_league_pattern season=season league=league %}" class="btn btn-primary">
+            <span><i class="bi bi-chevron-left"></i>Zurück zur Liga</span>
+        </a>
+    </div>
+    <h2><b>{{ league }} - {{ season }} - Statistiken</b></h2>
+
+    <div class="card">
+        <div aria-controls="collapseStats" aria-expanded="false" class="card-header" data-bs-target="#collapseStats"
+             data-bs-toggle="collapse" id="headingStats" role="button">
+            <h3 class="card-title mb-0">Spieler Statistiken</h3>
+        </div>
+        <div aria-labelledby="headingStats" class="collapse" id="collapseStats">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="statsTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active"
+                                id="scores-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#scores"
+                                type="button"
+                                role="tab">
+                            Punkte
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                id="touchdowns-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#touchdowns"
+                                type="button"
+                                role="tab">
+                            Touchdowns
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                id="extrapoints-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#extrapoints"
+                                type="button"
+                                role="tab">
+                            Extra Punkte
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                id="interceptions-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#interceptions"
+                                type="button"
+                                role="tab">
+                            Interceptions
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                id="safeties-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#safeties"
+                                type="button"
+                                role="tab">
+                            Safeties
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="card-body tab-content">
+                <!-- Scores -->
+                <div class="tab-pane fade show active" id="scores" role="tabpanel">
+                    {% if info.player_scoring_table == None %}
+                        Statistiken sind nach den ersten Spielen der Liga verfügbar.
+                    {% else %}
+                        {{ info.player_scoring_table | safe }}
+                    {% endif %}
+                </div>
+
+                <!-- Touchdowns -->
+                <div class="tab-pane fade show" id="touchdowns" role="tabpanel">
+                    {% if info.player_touchdown_table == None %}
+                        Statistiken sind nach den ersten Spielen der Liga verfügbar.
+                    {% else %}
+                        {{ info.player_touchdown_table | safe }}
+                    {% endif %}
+                </div>
+
+
+                <!-- ExtraPoints -->
+                <div class="tab-pane fade" id="extrapoints" role="tabpanel">
+                    <div class="row">
+                        <div class="col-sm">
+                            {{ info.player_one_extra_point_table | safe }}
+                        </div>
+                        <div class="col-sm">
+                            {{ info.player_two_extra_point_table | safe }}
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Interceptions -->
+                <div class="tab-pane fade" id="interceptions" role="tabpanel">
+                    {% if info.player_touchdown_table == None %}
+                        Statistiken sind nach den ersten Spielen der Liga verfügbar.
+                    {% else %}
+                        {{ info.player_interception_table | safe }}
+                    {% endif %}
+                </div>
+
+
+                <!-- Safeties -->
+                <div class="tab-pane fade" id="safeties" role="tabpanel">
+                    {% if info.player_touchdown_table == None %}
+                        Statistiken sind nach den ersten Spielen der Liga verfügbar.
+                    {% else %}
+                        {{ info.player_safety_table | safe }}
+                    {% endif %}
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <small><i class="bi bi-info"></i>Die Statistiken beinhaltet <b>keine</b> Final- / Relegations Spieltage.</small>
+
+    <script>
+        $(function () {
+            $('table tbody tr').addClass('text-nowrap')
+        })
+        $(document).ready(function () {
+            $("#search").on("keyup", function () {
+                console.log('keyup', $(this).val().toLowerCase())
+                console.log($("#schedule tbody tr"))
+                var value = $(this).val().toLowerCase();
+                $("#schedule tbody tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+
+    </script>
+
 {% endblock content %}

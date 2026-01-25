@@ -12,7 +12,7 @@ from .constants import (
     LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
     LEAGUE_GAMEDAY_GAMEINFOS_DELETE,
     LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
-    LEAGUE_GAMEDAY_GAME_DETAIL,
+    LEAGUE_GAMEDAY_GAME_DETAIL, LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
 )
 from .views import (
     GamedayDetailView,
@@ -23,7 +23,7 @@ from .views import (
     GameinfoUpdateView,
     GamedayDeleteView,
     GameinfoDeleteView,
-    GamedayGameDetailView,
+    GamedayGameDetailView, GamedayLeagueStatisticView,
 )
 
 urlpatterns = [
@@ -43,6 +43,11 @@ urlpatterns = [
         "gamedays/<int:season>/<str:league>/",
         GamedayListView.as_view(),
         name=LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
+    ),
+    path(
+        "gamedays/<int:season>/<str:league>/statistics",
+        GamedayLeagueStatisticView.as_view(),
+        name=LEAGUE_GAMEDAY_LEAGUE_STATISTICS
     ),
     path("gameday/<int:pk>/", GamedayDetailView.as_view(), name=LEAGUE_GAMEDAY_DETAIL),
     path("gameday/new/", GamedayCreateView.as_view(), name=LEAGUE_GAMEDAY_CREATE),

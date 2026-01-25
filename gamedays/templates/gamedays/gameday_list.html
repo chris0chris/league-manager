@@ -19,7 +19,7 @@
 {% if current_league %}
 <article class="media content-section">
     <div class="media-body">
-        <h2><a class="article-title" href=""><i class="bi bi-table"></i> {{ current_league }} Statistiken</a></h2>
+        <h2><a class="article-title" href="{% url season_year_league_statistic_pattern season=season league=current_league %}"><i class="bi bi-table"></i> {{ current_league }} Statistiken</a></h2>
     </div>
 </article>
 <h2>Spieltage</h2>
