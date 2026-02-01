@@ -25,6 +25,7 @@ from gamedays.forms import (
     GameinfoForm,
 )
 from gamedays.models import Gameday, League, Gameinfo
+from gamedays.service.builders import TableContextBuilder
 from gamedays.service.gameday_service import (
     EmptySchedule,
     EmptyFinalTable,
@@ -90,8 +91,8 @@ class TestGamedayDetailView(TestCase):
         assert context['info']['schedule'] != ''
         assert context['info']['qualify_table'] != ''
         assert context['info']['final_table'] != ''
-        assert context['info']['offense_table'] != EmptyOffenseStatisticTable.to_html()
-        assert context['info']['defense_table'] != EmptyDefenseStatisticTable.to_html()
+        assert context['info']['offense_table'] != EmptyOffenseStatisticTable().to_html()
+        assert context['info']['defense_table'] != EmptyDefenseStatisticTable().to_html()
 
     def test_detail_view_with_empty_gameday(self):
         gameday = DBSetup().create_empty_gameday()
@@ -101,11 +102,11 @@ class TestGamedayDetailView(TestCase):
         assert resp.status_code == HTTPStatus.OK
         context = resp.context_data
         assert context['object'].pk == gameday.pk
-        assert context['info']['schedule'] == EmptySchedule.to_html()
-        assert context['info']['qualify_table'] == EmptyQualifyTable.to_html()
-        assert context['info']['final_table'] == EmptyFinalTable.to_html()
-        assert context['info']['offense_table'] == EmptyOffenseStatisticTable.to_html()
-        assert context['info']['defense_table'] == EmptyDefenseStatisticTable.to_html()
+        assert context['info']['schedule'] == EmptySchedule().to_html()
+        assert context['info']['qualify_table'] == TableContextBuilder.build(EmptyQualifyTable())
+        assert context['info']['final_table'] == TableContextBuilder.build(EmptyFinalTable())
+        assert context['info']['offense_table'] == EmptyOffenseStatisticTable().to_html()
+        assert context['info']['defense_table'] == EmptyDefenseStatisticTable().to_html()
 
     def test_detail_view_gameday_not_available(self):
         resp = self.client.get(reverse(LEAGUE_GAMEDAY_DETAIL, args=[00]))
@@ -325,11 +326,15 @@ class TestGameinfoWizard(WebTest):
         assert gameinfo.standing == group_2.name
         assert gameinfo.league_group == group_2
 
-    def test_wizard_renders_all_steps_with_custom_gameday_format(self):
+    @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
+    def test_wizard_renders_all_steps_with_custom_gameday_format(self, mock_get_league_config_ruleset):
+        mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
         teams = DBSetup().create_teams(name="GroupTeam", number_teams=3)
         user = UserFactory(is_staff=True)
         self.app.set_user(user)
         gameday = GamedayFactory()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
+
 
         field_group_step = self.app.get(
             reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
@@ -432,11 +437,14 @@ class TestGameinfoUpdateView(WebTest):
             LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk}
         )
 
-    def test_can_access_update_view_and_submit_form(self):
+    @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
+    def test_can_access_update_view_and_submit_form(self, mock_get_league_config_ruleset):
+        mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
         staff_user = UserFactory(is_staff=True)
         self.app.set_user(staff_user)
         teams = DBSetup().create_teams(name="GiUpdateTeam", number_teams=3)
         gameday = DBSetup().g62_status_empty()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
 
         url = reverse(LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={"pk": gameday.pk})
         gameinfo_update_page = self.app.get(url)

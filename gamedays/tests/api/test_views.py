@@ -78,10 +78,13 @@ class TestGamedaySchedule(WebTest):
     def test_get_empty_schedule(self):
         response = self.app.get(reverse('api-gameday-schedule', kwargs={'pk': 1}) + '?get=schedule')
         assert response.status_code == HTTPStatus.OK
-        assert response.json == json.loads(EmptySchedule.to_json(), object_pairs_hook=OrderedDict)
+        assert response.json == json.loads(EmptySchedule().to_json(), object_pairs_hook=OrderedDict)
 
-    def test_get_qualify_table(self):
+    @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
+    def test_get_qualify_table(self, mock_get_league_config_ruleset):
+        mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
         gameday = DBSetup().g62_qualify_finished()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         with open(pathlib.Path(__file__).parent / 'testdata/qualify_g62_qualify_finished.json') as f:
             expected_qualify = json.load(f)
         response = self.app.get(reverse('api-gameday-schedule', kwargs={'pk': gameday.pk}) + '?get=qualify')
@@ -92,7 +95,7 @@ class TestGamedaySchedule(WebTest):
         gameday = DBSetup().create_empty_gameday()
         response = self.app.get(reverse('api-gameday-schedule', kwargs={'pk': gameday.pk}) + '?get=qualify')
         assert response.status_code == HTTPStatus.OK
-        assert response.json == json.loads(EmptyQualifyTable.to_json(), object_pairs_hook=OrderedDict)
+        assert response.json == json.loads(EmptyQualifyTable().to_json(), object_pairs_hook=OrderedDict)
 
     @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
     def test_get_final_table(self, mock_get_league_config_ruleset):
@@ -109,8 +112,7 @@ class TestGamedaySchedule(WebTest):
         gameday = DBSetup().g62_qualify_finished()
         response = self.app.get(reverse('api-gameday-schedule', kwargs={'pk': gameday.pk}) + '?get=final')
         assert response.status_code == HTTPStatus.OK
-        import pandas as pd
-        assert response.json == json.loads(pd.DataFrame().to_json(orient='split'))
+        assert response.json == []
 
 
 class TestGamesToWhistleAPIView(WebTest):

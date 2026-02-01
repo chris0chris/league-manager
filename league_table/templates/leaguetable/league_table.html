@@ -144,7 +144,7 @@
 
             <td>{{ row.rank }}</td>
             <td x-html="highlightMultiple(`{{ row.team__name }}`)"></td>
-            <td>{{ row.league_quotient|floatformat:3 }}</td>
+            <td>{{ row.win_quotient|floatformat:3 }}</td>
             <td>{{ row.pf }}</td>
             <td>{{ row.pa }}</td>
             <td>{{ row.diff }}</td>
@@ -154,10 +154,10 @@
             <td>{{ row.games_played }}</td>
             <td>{{ row.standing }}</td>
             <template x-if="showTieBreakCols">
-                <td>{{ row.league_points }}</td>
+                <td>{{ row.win_points }}</td>
             </template>
             <template x-if="showTieBreakCols">
-                <td>{{ row.max_league_points }}</td>
+                <td>{{ row.max_win_points }}</td>
             </template>
             <template x-if="showTieBreakCols">
                 <td>{{ row.direct_wins|default_if_none:"" }}</td>

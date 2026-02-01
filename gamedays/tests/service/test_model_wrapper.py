@@ -40,15 +40,21 @@ class TestGamedayModelWrapper(TestCase):
         expected_schedule = expected_schedule[columns]
         assert schedule.to_json() == expected_schedule.to_json()
 
-    def test_empty_get_qualify_table(self):
+    @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
+    def test_get_qualify_table_with_main_round(self, mock_get_league_config_ruleset):
+        mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
         gameday = DBSetup().create_main_round_gameday()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         gmw = GamedayModelWrapper(gameday.pk)
-        assert gmw.get_qualify_table() == ''
+        qualify_table = gmw.get_qualify_table()
+        del qualify_table["team_id"]
+        DataFrameAssertion.expect(qualify_table).to_equal_json("ts_qualify_main_round_table")
 
     @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
     def test_get_qualify_table(self, mock_get_league_config_ruleset):
         mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
         gameday = DBSetup().g62_qualify_finished()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         gmw = GamedayModelWrapper(gameday.pk)
         qualify_table = gmw.get_qualify_table()
         del qualify_table["team_id"]
@@ -65,7 +71,9 @@ class TestGamedayModelWrapper(TestCase):
         gameday = DBSetup().g62_finalround(sf='beendet', p5='beendet', p3='beendet', p1='beendet')
         LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         gmw = GamedayModelWrapper(gameday.pk)
-        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('ts_final_table_6_teams')
+        table = gmw.get_final_table()
+        del table["team_id"]
+        DataFrameAssertion.expect(table).to_equal_json('ts_final_table_6_teams')
 
     @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
     def test_get_final_table_for_7_teams(self, mock_get_league_config_ruleset):
@@ -73,14 +81,15 @@ class TestGamedayModelWrapper(TestCase):
         gameday = DBSetup().g72_finished()
         LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         gmw = GamedayModelWrapper(gameday.pk)
-        DataFrameAssertion.expect(gmw.get_final_table()).to_equal_json('ts_final_table_7_teams')
+        table = gmw.get_final_table()
+        del table["team_id"]
+        DataFrameAssertion.expect(table).to_equal_json('ts_final_table_7_teams')
 
-    def test_get_final_table_for_main_round(self):
+    def test_get_final_table_for_main_round_is_empty(self):
         gameday = DBSetup().create_main_round_gameday(status='beendet', number_teams=4)
         gmw = GamedayModelWrapper(gameday.pk)
         final_table = gmw.get_final_table()
-        del final_table["team_id"]
-        DataFrameAssertion.expect(final_table).to_equal_json('ts_final_table_4_teams')
+        assert final_table is None
 
     def test_get_qualify_team_by(self):
         gameday = DBSetup().g62_qualify_finished()

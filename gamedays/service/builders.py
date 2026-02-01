@@ -1,5 +1,9 @@
 import pandas as pd
 
+from gamedays.service.gameday_service import (
+    HtmlAndJsonRendering,
+)
+
 
 class TableContextBuilder:
     GROUP_CLASSES = [
@@ -15,7 +19,14 @@ class TableContextBuilder:
     ]
 
     @classmethod
-    def build(cls, table: pd.DataFrame) -> dict:
+    def build(cls, table: pd.DataFrame) -> dict | None:
+        if isinstance(table, HtmlAndJsonRendering):
+            return {
+                "table": [],
+                "columns": [],
+                "is_empty": True,
+                "html": table.to_html(),
+            }
         table["round_index"] = (
             table["standing"].ne(table["standing"].shift()).fillna(True).cumsum() - 1
         )
@@ -29,4 +40,6 @@ class TableContextBuilder:
         return {
             "table": table.to_dict(orient="records"),
             "columns": table.columns,
+            "is_empty": False,
+            "html": None,
         }

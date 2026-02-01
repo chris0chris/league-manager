@@ -1,4 +1,102 @@
 {
+  "data": [
+    {
+      "diff": 5,
+      "draws": 0,
+      "games_played": 4,
+      "index": 0,
+      "losses": 0,
+      "max_win_points": 4.0,
+      "pa": 7,
+      "pf": 12,
+      "rank": 1,
+      "standing": "Finalrunde",
+      "team__name": "B1",
+      "win_points": 4.0,
+      "win_quotient": 1.0,
+      "wins": 4
+    },
+    {
+      "diff": 3,
+      "draws": 0,
+      "games_played": 4,
+      "index": 1,
+      "losses": 1,
+      "max_win_points": 4.0,
+      "pa": 8,
+      "pf": 11,
+      "rank": 2,
+      "standing": "Finalrunde",
+      "team__name": "A1",
+      "win_points": 3.0,
+      "win_quotient": 0.75,
+      "wins": 3
+    },
+    {
+      "diff": 0,
+      "draws": 0,
+      "games_played": 4,
+      "index": 2,
+      "losses": 2,
+      "max_win_points": 4.0,
+      "pa": 9,
+      "pf": 9,
+      "rank": 3,
+      "standing": "Finalrunde",
+      "team__name": "A2",
+      "win_points": 2.0,
+      "win_quotient": 0.5,
+      "wins": 2
+    },
+    {
+      "diff": -2,
+      "draws": 0,
+      "games_played": 4,
+      "index": 3,
+      "losses": 3,
+      "max_win_points": 4.0,
+      "pa": 10,
+      "pf": 8,
+      "rank": 4,
+      "standing": "Finalrunde",
+      "team__name": "B2",
+      "win_points": 1.0,
+      "win_quotient": 0.25,
+      "wins": 1
+    },
+    {
+      "diff": -2,
+      "draws": 0,
+      "games_played": 3,
+      "index": 4,
+      "losses": 2,
+      "max_win_points": 3.0,
+      "pa": 7,
+      "pf": 5,
+      "rank": 5,
+      "standing": "Finalrunde",
+      "team__name": "B3",
+      "win_points": 1.0,
+      "win_quotient": 0.333,
+      "wins": 1
+    },
+    {
+      "diff": -4,
+      "draws": 0,
+      "games_played": 3,
+      "index": 5,
+      "losses": 3,
+      "max_win_points": 3.0,
+      "pa": 8,
+      "pf": 4,
+      "rank": 6,
+      "standing": "Finalrunde",
+      "team__name": "A3",
+      "win_points": 0.0,
+      "win_quotient": 0.0,
+      "wins": 0
+    }
+  ],
   "schema": {
     "fields": [
       {
@@ -6,12 +104,9 @@
         "type": "integer"
       },
       {
+        "extDtype": "string",
         "name": "team__name",
         "type": "string"
-      },
-      {
-        "name": "points",
-        "type": "integer"
       },
       {
         "extDtype": "Int64",
@@ -24,64 +119,52 @@
         "type": "integer"
       },
       {
+        "name": "wins",
+        "type": "integer"
+      },
+      {
+        "name": "draws",
+        "type": "integer"
+      },
+      {
+        "name": "losses",
+        "type": "integer"
+      },
+      {
+        "name": "games_played",
+        "type": "integer"
+      },
+      {
+        "extDtype": "Float64",
+        "name": "win_points",
+        "type": "number"
+      },
+      {
+        "name": "max_win_points",
+        "type": "number"
+      },
+      {
+        "name": "standing",
+        "type": "string"
+      },
+      {
         "extDtype": "Int64",
-        "name": "+/-",
+        "name": "diff",
+        "type": "integer"
+      },
+      {
+        "extDtype": "Float64",
+        "name": "win_quotient",
+        "type": "number"
+      },
+      {
+        "name": "rank",
         "type": "integer"
       }
     ],
+    "pandas_version": "1.4.0",
     "primaryKey": [
       "index"
-    ],
-    "pandas_version": "1.4.0"
-  },
-  "data": [
-    {
-      "index": 0,
-      "team__name": "B1",
-      "points": 8,
-      "pf": 12,
-      "pa": 7,
-      "+/-": 5
-    },
-    {
-      "index": 1,
-      "team__name": "A1",
-      "points": 6,
-      "pf": 11,
-      "pa": 8,
-      "+/-": 3
-    },
-    {
-      "index": 2,
-      "team__name": "A2",
-      "points": 4,
-      "pf": 9,
-      "pa": 9,
-      "+/-": 0
-    },
-    {
-      "index": 3,
-      "team__name": "B2",
-      "points": 2,
-      "pf": 8,
-      "pa": 10,
-      "+/-": -2
-    },
-    {
-      "index": 4,
-      "team__name": "B3",
-      "points": 2,
-      "pf": 5,
-      "pa": 7,
-      "+/-": -2
-    },
-    {
-      "index": 5,
-      "team__name": "A3",
-      "points": 0,
-      "pf": 4,
-      "pa": 8,
-      "+/-": -4
-    }
-  ]
+    ]
+  }
 }

@@ -9,8 +9,8 @@ def create_tiebreak_steps_and_defaults(apps, schema_editor):
 
     # Define the steps
     tiebreak_steps = [
-        ("league_points", "Siegpunkte"),
-        ("league_quotient", "Ligaquotient"),
+        ("win_points", "Siegpunkte"),
+        ("win_quotient", "Ligaquotient"),
         ("direct_wins", "Direkte Siege"),
         ("direct_point_diff", "Direkte Punktedifferenz"),
         ("direct_points_scored", "Direkt erzielte Punkte"),
@@ -39,7 +39,7 @@ def create_tiebreak_steps_and_defaults(apps, schema_editor):
 
     # Default order for Standard Flag Tie Break Regeln
     standard_orders = [
-        ("league_quotient", 1, "descending"),
+        ("win_quotient", 1, "descending"),
         ("direct_wins", 5, "descending"),
         ("direct_point_diff", 10, "descending"),
         ("direct_points_scored", 15, "descending"),
@@ -57,7 +57,7 @@ def create_tiebreak_steps_and_defaults(apps, schema_editor):
     # Default order for DFFL Liga Regeln
     # Same as standard, but adjust Siegpunkte order to 5, then others incremented
     dffl_orders = [
-        ("league_quotient", 5, "descending"),
+        ("win_quotient", 5, "descending"),
         ("direct_wins", 10, "descending"),
         ("direct_point_diff", 15, "descending"),
         ("direct_points_scored", 20, "descending"),

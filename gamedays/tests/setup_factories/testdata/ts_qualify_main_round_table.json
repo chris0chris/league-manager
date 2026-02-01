@@ -1,0 +1,212 @@
+{
+  "data": [
+    {
+      "diff": 9,
+      "direct_point_diff": 9,
+      "direct_points_scored": 12,
+      "direct_wins": 4,
+      "draws": 0,
+      "games_played": 0,
+      "index": 0,
+      "losses": 0,
+      "max_win_points": 4.0,
+      "name_ascending": "a1",
+      "overall_point_diff": 9,
+      "overall_points_scored": 12,
+      "pa": 3,
+      "pf": 12,
+      "rank": 1,
+      "standing": "Gruppe 1",
+      "team__name": "A1",
+      "win_points": 0.0,
+      "win_quotient": 0.0,
+      "wins": 0
+    },
+    {
+      "diff": 4,
+      "direct_point_diff": 4,
+      "direct_points_scored": 8,
+      "direct_wins": 3,
+      "draws": 0,
+      "games_played": 0,
+      "index": 1,
+      "losses": 0,
+      "max_win_points": 4.0,
+      "name_ascending": "a2",
+      "overall_point_diff": 4,
+      "overall_points_scored": 8,
+      "pa": 4,
+      "pf": 8,
+      "rank": 2,
+      "standing": "Gruppe 1",
+      "team__name": "A2",
+      "win_points": 0.0,
+      "win_quotient": 0.0,
+      "wins": 0
+    },
+    {
+      "diff": -1,
+      "direct_point_diff": -1,
+      "direct_points_scored": 4,
+      "direct_wins": 2,
+      "draws": 0,
+      "games_played": 0,
+      "index": 2,
+      "losses": 0,
+      "max_win_points": 4.0,
+      "name_ascending": "a3",
+      "overall_point_diff": -1,
+      "overall_points_scored": 4,
+      "pa": 5,
+      "pf": 4,
+      "rank": 3,
+      "standing": "Gruppe 1",
+      "team__name": "A3",
+      "win_points": 0.0,
+      "win_quotient": 0.0,
+      "wins": 0
+    },
+    {
+      "diff": -5,
+      "direct_point_diff": -5,
+      "direct_points_scored": 1,
+      "direct_wins": 1,
+      "draws": 0,
+      "games_played": 0,
+      "index": 3,
+      "losses": 0,
+      "max_win_points": 4.0,
+      "name_ascending": "a4",
+      "overall_point_diff": -5,
+      "overall_points_scored": 1,
+      "pa": 6,
+      "pf": 1,
+      "rank": 4,
+      "standing": "Gruppe 1",
+      "team__name": "A4",
+      "win_points": 0.0,
+      "win_quotient": 0.0,
+      "wins": 0
+    },
+    {
+      "diff": -7,
+      "direct_point_diff": -7,
+      "direct_points_scored": 0,
+      "direct_wins": 0,
+      "draws": 0,
+      "games_played": 0,
+      "index": 4,
+      "losses": 0,
+      "max_win_points": 4.0,
+      "name_ascending": "a5",
+      "overall_point_diff": -7,
+      "overall_points_scored": 0,
+      "pa": 7,
+      "pf": 0,
+      "rank": 5,
+      "standing": "Gruppe 1",
+      "team__name": "A5",
+      "win_points": 0.0,
+      "win_quotient": 0.0,
+      "wins": 0
+    }
+  ],
+  "schema": {
+    "fields": [
+      {
+        "name": "index",
+        "type": "integer"
+      },
+      {
+        "extDtype": "string",
+        "name": "team__name",
+        "type": "string"
+      },
+      {
+        "extDtype": "Int64",
+        "name": "pf",
+        "type": "integer"
+      },
+      {
+        "extDtype": "Int64",
+        "name": "pa",
+        "type": "integer"
+      },
+      {
+        "name": "wins",
+        "type": "integer"
+      },
+      {
+        "name": "draws",
+        "type": "integer"
+      },
+      {
+        "name": "losses",
+        "type": "integer"
+      },
+      {
+        "name": "games_played",
+        "type": "integer"
+      },
+      {
+        "extDtype": "Float64",
+        "name": "win_points",
+        "type": "number"
+      },
+      {
+        "name": "max_win_points",
+        "type": "number"
+      },
+      {
+        "extDtype": "string",
+        "name": "standing",
+        "type": "string"
+      },
+      {
+        "extDtype": "Int64",
+        "name": "diff",
+        "type": "integer"
+      },
+      {
+        "extDtype": "Float64",
+        "name": "win_quotient",
+        "type": "number"
+      },
+      {
+        "name": "direct_wins",
+        "type": "integer"
+      },
+      {
+        "name": "direct_point_diff",
+        "type": "integer"
+      },
+      {
+        "name": "direct_points_scored",
+        "type": "integer"
+      },
+      {
+        "extDtype": "Int64",
+        "name": "overall_point_diff",
+        "type": "integer"
+      },
+      {
+        "extDtype": "Int64",
+        "name": "overall_points_scored",
+        "type": "integer"
+      },
+      {
+        "extDtype": "string",
+        "name": "name_ascending",
+        "type": "string"
+      },
+      {
+        "name": "rank",
+        "type": "integer"
+      }
+    ],
+    "pandas_version": "1.4.0",
+    "primaryKey": [
+      "index"
+    ]
+  }
+}

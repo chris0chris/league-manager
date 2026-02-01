@@ -139,9 +139,9 @@ class LeagueTableService:
         df["pf"] = 0
         df["pa"] = 0
         df["diff"] = 0
-        df["league_points"] = 0
-        df["league_quotient"] = 0
-        df["max_league_points"] = 0
+        df["win_points"] = 0
+        df["win_quotient"] = 0
+        df["max_win_points"] = 0
         df["wins"] = 0
         df["draws"] = 0
         df["losses"] = 0

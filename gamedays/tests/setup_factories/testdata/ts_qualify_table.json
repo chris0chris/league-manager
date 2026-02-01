@@ -1,4 +1,138 @@
 {
+  "data": [
+    {
+      "diff": 3,
+      "direct_point_diff": null,
+      "direct_points_scored": null,
+      "direct_wins": null,
+      "draws": 0,
+      "games_played": 2,
+      "index": 0,
+      "losses": 0,
+      "max_win_points": 2.0,
+      "name_ascending": null,
+      "overall_point_diff": null,
+      "overall_points_scored": null,
+      "pa": 3,
+      "pf": 6,
+      "rank": 1,
+      "standing": "Gruppe 1",
+      "team__name": "A1",
+      "win_points": 2.0,
+      "win_quotient": 1.0,
+      "wins": 2
+    },
+    {
+      "diff": 0,
+      "direct_point_diff": null,
+      "direct_points_scored": null,
+      "direct_wins": null,
+      "draws": 0,
+      "games_played": 2,
+      "index": 1,
+      "losses": 1,
+      "max_win_points": 2.0,
+      "name_ascending": null,
+      "overall_point_diff": null,
+      "overall_points_scored": null,
+      "pa": 4,
+      "pf": 4,
+      "rank": 2,
+      "standing": "Gruppe 1",
+      "team__name": "A2",
+      "win_points": 1.0,
+      "win_quotient": 0.5,
+      "wins": 1
+    },
+    {
+      "diff": -3,
+      "direct_point_diff": null,
+      "direct_points_scored": null,
+      "direct_wins": null,
+      "draws": 0,
+      "games_played": 2,
+      "index": 2,
+      "losses": 2,
+      "max_win_points": 2.0,
+      "name_ascending": null,
+      "overall_point_diff": null,
+      "overall_points_scored": null,
+      "pa": 5,
+      "pf": 2,
+      "rank": 3,
+      "standing": "Gruppe 1",
+      "team__name": "A3",
+      "win_points": 0.0,
+      "win_quotient": 0.0,
+      "wins": 0
+    },
+    {
+      "diff": 3,
+      "direct_point_diff": null,
+      "direct_points_scored": null,
+      "direct_wins": null,
+      "draws": 0,
+      "games_played": 2,
+      "index": 3,
+      "losses": 0,
+      "max_win_points": 2.0,
+      "name_ascending": null,
+      "overall_point_diff": null,
+      "overall_points_scored": null,
+      "pa": 3,
+      "pf": 6,
+      "rank": 1,
+      "standing": "Gruppe 2",
+      "team__name": "B1",
+      "win_points": 2.0,
+      "win_quotient": 1.0,
+      "wins": 2
+    },
+    {
+      "diff": 0,
+      "direct_point_diff": null,
+      "direct_points_scored": null,
+      "direct_wins": null,
+      "draws": 0,
+      "games_played": 2,
+      "index": 4,
+      "losses": 1,
+      "max_win_points": 2.0,
+      "name_ascending": null,
+      "overall_point_diff": null,
+      "overall_points_scored": null,
+      "pa": 4,
+      "pf": 4,
+      "rank": 2,
+      "standing": "Gruppe 2",
+      "team__name": "B2",
+      "win_points": 1.0,
+      "win_quotient": 0.5,
+      "wins": 1
+    },
+    {
+      "diff": -3,
+      "direct_point_diff": null,
+      "direct_points_scored": null,
+      "direct_wins": null,
+      "draws": 0,
+      "games_played": 2,
+      "index": 5,
+      "losses": 2,
+      "max_win_points": 2.0,
+      "name_ascending": null,
+      "overall_point_diff": null,
+      "overall_points_scored": null,
+      "pa": 5,
+      "pf": 2,
+      "rank": 3,
+      "standing": "Gruppe 2",
+      "team__name": "B3",
+      "win_points": 0.0,
+      "win_quotient": 0.0,
+      "wins": 0
+    }
+  ],
   "schema": {
     "fields": [
       {
@@ -6,18 +140,9 @@
         "type": "integer"
       },
       {
-        "name": "standing",
-        "type": "any",
-        "extDtype": "string"
-      },
-      {
+        "extDtype": "string",
         "name": "team__name",
-        "type": "any",
-        "extDtype": "string"
-      },
-      {
-        "name": "points",
-        "type": "integer"
+        "type": "string"
       },
       {
         "extDtype": "Int64",
@@ -30,70 +155,77 @@
         "type": "integer"
       },
       {
+        "name": "wins",
+        "type": "integer"
+      },
+      {
+        "name": "draws",
+        "type": "integer"
+      },
+      {
+        "name": "losses",
+        "type": "integer"
+      },
+      {
+        "name": "games_played",
+        "type": "integer"
+      },
+      {
+        "extDtype": "Float64",
+        "name": "win_points",
+        "type": "number"
+      },
+      {
+        "name": "max_win_points",
+        "type": "number"
+      },
+      {
+        "extDtype": "string",
+        "name": "standing",
+        "type": "string"
+      },
+      {
         "extDtype": "Int64",
-        "name": "+/-",
+        "name": "diff",
+        "type": "integer"
+      },
+      {
+        "extDtype": "Float64",
+        "name": "win_quotient",
+        "type": "number"
+      },
+      {
+        "name": "direct_wins",
+        "type": "string"
+      },
+      {
+        "name": "direct_point_diff",
+        "type": "string"
+      },
+      {
+        "name": "direct_points_scored",
+        "type": "string"
+      },
+      {
+        "name": "overall_point_diff",
+        "type": "string"
+      },
+      {
+        "name": "overall_points_scored",
+        "type": "string"
+      },
+      {
+        "name": "name_ascending",
+        "type": "string"
+      },
+      {
+        "name": "rank",
         "type": "integer"
       }
     ],
+    "pandas_version": "1.4.0",
     "primaryKey": [
       "index"
-    ],
-    "pandas_version": "1.4.0"
-  },
-  "data": [
-    {
-      "index": 0,
-      "standing": "Gruppe 1",
-      "team__name": "A1",
-      "points": 4,
-      "pf": 6,
-      "pa": 3,
-      "+/-": 3
-    },
-    {
-      "index": 1,
-      "standing": "Gruppe 1",
-      "team__name": "A2",
-      "points": 2,
-      "pf": 4,
-      "pa": 4,
-      "+/-": 0
-    },
-    {
-      "index": 2,
-      "standing": "Gruppe 1",
-      "team__name": "A3",
-      "points": 0,
-      "pf": 2,
-      "pa": 5,
-      "+/-": -3
-    },
-    {
-      "index": 3,
-      "standing": "Gruppe 2",
-      "team__name": "B1",
-      "points": 4,
-      "pf": 6,
-      "pa": 3,
-      "+/-": 3
-    },
-    {
-      "index": 4,
-      "standing": "Gruppe 2",
-      "team__name": "B2",
-      "points": 2,
-      "pf": 4,
-      "pa": 4,
-      "+/-": 0
-    },
-    {
-      "index": 5,
-      "standing": "Gruppe 2",
-      "team__name": "B3",
-      "points": 0,
-      "pf": 2,
-      "pa": 5,
-      "+/-": -3
-    }
-  ]
+    ]
+  }
 }

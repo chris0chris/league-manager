@@ -117,34 +117,36 @@ class GamedayModelWrapper:
             league_season_ruleset = LeagueSeasonConfig.objects.get(
                 league=self.gameday.league, season=self.gameday.season
             ).ruleset
-            league_config_ruleset = LeagueConfigRuleset.from_ruleset(league_season_ruleset)
-            engine = TieBreakerEngine(league_config_ruleset)
-            # TODO
-            qualify_round["league_quotient"] = qualify_round["points"]
-            games_with_result = self._games_with_result
-            games_with_result["gameinfo__status"] = games_with_result[STATUS]
-            games_with_result = games_with_result[(games_with_result[STATUS] == FINISHED) & (games_with_result[STAGE] == QUALIIFY_ROUND)]
-            table = engine.rank_by_games(games_with_result)
-            return table.sort_values(by=STANDING)
         except LeagueSeasonConfig.DoesNotExist:
-            return qualify_round
+            # fallback use default league ruleset
+            league_season_ruleset = LeagueRuleset.objects.get(pk=2)
+        league_config_ruleset = LeagueConfigRuleset.from_ruleset(league_season_ruleset)
+        engine = TieBreakerEngine(league_config_ruleset)
+        # TODO
+        # qualify_round["win_quotient"] = qualify_round["points"]
+        games_with_result = self._games_with_result
+        games_with_result["gameinfo__status"] = games_with_result[STATUS]
+        games_with_result = games_with_result[(games_with_result[STAGE].isin([QUALIIFY_ROUND, MAIN_ROUND]))]
+        table = engine.rank_by_games(games_with_result)
+        return table.sort_values(by=STANDING)
 
     def get_final_table(self):
+        if not self.has_finalround():
+            return None
         if self._gameinfo[self._gameinfo[STATUS] != FINISHED].empty is False:
-            return pd.DataFrame()
-        if self.has_finalround():
-            try:
-                league_season_ruleset = LeagueSeasonConfig.objects.get(
-                    league=self.gameday.league, season=self.gameday.season
-                ).ruleset
-            except LeagueSeasonConfig.DoesNotExist:
-                # fallback use default league ruleset
-                league_season_ruleset = LeagueRuleset.objects.get(pk=2)
-            league_config_ruleset = LeagueConfigRuleset.from_ruleset(league_season_ruleset)
-            engine = FinalRankingEngine(league_config_ruleset)
-            return engine.compute_final_table(self._games_with_result)
-        else:
-            return self.get_qualify_table()
+             return pd.DataFrame()
+
+        try:
+            league_season_ruleset = LeagueSeasonConfig.objects.get(
+                league=self.gameday.league, season=self.gameday.season
+            ).ruleset
+        except LeagueSeasonConfig.DoesNotExist:
+            # fallback use default league ruleset
+            league_season_ruleset = LeagueRuleset.objects.get(pk=2)
+        league_config_ruleset = LeagueConfigRuleset.from_ruleset(league_season_ruleset)
+        engine = FinalRankingEngine(league_config_ruleset)
+        return engine.compute_final_table(self._games_with_result)
+
 
     def get_offense_player_statistics_table(self):
         scoring_events = [

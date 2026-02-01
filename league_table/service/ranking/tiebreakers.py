@@ -99,11 +99,11 @@ def compute_overall_points_scored(
     return df["pf"]
 
 
-@register_tiebreak("league_quotient")
+@register_tiebreak("win_quotient")
 def compute_league_quotient(
     df: pd.DataFrame, games_df: pd.DataFrame, tied_teams: list[int]
 ) -> pd.Series:
-    return df["league_quotient"]
+    return df["win_quotient"]
 
 
 @register_tiebreak("name_ascending")

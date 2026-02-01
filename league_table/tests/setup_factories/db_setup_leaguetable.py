@@ -17,7 +17,7 @@ LEAGUE_TABLE_TEST_RULESET = LeagueConfigRuleset(
         points_loss_same_league=0,
     ),
     tie_break_order=[
-        {"is_ascending": False, "key": "league_quotient"},
+        {"is_ascending": False, "key": "win_quotient"},
         {"is_ascending": False, "key": "direct_wins"},
         {"is_ascending": False, "key": "direct_point_diff"},
         {"is_ascending": False, "key": "direct_points_scored"},

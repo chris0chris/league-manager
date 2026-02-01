@@ -65,7 +65,7 @@ class TestTieBreakEngine:
             "overall_points_scored",
             "name",
             "initial_empty_table_and_empty_games",
-            "league_quotient",
+            "win_quotient",
         ],
     )
     def test_run_tie_break_step(self, table_file, games_file, expected_result_file):
@@ -137,13 +137,13 @@ class TestLeagueRankingEngine:
                     "id": 1,
                     "name": "Team A",
                     "points": "7",
-                    "field": "league_points",
+                    "field": "win_points",
                 },
                 {
                     "id": 4,
                     "name": "Team D",
                     "points": "-5",
-                    "field": "league_points",
+                    "field": "win_points",
                 },
             ],
             excluded_gameday_ids=[],

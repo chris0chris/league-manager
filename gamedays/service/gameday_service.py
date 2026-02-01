@@ -1,10 +1,30 @@
+from abc import ABC, abstractmethod
+
 import pandas as pd
 
 from gamedays.forms import SCHEDULE_CUSTOM_CHOICE_C, GamedayGaminfoFieldsAndGroupsForm
 from gamedays.models import Gameinfo
-from gamedays.service.gameday_settings import ID_AWAY, SCHEDULED, FIELD, OFFICIALS_NAME, STAGE, STANDING, HOME, \
-    POINTS_HOME, \
-    POINTS_AWAY, AWAY, STATUS, ID_HOME, OFFICIALS, TEAM_NAME, POINTS, PF, PA, DIFF, DFFL
+from gamedays.service.gameday_settings import (
+    ID_AWAY,
+    SCHEDULED,
+    FIELD,
+    OFFICIALS_NAME,
+    STAGE,
+    STANDING,
+    HOME,
+    POINTS_HOME,
+    POINTS_AWAY,
+    AWAY,
+    STATUS,
+    ID_HOME,
+    OFFICIALS,
+    TEAM_NAME,
+    PF,
+    PA,
+    DIFF,
+    DFFL,
+    WIN_POINTS,
+)
 from gamedays.service.model_wrapper import GamedayModelWrapper
 
 EMPTY_DATA = '[]'
@@ -13,7 +33,7 @@ TABLE_HEADERS = {
     DFFL: 'DFFL-Punkte',
     STANDING: 'Gruppe',
     TEAM_NAME: 'Team',
-    POINTS: 'Punkte',
+    WIN_POINTS: 'Punkte',
     PF: 'PF',
     PA: 'PA',
     DIFF: '+/-'
@@ -33,83 +53,82 @@ SCHEDULE_TABLE_HEADERS = {
 }
 
 
-class EmptySchedule:
-    @staticmethod
-    def to_html(*args, **kwargs):
+class HtmlAndJsonRendering(ABC):
+    @abstractmethod
+    def to_html(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    def to_json(self, *args, **kwargs):
+        raise NotImplementedError
+
+
+class EmptySchedule(HtmlAndJsonRendering):
+    def to_html(self, *args, **kwargs):
         return None
 
-    @staticmethod
-    def to_json(*args, **kwargs):
+    def to_json(self, *args, **kwargs):
         return EMPTY_DATA
 
 
-class EmptyQualifyTable:
-    @staticmethod
-    def to_html(*args, **kwargs):
-        return ''
+class EmptyQualifyTable(HtmlAndJsonRendering):
+    def to_html(self, *args, **kwargs):
+        return None
 
-    @staticmethod
-    def to_json(*args, **kwargs):
+    def to_json(self, *args, **kwargs):
         return EMPTY_DATA
 
 
-class EmptyFinalTable:
-    @staticmethod
-    def to_html(*args, **kwargs):
+class EmptyFinalTable(HtmlAndJsonRendering):
+    def to_html(self, *args, **kwargs):
         return 'Abschlusstabelle wird berechnet, sobald alle Spiele beendet sind.'
 
-    @staticmethod
-    def to_json(*args, **kwargs):
+    def to_json(self, *args, **kwargs):
         return EMPTY_DATA
 
 
-class EmptyOffenseStatisticTable:
+class EmptyFinalTableMainRound(HtmlAndJsonRendering):
+    def to_html(self, *args, **kwargs):
+        return 'Abschlusstabelle wird nicht berechnet, da es keine Playoffs gibt.'
 
-    @staticmethod
-    def to_html(*args, **kwargs):
+    def to_json(self, *args, **kwargs):
+        return EMPTY_DATA
+
+
+class EmptyOffenseStatisticTable(HtmlAndJsonRendering):
+    def to_html(self, *args, **kwargs):
         return 'Offense Statistiken sind nach dem 1. Spiel verfügbar.'
 
-    @staticmethod
-    def to_json(*args, **kwargs):
+    def to_json(self, *args, **kwargs):
         return EMPTY_DATA
 
 
-class EmptyDefenseStatisticTable:
-
-    @staticmethod
-    def to_html(*args, **kwargs):
+class EmptyDefenseStatisticTable(HtmlAndJsonRendering):
+    def to_html(self, *args, **kwargs):
         return 'Defense Statistiken sind nach dem 1. Spiel verfügbar.'
 
-    @staticmethod
-    def to_json(*args, **kwargs):
+    def to_json(self, *args, **kwargs):
         return EMPTY_DATA
 
 
 class EmptyGamedayService:
+    def get_schedule(self, *args, **kwargs):
+        return EmptySchedule()
 
-    @staticmethod
-    def get_schedule(*args, **kwargs):
-        return EmptySchedule
+    def get_games_to_whistle(self, *args, **kwargs):
+        return EmptySchedule()
 
-    @staticmethod
-    def get_games_to_whistle(*args, **kwargs):
-        return EmptySchedule
+    def get_qualify_table(self):
+        return EmptyQualifyTable()
 
-    @staticmethod
-    def get_qualify_table():
-        return EmptyQualifyTable
+    def get_final_table(self):
+        return EmptyFinalTable()
 
-    @staticmethod
-    def get_final_table():
-        return EmptyFinalTable
+    def get_offense_player_statistics_table(self):
+        return EmptyOffenseStatisticTable()
 
-    @staticmethod
-    def get_offense_player_statistics_table():
-        return EmptyOffenseStatisticTable
-
-    @staticmethod
-    def get_defense_player_statistic_table():
-        return EmptyDefenseStatisticTable
+    def get_defense_player_statistic_table(self):
+        return EmptyDefenseStatisticTable()
 
 
 class GamedayService:
@@ -118,13 +137,14 @@ class GamedayService:
         try:
             return cls(gameday_pk)
         except Gameinfo.DoesNotExist:
-            return EmptyGamedayService
+            return EmptyGamedayService()
 
     def __init__(self, pk):
         self.gmw = GamedayModelWrapper(pk)
 
     def get_schedule(self):
         schedule = self.gmw.get_schedule()
+        # TODO remove id
         columns = ['id', SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, STANDING, STAGE, STATUS]
         schedule = schedule[columns]
         schedule[OFFICIALS_NAME] = schedule[OFFICIALS_NAME].apply('<i>{}</i>'.format)
@@ -136,17 +156,15 @@ class GamedayService:
     def get_qualify_table(self):
         qualify_table = self.gmw.get_qualify_table()
         if qualify_table is '':
-            return EmptyQualifyTable
-        # TODO qualify_table = qualify_table[[STANDING, TEAM_NAME, POINTS, PF, PA, DIFF]]
-        # qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
+            return EmptyQualifyTable()
         return qualify_table
 
     def get_final_table(self):
         final_table = self.gmw.get_final_table()
-        if final_table.empty:
-            return final_table
-        # TODO final_table = final_table[[TEAM_NAME, POINTS, PF, PA, DIFF]]
-        # final_table = final_table.rename(columns=TABLE_HEADERS)
+        if final_table is None:
+            return EmptyFinalTableMainRound()
+        elif final_table.empty:
+            return EmptyFinalTable()
         return final_table
 
     def get_games_to_whistle(self, team):

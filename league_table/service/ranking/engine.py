@@ -25,24 +25,39 @@ class TeamStatsEngine:
                 "draws": "sum",
                 "losses": "sum",
                 "games_played": "sum",
+                "win_points": "sum",
+                "max_win_points": "sum",
                 "standing": "first",
             }
         )
 
         grouped["diff"] = grouped["pf"] - grouped["pa"]
-        grouped["win_quotient"] = (grouped["wins"] / grouped["games_played"]).round(
-            self.ruleset.league_quotient_precision
-        )
+        grouped["win_quotient"] = (
+            grouped["win_points"] / grouped["max_win_points"]
+        ).round(self.ruleset.league_quotient_precision)
 
         return grouped.reset_index()
 
     def _compute_team_stats(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.copy()
 
-        df["wins"] = (df["pf"] > df["pa"]).astype(int)
-        df["draws"] = (df["pf"] == df["pa"]).astype(int)
-        df["losses"] = (df["pf"] < df["pa"]).astype(int)
-        df["games_played"] = 1
+        lp = self.ruleset.league_points
+
+        finished_mask = df["status"] == FINISHED
+        win_mask = (df["pf"] > df["pa"]) & finished_mask
+        draw_mask = (df["pf"] == df["pa"]) & finished_mask
+        loss_mask = (df["pf"] < df["pa"]) & finished_mask
+
+        df["wins"] = win_mask.astype(int)
+        df["draws"] = draw_mask.astype(int)
+        df["losses"] = loss_mask.astype(int)
+        df["games_played"] = finished_mask.astype(int)
+        df["win_points"] = (
+            win_mask * lp.points_win_same_league
+            + draw_mask * lp.points_draw_same_league
+            + loss_mask * lp.points_loss_same_league
+        )
+        df["max_win_points"] = lp.max_points_same_league
 
         return df
 
@@ -80,7 +95,7 @@ class FinalRankingEngine:
         table = TeamStatsEngine(self.league_config_ruleset).build(games)
         table = table.set_index("team_id").reindex(final_standing).reset_index()
         table["rank"] = range(1, len(table) + 1)
-        table = table.rename(columns={"win_quotient": "league_quotient"})
+        table = table.rename(columns={"win_quotient": "win_quotient"})
         table["standing"] = "Finalrunde"
 
         return table
@@ -98,7 +113,7 @@ class LeagueRankingEngine:
 
         same_league = df["league_id"] == df["opponent_league_id"]
 
-        df["league_points"] = (
+        df["win_points"] = (
             (df["pf"] > df["pa"])
             * mask_finished
             * same_league.map(
@@ -116,7 +131,7 @@ class LeagueRankingEngine:
             )
         )
 
-        df["max_league_points"] = same_league.map(
+        df["max_win_points"] = same_league.map(
             {
                 True: lp.max_points_same_league,
                 False: lp.max_points_other_league,
@@ -160,13 +175,15 @@ class LeagueRankingEngine:
             df_games["standing"] = df_games["league__name"]
 
         team_stats = TeamStatsEngine(self.league_config.ruleset).build(df_games)
+        del team_stats["win_points"]
+        del team_stats["max_win_points"]
 
         league_stats = self.compute_league_specific_stats(df_games)
 
         league_agg = league_stats.groupby("team_id", as_index=False).agg(
             {
-                "league_points": "sum",
-                "max_league_points": "sum",
+                "win_points": "sum",
+                "max_win_points": "sum",
             }
         )
 
@@ -178,9 +195,9 @@ class LeagueRankingEngine:
 
         table = self.apply_team_point_adjustments(table)
 
-        table["league_quotient"] = (
-            table["league_points"] / table["max_league_points"]
-        ).round(self.league_config.ruleset.league_quotient_precision)
+        table["win_quotient"] = (table["win_points"] / table["max_win_points"]).round(
+            self.league_config.ruleset.league_quotient_precision
+        )
 
         return table
 
@@ -254,7 +271,6 @@ class TieBreakerEngine:
 
     def rank_by_games(self, games_df: pd.DataFrame) -> pd.DataFrame:
         stats = TeamStatsEngine(self.ruleset).build(games_df)
-        stats = stats.rename(columns={"win_quotient": "league_quotient"})
         return self.rank(stats, games_df)
 
     # -------------------------------------------------------------------------
@@ -263,7 +279,7 @@ class TieBreakerEngine:
     def _rank_group(self, df: pd.DataFrame, games_df: pd.DataFrame) -> pd.DataFrame:
         updated = []
 
-        for points, tied_df in df.groupby("league_quotient"):
+        for points, tied_df in df.groupby("win_quotient"):
             tied_df = tied_df.copy()
             for tb in self.tie_breakers:
                 if tb.key not in tied_df.columns:

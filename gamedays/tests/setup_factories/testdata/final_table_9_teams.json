@@ -1,76 +1,148 @@
 {
   "data": [
     {
-      "+/-": 14,
+      "diff": 14,
+      "draws": 0,
+      "games_played": 4,
       "index": 0,
+      "losses": 0,
+      "max_win_points": 4.0,
       "pa": 58,
       "pf": 72,
-      "points": 8,
-      "team__name": "C3"
+      "rank": 1,
+      "standing": "Finalrunde",
+      "team__name": "C3",
+      "win_points": 4.0,
+      "win_quotient": 1.0,
+      "wins": 4
     },
     {
-      "+/-": 6,
+      "diff": 6,
+      "draws": 0,
+      "games_played": 4,
       "index": 1,
+      "losses": 1,
+      "max_win_points": 4.0,
       "pa": 42,
       "pf": 48,
-      "points": 6,
-      "team__name": "B3"
+      "rank": 2,
+      "standing": "Finalrunde",
+      "team__name": "B3",
+      "win_points": 3.0,
+      "win_quotient": 0.75,
+      "wins": 3
     },
     {
-      "+/-": 14,
+      "diff": 14,
+      "draws": 0,
+      "games_played": 5,
       "index": 2,
+      "losses": 2,
+      "max_win_points": 5.0,
       "pa": 66,
       "pf": 80,
-      "points": 6,
-      "team__name": "C2"
+      "rank": 3,
+      "standing": "Finalrunde",
+      "team__name": "C2",
+      "win_points": 3.0,
+      "win_quotient": 0.6,
+      "wins": 3
     },
     {
-      "+/-": -8,
+      "diff": -8,
+      "draws": 0,
+      "games_played": 5,
       "index": 3,
+      "losses": 2,
+      "max_win_points": 5.0,
       "pa": 38,
       "pf": 30,
-      "points": 6,
-      "team__name": "A3"
+      "rank": 4,
+      "standing": "Finalrunde",
+      "team__name": "A3",
+      "win_points": 3.0,
+      "win_quotient": 0.6,
+      "wins": 3
     },
     {
-      "+/-": 0,
+      "diff": 0,
+      "draws": 0,
+      "games_played": 4,
       "index": 4,
+      "losses": 2,
+      "max_win_points": 4.0,
       "pa": 40,
       "pf": 40,
-      "points": 4,
-      "team__name": "B2"
+      "rank": 5,
+      "standing": "Finalrunde",
+      "team__name": "B2",
+      "win_points": 2.0,
+      "win_quotient": 0.5,
+      "wins": 2
     },
     {
-      "+/-": -8,
+      "diff": -8,
+      "draws": 0,
+      "games_played": 4,
       "index": 5,
+      "losses": 3,
+      "max_win_points": 4.0,
       "pa": 24,
       "pf": 16,
-      "points": 2,
-      "team__name": "A2"
+      "rank": 6,
+      "standing": "Finalrunde",
+      "team__name": "A2",
+      "win_points": 1.0,
+      "win_quotient": 0.25,
+      "wins": 1
     },
     {
-      "+/-": 12,
+      "diff": 12,
+      "draws": 0,
+      "games_played": 4,
       "index": 6,
+      "losses": 2,
+      "max_win_points": 4.0,
       "pa": 44,
       "pf": 56,
-      "points": 4,
-      "team__name": "C1"
+      "rank": 7,
+      "standing": "Finalrunde",
+      "team__name": "C1",
+      "win_points": 2.0,
+      "win_quotient": 0.5,
+      "wins": 2
     },
     {
-      "+/-": -6,
+      "diff": -6,
+      "draws": 0,
+      "games_played": 4,
       "index": 7,
+      "losses": 3,
+      "max_win_points": 4.0,
       "pa": 38,
       "pf": 32,
-      "points": 2,
-      "team__name": "B1"
+      "rank": 8,
+      "standing": "Finalrunde",
+      "team__name": "B1",
+      "win_points": 1.0,
+      "win_quotient": 0.25,
+      "wins": 1
     },
     {
-      "+/-": -24,
+      "diff": -24,
+      "draws": 0,
+      "games_played": 4,
       "index": 8,
+      "losses": 4,
+      "max_win_points": 4.0,
       "pa": 32,
       "pf": 8,
-      "points": 0,
-      "team__name": "A1"
+      "rank": 9,
+      "standing": "Finalrunde",
+      "team__name": "A1",
+      "win_points": 0.0,
+      "win_quotient": 0.0,
+      "wins": 0
     }
   ],
   "schema": {
@@ -80,12 +152,9 @@
         "type": "integer"
       },
       {
+        "extDtype": "string",
         "name": "team__name",
         "type": "string"
-      },
-      {
-        "name": "points",
-        "type": "integer"
       },
       {
         "extDtype": "Int64",
@@ -98,8 +167,46 @@
         "type": "integer"
       },
       {
+        "name": "wins",
+        "type": "integer"
+      },
+      {
+        "name": "draws",
+        "type": "integer"
+      },
+      {
+        "name": "losses",
+        "type": "integer"
+      },
+      {
+        "name": "games_played",
+        "type": "integer"
+      },
+      {
+        "extDtype": "Float64",
+        "name": "win_points",
+        "type": "number"
+      },
+      {
+        "name": "max_win_points",
+        "type": "number"
+      },
+      {
+        "name": "standing",
+        "type": "string"
+      },
+      {
         "extDtype": "Int64",
-        "name": "+/-",
+        "name": "diff",
+        "type": "integer"
+      },
+      {
+        "extDtype": "Float64",
+        "name": "win_quotient",
+        "type": "number"
+      },
+      {
+        "name": "rank",
         "type": "integer"
       }
     ],

@@ -85,8 +85,8 @@ class LeagueRuleset(models.Model):
 
 
 TIE_BREAK_CHOICES = [
-    ("league_quotient", "Ligaquotient"),
-    ("league_points", "Siegpunkte"),
+    ("win_quotient", "Ligaquotient"),
+    ("win_points", "Siegpunkte"),
     ("direct_wins", "Direkte Siegpunkte"),
     ("direct_point_diff", "Direkte Punktedifferenz"),
     ("direct_points_scored", "Direkt erzielte Punkte"),
