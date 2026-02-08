@@ -102,7 +102,7 @@ class GamedayLeagueStatisticView(TemplateView):
             "escape": False,
         }
 
-        lss = LeagueStatisticsService(**kwargs, top_n_players=10)
+        lss = LeagueStatisticsService.create(**kwargs, top_n_players=10)
 
         td_table = lss.get_touchdowns_table()
         int_table = lss.get_interception_table()
@@ -110,6 +110,7 @@ class GamedayLeagueStatisticView(TemplateView):
         two_xp_table = lss.get_two_extra_point_table()
         safety_table = lss.get_safety_table()
         scoring_players_table = lss.get_top_scoring_players()
+        team_statistics_table = lss.get_team_event_summary_table()
 
         context["info"] = {
             "player_touchdown_table": td_table.to_html(**render_configs),
@@ -118,6 +119,7 @@ class GamedayLeagueStatisticView(TemplateView):
             "player_two_extra_point_table": two_xp_table.to_html(**render_configs),
             "player_safety_table": safety_table.to_html(**render_configs),
             "player_scoring_table": scoring_players_table.to_html(**render_configs),
+            "team_statistics_table": team_statistics_table.to_html(**render_configs),
         }
 
         return context
