@@ -8,11 +8,11 @@
     <h2><b>{{ league }} - {{ season }} - Statistiken</b></h2>
 
     <div class="card">
-        <div aria-controls="collapseStats" aria-expanded="false" class="card-header" data-bs-target="#collapseStats"
+        <div aria-controls="collapseStats" aria-expanded="true" class="card-header" data-bs-target="#collapseStats"
              data-bs-toggle="collapse" id="headingStats" role="button">
             <h3 class="card-title mb-0">Spieler Statistiken</h3>
         </div>
-        <div aria-labelledby="headingStats" class="collapse" id="collapseStats">
+        <div aria-labelledby="headingStats" class="collapse show" id="collapseStats">
             <div class="card-header">
                 <ul class="nav nav-tabs card-header-tabs" id="statsTabs" role="tablist">
                     <li class="nav-item">
@@ -121,28 +121,28 @@
                     {% endif %}
                 </div>
 
+                <small><i class="bi bi-info"></i>Die Spieler Statistiken summiert die Anzahl aller Events einer <b>Trikotnummer</b>, eines Teams, in einer Saison in der oben genannten Liga.</small>
+            </div>
 
+        </div>
+    </div>
+    <p class="article-content"></p>
+    <div class="card">
+        <div aria-controls="collapseStats" aria-expanded="false" class="card-header" data-bs-target="#collapseTeamStats"
+             data-bs-toggle="collapse" id="headingTeamStats" role="button">
+            <h3 class="card-title mb-0">Team Statistiken</h3>
+        </div>
+        <div aria-labelledby="headingTeamStats" class="collapse" id="collapseTeamStats">
+            <div class="card-body">
+                {% if info.team_statistics_table == None %}
+                    Statistiken sind nach den ersten Spielen der Liga verfügbar.
+                {% else %}
+                    {{ info.team_statistics_table | safe }}
+                {% endif %}
             </div>
         </div>
     </div>
 
     <small><i class="bi bi-info"></i>Die Statistiken beinhaltet <b>keine</b> Final- / Relegations Spieltage.</small>
-
-    <script>
-        $(function () {
-            $('table tbody tr').addClass('text-nowrap')
-        })
-        $(document).ready(function () {
-            $("#search").on("keyup", function () {
-                console.log('keyup', $(this).val().toLowerCase())
-                console.log($("#schedule tbody tr"))
-                var value = $(this).val().toLowerCase();
-                $("#schedule tbody tr").filter(function () {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-                });
-            });
-        });
-
-    </script>
 
 {% endblock content %}

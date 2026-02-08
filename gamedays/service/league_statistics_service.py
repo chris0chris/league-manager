@@ -9,7 +9,7 @@ class EmptyStatisticsTable:
 
     @staticmethod
     def to_html(*args, **kwargs):
-            return "None"
+            return "Die Statistiken erscheinen nach den ersten Spielen."
 
     @staticmethod
     def to_json(*args, **kwargs):
@@ -21,13 +21,37 @@ class EmptyLeagueStatisticsService:
     def get_touchdowns_table():
         return EmptyStatisticsTable
 
+    @staticmethod
+    def get_interception_table():
+        return EmptyStatisticsTable
+
+    @staticmethod
+    def get_one_extra_point_table():
+        return EmptyStatisticsTable
+
+    @staticmethod
+    def get_two_extra_point_table():
+        return EmptyStatisticsTable
+
+    @staticmethod
+    def get_safety_table():
+        return EmptyStatisticsTable
+
+    @staticmethod
+    def get_top_scoring_players():
+        return EmptyStatisticsTable
+
+    @staticmethod
+    def get_team_event_summary_table():
+        return EmptyStatisticsTable
+
 
 class LeagueStatisticsService:
     @classmethod
     def create(cls, season, league, top_n_players):
         try:
             return cls(season, league, top_n_players)
-        except:
+        except ValueError:
             return EmptyLeagueStatisticsService
 
     def __init__(self, season, league, top_n_players):
@@ -53,3 +77,6 @@ class LeagueStatisticsService:
 
     def get_top_scoring_players(self):
         return self.lsmw.get_top_scoring_players(top=self.top_n_players)
+
+    def get_team_event_summary_table(self):
+        return self.lsmw.get_team_event_summary()

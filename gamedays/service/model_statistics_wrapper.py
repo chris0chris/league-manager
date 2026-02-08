@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 from gamedays.models import Gameday, Gameinfo, TeamLog
@@ -32,6 +31,14 @@ class LeagueStatisticsModelWrapper:
         self.player_aggregation = pd.DataFrame([])
         self.team_aggregation = pd.DataFrame([])
 
+        self.scoring_column_values = {
+            "Touchdown": 6,
+            "1-Extra-Punkt": 1,
+            "2-Extra-Punkte": 2,
+            "Safety (+1)": 1,
+            "Safety (+2)": 2,
+        }
+
         self._get_gameday_ids()
         self._aggregate_team_logs()
         self._aggregate_player_events()
@@ -64,6 +71,9 @@ class LeagueStatisticsModelWrapper:
                 .values(*TEAM_LOG_COLUMNS)
         )
 
+        if len(self.team_logs) == 0:
+            raise ValueError("There are no team logs in this league.")
+
         self.team_logs["team_player"] = self.team_logs.apply(lambda x: f"{x['team__name']} #{x['player']}", axis=1)
 
 
@@ -86,8 +96,11 @@ class LeagueStatisticsModelWrapper:
     def _get_top_event_players(self, event: str, top: int) -> pd.DataFrame:
         relevant_column = self.player_aggregation[[event]].sort_values(event, ascending=False).head(top).copy()
         relevant_column["rank"] = relevant_column[event].rank(method='min', ascending=False).astype(int)
+        # scoring_player_aggregation["rank"] <= top
 
-        return relevant_column.rename_axis(None, axis=1).reset_index()[["rank", "team_player", event]].rename(columns={
+        relevant_column = relevant_column.rename_axis(None, axis=1).reset_index()[["rank", "team_player", event]]
+
+        return relevant_column[(relevant_column["rank"] <= top) & (relevant_column[event] > 0)].rename(columns={
             "rank": "Liga Platzierung",
             "team_player": "Spieler",
             event: f"Anzahl {event}"
@@ -95,20 +108,12 @@ class LeagueStatisticsModelWrapper:
 
     def get_top_scoring_players(self, top: int) -> pd.DataFrame:
 
-        scoring_column_values = {
-            "Touchdown": 6,
-            "1-Extra-Punkt": 1,
-            "2-Extra-Punkte": 2,
-            "Safety (+1)": 1,
-            "Safety (+2)": 2,
-        }
-
         def _sum_scoring_values(series) -> int:
-            return sum([num * scoring_column_values.get(event, 0) for event, num in (zip(series.index, series))])
+            return sum([num * self.scoring_column_values.get(event, 0) for event, num in (zip(series.index, series))])
 
         scoring_player_aggregation = self.player_aggregation
 
-        missing_columns = list(set(scoring_column_values.keys()) - set(scoring_player_aggregation.columns))
+        missing_columns = list(set(self.scoring_column_values.keys()) - set(scoring_player_aggregation.columns))
         for column in missing_columns:
             scoring_player_aggregation[column] = 0
 
@@ -116,7 +121,7 @@ class LeagueStatisticsModelWrapper:
         scoring_player_aggregation.sort_values(by="total_points", ascending=False, inplace=True)
 
         scoring_player_aggregation = scoring_player_aggregation.rename_axis(None, axis=1).reset_index()[
-            ["team_player"] + list(scoring_column_values.keys()) + ["total_points"]
+            ["team_player"] + list(self.scoring_column_values.keys()) + ["total_points"]
         ]
 
         scoring_player_aggregation["rank"] = scoring_player_aggregation["total_points"] \
@@ -141,20 +146,45 @@ class LeagueStatisticsModelWrapper:
             "Safety (+2)"
         ]]
 
-    def get_top_touchdown_players(self, top=10):
+    def get_top_touchdown_players(self, top=10) -> pd.DataFrame:
         return self._get_top_event_players("Touchdown", top)
 
-    def get_top_one_extra_point_players(self, top=10):
+    def get_top_one_extra_point_players(self, top=10) -> pd.DataFrame:
         return self._get_top_event_players("1-Extra-Punkt", top)
 
-    def get_top_two_extra_point_players(self, top=10):
+    def get_top_two_extra_point_players(self, top=10) -> pd.DataFrame:
         return self._get_top_event_players("2-Extra-Punkte", top)
 
-    def get_top_interception_players(self, top=10):
+    def get_top_interception_players(self, top=10) -> pd.DataFrame:
         return self._get_top_event_players("Interception", top)
 
-    def get_top_safety_players(self, top=10):
+    def get_top_safety_players(self, top=10) -> pd.DataFrame:
         return self._get_top_event_players("Safety (+2)", top)
 
+    def get_team_event_summary(self) -> pd.DataFrame:
 
+        def _sum_scoring_values(series) -> int:
+            return sum([num * self.scoring_column_values.get(event, 0) for event, num in (zip(series.index, series))])
+
+        team_event_aggregation = self.team_aggregation
+
+        missing_columns = list(set(INDIVIDUAL_STATISTIC_EVENTS) - set(team_event_aggregation.columns))
+        for column in missing_columns:
+            team_event_aggregation[column] = 0
+
+        team_event_aggregation["total_points"] = team_event_aggregation.apply(_sum_scoring_values, axis=1)
+        team_event_aggregation.sort_values(by="total_points", ascending=False, inplace=True)
+
+        team_event_aggregation = team_event_aggregation.rename_axis(None, axis=1).reset_index()
+
+        team_event_aggregation = team_event_aggregation[
+            ["team__name"] + INDIVIDUAL_STATISTIC_EVENTS + ["total_points"]
+        ]
+
+        return team_event_aggregation.rename(columns={
+            "team__name": "Team",
+            "total_points": "Summe Punkte",
+            "1-Extra-Punkt": "1-XP",
+            "2-Extra-Punkte": "2-XP",
+        })
 
