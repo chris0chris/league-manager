@@ -7,7 +7,7 @@
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
-    "axios": "^1.7.9",
+    "axios": "^1.13.5",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "i18next": "^25.7.3",
