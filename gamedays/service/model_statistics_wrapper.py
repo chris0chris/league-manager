@@ -101,7 +101,7 @@ class LeagueStatisticsModelWrapper:
             aggfunc='count'
         ).fillna(0).astype(int)
 
-        missing_columns = set(TEAM_LOG_COLUMNS) - set(self.team_aggregation.columns)
+        missing_columns = set(TEAM_LOG_COLUMNS) - set(self.team_aggregation.columns) - {"team__name"}
         for missing_column in missing_columns:
             self.team_aggregation[missing_column] = 0
 
@@ -187,7 +187,7 @@ class LeagueStatisticsModelWrapper:
         team_event_aggregation["total_points"] = team_event_aggregation.apply(_sum_scoring_values, axis=1)
         team_event_aggregation.sort_values(by="total_points", ascending=False, inplace=True)
 
-        team_event_aggregation = team_event_aggregation.rename_axis(None, axis=1)
+        team_event_aggregation = team_event_aggregation.rename_axis(None, axis=1).reset_index()
 
         team_event_aggregation = team_event_aggregation[
             ["team__name"] + INDIVIDUAL_STATISTIC_EVENTS + ["total_points"]
