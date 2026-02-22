@@ -96,8 +96,20 @@ class TestGamedayGameServiceDataErrors(TestCase):
         """
         gameday = DBSetup().g62_finished()
         gameinfo = list(Gameinfo.objects.filter(gameday=gameday.pk))[0]
+        author = gameday.author
         
-        # Clear any existing team events (leave only static ones if any)
+        # Create a static event (team=None) to keep events_ready=True
+        # This ensures the validation code runs instead of returning EmptyEventsTable
+        TeamLog.objects.create(
+            gameinfo=gameinfo,
+            team=None,  # Static event (no team)
+            sequence=0,
+            event="GAME_START",
+            half=1,
+            author=author,
+        )
+        
+        # Clear all team-specific events (only delete events where team is not None)
         TeamLog.objects.filter(gameinfo=gameinfo, team__isnull=False).delete()
         
         ggs = GamedayGameService.create(gameinfo.pk)
