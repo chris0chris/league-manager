@@ -2,7 +2,7 @@ import pandas as pd
 from django.db.models.fields import return_None
 
 from gamedays.forms import SCHEDULE_CUSTOM_CHOICE_C, GamedayGaminfoFieldsAndGroupsForm
-from gamedays.models import Gameinfo, Gameday
+from gamedays.models import Gameinfo, Gameday, GameSetup
 from gamedays.service.gameday_settings import (
     ID_AWAY,
     SCHEDULED,
@@ -475,6 +475,11 @@ class GamedayGameService:
             ],
             split_score_repaired,
         )
+
+    def get_staff_game_end_notes(self):
+        return GameSetup.objects.filter(gameinfo=self.game.pk).values(
+            *["gameinfo__officials__name", "homeCaptain", "awayCaptain", "note", ]
+        ).first()
 
     def _repair_broken_split_score(self, split_score_ct: pd.DataFrame) -> pd.DataFrame:
         split_score_columns = set(split_score_ct.columns)
