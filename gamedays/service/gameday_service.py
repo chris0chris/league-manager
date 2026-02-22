@@ -234,6 +234,9 @@ class GamedayService:
     def get_offense_player_statistics_table(self):
         return self.gmw.get_offense_player_statistics_table()
 
+    def get_staff_passcheck_details(self):
+        return self.gmw.get_staff_passcheck_details(self.gameday_pk)
+
     def get_defense_player_statistic_table(self):
         return self.gmw.get_defense_statistic_table()
 

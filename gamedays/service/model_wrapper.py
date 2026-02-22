@@ -33,6 +33,7 @@ from gamedays.service.gameday_settings import (
     IN_POSSESSION,
     IS_HOME,
 )
+from passcheck.models import PasscheckVerification
 
 
 class DfflPoints(object):
@@ -438,3 +439,23 @@ class GamedayModelWrapper:
             results_with_standing[POINTS] == points
         ]
         return results_with_standing_and_according_points
+
+    def get_staff_passcheck_details(self, gameday_id):
+        column_mapping = {
+            "created_at": "Zeitpunkt",
+            "official_name": "Schiedsrichter",
+            "user__username": "Account",
+            "team__name": "Team",
+            "note": "Notiz"
+        }
+
+
+        passchecks = pd.DataFrame(
+            PasscheckVerification.objects
+                .filter(gameday_id=gameday_id)
+                .values(*column_mapping.keys())
+        )
+        passchecks["created_at"] = passchecks.created_at.dt.strftime("%Y-%m-%d %H:%M:%S")
+        passchecks["note"] = passchecks.note.apply(lambda x: x.replace("\n", "</br>"))
+
+        return passchecks.rename(columns=column_mapping)

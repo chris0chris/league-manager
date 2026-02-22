@@ -171,6 +171,12 @@ class GamedayDetailView(DetailView):
             url_pattern_official = ""
             url_pattern_official_signup = ""
 
+        passcheck_info_table = ""
+
+        if self.request.user.is_staff:
+            passcheck_info_table = gs.get_staff_passcheck_details().to_html(**render_configs)
+
+
         context["info"] = {
             "schedule": gs.get_schedule().to_html(**render_configs),
             "qualify_table": qualify_table,
@@ -182,6 +188,7 @@ class GamedayDetailView(DetailView):
             "defense_table": gs.get_defense_player_statistic_table().to_html(
                 **render_configs
             ),
+            "passcheck_info_table": passcheck_info_table,
             "url_pattern_official": url_pattern_official,
             "url_pattern_official_signup": url_pattern_official_signup,
         }
