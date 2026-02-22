@@ -131,12 +131,15 @@ class EventsTableError:
         """Build a user-friendly error message"""
         expected = f"{self.home_team} vs {self.away_team}"
         
-        if not self.events_teams:
+        # Filter out None/NaN values
+        valid_teams = [t for t in self.events_teams if t is not None and str(t) != 'nan']
+        
+        if not valid_teams:
             return f"Ereignisdaten für dieses Spiel sind nicht verfügbar. Bitte kontaktieren Sie den Support."
         
-        actual = ", ".join(self.events_teams)
+        actual = ", ".join(valid_teams)
         
-        if set(self.events_teams) == {self.home_team, self.away_team}:
+        if set(valid_teams) == {self.home_team, self.away_team}:
             return f"Ereignisdaten für dieses Spiel sind inkonsistent. Erwartet: {expected}, Gefunden: {actual}"
         
         return f"Ereignisdaten für dieses Spiel sind inkonsistent. Erwartet: {expected}, Gefunden: {actual}. Bitte kontaktieren Sie den Support."
@@ -526,7 +529,7 @@ class GamedayGameService:
         if team_events.empty:
             return False, []
         
-        teams_in_events = team_events['team__description'].unique().tolist()
+        teams_in_events = [t for t in team_events['team__description'].unique().tolist() if t is not None and pd.notna(t)]
         expected_teams = {self.home_team_name, self.away_team_name}
         actual_teams = set(teams_in_events)
         
