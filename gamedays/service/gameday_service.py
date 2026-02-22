@@ -1,5 +1,8 @@
+import logging
 import pandas as pd
 from django.db.models.fields import return_None
+
+logger = logging.getLogger(__name__)
 
 from gamedays.forms import SCHEDULE_CUSTOM_CHOICE_C, GamedayGaminfoFieldsAndGroupsForm
 from gamedays.models import Gameinfo, Gameday
@@ -112,6 +115,38 @@ class EmptyDefenseStatisticTable:
     @staticmethod
     def to_json(*args, **kwargs):
         return EMPTY_DATA
+
+
+class EventsTableError:
+    """Marker for when events table cannot be generated due to data inconsistency"""
+    
+    def __init__(self, home_team: str, away_team: str, events_teams: list, game_id: int):
+        self.home_team = home_team
+        self.away_team = away_team
+        self.events_teams = events_teams  # teams that actually appear in events
+        self.game_id = game_id
+        self.error_message = self._build_message()
+    
+    def _build_message(self) -> str:
+        """Build a user-friendly error message"""
+        expected = f"{self.home_team} vs {self.away_team}"
+        
+        # Filter out None/NaN values
+        valid_teams = [t for t in self.events_teams if t is not None and str(t) != 'nan']
+        
+        if not valid_teams:
+            return f"Ereignisdaten für dieses Spiel sind nicht verfügbar. Bitte kontaktieren Sie den Support."
+        
+        actual = ", ".join(valid_teams)
+        
+        if set(valid_teams) == {self.home_team, self.away_team}:
+            return f"Ereignisdaten für dieses Spiel sind inkonsistent. Erwartet: {expected}, Gefunden: {actual}"
+        
+        return f"Ereignisdaten für dieses Spiel sind inkonsistent. Erwartet: {expected}, Gefunden: {actual}. Bitte kontaktieren Sie den Support."
+    
+    def to_html(self, **kwargs) -> str:
+        """Return HTML representation (matches DataFrame.to_html() interface)"""
+        return self.error_message
 
 
 class EmptyGamedayService:
@@ -484,6 +519,30 @@ class GamedayGameService:
 
         return split_score_ct
 
+    def _validate_events_data(self, team_events) -> tuple[bool, list]:
+        """
+        Validate that event data contains expected teams.
+        
+        Returns:
+            (is_valid, teams_in_events) - tuple of (bool, list of team names)
+        """
+        if team_events.empty:
+            return False, []
+        
+        teams_in_events = [t for t in team_events['team__description'].unique().tolist() if t is not None and pd.notna(t)]
+        expected_teams = {self.home_team_name, self.away_team_name}
+        actual_teams = set(teams_in_events)
+        
+        # Check if actual teams don't match expected
+        if actual_teams != expected_teams:
+            logger.warning(
+                f"Events data mismatch for game {self.game.pk}: "
+                f"Expected {expected_teams}, got {actual_teams}"
+            )
+            return False, teams_in_events
+        
+        return True, teams_in_events
+
     def get_events_table(self):
         if not self.events_ready:
             return EmptyEventsTable
@@ -491,6 +550,22 @@ class GamedayGameService:
 
         static_events = events[pd.isna(events.team)].copy()
         team_events = events[~pd.isna(events.team)].copy()
+
+        # NEW: Validate data before processing
+        is_valid, teams_in_events = self._validate_events_data(team_events)
+        if not is_valid:
+            logger.error(
+                f"Cannot generate events table for game {self.game.pk} - "
+                f"event teams {teams_in_events} don't match expected "
+                f"{self.home_team_name} vs {self.away_team_name}. "
+                f"Game ID: {self.game.pk}, Gameday ID: {self.game.gameday.pk}"
+            )
+            return EventsTableError(
+                home_team=self.home_team_name,
+                away_team=self.away_team_name,
+                events_teams=teams_in_events,
+                game_id=self.game.pk
+            )
 
         event_ct = pd.crosstab(
             index=team_events.id,
