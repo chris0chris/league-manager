@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pandas as pd
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Max
@@ -223,14 +224,22 @@ class GamedayGameDetailView(DetailView):
             split_score_table_html = f"""{split_score_table_html}</ br>
 <small>Die Aufteilung der Punkte je Halbzeit kann eventuell inkorrekt sein.</small>"""
 
-        context['info'] = {
-            'away_team': ggs.away_team_name,
-            'home_team': ggs.home_team_name,
-            'events_table': ggs.get_events_table().to_html(**{
-                **render_configs,
-                "classes": classes + ["game-log-table"],
-            }),
-            'split_score_table': split_score_table_html,
+        events_table = ggs.get_events_table()
+        context["info"] = {
+            "away_team": ggs.away_team_name,
+            "home_team": ggs.home_team_name,
+            "events_table": (
+                events_table.to_html(
+                    **{
+                        **render_configs,
+                        "classes": classes + ["game-log-table"],
+                    }
+                )
+                if isinstance(events_table, pd.DataFrame)
+                else events_table.to_html()  # EventsTableError.to_html() returns plain text
+            ),
+            "split_score_table": split_score_table_html,
+        }
         }
         return context
 
