@@ -1,7 +1,3 @@
-from socket import send_fds
-
-import pandas as pd
-
 from gamedays.service.model_statistics_wrapper import LeagueStatisticsModelWrapper
 
 
