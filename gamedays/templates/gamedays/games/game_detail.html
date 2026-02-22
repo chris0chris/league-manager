@@ -57,7 +57,13 @@
 
     <div aria-labelledby="headingFinal" class="collapse show" id="collapseFinal">
         <div class="card-body">
-            {{ info.events_table | safe }}
+            {% if "Ereignisdaten für dieses Spiel" in info.events_table %}
+                <div class="alert alert-warning" role="alert">
+                    <strong>Warnung:</strong> {{ info.events_table | safe }}
+                </div>
+            {% else %}
+                {{ info.events_table | safe }}
+            {% endif %}
         </div>
     </div>
 </div>
