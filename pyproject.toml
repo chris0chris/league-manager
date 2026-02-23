@@ -80,8 +80,8 @@ message = "Bump version: {current_version} → {new_version}"
 moveable_tags = []
 commit_args = ""
 setup_hooks = []
-pre_commit_hooks = []
-post_commit_hooks = ["uv lock", "git add uv.lock", "git commit --amend --no-edit"]
+pre_commit_hooks = ["uv lock", "git add uv.lock"]
+post_commit_hooks = []
 
 [tool.bumpversion.parts.release]
 optional_value = "stable"
