@@ -29,14 +29,16 @@ class Association(models.Model):
     objects: QuerySet["Association"] = models.Manager()
 
     def __str__(self):
-        return f'{self.pk}: {self.abbr} - {self.name}'
+        return f"{self.pk}: {self.abbr} - {self.name}"
 
 
 class Team(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=255, unique=True)
     location = models.CharField(max_length=20)
-    logo = models.ImageField('Logo', upload_to="teammanager/logos", blank=True, null=True)
+    logo = models.ImageField(
+        "Logo", upload_to="teammanager/logos", blank=True, null=True
+    )
     association = models.ForeignKey(Association, on_delete=models.DO_NOTHING, null=True)
 
     objects: QuerySet["Team"] = models.Manager()
@@ -53,12 +55,14 @@ class SeasonLeagueTeam(models.Model):
     objects: QuerySet["SeasonLeagueTeam"] = models.Manager()
 
     def __str__(self):
-        return f'{self.season.name} {self.league} {self.team}'
+        return f"{self.season.name} {self.league} {self.team}"
 
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    avatar = models.ImageField('Avatar', upload_to="media/teammanager/avatars", blank=True, null=True)
+    avatar = models.ImageField(
+        "Avatar", upload_to="media/teammanager/avatars", blank=True, null=True
+    )
     team = models.ForeignKey(Team, on_delete=models.PROTECT, null=True)
     firstname = models.CharField(max_length=20, null=True)
     lastname = models.CharField(max_length=20, null=True)
@@ -77,12 +81,12 @@ class UserProfile(models.Model):
         permisssions = self.get_permisions()
         is_teammanager = False
         for permission in permisssions:
-            if permission.permission.name == 'Teammanager':
+            if permission.permission.name == "Teammanager":
                 is_teammanager = True
         return is_teammanager
 
     def __str__(self):
-        return f'{self.team.name}: {self.firstname} {self.lastname}'
+        return f"{self.team.name}: {self.firstname} {self.lastname}"
 
 
 class Permissions(models.Model):
@@ -101,7 +105,7 @@ class UserPermissions(models.Model):
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.permission.name}: {self.user.firstname} {self.user.lastname}'
+        return f"{self.permission.name}: {self.user.firstname} {self.user.lastname}"
 
 
 class Achievement(models.Model):
@@ -114,52 +118,90 @@ class Achievement(models.Model):
 
 
 class Gameday(models.Model):
+    STATUS_DRAFT = "DRAFT"
+    STATUS_PUBLISHED = "PUBLISHED"
+    STATUS_IN_PROGRESS = "IN_PROGRESS"
+    STATUS_COMPLETED = "COMPLETED"
+
+    STATUS_CHOICES = [
+        (STATUS_DRAFT, "Draft"),
+        (STATUS_PUBLISHED, "Published"),
+        (STATUS_IN_PROGRESS, "In Progress"),
+        (STATUS_COMPLETED, "Completed"),
+    ]
+
     name = models.CharField(max_length=100)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     league = models.ForeignKey(League, on_delete=models.CASCADE)
     date = models.DateField()
     start = models.TimeField()
-    format = models.CharField(max_length=100, default='6_2', blank=True)
+    format = models.CharField(max_length=100, default="6_2", blank=True)
     author = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=1)
-    address = models.TextField(default='', blank=True)
+    address = models.TextField(default="", blank=True)
+
+    # Lifecycle fields
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT
+    )
+    published_at = models.DateTimeField(null=True, blank=True)
+    designer_data = models.JSONField(null=True, blank=True)
 
     objects: QuerySet["Gameday"] = models.Manager()
 
     class Meta:
-        ordering = ['date']
+        ordering = ["date"]
         indexes = [
-            models.Index(fields=['id', 'date']),
+            models.Index(fields=["id", "date"]),
         ]
 
     def __str__(self):
-        return f'{self.pk}__{self.date} {self.name}'
+        return f"{self.pk}__{self.date} {self.name}"
 
 
 class Gameinfo(models.Model):
+    STATUS_DRAFT = "DRAFT"
+    STATUS_PUBLISHED = "PUBLISHED"
+    STATUS_IN_PROGRESS = "IN_PROGRESS"
+    STATUS_COMPLETED = "COMPLETED"
+
+    # Retaining existing "Geplant" for backward compatibility if needed,
+    # but strictly defining new flow constants.
+
     gameday = models.ForeignKey(Gameday, on_delete=models.CASCADE)
     scheduled = models.TimeField()
     field = models.PositiveSmallIntegerField()
     officials = models.ForeignKey(Team, on_delete=models.PROTECT, blank=True)
-    status = models.CharField(max_length=100, default='Geplant')
+    status = models.CharField(max_length=100, default="Geplant")
     gameStarted = models.TimeField(null=True, blank=True)
     gameHalftime = models.TimeField(null=True, blank=True)
     gameFinished = models.TimeField(null=True, blank=True)
     stage = models.CharField(max_length=100)
     standing = models.CharField(max_length=100)
-    league_group = models.ForeignKey('league_table.LeagueGroup', on_delete=CASCADE, null=True, default=None)
-    in_possession = models.CharField(max_length=100, blank=True, null=True, default=None)
+    league_group = models.ForeignKey(
+        "league_table.LeagueGroup", on_delete=CASCADE, null=True, default=None
+    )
+    in_possession = models.CharField(
+        max_length=100, blank=True, null=True, default=None
+    )
+
+    # Result tracking
+    halftime_score = models.JSONField(null=True, blank=True)
+    final_score = models.JSONField(null=True, blank=True)
+    is_locked = models.BooleanField(default=False)
 
     objects: QuerySet["Gameinfo"] = models.Manager()
 
     class Meta:
         indexes = [
-            models.Index(fields=['id', 'officials']),
-            models.Index(fields=['id', 'gameday']),
+            models.Index(fields=["id", "officials"]),
+            models.Index(fields=["id", "gameday"]),
         ]
 
     def __str__(self):
-        return f'{self.gameday.pk}__{self.pk}__{self.field} - {self.scheduled}: {self.stage} / {self.standing} ' \
-               f'- {self.officials} [{self.status}]'
+        return (
+            f"{self.gameday.pk}__{self.pk}__{self.field} - {self.scheduled}: {self.stage} / {self.standing} "
+            f"- {self.officials} [{self.status}]"
+        )
 
 
 class Gameresult(models.Model):
@@ -174,23 +216,25 @@ class Gameresult(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['id', 'gameinfo', 'isHome']),
-            models.Index(fields=['id', 'gameinfo']),
-            models.Index(fields=['id', 'team']),
+            models.Index(fields=["id", "gameinfo", "isHome"]),
+            models.Index(fields=["id", "gameinfo"]),
+            models.Index(fields=["id", "team"]),
         ]
 
     def __str__(self):
         if self.fh is None:
-            self.fh = ''
+            self.fh = ""
         if self.sh is None:
-            self.sh = ''
+            self.sh = ""
 
-        return f'{self.gameinfo.pk}__{self.gameinfo.field} {self.gameinfo.scheduled}: {self.team} -  / {self.pa}'
+        return f"{self.gameinfo.pk}__{self.gameinfo.field} {self.gameinfo.scheduled}: {self.team} -  / {self.pa}"
 
 
 class GameOfficial(models.Model):
     gameinfo: Gameinfo = models.ForeignKey(Gameinfo, on_delete=models.CASCADE)
-    official = models.ForeignKey('officials.Official', on_delete=models.CASCADE, null=True, blank=True)
+    official = models.ForeignKey(
+        "officials.Official", on_delete=models.CASCADE, null=True, blank=True
+    )
     name = models.CharField(max_length=100, null=True, blank=True)
     position = models.CharField(max_length=100)
 
@@ -198,13 +242,16 @@ class GameOfficial(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['gameinfo', 'position']),
+            models.Index(fields=["gameinfo", "position"]),
         ]
 
     def __str__(self):
-        name_or_official_name = f'{self.official.last_name}, {self.official.first_name}' \
-            if self.official else f'{self.name} *'
-        return f'{self.gameinfo.pk}__{name_or_official_name} - {self.position}'
+        name_or_official_name = (
+            f"{self.official.last_name}, {self.official.first_name}"
+            if self.official
+            else f"{self.name} *"
+        )
+        return f"{self.gameinfo.pk}__{name_or_official_name} - {self.position}"
 
 
 class GameSetup(models.Model):
@@ -220,7 +267,7 @@ class GameSetup(models.Model):
     objects: QuerySet["GameSetup"] = models.Manager()
 
     def __str__(self):
-        return f'{self.gameinfo.pk}'
+        return f"{self.gameinfo.pk}"
 
 
 class TeamLog(models.Model):
@@ -229,7 +276,7 @@ class TeamLog(models.Model):
     sequence = models.PositiveSmallIntegerField()
     player = models.PositiveSmallIntegerField(null=True, blank=True)
     event = models.CharField(max_length=100, blank=False)
-    input = models.CharField(max_length=100, default='', null=True)
+    input = models.CharField(max_length=100, default="", null=True)
     value = models.PositiveSmallIntegerField(default=0, blank=True)
     cop = models.BooleanField(default=False)
     half = models.PositiveSmallIntegerField()
@@ -241,20 +288,38 @@ class TeamLog(models.Model):
 
     def __str__(self):
         if self.cop:
-            return f'{self.gameinfo.pk}__{self.team}#{self.sequence} {self.event} - Half: {self.half}' \
-                   f'{" [DELETED]" if self.isDeleted else ""}'
-        return f'{self.gameinfo.pk}__{self.team}#{self.sequence} {self.event} Player: {self.player} ' \
-               f'Value: {self.value} - Half: {self.half}{" [DELETED]" if self.isDeleted else ""}'
+            return (
+                f"{self.gameinfo.pk}__{self.team}#{self.sequence} {self.event} - Half: {self.half}"
+                f'{" [DELETED]" if self.isDeleted else ""}'
+            )
+        return (
+            f"{self.gameinfo.pk}__{self.team}#{self.sequence} {self.event} Player: {self.player} "
+            f'Value: {self.value} - Half: {self.half}{" [DELETED]" if self.isDeleted else ""}'
+        )
 
 
 class PlayerAchievement(models.Model):
-    achievement = models.ForeignKey(Achievement, blank=False, null=False, on_delete=models.CASCADE)
-    player = models.ForeignKey(UserProfile, blank=False, null=False, on_delete=models.CASCADE)
+    achievement = models.ForeignKey(
+        Achievement, blank=False, null=False, on_delete=models.CASCADE
+    )
+    player = models.ForeignKey(
+        UserProfile, blank=False, null=False, on_delete=models.CASCADE
+    )
     value = models.IntegerField(blank=False, null=False)
-    game = models.ForeignKey(Gameinfo, null=False, blank=False, on_delete=models.CASCADE)
+    game = models.ForeignKey(
+        Gameinfo, null=False, blank=False, on_delete=models.CASCADE
+    )
 
     def __str__(self):
-        return self.achievement.name + ' ' + self.player.lastname + ' ' + self.player.firstname + ' ' + str(self.value)
+        return (
+            self.achievement.name
+            + " "
+            + self.player.lastname
+            + " "
+            + self.player.firstname
+            + " "
+            + str(self.value)
+        )
 
 
 class Person(models.Model):
@@ -262,8 +327,8 @@ class Person(models.Model):
     MALE = 2
 
     SEX_CHOICES = [
-        (FEMALE, 'Weiblich'),
-        (MALE, 'Männlich'),
+        (FEMALE, "Weiblich"),
+        (MALE, "Männlich"),
     ]
 
     first_name = models.CharField(max_length=50)
@@ -272,4 +337,3 @@ class Person(models.Model):
     year_of_birth = models.PositiveIntegerField(null=True, blank=True, default=None)
 
     objects: QuerySet["Person"] = models.Manager()
-

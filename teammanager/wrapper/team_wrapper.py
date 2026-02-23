@@ -9,7 +9,7 @@ class TeamWrapper(object):
         try:
             return Team.objects.get(id=self.team_id).description
         except Team.DoesNotExist:
-            return 'Team nicht gefunden'
+            return "Team nicht gefunden"
 
     def get_id(self):
         return self.team_id

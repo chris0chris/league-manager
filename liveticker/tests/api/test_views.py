@@ -26,7 +26,7 @@ class TestLivetickerAPIView(WebTest):
         assert response.status_code == HTTPStatus.OK
         assert len(response.json) == 4
         expected_result = {
-            'gameId': first_game_gameday_one.pk,
+            "gameId": first_game_gameday_one.pk,
             "status": "Geplant",
             "standing": "Gruppe 1",
             "time": "10:00",
@@ -34,13 +34,14 @@ class TestLivetickerAPIView(WebTest):
                 "name": "AAAAAAA1",
                 "score": 3,
                 "isInPossession": True,
-            }, "away": {
+            },
+            "away": {
                 "name": "AAAAAAA2",
                 "score": 2,
                 "isInPossession": False,
             },
-            "ticks": []
+            "ticks": [],
         }
         assert response.json[0] == expected_result
-        expected_result['gameId'] = first_game_gameday_two.pk
+        expected_result["gameId"] = first_game_gameday_two.pk
         assert response.json[2] == expected_result

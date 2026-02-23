@@ -5,7 +5,7 @@
  * Defines tournament formats that map team counts to complete tournament structures.
  */
 
-import { StageType, ProgressionMode, ProgressionConfig } from './flowchart';
+import { StageCategory, StageType, ProgressionMode, ProgressionConfig } from './flowchart';
 
 /**
  * Tournament format template definition
@@ -50,7 +50,10 @@ export interface TournamentStageTemplate {
   /** Stage name (e.g., "Group Stage", "Semifinals") */
   name: string;
 
-  /** Stage type (vorrunde, finalrunde, platzierung) */
+  /** Stage category (preliminary, final, placement) */
+  category: StageCategory;
+
+  /** Stage type (STANDARD, RANKING) */
   stageType: StageType;
 
   /** Progression mode (manual, round_robin, placement) */
@@ -66,6 +69,21 @@ export interface TournamentStageTemplate {
    * - number: Assign to specific field index
    */
   fieldAssignment: 'all' | 'split' | number;
+
+  /**
+   * For 'split' field assignment, specify how many groups to split into.
+   * If omitted, defaults to number of fields.
+   */
+  splitCount?: number;
+
+  /**
+   * Optional mapping for progression from source games or stages.
+   * Key is target game standing (e.g., 'SF1'), value is source mapping.
+   */
+  progressionMapping?: Record<string, {
+    home: { sourceIndex: number; type: 'winner' | 'loser' | 'rank'; sourceStageId?: string; sourceStageIndex?: number };
+    away: { sourceIndex: number; type: 'winner' | 'loser' | 'rank'; sourceStageId?: string; sourceStageIndex?: number };
+  }>;
 }
 
 /**

@@ -19,8 +19,10 @@ class TestGameService(TestCase):
         game_service = GameService(firstGame.pk)
         game_service.update_halftime(gameday.author)
         firstGame = Gameinfo.objects.first()
-        assert firstGame.status == '2. Halbzeit'
-        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameHalftime))
+        assert firstGame.status == "2. Halbzeit"
+        assert re.match(
+            "^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]", str(firstGame.gameHalftime)
+        )
         assert len(TeamLog.objects.all()) == 1
 
     def test_gamestart_is_updated(self):
@@ -29,10 +31,11 @@ class TestGameService(TestCase):
         game_service = GameService(firstGame.pk)
         game_service.update_gamestart(gameday.author)
         firstGame: Gameinfo = Gameinfo.objects.first()
-        assert firstGame.status == '1. Halbzeit'
-        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameStarted))
+        assert firstGame.status == "1. Halbzeit"
+        assert re.match(
+            "^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]", str(firstGame.gameStarted)
+        )
         assert len(TeamLog.objects.all()) == 1
-
 
     def test_gamefinished_is_updated(self):
         gameday = DBSetup().g62_status_empty()
@@ -40,8 +43,10 @@ class TestGameService(TestCase):
         game_service = GameService(firstGame.pk)
         game_service.update_game_finished(gameday.author)
         firstGame: Gameinfo = Gameinfo.objects.first()
-        assert firstGame.status == 'beendet'
-        assert re.match('^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]', str(firstGame.gameFinished))
+        assert firstGame.status == "beendet"
+        assert re.match(
+            "^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]", str(firstGame.gameFinished)
+        )
         assert len(TeamLog.objects.all()) == 1
 
     def test_entry_for_game_created_halftime_and_finished_only_written_once(self):
@@ -56,11 +61,10 @@ class TestGameService(TestCase):
         game_service.update_game_finished(gameday.author)
         assert len(TeamLog.objects.all()) == 3
 
-
     def test_update_score(self):
         DBSetup().g62_status_empty()
-        team_A1 = Team.objects.get(name='A1')
-        team_A2 = Team.objects.get(name='A2')
+        team_A1 = Team.objects.get(name="A1")
+        team_A2 = Team.objects.get(name="A2")
         game = DBSetup().create_teamlog_home_and_away(home=team_A1, away=team_A2)
         gamelog = GameLog(game)
         game_service = GameService(game.pk)

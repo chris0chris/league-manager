@@ -4,7 +4,6 @@
  * Tests cover:
  * - Import/Export functionality
  * - File handling and JSON parsing
- * - Clear all workflow
  * - Undo/Redo controls
  * - Error handling
  * - Button states and interactions
@@ -18,24 +17,20 @@ import FlowToolbar, { type FlowToolbarProps } from '../FlowToolbar';
 const defaultProps: FlowToolbarProps = {
   onImport: vi.fn(),
   onExport: vi.fn(),
-  onClearAll: vi.fn(),
-  hasNodes: false,
+  gamedayStatus: 'DRAFT',
   canExport: false,
 };
 
 describe('FlowToolbar', () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
-  let alertSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
   });
 
   afterEach(() => {
     consoleErrorSpy.mockRestore();
-    alertSpy.mockRestore();
   });
 
   describe('Rendering', () => {
@@ -47,22 +42,18 @@ describe('FlowToolbar', () => {
     it('renders Import button', () => {
       render(<FlowToolbar {...defaultProps} />);
       expect(screen.getByTestId('import-button')).toBeInTheDocument();
-      // Label is removed from Import button (icon-only now)
       expect(screen.queryByText('Import')).not.toBeInTheDocument();
     });
 
     it('renders Export button', () => {
       render(<FlowToolbar {...defaultProps} />);
       expect(screen.getByTestId('export-button')).toBeInTheDocument();
-      // Label is removed from Export button (icon-only now)
       expect(screen.queryByText('Export')).not.toBeInTheDocument();
     });
 
-    it('renders Clear All button', () => {
+    it('does NOT render Actions dropdown (moved to metadata section)', () => {
       render(<FlowToolbar {...defaultProps} />);
-      expect(screen.getByTestId('clear-all-button')).toBeInTheDocument();
-      // Label is removed from Clear All button
-      expect(screen.queryByText('Clear All')).not.toBeInTheDocument();
+      expect(screen.queryByText('Actions')).not.toBeInTheDocument();
     });
 
     it('renders hidden file input', () => {
@@ -110,22 +101,6 @@ describe('FlowToolbar', () => {
     });
   });
 
-  describe('Clear All functionality', () => {
-    it('enables Clear All button when hasNodes is true', () => {
-      render(<FlowToolbar {...defaultProps} hasNodes={true} />);
-      expect(screen.getByTestId('clear-all-button')).not.toBeDisabled();
-    });
-
-    it('calls onClearAll when Clear All button is clicked', async () => {
-      const onClearAll = vi.fn();
-      const user = userEvent.setup();
-      render(<FlowToolbar {...defaultProps} onClearAll={onClearAll} hasNodes={true} />);
-
-      await user.click(screen.getByTestId('clear-all-button'));
-      expect(onClearAll).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('Button tooltips and accessibility', () => {
     it('has tooltip for Import button', () => {
       render(<FlowToolbar {...defaultProps} />);
@@ -137,12 +112,6 @@ describe('FlowToolbar', () => {
       render(<FlowToolbar {...defaultProps} />);
       const exportButton = screen.getByTestId('export-button');
       expect(exportButton).toHaveAttribute('title', 'Export the current tournament schedule to a JSON file');
-    });
-
-    it('has tooltip for Clear All button', () => {
-      render(<FlowToolbar {...defaultProps} />);
-      const clearButton = screen.getByTestId('clear-all-button');
-      expect(clearButton).toHaveAttribute('title', 'Permanently clear all fields, stages, games, and teams');
     });
 
     it('has tooltip for Undo button when rendered', () => {

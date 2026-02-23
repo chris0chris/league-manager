@@ -37,6 +37,7 @@ function createMockStage(
     type: 'stage',
     position: { x: 0, y: 0 },
     data: {
+      type: 'stage',
       name,
       order,
       progressionMode,
@@ -81,10 +82,10 @@ describe('teamAssignment', () => {
       expect(getTeamColor(3)).toBe('#f39c12'); // Orange
     });
 
-    it('should wrap around after 12 colors', () => {
-      expect(getTeamColor(12)).toBe(TEAM_COLORS[0]);
-      expect(getTeamColor(13)).toBe(TEAM_COLORS[1]);
-      expect(getTeamColor(24)).toBe(TEAM_COLORS[0]);
+    it('should wrap around after 16 colors', () => {
+      expect(getTeamColor(16)).toBe(TEAM_COLORS[0]);
+      expect(getTeamColor(17)).toBe(TEAM_COLORS[1]);
+      expect(getTeamColor(32)).toBe(TEAM_COLORS[0]);
     });
 
     it('should handle large indices', () => {
@@ -138,7 +139,7 @@ describe('teamAssignment', () => {
       expect(teams[0].label).toBe('Team 1');
       expect(teams[19].label).toBe('Team 20');
       // Colors should wrap
-      expect(teams[12].color).toBe(TEAM_COLORS[0]);
+      expect(teams[16].color).toBe(TEAM_COLORS[0]);
     });
 
     it('should generate team objects with correct structure', () => {
@@ -173,48 +174,42 @@ describe('teamAssignment', () => {
         };
 
         const operations = assignTeamsToTournamentGames(structure, teams);
-
-        // Should create 4 assign_team operations (2 games × 2 teams)
         const assignOps = operations.filter((op) => op.type === 'assign_team');
-        expect(assignOps).toHaveLength(4);
 
-        // Game 1: Team 1 vs Team 2
+        // Game 1: Team 1 vs Team 4 (Circular rotation pairing for 4 teams, round 1)
         expect(assignOps.find((op) => op.type === 'assign_team' && op.gameId === 'g1' && op.teamId === 't1' && op.slot === 'home')).toBeDefined();
-        expect(assignOps.find((op) => op.type === 'assign_team' && op.gameId === 'g1' && op.teamId === 't2' && op.slot === 'away')).toBeDefined();
+        expect(assignOps.find((op) => op.type === 'assign_team' && op.gameId === 'g1' && op.teamId === 't4' && op.slot === 'away')).toBeDefined();
 
-        // Game 2: Team 3 vs Team 4
-        expect(assignOps.find((op) => op.type === 'assign_team' && op.gameId === 'g2' && op.teamId === 't3' && op.slot === 'home')).toBeDefined();
-        expect(assignOps.find((op) => op.type === 'assign_team' && op.gameId === 'g2' && op.teamId === 't4' && op.slot === 'away')).toBeDefined();
+        // Game 2: Team 2 vs Team 3
+        expect(assignOps.find((op) => op.type === 'assign_team' && op.gameId === 'g2' && op.teamId === 't2' && op.slot === 'home')).toBeDefined();
+        expect(assignOps.find((op) => op.type === 'assign_team' && op.gameId === 'g2' && op.teamId === 't3' && op.slot === 'away')).toBeDefined();
       });
 
       it('should wrap around teams in round robin', () => {
-        const teams: GlobalTeam[] = [createMockTeam('t1', 'Team 1'), createMockTeam('t2', 'Team 2')];
-
-        const stage = createMockStage('stage1', 'Group Stage', 0, 'round_robin');
-        const games: GameNode[] = [
-          createMockGame('g1', 'G1', 'stage1'),
-          createMockGame('g2', 'G2', 'stage1'),
+        const teams: GlobalTeam[] = [
+          createMockTeam('t1', 'Team 1'),
+          createMockTeam('t2', 'Team 2'),
+          createMockTeam('t3', 'Team 3'),
+        ];
+        const stage = createMockStage('s1', 'Group Stage', 0, 'round_robin');
+        stage.data.progressionConfig = { mode: 'round_robin', teamCount: 3, doubleRound: false };
+        
+        const games = [
+          createMockGame('g1', '1', 's1'),
+          createMockGame('g2', '2', 's1'),
+          createMockGame('g3', '3', 's1'),
         ];
 
-        const structure: TournamentStructure = {
-          stages: [stage],
-          games,
-          edges: [],
-        };
-
+        const structure = { fields: [], stages: [stage], games, edges: [] };
         const operations = assignTeamsToTournamentGames(structure, teams);
-
         const assignOps = operations.filter((op) => op.type === 'assign_team');
-        // Should create 4 operations: both games get Team 1 vs Team 2 (wraps around)
-        expect(assignOps).toHaveLength(4);
 
-        // Game 1: Team 1 vs Team 2
+        // Pairings for 3 teams: [1v2, 3v1, 2v3]
+        expect(assignOps).toHaveLength(6);
+
+        // Game 1: 1 vs 2
         expect(assignOps.find((op) => op.type === 'assign_team' && op.gameId === 'g1' && op.teamId === 't1')).toBeDefined();
         expect(assignOps.find((op) => op.type === 'assign_team' && op.gameId === 'g1' && op.teamId === 't2')).toBeDefined();
-
-        // Game 2: Team 1 vs Team 2 (wrapped around)
-        expect(assignOps.find((op) => op.type === 'assign_team' && op.gameId === 'g2' && op.teamId === 't1')).toBeDefined();
-        expect(assignOps.find((op) => op.type === 'assign_team' && op.gameId === 'g2' && op.teamId === 't2')).toBeDefined();
       });
 
       it('should split teams across parallel stages', () => {

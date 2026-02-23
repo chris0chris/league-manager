@@ -5,16 +5,18 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('officials', '0008_officialexternalgames_halftime_duration_and_more'),
+        ("officials", "0008_officialexternalgames_halftime_duration_and_more"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='official',
-            index=models.Index(fields=['id', 'team'], name='officials_o_id_f573ca_idx'),
+            model_name="official",
+            index=models.Index(fields=["id", "team"], name="officials_o_id_f573ca_idx"),
         ),
         migrations.AddIndex(
-            model_name='official',
-            index=models.Index(fields=['id', 'association'], name='officials_o_id_72c331_idx'),
+            model_name="official",
+            index=models.Index(
+                fields=["id", "association"], name="officials_o_id_72c331_idx"
+            ),
         ),
     ]

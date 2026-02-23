@@ -16,10 +16,12 @@ import { DEFAULT_START_TIME, DEFAULT_GAME_DURATION } from './tournamentConstants
  */
 export function parseTime(timeStr: string): number {
   if (!isValidTimeFormat(timeStr)) {
-    throw new Error(`Invalid time format: ${timeStr}. Expected HH:MM`);
+    throw new Error(`Invalid time format: ${timeStr}. Expected HH:MM or HH:MM:SS`);
   }
 
-  const [hours, minutes] = timeStr.split(':').map(Number);
+  const parts = timeStr.split(':').map(Number);
+  const hours = parts[0];
+  const minutes = parts[1];
   return hours * 60 + minutes;
 }
 
@@ -61,7 +63,7 @@ export function addMinutesToTime(time: string, minutes: number): string {
  * @returns true if valid HH:MM format (24-hour)
  */
 export function isValidTimeFormat(timeStr: string): boolean {
-  const timeRegex = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/;
+  const timeRegex = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])(:[0-5][0-9])?$/;
   return timeRegex.test(timeStr);
 }
 
@@ -194,6 +196,9 @@ export function calculateGameTimes(
     stagesByOrder.get(order)!.push(stage);
   });
 
+  // Track the latest end time for each field to prevent overlaps
+  const fieldEndTimes = new Map<string, string>(); // fieldId -> HH:MM string
+
   let previousOrderEndTime: string | null = null;
   const updatedGames = [...games];
 
@@ -222,7 +227,21 @@ export function calculateGameTimes(
         return;
       }
 
+      // Determine start time for this stage
+      // It must be at least orderStartTime (synchronization barrier)
       let currentTime = stage.data.startTime || orderStartTime;
+
+      // Check if the field is busy from a previous stage (even in same order group)
+      const fieldId = stage.parentId;
+      if (fieldId && fieldEndTimes.has(fieldId)) {
+        const fieldAvailableTime = fieldEndTimes.get(fieldId)!;
+        // If field is busy, wait until it's free + break
+        if (parseTime(fieldAvailableTime) > parseTime(currentTime)) {
+           // Add break duration between stages on the same field
+           currentTime = addMinutesToTime(fieldAvailableTime, breakDuration);
+        }
+      }
+
       const defaultDuration = stage.data.defaultGameDuration || gameDuration;
 
       for (let i = 0; i < stageGames.length; i++) {
@@ -251,8 +270,17 @@ export function calculateGameTimes(
         }
       }
 
+      // Update global latest end time (for next order synchronization)
       if (parseTime(currentTime) > parseTime(latestEndTime)) {
         latestEndTime = currentTime;
+      }
+
+      // Update field end time
+      if (fieldId) {
+        // The last calculated currentTime includes the last game's duration
+        // It does NOT include a trailing break (unless added in loop, which it isn't for last game)
+        // So currentTime is exactly when the field becomes free.
+        fieldEndTimes.set(fieldId, currentTime);
       }
     });
 

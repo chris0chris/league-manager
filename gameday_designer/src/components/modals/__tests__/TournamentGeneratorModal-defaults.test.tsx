@@ -3,61 +3,60 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TournamentGeneratorModal from '../TournamentGeneratorModal';
 import { DEFAULT_START_TIME, DEFAULT_GAME_DURATION } from '../../../utils/tournamentConstants';
+import { GamedayProvider } from '../../../context/GamedayContext';
 import type { GlobalTeam } from '../../../types/flowchart';
 import i18n from '../../../i18n/testConfig';
 
 describe('TournamentGeneratorModal - Defaults and Duration', () => {
   const mockOnHide = vi.fn();
   const mockOnGenerate = vi.fn();
-  const mockTeams: GlobalTeam[] = [];
+  const mockTeams: GlobalTeam[] = Array.from({ length: 6 }, (_, i) => ({
+    id: `t${i}`,
+    label: `Team ${i}`,
+    color: '#000',
+    order: i,
+    groupId: 'g1'
+  }));
 
   beforeEach(async () => {
     vi.clearAllMocks();
     await i18n.changeLanguage('en');
   });
 
-  it('should initialize start time with new default (10:00)', () => {
-    render(
-      <TournamentGeneratorModal
-        show={true}
-        onHide={mockOnHide}
-        teams={mockTeams}
-        onGenerate={mockOnGenerate}
-      />
+  const renderModal = () => {
+    return render(
+      <GamedayProvider>
+        <TournamentGeneratorModal
+          show={true}
+          onHide={mockOnHide}
+          teams={mockTeams}
+          onGenerate={mockOnGenerate}
+        />
+      </GamedayProvider>
     );
+  };
 
-    const startTimeInput = screen.getByLabelText(/start time/i) as HTMLInputElement;
+  it('should initialize start time with new default (10:00)', () => {
+    renderModal();
+
+    const startTimeInput = screen.getByLabelText(/label.startTime/i) as HTMLInputElement;
     expect(startTimeInput.value).toBe(DEFAULT_START_TIME);
     expect(DEFAULT_START_TIME).toBe('10:00');
   });
 
   it('should display a game duration input initialized with 70', () => {
-    render(
-      <TournamentGeneratorModal
-        show={true}
-        onHide={mockOnHide}
-        teams={mockTeams}
-        onGenerate={mockOnGenerate}
-      />
-    );
+    renderModal();
 
-    const durationInput = screen.getByLabelText(/game duration/i) as HTMLInputElement;
+    const durationInput = screen.getByLabelText(/label.gameDuration/i) as HTMLInputElement;
     expect(durationInput.value).toBe(DEFAULT_GAME_DURATION.toString());
     expect(DEFAULT_GAME_DURATION).toBe(70);
   });
 
   it('should allow changing the game duration', async () => {
     const user = userEvent.setup();
-    render(
-      <TournamentGeneratorModal
-        show={true}
-        onHide={mockOnHide}
-        teams={mockTeams}
-        onGenerate={mockOnGenerate}
-      />
-    );
+    renderModal();
 
-    const durationInput = screen.getByLabelText(/game duration/i) as HTMLInputElement;
+    const durationInput = screen.getByLabelText(/label.gameDuration/i) as HTMLInputElement;
     await user.clear(durationInput);
     await user.type(durationInput, '45');
     
@@ -66,16 +65,9 @@ describe('TournamentGeneratorModal - Defaults and Duration', () => {
 
   it('should validate duration range (15-180)', async () => {
     const user = userEvent.setup();
-    render(
-      <TournamentGeneratorModal
-        show={true}
-        onHide={mockOnHide}
-        teams={mockTeams}
-        onGenerate={mockOnGenerate}
-      />
-    );
+    renderModal();
 
-    const durationInput = screen.getByLabelText(/game duration/i) as HTMLInputElement;
+    const durationInput = screen.getByLabelText(/label.gameDuration/i) as HTMLInputElement;
     const generateButton = screen.getByRole('button', { name: /generate/i });
 
     // Too low

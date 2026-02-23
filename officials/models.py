@@ -2,7 +2,16 @@ import datetime
 from datetime import date
 
 from django.db import models
-from django.db.models import QuerySet, ExpressionWrapper, Case, When, F, FloatField, Value, Sum
+from django.db.models import (
+    QuerySet,
+    ExpressionWrapper,
+    Case,
+    When,
+    F,
+    FloatField,
+    Value,
+    Sum,
+)
 
 from gamedays.models import Association, Team, Gameday
 
@@ -19,13 +28,15 @@ class Official(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['id', 'team']),
-            models.Index(fields=['id', 'association']),
+            models.Index(fields=["id", "team"]),
+            models.Index(fields=["id", "association"]),
         ]
 
     def __str__(self):
-        return (f'{self.pk} - {self.team.description}__{self.last_name}, {self.first_name} - ('
-                f'{"NONE" if self.association is None else self.association.name})')
+        return (
+            f"{self.pk} - {self.team.description}__{self.last_name}, {self.first_name} - ("
+            f'{"NONE" if self.association is None else self.association.name})'
+        )
 
 
 class OfficialGamedaySignup(models.Model):
@@ -36,11 +47,13 @@ class OfficialGamedaySignup(models.Model):
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.gameday.name} - {self.official.first_name} {self.official.last_name}'
+        return f"{self.gameday.name} - {self.official.first_name} {self.official.last_name}"
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['gameday', 'official'], name='unique_gameday_and_official_id'),
+            models.UniqueConstraint(
+                fields=["gameday", "official"], name="unique_gameday_and_official_id"
+            ),
         ]
 
 
@@ -50,12 +63,12 @@ class OfficialLicense(models.Model):
     objects: QuerySet = models.Manager()
 
     def __str__(self):
-        return f'{self.name}'
+        return f"{self.name}"
 
 
 class EmptyLicense:
     pk = 4
-    name = 'Keine Lizenz vorhanden'
+    name = "Keine Lizenz vorhanden"
 
 
 class EmptyOfficialLicenseHistory:
@@ -76,10 +89,12 @@ class OfficialLicenseHistory(models.Model):
 
     def valid_until(self):
         # noinspection PyUnresolvedReferences
-        return datetime.date(self.created_at.year + 1, self.created_at.month, self.created_at.day)
+        return datetime.date(
+            self.created_at.year + 1, self.created_at.month, self.created_at.day
+        )
 
     def __str__(self):
-        return f'{self.created_at}__{self.license} - {self.official.last_name} # {self.result}'
+        return f"{self.created_at}__{self.license} - {self.official.last_name} # {self.result}"
 
 
 class OfficialExternalGames(models.Model):
@@ -98,41 +113,57 @@ class OfficialExternalGames(models.Model):
     objects: QuerySet = models.Manager()
 
     @staticmethod
-    def calculated_games_expression(field_prefix=''):
+    def calculated_games_expression(field_prefix=""):
         """
         Returns an ExpressionWrapper that calculates the adjusted number of games.
         """
         return ExpressionWrapper(
             Case(
                 When(
-                    **{f"{field_prefix}has_clockcontrol": True, f"{field_prefix}halftime_duration__gte": 15},
-                    then=F(f"{field_prefix}number_games")
+                    **{
+                        f"{field_prefix}has_clockcontrol": True,
+                        f"{field_prefix}halftime_duration__gte": 15,
+                    },
+                    then=F(f"{field_prefix}number_games"),
                 ),
                 When(
-                    **{f"{field_prefix}has_clockcontrol": True, f"{field_prefix}halftime_duration__lt": 15},
-                    then=F(f"{field_prefix}number_games") * 0.5
+                    **{
+                        f"{field_prefix}has_clockcontrol": True,
+                        f"{field_prefix}halftime_duration__lt": 15,
+                    },
+                    then=F(f"{field_prefix}number_games") * 0.5,
                 ),
                 When(
-                    **{f"{field_prefix}has_clockcontrol": False, f"{field_prefix}halftime_duration__gte": 23},
-                    then=F(f"{field_prefix}number_games")
+                    **{
+                        f"{field_prefix}has_clockcontrol": False,
+                        f"{field_prefix}halftime_duration__gte": 23,
+                    },
+                    then=F(f"{field_prefix}number_games"),
                 ),
                 When(
-                    **{f"{field_prefix}has_clockcontrol": False, f"{field_prefix}halftime_duration__lt": 23},
-                    then=F(f"{field_prefix}number_games") * 0.5
+                    **{
+                        f"{field_prefix}has_clockcontrol": False,
+                        f"{field_prefix}halftime_duration__lt": 23,
+                    },
+                    then=F(f"{field_prefix}number_games") * 0.5,
                 ),
                 default=Value(0),
-                output_field=FloatField()
+                output_field=FloatField(),
             ),
-            output_field=FloatField()
+            output_field=FloatField(),
         )
 
     @property
     def calculated_number_games(self):
-        return OfficialExternalGames.objects.filter(pk=self.pk).annotate(
-            adjusted_number_games=OfficialExternalGames.calculated_games_expression()
-        ).aggregate(
-            total_calculated_number_games=Sum('adjusted_number_games')
-        )['total_calculated_number_games']
+        return (
+            OfficialExternalGames.objects.filter(pk=self.pk)
+            .annotate(
+                adjusted_number_games=OfficialExternalGames.calculated_games_expression()
+            )
+            .aggregate(total_calculated_number_games=Sum("adjusted_number_games"))[
+                "total_calculated_number_games"
+            ]
+        )
 
     def __str__(self):
-        return f'{self.official.last_name}__{self.date}: {self.number_games}'
+        return f"{self.official.last_name}__{self.date}: {self.number_games}"

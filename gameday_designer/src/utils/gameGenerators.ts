@@ -9,6 +9,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { RoundRobinConfig, PlacementConfig, GameNode } from '../types/flowchart';
 import { createGameNodeInStage } from '../types/flowchart';
+import { getRoundRobinPairings } from './roundRobinLogic';
 
 /**
  * Generates games for a round robin tournament using the circular rotation algorithm.
@@ -29,61 +30,39 @@ import { createGameNodeInStage } from '../types/flowchart';
  */
 export function generateRoundRobinGames(
   stageId: string,
-  config: RoundRobinConfig
+  config: RoundRobinConfig,
+  duration?: number,
+  breakDuration?: number,
+  namePrefix?: string
 ): GameNode[] {
   const { teamCount, doubleRound } = config;
   const games: GameNode[] = [];
+  const gameDuration = duration ?? 50;
+  const gameBreak = breakDuration ?? 0;
+  const prefix = namePrefix ? `${namePrefix} ` : '';
 
-  // Circular rotation algorithm for round robin
-  // For N teams, we need N rounds if odd (to account for byes), N-1 if even
-  const isOdd = teamCount % 2 === 1;
-  const adjustedTeamCount = isOdd ? teamCount + 1 : teamCount; // Add dummy team for odd count
-  const roundsPerCycle = adjustedTeamCount - 1;
-  const rounds = doubleRound ? 2 * roundsPerCycle : roundsPerCycle;
+  const pairings = getRoundRobinPairings(teamCount, doubleRound);
 
-  // Create team array (with dummy team if odd)
-  const teams = Array.from({ length: adjustedTeamCount }, (_, i) => i < teamCount ? i + 1 : 0);
-  let gameCounter = 1;
-
-  for (let round = 0; round < rounds; round++) {
-    // In each round, pair teams using circular rotation
-    for (let i = 0; i < Math.floor(adjustedTeamCount / 2); i++) {
-      const team1Index = i;
-      const team2Index = adjustedTeamCount - 1 - i;
-      const team1 = teams[team1Index];
-      const team2 = teams[team2Index];
-
-      // Skip if either team is the dummy (0) or if they're the same
-      if (team1 === 0 || team2 === 0 || team1 === team2) continue;
-
-      const gameId = uuidv4();
-      const game = createGameNodeInStage(
-        gameId,
-        stageId,
-        {
-          standing: `Game ${gameCounter}`,
-          duration: 50,
-          breakAfter: 0,
-          manualTime: false,
-          startTime: undefined,
-          homeTeamId: null,
-          awayTeamId: null,
-          homeTeamDynamic: null,
-          awayTeamDynamic: null,
-        },
-        { x: 30, y: 50 }
-      );
-
-      games.push(game);
-      gameCounter++;
-    }
-
-    // Rotate teams (keep first team fixed, rotate others)
-    if (adjustedTeamCount > 2 && round < rounds - 1) {
-      const lastTeam = teams.pop()!;
-      teams.splice(1, 0, lastTeam);
-    }
-  }
+  pairings.forEach((pairing, index) => {
+    const gameId = uuidv4();
+    const game = createGameNodeInStage(
+      gameId,
+      stageId,
+      {
+        standing: `${prefix}Game ${index + 1}`,
+        duration: gameDuration,
+        breakAfter: gameBreak,
+        manualTime: false,
+        startTime: undefined,
+        homeTeamId: null,
+        awayTeamId: null,
+        homeTeamDynamic: null,
+        awayTeamDynamic: null,
+      },
+      { x: 30, y: 50 }
+    );
+    games.push(game);
+  });
 
   return games;
 }
@@ -108,15 +87,17 @@ export function generateRoundRobinGames(
  */
 export function generatePlacementGames(
   stageId: string,
-  config: PlacementConfig
+  config: PlacementConfig,
+  duration?: number,
+  breakDuration?: number
 ): GameNode[] {
   const { positions, format } = config;
   const games: GameNode[] = [];
 
   if (format === 'single_elimination') {
-    return generateSingleEliminationGames(stageId, positions);
+    return generateSingleEliminationGames(stageId, positions, duration, breakDuration);
   } else if (format === 'crossover') {
-    return generateCrossoverGames(stageId, positions);
+    return generateCrossoverGames(stageId, positions, duration, breakDuration);
   }
 
   return games;
@@ -134,40 +115,42 @@ export function generatePlacementGames(
  */
 function generateSingleEliminationGames(
   stageId: string,
-  positions: number
+  positions: number,
+  duration?: number,
+  breakDuration?: number
 ): GameNode[] {
   const games: GameNode[] = [];
 
   if (positions === 2) {
     // Just a final
-    games.push(createPlacementGame(stageId, 'Final'));
+    games.push(createPlacementGame(stageId, 'Final', duration, breakDuration));
     return games;
   }
 
   if (positions === 4) {
     // 2 semifinals + final + 3rd place
-    games.push(createPlacementGame(stageId, 'SF1'));
-    games.push(createPlacementGame(stageId, 'SF2'));
-    games.push(createPlacementGame(stageId, 'Final'));
-    games.push(createPlacementGame(stageId, '3rd Place'));
+    games.push(createPlacementGame(stageId, 'SF1', duration, breakDuration));
+    games.push(createPlacementGame(stageId, 'SF2', duration, breakDuration));
+    games.push(createPlacementGame(stageId, 'Final', duration, breakDuration));
+    games.push(createPlacementGame(stageId, '3rd Place', duration, breakDuration));
     return games;
   }
 
   if (positions === 8) {
     // 4 quarterfinals + 2 semifinals + final + 3rd place
-    games.push(createPlacementGame(stageId, 'QF1'));
-    games.push(createPlacementGame(stageId, 'QF2'));
-    games.push(createPlacementGame(stageId, 'QF3'));
-    games.push(createPlacementGame(stageId, 'QF4'));
-    games.push(createPlacementGame(stageId, 'SF1'));
-    games.push(createPlacementGame(stageId, 'SF2'));
-    games.push(createPlacementGame(stageId, 'Final'));
-    games.push(createPlacementGame(stageId, '3rd Place'));
+    games.push(createPlacementGame(stageId, 'QF1', duration, breakDuration));
+    games.push(createPlacementGame(stageId, 'QF2', duration, breakDuration));
+    games.push(createPlacementGame(stageId, 'QF3', duration, breakDuration));
+    games.push(createPlacementGame(stageId, 'QF4', duration, breakDuration));
+    games.push(createPlacementGame(stageId, 'SF1', duration, breakDuration));
+    games.push(createPlacementGame(stageId, 'SF2', duration, breakDuration));
+    games.push(createPlacementGame(stageId, 'Final', duration, breakDuration));
+    games.push(createPlacementGame(stageId, '3rd Place', duration, breakDuration));
     return games;
   }
 
   // For other position counts, just create a final
-  games.push(createPlacementGame(stageId, 'Final'));
+  games.push(createPlacementGame(stageId, 'Final', duration, breakDuration));
   return games;
 }
 
@@ -182,27 +165,29 @@ function generateSingleEliminationGames(
  */
 function generateCrossoverGames(
   stageId: string,
-  positions: number
+  positions: number,
+  duration?: number,
+  breakDuration?: number
 ): GameNode[] {
   const games: GameNode[] = [];
 
   if (positions === 2) {
     // Just a final
-    games.push(createPlacementGame(stageId, 'Final'));
+    games.push(createPlacementGame(stageId, 'Final', duration, breakDuration));
     return games;
   }
 
   if (positions === 4) {
     // Crossover: 1v4, 2v3, then finals
-    games.push(createPlacementGame(stageId, 'CO1')); // 1st vs 4th
-    games.push(createPlacementGame(stageId, 'CO2')); // 2nd vs 3rd
-    games.push(createPlacementGame(stageId, 'Final'));
-    games.push(createPlacementGame(stageId, '3rd Place'));
+    games.push(createPlacementGame(stageId, 'CO1', duration, breakDuration)); // 1st vs 4th
+    games.push(createPlacementGame(stageId, 'CO2', duration, breakDuration)); // 2nd vs 3rd
+    games.push(createPlacementGame(stageId, 'Final', duration, breakDuration));
+    games.push(createPlacementGame(stageId, '3rd Place', duration, breakDuration));
     return games;
   }
 
   // For other position counts, fallback to simple final
-  games.push(createPlacementGame(stageId, 'Final'));
+  games.push(createPlacementGame(stageId, 'Final', duration, breakDuration));
   return games;
 }
 
@@ -213,15 +198,15 @@ function generateCrossoverGames(
  * @param standing - The standing/label for the game
  * @returns A GameNode object
  */
-function createPlacementGame(stageId: string, standing: string): GameNode {
+function createPlacementGame(stageId: string, standing: string, duration?: number, breakDuration?: number): GameNode {
   const gameId = uuidv4();
   return createGameNodeInStage(
     gameId,
     stageId,
     {
       standing,
-      duration: 50,
-      breakAfter: 0,
+      duration: duration ?? 50,
+      breakAfter: breakDuration ?? 0,
       manualTime: false,
       startTime: undefined,
       homeTeamId: null,

@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from gamedays.management.schedule_update import ScheduleUpdate
 from gamedays.models import Gameinfo
 
-FINISHED = 'beendet'
+FINISHED = "beendet"
 
 
 @receiver(post_save, sender=Gameinfo)

@@ -4,8 +4,12 @@ from gamedays.models import League, Season
 
 
 class LeagueGroup(models.Model):
-    league = models.ForeignKey(League, on_delete=models.CASCADE, related_name="groups_league")
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="groups_season")
+    league = models.ForeignKey(
+        League, on_delete=models.CASCADE, related_name="groups_league"
+    )
+    season = models.ForeignKey(
+        Season, on_delete=models.CASCADE, related_name="groups_season"
+    )
     name = models.CharField(max_length=50)
 
     def __str__(self):
@@ -50,6 +54,10 @@ class LeagueRuleset(models.Model):
 
 
 class LeagueSeasonConfig(models.Model):
-    league = models.ForeignKey(League, on_delete=models.CASCADE, related_name="config_league")
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="config_season")
+    league = models.ForeignKey(
+        League, on_delete=models.CASCADE, related_name="config_league"
+    )
+    season = models.ForeignKey(
+        Season, on_delete=models.CASCADE, related_name="config_season"
+    )
     ruleset = models.ForeignKey(LeagueRuleset, on_delete=models.SET_NULL, null=True)

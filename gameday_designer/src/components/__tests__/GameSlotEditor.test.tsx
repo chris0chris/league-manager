@@ -13,6 +13,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import GameSlotEditor from '../GameSlotEditor';
+import { GamedayProvider } from '../../context/GamedayContext';
+import i18n from '../../i18n/testConfig';
 import type { GameSlot } from '../../types/designer';
 
 describe('GameSlotEditor', () => {
@@ -21,7 +23,7 @@ describe('GameSlotEditor', () => {
 
   const defaultGameSlot: GameSlot = {
     id: 'slot-1',
-    stage: 'Vorrunde',
+    stage: 'Preliminary',
     standing: 'Gruppe 1',
     home: { type: 'groupTeam', group: 0, team: 0 },
     away: { type: 'groupTeam', group: 0, team: 1 },
@@ -29,7 +31,8 @@ describe('GameSlotEditor', () => {
     breakAfter: 0,
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
     vi.clearAllMocks();
   });
 
@@ -38,14 +41,16 @@ describe('GameSlotEditor', () => {
     show = true
   ) => {
     return render(
-      <GameSlotEditor
-        show={show}
-        gameSlot={gameSlot}
-        onSave={mockOnSave}
-        onCancel={mockOnCancel}
-        matchNames={['HF1', 'HF2', 'Spiel 3', 'Finale']}
-        groupNames={['Gruppe 1', 'Gruppe 2']}
-      />
+      <GamedayProvider>
+        <GameSlotEditor
+          show={show}
+          gameSlot={gameSlot}
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          matchNames={['HF1', 'HF2', 'Spiel 3', 'Finale']}
+          groupNames={['Gruppe 1', 'Gruppe 2']}
+        />
+      </GamedayProvider>
     );
   };
 
@@ -69,34 +74,36 @@ describe('GameSlotEditor', () => {
   describe('form fields', () => {
     it('displays stage input with current value', () => {
       renderEditor();
-      const stageInput = screen.getByLabelText(/stage/i) as HTMLSelectElement;
-      expect(stageInput.value).toBe('Vorrunde');
+      // Using data-testid or finding by role is safer if label text is translated
+      const stageInput = screen.getByLabelText(/label.stage/i) as HTMLSelectElement;
+      expect(stageInput.value).toBe('Preliminary');
     });
 
     it('displays standing input with current value', () => {
       renderEditor();
-      const standingInput = screen.getByLabelText(/standing/i) as HTMLInputElement;
+      const standingInput = screen.getByLabelText(/label.standing/i) as HTMLInputElement;
       expect(standingInput.value).toBe('Gruppe 1');
     });
 
     it('displays home team selector', () => {
       renderEditor();
-      expect(screen.getByText('Home')).toBeInTheDocument();
+      // Option text is now translated
+      expect(screen.getByText(/label.home/i)).toBeInTheDocument();
     });
 
     it('displays away team selector', () => {
       renderEditor();
-      expect(screen.getByText('Away')).toBeInTheDocument();
+      expect(screen.getByText(/label.away/i)).toBeInTheDocument();
     });
 
     it('displays official team selector', () => {
       renderEditor();
-      expect(screen.getByText('Official')).toBeInTheDocument();
+      expect(screen.getByText(/label.official/i)).toBeInTheDocument();
     });
 
     it('displays break time input', () => {
       renderEditor();
-      const breakInput = screen.getByLabelText(/break/i) as HTMLInputElement;
+      const breakInput = screen.getByLabelText(/label.breakAfter/i) as HTMLInputElement;
       expect(breakInput.value).toBe('0');
     });
 
@@ -106,7 +113,7 @@ describe('GameSlotEditor', () => {
         breakAfter: 15,
       };
       renderEditor(slotWithBreak);
-      const breakInput = screen.getByLabelText(/break/i) as HTMLInputElement;
+      const breakInput = screen.getByLabelText(/label.breakAfter/i) as HTMLInputElement;
       expect(breakInput.value).toBe('15');
     });
   });
@@ -140,7 +147,7 @@ describe('GameSlotEditor', () => {
       expect(mockOnSave).toHaveBeenCalledTimes(1);
       expect(mockOnSave).toHaveBeenCalledWith(expect.objectContaining({
         id: 'slot-1',
-        stage: 'Vorrunde',
+        stage: 'Preliminary',
         standing: 'Gruppe 1',
       }));
     });
@@ -149,11 +156,11 @@ describe('GameSlotEditor', () => {
       const user = userEvent.setup();
       renderEditor();
 
-      await user.selectOptions(screen.getByLabelText(/stage/i), 'Finalrunde');
+      await user.selectOptions(screen.getByLabelText(/label.stage/i), 'Final');
       await user.click(screen.getByRole('button', { name: /save/i }));
 
       expect(mockOnSave).toHaveBeenCalledWith(expect.objectContaining({
-        stage: 'Finalrunde',
+        stage: 'Final',
       }));
     });
 
@@ -161,7 +168,7 @@ describe('GameSlotEditor', () => {
       const user = userEvent.setup();
       renderEditor();
 
-      const standingInput = screen.getByLabelText(/standing/i);
+      const standingInput = screen.getByLabelText(/label.standing/i);
       await user.clear(standingInput);
       await user.type(standingInput, 'HF1');
       await user.click(screen.getByRole('button', { name: /save/i }));

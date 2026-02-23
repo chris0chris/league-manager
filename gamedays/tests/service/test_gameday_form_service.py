@@ -26,7 +26,16 @@ def teams():
 class TestGameinfoFormData:
 
     @pytest.mark.parametrize(
-        "field_name", ["game_started", "game_halftime", "game_finished", "fh_home", "sh_home", "fh_away", "sh_away"]
+        "field_name",
+        [
+            "game_started",
+            "game_halftime",
+            "game_finished",
+            "fh_home",
+            "sh_home",
+            "fh_away",
+            "sh_away",
+        ],
     )
     def test_time_fields_can_be_none(self, teams, field_name):
         """Allow optional time fields to be None."""
@@ -81,33 +90,33 @@ class TestGamedayFormService(TestCase):
     def test_handle_gameinfo_and_gameresult(self):
         expected_gameinfo = GameinfoFactory()
         expected_gameday = DBSetup().create_empty_gameday()
-        teams = DBSetup().create_teams('team', 3)
+        teams = DBSetup().create_teams("team", 3)
 
         assert expected_gameinfo.gameday != expected_gameday
 
         expected_home_results = {
-            'gameinfo': expected_gameinfo,
-            'team': teams[0],
-            'first_half': 12,
-            'second_half': 13,
-            'points_against': 12,
+            "gameinfo": expected_gameinfo,
+            "team": teams[0],
+            "first_half": 12,
+            "second_half": 13,
+            "points_against": 12,
         }
         expected_away_results = {
-            'gameinfo': expected_gameinfo,
-            'team': teams[1],
-            'first_half': 5,
-            'second_half': 7,
-            'points_against': 25,
+            "gameinfo": expected_gameinfo,
+            "team": teams[1],
+            "first_half": 5,
+            "second_half": 7,
+            "points_against": 25,
         }
         gameday_form_service = GamedayFormService(expected_gameday)
         gameday_form_service.handle_gameinfo_and_gameresult(
             {
                 "home": expected_home_results["team"],
                 "away": expected_away_results["team"],
-                'field': 1,
-                'officials': teams[2],
-                'scheduled': '10:00',
-                'standing': 'Group 1',
+                "field": 1,
+                "officials": teams[2],
+                "scheduled": "10:00",
+                "standing": "Group 1",
                 "gameStarted": "10:00",
                 "gameHalftime": "10:30",
                 "gameFinished": "11:00",
@@ -117,7 +126,7 @@ class TestGamedayFormService(TestCase):
                 "fh_away": expected_away_results["first_half"],
                 "sh_away": expected_away_results["second_half"],
             },
-            expected_gameinfo
+            expected_gameinfo,
         )
 
         expected_gameinfo.refresh_from_db()
@@ -150,7 +159,9 @@ class TestGamedayFormService(TestCase):
         mock_form_class.from_mapping.assert_called_once_with({})
 
     # noinspection PyMethodMayBeStatic
-    def _check_for_team_properties_for_assertion(self, team_result: Gameresult, expected_result: dict):
+    def _check_for_team_properties_for_assertion(
+        self, team_result: Gameresult, expected_result: dict
+    ):
         actual = {
             "gameinfo": team_result.gameinfo,
             "team": team_result.team,

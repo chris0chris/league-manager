@@ -13,6 +13,7 @@ The component follows a strict container hierarchy:
 - **Global Team Pool**: Teams are managed in a central pool rather than as individual nodes.
 - **Team Groups**: Teams are organized into collapsible groups for better management in large tournaments.
 - **Assignment**: Games use `homeTeamId`/`awayTeamId` for static assignments or `homeTeamDynamic`/`awayTeamDynamic` for winner/loser progression.
+- **Templates**: Supports `splitCount` for multi-group stages and `progressionMapping` for explicit playoff entry wiring.
 
 ## Backend Services (`gameday_designer/service/`)
 

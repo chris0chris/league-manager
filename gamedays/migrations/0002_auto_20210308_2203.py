@@ -6,56 +6,98 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('gamedays', '0001_initial'),
+        ("gamedays", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='League',
+            name="League",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=20)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=20)),
             ],
         ),
         migrations.CreateModel(
-            name='Season',
+            name="Season",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=20)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=20)),
             ],
         ),
         migrations.CreateModel(
-            name='SeasonLeagueTeam',
+            name="SeasonLeagueTeam",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('league', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gamedays.league')),
-                ('season', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gamedays.season')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "league",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="gamedays.league",
+                    ),
+                ),
+                (
+                    "season",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="gamedays.season",
+                    ),
+                ),
             ],
         ),
         migrations.RenameField(
-            model_name='team',
-            old_name='place',
-            new_name='location',
+            model_name="team",
+            old_name="place",
+            new_name="location",
         ),
         migrations.RemoveField(
-            model_name='gameinfo',
-            name='pin',
+            model_name="gameinfo",
+            name="pin",
         ),
         migrations.RemoveField(
-            model_name='team',
-            name='division',
+            model_name="team",
+            name="division",
         ),
         migrations.AlterField(
-            model_name='userprofile',
-            name='team',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='gamedays.team'),
+            model_name="userprofile",
+            name="team",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="gamedays.team",
+            ),
         ),
         migrations.DeleteModel(
-            name='Division',
+            name="Division",
         ),
         migrations.AddField(
-            model_name='seasonleagueteam',
-            name='team',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gamedays.team'),
+            model_name="seasonleagueteam",
+            name="team",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="gamedays.team"
+            ),
         ),
     ]

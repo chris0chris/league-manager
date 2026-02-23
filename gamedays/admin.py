@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from gamedays.models import Gameday, Gameinfo, Gameresult, GameOfficial, GameSetup, TeamLog, Person
+from gamedays.models import (
+    Gameday,
+    Gameinfo,
+    Gameresult,
+    GameOfficial,
+    GameSetup,
+    TeamLog,
+    Person,
+)
 
 admin.site.register(Gameday)
 admin.site.register(Gameinfo)

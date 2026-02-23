@@ -17,6 +17,20 @@
     "previewStages_one": "{{count}} stage",
     "previewStages_other": "{{count}} stages",
     "previewFirstGame": "First game at {{time}}",
-    "previewGameDuration": "Default game duration: {{duration}} minutes"
+    "previewGameDuration": "Default game duration: {{duration}} minutes",
+    "durationValidation": "Duration must be between 15 and 180 minutes.",
+    "insufficientTeams": "Not enough teams in the pool. This format requires at least {{min}} teams, or select 'Generate teams automatically'.",
+    "generateTeamsDisabledHint": "Disable manual teams first"
+  },
+  "publishConfirmation": {
+    "title": "Publish Schedule",
+    "description": "Publishing the schedule will lock its structure. Results can be entered, but games and teams cannot be added or removed.",
+    "errorsTitle": "Blocking Errors Found",
+    "errorsDescription": "The following issues must be resolved before the schedule can be published:",
+    "warningsTitle": "Warnings Found",
+    "warningsDescription": "The schedule has some potential issues. You can still publish, but please review these items:",
+    "ready": "The schedule is valid and ready to be published.",
+    "confirmWithWarnings": "Publish Anyway",
+    "confirm": "Publish Now"
   }
 }

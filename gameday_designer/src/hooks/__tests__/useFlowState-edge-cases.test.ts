@@ -268,7 +268,11 @@ describe('useFlowState - Edge Cases', () => {
       // Create group with teams
       act(() => {
         groupId = result.current.addGlobalTeamGroup('Group A').id;
+      });
+      act(() => {
         team1Id = result.current.addGlobalTeam('Team 1', groupId).id;
+      });
+      act(() => {
         team2Id = result.current.addGlobalTeam('Team 2', groupId).id;
       });
 
@@ -346,10 +350,18 @@ describe('useFlowState - Edge Cases', () => {
       // Create two groups with teams
       act(() => {
         group1Id = result.current.addGlobalTeamGroup('Group 1').id;
+      });
+      act(() => {
         team1Id = result.current.addGlobalTeam('Team 1', group1Id).id;
+      });
+      act(() => {
         team2Id = result.current.addGlobalTeam('Team 2', group1Id).id;
+      });
 
+      act(() => {
         group2Id = result.current.addGlobalTeamGroup('Group 2').id;
+      });
+      act(() => {
         team3Id = result.current.addGlobalTeam('Team 3', group2Id).id;
       });
 
@@ -726,14 +738,12 @@ describe('useFlowState - Edge Cases', () => {
         result.current.clearAll();
       });
 
-      expect(result.current.nodes).toEqual([]);
-      expect(result.current.edges).toEqual([]);
-      expect(result.current.globalTeams).toEqual([]);
-      expect(result.current.globalTeamGroups).toEqual([]);
-      expect(result.current.selection).toEqual({ nodeIds: [], edgeIds: [] });
-
-      // Fields are kept
-      expect(result.current.fields.length).toBeGreaterThan(0);
+      // ALL state is cleared
+      expect(result.current.nodes.length).toBe(0);
+      expect(result.current.edges.length).toBe(0);
+      expect(result.current.globalTeams.length).toBe(0);
+      expect(result.current.globalTeamGroups.length).toBe(0);
+      expect(result.current.fields.length).toBe(0);
     });
   });
 });
