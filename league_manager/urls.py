@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -31,70 +30,53 @@ from league_manager.sitemaps import (
     OfficialsSitemap,
 )
 
-ADMIN_ALL_URLS = "admin-all-urls"
-CLEAR_CACHE = "clear-cache"
+ADMIN_ALL_URLS = 'admin-all-urls'
+CLEAR_CACHE = 'clear-cache'
 
-LEAGUE_MANAGER_MAINTENANCE = "maintenance"
+LEAGUE_MANAGER_MAINTENANCE = 'maintenance'
 
 # Sitemap configuration
 sitemaps = {
-    "static": StaticViewSitemap,
-    "leaguetable": LeaguetableSitemap,
-    "gamedays": GamedaySitemap,
-    "passcheck": PasscheckTeamSitemap,
-    "officials": OfficialsSitemap,
+    'static': StaticViewSitemap,
+    'leaguetable': LeaguetableSitemap,
+    'gamedays': GamedaySitemap,
+    'passcheck': PasscheckTeamSitemap,
+    'officials': OfficialsSitemap,
 }
 
 urlpatterns = [
-    path(
-        "sitemap.xml",
-        sitemap,
-        {"sitemaps": sitemaps},
-        name="django.contrib.sitemaps.views.sitemap",
-    ),
-    path("robots.txt", robots_txt_view, name="robots-txt"),
-    path(
-        "maintenance/",
-        TemplateView.as_view(template_name="league_manager/maintenance.html"),
-        name=LEAGUE_MANAGER_MAINTENANCE,
-    ),
-    path("clear-cache/", ClearCacheView.as_view(), name=CLEAR_CACHE),
-    path("admin/", admin.site.urls),
-    # ToDo: fix gameday urls
-    path("api/", include("gamedays.api.urls")),
-    path("api/designer/", include("gameday_designer.urls")),
-    path("api/liveticker/", include("liveticker.api.urls")),
-    path("api/officials/", include("officials.api.urls")),
-    path("api/passcheck/", include("passcheck.api.urls")),
-    path("gamedays/gameday/design/", include("gameday_designer.app_urls")),
-    path("officials/", include("officials.urls")),
-    path("teammanager/", include("teammanager.urls")),
-    path("scorecard/", include("scorecard.urls")),
-    path("liveticker/", include("liveticker.urls")),
-    path("leaguetable/", include("league_table.urls")),
-    path("gamedays/", include("gamedays.urls")),
-    path("passcheck/", include("passcheck.urls")),
-    path("dal/", include("league_manager.dal.urls")),
-    path("", homeview),
-    path(
-        "login/",
-        auth_view.LoginView.as_view(template_name="registration/login.html"),
-        name="login",
-    ),
-    path(
-        "logout/",
-        auth_view.LogoutView.as_view(template_name="registration/logout.html"),
-        name="logout",
-    ),
-    # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path("accounts/", include("accounts.urls")),
-    path(r"health/", include("health_check.urls")),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+                  path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+                  path('robots.txt', robots_txt_view, name='robots-txt'),
+                  path('maintenance/', TemplateView.as_view(template_name='league_manager/maintenance.html'),
+                       name=LEAGUE_MANAGER_MAINTENANCE),
+                  path('clear-cache/', ClearCacheView.as_view(), name=CLEAR_CACHE),
+                  path('admin/', admin.site.urls),
+                  # ToDo: fix gameday urls
+                  path('api/', include('gamedays.api.urls')),
+                  path('api/liveticker/', include('liveticker.api.urls')),
+                  path('api/officials/', include('officials.api.urls')),
+                  path('api/passcheck/', include('passcheck.api.urls')),
+                  path('officials/', include('officials.urls')),
+                  path('teammanager/', include('teammanager.urls')),
+                  path('scorecard/', include('scorecard.urls')),
+                  path('liveticker/', include('liveticker.urls')),
+                  path('leaguetable/', include('league_table.urls')),
+                  path('gamedays/', include('gamedays.urls')),
+                  path('passcheck/', include('passcheck.urls')),
+                  path('dal/', include('league_manager.dal.urls')),
+                  path('', homeview),
+                  path('login/', auth_view.LoginView.as_view(template_name='registration/login.html'), name='login'),
+                  path('logout/', auth_view.LogoutView.as_view(template_name='registration/logout.html'),
+                       name='logout'),
+                  # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+                  path('accounts/', include('accounts.urls')),
+                  path(r'health/', include('health_check.urls')),
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     import debug_toolbar
 
     urlpatterns = [
-        # path('silk/', include('silk.urls', namespace='silk')),
-        path("__debug__/", include(debug_toolbar.urls)),
-    ] + urlpatterns
+                      # path('silk/', include('silk.urls', namespace='silk')),
+                      path('__debug__/', include(debug_toolbar.urls)),
+                  ] + urlpatterns

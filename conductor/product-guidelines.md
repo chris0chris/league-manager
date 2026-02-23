@@ -11,7 +11,7 @@
 - **Clarity over Flourish:** Visual elements should support the data, not distract from it.
 
 ## User Guidance & Error Prevention
-- **Forgiving Actions (Undo vs. Confirm):** Prefer "Undo" mechanisms over blocking confirmation dialogs for destructive actions in draft states. For published or finalized data, prioritize strict protection and explicit "Unlock" steps to prevent accidental data loss. Actions should be immediate where safe, with a temporary (e.g., 10-second) window to revert changes via a non-intrusive notification (Toast).
+- **Forgiving Actions (Undo vs. Confirm):** Prefer "Undo" mechanisms over blocking confirmation dialogs for destructive actions. Actions should be immediate, with a temporary (e.g., 10-second) window to revert the change via a non-intrusive notification (Toast).
 - **Inline Validation:** Provide real-time feedback during data entry and schedule creation to catch errors early and reduce frustration.
 - **Comprehensive Tooltips:** Use tooltips to explain complex business rules, eligibility requirements, or calculation logic, helping users understand the system's requirements.
 - **Soft Warnings:** Highlight potential issues or optimizations (e.g., scheduling suggestions) that provide helpful context without strictly blocking user actions.
