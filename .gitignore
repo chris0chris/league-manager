@@ -164,3 +164,4 @@ ngrok.sh
 # LeagueSphere staging MySQL data
 /deployed/mysql-data/
 *.sql
+test-reports/
