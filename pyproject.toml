@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "leaguesphere"
-version = "2.17.3-rc.38"
+version = "2.17.5"
 requires-python = ">=3.11"
 dependencies = [
     "Django==5.2.10",
@@ -59,7 +59,7 @@ include = [
 ]
 
 [tool.bumpversion]
-current_version = "2.17.3-rc.38"
+current_version = "2.17.5"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\-rc\\.(?P<rc_build>\\d+))?"
 serialize = [
     "{major}.{minor}.{patch}-rc.{rc_build}",
@@ -107,10 +107,5 @@ filename = "gameday_designer/package.json"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
-search = 'version = "{current_version}"'
-replace = 'version = "{new_version}"'
-
-[[tool.bumpversion.files]]
-filename = "uv.lock"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
