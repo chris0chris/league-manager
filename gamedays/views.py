@@ -240,7 +240,6 @@ class GamedayGameDetailView(DetailView):
             ),
             "split_score_table": split_score_table_html,
         }
-        }
         return context
 
 class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView):
