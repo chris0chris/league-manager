@@ -5,7 +5,7 @@ from django.db.models.fields import return_None
 logger = logging.getLogger(__name__)
 
 from gamedays.forms import SCHEDULE_CUSTOM_CHOICE_C, GamedayGaminfoFieldsAndGroupsForm
-from gamedays.models import Gameinfo, Gameday
+from gamedays.models import Gameinfo, Gameday, GameSetup
 from gamedays.service.gameday_settings import (
     ID_AWAY,
     SCHEDULED,
@@ -116,6 +116,14 @@ class EmptyDefenseStatisticTable:
     def to_json(*args, **kwargs):
         return EMPTY_DATA
 
+class EmptyPasscheckDetailsTable:
+    @staticmethod
+    def to_html(*args, **kwargs):
+        return "Empty Gameday Passcheck Details Table"
+
+    @staticmethod
+    def to_json(*args, **kwargs):
+        return EMPTY_DATA
 
 class EventsTableError:
     """Marker for when events table cannot be generated due to data inconsistency"""
@@ -180,6 +188,9 @@ class EmptyGamedayService:
         gameday = Gameday.objects.get(pk=gameday_pk)
         return gameday.designer_data or {"nodes": [], "edges": []}
 
+    @staticmethod
+    def get_staff_passcheck_details():
+        return EmptyPasscheckDetailsTable
 
 class GamedayService:
     @classmethod
@@ -268,6 +279,9 @@ class GamedayService:
 
     def get_offense_player_statistics_table(self):
         return self.gmw.get_offense_player_statistics_table()
+
+    def get_staff_passcheck_details(self):
+        return self.gmw.get_staff_passcheck_details(self.gameday_pk)
 
     def get_defense_player_statistic_table(self):
         return self.gmw.get_defense_statistic_table()
@@ -507,6 +521,11 @@ class GamedayGameService:
             ],
             split_score_repaired,
         )
+
+    def get_staff_game_end_notes(self):
+        return GameSetup.objects.filter(gameinfo=self.game.pk).values(
+            *["gameinfo__officials__name", "homeCaptain", "awayCaptain", "note", ]
+        ).first()
 
     def _repair_broken_split_score(self, split_score_ct: pd.DataFrame) -> pd.DataFrame:
         split_score_columns = set(split_score_ct.columns)

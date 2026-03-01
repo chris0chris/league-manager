@@ -17,6 +17,7 @@ from gamedays.constants import (
     LEAGUE_GAMEDAY_GAMEINFOS_DELETE,
     LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
     LEAGUE_GAMEDAY_GAME_DETAIL,
+    LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
 )
 from gamedays.forms import (
     GamedayForm,
@@ -24,7 +25,7 @@ from gamedays.forms import (
     GamedayFormatForm,
     GameinfoForm,
 )
-from gamedays.models import Gameday, League, Gameinfo, TeamLog, Gameresult
+from gamedays.models import Gameday, League, Gameinfo, TeamLog, Gameresult, GameSetup
 from gamedays.service.gameday_service import (
     EmptySchedule,
     EmptyFinalTable,
@@ -36,7 +37,7 @@ from gamedays.service.gameday_service import (
 )
 
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
+from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory, SeasonFactory
 from gamedays.wizard import FIELD_GROUP_STEP, GAMEDAY_FORMAT_STEP, GAMEINFO_STEP
 from league_table.tests.setup_factories.factories_leaguetable import LeagueGroupFactory
 
@@ -107,6 +108,60 @@ class TestGamedayDetailView(TestCase):
         resp = self.client.get(reverse(LEAGUE_GAMEDAY_DETAIL, args=[00]))
         assert resp.status_code == HTTPStatus.NOT_FOUND
 
+class TestGamedayLeagueStatisticView(TestCase):
+
+    def test_league_statistic_view_with_invalid_league_and_season(self):
+        resp = self.client.get(
+            reverse(
+                LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
+                kwargs={
+                    "league": 0,
+                    "season": 0,
+                },
+            )
+        )
+        assert resp.status_code == HTTPStatus.OK
+
+    def test_league_statistic_view_with_gameday_game_no_team_log(self):
+        gameday = DBSetup().g62_finished(season=SeasonFactory(name="2025"))
+
+        resp = self.client.get(
+            reverse(
+                LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
+                kwargs={
+                    "league": gameday.league.name,
+                    "season": gameday.season.name,
+                },
+            )
+        )
+
+        assert resp.status_code == HTTPStatus.OK
+        context = resp.context_data
+
+        for v in context["info"].values():
+            assert v == 'Die Statistiken erscheinen nach den ersten Spielen.'
+
+    def test_league_statistic_view_with_gameday_team_log(self):
+        gameday = DBSetup().g62_finished(season=SeasonFactory(name="2025"))
+        for gameinfo in list(gameday.gameinfo_set.all()):
+            team_1_result, team_2_result = list(gameinfo.gameresult_set.all())
+            DBSetup().create_teamlog_home_and_away(team_1_result.team, team_2_result.team, gameinfo=gameinfo)
+
+        resp = self.client.get(
+            reverse(
+                LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
+                kwargs={
+                    "league": gameday.league.name,
+                    "season": gameday.season.name,
+                },
+            )
+        )
+
+        assert resp.status_code == HTTPStatus.OK
+        context = resp.context_data
+
+        for v in context["info"].values():
+            assert v != 'Die Statistiken erscheinen nach den ersten Spielen.'
 
 class TestGamedayGameDetailView(TestCase):
 

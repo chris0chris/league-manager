@@ -1,6 +1,7 @@
 LEAGUE_GAMEDAY_DETAIL = "league-gameday-detail"
 LEAGUE_GAMEDAY_GAME_DETAIL = "league-gameday-game-detail"
 LEAGUE_GAMEDAY_LIST = "league-gameday-list"
+LEAGUE_GAMEDAY_LEAGUE_STATISTICS = "league-gameday-statistics"
 LEAGUE_GAMEDAY_LIST_AND_YEAR = "league-gameday-list-and-year"
 LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE = "league-gameday-list-and-year-and-league"
 LEAGUE_GAMEDAY_CREATE = "league-gameday-create"

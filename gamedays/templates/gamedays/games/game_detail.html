@@ -49,6 +49,27 @@
         </div>
     </div>
 </div>
+{% if user.is_staff %}
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapseRefResults" aria-expanded="true" class="card-header" data-bs-target="#collapseRefResults"
+         data-bs-toggle="collapse" id="headingDetails" role="button">
+        <h2>Spielende Infos</h2>
+    </div>
+
+    <div aria-labelledby="headingRefResults" class="collapse show" id="collapseRefResults">
+        <div class="card-body">
+            <div class="row mb-1">
+                <div class="col"><b>Heim Kapitän:</b> {{ info.game_setup_details.homeCaptain }}</div>
+                <div class="col"><b>Schiedsrichter:</b> {{ info.game_setup_details.gameinfo__officials__name }}</div>
+            </div>
+            <div class="row mb-1">
+                <div class="col"><b>Auswärts Kapitän:</b> {{ info.game_setup_details.awayCaptain }}</div>
+                <div class="col"><b>Notiz:</b> {{ info.game_setup_details.note | safe }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 <div class="card" style="overflow: auto">
     <div aria-controls="collapseFinal" aria-expanded="true" class="card-header" data-bs-target="#collapseFinal"
          data-bs-toggle="collapse" id="headingFinal" role="button">
