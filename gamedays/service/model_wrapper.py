@@ -455,6 +455,10 @@ class GamedayModelWrapper:
                 .filter(gameday_id=gameday_id)
                 .values(*column_mapping.keys())
         )
+
+        if passchecks.empty:
+            return pd.DataFrame([], columns=column_mapping.values())
+
         passchecks["created_at"] = passchecks.created_at.dt.strftime("%Y-%m-%d %H:%M:%S")
         passchecks["note"] = passchecks.note.apply(lambda x: x.replace("\n", "</br>"))
 

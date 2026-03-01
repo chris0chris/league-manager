@@ -113,6 +113,14 @@ class EmptyDefenseStatisticTable:
     def to_json(*args, **kwargs):
         return EMPTY_DATA
 
+class EmptyPasscheckDetailsTable:
+    @staticmethod
+    def to_html(*args, **kwargs):
+        return "Empty Gameday Passcheck Details Table"
+
+    @staticmethod
+    def to_json(*args, **kwargs):
+        return EMPTY_DATA
 
 class EmptyGamedayService:
 
@@ -145,6 +153,9 @@ class EmptyGamedayService:
         gameday = Gameday.objects.get(pk=gameday_pk)
         return gameday.designer_data or {"nodes": [], "edges": []}
 
+    @staticmethod
+    def get_staff_passcheck_details():
+        return EmptyPasscheckDetailsTable
 
 class GamedayService:
     @classmethod
