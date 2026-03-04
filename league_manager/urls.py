@@ -22,7 +22,10 @@ from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include
 from django.views.generic import TemplateView
 
-from health_check.views import MainView as HealthCheckView
+try:
+    from health_check.views import MainView as HealthCheckView  # django-health-check >= 4.0.4
+except ImportError:
+    from health_check.views import HealthCheckView  # django-health-check < 4.0.4
 from league_manager.views import homeview, ClearCacheView, robots_txt_view
 from league_manager.sitemaps import (
     StaticViewSitemap,
