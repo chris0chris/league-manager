@@ -1,6 +1,6 @@
 import logging
 
-from rest_framework.fields import SerializerMethodField, IntegerField, JSONField
+from rest_framework.fields import SerializerMethodField, IntegerField
 from rest_framework.serializers import ModelSerializer, Serializer
 
 from gamedays.models import (
@@ -29,38 +29,16 @@ class LeagueSerializer(ModelSerializer):
 
 
 class GamedaySerializer(ModelSerializer):
-    designer_data = JSONField(required=False)
-
     class Meta:
         model = Gameday
         fields = "__all__"
         read_only_fields = ["author"]
         extra_kwargs = {"start": {"format": "%H:%M"}}
 
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        try:
-            from gamedays.service.gameday_service import GamedayService
-
-            ret["designer_data"] = GamedayService.create(
-                instance.pk
-            ).get_resolved_designer_data(instance.pk)
-        except Exception as e:
-            # Fallback to raw designer_data if resolution fails
-            logger.warning(
-                f"Failed to resolve designer data for gameday {instance.pk}: {str(e)}",
-                exc_info=True,
-            )
-            # Use raw designer_data if available
-            if instance.designer_data:
-                ret["designer_data"] = instance.designer_data
-        return ret
-
 
 class GamedayListSerializer(ModelSerializer):
     season_display = SerializerMethodField()
     league_display = SerializerMethodField()
-    designer_data = JSONField(required=False)
 
     class Meta:
         model = Gameday
@@ -77,7 +55,6 @@ class GamedayListSerializer(ModelSerializer):
             "author",
             "address",
             "status",
-            "designer_data",
         ]
         read_only_fields = ["author"]
         extra_kwargs = {"start": {"format": "%H:%M"}}
