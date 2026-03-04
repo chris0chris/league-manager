@@ -335,15 +335,15 @@ wheels = [
 
 [[package]]
 name = "django-health-check"
-version = "4.1.0"
+version = "4.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "dnspython" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f8/e6/37aefb657a522c410844d7fe617c997036ef570157905518c2bf03abfb8d/django_health_check-4.1.0.tar.gz", hash = "sha256:7c9ea01edad40b3ea1d9b5780fcec3fdc1e263f9d0c8503af3b043e6a4b38964", size = 21124, upload-time = "2026-03-01T16:03:10.728Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b2/8b/e23dcadbd8060c85dd8bad871494de507a8582850b32c5dfb154a1268c10/django_health_check-4.1.1.tar.gz", hash = "sha256:f354971e7057001b31501e34aade605184d93c2cfed41bc5346597e3377c0872", size = 21110, upload-time = "2026-03-04T09:16:48.449Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/01/a2a8e5250c0bf352660208bf62dd6bdc67d3c52c16a412da9c382b0bfd12/django_health_check-4.1.0-py3-none-any.whl", hash = "sha256:a823ec81aa108909855159fa1fdb84d443d0c25057de4cc98bfe230ae52d0751", size = 26173, upload-time = "2026-03-01T16:03:09.03Z" },
+    { url = "https://files.pythonhosted.org/packages/38/e0/cf24a31af5c5071c971157dc1bffa705b6b22e6f49412f84ebcbcffde5da/django_health_check-4.1.1-py3-none-any.whl", hash = "sha256:3986ff3877199e2ed12f27114af88b82c5f17dfce933bb873d73642248358d22", size = 26176, upload-time = "2026-03-04T09:16:47.363Z" },
 ]
 
 [[package]]
@@ -511,7 +511,7 @@ requires-dist = [
     { name = "django-crispy-forms", specifier = "==2.6" },
     { name = "django-debug-toolbar", marker = "extra == 'test'", specifier = "==6.2.0" },
     { name = "django-formtools", specifier = "==2.5.1" },
-    { name = "django-health-check", specifier = "==4.1.0" },
+    { name = "django-health-check", specifier = "==4.1.1" },
     { name = "django-pandas", specifier = "==0.6.7" },
     { name = "django-rest-knox", specifier = "==5.0.2" },
     { name = "django-webtest", marker = "extra == 'test'", specifier = "==1.9.14" },
