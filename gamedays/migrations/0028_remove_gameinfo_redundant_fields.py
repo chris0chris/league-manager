@@ -3,6 +3,20 @@
 from django.db import migrations
 
 
+def remove_fields_if_exist(apps, schema_editor):
+    with schema_editor.connection.cursor() as cursor:
+        db_columns = {
+            col.name
+            for col in schema_editor.connection.introspection.get_table_description(
+                cursor, "gamedays_gameinfo"
+            )
+        }
+    GameInfo = apps.get_model("gamedays", "GameInfo")
+    for field_name in ("final_score", "halftime_score", "is_locked"):
+        if field_name in db_columns:
+            schema_editor.remove_field(GameInfo, GameInfo._meta.get_field(field_name))
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,16 +24,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name="gameinfo",
-            name="final_score",
-        ),
-        migrations.RemoveField(
-            model_name="gameinfo",
-            name="halftime_score",
-        ),
-        migrations.RemoveField(
-            model_name="gameinfo",
-            name="is_locked",
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                migrations.RunPython(remove_fields_if_exist, migrations.RunPython.noop),
+            ],
+            state_operations=[
+                migrations.RemoveField(model_name="gameinfo", name="final_score"),
+                migrations.RemoveField(model_name="gameinfo", name="halftime_score"),
+                migrations.RemoveField(model_name="gameinfo", name="is_locked"),
+            ],
         ),
     ]
