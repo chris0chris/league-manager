@@ -352,33 +352,58 @@ npm --prefix scorecard/ -- vitest run src/components/scorecard/__tests__/Details
 
 ### Deployment Scripts
 
-**Deploy to staging only:**
-```bash
-./container/deploy.sh stage
-```
+The deploy script supports both standard deployments from the current branch and isolated deployments via git worktrees.
 
-Creates a Release Candidate (RC) version tag that triggers deployment to staging environment only:
-- From stable (e.g., `2.12.16`) → creates `2.12.17-rc.1`
-- From RC (e.g., `2.12.17-rc.1`) → creates `2.12.17-rc.2`
-- Triggers: Tests → Build → Staging deployment only
-- URL: https://stage.leaguesphere.app
-
-**Deploy to production:**
-```bash
-./container/deploy.sh {major|minor|patch}
-```
-
-Creates a stable version tag that triggers deployment to both staging and production:
-- Example: `./container/deploy.sh patch` → creates `2.12.17` from `2.12.16`
-- Triggers: Tests → Build → Staging deployment → Production deployment → Migrations
-- URLs: https://stage.leaguesphere.app + https://leaguesphere.app
-
-**All deployment options:**
+**Deploy from current branch:**
 ```bash
 ./container/deploy.sh stage   # Staging only (RC version)
 ./container/deploy.sh patch   # Staging + Production (patch bump)
-./container/deploy.sh minor   # Staging + Production (minor bump)
-./container/deploy.sh major   # Staging + Production (major bump)
+```
+
+Creates version tags on your current branch:
+- **stage**: RC version (e.g., `2.12.16` → `2.12.17-rc.1`, or `2.12.17-rc.1` → `2.12.17-rc.2`)
+  - Triggers: Tests → Build → Staging deployment only
+  - URL: https://stage.leaguesphere.app
+- **patch/minor/major**: Stable version (e.g., `2.12.16` → `2.12.17`)
+  - Triggers: Tests → Build → Staging deployment → Production deployment → Migrations
+  - URLs: https://stage.leaguesphere.app + https://leaguesphere.app
+
+**Deploy from specific branch via worktree:**
+```bash
+# Release from upstream/master without affecting local workspace
+./container/deploy.sh -b upstream/master patch
+
+# Create RC from a specific branch
+./container/deploy.sh -b origin/master stage
+
+# Push to a different remote
+./container/deploy.sh -b upstream/master -r upstream patch
+```
+
+The `-b` flag creates a temporary git worktree from the specified branch, performs the version bump and release, then cleans up automatically. This is useful when:
+- Your local master has uncommitted changes or diverged from upstream
+- You want to release from a specific branch without checking it out
+- CI/CD pipelines need to deploy from specific branches
+- You maintain a reusable `upstream-releases` branch for deployments
+
+**Flags:**
+- `-b <branch>`: Deploy from specified branch via temporary worktree
+- `-r <remote>`: Push to specified remote (default: `origin`)
+
+**Examples:**
+```bash
+# Standard usage (current branch)
+./container/deploy.sh stage
+./container/deploy.sh patch
+
+# Worktree mode (isolated deployments)
+./container/deploy.sh -b upstream/master patch
+./container/deploy.sh -b upstream/master stage
+./container/deploy.sh -b origin/feature-branch minor
+
+# Custom remote
+./container/deploy.sh -r upstream major
+./container/deploy.sh -b upstream/master -r upstream patch
 ```
 
 ## Versioning

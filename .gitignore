@@ -169,3 +169,4 @@ ngrok.sh
 
 # Git worktrees
 .worktrees/
+test-reports/

@@ -3,6 +3,8 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
+
 from gamedays.forms import SCHEDULE_CUSTOM_CHOICE_C, GamedayGaminfoFieldsAndGroupsForm
 from gamedays.models import Gameinfo, Gameday, Gameresult, TeamLog
 from gamedays.service.gameday_settings import (
