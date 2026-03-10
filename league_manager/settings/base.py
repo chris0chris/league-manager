@@ -157,13 +157,13 @@ REST_FRAMEWORK = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("MYSQL_DB_NAME", "test_db"),
+        "NAME": os.environ.get("MYSQL_DB_NAME") or "test_db",
         # 'NAME': 'test_5erdffl$league_manager',
         # 'NAME': 'test_demodffl$default',
-        "USER": os.environ.get("MYSQL_USER", "user"),
-        "PASSWORD": os.environ.get("MYSQL_PWD", "user"),
-        "HOST": os.environ.get("MYSQL_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("MYSQL_PORT", "3306"),
+        "USER": os.environ.get("MYSQL_USER") or "user",
+        "PASSWORD": os.environ.get("MYSQL_PWD") or "user",
+        "HOST": os.environ.get("MYSQL_HOST") or "127.0.0.1",
+        "PORT": os.environ.get("MYSQL_PORT") or "3306",
         "OPTIONS": {
             "init_command": "SET default_storage_engine=InnoDB;"  # SET foreign_key_checks = 0;',
         },
