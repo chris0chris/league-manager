@@ -81,6 +81,19 @@
         </div>
     </div>
 </div>
+{% if user.is_staff %}
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapsePasscheck" aria-expanded="false" class="card-header" data-bs-target="#collapsePasscheck"
+         data-bs-toggle="collapse" id="headingPasscheck" role="button">
+        <h2>Passcheck Übersicht</h2>
+    </div>
+    <div aria-labelledby="headingPasscheck" class="collapse" id="collapsePasscheck">
+        <div class="card-body">
+            {{ info.passcheck_info_table | safe }}
+        </div>
+    </div>
+</div>
+{% endif %}
 {% if info.qualify_table != '' %}
 <div class="card" style="overflow: auto">
     <div aria-controls="collapseQualify" aria-expanded="false" class="card-header" data-bs-target="#collapseQualify"

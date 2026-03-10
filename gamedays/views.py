@@ -14,7 +14,7 @@ from django.views.generic import (
     UpdateView,
     CreateView,
     FormView,
-    DeleteView,
+    DeleteView, TemplateView,
 )
 from formtools.wizard.views import SessionWizardView
 
@@ -25,6 +25,7 @@ from .constants import (
     LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
     LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
     LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
+    LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
 )
 from .forms import (
     GamedayForm,
@@ -39,6 +40,7 @@ from .forms import (
 from .models import Gameday, Gameinfo
 from .service.gameday_form_service import GamedayFormService
 from .service.gameday_service import GamedayService, GamedayGameService
+from .service.league_statistics_service import LeagueStatisticsService
 from .wizard import (
     FIELD_GROUP_STEP,
     GAMEDAY_FORMAT_STEP,
@@ -75,8 +77,54 @@ class GamedayListView(View):
                 "current_league": league,
                 "season_year_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR,
                 "season_year_league_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
+                "season_year_league_statistic_pattern": LEAGUE_GAMEDAY_LEAGUE_STATISTICS
             },
         )
+
+class GamedayLeagueStatisticView(TemplateView):
+    model = Gameday
+    template_name = "gamedays/statistics/league_statistics.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(GamedayLeagueStatisticView, self).get_context_data()
+        context["season_year_league_pattern"] = LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE
+        context = {**context, **kwargs}
+
+        render_configs = {
+            "index": False,
+            "classes": [
+                "table",
+                "table-hover",
+                "table-condensed",
+                "table-responsive",
+                "text-center",
+            ],
+            "border": 0,
+            "justify": "center",
+            "escape": False,
+        }
+
+        lss = LeagueStatisticsService.create(**kwargs, top_n_players=10)
+
+        td_table = lss.get_touchdowns_table()
+        int_table = lss.get_interception_table()
+        one_xp_table = lss.get_one_extra_point_table()
+        two_xp_table = lss.get_two_extra_point_table()
+        safety_table = lss.get_safety_table()
+        scoring_players_table = lss.get_top_scoring_players()
+        team_statistics_table = lss.get_team_event_summary_table()
+
+        context["info"] = {
+            "player_touchdown_table": td_table.to_html(**render_configs),
+            "player_interception_table": int_table.to_html(**render_configs),
+            "player_one_extra_point_table": one_xp_table.to_html(**render_configs),
+            "player_two_extra_point_table": two_xp_table.to_html(**render_configs),
+            "player_safety_table": safety_table.to_html(**render_configs),
+            "player_scoring_table": scoring_players_table.to_html(**render_configs),
+            "team_statistics_table": team_statistics_table.to_html(**render_configs),
+        }
+
+        return context
 
 
 class GamedayDetailView(DetailView):
@@ -124,6 +172,12 @@ class GamedayDetailView(DetailView):
             url_pattern_official = ""
             url_pattern_official_signup = ""
 
+        passcheck_info_table = ""
+
+        if self.request.user.is_staff:
+            passcheck_info_table = gs.get_staff_passcheck_details().to_html(**render_configs)
+
+
         context["info"] = {
             "schedule": gs.get_schedule().to_html(**render_configs),
             "qualify_table": qualify_table,
@@ -135,6 +189,7 @@ class GamedayDetailView(DetailView):
             "defense_table": gs.get_defense_player_statistic_table().to_html(
                 **render_configs
             ),
+            "passcheck_info_table": passcheck_info_table,
             "url_pattern_official": url_pattern_official,
             "url_pattern_official_signup": url_pattern_official_signup,
         }
@@ -244,6 +299,11 @@ class GamedayGameDetailView(DetailView):
             **{**render_configs, "classes": classes + ["game-split-score-table"]}
         )
 
+        game_setup_details = {}
+
+        if self.request.user.is_staff:
+            game_setup_details = ggs.get_staff_game_end_notes()
+
         if split_score_repaired:
             split_score_table_html = f"""{split_score_table_html}</ br>
 <small>Die Aufteilung der Punkte je Halbzeit kann eventuell inkorrekt sein.</small>"""
@@ -263,6 +323,7 @@ class GamedayGameDetailView(DetailView):
                 else events_table.to_html()  # EventsTableError.to_html() returns plain text
             ),
             "split_score_table": split_score_table_html,
+            "game_setup_details": game_setup_details,
         }
         return context
 
