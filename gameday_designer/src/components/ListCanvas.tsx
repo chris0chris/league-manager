@@ -10,6 +10,7 @@ import { Row, Col, Card, Button } from 'react-bootstrap';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import GlobalTeamTable from './list/GlobalTeamTable';
 import FieldSection from './list/FieldSection';
+import { GameResultsTable } from './GameResultsTable';
 import type { FlowNode, FlowEdge, FieldNode, StageNode, GlobalTeam, GlobalTeamGroup } from '../types/flowchart';
 import { isFieldNode, isStageNode } from '../types/flowchart';
 import { ICONS } from '../utils/iconConstants';
@@ -25,27 +26,37 @@ export interface ListCanvasProps {
   onAddField: () => void;
   onAddStage: (fieldId: string) => void;
   onSelectNode: (nodeId: string | null) => void;
+  onHighlightElement: (id: string, type: import('../types/flowchart').HighlightedElement['type']) => void;
   selectedNodeId: string | null;
   onAddGlobalTeam: (groupId: string) => void;
   onUpdateGlobalTeam: (teamId: string, data: Partial<Omit<GlobalTeam, 'id'>>) => void;
   onDeleteGlobalTeam: (teamId: string) => void;
+  onReplaceGlobalTeam: (teamId: string, newTeam: { id: number; text: string }) => void;
   onReorderGlobalTeam: (teamId: string, direction: 'up' | 'down') => void;
   onAddGlobalTeamGroup: () => void;
   onUpdateGlobalTeamGroup: (groupId: string, data: Partial<Omit<GlobalTeamGroup, 'id'>>) => void;
   onDeleteGlobalTeamGroup: (groupId: string) => void;
   onReorderGlobalTeamGroup: (groupId: string, direction: 'up' | 'down') => void;
+  onShowTeamSelection: (id: string, mode?: 'group' | 'replace' | 'official') => void;
   getTeamUsage: (teamId: string) => { gameId: string; slot: 'home' | 'away' }[];
   onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
+  onSwapTeams: (gameId: string) => void;
   onAddGame: (stageId: string) => void;
   onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
-  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) => void;
   onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onOpenResultModal: (gameId: string) => void;
+  onGenerateTournament?: () => void;
   expandedFieldIds: Set<string>;
   expandedStageIds: Set<string>;
   highlightedElement?: HighlightedElement | null;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
   onNotify?: (message: string, type: import('../types/designer').NotificationType, title?: string) => void;
+  onAddOfficials?: () => void;
+  resultsMode?: boolean;
+  gameResults?: import('../types/designer').GameResultsDisplay[];
+  onSaveBulkResults?: (results: Record<string, unknown>) => Promise<void>;
   readOnly?: boolean;
 }
 
@@ -60,27 +71,37 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
     onAddField,
     onAddStage,
     onSelectNode,
+    onHighlightElement,
     selectedNodeId,
     onAddGlobalTeam,
     onUpdateGlobalTeam,
     onDeleteGlobalTeam,
+    onReplaceGlobalTeam,
     onReorderGlobalTeam,
     onAddGlobalTeamGroup,
     onUpdateGlobalTeamGroup,
     onDeleteGlobalTeamGroup,
     onReorderGlobalTeamGroup,
+    onShowTeamSelection,
     getTeamUsage,
     onAssignTeam,
+    onSwapTeams,
     onAddGame,
     onAddGameToGameEdge,
     onAddStageToGameEdge,
     onRemoveEdgeFromSlot,
+    onOpenResultModal,
+    onGenerateTournament,
     expandedFieldIds,
     expandedStageIds,
     highlightedElement,
     highlightedSourceGameId,
     onDynamicReferenceClick,
     onNotify,
+    onAddOfficials,
+    resultsMode = false,
+    gameResults = [],
+    onSaveBulkResults,
     readOnly = false,
   } = props;
 
@@ -115,14 +136,35 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
     onAddGlobalTeamGroup();
   }, [onAddGlobalTeamGroup]);
 
+  if (resultsMode) {
+    return (
+      <div className="list-canvas px-3">
+        <Card className="shadow-sm">
+          <Card.Header className="bg-white">
+            <i className="bi bi-table me-2" />
+            <strong>{t('ui:label.gameResults')}</strong>
+          </Card.Header>
+          <Card.Body>
+            <GameResultsTable 
+              games={gameResults} 
+              onSave={onSaveBulkResults || (async () => {})} 
+            />
+          </Card.Body>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="list-canvas px-3">
       <Row className="list-canvas__content g-3">
         <Col md={isTeamPoolExpanded ? 3 : 'auto'} className={`teams-column ${!isTeamPoolExpanded ? 'teams-column--collapsed' : ''}`}>
           <Card
-            className={`team-pool-card ${!isTeamPoolExpanded ? 'team-pool-card--collapsed' : ''}`}
+            id="team-team-pool"
+            className={`team-pool-card ${!isTeamPoolExpanded ? 'team-pool-card--collapsed' : ''} ${highlightedElement?.id === 'team-pool' ? 'is-highlighted' : ''}`}
             onClick={!isTeamPoolExpanded ? handleToggleTeamPool : undefined}
             style={{ cursor: !isTeamPoolExpanded ? 'pointer' : 'default' }}
+            data-testid="team-pool-card"
           >
             {isTeamPoolExpanded ? (
               <>
@@ -131,16 +173,32 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
                   <i className={`bi ${ICONS.TEAM} me-2`} />
                   <strong>{t('ui:label.teamPool')}</strong>
                   {!readOnly && (
-                    <Button 
-                      size="sm" 
-                      variant="outline-primary" 
-                      onClick={handleAddGroupHeader} 
-                      className="ms-auto btn-adaptive"
-                      title={t('ui:tooltip.addGroup')}
-                    >
-                      <i className={`bi ${ICONS.ADD} me-2`} />
-                      <span className="btn-label-adaptive">{t('ui:button.addGroup')}</span>
-                    </Button>
+                    <div className="ms-auto d-flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline-primary" 
+                        onClick={handleAddGroupHeader} 
+                        className="btn-adaptive"
+                        title={t('ui:tooltip.addGroup')}
+                      >
+                        <i className={`bi ${ICONS.ADD} me-2`} />
+                        <span className="btn-label-adaptive">{t('ui:button.addGroup')}</span>
+                      </Button>
+                      {onAddOfficials && (
+                        <Button 
+                          size="sm" 
+                          variant="outline-secondary" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAddOfficials();
+                          }} 
+                          title={t('ui:tooltip.addExternalOfficials')}
+                          data-testid="add-officials-button"
+                        >
+                          <i className="bi bi-person-badge" />
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </Card.Header>
                 <Card.Body>
@@ -155,7 +213,9 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
                     onAddTeam={onAddGlobalTeam}
                     onUpdate={onUpdateGlobalTeam}
                     onDelete={onDeleteGlobalTeam}
+                    onReplace={onReplaceGlobalTeam}
                     onReorder={onReorderGlobalTeam}
+                    onShowTeamSelection={onShowTeamSelection}
                     getTeamUsage={getTeamUsage}
                     allNodes={nodes}
                     readOnly={readOnly}
@@ -178,21 +238,27 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
         </Col>
 
         <Col md={isTeamPoolExpanded ? 9 : true} className="fields-column">
-          <Card className="fields-card">
+          <Card 
+            id="field-fields-card"
+            className={`fields-card ${highlightedElement?.id === 'fields-card' ? 'is-highlighted' : ''}`}
+          >
             <Card.Header className="d-flex align-items-center">
               <i className={`bi ${ICONS.FIELD} me-2`} />
               <strong>{t('ui:label.fields')}</strong>
               {!readOnly && (
-                <Button 
-                  size="sm" 
-                  variant="outline-primary" 
-                  onClick={onAddField} 
-                  className="ms-auto btn-adaptive"
-                  title={t('ui:tooltip.addField')}
-                >
-                  <i className={`bi ${ICONS.ADD} me-2`} />
-                  <span className="btn-label-adaptive">{t('ui:button.addField')}</span>
-                </Button>
+                <div className="ms-auto d-flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline-primary" 
+                    onClick={onAddField} 
+                    className="btn-adaptive"
+                    title={t('ui:tooltip.addField')}
+                    data-testid="add-field-button"
+                  >
+                    <i className={`bi ${ICONS.ADD} me-2`} />
+                    <span className="btn-label-adaptive">{t('ui:button.addField')}</span>
+                  </Button>
+                </div>
               )}
             </Card.Header>
             <Card.Body>
@@ -202,15 +268,26 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
                   <h3 className="mt-3">{t('ui:message.noFieldsYet')}</h3>
                   <p className="text-muted mb-3">{t('ui:message.createFirstField')}</p>
                   {!readOnly && (
-                    <Button 
-                      variant="outline-primary" 
-                      onClick={onAddField} 
-                      className="btn-adaptive"
-                      title={t('ui:tooltip.addField')}
-                    >
-                      <i className={`bi ${ICONS.ADD} me-2`} />
-                      <span className="btn-label-adaptive">{t('ui:button.addField')}</span>
-                    </Button>
+                    <div className="d-flex justify-content-center gap-3">
+                      <Button 
+                        variant="outline-success" 
+                        onClick={() => onGenerateTournament?.()} 
+                        className="btn-adaptive px-4"
+                        title={t('ui:tooltip.generateTournament')}
+                      >
+                        <i className={`bi bi-magic me-2`} />
+                        <span className="btn-label-adaptive">{t('ui:button.generateTournament')}</span>
+                      </Button>
+                      <Button 
+                        variant="outline-primary" 
+                        onClick={onAddField} 
+                        className="btn-adaptive px-4"
+                        title={t('ui:tooltip.addField')}
+                      >
+                        <i className={`bi ${ICONS.ADD} me-2`} />
+                        <span className="btn-label-adaptive">{t('ui:button.addField')}</span>
+                      </Button>
+                    </div>
                   )}
                 </div>
               ) : (
@@ -227,14 +304,18 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
                       onUpdate={onUpdateNode}
                       onDelete={onDeleteNode}
                       onAddStage={onAddStage}
-                      onSelectNode={onSelectNode}
-                      selectedNodeId={selectedNodeId}
+                    onSelectNode={onSelectNode}
+                    onHighlightElement={onHighlightElement}
+                    selectedNodeId={selectedNodeId}
                       onAssignTeam={onAssignTeam}
+                      onSwapTeams={onSwapTeams}
                       onAddGame={onAddGame}
                       onAddGameToGameEdge={onAddGameToGameEdge}
-                      onAddStageToGameEdge={onAddStageToGameEdge}
-                      onRemoveEdgeFromSlot={onRemoveEdgeFromSlot}
-                      isExpanded={expandedFieldIds.has(field.id)}
+            onAddStageToGameEdge={onAddStageToGameEdge}
+            onRemoveEdgeFromSlot={onRemoveEdgeFromSlot}
+            onOpenResultModal={onOpenResultModal}
+            isExpanded={expandedFieldIds?.has?.(field.id)}
+
                       expandedStageIds={expandedStageIds}
                       highlightedElement={highlightedElement}
                       highlightedSourceGameId={highlightedSourceGameId}

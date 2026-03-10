@@ -9,6 +9,8 @@
   "tournamentGenerator": {
     "title": "Turnier generieren",
     "noTemplates": "Keine Turniervorlagen verfügbar.",
+    "warningTitle": "Achtung: Automatisches Löschen",
+    "warningMessage": "Das Generieren eines neuen Turniers löscht UNWIDERRUFLICH Ihren aktuellen Spielplan und die Felder. Diese Aktion kann nicht rückgängig gemacht werden.",
     "generateTeams": "{{count}} Teams automatisch generieren",
     "autoAssignTeams": "Teams automatisch Spielen zuweisen",
     "insufficientTeams": "Nicht genügend Teams im Pool. Dieses Format benötigt mindestens {{min}} Teams, oder wählen Sie 'Teams automatisch generieren'.",
@@ -32,5 +34,11 @@
     "ready": "Der Spielplan ist gültig und bereit zur Veröffentlichung.",
     "confirmWithWarnings": "Trotzdem veröffentlichen",
     "confirm": "Jetzt veröffentlichen"
+  },
+  "teamSelection": {
+    "title": "Existierendes Team verbinden",
+    "placeholder": "Nach Teamname suchen...",
+    "noResults": "Keine passenden Teams gefunden.",
+    "hint": "Geben Sie mindestens 2 Zeichen ein, um zu suchen."
   }
 }

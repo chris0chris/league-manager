@@ -119,10 +119,13 @@ export function assignTeamsToTournamentGames(
 ): TeamAssignmentOperation[] {
   const operations: TeamAssignmentOperation[] = [];
 
-  // Get all stages sorted by order
+  // 1. Sort teams by their defined order to ensure predictable assignment
+  const sortedTeams = [...teams].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  // 2. Get all stages sorted by order
   const stages = [...structure.stages].sort((a, b) => a.data.order - b.data.order);
 
-  // Group stages by their order (for parallel execution like split groups)
+  // 3. Group stages by their order (for parallel execution like split groups)
   const stagesByOrder = new Map<number, StageNode[]>();
   stages.forEach((stage) => {
     const order = stage.data.order;
@@ -135,8 +138,13 @@ export function assignTeamsToTournamentGames(
   // Track previous stage games for progression mapping (per order)
   let previousOrderGames: GameNode[] = [];
 
-  // Process each stage group
-  stagesByOrder.forEach((parallelStages) => {
+  // 4. Process each stage group
+  // We must process orders in numeric sequence
+  const sortedOrders = Array.from(stagesByOrder.keys()).sort((a, b) => a - b);
+
+  for (const order of sortedOrders) {
+    const parallelStages = stagesByOrder.get(order)!;
+    
     // Check if this is a split field assignment (multiple stages at same order)
     const isSplitField = parallelStages.length > 1;
 
@@ -150,9 +158,32 @@ export function assignTeamsToTournamentGames(
       const stageGames = structure.games
         .filter((game) => game.parentId === stage.id)
         .sort((a, b) => {
-          const aNum = parseInt(a.data.standing.replace(/\D/g, '')) || 0;
-          const bNum = parseInt(b.data.standing.replace(/\D/g, '')) || 0;
-          return aNum - bNum;
+          // Advanced sort for tournament games
+          const standingA = a.data.standing.toLowerCase();
+          const standingB = b.data.standing.toLowerCase();
+          
+          // Priority for specific labels (matches timeCalculation.ts)
+          const getPriority = (s: string) => {
+            if (s.includes('final')) return 100;
+            if (s.includes('3rd place') || s.includes('3. platz')) return 90;
+            if (s.includes('5th place') || s.includes('5. platz')) return 80;
+            if (s.includes('7th place') || s.includes('7. platz')) return 70;
+            if (s.includes('sf')) return 50;
+            if (s.includes('qf')) return 40;
+            return 0;
+          };
+
+          const pA = getPriority(standingA);
+          const pB = getPriority(standingB);
+
+          if (pA !== pB) return pA - pB;
+
+          // If same priority, use numeric suffix
+          const nA = parseInt(standingA.replace(/\D/g, '')) || 0;
+          const nB = parseInt(standingB.replace(/\D/g, '')) || 0;
+          if (nA !== nB) return nA - nB;
+
+          return standingA.localeCompare(standingB);
         });
 
       if (stageGames.length === 0) {
@@ -165,13 +196,13 @@ export function assignTeamsToTournamentGames(
         let stageTeams: GlobalTeam[];
         if (isSplitField) {
           // Split teams across stages (Group A gets first half, Group B gets second half, etc.)
-          const teamsPerGroup = Math.ceil(teams.length / parallelStages.length);
+          const teamsPerGroup = Math.ceil(sortedTeams.length / parallelStages.length);
           const startIndex = stageIndex * teamsPerGroup;
-          const endIndex = Math.min(startIndex + teamsPerGroup, teams.length);
-          stageTeams = teams.slice(startIndex, endIndex);
+          const endIndex = Math.min(startIndex + teamsPerGroup, sortedTeams.length);
+          stageTeams = sortedTeams.slice(startIndex, endIndex);
         } else {
           // Use all teams for this stage
-          stageTeams = teams;
+          stageTeams = sortedTeams;
         }
 
         // Get consistent pairings
@@ -229,7 +260,7 @@ export function assignTeamsToTournamentGames(
 
     // Update previous order games for next iteration
     previousOrderGames = currentOrderGames;
-  });
+  }
 
   return operations;
 }

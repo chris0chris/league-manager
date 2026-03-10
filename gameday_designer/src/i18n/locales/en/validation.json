@@ -29,6 +29,12 @@
     "no_games": "No games have been added to the schedule",
     "team_without_games": "Team \"{{team}}\" is not assigned to any game",
     "unused_field": "Field \"{{field}}\" has no games assigned",
-    "broken_progression": "Game \"{{game}}\" references non-existent standing \"{{target}}\" for {{slot}}"
-  }
-  
+    "broken_progression": "Game \"{{game}}\" references non-existent standing \"{{target}}\" for {{slot}}",
+    "metadataNameMissing": "Gameday Name is mandatory",
+    "metadataDateMissing": "Gameday Date is mandatory",
+    "metadataDateInPast": "Gameday date is in the past",
+    "metadataVenueMissing": "Gameday venue is missing",
+    "metadataStartMissing": "Gameday Start Time is mandatory",
+      "metadataSeasonMissing": "Season selection is mandatory",
+      "metadataLeagueMissing": "League selection is mandatory"
+    }  

@@ -3,6 +3,8 @@ import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
 import type { FlowNode, FlowEdge, GameToGameEdge } from '../../types/flowchart';
 
+const validMetadata = { id: 1, name: 'Test', date: '2026-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
+
 describe('useFlowValidation - Progression Integrity', () => {
   it('should error when a progression edge goes from a later stage to an earlier stage', () => {
     const nodes: FlowNode[] = [
@@ -54,7 +56,7 @@ describe('useFlowValidation - Progression Integrity', () => {
       } as GameToGameEdge,
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, edges));
+    const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], [], validMetadata));
 
     const error = result.current.errors.find(e => e.type === 'progression_order');
     expect(error).toBeDefined();

@@ -35,3 +35,138 @@
   box-shadow: none;
   border-color: rgba(0,0,0,.125);
 }
+
+.gameday-metadata-accordion .header-container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+
+.gameday-metadata-accordion .publish-button-container {
+  position: absolute;
+  right: 3.5rem; /* Space for the accordion arrow */
+  z-index: 5;
+}
+
+/* Ensure the accordion button doesn't respond to clicks on the publish button */
+.gameday-metadata-accordion .accordion-header {
+  position: relative;
+}
+
+/**
+ * Mobile-specific fixes for native date/time pickers.
+ * Sometimes pickers are offset when inside a sticky container.
+ */
+@media (max-width: 768px) {
+  .gameday-metadata-accordion .form-control[type="date"],
+  .gameday-metadata-accordion .form-control[type="time"] {
+    position: relative;
+    /* Reset any weird padding that might affect picker icon placement */
+    padding-inline-end: 0.5rem;
+  }
+
+    /* Target Chrome/Android native picker behavior */
+
+    .gameday-metadata-accordion .form-control[type="date"]::-webkit-calendar-picker-indicator,
+
+    .gameday-metadata-accordion .form-control[type="time"]::-webkit-calendar-picker-indicator {
+
+      width: 100%;
+
+      height: 100%;
+
+      position: absolute;
+
+      top: 0;
+
+      left: 0;
+
+      opacity: 0;
+
+      cursor: pointer;
+
+    }
+
+  }
+
+  
+
+  /**
+
+   * Highlighting styles
+
+   */
+
+  @keyframes metadata-pulse {
+
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
+
+    50% { transform: scale(1.005); box-shadow: 0 0 20px 5px rgba(13, 110, 253, 0.2); }
+
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+
+  }
+
+  
+
+  .gameday-metadata-accordion-container.is-highlighted {
+
+    animation: metadata-pulse 1.5s infinite ease-in-out;
+
+    border: 2px solid #0d6efd !important;
+
+    border-radius: 0.375rem;
+
+    z-index: 1030;
+
+  }
+
+  
+
+  .accordion-header.header-highlighted .accordion-button {
+
+  
+
+    background-color: #e7f3ff !important;
+
+  
+
+    font-weight: bold;
+
+  
+
+  }
+
+  
+
+  
+
+  
+
+  .form-control.is-highlighted, 
+
+  
+
+  .form-select.is-highlighted {
+
+  
+
+    animation: metadata-pulse 1.5s infinite ease-in-out;
+
+  
+
+    border: 2px solid #0d6efd !important;
+
+  
+
+    background-color: #f0f7ff !important;
+
+  
+
+  }
+
+  
+
+  
+
+  

@@ -132,6 +132,22 @@ export interface ApiError {
 }
 
 /**
+ * Season model from backend.
+ */
+export interface Season {
+  id: number;
+  name: string;
+}
+
+/**
+ * League model from backend.
+ */
+export interface League {
+  id: number;
+  name: string;
+}
+
+/**
  * Gameday metadata for high-level management.
  * Corresponds to Django Gameday model fields.
  */

@@ -4,18 +4,12 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Halftime from '../Halftime';
 import {GAME_LOG_ONLY_FIRSTHALF} from '../../../__tests__/testdata/gameLogData';
-import $ from 'jquery/src/jquery';
 import {testStore} from '../../../__tests__/Utils';
 import {apiGet} from '../../../actions/utils/api';
 import {GET_GAME_SETUP} from '../../../actions/types';
 import { vi } from 'vitest';
 
 const submitMock = vi.fn();
-const modalMock = vi.fn();
-vi.mock('jquery/src/jquery', () => ({ default: vi.fn() }));
-$.mockImplementation(() => {
-  return {modal: modalMock};
-});
 
 vi.mock('../../../actions/utils/api');
 apiGet.mockImplementation(() => (dispatch) => {
@@ -41,7 +35,6 @@ const setup = (isFirstHalf = true) => {
     },
   };
   const store = testStore(initialState);
-  modalMock.mockClear();
   submitMock.mockClear();
   apiGet.mockClear();
   render(<Halftime store={store} gameLog={GAME_LOG_ONLY_FIRSTHALF} isFirstHalf={isFirstHalf} onSubmit={submitMock}/>);

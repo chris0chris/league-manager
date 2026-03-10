@@ -7,7 +7,7 @@
  * - Dynamic reference derivation
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   FlowNode,
@@ -49,8 +49,19 @@ export function useEdgesState(
     } else if (edge.type === 'stageToGame' && isStageNode(sourceNode)) {
       const sourceStage = sourceNode as StageNode;
       const stageName = sourceStage.data.name;
-      const place = (edge.data as StageToGameEdgeData).sourceRank;
-      return { type: 'rank', place, stageId: sourceNode.id, stageName };
+      const { sourceRank, sourceGroup } = edge.data as StageToGameEdgeData;
+      
+      if (sourceGroup) {
+        return { 
+          type: 'groupRank', 
+          place: sourceRank, 
+          groupName: sourceGroup, 
+          stageId: sourceNode.id, 
+          stageName 
+        };
+      }
+      
+      return { type: 'rank', place: sourceRank, stageId: sourceNode.id, stageName };
     }
 
     return null;
@@ -133,24 +144,46 @@ export function useEdgesState(
       outputType: GameOutputHandle;
       targetGameId: string;
       targetSlot: GameInputHandle;
-    }>): string[] => {
-      if (edgesToAdd.length === 0) return [];
+    }>, clearExisting: boolean = false): string[] => {
+      if (edgesToAdd.length === 0) {
+        if (clearExisting) setEdges([]);
+        return [];
+      }
 
       const newEdges = edgesToAdd.map(({ sourceGameId, outputType, targetGameId, targetSlot }) => {
         const edgeId = `edge-${uuidv4()}`;
         return createGameToGameEdge(edgeId, sourceGameId, outputType, targetGameId, targetSlot);
       });
 
-      setEdges(eds => [...eds, ...newEdges]);
+      setEdges(eds => {
+        const base = clearExisting ? [] : eds;
+        return [...base, ...newEdges];
+      });
 
       // Perform atomic sync for all affected nodes
       setNodes(nds => nds.map(node => {
         if (!isGameNode(node)) return node;
         
         const relevantNewEdges = newEdges.filter(e => e.target === node.id);
-        if (relevantNewEdges.length === 0) return node;
+        if (relevantNewEdges.length === 0) {
+          if (clearExisting) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                homeTeamDynamic: null,
+                awayTeamDynamic: null,
+              }
+            };
+          }
+          return node;
+        }
 
         const newData = { ...node.data };
+        if (clearExisting) {
+          newData.homeTeamDynamic = null;
+          newData.awayTeamDynamic = null;
+        }
         relevantNewEdges.forEach(edge => {
           const dynamicRef = deriveDynamicRef(edge, nds);
           if (edge.targetHandle === 'home') {
@@ -174,9 +207,9 @@ export function useEdgesState(
    * Add a StageToGameEdge from source stage (Ranking) to target game.
    */
   const addStageToGameEdge = useCallback(
-    (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: GameInputHandle): string => {
+    (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: GameInputHandle, sourceGroup?: string): string => {
       const edgeId = `edge-${uuidv4()}`;
-      const newEdge = createStageToGameEdge(edgeId, sourceStageId, sourceRank, targetGameId, targetSlot);
+      const newEdge = createStageToGameEdge(edgeId, sourceStageId, sourceRank, targetGameId, targetSlot, sourceGroup);
 
       setEdges(eds => [...eds, newEdge]);
       
@@ -288,7 +321,7 @@ export function useEdgesState(
     [setEdges, setNodes]
   );
 
-  return {
+  return useMemo(() => ({
     deriveDynamicRef,
     syncNodesWithEdges,
     addGameToGameEdge,
@@ -297,5 +330,5 @@ export function useEdgesState(
     removeEdgeFromSlot,
     deleteEdge,
     deleteEdgesByNodes,
-  };
+  }), [deriveDynamicRef, syncNodesWithEdges, addGameToGameEdge, addBulkGameToGameEdges, addStageToGameEdge, removeEdgeFromSlot, deleteEdge, deleteEdgesByNodes]);
 }

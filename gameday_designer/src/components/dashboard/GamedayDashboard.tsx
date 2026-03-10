@@ -106,7 +106,12 @@ const GamedayDashboard: React.FC = () => {
     setLoading(true);
     try {
       const response = await gamedayApi.listGamedays({ search: searchTerm });
-      setGamedays(response.results);
+      // Filter: only show gamedays that have designer_data (created via Designer)
+      // We allow null/empty object for NEW gamedays, but exclude ones without the property entirely
+      const designerGamedays = response.results.filter(g => 
+        g.designer_data !== undefined
+      );
+      setGamedays(designerGamedays);
     } catch (error) {
       console.error('Failed to load gamedays', error);
       addNotification(t('ui:notification.loadGamedaysFailed'), 'danger', t('ui:notification.title.error'));
@@ -117,6 +122,21 @@ const GamedayDashboard: React.FC = () => {
 
   const handleCreateGameday = async () => {
     try {
+      // Fetch available seasons and leagues first to get valid defaults
+      const [seasons, leagues] = await Promise.all([
+        gamedayApi.listSeasons(),
+        gamedayApi.listLeagues()
+      ]);
+
+      if (seasons.length === 0 || leagues.length === 0) {
+        addNotification(
+          'Please ensure at least one Season and one League exist in the database before creating a gameday.', 
+          'warning', 
+          'Prerequisites missing'
+        );
+        return;
+      }
+
       const newGameday = await gamedayApi.createGameday({
         name: t('ui:placeholder.gamedayName'),
         date: new Date().toISOString().split('T')[0],
@@ -124,8 +144,8 @@ const GamedayDashboard: React.FC = () => {
         format: '6_2',
         author: 1, // TODO: Use actual user ID
         address: '',
-        season: 1, // TODO: Use actual season ID
-        league: 1, // TODO: Use actual league ID
+        season: seasons[0].id,
+        league: leagues[0].id,
       });
       navigate(`/designer/${newGameday.id}`);
     } catch (error) {
@@ -214,8 +234,17 @@ const GamedayDashboard: React.FC = () => {
     loadGamedays();
     const currentTimeouts = timeoutRefs.current;
     return () => {
-      // Cleanup timers on unmount
-      Object.values(currentTimeouts).forEach(timer => clearTimeout(timer));
+      // CRITICAL: When navigating away, we must immediately execute any pending deletions
+      // instead of just clearing them, otherwise they never happen.
+      const pendingIds = Object.keys(currentTimeouts).map(Number);
+      pendingIds.forEach(id => {
+        clearTimeout(currentTimeouts[id]);
+        delete currentTimeouts[id];
+        // Fire and forget deletion
+        gamedayApi.deleteGameday(id).catch(err => 
+          console.error(`Cleanup: Failed to delete gameday ${id}`, err)
+        );
+      });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
@@ -271,7 +300,9 @@ const GamedayDashboard: React.FC = () => {
       <div className="flex-grow-1 overflow-auto">
         {loading ? (
           <div className="d-flex justify-content-center py-5">
-            <Spinner animation="border" variant="primary" />
+            <Spinner animation="border" variant="primary" role="status">
+              <span className="visually-hidden">{t('ui:message.loading')}</span>
+            </Spinner>
           </div>
         ) : (
           <Row className="mx-0">

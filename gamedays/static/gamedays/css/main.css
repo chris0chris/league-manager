@@ -1,17 +1,14 @@
-body {
-  background: #fafafa;
-  color: #333333;
-  margin-top: 5rem;
-}
-
 html, body {
     height: 100%;
     margin: 0;
 }
 
 body {
-    display: flex;
-    flex-direction: column;
+  background: #fafafa;
+  color: #333333;
+  padding-top: 5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 main {
@@ -32,6 +29,14 @@ ul {
 
 .bg-steel {
   background-color: #5f788a;
+}
+
+.site-header .navbar {
+  z-index: 1035 !important;
+}
+
+.site-header .dropdown-menu {
+  z-index: 1040 !important;
 }
 
 .site-header .navbar-nav .nav-link {

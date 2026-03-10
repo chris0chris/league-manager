@@ -25,6 +25,10 @@ export interface TeamSelectorProps {
   matchNames: string[];
   /** Available group names for standing references */
   groupNames: string[];
+  /** Available stages for rank references */
+  availableStages?: Array<{ id: string; name: string }>;
+  /** Whether this selector is required (for visual indicator) */
+  isRequired?: boolean;
 }
 
 /**
@@ -33,7 +37,8 @@ export interface TeamSelectorProps {
 function createDefaultReference(
   type: ReferenceType,
   matchNames: string[],
-  groupNames: string[]
+  groupNames: string[],
+  availableStages: Array<{ id: string; name: string }> = []
 ): TeamReference {
   switch (type) {
     case 'groupTeam':
@@ -48,6 +53,21 @@ function createDefaultReference(
       return { type: 'winner', matchName: matchNames[0] || '' };
     case 'loser':
       return { type: 'loser', matchName: matchNames[0] || '' };
+    case 'rank':
+      return { 
+        type: 'rank', 
+        place: 1, 
+        stageId: availableStages[0]?.id || '', 
+        stageName: availableStages[0]?.name || '' 
+      };
+    case 'groupRank':
+      return { 
+        type: 'groupRank', 
+        place: 1, 
+        groupName: groupNames[0] || 'Group A',
+        stageId: availableStages[0]?.id || '', 
+        stageName: availableStages[0]?.name || '' 
+      };
     case 'static':
     default:
       return { type: 'static', name: '' };
@@ -63,13 +83,15 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
   label,
   matchNames,
   groupNames,
+  availableStages = [],
+  isRequired = false,
 }) => {
   /**
    * Handle type change.
    */
   const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newType = event.target.value as ReferenceType;
-    onChange(createDefaultReference(newType, matchNames, groupNames));
+    onChange(createDefaultReference(newType, matchNames, groupNames, availableStages));
   };
 
   /**
@@ -188,6 +210,113 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
           </Form.Group>
         );
 
+      case 'rank':
+        return (
+          <Row className="g-2">
+            <Col xs={4}>
+              <Form.Group controlId={`${label}-place`}>
+                <Form.Label className="small mb-1">Rank</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  value={value.place}
+                  onChange={(e) =>
+                    onChange({
+                      ...value,
+                      place: parseInt(e.target.value, 10) || 1,
+                    })
+                  }
+                  size="sm"
+                />
+              </Form.Group>
+            </Col>
+            <Col xs={8}>
+              <Form.Group controlId={`${label}-stage`}>
+                <Form.Label className="small mb-1">Stage</Form.Label>
+                <Form.Select
+                  value={value.stageId}
+                  onChange={(e) => {
+                    const stage = availableStages.find(s => s.id === e.target.value);
+                    onChange({
+                      ...value,
+                      stageId: e.target.value,
+                      stageName: stage?.name || '',
+                    });
+                  }}
+                  size="sm"
+                >
+                  <option value="">Select Stage...</option>
+                  {availableStages.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+          </Row>
+        );
+
+      case 'groupRank':
+        return (
+          <>
+            <Row className="g-2 mb-2">
+              <Col xs={4}>
+                <Form.Group controlId={`${label}-place`}>
+                  <Form.Label className="small mb-1">Rank</Form.Label>
+                  <Form.Control
+                    type="number"
+                    min={1}
+                    value={value.place}
+                    onChange={(e) =>
+                      onChange({
+                        ...value,
+                        place: parseInt(e.target.value, 10) || 1,
+                      })
+                    }
+                    size="sm"
+                  />
+                </Form.Group>
+              </Col>
+              <Col xs={8}>
+                <Form.Group controlId={`${label}-groupName`}>
+                  <Form.Label className="small mb-1">Group</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={value.groupName}
+                    onChange={(e) =>
+                      onChange({
+                        ...value,
+                        groupName: e.target.value,
+                      })
+                    }
+                    list={`${label}-groupNames`}
+                    size="sm"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group controlId={`${label}-stage`}>
+              <Form.Label className="small mb-1">Stage</Form.Label>
+              <Form.Select
+                value={value.stageId}
+                onChange={(e) => {
+                  const stage = availableStages.find(s => s.id === e.target.value);
+                  onChange({
+                    ...value,
+                    stageId: e.target.value,
+                    stageName: stage?.name || '',
+                  });
+                }}
+                size="sm"
+              >
+                <option value="">Select Stage...</option>
+                {availableStages.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </>
+        );
+
       case 'static':
       default:
         return (
@@ -210,10 +339,12 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
     }
   };
 
-  return (
-    <div className="team-selector mb-3">
-      <Form.Label className="fw-bold">{label}</Form.Label>
-      <Form.Group controlId={`${label}-type`} className="mb-2">
+   return (
+     <div className="team-selector mb-3">
+       <Form.Label className={`fw-bold ${isRequired ? 'text-danger' : ''}`}>
+         {label}
+       </Form.Label>
+       <Form.Group controlId={`${label}-type`} className="mb-2">
         <Form.Label className="small mb-1">Type</Form.Label>
         <Form.Select
           value={value.type}
@@ -224,6 +355,8 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
           <option value="standing">Standing (P1 Gruppe 1)</option>
           <option value="winner">Winner (Gewinner)</option>
           <option value="loser">Loser (Verlierer)</option>
+          <option value="rank">Rank (1st Overall)</option>
+          <option value="groupRank">Group Rank (1st in Group)</option>
           <option value="static">Static (Custom Name)</option>
         </Form.Select>
       </Form.Group>

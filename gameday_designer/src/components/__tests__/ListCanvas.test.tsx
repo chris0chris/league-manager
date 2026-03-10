@@ -89,7 +89,7 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
       renderCanvas(createDefaultProps());
 
       // There are now two Add Field buttons: header and body
-      const addButtons = screen.getAllByRole('button', { name: /add field/i });
+      const addButtons = screen.getAllByTitle(/add a new playing field/i);
       expect(addButtons.length).toBeGreaterThan(1);
     });
 
@@ -98,7 +98,7 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
       renderCanvas(createDefaultProps({ onAddField }));
 
       // Clicking any of them should work
-      const addButtons = screen.getAllByRole('button', { name: /add field/i });
+      const addButtons = screen.getAllByTitle(/add a new playing field/i);
       fireEvent.click(addButtons[0]);
 
       expect(onAddField).toHaveBeenCalled();
@@ -150,7 +150,7 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
       expect(screen.getByText('Field 1')).toBeInTheDocument();
 
       // Should render Add Field button/card at end
-      const addButtons = screen.getAllByRole('button', { name: /add field/i });
+      const addButtons = screen.getAllByTitle(/add a new playing field/i);
       // There should be at least one Add Field button (the card one)
       expect(addButtons.length).toBeGreaterThanOrEqual(1);
     });
@@ -163,7 +163,7 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
       );
 
       // Add Field button is now in the header when fields exist, not in a card
-      const addButton = screen.getByRole('button', { name: /add field/i });
+      const addButton = screen.getByTitle(/add a new playing field/i);
       expect(addButton).toBeInTheDocument();
     });
 
@@ -177,7 +177,7 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
       );
 
       // Find all Add Field buttons (could be multiple - in card, in empty stage, etc.)
-      const addButtons = screen.getAllByRole('button', { name: /add field/i });
+      const addButtons = screen.getAllByTitle(/add a new playing field/i);
 
       // Click the first one (should be the card button)
       fireEvent.click(addButtons[0]);
@@ -193,7 +193,7 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
       );
 
       // Add Field is now in the header, not a card - just verify it exists
-      const addButton = screen.getByRole('button', { name: /add field/i });
+      const addButton = screen.getByTitle(/add a new playing field/i);
       expect(addButton).toBeInTheDocument();
     });
 
@@ -278,7 +278,7 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
         })
       );
 
-      expect(screen.getByRole('button', { name: /add group/i })).toBeInTheDocument();
+      expect(screen.getByTitle(/create a new team group/i)).toBeInTheDocument();
     });
 
     it('calls onAddGlobalTeamGroup when Add Group button is clicked', () => {
@@ -296,7 +296,7 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
         })
       );
 
-      const addButton = screen.getByRole('button', { name: /add group/i });
+      const addButton = screen.getByTitle(/create a new team group/i);
       fireEvent.click(addButton);
 
       expect(onAddGlobalTeamGroup).toHaveBeenCalledTimes(1);

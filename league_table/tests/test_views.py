@@ -15,7 +15,6 @@ from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
 from gamedays.wizard import FIELD_GROUP_STEP
 from league_table.tests.setup_factories.factories_leaguetable import LeagueGroupFactory
 
-
 # class TestLeagueTableView(WebTest):
 #     def test_league_table_for_year_is_displayed(self):
 #         DBSetup().g72_finished()

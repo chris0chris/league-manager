@@ -3,6 +3,8 @@ import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
 import type { FlowNode, GlobalTeam } from '../../types/flowchart';
 
+const validMetadata = { id: 1, name: 'Test', date: '2026-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
+
 describe('useFlowValidation - Team Capacity', () => {
   const teams: GlobalTeam[] = [
     { id: 't1', label: 'Team 1', groupId: null, order: 0 },
@@ -70,7 +72,7 @@ describe('useFlowValidation - Team Capacity', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], teams));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], teams, [], validMetadata));
 
     expect(result.current.isValid).toBe(false);
     const capacityError = result.current.errors.find(e => e.type === 'team_overlap');
@@ -144,7 +146,7 @@ describe('useFlowValidation - Team Capacity', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], teams));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], teams, [], validMetadata));
 
     expect(result.current.isValid).toBe(false);
     const capacityError = result.current.errors.find(e => e.type === 'team_overlap');
@@ -185,7 +187,7 @@ describe('useFlowValidation - Team Capacity', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [{ id: 'team1', label: 'Team 1', groupId: null, order: 0 }]));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [{ id: 'team1', label: 'Team 1', groupId: null, order: 0 }], [], validMetadata));
     expect(result.current.isValid).toBe(true);
   });
 
@@ -204,7 +206,7 @@ describe('useFlowValidation - Team Capacity', () => {
     ];
 
     // Pass empty globalTeams
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], []));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
     const officialError = result.current.errors.find(e => e.type === 'official_playing');
     expect(officialError).toBeDefined();
@@ -225,7 +227,7 @@ describe('useFlowValidation - Team Capacity', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], []));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
     const officialError = result.current.errors.find(e => e.type === 'official_playing');
     expect(officialError).toBeDefined();
@@ -246,7 +248,7 @@ describe('useFlowValidation - Team Capacity', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], []));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
     const officialError = result.current.errors.find(e => e.type === 'official_playing');
     expect(officialError).toBeDefined();

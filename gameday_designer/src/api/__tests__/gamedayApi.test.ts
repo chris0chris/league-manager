@@ -87,7 +87,7 @@ describe('GamedayApi', () => {
 
       const result = await gamedayApi.listGamedays();
 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/', {
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/gamedays/', {
         params: undefined,
       });
       expect(result).toEqual(mockResponse);
@@ -106,7 +106,7 @@ describe('GamedayApi', () => {
 
       await gamedayApi.listGamedays({ search: 'Gameday 1' });
 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/', {
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/gamedays/', {
         params: { search: 'Gameday 1' },
       });
     });
@@ -133,7 +133,7 @@ describe('GamedayApi', () => {
 
       const result = await gamedayApi.getGameday(1);
 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/1/');
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/gamedays/1/');
       expect(result).toEqual(mockGameday);
     });
   });
@@ -160,7 +160,7 @@ describe('GamedayApi', () => {
 
       const result = await gamedayApi.createGameday(newGameday);
 
-      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/', newGameday);
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/gamedays/', newGameday);
       expect(result.id).toBe(3);
     });
   });
@@ -187,7 +187,7 @@ describe('GamedayApi', () => {
 
       const result = await gamedayApi.updateGameday(1, updatedData);
 
-      expect(mockAxiosInstance.put).toHaveBeenCalledWith('/1/', updatedData);
+      expect(mockAxiosInstance.put).toHaveBeenCalledWith('/gamedays/1/', updatedData);
       expect(result.name).toBe('Updated Gameday');
     });
   });
@@ -212,7 +212,7 @@ describe('GamedayApi', () => {
 
       const result = await gamedayApi.patchGameday(1, patchData);
 
-      expect(mockAxiosInstance.patch).toHaveBeenCalledWith('/1/', patchData);
+      expect(mockAxiosInstance.patch).toHaveBeenCalledWith('/gamedays/1/', patchData);
       expect(result.name).toBe('Patched Gameday');
     });
   });
@@ -223,7 +223,7 @@ describe('GamedayApi', () => {
 
       await gamedayApi.deleteGameday(1);
 
-      expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/1/');
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/gamedays/1/');
     });
   });
 });

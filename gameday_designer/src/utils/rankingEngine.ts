@@ -24,6 +24,35 @@ export function getStageParticipants(games: GameNode[]): string[] {
 }
 
 /**
+ * Identifies all unique group names participating in a set of games.
+ */
+export function getStageGroups(games: GameNode[]): string[] {
+  const groups = new Set<string>();
+  
+  games.forEach(game => {
+    if (game.data.group) {
+      groups.add(game.data.group);
+    }
+  });
+  
+  return Array.from(groups).sort();
+}
+
+/**
+ * Identifies all unique teams participating in a specific group.
+ */
+export function getGroupParticipants(games: GameNode[], groupName: string): string[] {
+  const participants = new Set<string>();
+  
+  games.filter(g => g.data.group === groupName).forEach(game => {
+    if (game.data.homeTeamId) participants.add(game.data.homeTeamId);
+    if (game.data.awayTeamId) participants.add(game.data.awayTeamId);
+  });
+  
+  return Array.from(participants);
+}
+
+/**
  * Calculates the ranking for a Ranking Stage.
  * 
  * NOTE: In the DESIGN phase, we don't have game scores.

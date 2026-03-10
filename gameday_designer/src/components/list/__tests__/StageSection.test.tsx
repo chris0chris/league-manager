@@ -98,7 +98,7 @@ describe('StageSection', () => {
     );
 
     // Should be expanded - there are now TWO "Add Game" buttons (header + body)
-    const addGameButtons = screen.getAllByText('Add Game');
+    const addGameButtons = screen.getAllByTitle(/add a new game/i);
     expect(addGameButtons.length).toBeGreaterThan(0);
   });
 
@@ -233,7 +233,7 @@ describe('StageSection', () => {
       );
 
       // Get header Add Game button
-      const addButtons = screen.getAllByRole('button', { name: /add game/i });
+      const addButtons = screen.getAllByTitle(/add a new game/i);
       fireEvent.click(addButtons[0]);
 
       expect(mockOnAddGame).toHaveBeenCalledWith('stage-1');
@@ -248,7 +248,7 @@ describe('StageSection', () => {
       );
 
       // Should only find one Add Game button (in header)
-      const addButtons = screen.getAllByRole('button', { name: /add game/i });
+      const addButtons = screen.getAllByTitle(/add a new game/i);
       expect(addButtons).toHaveLength(1);
       
       // Verify it's in the header
@@ -267,7 +267,7 @@ describe('StageSection', () => {
       expect(screen.getByText(/no games/i)).toBeInTheDocument();
 
       // Should show big Add Game button in body (there are two buttons now, header and body)
-      const addButtons = screen.getAllByRole('button', { name: /add game/i });
+      const addButtons = screen.getAllByTitle(/add a new game/i);
       expect(addButtons.length).toBeGreaterThan(1);
       
       const bodyButton = addButtons.find(btn => btn.closest('.stage-section__body'));

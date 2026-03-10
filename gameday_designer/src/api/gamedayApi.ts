@@ -10,6 +10,8 @@ import type {
   Gameday,
   GamedayListEntry,
   PaginatedResponse,
+  Season,
+  League,
 } from '../types';
 import { mockGamedayService } from './mockGamedayApi';
 
@@ -27,7 +29,7 @@ class GamedayApi {
 
   constructor(private forceClient = false) {
     this.client = axios.create({
-      baseURL: '/api/gamedays',
+      baseURL: '/api',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -71,7 +73,7 @@ class GamedayApi {
   }): Promise<PaginatedResponse<GamedayListEntry>> {
     if (this.isDev && !this.forceClient) return mockGamedayService.list(params);
     const response = await this.client.get<PaginatedResponse<GamedayListEntry>>(
-      '/',
+      '/gamedays/',
       { params }
     );
     return response.data;
@@ -86,7 +88,7 @@ class GamedayApi {
   async getGameday(id: number): Promise<Gameday> {
     if (this.isDev && !this.forceClient) return mockGamedayService.get(id);
     const response = await this.client.get<Gameday>(
-      `/${id}/`
+      `/gamedays/${id}/`
     );
     return response.data;
   }
@@ -102,7 +104,7 @@ class GamedayApi {
   ): Promise<Gameday> {
     if (this.isDev && !this.forceClient) return mockGamedayService.create(data);
     const response = await this.client.post<Gameday>(
-      '/',
+      '/gamedays/',
       data
     );
     return response.data;
@@ -121,7 +123,7 @@ class GamedayApi {
   ): Promise<Gameday> {
     if (this.isDev && !this.forceClient) return mockGamedayService.update(id, data);
     const response = await this.client.put<Gameday>(
-      `/${id}/`,
+      `/gamedays/${id}/`,
       data
     );
     return response.data;
@@ -140,9 +142,33 @@ class GamedayApi {
   ): Promise<Gameday> {
     if (this.isDev && !this.forceClient) return mockGamedayService.update(id, data);
     const response = await this.client.patch<Gameday>(
-      `/${id}/`,
+      `/gamedays/${id}/`,
       data
     );
+    return response.data;
+  }
+
+  /**
+   * List all available seasons.
+   */
+  async listSeasons(): Promise<Season[]> {
+    if (this.isDev && !this.forceClient) return [
+      { id: 1, name: '2026 Season' },
+      { id: 2, name: '2025 Season' }
+    ];
+    const response = await this.client.get<Season[]>('/seasons/');
+    return response.data;
+  }
+
+  /**
+   * List all available leagues.
+   */
+  async listLeagues(): Promise<League[]> {
+    if (this.isDev && !this.forceClient) return [
+      { id: 1, name: 'DFFL' },
+      { id: 2, name: 'DFFL2' }
+    ];
+    const response = await this.client.get<League[]>('/leagues/');
     return response.data;
   }
 
@@ -153,7 +179,7 @@ class GamedayApi {
    */
   async deleteGameday(id: number): Promise<void> {
     if (this.isDev && !this.forceClient) return mockGamedayService.delete(id);
-    await this.client.delete(`/${id}/`);
+    await this.client.delete(`/gamedays/${id}/`);
   }
 
   /**
@@ -163,7 +189,7 @@ class GamedayApi {
    */
   async publish(id: number): Promise<Gameday> {
     if (this.isDev && !this.forceClient) return mockGamedayService.update(id, { status: 'PUBLISHED' });
-    const response = await this.client.post<Gameday>(`/${id}/publish/`);
+    const response = await this.client.post<Gameday>(`/gamedays/${id}/publish/`);
     return response.data;
   }
 
@@ -173,8 +199,51 @@ class GamedayApi {
   async updateGameResult(gameId: number, data: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }): Promise<unknown> {
     // In dev we just return the data since we don't have a mock for this yet
     if (this.isDev && !this.forceClient) return { ...data, status: data.final_score ? 'COMPLETED' : 'IN_PROGRESS' };
-    const response = await this.client.patch(`/gameinfo/${gameId}/result/`, data);
+    const response = await this.client.patch(`/gamedays/gameinfo/${gameId}/result/`, data);
     return response.data;
+  }
+
+  /**
+   * Get all games for a gameday.
+   */
+  async getGamedayGames(gamedayId: number): Promise<import('../types/designer').GameResultsDisplay[]> {
+    if (this.isDev && !this.forceClient) return [];
+    const response = await this.client.get<import('../types/designer').GameResultsDisplay[]>(
+      `/gamedays/${gamedayId}/games/`
+    );
+    return response.data;
+  }
+
+  /**
+   * Update bulk game results for a gameday.
+   */
+  async updateBulkGameResults(gamedayId: number, gameId: number, results: unknown[]): Promise<void> {
+    if (this.isDev && !this.forceClient) return;
+    await this.client.post(
+      `/gamedays/${gamedayId}/games/${gameId}/results/`,
+      { results }
+    );
+  }
+
+  /**
+   * Search for teams in the database pool using DAL endpoint.
+   */
+  async searchTeams(query: string): Promise<{ id: number; text: string }[]> {
+    if (this.isDev && !this.forceClient) {
+      const mockTeams = [
+        { id: 101, text: 'Augsburg Lions' },
+        { id: 102, text: 'Munich Cowboys' },
+        { id: 103, text: 'Berlin Adler' },
+        { id: 104, text: 'Hamburg Sea Devils' },
+        { id: 105, text: 'Frankfurt Galaxy' },
+      ];
+      return mockTeams.filter(t => t.text.toLowerCase().includes(query.toLowerCase()));
+    }
+    const response = await this.client.get<{ results: { id: number; text: string }[] }>(
+      '/dal/team/',
+      { params: { q: query }, baseURL: '' } // Clear baseURL to use absolute path from root
+    );
+    return response.data.results;
   }
 }
 

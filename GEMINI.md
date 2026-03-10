@@ -118,6 +118,7 @@ npm --prefix scorecard/ run test:run
 - **Trigger**: When a feature is "almost ready" and CI is green, it should be deployed to the staging environment.
 - **Process**: Use the `./container/deploy.sh stage` script to trigger the deployment.
 - **Validation**: All changes MUST be validated on the staging environment before the PR is merged or a production deployment is initiated.
+- **Verification Gate**: **CRITICAL**: Before closing any issue, subtask, or finishing a task, you MUST provide the staging URL/version to the user and await explicit confirmation that they have verified the fix on the staging environment. Do NOT close tasks prematurely.
 
 ### 2. Production Safety Policies (Ansible)
 **CRITICAL: Mandatory Deployment Process**

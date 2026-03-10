@@ -24,6 +24,7 @@ import type {
   FlowField,
   GlobalTeam,
   GlobalTeamGroup,
+  GamedayMetadata,
 } from '../types/flowchart';
 import {
   isGameNode,
@@ -607,6 +608,11 @@ function checkTimeOverlaps(
       const duration = data.duration || DEFAULT_GAME_DURATION;
       const endMinutes = startMinutes + duration;
 
+      // Basic linear time heuristic for validation (since validation doesn't know absolute day)
+      // If a game in a higher-order stage appears to start 'before' an earlier stage,
+      // it likely means it's on the next day.
+      // But for validation purposes, we mainly care about intra-stage and intra-field conflicts.
+      
       if (!gamesByField.has(fieldId)) {
         gamesByField.set(fieldId, []);
       }
@@ -614,26 +620,45 @@ function checkTimeOverlaps(
         id: node.id,
         start: startMinutes,
         end: endMinutes,
-        standing: data.standing || node.id
+        standing: data.standing || node.id,
+        order: (node.data as { order?: number }).order ?? 0 // Use order if available
       });
     } catch {
-      // Ignore invalid time formats (handled by other validation or UI)
+      // Ignore invalid time formats
       continue;
     }
   }
 
   // Check for overlaps in each field
   for (const [fieldId, games] of gamesByField) {
-    // Sort by start time
-    games.sort((a, b) => a.start - b.start);
+    // Sort by order then by start time
+    games.sort((a, b) => {
+      if (a.order !== b.order) return a.order - b.order;
+      return a.start - b.start;
+    });
 
     for (let i = 0; i < games.length - 1; i++) {
       const current = games[i];
       const next = games[i + 1];
 
-      // Check overlap: if next game starts before current game ends
-      // Note: We use < because if next starts exactly when current ends, it's NOT an overlap
-      if (next.start < current.end) {
+      // If next appears to start before current, but it's a higher order,
+      // it's likely the next day and NOT an overlap.
+      let isOverlap = false;
+      if (next.order > current.order) {
+        // If next order, only overlap if next.start is actually within current's duration 
+        // on the SAME logical day. Since we can't be sure about days here without full state,
+        // we assume if it's a later order and start is 'earlier' or 'same', it's next day.
+        if (next.start < current.end && next.start >= current.start) {
+           isOverlap = true;
+        }
+      } else {
+        // Same order: standard overlap check
+        if (next.start < current.end) {
+          isOverlap = true;
+        }
+      }
+
+      if (isOverlap) {
         let fieldName = fields.find(f => f.id === fieldId)?.name;
         
         // If not found in fields array, look in nodes (v2 model)
@@ -1005,7 +1030,7 @@ function checkUnevenGames(
           minGames,
           maxGames
         },
-        affectedNodes: [], // Groups don't have nodes directly
+        affectedNodes: [groupId], // Use groupId as target
       });
     }
   }
@@ -1077,7 +1102,7 @@ function checkNoTeams(globalTeams: GlobalTeam[]): FlowValidationWarning[] {
         message: 'No teams have been added to the team pool',
         messageKey: 'no_teams',
         messageParams: {},
-        affectedNodes: [],
+        affectedNodes: ['team-pool'],
       },
     ];
   }
@@ -1097,7 +1122,7 @@ function checkNoGames(nodes: FlowNode[]): FlowValidationWarning[] {
         message: 'No games have been added to the schedule',
         messageKey: 'no_games',
         messageParams: {},
-        affectedNodes: [],
+        affectedNodes: ['fields-card'],
       },
     ];
   }
@@ -1231,6 +1256,153 @@ function checkBrokenDynamicProgressions(nodes: FlowNode[]): FlowValidationWarnin
 }
 
 /**
+ * Check for mandatory metadata (Name, Date, Start Time).
+ */
+function checkMandatoryMetadata(metadata?: GamedayMetadata): FlowValidationError[] {
+  const errors: FlowValidationError[] = [];
+  if (!metadata) return [];
+
+  if (!metadata.name || !metadata.name.trim()) {
+    errors.push({
+      id: 'metadata_name_missing',
+      type: 'incomplete_game_inputs',
+      message: 'Gameday Name is mandatory',
+      messageKey: 'metadataNameMissing',
+      affectedNodes: ['metadata-gamedayName'],
+    });
+  }
+
+  if (!metadata.date) {
+    errors.push({
+      id: 'metadata_date_missing',
+      type: 'incomplete_game_inputs',
+      message: 'Gameday Date is mandatory',
+      messageKey: 'metadataDateMissing',
+      affectedNodes: ['metadata-gamedayDate'],
+    });
+  }
+
+  if (!metadata.start) {
+    errors.push({
+      id: 'metadata_start_missing',
+      type: 'incomplete_game_inputs',
+      message: 'Gameday Start Time is mandatory',
+      messageKey: 'metadataStartMissing',
+      affectedNodes: ['metadata-gamedayStart'],
+    });
+  }
+
+  if (!metadata.season || metadata.season === 0) {
+    errors.push({
+      id: 'metadata_season_missing',
+      type: 'incomplete_game_inputs',
+      message: 'Season is mandatory',
+      messageKey: 'metadataSeasonMissing',
+      affectedNodes: ['metadata-gamedaySeason'],
+    });
+  }
+
+  if (!metadata.league || metadata.league === 0) {
+    errors.push({
+      id: 'metadata_league_missing',
+      type: 'incomplete_game_inputs',
+      message: 'League is mandatory',
+      messageKey: 'metadataLeagueMissing',
+      affectedNodes: ['metadata-gamedayLeague'],
+    });
+  }
+
+  return errors;
+}
+
+/**
+ * Check for additional metadata warnings (Venue, Past Date).
+ */
+function checkMetadataWarnings(metadata?: GamedayMetadata): FlowValidationWarning[] {
+  const warnings: FlowValidationWarning[] = [];
+  if (!metadata) return [];
+
+  if (!metadata.address || !metadata.address.trim()) {
+    warnings.push({
+      id: 'metadata_venue_missing',
+      type: 'unassigned_field',
+      message: 'Gameday Venue is missing',
+      messageKey: 'metadataVenueMissing',
+      affectedNodes: ['metadata-gamedayVenue'],
+    });
+  }
+
+  if (metadata.date) {
+    const now = new Date();
+    // Manually construct YYYY-MM-DD in LOCAL time to match user input
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+    
+    if (metadata.date < todayStr) {
+      warnings.push({
+        id: 'metadata_date_in_past',
+        type: 'stage_time_conflict',
+        message: 'Gameday date is in the past',
+        messageKey: 'metadataDateInPast',
+        affectedNodes: ['metadata-gamedayDate'],
+      });
+    }
+  }
+
+  return warnings;
+}
+
+/**
+ * Pure function to validate the flowchart structure.
+ * Can be used in unit tests outside of React components.
+ */
+export function validateFlowchart(
+  nodes: FlowNode[],
+  edges: FlowEdge[],
+  fields: FlowField[] = [],
+  globalTeams: GlobalTeam[] = [],
+  globalTeamGroups: GlobalTeamGroup[] = [],
+  metadata?: GamedayMetadata
+): FlowValidationResult {
+  const errors: FlowValidationError[] = [
+    ...checkMandatoryMetadata(metadata),
+    ...checkIncompleteInputs(nodes, edges),
+    ...checkCircularDependencies(nodes, edges),
+    ...checkOfficialPlaying(nodes, edges, globalTeams),
+    ...checkStagesOutsideFields(nodes),
+    ...checkGamesOutsideContainers(nodes),
+    ...checkTeamsOutsideContainers(nodes),
+    ...checkTimeOverlaps(nodes, fields),
+    ...checkTeamCapacity(nodes, globalTeams),
+    ...checkProgressionIntegrity(nodes, edges),
+    ...checkCyclicStageReferences(nodes, edges),
+    ...checkSelfPlay(nodes, edges),
+  ];
+
+  const warnings: FlowValidationWarning[] = [
+    ...checkMetadataWarnings(metadata),
+    ...checkDuplicateStandings(nodes),
+    ...checkOrphanedTeams(nodes, edges),
+    ...checkUnassignedFields(nodes),
+    ...checkStageSequence(nodes),
+    ...checkUnevenGames(nodes, globalTeams, globalTeamGroups),
+    ...checkNoTeams(globalTeams),
+    ...checkNoGames(nodes),
+    ...checkTeamsWithoutGames(nodes, globalTeams),
+    ...checkUnusedFields(nodes),
+    ...checkBrokenDynamicProgressions(nodes),
+  ];
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  };
+}
+
+/**
  * useFlowValidation hook.
  *
  * Validates the flowchart and returns errors and warnings.
@@ -1240,6 +1412,7 @@ function checkBrokenDynamicProgressions(nodes: FlowNode[]): FlowValidationWarnin
  * @param fields - All fields in the tournament
  * @param globalTeams - Global team pool
  * @param globalTeamGroups - Team groups
+ * @param metadata - Gameday metadata
  * @returns Validation result with errors and warnings
  */
 export function useFlowValidation(
@@ -1247,40 +1420,11 @@ export function useFlowValidation(
   edges: FlowEdge[],
   fields: FlowField[] = [],
   globalTeams: GlobalTeam[] = [],
-  globalTeamGroups: GlobalTeamGroup[] = []
+  globalTeamGroups: GlobalTeamGroup[] = [],
+  metadata?: GamedayMetadata
 ): FlowValidationResult {
-  return useMemo(() => {
-    const errors: FlowValidationError[] = [
-      ...checkIncompleteInputs(nodes, edges),
-      ...checkCircularDependencies(nodes, edges),
-      ...checkOfficialPlaying(nodes, edges, globalTeams),
-      ...checkStagesOutsideFields(nodes),
-      ...checkGamesOutsideContainers(nodes),
-      ...checkTeamsOutsideContainers(nodes),
-      ...checkTimeOverlaps(nodes, fields),
-      ...checkTeamCapacity(nodes, globalTeams),
-      ...checkProgressionIntegrity(nodes, edges),
-      ...checkCyclicStageReferences(nodes, edges),
-      ...checkSelfPlay(nodes, edges),
-    ];
-
-    const warnings: FlowValidationWarning[] = [
-      ...checkDuplicateStandings(nodes),
-      ...checkOrphanedTeams(nodes, edges),
-      ...checkUnassignedFields(nodes),
-      ...checkStageSequence(nodes),
-      ...checkUnevenGames(nodes, globalTeams, globalTeamGroups),
-      ...checkNoTeams(globalTeams),
-      ...checkNoGames(nodes),
-      ...checkTeamsWithoutGames(nodes, globalTeams),
-      ...checkUnusedFields(nodes),
-      ...checkBrokenDynamicProgressions(nodes),
-    ];
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-      warnings,
-    };
-  }, [nodes, edges, fields, globalTeams, globalTeamGroups]);
+  return useMemo(
+    () => validateFlowchart(nodes, edges, fields, globalTeams, globalTeamGroups, metadata),
+    [nodes, edges, fields, globalTeams, globalTeamGroups, metadata]
+  );
 }

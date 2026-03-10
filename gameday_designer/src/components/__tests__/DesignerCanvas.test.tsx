@@ -11,6 +11,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DesignerCanvas from '../DesignerCanvas';
+import { GamedayProvider } from '../../context/GamedayContext';
 import type { Field } from '../../types/designer';
 
 describe('DesignerCanvas', () => {
@@ -64,16 +65,18 @@ describe('DesignerCanvas', () => {
     selectedGameSlotId: string | null = null
   ) => {
     return render(
-      <DesignerCanvas
-        fields={fields}
-        selectedGameSlotId={selectedGameSlotId}
-        onUpdateFieldName={mockOnUpdateFieldName}
-        onRemoveField={mockOnRemoveField}
-        onAddGameSlot={mockOnAddGameSlot}
-        onSelectGameSlot={mockOnSelectGameSlot}
-        onDeleteGameSlot={mockOnDeleteGameSlot}
-        onDuplicateGameSlot={mockOnDuplicateGameSlot}
-      />
+      <GamedayProvider>
+        <DesignerCanvas
+          fields={fields}
+          selectedGameSlotId={selectedGameSlotId}
+          onUpdateFieldName={mockOnUpdateFieldName}
+          onRemoveField={mockOnRemoveField}
+          onAddGameSlot={mockOnAddGameSlot}
+          onSelectGameSlot={mockOnSelectGameSlot}
+          onDeleteGameSlot={mockOnDeleteGameSlot}
+          onDuplicateGameSlot={mockOnDuplicateGameSlot}
+        />
+      </GamedayProvider>
     );
   };
 

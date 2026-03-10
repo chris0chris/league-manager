@@ -3,6 +3,8 @@ import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
 import type { FlowNode } from '../../types/flowchart';
 
+const validMetadata = { id: 1, name: 'Test', date: '2026-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
+
 describe('useFlowValidation i18n', () => {
   it('should return translation keys and params for validation errors', () => {
     // Create a scenario with incomplete inputs (no home/away teams)
@@ -36,7 +38,7 @@ describe('useFlowValidation i18n', () => {
         },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, []));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
     expect(result.current.isValid).toBe(false);
     expect(result.current.errors).toHaveLength(1);

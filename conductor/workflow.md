@@ -64,6 +64,11 @@ All tasks follow a strict lifecycle:
     - **Action:** Stage the modified `plan.md` file.
     - **Action:** Commit this change with a descriptive message (e.g., `conductor(plan): Mark task 'Create user model' as complete`).
 
+11. **Deploy and Verify on Staging:**
+    - **Action:** Deploy the feature branch to the staging environment using `./container/deploy.sh stage`.
+    - **Action:** Provide the user with the staging version/URL.
+    - **Action:** **PAUSE** and await explicit user confirmation that the fix/feature works as expected on stage. Do NOT close the PR or associated issues until this confirmation is received.
+
 
 ### Phase Completion Verification and Checkpointing Protocol
 
@@ -273,6 +278,7 @@ A task is complete when:
 8. Changes committed with proper message
 9. Git note with task summary attached to the commit
 10. Pull Request created on `origin` for the completed track (use `gh pr create --repo dachrisch/leaguesphere ...`)
+11. **Verified on Staging**: The fix/feature has been deployed to the staging environment, and the user has explicitly verified and approved it. No task or issue should be closed until this verification is complete.
 
 ## Emergency Procedures
 
@@ -316,7 +322,8 @@ A task is complete when:
 4. Run database migrations
 5. Verify deployment
 6. Test critical paths
-7. Monitor for errors
+7. **User Staging Approval**: Present the staging version to the user and await explicit approval before proceeding to any closure or production deployment.
+8. Monitor for errors
 
 ### Post-Deployment
 1. Monitor analytics

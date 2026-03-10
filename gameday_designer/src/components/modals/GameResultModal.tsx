@@ -57,7 +57,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
           <Row className="mb-4 align-items-center">
             <Col>
               <Form.Group controlId="halftimeHome">
-                <Form.Label className="small">{homeTeamName} ({t('ui:label.halftime')})</Form.Label>
+                <Form.Label className="small">Home: {homeTeamName} ({t('ui:label.halftime')})</Form.Label>
                 <Form.Control
                   type="number"
                   min="0"
@@ -69,7 +69,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
             <Col xs="auto" className="pt-4">:</Col>
             <Col>
               <Form.Group controlId="halftimeAway">
-                <Form.Label className="small">{awayTeamName} ({t('ui:label.halftime')})</Form.Label>
+                <Form.Label className="small">Away: {awayTeamName} ({t('ui:label.halftime')})</Form.Label>
                 <Form.Control
                   type="number"
                   min="0"
@@ -84,7 +84,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
           <Row className="mb-3 align-items-center">
             <Col>
               <Form.Group controlId="finalHome">
-                <Form.Label className="small">{homeTeamName} ({t('ui:label.final')})</Form.Label>
+                <Form.Label className="small">Home: {homeTeamName} ({t('ui:label.final')})</Form.Label>
                 <Form.Control
                   type="number"
                   min="0"
@@ -96,7 +96,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
             <Col xs="auto" className="pt-4">:</Col>
             <Col>
               <Form.Group controlId="finalAway">
-                <Form.Label className="small">{awayTeamName} ({t('ui:label.final')})</Form.Label>
+                <Form.Label className="small">Away: {awayTeamName} ({t('ui:label.final')})</Form.Label>
                 <Form.Control
                   type="number"
                   min="0"

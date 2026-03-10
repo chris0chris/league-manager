@@ -1,6 +1,6 @@
-from .base import *
+from .dev import *
 
-SECRET_KEY = "django-insecure-test-key"
+SECRET_KEY = "django-insecure-test-key-for-sqlite"
 
 DATABASES = {
     "default": {
@@ -8,3 +8,8 @@ DATABASES = {
         "NAME": ":memory:",
     }
 }
+
+# Speed up tests
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.MD5PasswordHasher",
+]

@@ -5,6 +5,7 @@ from datetime import datetime
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
+from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView
@@ -18,8 +19,14 @@ from gamedays.api.serializers import (
     GamedayListSerializer,
     GameinfoSerializer,
     GameOfficialSerializer,
+    SeasonSerializer,
+    LeagueSerializer,
 )
-from gamedays.models import Gameday, Gameinfo, GameOfficial
+from gamedays.serializers.game_results import (
+    GameResultsUpdateSerializer,
+    GameInfoSerializer,
+)
+from gamedays.models import Gameday, Gameinfo, GameOfficial, Season, League, Gameresult
 from gamedays.service.gameday_service import GamedayService
 
 
@@ -33,6 +40,7 @@ class GamedayViewSet(viewsets.ModelViewSet):
     serializer_class = GamedaySerializer
     pagination_class = StandardResultsSetPagination
     queryset = Gameday.objects.all()
+    permission_classes = [AllowAny]
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -46,13 +54,19 @@ class GamedayViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         if instance.status != Gameday.STATUS_DRAFT:
             return Response(
-                {"detail": "Published gamedays cannot be deleted. Please unlock the gameday first."},
+                {
+                    "detail": "Published gamedays cannot be deleted. Please unlock the gameday first."
+                },
                 status=status.HTTP_403_FORBIDDEN,
             )
         return super().destroy(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = Gameday.objects.all().select_related("season", "league", "author").order_by("-date")
+        queryset = (
+            Gameday.objects.all()
+            .select_related("season", "league", "author")
+            .order_by("-date")
+        )
         search = self.request.query_params.get("search", "")
         if search:
             if ":" in search:
@@ -82,16 +96,12 @@ class GamedayViewSet(viewsets.ModelViewSet):
         gameday.published_at = timezone.now()
         gameday.save()
 
-        # Update all associated games
-        Gameinfo.objects.filter(gameday=gameday).update(
-            status=Gameinfo.STATUS_PUBLISHED
-        )
-
-        return Response(self.get_serializer(gameday).data)
+        return Response(GamedaySerializer(gameday).data, status=status.HTTP_200_OK)
 
 
 class GamedayListAPIView(ListAPIView):
     serializer_class = GamedaySerializer
+    queryset = Gameday.objects.all()
 
     def get_queryset(self):
         if settings.DEBUG:
@@ -139,7 +149,6 @@ class GameOfficialCreateOrUpdateView(RetrieveUpdateAPIView):
 
 
 class GamedayScheduleView(APIView):
-
     # noinspection PyMethodMayBeStatic
     def get(self, request: Request, *args, **kwargs):
         gs = GamedayService.create(kwargs["pk"])
@@ -177,11 +186,6 @@ class GamedayPublishAPIView(APIView):
         gameday.published_at = timezone.now()
         gameday.save()
 
-        # Update all associated games
-        Gameinfo.objects.filter(gameday=gameday).update(
-            status=Gameinfo.STATUS_PUBLISHED
-        )
-
         return Response(GamedaySerializer(gameday).data, status=status.HTTP_200_OK)
 
 
@@ -194,13 +198,32 @@ class GameResultUpdateAPIView(APIView):
         final_score = request.data.get("final_score")
 
         if halftime_score is not None:
-            game.halftime_score = halftime_score
             if game.status == Gameinfo.STATUS_PUBLISHED or game.status == "Geplant":
                 game.status = Gameinfo.STATUS_IN_PROGRESS
+            # Sync to Gameresult records
+            Gameresult.objects.filter(gameinfo=game, isHome=True).update(
+                fh=halftime_score.get("home")
+            )
+            Gameresult.objects.filter(gameinfo=game, isHome=False).update(
+                fh=halftime_score.get("away")
+            )
 
         if final_score is not None:
-            game.final_score = final_score
             game.status = Gameinfo.STATUS_COMPLETED
+            # Sync to Gameresult records
+            # Final score in JSON is total, in Gameresult it's sh (since fh is already set)
+            home_res = Gameresult.objects.filter(gameinfo=game, isHome=True).first()
+            away_res = Gameresult.objects.filter(gameinfo=game, isHome=False).first()
+
+            home_fh = halftime_score.get("home", 0) if halftime_score else (home_res.fh if home_res else 0)
+            away_fh = halftime_score.get("away", 0) if halftime_score else (away_res.fh if away_res else 0)
+
+            Gameresult.objects.filter(gameinfo=game, isHome=True).update(
+                fh=home_fh, sh=final_score.get("home", 0) - (home_fh or 0)
+            )
+            Gameresult.objects.filter(gameinfo=game, isHome=False).update(
+                fh=away_fh, sh=final_score.get("away", 0) - (away_fh or 0)
+            )
 
         game.save()
 
@@ -218,3 +241,50 @@ class GameResultUpdateAPIView(APIView):
 
         return Response(GameinfoSerializer(game).data, status=status.HTTP_200_OK)
 
+
+class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Season.objects.all().order_by("-name")
+    serializer_class = SeasonSerializer
+    pagination_class = None
+
+
+class LeagueViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = League.objects.all().order_by("name")
+    serializer_class = LeagueSerializer
+    pagination_class = None
+
+
+class GameResultsListView(APIView):
+    """Get all games for a gameday"""
+
+    def get(self, request, gameday_pk=None):
+        """GET /api/gamedays/{gameday_id}/games/"""
+        try:
+            gameday = Gameday.objects.get(pk=gameday_pk)
+        except Gameday.DoesNotExist:
+            return Response(
+                {"error": "Gameday not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        games = Gameinfo.objects.filter(gameday=gameday)
+        serializer = GameInfoSerializer(games, many=True)
+        return Response(serializer.data)
+
+
+class GameResultsUpdateView(APIView):
+    """Update game results for a specific game"""
+
+    def post(self, request, gameday_pk=None, game_pk=None):
+        """POST /api/gamedays/{gameday_id}/games/{game_id}/results/"""
+        try:
+            game = Gameinfo.objects.get(pk=game_pk, gameday_id=gameday_pk)
+        except Gameinfo.DoesNotExist:
+            return Response(
+                {"error": "Game not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = GameResultsUpdateSerializer(game, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

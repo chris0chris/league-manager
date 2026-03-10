@@ -10,7 +10,6 @@ from django.shortcuts import render, redirect
 
 import gamedays.models
 
-
 # Create your views here.
 
 

@@ -7,7 +7,7 @@
  * - Hierarchy queries
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   FlowNode,
@@ -335,8 +335,11 @@ export function useNodesState(
    * Add a complete tournament structure.
    */
   const addBulkTournament = useCallback(
-    (structure: TournamentStructure): void => {
-      setNodes((prevNodes) => [...prevNodes, ...structure.fields, ...structure.stages, ...structure.games]);
+    (structure: TournamentStructure, clearExisting: boolean = false): void => {
+      setNodes((prevNodes) => {
+        const base = clearExisting ? [] : prevNodes;
+        return [...base, ...structure.fields, ...structure.stages, ...structure.games];
+      });
     },
     [setNodes]
   );
@@ -363,16 +366,30 @@ export function useNodesState(
     [nodes]
   );
 
-  return {
-    addFieldNode,
-    addStageNode,
-    addGameNodeInStage,
-    updateNode,
-    deleteNode,
-    addBulkTournament,
-    ensureContainerHierarchy,
-    getTargetStage,
-    getGameField,
-    getGameStage,
-  };
-}
+    return useMemo(() => ({
+
+      addFieldNode,
+
+      addStageNode,
+
+      addGameNodeInStage,
+
+      updateNode,
+
+      deleteNode,
+
+      addBulkTournament,
+
+      ensureContainerHierarchy,
+
+      getTargetStage,
+
+      getGameField,
+
+      getGameStage,
+
+    }), [addFieldNode, addStageNode, addGameNodeInStage, updateNode, deleteNode, addBulkTournament, ensureContainerHierarchy, getTargetStage, getGameField, getGameStage]);
+
+  }
+
+  

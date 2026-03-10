@@ -41,8 +41,12 @@ export interface GlobalTeamTableProps {
   onUpdate: (teamId: string, data: Partial<Omit<GlobalTeam, 'id'>>) => void;
   /** Callback to delete a team */
   onDelete: (teamId: string) => void;
+  /** Callback to replace a team with another from database */
+  onReplace: (teamId: string, newTeam: { id: number; text: string }) => void;
   /** Callback to reorder a team */
   onReorder: (teamId: string, direction: 'up' | 'down') => void;
+  /** Callback to show team selection modal */
+  onShowTeamSelection: (id: string, mode?: 'group' | 'replace') => void;
   /** Function to get which games use a team */
   getTeamUsage: (teamId: string) => { gameId: string; slot: 'home' | 'away' }[];
   /** All nodes (for resolving game names) */
@@ -65,7 +69,9 @@ const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
   onAddTeam,
   onUpdate,
   onDelete,
+  onReplace,
   onReorder,
+  onShowTeamSelection,
   getTeamUsage,
   readOnly = false,
   // allNodes - unused for now but kept in props for future use
@@ -228,10 +234,10 @@ const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
             <Button
               variant="outline-primary"
               onClick={onAddGroup}
-              className="btn-adaptive"
+              className="btn-adaptive px-4"
               title={t('ui:tooltip.addGroup')}
             >
-              <i className={`bi ${ICONS.ADD}`}></i>
+              <i className={`bi ${ICONS.ADD} me-2`}></i>
               <span className="btn-label-adaptive">{t('ui:button.addGroup')}</span>
             </Button>
           )}
@@ -242,6 +248,13 @@ const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
           {/* Render group cards */}
           {sortedGroups.map((group, index) => {
             const teamsInGroup = teamsByGroup.get(group.id) || [];
+            
+            // Heuristic: only skip empty groups if they are NOT the system officials group
+            if (teamsInGroup.length === 0 && group.id !== 'group-officials' && teams.length > 0) {
+              // We could skip here if we wanted to hide empty regular groups, 
+              // but currently the Designer UI prefers showing them for manual team addition.
+            }
+
             return (
               <TeamGroupCard
                 key={group.id}
@@ -254,7 +267,9 @@ const GlobalTeamTable: React.FC<GlobalTeamTableProps> = ({
                 onReorderGroup={onReorderGroup}
                 onUpdateTeam={onUpdate}
                 onDeleteTeam={onDelete}
+                onReplaceTeam={onReplace}
                 onReorderTeam={onReorder}
+                onShowTeamSelection={onShowTeamSelection}
                 onAddTeam={onAddTeam}
                 getTeamUsage={getTeamUsage}
                 index={index}

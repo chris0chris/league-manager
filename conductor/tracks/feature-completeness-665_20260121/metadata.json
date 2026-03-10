@@ -1,0 +1,8 @@
+{
+  "track_id": "feature-completeness-665_20260121",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-21T23:59:00Z",
+  "updated_at": "2026-01-21T23:59:00Z",
+  "description": "Complete missing features for metadata, team selection, and group-based assignments (#694, #666, #678, #671, #679)"
+}

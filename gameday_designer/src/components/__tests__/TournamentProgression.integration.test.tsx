@@ -26,6 +26,10 @@ vi.mock('../../api/gamedayApi', () => ({
     patchGameday: vi.fn(),
     deleteGameday: vi.fn(),
     updateGameResult: vi.fn(),
+    getGamedayGames: vi.fn().mockResolvedValue([]),
+    updateBulkGameResults: vi.fn().mockResolvedValue({}),
+    listSeasons: vi.fn().mockResolvedValue([]),
+    listLeagues: vi.fn().mockResolvedValue([]),
   },
 }));
 
@@ -85,7 +89,7 @@ describe('Tournament Progression Integration', () => {
     const { user } = await renderApp();
 
     // 1. Open Modal
-    const generateBtn = (await screen.findAllByRole('button', { name: /generate tournament/i }))[0];
+    const generateBtn = await screen.findByTestId('generate-tournament-button');
     await user.click(generateBtn);
 
     // 2. Select Template (F6-2-2 is default)

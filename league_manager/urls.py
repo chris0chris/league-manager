@@ -22,6 +22,16 @@ from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include
 from django.views.generic import TemplateView
 
+from health_check.views import HealthCheckView as _BaseHealthCheckView
+
+
+class HealthCheckView(_BaseHealthCheckView):
+    checks = [
+        "health_check.checks.Cache",
+        "health_check.checks.Database",
+        "health_check.checks.DNS",
+        "health_check.checks.Storage",
+    ]
 from league_manager.views import homeview, ClearCacheView, robots_txt_view
 from league_manager.sitemaps import (
     StaticViewSitemap,
@@ -88,7 +98,7 @@ urlpatterns = [
     ),
     # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path("accounts/", include("accounts.urls")),
-    path(r"health/", include("health_check.urls")),
+    path(r"health/", HealthCheckView.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

@@ -1,6 +1,9 @@
 import axios from 'axios';
 import {returnErrors} from '../messages';
 
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+
 export const apiPost = (url, body, successType, errorType) => async (
     dispatch,
     getState,

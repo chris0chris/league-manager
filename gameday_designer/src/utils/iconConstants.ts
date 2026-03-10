@@ -26,6 +26,11 @@ export const ICONS = {
   REORDER_DOWN: 'bi-arrow-down',
   GENERATE: 'bi-magic',
   TOURNAMENT: 'bi-trophy',
+  UNDO: 'bi-arrow-counterclockwise',
+  REPLACE: 'bi-arrow-repeat',
+  LINK: 'bi-link-45deg',
+  SEARCH: 'bi-search',
+  BACK: 'bi-arrow-left',
   
   // UI State
   EXPANDED: 'bi-chevron-down',

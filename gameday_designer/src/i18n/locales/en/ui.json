@@ -4,9 +4,12 @@
     "addStage": "Add Stage",
     "addGame": "Add Game",
     "addTeam": "Add Team",
+    "connectTeam": "Connect Team",
     "addGroup": "Add Group",
     "import": "Import",
     "export": "Export",
+    "exportSchedule": "Schedule (JSON)",
+    "exportTemplate": "Template (Structured)",
     "clearAll": "Clear All",
     "add": "Add",
     "remove": "Remove",
@@ -15,6 +18,7 @@
     "confirm": "Confirm",
     "generate": "Generate",
     "generateTournament": "Generate Tournament",
+    "replaceTeam": "Replace Team",
     "moveUp": "Move up",
     "moveDown": "Move down",
     "delete": "Delete",
@@ -27,18 +31,34 @@
     "gamedayManagement": "Gameday Management",
     "gamedayDesigner": "Gameday Designer",
     "result": "Result",
+    "enterResults": "Enter Results",
+    "exitResults": "Designer View",
     "backToDashboard": "Back to Dashboard"
   },
   "label": {
     "dashboard": "Dashboard",
+    "gameResults": "Game Results",
     "back": "Back",
     "fields": "Fields",
     "stages": "Stages",
     "teams": "Teams",
     "games": "Games",
+    "official": "Official",
+    "externalOfficials": "External Officials",
     "german": "Deutsch",
     "english": "English",
-    "undo": "Undo"
+    "undo": "Undo",
+    "searchDatabase": "Search from database...",
+    "gamedayName": "Gameday Name",
+    "gamedayDate": "Gameday Date",
+    "gamedayStartTime": "Start Time",
+    "season": "Season",
+    "league": "League",
+    "venue": "Venue",
+    "ranking": "Ranking",
+    "rank": "Rank",
+    "in": "in",
+    "of": "of"
   },
   "title": {
     "enterGameResult": "Enter Game Result"
@@ -46,7 +66,9 @@
   "placeholder": {
     "standing": "e.g., Group 1, HF1, P1",
     "gamedayName": "New Gameday",
-    "searchGamedays": "Search gamedays..."
+    "searchGamedays": "Search gamedays...",
+    "selectSeason": "Select Season",
+    "selectLeague": "Select League"
   },
   "message": {
     "noTeamsYet": "No teams yet",
@@ -73,6 +95,7 @@
   },
   "tooltip": {
     "addTeamToGroup": "Add a new team to this group",
+    "connectTeam": "Connect an existing team from the database pool",
     "addFirstTeamToGroup": "Add your first team to this group",
     "moveGroupUp": "Move this team group one position up",
     "moveGroupDown": "Move this team group one position down",
@@ -89,10 +112,13 @@
     "stageColor": "Change the accent color for this phase",
     "importFromJson": "Import a tournament schedule from a JSON file",
     "exportToJson": "Export the current tournament schedule to a JSON file",
+    "exportTemplateToJson": "Export the logical tournament structure as a portable template",
     "undo": "Undo the last action",
     "redo": "Redo the previously undone action",
+    "addExternalOfficials": "Add external officials group",
     "clearAllNodesAndEdges": "Permanently clear all fields, stages, games, and teams",
     "moveTeamToGroup": "Move this team to a different group",
+    "replaceTeam": "Replace this team with another from the database (updates all games)",
     "addField": "Add a new playing field to the tournament",
     "addGroup": "Create a new team group to organize your teams",
     "addStage": "Add a new tournament phase (e.g., Round Robin, Playoffs) to this field",
@@ -107,6 +133,7 @@
   "notification": {
     "gameResultSaved": "Game result saved",
     "saveResultFailed": "Failed to save game result",
+    "autoSaveSuccess": "Changes saved automatically",
     "autoSaveFailed": "Failed to auto-save changes",
     "loadGamedayFailed": "Failed to load gameday",
     "loadGamedaysFailed": "Failed to load gamedays",

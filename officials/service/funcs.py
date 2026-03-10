@@ -12,4 +12,3 @@ class GroupConcat(Func):
             template="%(function)s(%(expressions)s)",
             **extra_context,
         )
-

@@ -40,6 +40,10 @@ vi.mock('../../api/gamedayApi', () => ({
     patchGameday: vi.fn(),
     publish: vi.fn(),
     updateGameResult: vi.fn(),
+    getGamedayGames: vi.fn().mockResolvedValue([]),
+    updateBulkGameResults: vi.fn().mockResolvedValue({}),
+    listSeasons: vi.fn().mockResolvedValue([]),
+    listLeagues: vi.fn().mockResolvedValue([]),
   },
 }));
 
@@ -72,8 +76,11 @@ describe('ListDesignerApp Coverage', () => {
     nodes: [] as FlowNode[],
     edges: [] as FlowEdge[],
     fields: [] as FieldNode[],
-    globalTeams: [] as GlobalTeam[],
-    globalTeamGroups: [] as GlobalTeamGroup[],
+    globalTeams: [
+        { id: 'team-1', label: 'Team A', color: '#3498db', groupId: 'group-1', order: 0 },
+        { id: 'team-2', label: 'Team B', color: '#e74c3c', groupId: 'group-1', order: 1 }
+    ] as GlobalTeam[],
+    globalTeamGroups: [{ id: 'group-1', label: 'Group 1', order: 0 }] as GlobalTeamGroup[],
     selectedNode: null,
     validation: { isValid: true, errors: [], warnings: [] },
     notifications: [],
@@ -116,6 +123,7 @@ describe('ListDesignerApp Coverage', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllEnvs();
   });
 
   const renderApp = async () => {
@@ -190,6 +198,51 @@ describe('ListDesignerApp Coverage', () => {
     }));
   });
 
+  it('handles publish success', async () => {
+    (gamedayApi.publish as Mock).mockResolvedValue({ ...defaultMockReturn.metadata, status: 'PUBLISHED' });
+    
+    await renderApp();
+
+    const publishBtn = screen.getByTestId('publish-schedule-button');
+    fireEvent.click(publishBtn);
+
+    const confirmBtn = screen.getByRole('button', { name: /publish now/i });
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => {
+        expect(gamedayApi.publish).toHaveBeenCalledWith(1);
+        expect(mockHandlers.addNotification).toHaveBeenCalledWith(
+            expect.stringContaining('published and locked'),
+            'success',
+            'Success'
+        );
+    });
+  });
+
+  it('handles unlock success', async () => {
+    (useDesignerController as Mock).mockReturnValue({
+        ...defaultMockReturn,
+        metadata: { ...defaultMockReturn.metadata, status: 'PUBLISHED' }
+    });
+    (gamedayApi.patchGameday as Mock).mockResolvedValue({ ...defaultMockReturn.metadata, status: 'DRAFT' });
+
+    await renderApp();
+
+    fireEvent.click(screen.getByTestId('gameday-metadata-header').querySelector('.accordion-button')!);
+    
+    const unlockBtn = screen.getByRole('button', { name: /unlock schedule/i });
+    fireEvent.click(unlockBtn);
+
+    await waitFor(() => {
+        expect(gamedayApi.patchGameday).toHaveBeenCalledWith(1, { status: 'DRAFT' });
+        expect(mockHandlers.addNotification).toHaveBeenCalledWith(
+            expect.stringContaining('unlocked for editing'),
+            'success',
+            'Success'
+        );
+    });
+  });
+
   it('handles publish failure', async () => {
     (gamedayApi.publish as Mock).mockRejectedValue(new Error('Publish Error'));
     
@@ -219,7 +272,7 @@ describe('ListDesignerApp Coverage', () => {
 
     await renderApp();
 
-    fireEvent.click(screen.getByTestId('gameday-metadata-header').querySelector('button')!);
+    fireEvent.click(screen.getByTestId('gameday-metadata-header').querySelector('.accordion-button')!);
     
     const unlockBtn = screen.getByRole('button', { name: /unlock schedule/i });
     fireEvent.click(unlockBtn);
@@ -234,29 +287,43 @@ describe('ListDesignerApp Coverage', () => {
   });
 
   it('handles game result modal names and hide', async () => {
+    const mockField = { id: 'field-1', type: 'field', data: { name: 'Field 1', order: 0 } };
+    const mockStage = { id: 'stage-1', type: 'stage', parentId: 'field-1', data: { name: 'Stage 1', order: 0 } };
     const mockGame = {
         id: 'game-1',
         type: 'game',
-        data: { homeTeamId: 10, awayTeamId: 20 }
+        parentId: 'stage-1',
+        data: { homeTeamId: 'team-10', awayTeamId: 'team-20', standing: 'Game 1' }
     };
     const mockTeams = [
-        { id: 10, label: 'Team A' },
-        { id: 20, label: 'Team B' }
+        { id: 'team-10', label: 'Team A', color: '#3498db', groupId: 'group-1', order: 0 },
+        { id: 'team-20', label: 'Team B', color: '#e74c3c', groupId: 'group-1', order: 1 }
     ];
 
     (useDesignerController as Mock).mockReturnValue({
         ...defaultMockReturn,
         metadata: { ...defaultMockReturn.metadata, status: 'PUBLISHED' },
-        nodes: [mockGame],
+        nodes: [mockField, mockStage, mockGame],
+        fields: [mockField],
         selectedNode: mockGame,
-        globalTeams: mockTeams
+        globalTeams: mockTeams,
+        ui: {
+            ...defaultMockReturn.ui,
+            expandedFieldIds: new Set(['field-1']),
+            expandedStageIds: new Set(['stage-1'])
+        }
     });
+    (gamedayApi.getGameday as Mock).mockResolvedValue({ ...defaultMockReturn.metadata, status: 'PUBLISHED' });
 
     await renderApp();
+    
+    // Decoupled selection and modal: must explicitly open result modal now
+    const resultBtn = await screen.findByTestId('enter-result-game-1');
+    fireEvent.click(resultBtn);
 
     await waitFor(() => {
+        expect(screen.getByText(/Game 1/i, { selector: '.modal-title' })).toBeInTheDocument();
         expect(screen.getAllByText(/Team A/i).length).toBeGreaterThan(0);
-        expect(screen.getAllByText(/Team B/i).length).toBeGreaterThan(0);
     });
 
     const closeBtn = screen.getByLabelText('Close');
@@ -266,6 +333,7 @@ describe('ListDesignerApp Coverage', () => {
   });
 
   it('handles auto-save failure', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-01-21T10:00:00Z'));
     

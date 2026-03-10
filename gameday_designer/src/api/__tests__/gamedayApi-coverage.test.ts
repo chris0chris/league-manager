@@ -106,7 +106,7 @@ describe('GamedayApi Interceptors and Edge Cases', () => {
 
     const result = await gamedayApi.updateGameResult(123, mockData);
 
-    expect(mockAxiosInstance.patch).toHaveBeenCalledWith('/gameinfo/123/result/', mockData);
+    expect(mockAxiosInstance.patch).toHaveBeenCalledWith('/gamedays/gameinfo/123/result/', mockData);
     expect(result).toEqual({ status: 'COMPLETED' });
   });
 });

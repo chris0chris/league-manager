@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useCallback, memo, useMemo } from 'react';
-import { Table, Form } from 'react-bootstrap';
+import { Table, Form, Button } from 'react-bootstrap';
 import Select, { components, StylesConfig, GroupBase } from 'react-select';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import type { 
@@ -20,7 +20,7 @@ import type {
 import { isGameNode, isStageNode } from '../../types/flowchart';
 import { isRankReference } from '../../types/designer';
 import { findSourceGameForReference, findSourceStageForReference, getGamePath } from '../../utils/edgeAnalysis';
-import { getStageParticipants } from '../../utils/rankingEngine';
+import { getStageParticipants, getStageGroups, getGroupParticipants } from '../../utils/rankingEngine';
 import { isValidTimeFormat } from '../../utils/timeCalculation';
 import { ICONS } from '../../utils/iconConstants';
 import './GameTable.css';
@@ -33,6 +33,7 @@ interface TeamOption {
   isTeam?: boolean;
   isStageHeader?: boolean;
   isDisabled?: boolean;
+  isWinner?: boolean;
 }
 
 // Custom Option component with colored dot for teams and stage headers
@@ -102,7 +103,10 @@ const CustomSingleValue = memo((props: { data: TeamOption; children?: React.Reac
             }}
           />
         )}
-        <span>{data.label}</span>
+        <span className={data.isWinner ? 'fw-bold text-success' : ''}>
+          {data.label}
+          {data.isWinner && <i className="bi bi-trophy-fill text-warning ms-2" title="Winner" />}
+        </span>
       </div>
     </components.SingleValue>
   );
@@ -117,7 +121,38 @@ function buildGroupedTeamOptions(
   t: (key: string) => string
 ): TeamOption[] {
   const options: TeamOption[] = [];
-  const sortedGroups = [...groups].sort((a, b) => a.order - b.order);
+  
+  // 1. Prioritize officials group if it exists
+  const officialsGroup = groups.find(g => g.id === 'group-officials');
+  if (officialsGroup) {
+    const groupTeams = teams
+      .filter(team => team.groupId === officialsGroup.id)
+      .sort((a, b) => a.order - b.order);
+
+    if (groupTeams.length > 0) {
+      options.push({
+        value: `group-header-${officialsGroup.id}`,
+        label: officialsGroup.name,
+        color: officialsGroup.color || '#6c757d',
+        isStageHeader: true,
+        isDisabled: true
+      });
+
+      groupTeams.forEach(team => {
+        options.push({
+          value: team.id,
+          label: team.label,
+          color: team.color || '#6c757d',
+          isTeam: true
+        });
+      });
+    }
+  }
+
+  // 2. Regular groups (excluding officials)
+  const sortedGroups = [...groups]
+    .filter(g => g.id !== 'group-officials')
+    .sort((a, b) => a.order - b.order);
 
   sortedGroups.forEach(group => {
     const groupTeams = teams
@@ -188,11 +223,14 @@ export interface GameTableProps {
   onUpdate: (nodeId: string, data: Partial<GameNode['data']>) => void;
   onDelete: (nodeId: string) => void;
   onSelectNode: (nodeId: string | null) => void;
+  onHighlightElement: (id: string, type: HighlightedElement['type']) => void;
   selectedNodeId: string | null;
   onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
+  onSwapTeams: (gameId: string) => void;
   onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
-  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) => void;
   onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onOpenResultModal: (gameId: string) => void;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
   onNotify?: (message: string, type: import('../../types/designer').NotificationType, title?: string) => void;
@@ -208,12 +246,15 @@ const GameTable: React.FC<GameTableProps> = memo(({
   highlightedElement,
   onDelete,
   onSelectNode,
+  onHighlightElement,
   selectedNodeId,
   onAssignTeam,
+  onSwapTeams,
   onUpdate,
   onAddGameToGameEdge,
   onAddStageToGameEdge,
   onRemoveEdgeFromSlot,
+  onOpenResultModal,
   highlightedSourceGameId,
   onDynamicReferenceClick,
   onNotify,
@@ -224,9 +265,30 @@ const GameTable: React.FC<GameTableProps> = memo(({
   const [editingField, setEditingField] = useState<'standing' | 'breakAfter' | 'time' | null>(null);
   const [editedValue, setEditedValue] = useState<string>('');
 
+  const upstreamSourceMatchNames = useMemo(() => {
+    if (!highlightedElement || highlightedElement.type !== 'game') return new Set<string>();
+    
+    const highlightedGame = allNodes.find(n => n.id === highlightedElement.id) as GameNode | undefined;
+    if (!highlightedGame) return new Set<string>();
+    
+    const sources = new Set<string>();
+    const data = highlightedGame.data as GameNodeData;
+    
+    if (data.homeTeamDynamic && !isRankReference(data.homeTeamDynamic)) sources.add(data.homeTeamDynamic.matchName);
+    if (data.awayTeamDynamic && !isRankReference(data.awayTeamDynamic)) sources.add(data.awayTeamDynamic.matchName);
+    
+    const official = data.official;
+    if (official && typeof official !== 'string' && (official.type === 'winner' || official.type === 'loser')) {
+      sources.add(official.matchName);
+    }
+    
+    return sources;
+  }, [highlightedElement, allNodes]);
+
   const handleRowClick = useCallback((gameId: string) => {
     onSelectNode(gameId);
-  }, [onSelectNode]);
+    onHighlightElement(gameId, 'game');
+  }, [onSelectNode, onHighlightElement]);
 
   const handleDelete = useCallback((e: React.MouseEvent, gameId: string) => {
     e.stopPropagation();
@@ -330,8 +392,16 @@ const GameTable: React.FC<GameTableProps> = memo(({
       const [outputType, sourceGameId] = value.split(':');
       onAddGameToGameEdge(sourceGameId, outputType as 'winner' | 'loser', gameId, slot);
     } else if (value.startsWith('rank:')) {
-      const [, sourceStageId, place] = value.split(':');
-      onAddStageToGameEdge(sourceStageId, parseInt(place, 10), gameId, slot);
+      const parts = value.split(':');
+      if (parts.length === 5 && parts[1] === 'group') {
+        // Format: rank:group:stageId:groupName:place
+        const [, , sourceStageId, groupName, place] = parts;
+        onAddStageToGameEdge(sourceStageId, parseInt(place, 10), gameId, slot, groupName);
+      } else {
+        // Format: rank:stageId:place
+        const [, sourceStageId, place] = parts;
+        onAddStageToGameEdge(sourceStageId, parseInt(place, 10), gameId, slot);
+      }
     } else {
       onAssignTeam(gameId, value, slot);
     }
@@ -339,10 +409,23 @@ const GameTable: React.FC<GameTableProps> = memo(({
 
   const handleOfficialChange = useCallback(
     (gameId: string, value: string) => {
-      onUpdate(gameId, { official: value || undefined });
+      if (!value) {
+        onUpdate(gameId, { official: undefined });
+        return;
+      }
+      
+      // If the value looks like a dynamic reference (winner:..., loser:..., rank:...)
+      // we should ideally parse it back to a TeamReference object.
+      // But for simplicity and backward compatibility, we can wrap it in a static ref
+      // or handle it as a string if we've updated the types.
+      // Given the backend changes, wrapping in a static reference is safe.
+      onUpdate(gameId, { 
+        official: { type: 'static', name: value } as TeamReference 
+      });
     },
     [onUpdate]
   );
+
 
   const teamOptions = useMemo(() => buildGroupedTeamOptions(globalTeams, globalTeamGroups, t), [globalTeams, globalTeamGroups, t]);
 
@@ -370,13 +453,27 @@ const GameTable: React.FC<GameTableProps> = memo(({
       const stageGames = allNodes.filter(n => isGameNode(n) && n.parentId === stage.id) as GameNode[];
       const participants = getStageParticipants(stageGames);
       
-      // For each participant, add a rank option
+      // For each participant, add a rank option (Overall)
       participants.forEach((_, index) => {
         const place = index + 1;
         options.push({
           value: `rank:${stage.id}:${place}`,
           label: `🏆 ${t('ui:message.placeFrom', { place, stage: stage.data.name })}`,
           isTeam: false
+        });
+      });
+
+      // Add Group-based ranks
+      const groups = getStageGroups(stageGames);
+      groups.forEach(groupName => {
+        const groupParticipants = getGroupParticipants(stageGames, groupName);
+        groupParticipants.forEach((_, index) => {
+          const place = index + 1;
+          options.push({
+            value: `rank:group:${stage.id}:${groupName}:${place}`,
+            label: `🎖️ ${t('ui:message.placeInGroup', { place, group: groupName, stage: stage.data.name })}`,
+            isTeam: false
+          });
         });
       });
     });
@@ -390,18 +487,37 @@ const GameTable: React.FC<GameTableProps> = memo(({
     const isManual = game.data.manualTime;
 
     return (
-      <td style={{ backgroundColor: isManual ? '#fff3cd' : undefined }} onClick={(e) => e.stopPropagation()}>
+      <td style={{ backgroundColor: isManual ? '#fff3cd' : undefined }} onClick={(e) => { e.stopPropagation(); onSelectNode(game.id); onHighlightElement(game.id, 'game'); }}>
         {isEditingTime ? (
-          <Form.Control
-            type="time"
-            size="sm"
-            value={editedValue}
-            onChange={(e) => setEditedValue(e.target.value)}
-            onBlur={() => handleSaveEdit(game.id, 'time')}
-            onKeyDown={(e) => handleKeyPress(e, game.id, 'time')}
-            autoFocus
-            style={{ fontSize: '0.875rem', width: '110px' }}
-          />
+          <div className="d-flex align-items-center gap-1">
+            <Form.Control
+              type="time"
+              size="sm"
+              value={editedValue}
+              onChange={(e) => setEditedValue(e.target.value)}
+              onKeyDown={(e) => handleKeyPress(e, game.id, 'time')}
+              autoFocus
+              style={{ fontSize: '0.875rem', width: '110px' }}
+            />
+            <Button 
+              variant="success" 
+              size="sm" 
+              className="p-0 px-1" 
+              onClick={() => handleSaveEdit(game.id, 'time')}
+              title={t('ui:button.save')}
+            >
+              <i className="bi bi-check-lg" />
+            </Button>
+            <Button 
+              variant="outline-secondary" 
+              size="sm" 
+              className="p-0 px-1" 
+              onClick={handleCancelEdit}
+              title={t('ui:button.cancel')}
+            >
+              <i className="bi bi-x-lg" />
+            </Button>
+          </div>
         ) : (
           <div className="d-flex align-items-center gap-1">
             <span 
@@ -411,7 +527,14 @@ const GameTable: React.FC<GameTableProps> = memo(({
             >
               {timeValue || '--:--'}
             </span>
-            {isManual && <i className="bi bi-pencil-fill text-warning" style={{ fontSize: '0.7rem' }} />}
+            {!readOnly && (
+              <i 
+                className={`bi bi-pencil-fill ${isManual ? 'text-warning' : 'text-muted'}`} 
+                style={{ fontSize: '0.7rem', cursor: 'pointer' }} 
+                onClick={(e) => handleStartEdit(e, game, 'time')}
+                title={t('ui:tooltip.clickToEdit')}
+              />
+            )}
           </div>
         )}
       </td>
@@ -420,9 +543,26 @@ const GameTable: React.FC<GameTableProps> = memo(({
 
   const renderOfficialCell = (game: GameNode) => {
     const official = game.data.official;
-    const hasOfficial = !!official;
     const eligibleGames = getEligibleSourceGames(game);
     
+    // Highlight if this specific slot in the HIGHLIGHTED game is dynamic
+    const isReferencingUpstream = highlightedElement?.id === game.id && highlightedElement?.type === 'game' && !!official && typeof official !== 'string' && (official.type === 'winner' || official.type === 'loser');
+
+    let currentValue = '';
+    if (typeof official === 'string') {
+      currentValue = official;
+    } else if (official) {
+      if (official.type === 'static') {
+        currentValue = official.name;
+      } else if (official.type === 'winner' || official.type === 'loser') {
+         const sourceGame = findSourceGameForReference(game.id, 'official', edges, allNodes);
+        if (sourceGame) {
+          currentValue = `${official.type}:${sourceGame.id}`;
+        }
+      }
+    }
+
+    // Include all global teams (grouped) and dynamic references
     const options = [
       ...teamOptions,
       ...rankingStageOptions
@@ -447,34 +587,32 @@ const GameTable: React.FC<GameTableProps> = memo(({
     });
 
     return (
-      <div className="d-flex align-items-center gap-2" onClick={(e) => e.stopPropagation()}>
-        <Form.Check
-          type="checkbox"
-          checked={hasOfficial}
-          disabled={readOnly}
-          onChange={(e) => {
-            if (!e.target.checked) handleOfficialChange(game.id, '');
-            else if (globalTeams.length > 0) handleOfficialChange(game.id, globalTeams[0].id);
-          }}
+      <div 
+        className={isReferencingUpstream ? 'referencing-highlight' : ''}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectNode(game.id);
+          onHighlightElement(game.id, 'game');
+        }}
+      >
+        <Select<TeamOption>
+          value={options.find(opt => opt.value === currentValue) || null}
+          options={options}
+          onChange={(newValue) => newValue && handleOfficialChange(game.id, newValue.value)}
+          components={{ Option: CustomOption, SingleValue: CustomSingleValue }}
+          isOptionDisabled={(option) => option.isDisabled || false}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
+          styles={customSelectStyles}
+          isClearable={false}
+          isSearchable={false}
+          isDisabled={readOnly}
         />
-        {hasOfficial && (
-          <Select<TeamOption>
-            value={options.find(opt => opt.value === official) || null}
-            options={options}
-            onChange={(newValue) => newValue && handleOfficialChange(game.id, newValue.value)}
-            components={{ Option: CustomOption, SingleValue: CustomSingleValue }}
-            isOptionDisabled={(option) => option.isDisabled || false}
-            menuPortalTarget={document.body}
-            menuPosition="fixed"
-            styles={{ ...customSelectStyles, control: (provided) => ({ ...provided, minHeight: '31px', fontSize: '0.875rem', borderColor: '#dee2e6', minWidth: '150px' }) }}
-            isClearable={false}
-            isSearchable={false}
-            isDisabled={readOnly}
-          />
-        )}
       </div>
     );
   };
+
+
 
   const renderTeamCell = (game: GameNode, slot: 'home' | 'away') => {
     const data = game.data as GameNodeData;
@@ -482,6 +620,13 @@ const GameTable: React.FC<GameTableProps> = memo(({
     const teamId = slot === 'home' ? data.homeTeamId : data.awayTeamId;
     const resolvedName = slot === 'home' ? data.resolvedHomeTeam : data.resolvedAwayTeam;
     
+    const isWinner = !!(data.final_score && (
+      (slot === 'home' && data.final_score.home > data.final_score.away) ||
+      (slot === 'away' && data.final_score.away > data.final_score.home)
+    ));
+
+    const isReferencingUpstream = highlightedElement?.id === game.id && highlightedElement?.type === 'game' && !!dynamicRef;
+
     let currentValue = '';
     if (dynamicRef) {
       if (isRankReference(dynamicRef)) {
@@ -523,6 +668,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
         <div 
           onClick={(e) => {
             e.stopPropagation();
+            onSelectNode(game.id);
+            onHighlightElement(game.id, 'game');
             if (onDynamicReferenceClick) {
               if (isRankReference(dynamicRef)) {
                 const source = findSourceStageForReference(game.id, slot, edges, allNodes);
@@ -534,13 +681,16 @@ const GameTable: React.FC<GameTableProps> = memo(({
             }
           }}
           style={{ cursor: 'pointer' }}
-          className="d-flex flex-column"
+          className={`d-flex flex-column ${isReferencingUpstream ? 'referencing-highlight' : ''}`}
         >
           <span className="small text-muted mb-1">
             {dynamicRef.type === 'winner' ? t('ui:label.winner') : t('ui:label.loser')} {dynamicRef.matchName}
           </span>
           {resolvedName ? (
-            <strong className="text-primary">{resolvedName}</strong>
+            <div className={isWinner ? 'text-success d-flex align-items-center' : 'text-primary'}>
+              <strong className={isWinner ? 'fw-bold' : ''}>{resolvedName}</strong>
+              {isWinner && <i className="bi bi-trophy-fill text-warning ms-2" title="Winner" />}
+            </div>
           ) : (
             <span className="text-muted italic">{t('ui:label.tbd')}</span>
           )}
@@ -550,8 +700,11 @@ const GameTable: React.FC<GameTableProps> = memo(({
 
     return (
       <div 
+        className={isReferencingUpstream ? 'referencing-highlight' : ''}
         onClick={(e) => {
           e.stopPropagation();
+          onSelectNode(game.id);
+          onHighlightElement(game.id, 'game');
           if (dynamicRef && onDynamicReferenceClick) {
             if (isRankReference(dynamicRef)) {
               const source = findSourceStageForReference(game.id, slot, edges, allNodes);
@@ -565,7 +718,10 @@ const GameTable: React.FC<GameTableProps> = memo(({
         style={{ cursor: dynamicRef ? 'pointer' : 'default' }}
       >
         <Select<TeamOption>
-          value={options.find(opt => opt.value === currentValue) || options[0]}
+          value={(() => {
+            const opt = options.find(opt => opt.value === currentValue) || options[0];
+            return isWinner ? { ...opt, isWinner: true } : opt;
+          })()}
           options={options}
           onChange={(newValue) => newValue && handleTeamChange(game.id, slot, newValue.value)}
           components={{ Option: CustomOption, SingleValue: CustomSingleValue }}
@@ -592,6 +748,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
           <th>{t('ui:label.standing')}</th>
           <th>{t('ui:label.time')}</th>
           <th>{t('ui:label.home')}</th>
+          {!readOnly && <th style={{ width: '40px' }}></th>}
           <th>{t('ui:label.away')}</th>
           {readOnly && <th>{t('ui:label.score')}</th>}
           <th>{t('ui:label.official')}</th>
@@ -610,13 +767,13 @@ const GameTable: React.FC<GameTableProps> = memo(({
               key={game.id} 
               id={`game-${game.id}`} 
               onClick={() => handleRowClick(game.id)} 
-              className={`${isHighlighted ? 'element-highlighted' : ''} ${isSourceHighlighted ? 'source-highlighted' : ''}`}
+              className={`${isHighlighted ? 'element-highlighted' : ''} ${isSourceHighlighted ? 'source-highlighted' : ''} ${upstreamSourceMatchNames.has(game.data.standing) ? 'element-highlighted' : ''}`}
               style={{ 
                 cursor: 'pointer', 
                 backgroundColor: selectedNodeId === game.id ? '#fff3cd' : undefined 
               }}
             >
-              <td onClick={(e) => e.stopPropagation()}>
+              <td onClick={(e) => { e.stopPropagation(); onSelectNode(game.id); onHighlightElement(game.id, 'game'); }}>
                 {editingGameId === game.id && editingField === 'standing' ? (
                   <Form.Control type="text" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'standing')} onKeyDown={(e) => handleKeyPress(e, game.id, 'standing')} autoFocus style={{ fontSize: '0.875rem' }} />
                 ) : (
@@ -631,6 +788,22 @@ const GameTable: React.FC<GameTableProps> = memo(({
               </td>
               {renderTimeCell(game)}
               <td>{renderTeamCell(game, 'home')}</td>
+              {!readOnly && (
+                <td className="text-center align-middle px-0">
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    className="p-0 text-muted"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSwapTeams(game.id);
+                    }}
+                    title={t('ui:tooltip.swapTeams', 'Swap Home/Away')}
+                  >
+                    <i className="bi bi-arrow-left-right" />
+                  </Button>
+                </td>
+              )}
               <td>{renderTeamCell(game, 'away')}</td>
               {readOnly && (
                 <td className="text-center fw-bold">
@@ -640,7 +813,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
                 </td>
               )}
               <td>{renderOfficialCell(game)}</td>
-              <td onClick={(e) => e.stopPropagation()}>
+              <td>
                 {editingGameId === game.id && editingField === 'breakAfter' ? (
                   <Form.Control type="number" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'breakAfter')} onKeyDown={(e) => handleKeyPress(e, game.id, 'breakAfter')} autoFocus min="0" style={{ fontSize: '0.875rem', width: '80px' }} />
                 ) : (
@@ -656,16 +829,17 @@ const GameTable: React.FC<GameTableProps> = memo(({
               <td>
                 {readOnly ? (
                   <button 
-                    className="btn btn-sm btn-outline-success btn-adaptive"
+                    className="btn btn-sm btn-outline-success"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // We'll handle this in ListDesignerApp
                       onSelectNode(game.id);
+                      onOpenResultModal(game.id);
                     }}
                     title={t('ui:tooltip.enterResult')}
+                    data-testid={`enter-result-${game.id}`}
                   >
                     <i className="bi bi-pencil-square me-2" />
-                    <span className="btn-label-adaptive">{t('ui:button.result')}</span>
+                    <span>{t('ui:button.result')}</span>
                   </button>
                 ) : (
                   <button 

@@ -16,7 +16,9 @@ from officials.service.moodle.moodle_api import (
 class TestMoodleApi:
 
     @pytest.mark.skipif(
-        "CIRCLECI" in os.environ or settings.MOODLE_URL is None or settings.MOODLE_URL == "None",
+        "CIRCLECI" in os.environ
+        or settings.MOODLE_URL is None
+        or settings.MOODLE_URL == "None",
         reason="Moodle URL not configured",
     )
     def test_get_all_courses(self):
@@ -25,7 +27,9 @@ class TestMoodleApi:
         assert len(all_courses.get_all()) > 1
 
     @pytest.mark.skipif(
-        "CIRCLECI" in os.environ or settings.MOODLE_URL is None or settings.MOODLE_URL == "None",
+        "CIRCLECI" in os.environ
+        or settings.MOODLE_URL is None
+        or settings.MOODLE_URL == "None",
         reason="Moodle URL not configured",
     )
     def test_get_all_participants_for_course(self):
@@ -39,7 +43,9 @@ class TestMoodleApi:
         )
 
     @pytest.mark.skipif(
-        "CIRCLECI" in os.environ or settings.MOODLE_URL is None or settings.MOODLE_URL == "None",
+        "CIRCLECI" in os.environ
+        or settings.MOODLE_URL is None
+        or settings.MOODLE_URL == "None",
         reason="Moodle URL not configured",
     )
     def test_get_all_exams_for_course(self):
@@ -50,7 +56,9 @@ class TestMoodleApi:
         assert str(all_exams[0]) == "5: quiz_id=1 -> grade: 10.0"
 
     @pytest.mark.skipif(
-        "CIRCLECI" in os.environ or settings.MOODLE_URL is None or settings.MOODLE_URL == "None",
+        "CIRCLECI" in os.environ
+        or settings.MOODLE_URL is None
+        or settings.MOODLE_URL == "None",
         reason="Moodle URL not configured",
     )
     def test_get_user_result_for_exam(self):
@@ -59,7 +67,9 @@ class TestMoodleApi:
         assert result.get_result() == 1
 
     @pytest.mark.skipif(
-        "CIRCLECI" in os.environ or settings.MOODLE_URL is None or settings.MOODLE_URL == "None",
+        "CIRCLECI" in os.environ
+        or settings.MOODLE_URL is None
+        or settings.MOODLE_URL == "None",
         reason="Moodle URL not configured",
     )
     def test_get_user_result_for_non_existing_exam(self):
@@ -68,7 +78,9 @@ class TestMoodleApi:
         assert result.get_result() is None
 
     @pytest.mark.skipif(
-        "CIRCLECI" in os.environ or settings.MOODLE_URL is None or settings.MOODLE_URL == "None",
+        "CIRCLECI" in os.environ
+        or settings.MOODLE_URL is None
+        or settings.MOODLE_URL == "None",
         reason="Moodle URL not configured",
     )
     def test_get_user_info(self):

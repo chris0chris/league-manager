@@ -1,10 +1,12 @@
+# NOTE: GitHub Actions are being deactivated in favor of CircleCI due to pricing changes.
+# Reference: https://github.com/resources/insights/2026-pricing-changes-for-github-actions
 name: 🏗️🧪🚀 Build, Test and Deploy everything
 
 on:
-  push:
-    tags:
-      - '*'
   workflow_dispatch:
+#  push:
+#    tags:
+#      - '*'
 
 permissions:
   contents: write

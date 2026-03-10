@@ -61,12 +61,13 @@ const AppHeader: React.FC = () => {
           <Nav className="align-items-center gap-3">
             {isEditor && onGenerateTournament && (
               <Button
-                variant="outline-primary"
+                variant="primary"
                 onClick={onGenerateTournament}
                 size="sm"
-                className="btn-adaptive text-light border-light opacity-75 hover-opacity-100"
+                className="btn-adaptive fw-bold shadow-sm"
                 disabled={isLocked}
                 title={t('ui:tooltip.generateTournament')}
+                data-testid="generate-tournament-button"
               >
                 <i className={`bi bi-magic me-2`}></i>
                 <span className="btn-label-adaptive">{t('ui:button.generateTournament')}</span>

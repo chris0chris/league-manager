@@ -26,7 +26,7 @@ const PublishConfirmationModal: React.FC<PublishConfirmationModalProps> = ({
   onHighlight
 }) => {
   const { t } = useTypedTranslation(['ui', 'validation', 'modal']);
-  const { isValid, errors, warnings } = validation;
+  const { isValid = false, errors = [], warnings = [] } = validation || {};
 
   const getMessage = (item: FlowValidationError | FlowValidationWarning) => {
     if (item.messageKey) {

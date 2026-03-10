@@ -1,0 +1,8 @@
+{
+  "track_id": "critical-ui-fixes-665_20260121",
+  "type": "bug",
+  "status": "new",
+  "created_at": "2026-01-21T23:59:00Z",
+  "updated_at": "2026-01-21T23:59:00Z",
+  "description": "Fix critical navigation and UI issues in Gameday Designer (#692, #695, #680)"
+}

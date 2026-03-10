@@ -28,9 +28,79 @@ export interface ExportResult {
   /** Whether the export was successful */
   success: boolean;
   /** The exported schedule JSON (if successful) */
-  data?: ScheduleJson[];
+  data?: ScheduleJson[] | StructuredTemplate;
   /** Error messages (if any) */
   errors: string[];
+}
+
+/**
+ * Structured template format for portability.
+ * Preserves hierarchy, stage types, and progression wiring.
+ */
+export interface StructuredTemplate {
+  version: string;
+  metadata: {
+    name: string;
+    description?: string;
+    gameDuration: number;
+    breakDuration: number;
+  };
+  stages: {
+    id: string;
+    name: string;
+    type: 'STANDARD' | 'RANKING';
+    order: number;
+    color?: string;
+    games: {
+      id: string;
+      standing: string;
+      home: TeamReference;
+      away: TeamReference;
+      official?: TeamReference;
+      breakAfter?: number;
+    }[];
+  }[];
+}
+
+/**
+ * Export the flowchart state to a structured template format.
+ * This format is portable and preserves business logic (stage types, wiring).
+ */
+export function exportToStructuredTemplate(state: FlowState): StructuredTemplate {
+  const { nodes, globalTeams } = state;
+  
+  const stageNodes = nodes.filter(isStageNode).sort((a, b) => a.data.order - b.data.order);
+  const gameNodes = nodes.filter(isGameNode);
+
+  const stages = stageNodes.map(stage => {
+    const stageGames = gameNodes.filter(g => g.parentId === stage.id);
+    
+    return {
+      id: stage.id,
+      name: stage.data.name,
+      type: stage.data.stageType || 'STANDARD',
+      order: stage.data.order,
+      color: stage.data.color,
+      games: stageGames.map(game => ({
+        id: game.id,
+        standing: game.data.standing,
+        home: deriveTeamReference(game, 'home', globalTeams),
+        away: deriveTeamReference(game, 'away', globalTeams),
+        official: game.data.official,
+        breakAfter: game.data.breakAfter,
+      })),
+    };
+  });
+
+  return {
+    version: '2.0',
+    metadata: {
+      name: state.metadata?.name || 'Tournament Template',
+      gameDuration: 70, // Default for now
+      breakDuration: 0,
+    },
+    stages,
+  };
 }
 
 /**

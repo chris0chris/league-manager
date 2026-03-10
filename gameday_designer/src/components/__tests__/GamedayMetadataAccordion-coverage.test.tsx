@@ -73,8 +73,16 @@ describe('GamedayMetadataAccordion Coverage', () => {
     }, { timeout: 2000 });
   });
 
-  it('renders status COMPLETED and default status colors', () => {
+  it('renders status IN_PROGRESS and varied statuses', () => {
     const { rerender } = render(
+      <GamedayMetadataAccordion 
+        metadata={{ ...mockMetadata, status: 'IN_PROGRESS' }} 
+        onUpdate={mockOnUpdate} 
+      />
+    );
+    expect(screen.getByTestId('gameday-metadata-header')).toHaveClass('header-status-primary');
+
+    rerender(
       <GamedayMetadataAccordion 
         metadata={{ ...mockMetadata, status: 'COMPLETED' }} 
         onUpdate={mockOnUpdate} 
@@ -89,6 +97,66 @@ describe('GamedayMetadataAccordion Coverage', () => {
       />
     );
     expect(screen.getByTestId('gameday-metadata-header')).toHaveClass('header-status-light');
+  });
+
+  it('renders success badge when valid and no warnings', () => {
+    const validation = {
+      isValid: true,
+      errors: [],
+      warnings: [],
+    };
+
+    render(
+      <GamedayMetadataAccordion 
+        metadata={mockMetadata} 
+        onUpdate={mockOnUpdate}
+        validation={validation}
+      />
+    );
+
+    const badges = screen.getByTestId('validation-badges');
+    expect(badges.querySelector('.bi-check-circle-fill')).toBeInTheDocument();
+  });
+
+  it('handles clicking on varied error/warning types in popover', () => {
+    const validation = {
+      isValid: false,
+      errors: [
+        { type: 'stage_config', message: 'Stage error', affectedNodes: ['stage-1'] },
+        { type: 'field_config', message: 'Field error', affectedNodes: ['field-1'] },
+        { type: 'team_limit', message: 'Team error', affectedNodes: ['team-1'] }
+      ],
+      warnings: [
+        { type: 'broken_progression', message: 'Progression warning', affectedNodes: ['game-1'] }
+      ],
+    };
+
+    render(
+      <GamedayMetadataAccordion 
+        metadata={mockMetadata} 
+        onUpdate={mockOnUpdate}
+        validation={validation}
+        onHighlight={mockOnHighlight}
+      />
+    );
+
+    fireEvent.mouseEnter(screen.getByTestId('validation-badges'));
+    
+    // Click stage error
+    fireEvent.click(screen.getByText('Stage error').closest('.list-group-item')!);
+    expect(mockOnHighlight).toHaveBeenLastCalledWith('stage-1', 'stage');
+
+    // Click field error
+    fireEvent.click(screen.getByText('Field error').closest('.list-group-item')!);
+    expect(mockOnHighlight).toHaveBeenLastCalledWith('field-1', 'field');
+
+    // Click team error
+    fireEvent.click(screen.getByText('Team error').closest('.list-group-item')!);
+    expect(mockOnHighlight).toHaveBeenLastCalledWith('team-1', 'team');
+
+    // Click progression warning
+    fireEvent.click(screen.getByText('Progression warning').closest('.list-group-item')!);
+    expect(mockOnHighlight).toHaveBeenLastCalledWith('game-1', 'game');
   });
 
   it('uses messageKey for validation messages', () => {

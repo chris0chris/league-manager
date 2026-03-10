@@ -1,13 +1,15 @@
 
 import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
-import type { FlowNode } from '../../types/flowchart';
+import type { FlowNode, GlobalTeam } from '../../types/flowchart';
 import { describe, it, expect } from 'vitest';
+
+const validMetadata = { id: 1, name: 'Test', date: '2026-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
 
 describe('useFlowValidation - New Warnings', () => {
   describe('No Teams Warning', () => {
     it('should warn when global team pool is empty', () => {
-      const { result } = renderHook(() => useFlowValidation([], [], [], []));
+      const { result } = renderHook(() => useFlowValidation([], [], [], [], [], validMetadata));
       
       const warning = result.current.warnings.find(w => w.type === 'no_teams');
       expect(warning).toBeDefined();
@@ -16,7 +18,7 @@ describe('useFlowValidation - New Warnings', () => {
 
     it('should not warn when global team pool has teams', () => {
       const teams: GlobalTeam[] = [{ id: 't1', label: 'Team 1', groupId: 'g1', order: 0 }];
-      const { result } = renderHook(() => useFlowValidation([], [], [], teams));
+      const { result } = renderHook(() => useFlowValidation([], [], [], teams, [], validMetadata));
       
       const warning = result.current.warnings.find(w => w.type === 'no_teams');
       expect(warning).toBeUndefined();
@@ -29,7 +31,7 @@ describe('useFlowValidation - New Warnings', () => {
         { id: 'f1', type: 'field', data: { name: 'Field 1', order: 0 }, position: { x: 0, y: 0 } },
         { id: 's1', type: 'stage', parentId: 'f1', data: { name: 'Stage 1', order: 0 }, position: { x: 0, y: 0 } }
       ];
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
       
       const warning = result.current.warnings.find(w => w.type === 'no_games');
       expect(warning).toBeDefined();
@@ -42,7 +44,7 @@ describe('useFlowValidation - New Warnings', () => {
         { id: 's1', type: 'stage', parentId: 'f1', data: { name: 'Stage 1', order: 0 }, position: { x: 0, y: 0 } },
         { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' }, position: { x: 0, y: 0 } }
       ];
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
       
       const warning = result.current.warnings.find(w => w.type === 'no_games');
       expect(warning).toBeUndefined();
@@ -61,7 +63,7 @@ describe('useFlowValidation - New Warnings', () => {
         { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1', homeTeamId: 't1', awayTeamId: null }, position: { x: 0, y: 0 } }
       ];
       // t2 is not assigned
-      const { result } = renderHook(() => useFlowValidation(nodes, [], [], teams));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], teams, [], validMetadata));
       
       const warning = result.current.warnings.find(w => w.type === 'team_without_games');
       expect(warning).toBeDefined();
@@ -75,7 +77,7 @@ describe('useFlowValidation - New Warnings', () => {
         { id: 's1', type: 'stage', parentId: 'f1', data: { name: 'S1', order: 0 }, position: { x: 0, y: 0 } },
         { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' }, position: { x: 0, y: 0 } }
       ];
-      const { result } = renderHook(() => useFlowValidation(nodes, [], [], teams));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], teams, [], validMetadata));
       
       const warning = result.current.warnings.find(w => w.type === 'team_without_games');
       expect(warning).toBeUndefined();
@@ -91,7 +93,7 @@ describe('useFlowValidation - New Warnings', () => {
         { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' }, position: { x: 0, y: 0 } }
       ];
       // f1 has games, f2 does not
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
       
       const warning = result.current.warnings.find(w => w.type === 'unused_field');
       expect(warning).toBeDefined();
@@ -103,7 +105,7 @@ describe('useFlowValidation - New Warnings', () => {
         { id: 'f1', type: 'field', data: { name: 'Field 1', order: 0 }, position: { x: 0, y: 0 } },
         { id: 'f2', type: 'field', data: { name: 'Field 2', order: 1 }, position: { x: 0, y: 0 } }
       ];
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
       
       const warning = result.current.warnings.find(w => w.type === 'unused_field');
       expect(warning).toBeUndefined();
@@ -117,7 +119,7 @@ describe('useFlowValidation - New Warnings', () => {
         { id: 's1', type: 'stage', parentId: 'f1', data: { name: 'S1', order: 0 }, position: { x: 0, y: 0 } },
         { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1', homeTeamDynamic: { type: 'winner', matchName: 'NonExistent' }, awayTeamId: 't2' }, position: { x: 0, y: 0 } }
       ];
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
       
       const warning = result.current.warnings.find(w => w.type === 'broken_progression');
       expect(warning).toBeDefined();
@@ -131,7 +133,7 @@ describe('useFlowValidation - New Warnings', () => {
         { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' }, position: { x: 0, y: 0 } },
         { id: 'g2', type: 'game', parentId: 's1', data: { standing: 'G2', homeTeamDynamic: { type: 'winner', matchName: 'G1' }, awayTeamId: 't3' }, position: { x: 0, y: 0 } }
       ];
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
       
       const warning = result.current.warnings.find(w => w.type === 'broken_progression');
       expect(warning).toBeUndefined();

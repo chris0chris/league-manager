@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     "passcheck",
     "gameday_designer",
     "health_check",
-    "health_check.contrib.db_heartbeat",
 ]
 
 MIDDLEWARE = [

@@ -585,6 +585,11 @@ Custom context processors in `league_manager/context_processors.py`:
 - `version_number` - current app version
 - `pages_links` - external links (e.g., Google Sheets schedule template)
 
+### Database Initialization
+
+The test database requires specific seed data including placeholder teams used by schedule formats. 
+Refer to `container/SPINUP_GUIDE.md` for the initialization process and troubleshooting common errors.
+
 ### External Integrations
 
 Environment variables for external services:

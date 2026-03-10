@@ -3,7 +3,6 @@ import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {FaCheck, FaStopwatch, FaTimes} from 'react-icons/fa';
 import Timer from '../layout/Timer';
-import $ from 'jquery/src/jquery';
 
 const Timeout = (props) => {
   const {teamName = 'TeamName', modId, isSecondHalf, onSubmit: updateParent} = props;
@@ -23,7 +22,9 @@ const Timeout = (props) => {
   };
   const handleSubmit = (ev) => {
     ev.preventDefault();
-    $(`#modalId_${modId}`).modal('hide');
+    const modalElement = document.getElementById(`modalId_${modId}`);
+    const modal = window.bootstrap.Modal.getInstance(modalElement) || new window.bootstrap.Modal(modalElement);
+    modal.hide();
     updateParent({
       team: teamName,
       event: [

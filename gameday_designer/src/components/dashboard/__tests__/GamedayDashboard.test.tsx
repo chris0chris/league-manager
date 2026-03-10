@@ -18,6 +18,8 @@ vi.mock('../../../api/gamedayApi', () => ({
     listGamedays: vi.fn(),
     createGameday: vi.fn(),
     deleteGameday: vi.fn().mockResolvedValue({}),
+    listSeasons: vi.fn().mockResolvedValue([]),
+    listLeagues: vi.fn().mockResolvedValue([]),
   },
 }));
 
@@ -44,6 +46,7 @@ describe('GamedayDashboard', () => {
       season: 1,
       league: 1,
       status: 'PUBLISHED',
+      designer_data: {},
     },
     {
       id: 2,
@@ -56,6 +59,7 @@ describe('GamedayDashboard', () => {
       season: 1,
       league: 1,
       status: 'DRAFT',
+      designer_data: {},
     },
   ];
 
@@ -70,6 +74,8 @@ describe('GamedayDashboard', () => {
     await i18n.changeLanguage('en');
     vi.clearAllMocks();
     (gamedayApi.listGamedays as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
+    (gamedayApi.listSeasons as ReturnType<typeof vi.fn>).mockResolvedValue([{ id: 1, name: '2026' }]);
+    (gamedayApi.listLeagues as ReturnType<typeof vi.fn>).mockResolvedValue([{ id: 1, name: 'DFFL' }]);
   });
 
   const renderDashboard = async (initialEntries = ['/']) => {

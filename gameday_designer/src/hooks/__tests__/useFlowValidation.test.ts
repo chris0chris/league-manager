@@ -19,10 +19,12 @@ import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
 import type { FlowNode, FlowEdge, GameToGameEdge, TeamToGameEdge } from '../../types/flowchart';
 
+const validMetadata = { id: 1, name: 'Test', date: '2099-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
+
 describe('useFlowValidation', () => {
   describe('Valid Flowchart', () => {
     it('should return valid for empty flowchart with warnings', () => {
-      const { result } = renderHook(() => useFlowValidation([], []));
+      const { result } = renderHook(() => useFlowValidation([], [], [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(true);
       expect(result.current.errors).toHaveLength(0);
@@ -60,7 +62,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(true);
       expect(result.current.errors).toHaveLength(0);
@@ -132,7 +134,7 @@ describe('useFlowValidation', () => {
         } as GameToGameEdge,
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, edges));
+      const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(true);
       expect(result.current.errors).toHaveLength(0);
@@ -171,7 +173,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(false);
       expect(result.current.errors).toHaveLength(1);
@@ -210,7 +212,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(false);
       expect(result.current.errors).toHaveLength(1);
@@ -249,7 +251,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(false);
       expect(result.current.errors).toHaveLength(1);
@@ -323,7 +325,7 @@ describe('useFlowValidation', () => {
         } as GameToGameEdge,
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, edges));
+      const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(true);
       expect(result.current.errors).toHaveLength(0);
@@ -399,7 +401,7 @@ describe('useFlowValidation', () => {
         } as GameToGameEdge,
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, edges));
+      const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(false);
       expect(result.current.errors.length).toBeGreaterThanOrEqual(1);
@@ -437,7 +439,7 @@ describe('useFlowValidation', () => {
         { id: 'e2', type: 'gameToGame', source: 'g2', target: 'g3', sourceHandle: 'winner', targetHandle: 'away', data: { sourcePort: 'winner', targetPort: 'away' } } as GameToGameEdge,
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, edges));
+      const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], [], validMetadata));
       // g1 and g2 are valid (have teams)
       // g3 is valid (has edges for both ports)
       expect(result.current.isValid).toBe(true);
@@ -480,7 +482,7 @@ describe('useFlowValidation', () => {
         { id: 'e1', type: 'teamToGame', source: 'team1', target: 'game1', targetHandle: 'home', data: { targetPort: 'home' } } as TeamToGameEdge,
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, edges));
+      const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], [], validMetadata));
       const officialError = result.current.errors.find(e => e.type === 'official_playing');
       expect(officialError).toBeDefined();
     });
@@ -520,7 +522,7 @@ describe('useFlowValidation', () => {
         { id: 'e1', type: 'teamToGame', source: 'team1', target: 'game1', targetHandle: 'away', data: { targetPort: 'away' } } as TeamToGameEdge,
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, edges));
+      const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], [], validMetadata));
       const officialError = result.current.errors.find(e => e.type === 'official_playing');
       expect(officialError).toBeDefined();
     });
@@ -560,7 +562,7 @@ describe('useFlowValidation', () => {
         { id: 'team-b', label: 'Team B', groupId: null, order: 1 },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, [], [], globalTeams));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], globalTeams, [], validMetadata));
 
       const officialError = result.current.errors.find(e => e.type === 'official_playing');
       expect(officialError).toBeDefined();
@@ -606,7 +608,7 @@ describe('useFlowValidation', () => {
         { id: 'team-b', label: 'Team B', groupId: null, order: 1 },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, [], [], globalTeams));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], globalTeams, [], validMetadata));
 
       const officialError = result.current.errors.find(e => e.type === 'official_playing');
       expect(officialError).toBeDefined();
@@ -663,7 +665,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.warnings.length).toBeGreaterThan(0);
       const duplicateWarning = result.current.warnings.find(w => w.type === 'duplicate_standing');
@@ -717,7 +719,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       const duplicateWarning = result.current.warnings.find(w => w.type === 'duplicate_standing');
       expect(duplicateWarning).toBeUndefined();
@@ -752,7 +754,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.warnings.length).toBeGreaterThan(0);
       const orphanWarning = result.current.warnings.find(w => w.type === 'orphaned_team');
@@ -811,7 +813,7 @@ describe('useFlowValidation', () => {
         } as TeamToGameEdge,
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, edges));
+      const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], [], validMetadata));
 
       const orphanWarning = result.current.warnings.find(w => w.type === 'orphaned_team');
       expect(orphanWarning).toBeUndefined();
@@ -843,7 +845,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(false);
       const containerError = result.current.errors.find(e => e.type === 'game_outside_container');
@@ -862,7 +864,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(false);
       const containerError = result.current.errors.find(e => e.type === 'stage_outside_field');
@@ -894,7 +896,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(false);
       const containerError = result.current.errors.find(e => e.id === 'game1_outside_container');
@@ -916,7 +918,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(false);
       const containerError = result.current.errors.find(e => e.id === 'team1_outside_container');
@@ -944,7 +946,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(false);
       const containerError = result.current.errors.find(e => e.type === 'team_outside_container');
@@ -963,7 +965,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       expect(result.current.isValid).toBe(false);
       const containerError = result.current.errors.find(e => e.type === 'stage_outside_field');
@@ -1005,7 +1007,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, [], [{ id: 'field1', name: 'Field 1', order: 0 }]));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [{ id: 'field1', name: 'Field 1', order: 0 }], [], [], validMetadata));
 
       expect(result.current.errors).toHaveLength(3); // 2 hierarchy errors + 1 overlap error
       const overlapError = result.current.errors.find(e => e.type === 'field_overlap');
@@ -1042,7 +1044,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
       expect(result.current.isValid).toBe(true);
     });
 
@@ -1078,7 +1080,7 @@ describe('useFlowValidation', () => {
       ];
 
       // Pass empty fields array
-      const { result } = renderHook(() => useFlowValidation(nodes, [], []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       const overlapError = result.current.errors.find(e => e.type === 'field_overlap');
       expect(overlapError).toBeDefined();
@@ -1110,7 +1112,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, [], []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
       const overlapError = result.current.errors.find(e => e.type === 'field_overlap');
       expect(overlapError).toBeDefined();
@@ -1132,7 +1134,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, []));
+      const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
       expect(result.current.errors.find(e => e.type === 'field_overlap')).toBeUndefined();
     });
   });
@@ -1155,7 +1157,7 @@ describe('useFlowValidation', () => {
         },
       ];
 
-      const { result } = renderHook(() => useFlowValidation(gameNodes, []));
+      const { result } = renderHook(() => useFlowValidation(gameNodes, [], [], [], [], validMetadata));
       const error = result.current.errors.find(e => e.type === 'self_reference');
       expect(error).toBeDefined();
       expect(error?.messageKey).toBe('self_play');
@@ -1173,7 +1175,7 @@ describe('useFlowValidation', () => {
         { id: 'e2', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'winner', targetHandle: 'away' } as GameToGameEdge,
       ];
 
-      const { result } = renderHook(() => useFlowValidation(gameNodes, edges));
+      const { result } = renderHook(() => useFlowValidation(gameNodes, edges, [], [], [], validMetadata));
       const error = result.current.errors.find(e => e.type === 'self_reference');
       expect(error).toBeDefined();
       expect(error?.message).toContain('same dynamic source');
@@ -1191,7 +1193,7 @@ describe('useFlowValidation', () => {
         { id: 'e2', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'loser', targetHandle: 'away' } as GameToGameEdge,
       ];
 
-      const { result } = renderHook(() => useFlowValidation(gameNodes, edges));
+      const { result } = renderHook(() => useFlowValidation(gameNodes, edges, [], [], [], validMetadata));
       const error = result.current.errors.find(e => e.type === 'self_reference');
       expect(error).toBeUndefined();
     });
@@ -1216,7 +1218,7 @@ describe('useFlowValidation', () => {
         } as FlowEdge,
       ];
 
-      const { result } = renderHook(() => useFlowValidation(nodes, edges));
+      const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], [], validMetadata));
       const error = result.current.errors.find(e => e.id.startsWith('cyclic_stage_ref_'));
       expect(error).toBeDefined();
       expect(error?.message).toContain('cannot reference its own ranking');
@@ -1235,7 +1237,7 @@ describe('useFlowValidation', () => {
       ];
 
       const { result, rerender } = renderHook(
-        ({ nodes, edges }) => useFlowValidation(nodes, edges),
+        ({ nodes, edges }) => useFlowValidation(nodes, edges, [], [], [], validMetadata),
         { initialProps: { nodes, edges: [] } }
       );
 
@@ -1273,7 +1275,7 @@ describe('useFlowValidation', () => {
       ];
 
       const { result, rerender } = renderHook(
-        ({ nodes, edges }) => useFlowValidation(nodes, edges),
+        ({ nodes, edges }) => useFlowValidation(nodes, edges, [], [], [], validMetadata),
         { initialProps: { nodes: nodes1, edges: [] } }
       );
 
@@ -1282,6 +1284,61 @@ describe('useFlowValidation', () => {
       const secondResult = result.current;
 
       expect(firstResult).not.toBe(secondResult);
+    });
+  });
+
+  describe('Mandatory Metadata', () => {
+    it('should error when name is missing', () => {
+      const metadata = { name: '', date: '2026-01-01', start: '10:00' } as Partial<GamedayMetadata>;
+      const { result } = renderHook(() => useFlowValidation([], [], [], [], [], metadata as GamedayMetadata));
+      
+      const error = result.current.errors.find(e => e.id === 'metadata_name_missing');
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('Name is mandatory');
+    });
+
+    it('should error when date is missing', () => {
+      const metadata = { name: 'Test', date: '', start: '10:00' } as Partial<GamedayMetadata>;
+      const { result } = renderHook(() => useFlowValidation([], [], [], [], [], metadata as GamedayMetadata));
+      
+      const error = result.current.errors.find(e => e.id === 'metadata_date_missing');
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('Date is mandatory');
+    });
+
+    it('should error when start time is missing', () => {
+      const metadata = { name: 'Test', date: '2026-01-01', start: '' } as Partial<GamedayMetadata>;
+      const { result } = renderHook(() => useFlowValidation([], [], [], [], [], metadata as GamedayMetadata));
+      
+      const error = result.current.errors.find(e => e.id === 'metadata_start_missing');
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('Start Time is mandatory');
+    });
+
+    it('should error when season is missing', () => {
+      const metadata = { name: 'Test', date: '2026-01-01', start: '10:00', season: 0 } as Partial<GamedayMetadata>;
+      const { result } = renderHook(() => useFlowValidation([], [], [], [], [], metadata as GamedayMetadata));
+      
+      const error = result.current.errors.find(e => e.id === 'metadata_season_missing');
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('Season is mandatory');
+    });
+
+    it('should error when league is missing', () => {
+      const metadata = { name: 'Test', date: '2026-01-01', start: '10:00', league: 0 } as Partial<GamedayMetadata>;
+      const { result } = renderHook(() => useFlowValidation([], [], [], [], [], metadata as GamedayMetadata));
+      
+      const error = result.current.errors.find(e => e.id === 'metadata_league_missing');
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('League is mandatory');
+    });
+
+    it('should return valid when all mandatory metadata is present', () => {
+      const metadata = { name: 'Test', date: '2026-01-01', start: '10:00', season: 1, league: 1 } as Partial<GamedayMetadata>;
+      const { result } = renderHook(() => useFlowValidation([], [], [], [], [], metadata as GamedayMetadata));
+      
+      const errors = result.current.errors.filter(e => e.id.startsWith('metadata_'));
+      expect(errors).toHaveLength(0);
     });
   });
 });

@@ -26,23 +26,21 @@ export function parseTime(timeStr: string): number {
 }
 
 /**
- * Format minutes since midnight into HH:MM string.
+ * Format minutes into HH:MM string. 
+ * Correctly handles wrap-around for display.
  *
- * @param minutes - Total minutes since midnight
+ * @param minutes - Total minutes
  * @returns Time string in HH:MM format (24-hour)
  */
 export function formatTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60) % 24;
-  const mins = minutes % 60;
+  const normalizedMinutes = ((minutes % 1440) + 1440) % 1440;
+  const hours = Math.floor(normalizedMinutes / 60);
+  const mins = normalizedMinutes % 60;
   return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
 }
 
 /**
  * Add minutes to a time string and return the result.
- *
- * @param timeStr - Starting time in HH:MM format
- * @param minutesToAdd - Number of minutes to add
- * @returns New time string in HH:MM format
  */
 export function addMinutes(timeStr: string, minutesToAdd: number): string {
   const totalMinutes = parseTime(timeStr) + minutesToAdd;
@@ -50,7 +48,7 @@ export function addMinutes(timeStr: string, minutesToAdd: number): string {
 }
 
 /**
- * Alias for addMinutes to match test naming convention.
+ * Alias for addMinutes.
  */
 export function addMinutesToTime(time: string, minutes: number): string {
   return addMinutes(time, minutes);
@@ -174,6 +172,7 @@ export function getStageEndTime(
 
 /**
  * Calculate start times for all games in a tournament.
+ * Uses linear minute counter to prevent wrap-around bugs during calculation.
  */
 export function calculateGameTimes(
   fields: FieldNode[],
@@ -186,106 +185,138 @@ export function calculateGameTimes(
     return [];
   }
 
+  // 1. Sort stages by their template-defined order
   const sortedStages = [...stages].sort((a, b) => a.data.order - b.data.order);
-  const stagesByOrder = new Map<number, StageNode[]>();
-  sortedStages.forEach(stage => {
+
+  // 2. Track field availability in absolute minutes since tournament start
+  // Use a map: fieldId -> absolute minutes (can exceed 1440)
+  const fieldBusyUntilMinutes = new Map<string, number>(); 
+
+  // 3. Base tournament start time in absolute minutes
+  const baseStartTimeMinutes = parseTime(stages.find(s => s.data.order === 0)?.data.startTime || DEFAULT_START_TIME);
+
+  // Use a map for internal updates
+  const gameMap = new Map<string, GameNode>(games.map(g => [g.id, g]));
+  // Track absolute end minutes for every game to enforce synchronization barriers
+  const gameEndAbsMinutes = new Map<string, number>();
+
+  // 4. Process stages one by one in chronological order
+  for (const stage of sortedStages) {
+    const fieldId = stage.parentId;
+    if (!fieldId) continue;
+
     const order = stage.data.order;
-    if (!stagesByOrder.has(order)) {
-      stagesByOrder.set(order, []);
-    }
-    stagesByOrder.get(order)!.push(stage);
-  });
 
-  // Track the latest end time for each field to prevent overlaps
-  const fieldEndTimes = new Map<string, string>(); // fieldId -> HH:MM string
-
-  let previousOrderEndTime: string | null = null;
-  const updatedGames = [...games];
-
-  Array.from(stagesByOrder.keys()).sort((a, b) => a - b).forEach((order) => {
-    const parallelStages = stagesByOrder.get(order)!;
-    let orderStartTime: string;
-
-    if (order === 0) {
-      orderStartTime = parallelStages[0]?.data.startTime || DEFAULT_START_TIME;
-    } else {
-      if (previousOrderEndTime) {
-        orderStartTime = addMinutesToTime(previousOrderEndTime, breakDuration);
-      } else {
-        orderStartTime = parallelStages[0]?.data.startTime || DEFAULT_START_TIME;
+    // Determine synchronization barrier (must start after ALL games in previous orders complete)
+    let globalBarrierAbsMinutes = baseStartTimeMinutes;
+    if (order > 0) {
+      const allPreviousGames = Array.from(gameMap.values()).filter(g => {
+        const s = stages.find(st => st.id === g.parentId);
+        return s && s.data.order < order;
+      });
+      
+      const previousEndTimes = allPreviousGames.map(g => gameEndAbsMinutes.get(g.id) || baseStartTimeMinutes);
+      if (previousEndTimes.length > 0) {
+        globalBarrierAbsMinutes = Math.max(...previousEndTimes);
       }
     }
 
-    let latestEndTime = orderStartTime;
+    // Determine earliest this stage can start
+    let stageEarliestStartAbsMinutes = baseStartTimeMinutes;
+    
+    // Constraint A: Global barrier
+    if (order > 0) {
+      stageEarliestStartAbsMinutes = globalBarrierAbsMinutes + breakDuration;
+    }
 
-    parallelStages.forEach(stage => {
-      const stageGames = updatedGames
-        .filter(game => game.parentId === stage.id)
-        .sort((a, b) => (parseInt(a.data.standing) || 0) - (parseInt(b.data.standing) || 0));
+    // Constraint B: Field availability
+    if (fieldBusyUntilMinutes.has(fieldId)) {
+      const fieldReadyAt = fieldBusyUntilMinutes.get(fieldId)! + breakDuration;
+      if (fieldReadyAt > stageEarliestStartAbsMinutes) {
+        stageEarliestStartAbsMinutes = fieldReadyAt;
+      }
+    }
 
-      if (stageGames.length === 0) {
-        return;
+    // Constraint C: Explicit stage start time (wrapped into absolute minutes)
+    if (stage.data.startTime) {
+      const explicitStartMinutes = parseTime(stage.data.startTime);
+      // NOTE: We assume explicit start time refers to the current logical 'day' of the stage
+      // or at least shouldn't jump backwards. 
+      if (explicitStartMinutes > stageEarliestStartAbsMinutes) {
+        stageEarliestStartAbsMinutes = explicitStartMinutes;
+      }
+    }
+
+    // 5. Calculate times for all games in THIS stage
+    const stageGames = Array.from(gameMap.values())
+      .filter(game => game.parentId === stage.id)
+      .sort((a, b) => {
+        // Advanced sort for tournament games
+        const standingA = a.data.standing.toLowerCase();
+        const standingB = b.data.standing.toLowerCase();
+        
+        // Priority for specific labels
+        const getPriority = (s: string) => {
+          if (s.includes('final')) return 100;
+          if (s.includes('3rd place') || s.includes('3. platz')) return 90;
+          if (s.includes('5th place') || s.includes('5. platz')) return 80;
+          if (s.includes('7th place') || s.includes('7. platz')) return 70;
+          if (s.includes('sf')) return 50;
+          if (s.includes('qf')) return 40;
+          return 0;
+        };
+
+        const pA = getPriority(standingA);
+        const pB = getPriority(standingB);
+
+        if (pA !== pB) return pA - pB;
+
+        // If same priority, use numeric suffix
+        const nA = parseInt(standingA.replace(/\D/g, '')) || 0;
+        const nB = parseInt(standingB.replace(/\D/g, '')) || 0;
+        if (nA !== nB) return nA - nB;
+
+        // Fallback to alphabetical
+        return standingA.localeCompare(standingB);
+      });
+
+    let currentAbsMinutes = stageEarliestStartAbsMinutes;
+    const defaultDuration = stage.data.defaultGameDuration || gameDuration;
+
+    for (let i = 0; i < stageGames.length; i++) {
+      const game = stageGames[i];
+      
+      let gameStartAbsMinutes = currentAbsMinutes;
+      if (game.data.manualTime && game.data.startTime) {
+        // If manual time, try to find the absolute minutes that match it
+        // This is tricky with wrap-around, but we'll assume it's same day for now
+        gameStartAbsMinutes = parseTime(game.data.startTime);
       }
 
-      // Determine start time for this stage
-      // It must be at least orderStartTime (synchronization barrier)
-      let currentTime = stage.data.startTime || orderStartTime;
+      const duration = game.data.duration || defaultDuration;
+      const gameEndAbs = gameStartAbsMinutes + duration;
 
-      // Check if the field is busy from a previous stage (even in same order group)
-      const fieldId = stage.parentId;
-      if (fieldId && fieldEndTimes.has(fieldId)) {
-        const fieldAvailableTime = fieldEndTimes.get(fieldId)!;
-        // If field is busy, wait until it's free + break
-        if (parseTime(fieldAvailableTime) > parseTime(currentTime)) {
-           // Add break duration between stages on the same field
-           currentTime = addMinutesToTime(fieldAvailableTime, breakDuration);
-        }
+      const updatedGame = {
+        ...game,
+        data: {
+          ...game.data,
+          startTime: formatTime(gameStartAbsMinutes),
+          duration: duration,
+        },
+      };
+      
+      gameMap.set(game.id, updatedGame);
+      gameEndAbsMinutes.set(game.id, gameEndAbs);
+
+      // Update field availability
+      if (gameEndAbs > (fieldBusyUntilMinutes.get(fieldId) || 0)) {
+        fieldBusyUntilMinutes.set(fieldId, gameEndAbs);
       }
 
-      const defaultDuration = stage.data.defaultGameDuration || gameDuration;
+      // Advance for next game in stage
+      currentAbsMinutes = gameEndAbs + breakDuration;
+    }
+  }
 
-      for (let i = 0; i < stageGames.length; i++) {
-        const game = stageGames[i];
-        const gameIndex = updatedGames.findIndex(g => g.id === game.id);
-
-        if (gameIndex === -1) continue;
-
-        if (game.data.manualTime && game.data.startTime) {
-          currentTime = game.data.startTime;
-        } else {
-          updatedGames[gameIndex] = {
-            ...game,
-            data: {
-              ...game.data,
-              startTime: currentTime,
-              duration: game.data.duration || defaultDuration,
-            },
-          };
-        }
-
-        const duration = updatedGames[gameIndex].data.duration || defaultDuration;
-        currentTime = addMinutesToTime(currentTime, duration);
-        if (i < stageGames.length - 1) {
-          currentTime = addMinutesToTime(currentTime, breakDuration);
-        }
-      }
-
-      // Update global latest end time (for next order synchronization)
-      if (parseTime(currentTime) > parseTime(latestEndTime)) {
-        latestEndTime = currentTime;
-      }
-
-      // Update field end time
-      if (fieldId) {
-        // The last calculated currentTime includes the last game's duration
-        // It does NOT include a trailing break (unless added in loop, which it isn't for last game)
-        // So currentTime is exactly when the field becomes free.
-        fieldEndTimes.set(fieldId, currentTime);
-      }
-    });
-
-    previousOrderEndTime = latestEndTime;
-  });
-
-  return updatedGames;
+  return Array.from(gameMap.values());
 }

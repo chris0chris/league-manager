@@ -61,7 +61,7 @@ export function generateTournament(
   const finalGameDuration = gameDuration ?? template.timing.defaultGameDuration;
   const finalBreakDuration = breakDuration ?? template.timing.defaultBreakBetweenGames;
   
-  let stages = createStages(template, fields, startTime, finalGameDuration, finalBreakDuration);
+  let stages = createStages(template, fields, startTime, finalGameDuration, finalBreakDuration, teams);
 
   // 3. Generate games for each stage
   let games = generateGamesForStages(stages);
@@ -200,7 +200,8 @@ function createStages(
   fields: FieldNode[],
   startTime: string,
   gameDuration: number,
-  breakDuration: number
+  breakDuration: number,
+  teams: GlobalTeam[]
 ): StageNode[] {
   const stages: StageNode[] = [];
   let stageOrderCounter = 0;
@@ -232,10 +233,10 @@ function createStages(
       
       // Calculate groupCount if not explicitly provided
       if (groupCount === undefined && stageTemplate.progressionMode === 'round_robin') {
-        const totalTeams = template.teamCount.exact || template.teamCount.min;
+        const actualTeamCount = teams.length;
         const teamsPerGroup = (stageTemplate.config as RoundRobinConfig).teamCount;
         if (teamsPerGroup > 0) {
-          groupCount = Math.floor(totalTeams / teamsPerGroup);
+          groupCount = Math.floor(actualTeamCount / teamsPerGroup);
         }
       }
       
@@ -263,22 +264,21 @@ function createStages(
       stageOrderCounter++;
     } else if (typeof stageTemplate.fieldAssignment === 'number') {
       // Assign to specific field index
-      const fieldIndex = stageTemplate.fieldAssignment;
-      if (fieldIndex < fields.length) {
-        const stageId = `stage-${uuidv4()}`;
-        const stage = createStageNode(stageId, fields[fieldIndex].id, {
-          name: stageTemplate.name,
-          stageType: stageTemplate.stageType,
-          order: stageOrderCounter,
-          progressionMode: stageTemplate.progressionMode,
-          progressionConfig: stageTemplate.config,
-          startTime: startTime,
-          defaultGameDuration: gameDuration,
-          defaultBreakBetweenGames: breakDuration,
-          progressionMapping: stageTemplate.progressionMapping,
-        });
-        stages.push(stage);
-      }
+      // If fieldCount is less than the requested index, wrap around using modulo
+      const fieldIndex = stageTemplate.fieldAssignment % fields.length;
+      const stageId = `stage-${uuidv4()}`;
+      const stage = createStageNode(stageId, fields[fieldIndex].id, {
+        name: stageTemplate.name,
+        stageType: stageTemplate.stageType,
+        order: stageOrderCounter,
+        progressionMode: stageTemplate.progressionMode,
+        progressionConfig: stageTemplate.config,
+        startTime: startTime,
+        defaultGameDuration: gameDuration,
+        defaultBreakBetweenGames: breakDuration,
+        progressionMapping: stageTemplate.progressionMapping,
+      });
+      stages.push(stage);
       stageOrderCounter++;
     }
   }
@@ -315,14 +315,24 @@ function generateGamesForStages(
         stageData.progressionConfig as RoundRobinConfig,
         stageData.defaultGameDuration,
         stageData.defaultBreakBetweenGames,
-        namePrefix
+        namePrefix,
+        stage.parentId // Pass fieldId
       );
     } else if (stageData.progressionMode === 'placement') {
+      let namePrefix: string | undefined;
+      // Extract prefix from stage name (e.g. "3rd/5th Place" -> "3rd/5th")
+      const prefixMatch = stageData.name.match(/^(.*?)\sPlace$/);
+      if (prefixMatch) {
+        namePrefix = prefixMatch[1];
+      }
+
       games = generatePlacementGames(
         stage.id,
         stageData.progressionConfig as PlacementConfig,
         stageData.defaultGameDuration,
-        stageData.defaultBreakBetweenGames
+        stageData.defaultBreakBetweenGames,
+        namePrefix,
+        stage.parentId // Pass fieldId
       );
     }
     // 'manual' mode generates no games automatically
@@ -332,3 +342,4 @@ function generateGamesForStages(
 
   return allGames;
 }
+

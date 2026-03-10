@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import Timeout from './Timeout';
 import { FaArrowLeft, FaArrowRight, FaCheck, FaTimes } from 'react-icons/fa';
 import Timer from '../layout/Timer';
-import $ from 'jquery/src/jquery';
 import { getGameSetup } from '../../actions/gamesetup';
 import { createLogEntry } from '../../actions/games';
 import { connect } from 'react-redux';
@@ -15,7 +14,9 @@ const Halftime = (props) => {
   const handleSubmit = (ev) => {
     ev.preventDefault();
     setTimerIsOn(false);
-    $('#halftimeTimer').modal('hide');
+    const modalElement = document.getElementById('halftimeTimer');
+    const modal = window.bootstrap.Modal.getInstance(modalElement) || new window.bootstrap.Modal(modalElement);
+    modal.hide();
     const teamInPossession = props.gameSetup.fhPossession == gameLog.home.name ? gameLog.away.name : gameLog.home.name;
     handleCallback(true, teamInPossession);
   };

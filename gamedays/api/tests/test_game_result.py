@@ -22,9 +22,9 @@ class TestGameResult(WebTest):
         )
 
         assert response.status_code == HTTPStatus.OK
+        assert response.json["halftime_score"] == {"home": 14, "away": 6}
 
         game.refresh_from_db()
-        assert game.halftime_score == {"home": 14, "away": 6}
         assert game.status == Gameinfo.STATUS_IN_PROGRESS
 
         gameday.refresh_from_db()
@@ -44,9 +44,9 @@ class TestGameResult(WebTest):
         )
 
         assert response.status_code == HTTPStatus.OK
+        assert response.json["final_score"] == {"home": 28, "away": 12}
 
         game.refresh_from_db()
-        assert game.final_score == {"home": 28, "away": 12}
         assert game.status == Gameinfo.STATUS_COMPLETED
 
     def test_gameday_completed_when_all_games_finished(self):

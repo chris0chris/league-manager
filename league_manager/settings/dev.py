@@ -3,7 +3,7 @@ import datetime
 from .base import *
 
 DEBUG = True
-DEBUG_DATE = datetime.date(2024, 4, 13)
+DEBUG_DATE = datetime.date.today()
 
 DEBUG_TOOLBAR = True
 # DEBUG_TOOLBAR = False
@@ -19,6 +19,7 @@ ALLOWED_HOSTS = [
     "lm.servyy-test",
     "lm.lehel.xyz",
     "stage.leaguesphere.servyy-test.lxd",
+    "testserver",
 ]
 
 CSRF_TRUSTED_ORIGINS = [

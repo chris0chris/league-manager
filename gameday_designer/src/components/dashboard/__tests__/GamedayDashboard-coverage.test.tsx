@@ -18,6 +18,8 @@ vi.mock('../../../api/gamedayApi', () => ({
     listGamedays: vi.fn(),
     createGameday: vi.fn(),
     deleteGameday: vi.fn(),
+    listSeasons: vi.fn().mockResolvedValue([]),
+    listLeagues: vi.fn().mockResolvedValue([]),
   },
 }));
 
@@ -45,6 +47,7 @@ describe('GamedayDashboard Coverage', () => {
       season: 1,
       league: 1,
       status: 'DRAFT',
+      designer_data: {},
     },
   ];
 
@@ -61,6 +64,8 @@ describe('GamedayDashboard Coverage', () => {
     vi.useRealTimers();
     (gamedayApi.listGamedays as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
     (gamedayApi.deleteGameday as ReturnType<typeof vi.fn>).mockResolvedValue({});
+    (gamedayApi.listSeasons as ReturnType<typeof vi.fn>).mockResolvedValue([{ id: 1, name: '2026' }]);
+    (gamedayApi.listLeagues as ReturnType<typeof vi.fn>).mockResolvedValue([{ id: 1, name: 'DFFL' }]);
     mockLocation.state = null;
   });
 
@@ -103,6 +108,20 @@ describe('GamedayDashboard Coverage', () => {
     
     await waitFor(() => {
       expect(screen.getByText(/failed to create gameday/i)).toBeInTheDocument();
+    });
+  });
+
+  it('handles create gameday when prerequisites are missing', async () => {
+    (gamedayApi.listSeasons as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    (gamedayApi.listLeagues as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    
+    await renderDashboard();
+    
+    const createBtn = screen.getByRole('button', { name: /Create Gameday/i });
+    fireEvent.click(createBtn);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Please ensure at least one Season and one League exist/i)).toBeInTheDocument();
     });
   });
 
@@ -197,5 +216,31 @@ describe('GamedayDashboard Coverage', () => {
         vi.advanceTimersByTime(5001); 
     });
     expect(progressBar).toHaveAttribute('aria-valuenow', '0');
+  });
+
+  it('triggers immediate deletion on unmount for pending items', async () => {
+    const { unmount } = render(
+      <MemoryRouter>
+        <GamedayProvider>
+          <GamedayDashboard />
+        </GamedayProvider>
+      </MemoryRouter>
+    );
+    await waitFor(() => expect(screen.getByText('Gameday 2')).toBeInTheDocument());
+
+    vi.useFakeTimers();
+    const deleteBtn = screen.getByTitle(/delete gameday/i);
+    fireEvent.click(deleteBtn);
+
+    // Placeholder shown, but timeout NOT yet reached
+    expect(screen.queryByText('Gameday 2')).not.toBeInTheDocument();
+    expect(gamedayApi.deleteGameday).not.toHaveBeenCalled();
+
+    // UNMOUNT - should trigger immediate deleteGameday
+    act(() => {
+      unmount();
+    });
+
+    expect(gamedayApi.deleteGameday).toHaveBeenCalledWith(2);
   });
 });

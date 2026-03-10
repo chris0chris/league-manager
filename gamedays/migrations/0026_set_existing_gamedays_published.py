@@ -2,15 +2,18 @@
 
 from django.db import migrations
 
+
 def set_existing_gamedays_published(apps, schema_editor):
-    Gameday = apps.get_model('gamedays', 'Gameday')
+    Gameday = apps.get_model("gamedays", "Gameday")
     # Update all existing gamedays to PUBLISHED
-    Gameday.objects.all().update(status='PUBLISHED')
+    Gameday.objects.all().update(status="PUBLISHED")
+
 
 def reverse_set_existing_gamedays_published(apps, schema_editor):
-    Gameday = apps.get_model('gamedays', 'Gameday')
+    Gameday = apps.get_model("gamedays", "Gameday")
     # Revert all gamedays to DRAFT (if needed for rollback)
-    Gameday.objects.all().update(status='DRAFT')
+    Gameday.objects.all().update(status="DRAFT")
+
 
 class Migration(migrations.Migration):
 
@@ -19,5 +22,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(set_existing_gamedays_published, reverse_set_existing_gamedays_published),
+        migrations.RunPython(
+            set_existing_gamedays_published, reverse_set_existing_gamedays_published
+        ),
     ]

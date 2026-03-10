@@ -58,6 +58,18 @@ export interface RankReference {
 }
 
 /**
+ * Team reference for a specific rank in a specific group within a stage.
+ * Example: { type: 'groupRank', place: 1, groupName: 'Group A', stageId: 'stage-123' }
+ */
+export interface GroupRankReference {
+  type: 'groupRank';
+  place: number;
+  groupName: string;
+  stageId: string;
+  stageName: string;
+}
+
+/**
  * Static team reference using a direct name.
  * Example: { type: 'static', name: 'Team Officials' }
  */
@@ -76,6 +88,7 @@ export type TeamReference =
   | WinnerReference
   | LoserReference
   | RankReference
+  | GroupRankReference
   | StaticReference;
 
 /**
@@ -119,7 +132,8 @@ export interface Field {
 export type ValidationErrorType =
   | 'official_playing'
   | 'invalid_reference'
-  | 'circular_dependency';
+  | 'circular_dependency'
+  | 'missing_official';
 
 /**
  * Validation warning types
@@ -283,6 +297,15 @@ export function isRankReference(ref: TeamReference): ref is RankReference {
 }
 
 /**
+ * Type guard to check if a team reference is a GroupRankReference
+ */
+export function isGroupRankReference(
+  ref: TeamReference
+): ref is GroupRankReference {
+  return ref.type === 'groupRank';
+}
+
+/**
  * Type guard to check if a team reference is a StaticReference
  */
 export function isStaticReference(ref: TeamReference): ref is StaticReference {
@@ -343,4 +366,26 @@ export function createDefaultField(id: string, order: number): Field {
     order,
     gameSlots: [],
   };
+}
+
+/**
+ * Game result input for a single team in a game.
+ */
+export interface GameResultInput {
+  id: number;
+  team: { id: number; name: string };
+  fh: number | null;
+  sh: number | null;
+  isHome: boolean;
+}
+
+/**
+ * Game results display showing all games and their results.
+ */
+export interface GameResultsDisplay {
+  id: number;
+  field: number;
+  scheduled: string;
+  status: string;
+  results: GameResultInput[];
 }

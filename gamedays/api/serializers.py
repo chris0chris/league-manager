@@ -1,33 +1,54 @@
-from rest_framework.fields import SerializerMethodField, IntegerField, JSONField
+import logging
+
+from rest_framework.fields import SerializerMethodField, IntegerField
 from rest_framework.serializers import ModelSerializer, Serializer
 
-from gamedays.models import Gameday, Gameinfo, GameOfficial, GameSetup
+from gamedays.models import (
+    Gameday,
+    Gameinfo,
+    GameOfficial,
+    GameSetup,
+    Season,
+    League,
+    Gameresult,
+)
+
+logger = logging.getLogger(__name__)
+
+
+class SeasonSerializer(ModelSerializer):
+    class Meta:
+        model = Season
+        fields = ["id", "name"]
+
+
+class LeagueSerializer(ModelSerializer):
+    class Meta:
+        model = League
+        fields = ["id", "name"]
 
 
 class GamedaySerializer(ModelSerializer):
-    designer_data = JSONField(required=False)
-
     class Meta:
         model = Gameday
         fields = "__all__"
         read_only_fields = ["author"]
         extra_kwargs = {"start": {"format": "%H:%M"}}
 
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        from gamedays.service.gameday_service import GamedayService
-        ret['designer_data'] = GamedayService.create(instance.pk).get_resolved_designer_data(instance.pk)
-        return ret
-
 
 class GamedayListSerializer(ModelSerializer):
+    season_display = SerializerMethodField()
+    league_display = SerializerMethodField()
+
     class Meta:
         model = Gameday
         fields = [
             "id",
             "name",
             "season",
+            "season_display",
             "league",
+            "league_display",
             "date",
             "start",
             "format",
@@ -38,13 +59,19 @@ class GamedayListSerializer(ModelSerializer):
         read_only_fields = ["author"]
         extra_kwargs = {"start": {"format": "%H:%M"}}
 
+    def get_season_display(self, obj):
+        return obj.season.name if obj.season else ""
+
+    def get_league_display(self, obj):
+        return obj.league.name if obj.league else ""
+
 
 class GamedayInfoSerializer(Serializer):
     id = IntegerField()
     name = SerializerMethodField()
 
     def get_name(self, obj: dict):
-        return f'{obj["name"]} ({obj["league__name"]})'
+        return f"{obj['name']} ({obj['league__name']})"
 
 
 class GameOfficialSerializer(ModelSerializer):
@@ -54,6 +81,9 @@ class GameOfficialSerializer(ModelSerializer):
 
 
 class GameinfoSerializer(ModelSerializer):
+    halftime_score = SerializerMethodField()
+    final_score = SerializerMethodField()
+
     class Meta:
         model = Gameinfo
         fields = [
@@ -63,12 +93,31 @@ class GameinfoSerializer(ModelSerializer):
             "gameFinished",
             "halftime_score",
             "final_score",
-            "is_locked",
         ]
         extra_kwargs = {
             "gameStarted": {"format": "%H:%M"},
             "gameHalftime": {"format": "%H:%M"},
             "gameFinished": {"format": "%H:%M"},
+        }
+
+    def _get_scores(self, obj):
+        results = Gameresult.objects.filter(gameinfo=obj)
+        scores = {"home_fh": 0, "home_sh": 0, "away_fh": 0, "away_sh": 0}
+        for r in results:
+            prefix = "home" if r.isHome else "away"
+            scores[f"{prefix}_fh"] = r.fh or 0
+            scores[f"{prefix}_sh"] = r.sh or 0
+        return scores
+
+    def get_halftime_score(self, obj):
+        scores = self._get_scores(obj)
+        return {"home": scores["home_fh"], "away": scores["away_fh"]}
+
+    def get_final_score(self, obj):
+        scores = self._get_scores(obj)
+        return {
+            "home": scores["home_fh"] + scores["home_sh"],
+            "away": scores["away_fh"] + scores["away_sh"],
         }
 
 

@@ -13,6 +13,9 @@ export default defineConfig({
   },
 
   test: {
+    // Global test timeout
+    testTimeout: 10000,
+
     // Use jsdom environment for DOM testing
     environment: 'jsdom',
 

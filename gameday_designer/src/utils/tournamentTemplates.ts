@@ -44,6 +44,10 @@ export const TEMPLATE_F6_2_2: TournamentTemplate = {
         'SF2': {
           home: { sourceIndex: 2, type: 'winner' },
           away: { sourceIndex: 5, type: 'winner' }
+        },
+        '3rd Place': {
+          home: { sourceIndex: 0, type: 'loser' }, // loser of SF1
+          away: { sourceIndex: 1, type: 'loser' }  // loser of SF2
         }
       }
     },
@@ -82,7 +86,7 @@ export const TEMPLATE_F8_2_3: TournamentTemplate = {
       category: 'final',
       progressionMode: 'placement',
       config: { mode: 'placement', positions: 8, format: 'single_elimination' },
-      fieldAssignment: 'all',
+      fieldAssignment: 0,
       progressionMapping: {
         'QF1': {
           home: { sourceIndex: 0, type: 'winner' },
@@ -107,11 +111,23 @@ export const TEMPLATE_F8_2_3: TournamentTemplate = {
       category: 'placement',
       progressionMode: 'placement',
       config: { mode: 'placement', positions: 4, format: 'single_elimination' },
-      fieldAssignment: 1,
+      fieldAssignment: 0,
       progressionMapping: {
-        'SF1': { // Using SF1 label for consolation semi
+        '3rd/5th SF1': { 
           home: { sourceIndex: 4, type: 'loser' },
           away: { sourceIndex: 5, type: 'loser' }
+        },
+        '3rd/5th SF2': { 
+          home: { sourceIndex: 6, type: 'loser' },
+          away: { sourceIndex: 7, type: 'loser' }
+        },
+        '3rd/5th Final': {
+          home: { sourceIndex: 0, type: 'winner' }, // winner of 3rd/5th SF1 (which is index 0 in THIS stage)
+          away: { sourceIndex: 1, type: 'winner' }  // winner of 3rd/5th SF2
+        },
+        '3rd/5th 3rd Place': {
+          home: { sourceIndex: 0, type: 'loser' },
+          away: { sourceIndex: 1, type: 'loser' }
         }
       }
     },

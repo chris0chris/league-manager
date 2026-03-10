@@ -3,14 +3,7 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Timeout from '../Timeout';
-import $ from 'jquery/src/jquery';
 import { vi } from 'vitest';
-
-const modalMock = vi.fn();
-vi.mock('jquery/src/jquery', () => ({ default: vi.fn() }));
-$.mockImplementation(() => {
-  return {modal: modalMock};
-});
 
 const onSubmitMock = vi.fn();
 
@@ -36,7 +29,7 @@ describe('Timeout component', () => {
     await user.type(screen.getByPlaceholderText('Minuten'), '00');
     await user.type(screen.getByPlaceholderText('Sekunden'), '01');
     await user.click(screen.getByRole('button', {name: 'Fertig'}));
-    expect(modalMock.mock.calls[0][0]).toBe('hide');
+    expect(global.bootstrap.Modal.getInstance().hide).toHaveBeenCalled();
     expect(screen.getByTestId('timeoutButton')).toBeDisabled();
     expect(screen.getByText('0:1')).toBeInTheDocument();
     expect(onSubmitMock.mock.calls[0][0]).toEqual({

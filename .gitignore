@@ -164,4 +164,9 @@ ngrok.sh
 # LeagueSphere staging MySQL data
 /deployed/mysql-data/
 *.sql
+# Allow test database dump for test setup
+!container/test_db_dump.sql
+
+# Git worktrees
+.worktrees/
 test-reports/

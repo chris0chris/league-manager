@@ -4,10 +4,12 @@ from rest_framework.test import APIClient
 from gamedays.models import Association, Season, League, Gameday, Team
 from gameday_designer.models import ScheduleTemplate, TemplateSlot
 
+
 @pytest.fixture
 def api_client():
     """Provide DRF APIClient."""
     return APIClient()
+
 
 @pytest.fixture
 def staff_user(db):
@@ -15,6 +17,7 @@ def staff_user(db):
     return User.objects.create_user(
         username="staff", email="staff@example.com", password="password", is_staff=True
     )
+
 
 @pytest.fixture
 def association_user(db):
@@ -26,10 +29,12 @@ def association_user(db):
         is_staff=False,
     )
 
+
 @pytest.fixture
 def association(db):
     """Create test association."""
     return Association.objects.create(name="Test Association", abbr="TEST")
+
 
 @pytest.fixture
 def template(db, association, staff_user):
@@ -46,6 +51,7 @@ def template(db, association, staff_user):
         updated_by=staff_user,
     )
 
+
 @pytest.fixture
 def global_template(db, staff_user):
     """Create global template."""
@@ -60,6 +66,7 @@ def global_template(db, staff_user):
         created_by=staff_user,
         updated_by=staff_user,
     )
+
 
 @pytest.fixture
 def template_with_slots(db, template):
@@ -92,10 +99,12 @@ def template_with_slots(db, template):
     )
     return template
 
+
 @pytest.fixture
 def gameday(db, association, staff_user):
     """Create test gameday."""
     from datetime import date, time
+
     league = League.objects.create(name="Test League")
     season = Season.objects.create(name="2025")
     return Gameday.objects.create(
@@ -107,6 +116,7 @@ def gameday(db, association, staff_user):
         league=league,
         author=staff_user,
     )
+
 
 @pytest.fixture
 def teams(db, association):

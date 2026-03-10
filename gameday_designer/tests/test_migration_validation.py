@@ -26,7 +26,6 @@ from gamedays.models import Gameday, Gameinfo, Gameresult, Team, Association
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gameday_designer.models import ScheduleTemplate
 
-
 # All schedule formats to test
 SCHEDULE_FORMATS = [
     "2_1",

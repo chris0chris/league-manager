@@ -15,22 +15,24 @@
   flex: 1;
   display: flex;
   min-height: 0;
-  align-items: start; /* Prevent columns from stretching to equal heights */
+  align-items: stretch; /* Ensure columns stretch to fill the height */
+  height: 100%;
 }
 
 /* Teams column */
 .teams-column {
+  flex: 1;
   height: 100%;
+  max-height: 100%;
   min-height: 0;
-  overflow-y: auto;
 }
 
 /* Fields column */
 .fields-column {
+  flex: 1;
   height: 100%;
+  max-height: 100%;
   min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 /* Custom scrollbar styling for scrollable areas */
@@ -69,7 +71,6 @@
 .team-pool-card .card-body {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
   min-height: 0; /* Allow flex child to shrink */
 }
 
@@ -86,7 +87,22 @@
 .fields-card .card-body {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
+  min-height: 0; /* Allow flex child to shrink */
+}
+
+/* Fields Card */
+.fields-card {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+
+.fields-card .card-body {
+  flex: 1;
+  overflow-y: auto;
   min-height: 0; /* Allow flex child to shrink */
 }
 
@@ -176,7 +192,7 @@
 
 /**
  * Fields Grid Layout with Responsive CSS Grid
- * Enforce exactly 2 columns (50% each) on wide screens.
+ * Enforce vertical layout by default, max 2 columns on very large screens.
  */
 .fields-grid {
   display: grid;
@@ -184,7 +200,7 @@
   grid-template-columns: 1fr;
 }
 
-@media (min-width: 2800px) {
+@media (min-width: 2500px) {
   .fields-grid {
     grid-template-columns: 1fr 1fr;
   }

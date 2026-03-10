@@ -10,7 +10,7 @@
  */
 
 import React, { useRef } from 'react';
-import { Button, ButtonGroup, ButtonToolbar } from 'react-bootstrap';
+import { Button, ButtonGroup, ButtonToolbar, Dropdown } from 'react-bootstrap';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { ICONS } from '../utils/iconConstants';
 
@@ -24,6 +24,8 @@ export interface FlowToolbarProps {
   onImport: (json: unknown) => void;
   /** Callback to export to JSON */
   onExport: () => void;
+  /** Callback to export structured template */
+  onExportTemplate?: () => void;
   /** Current gameday status */
   gamedayStatus?: string;
   /** Callback for notifications */
@@ -38,6 +40,10 @@ export interface FlowToolbarProps {
   canRedo?: boolean;
   /** Whether export is available (has valid data) */
   canExport?: boolean;
+  /** Callback to switch to results mode */
+  onResultsMode?: () => void;
+  /** Whether results mode is active */
+  resultsMode?: boolean;
 }
 
 /**
@@ -48,6 +54,7 @@ export interface FlowToolbarProps {
 const FlowToolbar: React.FC<FlowToolbarProps> = ({
   onImport,
   onExport,
+  onExportTemplate,
   gamedayStatus = 'DRAFT',
   onNotify,
   onUndo,
@@ -55,6 +62,8 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
   canUndo = false,
   canRedo = false,
   canExport = false,
+  onResultsMode,
+  resultsMode = false,
 }) => {
   const { t } = useTypedTranslation(['ui']);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -93,6 +102,21 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
   return (
     <div className="flow-toolbar" data-testid="flow-toolbar">
       <ButtonToolbar>
+        {/* Results mode button */}
+        {gamedayStatus !== 'DRAFT' && onResultsMode && (
+          <ButtonGroup className="me-2">
+            <Button
+              variant={resultsMode ? "primary" : "outline-primary"}
+              onClick={onResultsMode}
+              title={resultsMode ? t('ui:button.exitResults') : t('ui:button.enterResults')}
+              data-testid="results-mode-button"
+            >
+              <i className={`bi ${resultsMode ? 'bi-grid' : 'bi-table'} me-1`}></i>
+              {resultsMode ? t('ui:button.exitResults') : t('ui:button.enterResults')}
+            </Button>
+          </ButtonGroup>
+        )}
+
         {/* Import/Export buttons */}
         <ButtonGroup className="me-2">
           <Button
@@ -104,15 +128,42 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
           >
             <i className={`bi ${ICONS.IMPORT}`}></i>
           </Button>
-          <Button
-            variant="outline-secondary"
-            onClick={onExport}
-            disabled={!canExport}
-            title={t('ui:tooltip.exportToJson')}
-            data-testid="export-button"
-          >
-            <i className={`bi ${ICONS.EXPORT}`}></i>
-          </Button>
+          <Dropdown as={ButtonGroup}>
+            <Button
+              variant="outline-secondary"
+              onClick={onExport}
+              disabled={!canExport}
+              title={t('ui:tooltip.exportToJson')}
+              data-testid="export-button"
+            >
+              <i className={`bi ${ICONS.EXPORT}`}></i>
+            </Button>
+
+            <Dropdown.Toggle 
+              split 
+              variant="outline-secondary" 
+              id="export-dropdown" 
+              disabled={!canExport} 
+              data-testid="export-dropdown-toggle"
+            />
+
+            <Dropdown.Menu>
+              <Dropdown.Item onClick={onExport}>
+                <i className={`bi ${ICONS.EXPORT} me-2`}></i>
+                {t('ui:button.exportSchedule')}
+              </Dropdown.Item>
+              {onExportTemplate && (
+                <Dropdown.Item 
+                  onClick={onExportTemplate} 
+                  data-testid="export-template-button"
+                  title={t('ui:tooltip.exportTemplateToJson')}
+                >
+                  <i className="bi bi-file-earmark-code me-2"></i>
+                  {t('ui:button.exportTemplate')}
+                </Dropdown.Item>
+              )}
+            </Dropdown.Menu>
+          </Dropdown>
         </ButtonGroup>
 
         {/* Undo/Redo buttons */}
@@ -124,10 +175,8 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
               disabled={!canUndo || gamedayStatus !== 'DRAFT'}
               title={t('ui:tooltip.undo')}
               data-testid="undo-button"
-              className="btn-adaptive"
             >
-              <i className={`bi bi-arrow-counterclockwise me-2`}></i>
-              <span className="btn-label-adaptive">{t('ui:button.undo')}</span>
+              <i className={`bi ${ICONS.UNDO}`}></i>
             </Button>
             <Button
               variant="outline-secondary"
@@ -135,10 +184,8 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
               disabled={!canRedo || gamedayStatus !== 'DRAFT'}
               title={t('ui:tooltip.redo')}
               data-testid="redo-button"
-              className="btn-adaptive"
             >
-              <i className="bi bi-arrow-clockwise me-2"></i>
-              <span className="btn-label-adaptive">{t('ui:button.redo')}</span>
+              <i className="bi bi-arrow-clockwise"></i>
             </Button>
           </ButtonGroup>
         )}

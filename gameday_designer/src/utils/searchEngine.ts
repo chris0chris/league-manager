@@ -75,7 +75,7 @@ export function matchGameday(gameday: GamedayListEntry, query: string): boolean 
   // Check specific filters
   for (const [key, value] of Object.entries(filters)) {
     const lowerValue = value.toLowerCase();
-    let matchesFilter = false;
+    let matchesFilter;
 
     switch (key) {
       case 'season':

@@ -5,6 +5,7 @@
  * - Shows all fields in responsive columns
  * - Renders FieldColumn for each field
  * - Shows empty state message when no fields
+ * - Can switch to results entry mode
  */
 
 import React from 'react';
@@ -34,6 +35,7 @@ export interface DesignerCanvasProps {
 /**
  * DesignerCanvas component.
  * Main container that displays all fields in a responsive column layout.
+ * Can switch to results entry mode to display GameResultsTable.
  */
 const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   fields,
@@ -59,28 +61,30 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   const sortedFields = [...fields].sort((a, b) => a.order - b.order);
 
   return (
-    <Row className="g-3">
-      {sortedFields.map((field) => (
-        <Col
-          key={field.id}
-          xs={12}
-          md={6}
-          lg={fields.length <= 2 ? 6 : 4}
-          xl={fields.length <= 3 ? 4 : 3}
-        >
-          <FieldColumn
-            field={field}
-            selectedGameSlotId={selectedGameSlotId}
-            onUpdateFieldName={onUpdateFieldName}
-            onRemoveField={onRemoveField}
-            onAddGameSlot={onAddGameSlot}
-            onSelectGameSlot={onSelectGameSlot}
-            onDeleteGameSlot={onDeleteGameSlot}
-            onDuplicateGameSlot={onDuplicateGameSlot}
-          />
-        </Col>
-      ))}
-    </Row>
+    <div>
+      <Row className="g-3">
+        {sortedFields.map((field) => (
+          <Col
+            key={field.id}
+            xs={12}
+            md={6}
+            lg={fields.length <= 2 ? 6 : 4}
+            xl={fields.length <= 3 ? 4 : 3}
+          >
+            <FieldColumn
+              field={field}
+              selectedGameSlotId={selectedGameSlotId}
+              onUpdateFieldName={onUpdateFieldName}
+              onRemoveField={onRemoveField}
+              onAddGameSlot={onAddGameSlot}
+              onSelectGameSlot={onSelectGameSlot}
+              onDeleteGameSlot={onDeleteGameSlot}
+              onDuplicateGameSlot={onDuplicateGameSlot}
+            />
+          </Col>
+        ))}
+      </Row>
+    </div>
   );
 };
 

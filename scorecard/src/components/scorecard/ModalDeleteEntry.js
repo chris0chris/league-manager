@@ -3,14 +3,15 @@ import PropTypes from 'prop-types';
 import {FaTimes, FaTrash} from 'react-icons/fa';
 import {connect} from 'react-redux';
 import {deleteLogEntry} from '../../actions/games';
-import $ from 'jquery/src/jquery';
 
 const ModalDeleteEntry = (props) => {
   const handleSubmit = (ev) => {
     ev.preventDefault();
      
     const {__html, ...entryToDelete} = props.deleteEntry;
-    $('#modalDeleteEntry').modal('hide');
+    const modalElement = document.getElementById('modalDeleteEntry');
+    const modal = window.bootstrap.Modal.getInstance(modalElement) || new window.bootstrap.Modal(modalElement);
+    modal.hide();
     props.deleteLogEntry(props.gameLog.gameId, entryToDelete);
   };
   return (

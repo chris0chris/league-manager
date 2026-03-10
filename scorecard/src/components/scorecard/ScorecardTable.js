@@ -1,7 +1,6 @@
 
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import $ from 'jquery/src/jquery';
 import {connect} from 'react-redux';
 
 const ScorecardTable = (props) => {
@@ -33,7 +32,9 @@ const ScorecardTable = (props) => {
       type: 'DELETE_ENTRY',
       payload: entryToDelete,
     });
-    $(`#modalDeleteEntry`).modal('show');
+    const modalElement = document.getElementById('modalDeleteEntry');
+    const modal = window.bootstrap.Modal.getInstance(modalElement) || new window.bootstrap.Modal(modalElement);
+    modal.show();
   };
   const handleClick = () => {
   };

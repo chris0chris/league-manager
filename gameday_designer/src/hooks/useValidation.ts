@@ -24,8 +24,9 @@ import { formatTeamReference } from '../utils/teamReference';
  * Check if a team reference is a result reference (winner/loser).
  */
 function isResultReference(
-  ref: TeamReference
+  ref: TeamReference | string | null | undefined
 ): ref is TeamReference & { matchName: string } {
+  if (!ref || typeof ref === 'string') return false;
   return ref.type === 'winner' || ref.type === 'loser';
 }
 
@@ -48,6 +49,7 @@ function getReferencedMatchNames(slot: GameSlot): string[] {
   return refs;
 }
 
+
 /**
  * Collect all standing names from all fields.
  */
@@ -61,6 +63,32 @@ function getAllStandingNames(fields: Field[]): Set<string> {
     }
   }
   return standings;
+}
+
+/**
+ * Check if official is assigned.
+ */
+function checkMissingOfficial(fields: Field[]): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  for (const field of fields) {
+    for (const slot of field.gameSlots) {
+      // Check if official is empty (static type with empty name or any unset reference)
+      if (
+        !slot.official ||
+        (slot.official.type === 'static' && !slot.official.name)
+      ) {
+        errors.push({
+          id: `${slot.id}_missing_official`,
+          type: 'missing_official',
+          message: `Game "${slot.standing}": No official team assigned`,
+          affectedSlots: [slot.id],
+        });
+      }
+    }
+  }
+
+  return errors;
 }
 
 /**
@@ -225,6 +253,7 @@ function checkDuplicateStandings(fields: Field[]): ValidationWarning[] {
 export function useValidation(fields: Field[]): ValidationResult {
   return useMemo(() => {
     const errors: ValidationError[] = [
+      ...checkMissingOfficial(fields),
       ...checkOfficialPlaying(fields),
       ...checkInvalidReferences(fields),
       ...checkCircularDependencies(fields),

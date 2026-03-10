@@ -58,22 +58,36 @@ const EditorForm: React.FC<EditorFormProps> = ({
   const [official, setOfficial] = useState<TeamReference>(gameSlot.official);
   const [breakAfter, setBreakAfter] = useState(gameSlot.breakAfter);
 
-  /**
-   * Handle save button click.
-   */
-  const handleSave = () => {
-    const updatedSlot: GameSlot = {
-      id: gameSlot.id,
-      stage,
-      standing,
-      home,
-      away,
-      official,
-      breakAfter,
-    };
+   /**
+    * Check if official is set (not empty static reference).
+    */
+   const isOfficialValid = (): boolean => {
+     if (!official) return false;
+     if (official.type === 'static' && !official.name) return false;
+     return true;
+   };
 
-    onSave(updatedSlot);
-  };
+   /**
+    * Handle save button click.
+    */
+   const handleSave = () => {
+     if (!isOfficialValid()) {
+       alert(t('validation:missing_official_error') || 'Please assign an official team');
+       return;
+     }
+
+     const updatedSlot: GameSlot = {
+       id: gameSlot.id,
+       stage,
+       standing,
+       home,
+       away,
+       official,
+       breakAfter,
+     };
+
+     onSave(updatedSlot);
+   };
 
   /**
    * Handle stage change.
@@ -141,15 +155,16 @@ const EditorForm: React.FC<EditorFormProps> = ({
               groupNames={groupNames}
             />
           </Col>
-          <Col md={4}>
-            <TeamSelector
-              value={official}
-              onChange={setOfficial}
-              label={t('ui:label.official')}
-              matchNames={matchNames}
-              groupNames={groupNames}
-            />
-          </Col>
+           <Col md={4}>
+             <TeamSelector
+               value={official}
+               onChange={setOfficial}
+               label={`${t('ui:label.official')} *`}
+               matchNames={matchNames}
+               groupNames={groupNames}
+               isRequired
+             />
+           </Col>
         </Row>
 
         <Row>
@@ -166,14 +181,14 @@ const EditorForm: React.FC<EditorFormProps> = ({
           </Col>
         </Row>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onCancel}>
-          {t('ui:button.cancel')}
-        </Button>
-        <Button variant="primary" onClick={handleSave}>
-          {t('ui:button.save')}
-        </Button>
-      </Modal.Footer>
+       <Modal.Footer>
+         <Button variant="secondary" onClick={onCancel}>
+           {t('ui:button.cancel')}
+         </Button>
+         <Button variant="primary" onClick={handleSave} disabled={!isOfficialValid()}>
+           {t('ui:button.save')}
+         </Button>
+       </Modal.Footer>
     </>
   );
 };

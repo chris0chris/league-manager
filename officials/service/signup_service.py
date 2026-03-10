@@ -148,4 +148,3 @@ class ConcatOfficialsNames(Func):
             template="%(function)s(%(expressions)s)",
             **extra_context,
         )
-

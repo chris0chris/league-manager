@@ -17,6 +17,14 @@ import {
   isStageNode,
   isGameNode,
 } from '../../types/flowchart';
+import type { 
+  FlowState, 
+  FieldNode, 
+  GameNode, 
+  FlowField, 
+  GamedayMetadata,
+  FlowNode
+} from '../../types/flowchart';
 
 describe('useFlowState - Container Operations', () => {
   describe('addFieldNode', () => {
@@ -30,7 +38,7 @@ describe('useFlowState - Container Operations', () => {
       expect(result.current.nodes).toHaveLength(1);
       const field = result.current.nodes[0];
       expect(isFieldNode(field)).toBe(true);
-      expect(field.data.name).toBe('Feld 1');
+      expect((field as FieldNode).data.name).toBe('Feld 1');
     });
 
     it('creates field with custom name', () => {
@@ -40,7 +48,7 @@ describe('useFlowState - Container Operations', () => {
         result.current.addFieldNode({ name: 'Main Field' });
       });
 
-      const field = result.current.nodes[0];
+      const field = result.current.nodes[0] as FieldNode;
       expect(field.data.name).toBe('Main Field');
     });
 
@@ -69,8 +77,8 @@ describe('useFlowState - Container Operations', () => {
       });
 
       expect(result.current.nodes).toHaveLength(2);
-      expect(result.current.nodes[0].data.name).toBe('Feld 1');
-      expect(result.current.nodes[1].data.name).toBe('Feld 2');
+      expect((result.current.nodes[0] as FieldNode).data.name).toBe('Feld 1');
+      expect((result.current.nodes[1] as FieldNode).data.name).toBe('Feld 2');
     });
   });
 
@@ -78,7 +86,7 @@ describe('useFlowState - Container Operations', () => {
     it('creates a stage inside a field', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
+      let fieldId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -96,7 +104,7 @@ describe('useFlowState - Container Operations', () => {
     it('creates stage with custom name and type', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
+      let fieldId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -113,7 +121,7 @@ describe('useFlowState - Container Operations', () => {
     it('creates second stage with Finalrunde as default', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
+      let fieldId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -135,12 +143,12 @@ describe('useFlowState - Container Operations', () => {
     it('returns null if field does not exist', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let stageResult: ReturnType<typeof result.current.addStageNode>;
+      let stageResult: ReturnType<typeof result.current.addStageNode> = null;
       act(() => {
         stageResult = result.current.addStageNode('non-existent-field');
       });
 
-      expect(stageResult!).toBeNull();
+      expect(stageResult).toBeNull();
       expect(result.current.nodes).toHaveLength(0);
     });
   });
@@ -149,8 +157,8 @@ describe('useFlowState - Container Operations', () => {
     it('creates a game inside a stage', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let stageId: string;
-      let fieldId: string;
+      let stageId: string = '';
+      let fieldId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -171,8 +179,8 @@ describe('useFlowState - Container Operations', () => {
     it('creates game with custom standing', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let stageId: string;
-      let fieldId: string;
+      let stageId: string = '';
+      let fieldId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -185,7 +193,7 @@ describe('useFlowState - Container Operations', () => {
         result.current.addGameNodeInStage(stageId, { standing: 'HF1' });
       });
 
-      const game = result.current.nodes.find(isGameNode);
+      const game = result.current.nodes.find(isGameNode) as GameNode;
       expect(game?.data.standing).toBe('HF1');
     });
 
@@ -211,8 +219,8 @@ describe('useFlowState - Container Operations', () => {
     it('deletes field and all its stages and games', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
+      let fieldId: string = '';
+      let stageId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -238,8 +246,8 @@ describe('useFlowState - Container Operations', () => {
     it('deletes stage and all its games', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
+      let fieldId: string = '';
+      let stageId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -266,9 +274,9 @@ describe('useFlowState - Container Operations', () => {
     it('deletes only the game node (no cascade)', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let gameId: string;
+      let fieldId: string = '';
+      let stageId: string = '';
+      let gameId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -293,9 +301,9 @@ describe('useFlowState - Container Operations', () => {
     it('removes edges connected to deleted nodes', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let gameId: string;
+      let fieldId: string = '';
+      let stageId: string = '';
+      let gameId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -304,7 +312,7 @@ describe('useFlowState - Container Operations', () => {
         stageId = result.current.addStageNode(fieldId)!.id;
       });
 
-      let gameId2: string;
+      let gameId2: string = '';
 
       act(() => {
         gameId = result.current.addGameNodeInStage(stageId).id;
@@ -341,9 +349,9 @@ describe('useFlowState - Container Operations', () => {
     it('returns the parent field of a game', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let gameId: string;
+      let fieldId: string = '';
+      let stageId: string = '';
+      let gameId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode({ name: 'Main Field' }).id;
       });
@@ -380,9 +388,9 @@ describe('useFlowState - Container Operations', () => {
     it('returns the parent stage of a game', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let gameId: string;
+      let fieldId: string = '';
+      let stageId: string = '';
+      let gameId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -418,7 +426,7 @@ describe('useFlowState - Container Operations', () => {
     it('returns all stages in a field', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
+      let fieldId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -437,7 +445,7 @@ describe('useFlowState - Container Operations', () => {
     it('returns empty array for field with no stages', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
+      let fieldId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -451,8 +459,8 @@ describe('useFlowState - Container Operations', () => {
     it('returns all games in a stage', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
+      let fieldId: string = '';
+      let stageId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -473,8 +481,8 @@ describe('useFlowState - Container Operations', () => {
     it('returns empty array for stage with no games', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
+      let fieldId: string = '';
+      let stageId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -492,7 +500,7 @@ describe('useFlowState - Container Operations', () => {
     it('selectedContainerField returns selected field', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
+      let fieldId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
         result.current.selectNode(fieldId);
@@ -505,8 +513,8 @@ describe('useFlowState - Container Operations', () => {
     it('selectedContainerStage returns selected stage', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
+      let fieldId: string = '';
+      let stageId: string = '';
       act(() => {
         fieldId = result.current.addFieldNode().id;
       });
@@ -518,6 +526,178 @@ describe('useFlowState - Container Operations', () => {
 
       expect(result.current.selectedContainerStage).toBeDefined();
       expect(result.current.selectedContainerStage?.id).toBe(stageId);
+    });
+  });
+
+  describe('Other state operations', () => {
+    it('handles deleteField and cleans up game field assignments', () => {
+      const { result } = renderHook(() => useFlowState());
+      let field: FlowField;
+      act(() => {
+        field = result.current.addField('Field 1');
+        result.current.addGameNode({ fieldId: field.id });
+      });
+
+      expect(result.current.fields).toHaveLength(1);
+      
+      act(() => {
+        result.current.deleteField(field.id);
+      });
+
+      expect(result.current.fields).toHaveLength(0);
+      const gameNode = result.current.nodes.find(isGameNode);
+      // @ts-expect-error - testing dynamic data access
+      expect(gameNode?.data.fieldId).toBeNull();
+    });
+
+    it('handles importState with migrated teams', () => {
+      const { result } = renderHook(() => useFlowState());
+      const mockState: Partial<FlowState> = {
+        metadata: { id: 1, name: 'Imported', date: '', start: '10:00', format: '6_2', author: 1, address: '', season: 1, league: 1, status: 'DRAFT' },
+        nodes: [{ id: 'n1', type: 'field', data: { name: 'F1', order: 0 }, position: { x: 0, y: 0 } } as unknown as FlowNode],
+        globalTeams: [
+          // @ts-expect-error - testing migration
+          { id: 't1', label: 'Team 1', reference: 'REF' }
+        ]
+      };
+
+      act(() => {
+        result.current.importState(mockState as FlowState);
+      });
+
+      expect(result.current.metadata.name).toBe('Imported');
+      expect(result.current.nodes).toHaveLength(1);
+      expect(result.current.globalTeams[0]).toHaveProperty('groupId', null);
+    });
+
+    it('clearAll resets everything including teams', () => {
+      const { result } = renderHook(() => useFlowState());
+      act(() => {
+        result.current.addField('F');
+        result.current.addGlobalTeamGroup('G');
+      });
+      expect(result.current.fields).toHaveLength(1);
+      expect(result.current.globalTeamGroups).toHaveLength(1);
+
+      act(() => {
+        result.current.clearAll();
+      });
+
+      expect(result.current.fields).toHaveLength(0);
+      expect(result.current.globalTeamGroups).toHaveLength(0);
+    });
+
+    it('clearSchedule resets nodes but preserves teams', () => {
+      const { result } = renderHook(() => useFlowState());
+      act(() => {
+        result.current.addGameNode();
+        result.current.addGlobalTeamGroup('G');
+      });
+      expect(result.current.nodes).toHaveLength(1);
+      expect(result.current.globalTeamGroups).toHaveLength(1);
+
+      act(() => {
+        result.current.clearSchedule();
+      });
+
+      expect(result.current.nodes).toHaveLength(0);
+      expect(result.current.globalTeamGroups).toHaveLength(1);
+    });
+
+    it('addBulkFields handles clearExisting flag', () => {
+      const { result } = renderHook(() => useFlowState());
+      act(() => {
+        result.current.addField('Old Field');
+      });
+      expect(result.current.fields).toHaveLength(1);
+
+      act(() => {
+        result.current.addBulkFields([{ id: 'new', name: 'New', order: 0 }], true);
+      });
+
+      expect(result.current.fields).toHaveLength(1);
+      expect(result.current.fields[0].name).toBe('New');
+    });
+
+    it('updateMetadata updates metadata state', () => {
+      const { result } = renderHook(() => useFlowState());
+      act(() => {
+        result.current.updateMetadata({ address: 'New Venue' });
+      });
+      expect(result.current.metadata.address).toBe('New Venue');
+    });
+
+    it('importState handles missing metadata fields and migration', () => {
+      const { result } = renderHook(() => useFlowState());
+      act(() => {
+        result.current.importState({ 
+          metadata: { id: 1, name: 'Minimal' } as GamedayMetadata,
+          globalTeams: [{ id: 't1', label: 'L', reference: 'R' }] as unknown as FlowState['globalTeams']
+        } as FlowState);
+      });
+      expect(result.current.metadata.date).toBe('');
+      expect(result.current.metadata.status).toBe('DRAFT');
+      expect(result.current.globalTeams[0].groupId).toBeNull();
+    });
+
+    it('deleteNode handles cascading from field to stage to games', () => {
+      const { result } = renderHook(() => useFlowState());
+      let fieldId: string = '';
+      let stageId: string = '';
+      act(() => {
+        fieldId = result.current.addFieldNode().id;
+      });
+      act(() => {
+        stageId = result.current.addStageNode(fieldId)!.id;
+      });
+      act(() => {
+        result.current.addGameNodeInStage(stageId);
+      });
+      expect(result.current.nodes).toHaveLength(3);
+      act(() => {
+        result.current.deleteNode(fieldId);
+      });
+      expect(result.current.nodes).toHaveLength(0);
+    });
+
+    it('deleteNode cleans up lost dynamic team references', () => {
+      const { result } = renderHook(() => useFlowState());
+      let fieldId: string = '', stageId: string = '', g1Id: string = '', g2Id: string = '';
+      act(() => {
+        fieldId = result.current.addFieldNode().id;
+      });
+      act(() => {
+        stageId = result.current.addStageNode(fieldId)!.id;
+      });
+      act(() => {
+        g1Id = result.current.addGameNodeInStage(stageId).id;
+      });
+      act(() => {
+        g2Id = result.current.addGameNodeInStage(stageId, { homeTeamDynamic: { type: 'winner', matchName: 'Game 1' } }).id;
+      });
+      act(() => {
+        result.current.setEdges([{
+          id: 'e1', source: g1Id, target: g2Id, sourceHandle: 'winner', targetHandle: 'home',
+          type: 'gameToGame', data: { sourcePort: 'winner', targetPort: 'home' }
+        }]);
+      });
+      
+      act(() => {
+        result.current.deleteNode(g1Id);
+      });
+
+      const g2 = result.current.nodes.find(n => n.id === g2Id) as GameNode;
+      expect(g2?.data.homeTeamDynamic).toBeNull();
+    });
+
+    it('getGameField and getGameStage handle invalid hierarchy', () => {
+      const { result } = renderHook(() => useFlowState());
+      const gId = 'game-1';
+      act(() => {
+        result.current.addBulkGames([{ id: gId, type: 'game', data: { standing: 'G1' }, parentId: 'non-existent', position: { x: 0, y: 0 } } as unknown as GameNode]);
+      });
+      expect(result.current.getGameField(gId)).toBeNull();
+      expect(result.current.getGameStage(gId)).toBeNull();
     });
   });
 });

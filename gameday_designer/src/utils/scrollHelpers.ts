@@ -54,11 +54,15 @@ export function scrollToGame(gameId: string, smooth: boolean = true): void {
  */
 export function expandPathToNode(
   nodeId: string,
-  type: 'game' | 'stage' | 'field' | 'team',
+  type: 'game' | 'stage' | 'field' | 'team' | 'metadata',
   nodes: FlowNode[],
   expandField: (fieldId: string) => void,
   expandStage: (stageId: string) => void
 ): boolean {
+  if (type === 'metadata') {
+    return true;
+  }
+
   if (type === 'game') {
     return expandPathToGame(nodeId, nodes, expandField, expandStage);
   }
@@ -85,7 +89,7 @@ export function expandPathToNode(
  */
 export async function scrollToElementWithExpansion(
   id: string,
-  type: 'game' | 'stage' | 'field' | 'team',
+  type: 'game' | 'stage' | 'field' | 'team' | 'metadata',
   nodes: FlowNode[],
   expandField: (fieldId: string) => void,
   expandStage: (stageId: string) => void,
@@ -98,7 +102,8 @@ export async function scrollToElementWithExpansion(
     game: 'game',
     stage: 'stage',
     field: 'field',
-    team: 'team'
+    team: 'team',
+    metadata: 'gameday'
   };
   const prefix = prefixMap[type];
 

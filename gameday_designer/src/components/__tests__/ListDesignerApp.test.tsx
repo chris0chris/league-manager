@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import ListDesignerApp from '../ListDesignerApp';
@@ -44,6 +44,10 @@ vi.mock('../../api/gamedayApi', () => ({
       status: 'DRAFT',
     }),
     patchGameday: vi.fn().mockResolvedValue({}),
+    getGamedayGames: vi.fn().mockResolvedValue([]),
+    updateBulkGameResults: vi.fn().mockResolvedValue({}),
+    listSeasons: vi.fn().mockResolvedValue([]),
+    listLeagues: vi.fn().mockResolvedValue([]),
   },
 }));
 
@@ -177,13 +181,13 @@ describe('ListDesignerApp', () => {
         ...defaultMockReturn,
         ui: { ...defaultMockReturn.ui, canExport: true }
       });
-      const { user } = await renderApp();
+      await renderApp();
       
-      const exportBtn = screen.getByTestId('export-button');
+      const exportBtn = await screen.findByTestId('export-button');
       await waitFor(() => expect(exportBtn).not.toBeDisabled());
-      await user.click(exportBtn);
+      fireEvent.click(exportBtn);
       
-      expect(mockHandlers.handleExport).toHaveBeenCalled();
+      await waitFor(() => expect(mockHandlers.handleExport).toHaveBeenCalled());
     });
 
     it('should call clearAll when clear is triggered', async () => {
@@ -191,16 +195,16 @@ describe('ListDesignerApp', () => {
         ...defaultMockReturn,
         ui: { ...defaultMockReturn.ui, hasData: true }
       });
-      const { user } = await renderApp();
+      await renderApp();
       
       const metadataHeader = screen.getByTestId('gameday-metadata-header');
-      const accordionBtn = within(metadataHeader).getByRole('button');
-      await user.click(accordionBtn);
+      const accordionBtn = metadataHeader.querySelector('.accordion-button') as HTMLElement;
+      fireEvent.click(accordionBtn);
       
       const clearBtn = await screen.findByRole('button', { name: /clear schedule/i });
-      await user.click(clearBtn);
+      fireEvent.click(clearBtn);
       
-      expect(mockHandlers.handleClearAll).toHaveBeenCalled();
+      await waitFor(() => expect(mockHandlers.handleClearAll).toHaveBeenCalled());
     });
   });
 });

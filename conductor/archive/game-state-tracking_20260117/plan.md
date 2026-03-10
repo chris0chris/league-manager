@@ -33,37 +33,37 @@ This phase implements the business logic for state transitions, result updates, 
 ## Phase 3: Frontend - Gameday Lifecycle UI
 This phase adds the controls to the Gameday Designer to manage the overall gameday state.
 
-- [ ] Task: Add "Publish Schedule" Button
-    - [ ] Implement button in the toolbar.
-    - [ ] Add confirmation modal explaining the "Locked" state.
-- [ ] Task: Implement Locked State UI
-    - [ ] visual indicators for "Published" state.
-    - [ ] Disable/Restrict drag-and-drop and editing features when locked.
-    - [ ] Add "Unlock" mechanism (with strict confirmation).
-- [ ] Task: TDD - Write tests for lifecycle UI components.
+- [x] Task: Add "Publish Schedule" Button 8e6c18e
+    - [x] Implement button in the toolbar (moved to Actions dropdown/Metadata header).
+    - [x] Add confirmation modal explaining the "Locked" state.
+- [x] Task: Implement Locked State UI 8e6c18e
+    - [x] visual indicators for "Published" state.
+    - [x] Disable/Restrict drag-and-drop and editing features when locked.
+    - [x] Add "Unlock" mechanism (with strict confirmation).
+- [x] Task: TDD - Write tests for lifecycle UI components. 8e6c18e
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend - Gameday Lifecycle UI' (Protocol in workflow.md) [checkpoint: 881192e]
 
 
 ## Phase 4: Frontend - Result Entry & Visualization
 This phase enables users to enter scores and see the dynamic flow of the tournament.
 
-- [ ] Task: Create Result Entry Modal
-    - [ ] Design modal to enter Halftime and Final scores for a game.
-    - [ ] Add entry point from the Game Node (e.g., "Enter Result" button).
-- [ ] Task: Update Game Node Display
-    - [ ] Show current game status (In Progress, Completed).
-    - [ ] Display scores directly on the node.
-- [ ] Task: Implement Dynamic Reference Visualization
-    - [ ] Update `GameNode` to display resolved team names (e.g., "Winner G1 (Team Alpha)") alongside placeholders.
-    - [ ] Ensure real-time updates when results change.
-- [ ] Task: TDD - Write tests for result entry and node updates.
+- [x] Task: Create Result Entry Modal 8e6c18e
+    - [x] Design modal to enter Halftime and Final scores for a game.
+    - [x] Add entry point from the Game Node (e.g., "Enter Result" button).
+- [x] Task: Update Game Node Display 8e6c18e
+    - [x] Show current game status (In Progress, Completed).
+    - [x] Display scores directly on the node.
+- [x] Task: Implement Dynamic Reference Visualization 8e6c18e
+    - [x] Update `GameNode` to display resolved team names (e.g., "Winner G1 (Team Alpha)") alongside placeholders.
+    - [x] Ensure real-time updates when results change.
+- [x] Task: TDD - Write tests for result entry and node updates. 8e6c18e
 - [x] Task: Conductor - User Manual Verification 'Phase 4: Frontend - Result Entry & Visualization' (Protocol in workflow.md) [checkpoint: a3ca8ca]
 
 
 ## Phase 5: Final Polish & Integration
-- [ ] Task: End-to-End Testing
-    - [ ] Verify complete flow: Create -> Publish -> Enter Results -> View Progression.
-- [ ] Task: UI/UX Refinements
-    - [ ] Polish transitions and empty states.
-    - [ ] Ensure mobile responsiveness for result entry.
+- [x] Task: End-to-End Testing 8e6c18e
+    - [x] Verify complete flow: Create -> Publish -> Enter Results -> View Progression.
+- [x] Task: UI/UX Refinements 8e6c18e
+    - [x] Polish transitions and empty states.
+    - [x] Ensure mobile responsiveness for result entry.
 - [x] Task: Conductor - User Manual Verification 'Phase 5: Final Polish & Integration' (Protocol in workflow.md) [checkpoint: db918db]

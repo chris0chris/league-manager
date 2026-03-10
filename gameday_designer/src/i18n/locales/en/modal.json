@@ -9,6 +9,8 @@
   "tournamentGenerator": {
     "title": "Generate Tournament",
     "noTemplates": "No tournament templates available.",
+    "warningTitle": "Attention: Auto-Clear",
+    "warningMessage": "Generating a new tournament will PERMANENTLY delete your current schedule and fields. This action cannot be undone.",
     "generateTeams": "Generate {{count}} teams automatically",
     "autoAssignTeams": "Auto-assign teams to games",
     "previewTitle": "Preview:",
@@ -32,5 +34,11 @@
     "ready": "The schedule is valid and ready to be published.",
     "confirmWithWarnings": "Publish Anyway",
     "confirm": "Publish Now"
+  },
+  "teamSelection": {
+    "title": "Connect Existing Team",
+    "placeholder": "Search by team name...",
+    "noResults": "No teams found matching your search.",
+    "hint": "Enter at least 2 characters to search."
   }
 }

@@ -3,6 +3,8 @@ import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
 import type { FlowNode } from '../../types/flowchart';
 
+const validMetadata = { id: 1, name: 'Test', date: '2026-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
+
 describe('useFlowValidation - Stage Sequence', () => {
   it('should warn when stages on the same field have out-of-order start times', () => {
     const nodes: FlowNode[] = [
@@ -28,7 +30,7 @@ describe('useFlowValidation - Stage Sequence', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, []));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
     const warning = result.current.warnings.find(w => w.type === 'stage_time_conflict' && w.id.includes('stage_sequence_time'));
     expect(warning).toBeDefined();
@@ -65,7 +67,7 @@ describe('useFlowValidation - Stage Sequence', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, []));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
     const warning = result.current.warnings.find(w => w.id.includes('stage_sequence_type'));
     expect(warning).toBeDefined();
@@ -89,7 +91,7 @@ describe('useFlowValidation - Stage Sequence', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, []));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
     const error = result.current.errors.find(e => e.type === 'stage_outside_field' && e.id === 'stage1_outside_field');
     expect(error).toBeDefined();
@@ -113,7 +115,7 @@ describe('useFlowValidation - Stage Sequence', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, []));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
 
     const error = result.current.errors.find(e => e.type === 'stage_outside_field' && e.id === 'stage1_outside_field');
     expect(error).toBeDefined();

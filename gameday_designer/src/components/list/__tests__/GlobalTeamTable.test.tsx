@@ -82,7 +82,7 @@ describe('GlobalTeamTable', () => {
 
   it('renders "Add Group" button', () => {
     renderTable({ groups: [], teams: [] });
-    const addButton = screen.getByRole('button', { name: /Add Group/i });
+    const addButton = screen.getByTitle(/create a new team group/i);
     expect(addButton).toBeInTheDocument();
 
     fireEvent.click(addButton);

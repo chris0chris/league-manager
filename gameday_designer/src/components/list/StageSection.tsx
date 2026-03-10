@@ -31,12 +31,15 @@ export interface StageSectionProps {
   onUpdate: (nodeId: string, data: Partial<StageNode['data']>) => void;
   onDelete: (nodeId: string) => void;
   onSelectNode: (nodeId: string | null) => void;
+  onHighlightElement: (id: string, type: import('../../types/flowchart').HighlightedElement['type']) => void;
   selectedNodeId: string | null;
   onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
+  onSwapTeams: (gameId: string) => void;
   onAddGame: (stageId: string) => void;
   onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
-  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) => void;
   onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onOpenResultModal: (gameId: string) => void;
   isExpanded: boolean;
   highlightedSourceGameId?: string | null;
   onDynamicReferenceClick: (sourceGameId: string) => void;
@@ -53,14 +56,18 @@ const StageSection: React.FC<StageSectionProps> = memo(({
   highlightedElement,
   onUpdate,
   onDelete,
-  onSelectNode,
-  selectedNodeId,
+    onSelectNode,
+    onHighlightElement,
+    selectedNodeId,
   onAssignTeam,
+  onSwapTeams,
   onAddGame,
-  onAddGameToGameEdge,
-  onAddStageToGameEdge,
-  onRemoveEdgeFromSlot,
-  isExpanded: isExpandedProp,
+    onAddGameToGameEdge,
+    onAddStageToGameEdge,
+    onRemoveEdgeFromSlot,
+    onOpenResultModal,
+    isExpanded: isExpandedProp,
+
   highlightedSourceGameId,
   onDynamicReferenceClick,
   onNotify,
@@ -266,12 +273,11 @@ const StageSection: React.FC<StageSectionProps> = memo(({
                 variant="link" 
                 onClick={handleStartEdit} 
                 aria-label={t('ui:tooltip.editStageName')} 
-                className="p-0 me-auto btn-adaptive" 
+                className="p-0 me-auto" 
                 style={{ fontSize: '0.875rem' }}
                 title={t('ui:tooltip.editStageName')}
               >
                 <i className={`bi ${ICONS.PENCIL_SMALL}`}></i>
-                <span className="btn-label-adaptive">{t('ui:button.edit')}</span>
               </Button>
             )}
             {readOnly && <span className="me-auto" />}
@@ -279,17 +285,15 @@ const StageSection: React.FC<StageSectionProps> = memo(({
         )}
 
         {!readOnly && (
-          <Button 
-            size="sm" 
-            variant="outline-primary" 
+          <button 
+            className="btn btn-sm btn-outline-primary btn-adaptive me-2"
             onClick={handleAddGame} 
             aria-label={t('ui:button.addGame')} 
-            className="me-2 btn-adaptive"
             title={t('ui:tooltip.addGame')}
           >
             <i className={`bi ${ICONS.ADD} me-2`}></i>
             <span className="btn-label-adaptive">{t('ui:button.addGame')}</span>
-          </Button>
+          </button>
         )}
 
         <input
@@ -309,7 +313,6 @@ const StageSection: React.FC<StageSectionProps> = memo(({
             size="sm" 
             onClick={handleDelete} 
             aria-label={t('ui:tooltip.deleteStage')}
-            className="btn-adaptive"
             title={t('ui:tooltip.deleteStage')}
           >
             <i className={`bi ${ICONS.DELETE}`}></i>
@@ -326,16 +329,15 @@ const StageSection: React.FC<StageSectionProps> = memo(({
                 <i className={`bi ${ICONS.TOURNAMENT} me-2`} style={{ fontSize: '2rem', opacity: 0.3 }}></i>
                 <p className="text-muted mb-3">{t('ui:message.noGamesInStage')}</p>
                 {!readOnly && (
-                  <Button 
-                    variant="outline-primary" 
+                  <button 
+                    className="btn btn-outline-primary btn-adaptive px-4"
                     onClick={handleAddGame} 
                     aria-label={t('ui:button.addGame')} 
-                    className="btn-adaptive"
                     title={t('ui:tooltip.addGame')}
                   >
                     <i className={`bi ${ICONS.ADD} me-2`} />
                     <span className="btn-label-adaptive">{t('ui:button.addGame')}</span>
-                  </Button>
+                  </button>
                 )}
               </div>
             ) : (
@@ -350,12 +352,16 @@ const StageSection: React.FC<StageSectionProps> = memo(({
                   onUpdate={onUpdate}
                   onDelete={onDelete}
                   onSelectNode={onSelectNode}
+                  onHighlightElement={onHighlightElement}
                   selectedNodeId={selectedNodeId}
                   onAssignTeam={onAssignTeam}
+                  onSwapTeams={onSwapTeams}
                   onAddGameToGameEdge={onAddGameToGameEdge}
-                  onAddStageToGameEdge={onAddStageToGameEdge}
+                   onAddStageToGameEdge={onAddStageToGameEdge}
                   onRemoveEdgeFromSlot={onRemoveEdgeFromSlot}
+                  onOpenResultModal={onOpenResultModal}
                   highlightedSourceGameId={highlightedSourceGameId}
+
                   onDynamicReferenceClick={onDynamicReferenceClick}
                   onNotify={onNotify}
                   readOnly={readOnly}

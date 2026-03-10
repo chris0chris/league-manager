@@ -549,7 +549,7 @@ describe('tournamentGenerator', () => {
       expect(result.games).toHaveLength(0);
     });
 
-    it('should skip field assignment when field index out of range', () => {
+    it('should wrap field assignment when field index out of range', () => {
       const template: TournamentTemplate = {
         ...basicTemplate,
         stages: [
@@ -558,7 +558,7 @@ describe('tournamentGenerator', () => {
             category: 'preliminary',
             progressionMode: 'round_robin',
             config: { gamesPerTeam: 2 },
-            fieldAssignment: 5, // Out of range for 2 fields
+            fieldAssignment: 5, // Out of range for 2 fields, should wrap to 5 % 2 = 1
           },
         ],
       };
@@ -571,8 +571,9 @@ describe('tournamentGenerator', () => {
 
       const result = generateTournament(sampleTeams, config);
 
-      // Should not create the stage if field index is out of range
-      expect(result.stages).toHaveLength(0);
+      // Should create the stage on the wrapped-around field (index 1)
+      expect(result.stages).toHaveLength(1);
+      expect(result.stages[0].parentId).toBe(result.fields[1].id);
     });
   });
 

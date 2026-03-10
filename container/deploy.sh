@@ -190,11 +190,28 @@ case "$VERSION_ARG" in
         # Determine bump strategy
         if [[ $CURRENT_VERSION =~ -rc\.([0-9]+)$ ]]; then
             # Already on RC version - bump rc_build (e.g., 2.13.1-rc.1 → 2.13.1-rc.2)
-            # Uses bump-my-version which automatically runs post-commit hooks for uv.lock
             echo "Incrementing RC build number..."
-            # Ensure uv.lock is updated and staged if the hook is used,
-            # or handle it here for robustness
-            bump-my-version bump rc_build
+            RC_NUM="${BASH_REMATCH[1]}"
+            NEW_RC=$((RC_NUM + 1))
+            BASE_VERSION="${CURRENT_VERSION%-rc.*}"
+            NEW_VERSION="${BASE_VERSION}-rc.${NEW_RC}"
+
+            echo "Creating version: $NEW_VERSION"
+
+            sed -i "s/__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" league_manager/__init__.py
+            sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" liveticker/package.json
+            sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" passcheck/package.json
+            sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" scorecard/package.json
+            sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" gameday_designer/package.json
+            sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" pyproject.toml
+            sed -i "s/current_version = \".*\"/current_version = \"$NEW_VERSION\"/" pyproject.toml
+
+            echo "Regenerating uv.lock..."
+            uv lock
+
+            git add league_manager/__init__.py liveticker/package.json passcheck/package.json scorecard/package.json gameday_designer/package.json pyproject.toml uv.lock
+            git commit -m "Bump version: $CURRENT_VERSION → $NEW_VERSION"
+            git tag -a "v$NEW_VERSION" -m "Bump version: $CURRENT_VERSION → $NEW_VERSION"
         else
             # Stable version - bump patch and create RC.1 (e.g., 2.13.0 → 2.13.1-rc.1)
             # Manual approach needed because bump-my-version cannot create RC from stable
