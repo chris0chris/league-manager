@@ -10,7 +10,7 @@
     "axios": "1.13.6",
     "bootstrap": "5.3.8",
     "bootstrap-icons": "1.13.1",
-    "i18next": "25.8.14",
+    "i18next": "25.8.17",
     "i18next-browser-languagedetector": "8.2.1",
     "i18next-resources-to-backend": "1.2.1",
     "react": "19.2.4",
