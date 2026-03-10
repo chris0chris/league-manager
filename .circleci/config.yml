@@ -386,7 +386,7 @@ jobs:
       - setup_remote_docker:
           version: 20.10.24
       - run:
-          name: Plan a deploy
+          name: Plan staging deploy
           command: |
             circleci run release plan \
               --environment-name="stage" \
@@ -403,11 +403,11 @@ jobs:
           tag: staging
           extra_tag: $CIRCLE_TAG
       - run:
-          name: Update a deploy to SUCCESS
+          name: Update staging deploy to SUCCESS
           command: circleci run release update --status=SUCCESS 
           when: on_success 
       - run:
-          name: Update planned deploy to FAILED
+          name: Update planned staging deploy to FAILED
           command: circleci run release update --status=FAILED 
           when: on_fail
 
@@ -426,7 +426,7 @@ jobs:
       - setup_remote_docker:
           version: 20.10.24
       - run:
-          name: Plan a deploy
+          name: Plan production deploy
           command: |
             circleci run release plan \
               --environment-name="prod" \
@@ -443,11 +443,11 @@ jobs:
           tag: latest
           extra_tag: $CIRCLE_TAG
       - run:
-          name: Update a deploy to SUCCESS
+          name: Update production deploy to SUCCESS
           command: circleci run release update --status=SUCCESS 
           when: on_success 
       - run:
-          name: Update planned deploy to FAILED
+          name: Update planned production deploy to FAILED
           command: circleci run release update --status=FAILED 
           when: on_fail
 
