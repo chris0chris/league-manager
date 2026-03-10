@@ -93,18 +93,28 @@ first_value = "1"
 
 [[tool.bumpversion.files]]
 filename = "league_manager/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "liveticker/package.json"
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "passcheck/package.json"
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "scorecard/package.json"
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "gameday_designer/package.json"
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
