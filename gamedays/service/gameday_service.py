@@ -3,8 +3,6 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-logger = logging.getLogger(__name__)
-
 from gamedays.forms import SCHEDULE_CUSTOM_CHOICE_C, GamedayGaminfoFieldsAndGroupsForm
 from gamedays.models import Gameinfo, Gameday, Gameresult, TeamLog, GameSetup
 from gamedays.service.gameday_settings import (
@@ -114,6 +112,14 @@ class EmptyDefenseStatisticTable:
     def to_json(*args, **kwargs):
         return EMPTY_DATA
 
+class EmptyPasscheckDetailsTable:
+    @staticmethod
+    def to_html(*args, **kwargs):
+        return "Empty Gameday Passcheck Details Table"
+
+    @staticmethod
+    def to_json(*args, **kwargs):
+        return EMPTY_DATA
 
 class EventsTableError:
     """Marker for when events table cannot be generated due to data inconsistency"""
@@ -171,6 +177,16 @@ class EmptyGamedayService:
     @staticmethod
     def get_defense_player_statistic_table():
         return EmptyDefenseStatisticTable
+
+    @staticmethod
+    def get_resolved_designer_data(gameday_pk):
+        gameday = Gameday.objects.get(pk=gameday_pk)
+        return gameday.designer_data or {"nodes": [], "edges": []}
+
+    @staticmethod
+    def get_staff_passcheck_details():
+        return EmptyPasscheckDetailsTable
+
 
 class GamedayService:
     @classmethod
