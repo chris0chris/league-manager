@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("gamedays", "0028_gamedaydesignerstate"),
+        ("gamedays", "0029_gamedaydesignerstate"),
     ]
 
     operations = [

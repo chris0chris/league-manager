@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("gamedays", "0027_alter_gameresult_team"),
+        ("gamedays", "0028_remove_gameinfo_redundant_fields"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
