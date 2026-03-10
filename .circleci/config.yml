@@ -404,11 +404,11 @@ jobs:
           extra_tag: $CIRCLE_TAG
       - run:
           name: Update staging deploy to SUCCESS
-          command: circleci run release update --status=SUCCESS 
+          command: circleci run release update "leaguesphere-stage" --status=SUCCESS 
           when: on_success 
       - run:
           name: Update planned staging deploy to FAILED
-          command: circleci run release update --status=FAILED 
+          command: circleci run release update "leaguesphere-stage" --status=FAILED 
           when: on_fail
 
   run_migrations_staging:
@@ -444,11 +444,11 @@ jobs:
           extra_tag: $CIRCLE_TAG
       - run:
           name: Update production deploy to SUCCESS
-          command: circleci run release update --status=SUCCESS 
+          command: circleci run release update "leaguesphere-prod" --status=SUCCESS 
           when: on_success 
       - run:
           name: Update planned production deploy to FAILED
-          command: circleci run release update --status=FAILED 
+          command: circleci run release update "leaguesphere-prod" --status=FAILED 
           when: on_fail
 
   run_migrations_production:
