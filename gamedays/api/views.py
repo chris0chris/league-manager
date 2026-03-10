@@ -603,8 +603,8 @@ class GameResultUpdateAPIView(APIView):
             home_res = Gameresult.objects.filter(gameinfo=game, isHome=True).first()
             away_res = Gameresult.objects.filter(gameinfo=game, isHome=False).first()
 
-            home_fh = halftime_score.get("home") if halftime_score else (home_res.fh if home_res else 0)
-            away_fh = halftime_score.get("away") if halftime_score else (away_res.fh if away_res else 0)
+            home_fh = halftime_score.get("home", 0) if halftime_score else (home_res.fh if home_res else 0)
+            away_fh = halftime_score.get("away", 0) if halftime_score else (away_res.fh if away_res else 0)
 
             Gameresult.objects.filter(gameinfo=game, isHome=True).update(
                 fh=home_fh, sh=final_score.get("home", 0) - (home_fh or 0)

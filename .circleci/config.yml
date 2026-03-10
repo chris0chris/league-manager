@@ -386,9 +386,9 @@ jobs:
       - setup_remote_docker:
           version: 20.10.24
       - run:
-          name: Plan a deploy
+          name: Plan staging deploy
           command: |
-            circleci run release plan \
+            circleci run release plan "leaguesphere-stage" \
               --environment-name="stage" \
               --component-name="leaguesphere" \
               --target-version="${CIRCLE_TAG}"
@@ -403,12 +403,12 @@ jobs:
           tag: staging
           extra_tag: $CIRCLE_TAG
       - run:
-          name: Update a deploy to SUCCESS
-          command: circleci run release update --status=SUCCESS 
+          name: Update staging deploy to SUCCESS
+          command: circleci run release update "leaguesphere-stage" --status=SUCCESS 
           when: on_success 
       - run:
-          name: Update planned deploy to FAILED
-          command: circleci run release update --status=FAILED 
+          name: Update planned staging deploy to FAILED
+          command: circleci run release update "leaguesphere-stage" --status=FAILED 
           when: on_fail
 
   run_migrations_staging:
@@ -426,9 +426,9 @@ jobs:
       - setup_remote_docker:
           version: 20.10.24
       - run:
-          name: Plan a deploy
+          name: Plan production deploy
           command: |
-            circleci run release plan \
+            circleci run release plan "leaguesphere-prod" \
               --environment-name="prod" \
               --component-name="leaguesphere" \
               --target-version="${CIRCLE_TAG}"
@@ -443,12 +443,12 @@ jobs:
           tag: latest
           extra_tag: $CIRCLE_TAG
       - run:
-          name: Update a deploy to SUCCESS
-          command: circleci run release update --status=SUCCESS 
+          name: Update production deploy to SUCCESS
+          command: circleci run release update "leaguesphere-prod" --status=SUCCESS 
           when: on_success 
       - run:
-          name: Update planned deploy to FAILED
-          command: circleci run release update --status=FAILED 
+          name: Update planned production deploy to FAILED
+          command: circleci run release update "leaguesphere-prod" --status=FAILED 
           when: on_fail
 
   run_migrations_production:

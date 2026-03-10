@@ -1,51 +1,55 @@
-/**
- * ListCanvas Component
- *
- * Main container for the list-based UI that displays the global team pool
- * and fields with their nested stages/games.
- */
-
-import React, { useState, useCallback, useMemo, memo } from 'react';
-import { Row, Col, Card, Button } from 'react-bootstrap';
-import { useTypedTranslation } from '../i18n/useTypedTranslation';
-import GlobalTeamTable from './list/GlobalTeamTable';
+import React, { memo, useMemo, useState, useCallback } from 'react';
+import { Card, Button, Accordion, Stack } from 'react-bootstrap';
+import { 
+  DesignerNode, 
+  GameNode, 
+  StageNode, 
+  FieldNode, 
+  isGameNode, 
+  isStageNode, 
+  isFieldNode,
+  Team,
+  TeamGroup,
+  HighlightedElement
+} from '../types/designer';
+import { Edge } from '@xyflow/react';
+import TeamPool from './list/TeamPool';
 import FieldSection from './list/FieldSection';
-import type { FlowNode, FlowEdge, FieldNode, StageNode, GlobalTeam, GlobalTeamGroup } from '../types/flowchart';
-import { isFieldNode, isStageNode } from '../types/flowchart';
-import { ICONS } from '../utils/iconConstants';
-import './ListCanvas.css';
+import EmptyState from './list/EmptyState';
+import GameResultsTable from './list/GameResultsTable';
+import { useTypedTranslation } from '../i18n/i18n';
 
-export interface ListCanvasProps {
-  nodes: FlowNode[];
-  edges: FlowEdge[];
-  globalTeams: GlobalTeam[];
-  globalTeamGroups: GlobalTeamGroup[];
-  onUpdateNode: (nodeId: string, data: Record<string, unknown>) => void;
-  onDeleteNode: (nodeId: string) => void;
+interface ListCanvasProps {
+  nodes: DesignerNode[];
+  edges: Edge[];
+  globalTeams: Team[];
+  globalTeamGroups: TeamGroup[];
+  onUpdateNode: (id: string, data: Partial<import('../types/designer').GameData | import('../types/designer').StageData | import('../types/designer').FieldData>) => void;
+  onDeleteNode: (id: string) => void;
   onAddField: () => void;
   onAddStage: (fieldId: string) => void;
-  onSelectNode: (nodeId: string | null) => void;
-  onHighlightElement: (id: string, type: import('../types/flowchart').HighlightedElement['type']) => void;
-  selectedNodeId: string | null;
-  onAddGlobalTeam: (groupId: string) => void;
-  onUpdateGlobalTeam: (teamId: string, data: Partial<Omit<GlobalTeam, 'id'>>) => void;
-  onDeleteGlobalTeam: (teamId: string) => void;
-  onReplaceGlobalTeam: (teamId: string, newTeam: { id: number; text: string }) => void;
-  onReorderGlobalTeam: (teamId: string, direction: 'up' | 'down') => void;
+  onSelectNode: (id: string | null) => void;
+  onHighlightElement: (element: HighlightedElement | null) => void;
+  selectedNodeId?: string | null;
+  onAddGlobalTeam: (label: string, group?: string) => void;
+  onUpdateGlobalTeam: (id: string, data: Partial<Team>) => void;
+  onDeleteGlobalTeam: (id: string) => void;
+  onReplaceGlobalTeam: (oldId: string, newId: string) => void;
+  onReorderGlobalTeam: (id: string, newIndex: number) => void;
   onAddGlobalTeamGroup: () => void;
-  onUpdateGlobalTeamGroup: (groupId: string, data: Partial<Omit<GlobalTeamGroup, 'id'>>) => void;
-  onDeleteGlobalTeamGroup: (groupId: string) => void;
-  onReorderGlobalTeamGroup: (groupId: string, direction: 'up' | 'down') => void;
-  onShowTeamSelection: (id: string, mode?: 'group' | 'replace' | 'official') => void;
-  getTeamUsage: (teamId: string) => { gameId: string; slot: 'home' | 'away' }[];
-  onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
-  onSwapTeams: (gameId: string) => void;
+  onUpdateGlobalTeamGroup: (id: string, data: Partial<TeamGroup>) => void;
+  onDeleteGlobalTeamGroup: (id: string) => void;
+  onReorderGlobalTeamGroup: (id: string, newIndex: number) => void;
+  onShowTeamSelection: (slotId: string, side: 'home' | 'away' | 'official') => void;
+  getTeamUsage: (teamId: string) => { count: number; games: string[] };
+  onAssignTeam: (slotId: string, side: 'home' | 'away' | 'official', teamId: string) => void;
+  onSwapTeams: (slotId: string) => void;
   onAddGame: (stageId: string) => void;
-  onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
-  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) => void;
-  onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
-  onOpenResultModal: (gameId: string) => void;
-  onGenerateTournament?: () => void;
+  onAddGameToGameEdge: (sourceId: string, targetId: string, targetHandle: 'home' | 'away') => void;
+  onAddStageToGameEdge: (sourceId: string, targetId: string, targetHandle: 'home' | 'away') => void;
+  onRemoveEdgeFromSlot: (slotId: string, handle: 'home' | 'away') => void;
+  onOpenResultModal: (game: GameNode) => void;
+  onGenerateTournament: () => void;
   expandedFieldIds: Set<string>;
   expandedStageIds: Set<string>;
   highlightedElement?: HighlightedElement | null;
@@ -53,6 +57,9 @@ export interface ListCanvasProps {
   onDynamicReferenceClick: (sourceGameId: string) => void;
   onNotify?: (message: string, type: import('../types/designer').NotificationType, title?: string) => void;
   onAddOfficials?: () => void;
+  resultsMode?: boolean;
+  gameResults?: import('../types/designer').GameResultsDisplay[];
+  onSaveBulkResults?: (results: Record<string, unknown>) => Promise<void>;
   readOnly?: boolean;
 }
 
@@ -95,6 +102,9 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
     onDynamicReferenceClick,
     onNotify,
     onAddOfficials,
+    resultsMode = false,
+    gameResults = [],
+    onSaveBulkResults,
     readOnly = false,
   } = props;
 
@@ -129,183 +139,168 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
     onAddGlobalTeamGroup();
   }, [onAddGlobalTeamGroup]);
 
+  if (resultsMode) {
+    return (
+      <div className="list-canvas px-3">
+        <Card className="shadow-sm">
+          <Card.Header className="bg-white">
+            <i className="bi bi-table me-2" />
+            {t('ui:title.bulkResultsEntry')}
+          </Card.Header>
+          <Card.Body className="p-0">
+            <GameResultsTable 
+              results={gameResults} 
+              onSave={onSaveBulkResults}
+            />
+          </Card.Body>
+        </Card>
+      </div>
+    );
+  }
+
+  if (fields.length === 0) {
+    return (
+      <div className="list-canvas px-3">
+        <Stack gap={3}>
+          <Accordion activeKey={isTeamPoolExpanded ? '0' : undefined} className="mb-3">
+            <Accordion.Item eventKey="0">
+              <Accordion.Header onClick={handleToggleTeamPool}>
+                <Stack direction="horizontal" gap={2} className="w-100 me-3">
+                  <i className="bi bi-people-fill text-primary" />
+                  <span className="fw-bold">{t('ui:title.teamPool')}</span>
+                  <div className="ms-auto">
+                    <Button 
+                      size="sm" 
+                      variant="outline-primary" 
+                      onClick={handleAddGroupHeader}
+                      disabled={readOnly}
+                    >
+                      <i className="bi bi-plus-lg me-1" />
+                      {t('ui:button.addGroup')}
+                    </Button>
+                  </div>
+                </Stack>
+              </Accordion.Header>
+              <Accordion.Body className="p-0">
+                <TeamPool
+                  teams={globalTeams}
+                  groups={globalTeamGroups}
+                  onAddTeam={onAddGlobalTeam}
+                  onUpdateTeam={onUpdateGlobalTeam}
+                  onDeleteTeam={onDeleteGlobalTeam}
+                  onReplaceTeam={onReplaceGlobalTeam}
+                  onReorderTeam={onReorderGlobalTeam}
+                  onAddGroup={onAddGlobalTeamGroup}
+                  onUpdateGroup={onUpdateGlobalTeamGroup}
+                  onDeleteGroup={onDeleteGlobalTeamGroup}
+                  onReorderGroup={onReorderGlobalTeamGroup}
+                  onNotify={onNotify}
+                  onAddOfficials={onAddOfficials}
+                  readOnly={readOnly}
+                />
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+          <EmptyState onAddField={onAddField} onGenerateTournament={onGenerateTournament} readOnly={readOnly} />
+        </Stack>
+      </div>
+    );
+  }
+
   return (
     <div className="list-canvas px-3">
-      <Row className="list-canvas__content g-3">
-        <Col md={isTeamPoolExpanded ? 3 : 'auto'} className={`teams-column ${!isTeamPoolExpanded ? 'teams-column--collapsed' : ''}`}>
-          <Card
-            id="team-team-pool"
-            className={`team-pool-card ${!isTeamPoolExpanded ? 'team-pool-card--collapsed' : ''} ${highlightedElement?.id === 'team-pool' ? 'is-highlighted' : ''}`}
-            onClick={!isTeamPoolExpanded ? handleToggleTeamPool : undefined}
-            style={{ cursor: !isTeamPoolExpanded ? 'pointer' : 'default' }}
-            data-testid="team-pool-card"
-          >
-            {isTeamPoolExpanded ? (
-              <>
-                <Card.Header className="d-flex align-items-center" onClick={handleToggleTeamPool} style={{ cursor: 'pointer' }}>
-                  <i className={`bi ${ICONS.COLLAPSED} me-2`} />
-                  <i className={`bi ${ICONS.TEAM} me-2`} />
-                  <strong>{t('ui:label.teamPool')}</strong>
-                  {!readOnly && (
-                    <div className="ms-auto d-flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline-primary" 
-                        onClick={handleAddGroupHeader} 
-                        className="btn-adaptive"
-                        title={t('ui:tooltip.addGroup')}
-                      >
-                        <i className={`bi ${ICONS.ADD} me-2`} />
-                        <span className="btn-label-adaptive">{t('ui:button.addGroup')}</span>
-                      </Button>
-                      {onAddOfficials && (
-                        <Button 
-                          size="sm" 
-                          variant="outline-secondary" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onAddOfficials();
-                          }} 
-                          title={t('ui:tooltip.addExternalOfficials')}
-                          data-testid="add-officials-button"
-                        >
-                          <i className="bi bi-person-badge" />
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </Card.Header>
-                <Card.Body>
-                  <GlobalTeamTable
-                    teams={globalTeams}
-                    groups={globalTeamGroups}
-                    highlightedElement={highlightedElement}
-                    onAddGroup={onAddGlobalTeamGroup}
-                    onUpdateGroup={onUpdateGlobalTeamGroup}
-                    onDeleteGroup={onDeleteGlobalTeamGroup}
-                    onReorderGroup={onReorderGlobalTeamGroup}
-                    onAddTeam={onAddGlobalTeam}
-                    onUpdate={onUpdateGlobalTeam}
-                    onDelete={onDeleteGlobalTeam}
-                    onReplace={onReplaceGlobalTeam}
-                    onReorder={onReorderGlobalTeam}
-                    onShowTeamSelection={onShowTeamSelection}
-                    getTeamUsage={getTeamUsage}
-                    allNodes={nodes}
-                    readOnly={readOnly}
-                  />
-                </Card.Body>
-              </>
-            ) : (
-              <div className="team-pool-sidebar">
-                <i className={`bi ${ICONS.TEAM} mb-2`} />
-                {globalTeamGroups.length > 0 && (
-                  <div className="team-pool-sidebar__indicators">
-                    <span className="badge bg-primary">{globalTeamGroups.length}</span>
-                    <span className="badge bg-secondary">{globalTeams.length}</span>
-                  </div>
-                )}
-                <div className="team-pool-sidebar__title">{t('ui:label.teamPool')}</div>
-              </div>
-            )}
-          </Card>
-        </Col>
-
-        <Col md={isTeamPoolExpanded ? 9 : true} className="fields-column">
-          <Card 
-            id="field-fields-card"
-            className={`fields-card ${highlightedElement?.id === 'fields-card' ? 'is-highlighted' : ''}`}
-          >
-            <Card.Header className="d-flex align-items-center">
-              <i className={`bi ${ICONS.FIELD} me-2`} />
-              <strong>{t('ui:label.fields')}</strong>
-              {!readOnly && (
-                <div className="ms-auto d-flex gap-2">
+      <Stack gap={3}>
+        <Accordion activeKey={isTeamPoolExpanded ? '0' : undefined}>
+          <Accordion.Item eventKey="0">
+            <Accordion.Header onClick={handleToggleTeamPool}>
+              <Stack direction="horizontal" gap={2} className="w-100 me-3">
+                <i className="bi bi-people-fill text-primary" />
+                <span className="fw-bold">{t('ui:title.teamPool')}</span>
+                <div className="ms-auto">
                   <Button 
                     size="sm" 
                     variant="outline-primary" 
-                    onClick={onAddField} 
-                    className="btn-adaptive"
-                    title={t('ui:tooltip.addField')}
-                    data-testid="add-field-button"
+                    onClick={handleAddGroupHeader}
+                    disabled={readOnly}
                   >
-                    <i className={`bi ${ICONS.ADD} me-2`} />
-                    <span className="btn-label-adaptive">{t('ui:button.addField')}</span>
+                    <i className="bi bi-plus-lg me-1" />
+                    {t('ui:button.addGroup')}
                   </Button>
                 </div>
-              )}
-            </Card.Header>
-            <Card.Body>
-              {fields.length === 0 ? (
-                <div className="text-center py-5">
-                  <i className={`bi ${ICONS.FIELD}`} style={{ fontSize: '4rem', opacity: 0.3 }} />
-                  <h3 className="mt-3">{t('ui:message.noFieldsYet')}</h3>
-                  <p className="text-muted mb-3">{t('ui:message.createFirstField')}</p>
-                  {!readOnly && (
-                    <div className="d-flex justify-content-center gap-3">
-                      <Button 
-                        variant="outline-success" 
-                        onClick={() => onGenerateTournament?.()} 
-                        className="btn-adaptive px-4"
-                        title={t('ui:tooltip.generateTournament')}
-                      >
-                        <i className={`bi bi-magic me-2`} />
-                        <span className="btn-label-adaptive">{t('ui:button.generateTournament')}</span>
-                      </Button>
-                      <Button 
-                        variant="outline-primary" 
-                        onClick={onAddField} 
-                        className="btn-adaptive px-4"
-                        title={t('ui:tooltip.addField')}
-                      >
-                        <i className={`bi ${ICONS.ADD} me-2`} />
-                        <span className="btn-label-adaptive">{t('ui:button.addField')}</span>
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="fields-grid compact-actions">
-                  {fields.map((field) => (
-                    <FieldSection
-                      key={field.id}
-                      field={field}
-                      stages={getFieldStagesMap.get(field.id) || []}
-                      allNodes={nodes}
-                      edges={edges}
-                      globalTeams={globalTeams}
-                      globalTeamGroups={globalTeamGroups}
-                      onUpdate={onUpdateNode}
-                      onDelete={onDeleteNode}
-                      onAddStage={onAddStage}
-                    onSelectNode={onSelectNode}
-                    onHighlightElement={onHighlightElement}
-                    selectedNodeId={selectedNodeId}
-                      onAssignTeam={onAssignTeam}
-                      onSwapTeams={onSwapTeams}
-                      onAddGame={onAddGame}
-                      onAddGameToGameEdge={onAddGameToGameEdge}
-            onAddStageToGameEdge={onAddStageToGameEdge}
-            onRemoveEdgeFromSlot={onRemoveEdgeFromSlot}
-            onOpenResultModal={onOpenResultModal}
-            isExpanded={expandedFieldIds?.has?.(field.id)}
+              </Stack>
+            </Accordion.Header>
+            <Accordion.Body className="p-0">
+              <TeamPool
+                teams={globalTeams}
+                groups={globalTeamGroups}
+                onAddTeam={onAddGlobalTeam}
+                onUpdateTeam={onUpdateGlobalTeam}
+                onDeleteTeam={onDeleteGlobalTeam}
+                onReplaceTeam={onReplaceGlobalTeam}
+                onReorderTeam={onReorderGlobalTeam}
+                onAddGroup={onAddGlobalTeamGroup}
+                onUpdateGroup={onUpdateGlobalTeamGroup}
+                onDeleteGroup={onDeleteGlobalTeamGroup}
+                onReorderGroup={onReorderGlobalTeamGroup}
+                onNotify={onNotify}
+                onAddOfficials={onAddOfficials}
+                readOnly={readOnly}
+              />
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
 
-                      expandedStageIds={expandedStageIds}
-                      highlightedElement={highlightedElement}
-                      highlightedSourceGameId={highlightedSourceGameId}
-                      onDynamicReferenceClick={onDynamicReferenceClick}
-                      onNotify={onNotify}
-                      readOnly={readOnly}
-                    />
-                  ))}
-                </div>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+        <Stack gap={4} className="pb-5">
+          {fields.map((field) => (
+            <FieldSection
+              key={field.id}
+              field={field}
+              stages={getFieldStagesMap.get(field.id) || []}
+              onUpdateNode={onUpdateNode}
+              onDeleteNode={onDeleteNode}
+              onAddStage={onAddStage}
+              onSelectNode={onSelectNode}
+              onHighlightElement={onHighlightElement}
+              selectedNodeId={selectedNodeId}
+              globalTeams={globalTeams}
+              globalTeamGroups={globalTeamGroups}
+              onShowTeamSelection={onShowTeamSelection}
+              getTeamUsage={getTeamUsage}
+              onAssignTeam={onAssignTeam}
+              onSwapTeams={onSwapTeams}
+              onAddGame={onAddGame}
+              nodes={nodes}
+              edges={edges}
+              onAddGameToGameEdge={onAddGameToGameEdge}
+              onAddStageToGameEdge={onAddStageToGameEdge}
+              onRemoveEdgeFromSlot={onRemoveEdgeFromSlot}
+              onOpenResultModal={onOpenResultModal}
+              expandedFieldIds={expandedFieldIds}
+              expandedStageIds={expandedStageIds}
+              highlightedElement={highlightedElement}
+              highlightedSourceGameId={highlightedSourceGameId}
+              onDynamicReferenceClick={onDynamicReferenceClick}
+              readOnly={readOnly}
+            />
+          ))}
+          
+          <div className="d-flex justify-content-center pt-2">
+            <Button 
+              variant="outline-primary" 
+              className="px-4 py-2 border-dashed shadow-none hover-bg-light"
+              onClick={onAddField}
+              disabled={readOnly}
+            >
+              <i className="bi bi-plus-circle me-2" />
+              {t('ui:button.addField')}
+            </Button>
+          </div>
+        </Stack>
+      </Stack>
     </div>
   );
 });
+
+ListCanvas.displayName = 'ListCanvas';
 
 export default ListCanvas;

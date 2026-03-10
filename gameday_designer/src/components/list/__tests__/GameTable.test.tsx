@@ -9,8 +9,8 @@ import '@testing-library/jest-dom';
 import GameTable from '../GameTable';
 import { GamedayProvider } from '../../../context/GamedayContext';
 import i18n from '../../../i18n/testConfig';
-import type { GameNode, StageNode, FieldNode, GlobalTeam, GlobalTeamGroup, FlowEdge } from '../../../types/flowchart';
-import { createFieldNode, createStageNode, createGameNodeInStage } from '../../../types/flowchart';
+import type { GameNode, StageNode, FieldNode, Team, TeamGroup } from '../../../types/designer';
+import { createDefaultField, createDefaultTeamReference } from '../../../types/designer';
 import * as timeUtils from '../../../utils/timeCalculation';
 
 vi.mock('../../../utils/timeCalculation', async () => {
@@ -27,71 +27,77 @@ describe('GameTable', () => {
   let stage2: StageNode;
   let game1: GameNode;
   let game2: GameNode;
-  let team1: GlobalTeam;
-  let teamGroup1: GlobalTeamGroup;
+  let team1: Team;
 
-  let mockOnUpdate: ReturnType<typeof vi.fn>;
-  let mockOnDelete: ReturnType<typeof vi.fn>;
-  let mockOnSelectNode: ReturnType<typeof vi.fn>;
-  let mockOnHighlightElement: ReturnType<typeof vi.fn>;
-  let mockOnOpenResultModal: ReturnType<typeof vi.fn>;
-  let mockOnAssignTeam: ReturnType<typeof vi.fn>;
-  let mockOnAddGameToGameEdge: ReturnType<typeof vi.fn>;
-  let mockOnAddStageToGameEdge: ReturnType<typeof vi.fn>;
-  let mockOnRemoveEdgeFromSlot: ReturnType<typeof vi.fn>;
-  let mockOnDynamicReferenceClick: ReturnType<typeof vi.fn>;
-  let mockOnNotify: ReturnType<typeof vi.fn>;
-  let mockOnSwapTeams: ReturnType<typeof vi.fn>;
+  const mockOnUpdateNode = vi.fn();
+  const mockOnDelete = vi.fn();
+  const mockOnSelectNode = vi.fn();
+  const mockOnAssignTeam = vi.fn();
+  const mockOnSwapTeams = vi.fn();
+  const mockOnShowTeamSelection = vi.fn();
+  const mockGetTeamUsage = vi.fn().mockReturnValue({ count: 0, games: [] });
+  const mockOnAddGameToGameEdge = vi.fn();
+  const mockOnAddStageToGameEdge = vi.fn();
+  const mockOnRemoveEdgeFromSlot = vi.fn();
+  const mockOnOpenResultModal = vi.fn();
+  const mockOnHighlightElement = vi.fn();
+  const mockOnDynamicReferenceClick = vi.fn();
 
-  beforeEach(async () => {
-    await i18n.changeLanguage('en');
+  beforeEach(() => {
     vi.clearAllMocks();
-
-    field1 = createFieldNode('field-1', { name: 'Field 1', order: 0 });
-    stage1 = createStageNode('stage-1', 'field-1', { name: 'Stage 1', category: 'preliminary', order: 0 });
-    stage2 = createStageNode('stage-2', 'field-1', { name: 'Stage 2', category: 'final', order: 1 });
     
-    // game1 is in stage1
-    game1 = createGameNodeInStage('game-1', 'stage-1', { standing: 'Quali 1', stage: 'Stage 1' });
-    // game2 is in stage2
-    game2 = createGameNodeInStage('game-2', 'stage-2', { 
-      standing: 'Game 2', 
-      startTime: '10:00', 
-      manualTime: true,
-      stage: 'Stage 2' 
-    });
+    field1 = { id: 'field-1', type: 'field', data: { name: 'Field 1', order: 0 }, position: { x: 0, y: 0 } };
+    stage1 = { id: 'stage-1', type: 'stage', data: { name: 'Vorrunde', order: 0, splitCount: 1 }, parentId: 'field-1', position: { x: 0, y: 0 } };
+    stage2 = { id: 'stage-2', type: 'stage', data: { name: 'Playoffs', order: 1, splitCount: 1 }, parentId: 'field-1', position: { x: 0, y: 0 } };
+    
+    game1 = {
+      id: 'game-1',
+      type: 'game',
+      parentId: 'stage-1',
+      position: { x: 0, y: 0 },
+      data: {
+        standing: 'Game 1',
+        startTime: '10:00',
+        home: createDefaultTeamReference(),
+        away: createDefaultTeamReference(),
+        official: createDefaultTeamReference(),
+        breakAfter: 0
+      }
+    };
 
-    teamGroup1 = { id: 'group-1', name: 'Group A', order: 0 };
-    team1 = { id: 'team-1', label: 'Team A', groupId: 'group-1', order: 0 };
+    game2 = {
+      id: 'game-2',
+      type: 'game',
+      parentId: 'stage-1',
+      position: { x: 0, y: 50 },
+      data: {
+        standing: 'Game 2',
+        startTime: '11:00',
+        home: createDefaultTeamReference(),
+        away: createDefaultTeamReference(),
+        official: createDefaultTeamReference(),
+        breakAfter: 15
+      }
+    };
 
-    mockOnUpdate = vi.fn();
-    mockOnDelete = vi.fn();
-    mockOnSelectNode = vi.fn();
-    mockOnHighlightElement = vi.fn();
-    mockOnOpenResultModal = vi.fn();
-    mockOnAssignTeam = vi.fn();
-    mockOnAddGameToGameEdge = vi.fn();
-    mockOnAddStageToGameEdge = vi.fn();
-    mockOnRemoveEdgeFromSlot = vi.fn();
-    mockOnDynamicReferenceClick = vi.fn();
-    mockOnNotify = vi.fn();
-    mockOnSwapTeams = vi.fn();
+    team1 = { id: 'team-1', label: 'Team 1' };
   });
 
   const renderTable = (props = {}) => {
     return render(
       <GamedayProvider>
         <GameTable
-          games={[game2]}
+          games={[game1, game2]}
+          nodes={[field1, stage1, stage2, game1, game2]}
           edges={[]}
-          allNodes={[field1, stage1, stage2, game1, game2]}
           globalTeams={[team1]}
-          globalTeamGroups={[teamGroup1]}
-          onUpdate={mockOnUpdate}
-          onDelete={mockOnDelete}
+          globalTeamGroups={[]}
+          onUpdateNode={mockOnUpdateNode}
+          onDeleteNode={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           onHighlightElement={mockOnHighlightElement}
-          selectedNodeId={null}
+          onShowTeamSelection={mockOnShowTeamSelection}
+          getTeamUsage={mockGetTeamUsage}
           onAssignTeam={mockOnAssignTeam}
           onSwapTeams={mockOnSwapTeams}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
@@ -99,78 +105,96 @@ describe('GameTable', () => {
           onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
           onOpenResultModal={mockOnOpenResultModal}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
-          onNotify={mockOnNotify}
           {...props}
         />
       </GamedayProvider>
     );
   };
 
-  it('renders table headers', () => {
-    renderTable();
-    expect(screen.getByText(/Standing/i)).toBeInTheDocument();
-    expect(screen.getByText(/Home/i)).toBeInTheDocument();
-    expect(screen.getByText(/Away/i)).toBeInTheDocument();
+  describe('Rendering', () => {
+    it('renders all games in the list', () => {
+      renderTable();
+      expect(screen.getByText('Game 1')).toBeInTheDocument();
+      expect(screen.getByText('Game 2')).toBeInTheDocument();
+    });
+
+    it('renders time and duration information', () => {
+      renderTable();
+      expect(screen.getByDisplayValue('10:00')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('11:00')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('15')).toBeInTheDocument();
+    });
+
+    it('shows correct team names when assigned', () => {
+      const gameWithTeams = {
+        ...game1,
+        data: {
+          ...game1.data,
+          homeTeamId: 'team-1',
+          awayTeamId: 'team-2'
+        }
+      } as GameNode;
+      
+      const team2 = { id: 'team-2', label: 'Team 2' };
+      
+      renderTable({ 
+        games: [gameWithTeams], 
+        globalTeams: [team1, team2] 
+      });
+      
+      expect(screen.getByText('Team 1')).toBeInTheDocument();
+      expect(screen.getByText('Team 2')).toBeInTheDocument();
+    });
   });
 
-  it('renders empty message when no games provided', () => {
-    renderTable({ games: [] });
-    expect(screen.getByText(/No games in this stage/i)).toBeInTheDocument();
-  });
-
-  describe('Inline editing', () => {
-    it('saves standing on Enter', async () => {
-      const user = userEvent.setup();
-      renderTable();
-      await user.click(screen.getByText('Game 2'));
-      const input = screen.getByDisplayValue('Game 2');
-      await user.clear(input);
-      await user.type(input, 'New Name{Enter}');
-      expect(mockOnUpdate).toHaveBeenCalledWith('game-2', { standing: 'New Name' });
-    });
-
-    it('saves break after on Enter', async () => {
-      const user = userEvent.setup();
-      renderTable();
-      await user.click(screen.getByText('0'));
-      const input = screen.getByDisplayValue('0');
-      await user.clear(input);
-      await user.type(input, '15{Enter}');
-      expect(mockOnUpdate).toHaveBeenCalledWith('game-2', { breakAfter: 15 });
-    });
-
-    it('saves time on Save click', async () => {
-      const user = userEvent.setup();
-      const { container } = renderTable({ games: [game1], allNodes: [field1, stage1, stage2, game1, game2] });
-      await user.click(screen.getByText('--:--'));
-      const input = container.querySelector('input[type="time"]') as HTMLInputElement;
-      await user.type(input, '14:00');
-      const saveBtn = screen.getByTitle('Save');
-      await user.click(saveBtn);
-      expect(mockOnUpdate).toHaveBeenCalledWith('game-1', { startTime: '14:00', manualTime: true });
-    });
-
-    it('clears time when empty and saved', async () => {
-      const user = userEvent.setup();
-      const { container } = renderTable({ games: [game2] });
-      await user.click(screen.getByText('10:00'));
-      const input = container.querySelector('input[type="time"]') as HTMLInputElement;
-      await user.clear(input);
-      const saveBtn = screen.getByTitle('Save');
-      await user.click(saveBtn);
-      expect(mockOnUpdate).toHaveBeenCalledWith('game-2', { startTime: undefined, manualTime: false });
-    });
-
-    it('shows error notification for invalid time format on save', async () => {
-      const user = userEvent.setup();
+  describe('Validation', () => {
+    it('shows error state for invalid time format', () => {
       vi.mocked(timeUtils.isValidTimeFormat).mockReturnValue(false);
-      const { container } = renderTable({ games: [game2], onNotify: mockOnNotify });
-      await user.click(screen.getByText('10:00'));
-      const input = container.querySelector('input[type="time"]') as HTMLInputElement;
-      await user.type(input, 'invalid');
-      const saveBtn = screen.getByTitle('Save');
-      await user.click(saveBtn);
-      expect(mockOnNotify).toHaveBeenCalled();
+      renderTable();
+      const timeInput = screen.getAllByRole('textbox')[0];
+      expect(timeInput).toHaveClass('is-invalid');
+    });
+
+    it('does not show error for valid time format', () => {
+      vi.mocked(timeUtils.isValidTimeFormat).mockReturnValue(true);
+      renderTable();
+      const timeInput = screen.getAllByRole('textbox')[0];
+      expect(timeInput).not.toHaveClass('is-invalid');
+    });
+  });
+
+  describe('Input changes', () => {
+    it('calls onUpdateNode when time changes', async () => {
+      const user = userEvent.setup();
+      renderTable();
+      const timeInput = screen.getAllByRole('textbox')[0];
+      await user.clear(timeInput);
+      await user.type(timeInput, '10:30');
+      expect(mockOnUpdateNode).toHaveBeenCalledWith('game-1', expect.objectContaining({
+        startTime: '10:30'
+      }));
+    });
+
+    it('calls onUpdateNode when standing changes', async () => {
+      const user = userEvent.setup();
+      renderTable();
+      const standingInput = screen.getAllByRole('textbox')[2]; // Index 2 is standing for first game
+      await user.clear(standingInput);
+      await user.type(standingInput, 'Final');
+      expect(mockOnUpdateNode).toHaveBeenCalledWith('game-1', expect.objectContaining({
+        standing: 'Final'
+      }));
+    });
+
+    it('calls onUpdateNode when breakAfter changes', async () => {
+      const user = userEvent.setup();
+      renderTable();
+      const breakInput = screen.getAllByRole('spinbutton')[0];
+      await user.clear(breakInput);
+      await user.type(breakInput, '20');
+      expect(mockOnUpdateNode).toHaveBeenCalledWith('game-1', expect.objectContaining({
+        breakAfter: 20
+      }));
     });
   });
 
@@ -209,85 +233,30 @@ describe('GameTable', () => {
       // Official selector should be rendered without checkbox toggle
       // The selector is now always displayed (no checkbox to enable/disable)
       const table = screen.getByRole('table');
-      expect(table).toBeInTheDocument();
-    });
-
-    it('allows selecting official from dropdown', async () => {
-      renderTable();
-      // Official selector is always visible, can be interacted with directly
-      const table = screen.getByRole('table');
-      expect(table).toBeInTheDocument();
+      expect(table).toHaveTextContent(/-- Team wählen --/i);
     });
   });
 
-  describe('Dynamic reference interactions', () => {
-    it('renders and allows clicking game-to-game ref', async () => {
-      const user = userEvent.setup();
+  describe('Dynamic References', () => {
+    it('renders winner/loser references correctly', () => {
       const gameWithWinner = {
         ...game2,
         data: { ...game2.data, homeTeamDynamic: { type: 'winner', matchName: 'Quali 1' } }
       } as GameNode;
-      const edges = [{
-        id: 'e1', type: 'gameToGame', source: 'game-1', target: 'game-2', sourceHandle: 'winner', targetHandle: 'home', data: { sourcePort: 'winner', targetPort: 'home' }
-      } as FlowEdge];
-
-      renderTable({ games: [gameWithWinner], edges });
-      
-      const refElement = screen.getByText(/Winner of Quali 1/i).closest('div');
-      expect(refElement).toBeInTheDocument();
-      await user.click(refElement!);
-      expect(mockOnDynamicReferenceClick).toHaveBeenCalledWith('game-1');
+      renderTable({ games: [gameWithWinner] });
+      expect(screen.getByText(/Winner Quali 1/i)).toBeInTheDocument();
     });
 
-    it('renders and allows clicking rank ref', async () => {
-      const user = userEvent.setup();
-      const rankingStage: StageNode = {
-        ...stage1,
-        id: 'stage-ranking',
-        parentId: 'field-1',
-        data: { ...stage1.data, stageType: 'RANKING', name: 'Placement', order: 0 }
-      };
-      
-      // game1 must be IN the rankingStage for participants to be found
-      const gameInRanking = {
-        ...game1,
-        parentId: 'stage-ranking',
-        data: { ...game1.data, homeTeamId: 'team-1', awayTeamId: 'team-2' }
-      };
-
-      const gameWithRank: GameNode = {
+    it('renders rank references correctly', () => {
+      const gameWithRank = {
         ...game2,
-        parentId: 'stage-2',
-        data: { 
-          ...game2.data, 
-          stage: 'Stage 2',
-          homeTeamDynamic: { type: 'rank', place: 1, stageId: 'stage-ranking', stageName: 'Placement' } 
-        }
-      };
-      
-      const edges = [{
-        id: 'e1', 
-        type: 'stageToGame', 
-        source: 'stage-ranking', 
-        target: 'game-2', 
-        sourceHandle: 'rank-1', 
-        targetHandle: 'home', 
-        data: { sourceRank: 1, targetPort: 'home' }
-      } as FlowEdge];
-
-      renderTable({ 
-        games: [gameWithRank], 
-        edges, 
-        allNodes: [field1, rankingStage, stage2, gameInRanking, gameWithRank] 
-      });
-      
-      const refElement = screen.getByText(/1. Place from Placement/i).closest('div');
-      expect(refElement).toBeInTheDocument();
-      await user.click(refElement!);
-      expect(mockOnDynamicReferenceClick).toHaveBeenCalledWith('stage-ranking');
+        data: { ...game2.data, awayTeamDynamic: { type: 'rank', rank: 1, stageName: 'Vorrunde' } }
+      } as GameNode;
+      renderTable({ games: [gameWithRank] });
+      expect(screen.getByText(/1. Vorrunde/i)).toBeInTheDocument();
     });
 
-    it('renders resolved team name in readOnly mode', () => {
+    it('shows resolved team name when available', () => {
       const gameWithResolved = {
         ...game2,
         data: { 

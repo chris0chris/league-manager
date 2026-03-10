@@ -1,6 +1,5 @@
 {
   "name": "scorecard",
-  "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "directories": {
@@ -27,7 +26,7 @@
     "@testing-library/user-event": "^14.0.0",
     "babel-loader": "^10.0.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
-    "eslint": "^9.0.0",
+    "eslint": "^10.0.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-react": "^7.22.0",
     "git-revision-webpack-plugin": "^5.0.0",

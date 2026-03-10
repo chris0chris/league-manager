@@ -76,7 +76,8 @@ services:
       DJANGO_SETTINGS_MODULE: league_manager.settings.stage
       RUN_MIGRATIONS: true
     networks:
-      - backend
+      - backend   # MySQL communication (internal)
+      - proxy     # External access + DNS egress
     depends_on:
       mysql:
         condition: service_healthy

@@ -97,14 +97,21 @@
     "awayTeam": "Auswärts: {{team}}"
   },
   "title": {
-    "enterGameResult": "Spielergebnis eingeben"
+    "enterGameResult": "Spielergebnis eingeben",
+    "bulkResultsEntry": "Ergebnisse eintragen",
+    "teamPool": "Team-Pool",
+    "gamedayDashboard": "Turnier-Dashboard",
+    "selectOfficial": "Schiedsrichter wählen",
+    "selectTeam": "Team wählen"
   },
   "placeholder": {
     "standing": "z.B. Gruppe 1, HF1, P1",
     "gamedayName": "Neuer Spieltag",
     "searchGamedays": "Spieltage suchen...",
     "selectSeason": "Saison wählen",
-    "selectLeague": "Liga wählen"
+    "selectLeague": "Liga wählen",
+    "allSeasons": "Alle Saisons",
+    "allStatuses": "Alle Status"
   },
   "message": {
     "noTeamsYet": "Noch keine Teams",
@@ -129,7 +136,11 @@
     "ungrouped": "Ungruppiert",
     "assignedGamesCount": "Anzahl der Spiele, denen dieses Team zugewiesen ist",
     "loading": "Wird geladen...",
-    "loadingGameday": "Spieltag wird geladen..."
+    "loadingGameday": "Spieltag wird geladen...",
+    "manageTournaments": "Flag Football Turnierpläne verwalten",
+    "loadingGamedays": "Lade Spieltage...",
+    "noGamedaysYet": "Noch keine Spieltage",
+    "startByCreating": "Beginnen Sie, indem Sie einen neuen Spieltag erstellen."
   },
   "tooltip": {
     "addTeamToGroup": "Ein neues Team zu dieser Gruppe hinzufügen",
@@ -144,7 +155,7 @@
     "teamColor": "Das Farbabzeichen für dieses Team ändern",
     "editFieldName": "Klicken, um den Namen dieses Spielfelds zu bearbeiten",
     "deleteField": "Dieses Feld und alle darin enthaltenen Phasen und Spiele dauerhaft entfernen",
-    "fieldColor": "Die Akzentfarbe für dieses Feld ändern",
+    "fieldColor": "Die Akzentfarbe for dieses Feld ändern",
     "editStageName": "Klicken, um den Namen dieser Turnierphase zu bearbeiten",
     "deleteStage": "Diese Phase und alle darin enthaltenen Spiele dauerhaft entfernen",
     "stageColor": "Die Akzentfarbe für diese Phase ändern",
@@ -167,7 +178,8 @@
     "deleteGame": "Spiel löschen",
     "autoTimeHint": "Automatisch berechnet - Klicken zum Überschreiben",
     "manualTimeHint": "Manuell gesetzt - Klicken zum Bearbeiten",
-    "swapTeams": "Heim- und Auswärtsteam tauschen"
+    "swapTeams": "Heim- und Auswärtsteam tauschen",
+    "unlockToDelete": "Schalten Sie den Spielplan frei, um ihn zu löschen"
   },
   "notification": {
     "gameResultSaved": "Spielergebnis gespeichert",
@@ -198,12 +210,18 @@
       "importError": "Import-Fehler",
       "deletion": "Löschen",
       "timeFormat": "Zeitformat"
-    }
+    },
+    "loadFailed": "Laden fehlgeschlagen",
+    "resultSaved": "Ergebnis gespeichert",
+    "resultSaveFailed": "Ergebnis speichern fehlgeschlagen",
+    "resultsSavedBulk": "Ergebnisse erfolgreich gespeichert",
+    "resultsSaveFailedBulk": "Speichern der Ergebnisse fehlgeschlagen"
   },
   "error": {
     "prerequisitesMissing": {
       "title": "Voraussetzungen fehlen",
       "message": "Bitte stellen Sie sicher, dass mindestens eine Saison und eine Liga existieren, bevor Sie einen Spieltag erstellen."
-    }
+    },
+    "gamedayNotFound": "Spieltag nicht gefunden"
   }
 }
