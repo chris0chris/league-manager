@@ -388,8 +388,7 @@ jobs:
       - run:
           name: Plan staging deploy
           command: |
-            circleci run release plan \
-              --deploy-name="leaguesphere-stage" \
+            circleci run release plan "leaguesphere-stage" \
               --environment-name="stage" \
               --component-name="leaguesphere" \
               --target-version="${CIRCLE_TAG}"
@@ -429,8 +428,7 @@ jobs:
       - run:
           name: Plan production deploy
           command: |
-            circleci run release plan \
-              --deploy-name="leaguesphere-prod" \
+            circleci run release plan "leaguesphere-prod" \
               --environment-name="prod" \
               --component-name="leaguesphere" \
               --target-version="${CIRCLE_TAG}"
