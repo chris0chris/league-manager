@@ -6,7 +6,7 @@ import { gamedayApi } from '../../api/gamedayApi';
 import type { GamedayListEntry } from '../../types';
 import type { Notification, NotificationType } from '../../types/designer';
 import GamedayCard from './GamedayCard';
-import NotificationToast from '../NotificationToast';
+import NotificationToast from '../ui/NotificationToast';
 import { v4 as uuidv4 } from 'uuid';
 import { ProgressBar } from 'react-bootstrap';
 

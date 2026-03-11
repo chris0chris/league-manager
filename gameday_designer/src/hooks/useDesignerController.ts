@@ -21,11 +21,14 @@ import {
   TOURNAMENT_GENERATION_STATE_DELAY,
   DEFAULT_TOURNAMENT_GROUP_NAME,
 } from '../utils/tournamentConstants';
-import type { GlobalTeam, HighlightedElement, Notification, NotificationType } from '../types/flowchart';
-import type { TournamentGenerationConfig } from '../types/tournament';
+import type { GlobalTeam, GlobalTeamGroup, FlowNode, HighlightedElement, Notification, NotificationType, FlowState } from '../types/flowchart';
+import type { TournamentGenerationConfig, RoundRobinConfig } from '../types/tournament';
+import type { UseFlowStateReturn, GamedayMetadata } from '../types/designer';
 import { v4 as uuidv4 } from 'uuid';
+import { gamedayApi } from '../api/gamedayApi';
 
 export function useDesignerController(
+  gamedayId: string | undefined,
   flowState: UseFlowStateReturn,
   onMetadataHighlight?: () => void
 ) {
@@ -56,7 +59,36 @@ export function useDesignerController(
     replaceGlobalTeam = () => {},
     addBulkGameToGameEdges = () => {},
     addBulkFields = () => {},
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+    stats,
   } = flowState || {};
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loadData = useCallback(async () => {
+    if (!gamedayId) return;
+    setIsLoading(true);
+    try {
+      const state = await gamedayApi.getDesignerState(parseInt(gamedayId));
+      if (state && state.state_data) {
+        importState(state.state_data);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [gamedayId, importState]);
+
+  const saveData = useCallback(async (state: FlowState) => {
+    if (!gamedayId) return;
+    try {
+      await gamedayApi.updateDesignerState(parseInt(gamedayId), state);
+    } catch (error) {
+      console.error('Failed to save designer state', error);
+    }
+  }, [gamedayId]);
 
   // Validate the current flowchart
   const validation = useFlowValidation(nodes, edges, fields, globalTeams, globalTeamGroups, metadata);
@@ -294,9 +326,13 @@ export function useDesignerController(
     canExport,
     hasData: nodes.length > 0 || globalTeams.length > 0 || fields.length > 0,
     saveTrigger: flowState?.saveTrigger,
-  }), [highlightedElement, expandedFieldIds, expandedStageIds, showTournamentModal, canExport, nodes.length, globalTeams.length, fields.length, flowState?.saveTrigger]);
+    isLoading,
+    notifications,
+  }), [highlightedElement, expandedFieldIds, expandedStageIds, showTournamentModal, canExport, nodes.length, globalTeams.length, fields.length, flowState?.saveTrigger, isLoading, notifications]);
 
   const handlersInternal = useMemo(() => ({
+    loadData,
+    saveData,
     expandField,
     expandStage,
     handleHighlightElement,
@@ -327,13 +363,15 @@ export function useDesignerController(
     onMetadataHighlight,
     replaceGlobalTeam
   }), [
-    expandField, expandStage, handleHighlightElement, handleDynamicReferenceClick,
-    handleImport, handleExport, clearAll, updateNode, updateGlobalTeam, 
-    deleteGlobalTeam, reorderGlobalTeam, assignTeamToGame, handleSwapTeams, 
-    deleteNode, selectNode, handleGenerateTournament, addGlobalTeam, 
-    addGlobalTeamGroup, addFieldNode, addStageNode, dismissNotification, 
-    addNotification, onMetadataHighlight, replaceGlobalTeam
+    loadData, saveData, expandField, expandStage, handleHighlightElement, 
+    handleDynamicReferenceClick, handleImport, handleExport, clearAll, 
+    updateNode, updateGlobalTeam, deleteGlobalTeam, reorderGlobalTeam, 
+    assignTeamToGame, handleSwapTeams, deleteNode, selectNode, 
+    handleGenerateTournament, addGlobalTeam, addGlobalTeamGroup, 
+    addFieldNode, addStageNode, dismissNotification, addNotification, 
+    onMetadataHighlight, replaceGlobalTeam
   ]);
+
   return useMemo(() => ({
     // State
     ...flowState,
