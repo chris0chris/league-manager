@@ -76,7 +76,10 @@ services:
       DJANGO_SETTINGS_MODULE: league_manager.settings.stage
       RUN_MIGRATIONS: true
     networks:
-      - backend   # MySQL communication (internal)
+      backend:
+      proxy:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME}.app
     depends_on:
       mysql:
         condition: service_healthy
