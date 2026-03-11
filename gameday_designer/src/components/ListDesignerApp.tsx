@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Stack, Alert } from 'react-bootstrap';
 import { useDesignerController } from '../hooks/useDesignerController';
 import ListCanvas from './ListCanvas';
+import { GameResultsTable } from './GameResultsTable';
 import FlowToolbar from './FlowToolbar';
 import GamedayMetadataAccordion from './GamedayMetadataAccordion';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
@@ -319,56 +320,80 @@ const ListDesignerApp: React.FC = () => {
           <GamedayMetadataAccordion
             metadata={metadata}
             onUpdate={handleUpdateMetadata}
-            validationIssues={ui?.validationIssues}
+            onClearAll={handleClearAll}
+            onDelete={() => {
+              if (window.confirm(t('ui:message.confirmDeleteGameday'))) {
+                gamedayApi.deleteGameday(parseInt(id)).then(() => navigate('/'));
+              }
+            }}
+            onPublish={async () => {
+              await gamedayApi.publish(parseInt(id));
+              loadData();
+            }}
+            onUnlock={async () => {
+              await gamedayApi.patchGameday(parseInt(id), { status: 'DRAFT' });
+              loadData();
+            }}
+            validation={validation}
             highlightedElement={ui?.highlightedElement}
-            onHighlightElement={handleHighlightElement}
-            saveTrigger={saveTrigger}
+            onHighlight={handleHighlightElement}
             readOnly={isLocked}
+            hasData={ui?.hasData ?? false}
           />
 
-          <ListCanvas
-            nodes={flowState.nodes}
-            edges={flowState.edges}
-            globalTeams={flowState.globalTeams}
-            globalTeamGroups={flowState.globalTeamGroups}
-            onUpdateNode={handleUpdateNode}
-            onDeleteNode={handleDeleteNode}
-            onAddField={handleAddFieldContainer}
-            onAddStage={handleAddStage}
-            onSelectNode={handleSelectNode}
-            onHighlightElement={handleHighlightElement}
-            selectedNodeId={ui?.selectedNodeId}
-            onAddGlobalTeam={handleAddGlobalTeam}
-            onUpdateGlobalTeam={handleUpdateGlobalTeam}
-            onDeleteGlobalTeam={handleDeleteGlobalTeam}
-            onReplaceGlobalTeam={handleReplaceGlobalTeam}
-            onReorderGlobalTeam={handleReorderGlobalTeam}
-            onAddGlobalTeamGroup={handleAddGlobalTeamGroup}
-            onUpdateGlobalTeamGroup={handleUpdateGlobalTeamGroup}
-            onDeleteGlobalTeamGroup={handleDeleteGlobalTeamGroup}
-            onReorderGlobalTeamGroup={handleReorderGlobalTeamGroup}
-            onShowTeamSelection={handleShowTeamSelection}
-            getTeamUsage={(teamId) => ({ count: 0, games: [] })} // TODO: Implement
-            onAssignTeam={handleAssignTeam}
-            onSwapTeams={handleSwapTeams}
-            onAddGame={handleUpdateGameSlot}
-            onAddGameToGameEdge={handleConnectTeam}
-            onAddStageToGameEdge={handleConnectTeam}
-            onRemoveEdgeFromSlot={handleRemoveEdgeFromSlot}
-            onOpenResultModal={handleOpenResultModal}
-            onGenerateTournament={onGenerateTournamentHandler}
-            expandedFieldIds={ui?.expandedFieldIds || new Set()}
-            expandedStageIds={ui?.expandedStageIds || new Set()}
-            highlightedElement={ui?.highlightedElement}
-            highlightedSourceGameId={ui?.highlightedSourceGameId}
-            onDynamicReferenceClick={handleDynamicReferenceClick}
-            onNotify={addNotification}
-            onAddOfficials={() => handleAddGlobalTeam(t('domain:team.officials'))}
-            resultsMode={resultsMode}
-            gameResults={gameResults}
-            onSaveBulkResults={handleSaveBulkResults}
-            readOnly={isLocked}
-          />
+          {resultsMode ? (
+            <div className="bg-white p-4 rounded shadow-sm">
+              <h3 className="mb-4">{t('ui:title.resultsMode')}</h3>
+              <GameResultsTable 
+                games={gameResults} 
+                onSave={handleSaveBulkResults} 
+              />
+            </div>
+          ) : (
+            <ListCanvas
+              nodes={flowState.nodes}
+              edges={flowState.edges}
+              globalTeams={flowState.globalTeams}
+              globalTeamGroups={flowState.globalTeamGroups}
+              onUpdateNode={handleUpdateNode}
+              onDeleteNode={handleDeleteNode}
+              onAddField={handleAddFieldContainer}
+              onAddStage={handleAddStage}
+              onSelectNode={handleSelectNode}
+              onHighlightElement={handleHighlightElement}
+              selectedNodeId={ui?.selectedNodeId}
+              onAddGlobalTeam={handleAddGlobalTeam}
+              onUpdateGlobalTeam={handleUpdateGlobalTeam}
+              onDeleteGlobalTeam={handleDeleteGlobalTeam}
+              onReplaceGlobalTeam={handleReplaceGlobalTeam}
+              onReorderGlobalTeam={handleReorderGlobalTeam}
+              onAddGlobalTeamGroup={handleAddGlobalTeamGroup}
+              onUpdateGlobalTeamGroup={handleUpdateGlobalTeamGroup}
+              onDeleteGlobalTeamGroup={handleDeleteGlobalTeamGroup}
+              onReorderGlobalTeamGroup={handleReorderGlobalTeamGroup}
+              onShowTeamSelection={handleShowTeamSelection}
+              getTeamUsage={(teamId) => ({ count: 0, games: [] })} // TODO: Implement
+              onAssignTeam={handleAssignTeam}
+              onSwapTeams={handleSwapTeams}
+              onAddGame={handleUpdateGameSlot}
+              onAddGameToGameEdge={handleConnectTeam}
+              onAddStageToGameEdge={handleConnectTeam}
+              onRemoveEdgeFromSlot={handleRemoveEdgeFromSlot}
+              onOpenResultModal={handleOpenResultModal}
+              onGenerateTournament={onGenerateTournamentHandler}
+              expandedFieldIds={ui?.expandedFieldIds || new Set()}
+              expandedStageIds={ui?.expandedStageIds || new Set()}
+              highlightedElement={ui?.highlightedElement}
+              highlightedSourceGameId={ui?.highlightedSourceGameId}
+              onDynamicReferenceClick={handleDynamicReferenceClick}
+              onNotify={addNotification}
+              onAddOfficials={() => handleAddGlobalTeam(t('domain:team.officials'))}
+              resultsMode={resultsMode}
+              gameResults={gameResults}
+              onSaveBulkResults={handleSaveBulkResults}
+              readOnly={isLocked}
+            />
+          )}
         </Stack>
       </Container>
 

@@ -193,6 +193,20 @@ class GamedayApi {
     return response.data;
   }
 
+  async getDesignerState(id: number): Promise<any> {
+    if (this.isDev && !this.forceClient) return null;
+    const response = await this.client.get(`/gamedays/${id}/designer-state/`);
+    return response.data;
+  }
+
+  async updateDesignerState(id: number, state: any): Promise<any> {
+    if (this.isDev && !this.forceClient) return null;
+    const response = await this.client.put(`/gamedays/${id}/designer-state/`, {
+      state_data: state
+    });
+    return response.data;
+  }
+
   /**
    * Update game result.
    */

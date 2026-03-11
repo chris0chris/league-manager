@@ -26,7 +26,7 @@ from gamedays.serializers.game_results import (
     GameResultsUpdateSerializer,
     GameInfoSerializer,
 )
-from gamedays.models import Gameday, Gameinfo, GameOfficial, Season, League, Gameresult
+from gamedays.models import Gameday, Gameinfo, GameOfficial, Season, League, Gameresult, GamedayDesignerState
 from gamedays.service.gameday_service import GamedayService
 
 
@@ -97,6 +97,20 @@ class GamedayViewSet(viewsets.ModelViewSet):
         gameday.save()
 
         return Response(GamedaySerializer(gameday).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get", "put"], url_path="designer-state")
+    def designer_state(self, request, pk=None):
+        gameday = self.get_object()
+        if request.method == "GET":
+            state, created = GamedayDesignerState.objects.get_or_create(gameday=gameday)
+            return Response({"state_data": state.state_data})
+
+        if request.method == "PUT":
+            state, created = GamedayDesignerState.objects.get_or_create(gameday=gameday)
+            state.state_data = request.data.get("state_data", {})
+            state.last_modified_by = request.user
+            state.save()
+            return Response({"state_data": state.state_data})
 
 
 class GamedayListAPIView(ListAPIView):
