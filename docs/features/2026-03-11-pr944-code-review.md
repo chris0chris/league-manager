@@ -242,6 +242,28 @@ Fixed in this PR. Good.
 
 ---
 
+## Fix PRs
+
+The following fix PRs have been created, all targeting `feature/dual-progression`:
+
+| Finding | Severity | Fix PR | Branch | Status |
+|---------|----------|--------|--------|--------|
+| #1 Status case mismatch | Critical | [#945](https://github.com/dachrisch/leaguesphere/pull/945) | `fix/status-case-mismatch` | Open |
+| #3 N+1 query in placeholder resolution | High | [#950](https://github.com/dachrisch/leaguesphere/pull/950) | `fix/placeholder-n-plus-1` | Open |
+| #4 Inline imports | Low | [#951](https://github.com/dachrisch/leaguesphere/pull/951) | `fix/inline-imports` | Open |
+| #5 Fragile slot matching | High | Deferred | — | Requires DB migration; tracked separately |
+| #6 Bare except Exception | Medium | [#946](https://github.com/dachrisch/leaguesphere/pull/946) | `fix/bare-except-narrowing` | Open |
+| #8 IndexError guard | Medium | [#947](https://github.com/dachrisch/leaguesphere/pull/947) | `fix/indexerror-guard` | Open |
+| #9 Ambiguous _apply_rule matching | High | [#949](https://github.com/dachrisch/leaguesphere/pull/949) | `fix/apply-rule-ambiguity` | Open |
+| #10 Test magic values | Low | [#952](https://github.com/dachrisch/leaguesphere/pull/952) | `fix/test-magic-values` | Open |
+| #11 Passcheck falsy check | Low | [#948](https://github.com/dachrisch/leaguesphere/pull/948) | `fix/passcheck-falsy-check` | Open |
+| #12 Template fallback logging | Low | [#953](https://github.com/dachrisch/leaguesphere/pull/953) | `fix/template-fallback-logging` | Open |
+
+Findings #2 (behavioral change in `_create_gameresults`), #7 (method repositioning), #13
+(docs cleanup), and #14 (EOF newline) do not require code fixes.
+
+---
+
 ## Recommended Actions Before Merge
 
 | Priority | Action |
