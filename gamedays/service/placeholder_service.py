@@ -55,8 +55,8 @@ class GamedayPlaceholderService:
                 return slot.home_reference or (f"G{slot.home_group+1}_T{slot.home_team+1}" if slot.home_group is not None else "TBD")
             else:
                 return slot.away_reference or (f"G{slot.away_group+1}_T{slot.away_team+1}" if slot.away_group is not None else "TBD")
-        except Exception as e:
-            logger.debug(f"Placeholder resolution failed for game {gameinfo_id}: {str(e)}")
+        except (Gameinfo.DoesNotExist, IndexError, AttributeError) as e:
+            logger.warning(f"Placeholder resolution failed for game {gameinfo_id}: {str(e)}")
             return "TBD"
 
     def _find_slot_for_game(self, gi: Gameinfo) -> TemplateSlot:
@@ -90,5 +90,5 @@ class GamedayPlaceholderService:
             gi = Gameinfo.objects.get(pk=gameinfo_id)
             service = cls(gi.gameday_id)
             return service.get_placeholder(gameinfo_id, is_home)
-        except Exception:
+        except Gameinfo.DoesNotExist:
             return "TBD"
