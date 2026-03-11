@@ -319,11 +319,6 @@ jobs:
   check_migrations:
     docker:
       - image: cimg/base:stable
-      - image: cimg/mysql:9.6
-        command: [ --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --default-storage-engine=InnoDB ]
-        environment:
-          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-          MYSQL_DATABASE: test_test_db
     steps:
       - setup_remote_docker:
           version: 20.10.24
@@ -334,11 +329,10 @@ jobs:
           command: |
             docker load -i /tmp/docker-images/backend.tar
             docker run --rm \
-              --network host \
-              -e MYSQL_HOST="127.0.0.1" \
-              -e MYSQL_DB_NAME="test_test_db" \
-              -e MYSQL_USER="root" \
-              -e MYSQL_PWD="" \
+              -e MYSQL_HOST="$MYSQL_HOST" \
+              -e MYSQL_DB_NAME="$MYSQL_DB_NAME" \
+              -e MYSQL_USER="$MYSQL_USER" \
+              -e MYSQL_PWD="$MYSQL_PWD" \
               backend:latest \
               bash -c "set -e && python manage.py check && python manage.py makemigrations --check --dry-run && python manage.py migrate --plan"
 
