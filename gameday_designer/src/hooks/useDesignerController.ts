@@ -59,11 +59,6 @@ export function useDesignerController(
     replaceGlobalTeam = () => {},
     addBulkGameToGameEdges = () => {},
     addBulkFields = () => {},
-    canUndo,
-    canRedo,
-    undo,
-    redo,
-    stats,
   } = flowState || {};
 
   const [isLoading, setIsLoading] = useState(false);

@@ -112,6 +112,7 @@ class EmptyDefenseStatisticTable:
     def to_json(*args, **kwargs):
         return EMPTY_DATA
 
+
 class EmptyPasscheckDetailsTable:
     @staticmethod
     def to_html(*args, **kwargs):
@@ -121,33 +122,38 @@ class EmptyPasscheckDetailsTable:
     def to_json(*args, **kwargs):
         return EMPTY_DATA
 
+
 class EventsTableError:
     """Marker for when events table cannot be generated due to data inconsistency"""
-    
-    def __init__(self, home_team: str, away_team: str, events_teams: list, game_id: int):
+
+    def __init__(
+        self, home_team: str, away_team: str, events_teams: list, game_id: int
+    ):
         self.home_team = home_team
         self.away_team = away_team
         self.events_teams = events_teams  # teams that actually appear in events
         self.game_id = game_id
         self.error_message = self._build_message()
-    
+
     def _build_message(self) -> str:
         """Build a user-friendly error message"""
         expected = f"{self.home_team} vs {self.away_team}"
-        
+
         # Filter out None/NaN values
-        valid_teams = [t for t in self.events_teams if t is not None and str(t) != 'nan']
-        
+        valid_teams = [
+            t for t in self.events_teams if t is not None and str(t) != "nan"
+        ]
+
         if not valid_teams:
             return f"Ereignisdaten für dieses Spiel sind nicht verfügbar. Bitte kontaktieren Sie den Support."
-        
+
         actual = ", ".join(valid_teams)
-        
+
         if set(valid_teams) == {self.home_team, self.away_team}:
             return f"Ereignisdaten für dieses Spiel sind inkonsistent. Erwartet: {expected}, Gefunden: {actual}"
-        
+
         return f"Ereignisdaten für dieses Spiel sind inkonsistent. Erwartet: {expected}, Gefunden: {actual}. Bitte kontaktieren Sie den Support."
-    
+
     def to_html(self, **kwargs) -> str:
         """Return HTML representation (matches DataFrame.to_html() interface)"""
         return self.error_message
@@ -180,7 +186,9 @@ class EmptyGamedayService:
 
     @staticmethod
     def get_staff_passcheck_details(gameday_id):
-        return pd.DataFrame([], columns=["Zeitpunkt", "Schiedsrichter", "Account", "Team", "Notiz"])
+        return pd.DataFrame(
+            [], columns=["Zeitpunkt", "Schiedsrichter", "Account", "Team", "Notiz"]
+        )
 
     @staticmethod
     def get_resolved_designer_data(gameday_pk):
@@ -368,20 +376,25 @@ class GamedayGameService:
 
         if len(self.gameresult) > 0:
             from gamedays.service.placeholder_service import GamedayPlaceholderService
+
             placeholder_service = GamedayPlaceholderService(self.game.gameday_id)
-            
-            home_row = self.gameresult[self.gameresult['isHome'] == True].iloc[0]
-            away_row = self.gameresult[self.gameresult['isHome'] == False].iloc[0]
-            
+
+            home_row = self.gameresult[self.gameresult["isHome"] == True].iloc[0]
+            away_row = self.gameresult[self.gameresult["isHome"] == False].iloc[0]
+
             self.home_team_id = home_row["team"]
             self.home_team_name = home_row["team__description"]
             if pd.isna(self.home_team_name) or self.home_team_name is None:
-                self.home_team_name = placeholder_service.get_placeholder(pk, is_home=True)
-                
+                self.home_team_name = placeholder_service.get_placeholder(
+                    pk, is_home=True
+                )
+
             self.away_team_id = away_row["team"]
             self.away_team_name = away_row["team__description"]
             if pd.isna(self.away_team_name) or self.away_team_name is None:
-                self.away_team_name = placeholder_service.get_placeholder(pk, is_home=False)
+                self.away_team_name = placeholder_service.get_placeholder(
+                    pk, is_home=False
+                )
 
         self._score_column_mapping = {
             # "created_time": "Zeit",
@@ -476,9 +489,18 @@ class GamedayGameService:
         )
 
     def get_staff_game_end_notes(self):
-        return GameSetup.objects.filter(gameinfo=self.game.pk).values(
-            *["gameinfo__officials__name", "homeCaptain", "awayCaptain", "note", ]
-        ).first()
+        return (
+            GameSetup.objects.filter(gameinfo=self.game.pk)
+            .values(
+                *[
+                    "gameinfo__officials__name",
+                    "homeCaptain",
+                    "awayCaptain",
+                    "note",
+                ]
+            )
+            .first()
+        )
 
     def _repair_broken_split_score(self, split_score_ct: pd.DataFrame) -> pd.DataFrame:
         split_score_columns = set(split_score_ct.columns)
@@ -494,17 +516,21 @@ class GamedayGameService:
     def _validate_events_data(self, team_events) -> tuple[bool, list]:
         """
         Validate that event data contains expected teams.
-        
+
         Returns:
             (is_valid, teams_in_events) - tuple of (bool, list of team names)
         """
         if team_events.empty:
             return False, []
-        
-        teams_in_events = [t for t in team_events['team__description'].unique().tolist() if t is not None and pd.notna(t)]
+
+        teams_in_events = [
+            t
+            for t in team_events["team__description"].unique().tolist()
+            if t is not None and pd.notna(t)
+        ]
         expected_teams = {self.home_team_name, self.away_team_name}
         actual_teams = set(teams_in_events)
-        
+
         # Check if actual teams don't match expected
         if actual_teams != expected_teams:
             logger.warning(
@@ -512,7 +538,7 @@ class GamedayGameService:
                 f"Expected {expected_teams}, got {actual_teams}"
             )
             return False, teams_in_events
-        
+
         return True, teams_in_events
 
     def get_events_table(self):
@@ -536,7 +562,7 @@ class GamedayGameService:
                 home_team=self.home_team_name,
                 away_team=self.away_team_name,
                 events_teams=teams_in_events,
-                game_id=self.game.pk
+                game_id=self.game.pk,
             )
 
         event_ct = pd.crosstab(

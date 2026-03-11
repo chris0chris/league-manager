@@ -281,15 +281,15 @@ def verify_data_persistence(gameday, teams, games):
 
     # Verify scores for Game 1
     game1_home = Gameresult.objects.get(gameinfo=games[0], isHome=True)
-    assert game1_home.fh == 2 and game1_home.sh == 1, (
-        f"Game 1 home scores incorrect: {game1_home.fh}-{game1_home.sh}"
-    )
+    assert (
+        game1_home.fh == 2 and game1_home.sh == 1
+    ), f"Game 1 home scores incorrect: {game1_home.fh}-{game1_home.sh}"
     print(f"✓ Game 1 home scores verified: {game1_home.fh}-{game1_home.sh}")
 
     game1_away = Gameresult.objects.get(gameinfo=games[0], isHome=False)
-    assert game1_away.fh == 1 and game1_away.sh == 0, (
-        f"Game 1 away scores incorrect: {game1_away.fh}-{game1_away.sh}"
-    )
+    assert (
+        game1_away.fh == 1 and game1_away.sh == 0
+    ), f"Game 1 away scores incorrect: {game1_away.fh}-{game1_away.sh}"
     print(f"✓ Game 1 away scores verified: {game1_away.fh}-{game1_away.sh}")
 
     # Verify bracket references were resolved

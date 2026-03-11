@@ -13,7 +13,10 @@ class GameResultSerializer(serializers.ModelSerializer):
         if obj.team:
             return obj.team.name
         from gamedays.service.placeholder_service import GamedayPlaceholderService
-        return GamedayPlaceholderService.resolve_placeholder(obj.gameinfo_id, obj.isHome)
+
+        return GamedayPlaceholderService.resolve_placeholder(
+            obj.gameinfo_id, obj.isHome
+        )
 
 
 class GameResultsUpdateSerializer(serializers.Serializer):

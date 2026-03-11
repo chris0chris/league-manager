@@ -101,19 +101,26 @@ class GamedayModelWrapper:
         self._resolve_placeholders()
 
     def _resolve_placeholders(self):
-        if self._games_with_result.empty or TEAM_NAME not in self._games_with_result.columns:
+        if (
+            self._games_with_result.empty
+            or TEAM_NAME not in self._games_with_result.columns
+        ):
             return
 
         # Only proceed if there are missing team names
         if self._games_with_result[TEAM_NAME].isna().any():
             from gamedays.service.placeholder_service import GamedayPlaceholderService
-            placeholder_service = GamedayPlaceholderService(self._gameinfo['gameday'].iloc[0])
-            
+
+            placeholder_service = GamedayPlaceholderService(
+                self._gameinfo["gameday"].iloc[0]
+            )
+
             # Resolve each missing row
-            for index, row in self._games_with_result[self._games_with_result[TEAM_NAME].isna()].iterrows():
+            for index, row in self._games_with_result[
+                self._games_with_result[TEAM_NAME].isna()
+            ].iterrows():
                 placeholder = placeholder_service.get_placeholder(
-                    row[GAMEINFO_ID], 
-                    is_home=row[IS_HOME]
+                    row[GAMEINFO_ID], is_home=row[IS_HOME]
                 )
                 self._games_with_result.at[index, TEAM_NAME] = placeholder
 
@@ -123,19 +130,21 @@ class GamedayModelWrapper:
             "official_name": "Schiedsrichter",
             "user__username": "Account",
             "team__name": "Team",
-            "note": "Notiz"
+            "note": "Notiz",
         }
 
         passchecks = pd.DataFrame(
-            PasscheckVerification.objects
-                .filter(gameday_id=gameday_id)
-                .values(*column_mapping.keys())
+            PasscheckVerification.objects.filter(gameday_id=gameday_id).values(
+                *column_mapping.keys()
+            )
         )
 
         if passchecks.empty:
             return pd.DataFrame([], columns=column_mapping.values())
 
-        passchecks["created_at"] = passchecks.created_at.dt.strftime("%Y-%m-%d %H:%M:%S")
+        passchecks["created_at"] = passchecks.created_at.dt.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         passchecks["note"] = passchecks.note.apply(lambda x: x.replace("\n", "</br>"))
 
         return passchecks.rename(columns=column_mapping)

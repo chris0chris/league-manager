@@ -1,10 +1,15 @@
 from gamedays.models import Team, Gameinfo, Gameresult, Gameday
-from gameday_designer.models import ScheduleTemplate, TemplateUpdateRule, TemplateApplication
+from gameday_designer.models import (
+    ScheduleTemplate,
+    TemplateUpdateRule,
+    TemplateApplication,
+)
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.service.placeholder_service import GamedayPlaceholderService
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class GamedayScheduleResolutionService:
     def __init__(self, gameday_id: int):
@@ -24,8 +29,7 @@ class GamedayScheduleResolutionService:
 
         # Find rules that depend on the stage that just finished
         rules = TemplateUpdateRule.objects.filter(
-            template=self.template,
-            pre_finished=finished_standing
+            template=self.template, pre_finished=finished_standing
         )
 
         for rule in rules:
@@ -38,7 +42,7 @@ class GamedayScheduleResolutionService:
             gameday=self.gameday,
             field=rule.slot.field,
             stage=rule.slot.stage,
-            standing=rule.slot.standing
+            standing=rule.slot.standing,
         ).first()
 
         if not target_gi:
@@ -50,15 +54,15 @@ class GamedayScheduleResolutionService:
                 team_name = self.gmw.get_team_by(
                     place=team_rule.place,
                     standing=team_rule.standing,
-                    points=team_rule.points
+                    points=team_rule.points,
                 )
                 team = Team.objects.get(name=team_name)
-                
-                if team_rule.role == 'home':
+
+                if team_rule.role == "home":
                     self._update_gameresult(target_gi, team, True)
-                elif team_rule.role == 'away':
+                elif team_rule.role == "away":
                     self._update_gameresult(target_gi, team, False)
-                elif team_rule.role == 'official':
+                elif team_rule.role == "official":
                     if target_gi.officials != team:
                         target_gi.officials = team
                         target_gi.save()
@@ -67,8 +71,7 @@ class GamedayScheduleResolutionService:
 
     def _update_gameresult(self, gi: Gameinfo, team: Team, is_home: bool):
         gameresult, created = Gameresult.objects.get_or_create(
-            gameinfo=gi, 
-            isHome=is_home
+            gameinfo=gi, isHome=is_home
         )
         if gameresult.team != team:
             gameresult.team = team

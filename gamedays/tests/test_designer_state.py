@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from gamedays.models import Gameday, GamedayDesignerState
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
+
 class TestGamedayDesignerState(TestCase):
     def setUp(self):
         self.db_setup = DBSetup()
@@ -14,7 +15,7 @@ class TestGamedayDesignerState(TestCase):
         state = GamedayDesignerState.objects.create(
             gameday=self.gameday,
             state_data={"nodes": [], "edges": []},
-            last_modified_by=self.user
+            last_modified_by=self.user,
         )
         assert state.gameday == self.gameday
         assert state.state_data == {"nodes": [], "edges": []}

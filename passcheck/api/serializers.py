@@ -121,23 +121,25 @@ class PasscheckGamesListSerializer(Serializer):
         name = obj[self.HOME_C]
         if name is None:
             from gamedays.service.placeholder_service import GamedayPlaceholderService
-            game_id = obj.get('id')
+
+            game_id = obj.get("id")
             if game_id:
-                name = GamedayPlaceholderService.resolve_placeholder(game_id, is_home=True)
-        return self._get_team_values(
-            name, obj[self.HOME_ID_C], obj[self.CHECKED_HOME]
-        )
+                name = GamedayPlaceholderService.resolve_placeholder(
+                    game_id, is_home=True
+                )
+        return self._get_team_values(name, obj[self.HOME_ID_C], obj[self.CHECKED_HOME])
 
     def get_away(self, obj: dict):
         name = obj[self.AWAY_C]
         if name is None:
             from gamedays.service.placeholder_service import GamedayPlaceholderService
-            game_id = obj.get('id')
+
+            game_id = obj.get("id")
             if game_id:
-                name = GamedayPlaceholderService.resolve_placeholder(game_id, is_home=False)
-        return self._get_team_values(
-            name, obj[self.AWAY_ID_C], obj[self.CHECKED_AWAY]
-        )
+                name = GamedayPlaceholderService.resolve_placeholder(
+                    game_id, is_home=False
+                )
+        return self._get_team_values(name, obj[self.AWAY_ID_C], obj[self.CHECKED_AWAY])
 
     # noinspection PyMethodMayBeStatic
     def _get_team_values(self, name, team_id, is_checked):

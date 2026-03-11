@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Stack, Alert } from 'react-bootstrap';
 import { useDesignerController } from '../hooks/useDesignerController';
 import ListCanvas from './ListCanvas';
-import { GameResultsTable } from './GameResultsTable';
+import { GameResultsTable, ScoreEdit } from './GameResultsTable';
 import FlowToolbar from './FlowToolbar';
 import GamedayMetadataAccordion from './GamedayMetadataAccordion';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
@@ -104,7 +104,6 @@ const ListDesignerApp: React.FC = () => {
     addNotification(t('ui:notification.autoSaveSuccess'), 'success', t('ui:notification.templateExported.title'));
   }, [flowState, metadata?.name, addNotification, t]);
 
-  const { saveTrigger } = ui || {};
   const isLocked = metadata?.status ? metadata.status !== 'DRAFT' : true;
 
   const onGenerateTournamentHandler = useCallback(() => setShowTournamentModal(true), []);
@@ -209,8 +208,10 @@ const ListDesignerApp: React.FC = () => {
     }, 2000);
 
     return () => {
-      if (pendingSaveRef.current.timer) {
-        clearTimeout(pendingSaveRef.current.timer);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const currentPendingSave = pendingSaveRef.current;
+      if (currentPendingSave.timer) {
+        clearTimeout(currentPendingSave.timer);
       }
     };
   }, [flowState, saveData, isLocked]);
@@ -267,14 +268,15 @@ const ListDesignerApp: React.FC = () => {
     setTeamSelectionModalContext(null);
   }, [teamSelectionContext, handleAssignTeam]);
 
-  const handleSaveBulkResults = useCallback(async (results: Record<string, any>) => {
+  const handleSaveBulkResults = useCallback(async (results: Record<string, ScoreEdit>) => {
     if (!id) return;
     try {
-      // results is Map<gameId, {home_fh, away_fh, home_final, away_final}>
-      const updatePromises = Object.entries(results).map(([gameId, scores]) => {
-        const halftime = { home: scores.home_fh, away: scores.away_fh };
-        const final = { home: scores.home_final, away: scores.away_final };
-        return gamedayApi.updateGameResult(parseInt(gameId), halftime, final);
+      // results is Map<resultId, ScoreEdit>
+      const updatePromises = Object.entries(results).map(([resultId, scores]) => {
+        return gamedayApi.updateGameResultDetail(parseInt(resultId), {
+          fh: scores.fh ?? undefined,
+          sh: scores.sh ?? undefined,
+        });
       });
       
       await Promise.all(updatePromises);
@@ -286,7 +288,7 @@ const ListDesignerApp: React.FC = () => {
       addNotification(t('ui:notification.resultsSaved'), 'success', t('ui:notification.title.success'));
     } catch (error) {
       console.error('Failed to save bulk results', error);
-      addNotification(t('ui:notification.resultsSaveFailed'), 'danger', t('ui:notification.title.error'));
+      addNotification(t('ui:notification.resultSaveFailed'), 'danger', t('ui:notification.title.error'));
     }
   }, [id, setGameResults, addNotification, t]);
 
@@ -372,8 +374,9 @@ const ListDesignerApp: React.FC = () => {
               onDeleteGlobalTeamGroup={handleDeleteGlobalTeamGroup}
               onReorderGlobalTeamGroup={handleReorderGlobalTeamGroup}
               onShowTeamSelection={handleShowTeamSelection}
-              getTeamUsage={(teamId) => ({ count: 0, games: [] })} // TODO: Implement
+              getTeamUsage={() => ({ count: 0, games: [] })} // TODO: Implement
               onAssignTeam={handleAssignTeam}
+
               onSwapTeams={handleSwapTeams}
               onAddGame={handleUpdateGameSlot}
               onAddGameToGameEdge={handleConnectTeam}

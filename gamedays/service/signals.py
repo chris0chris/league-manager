@@ -4,7 +4,9 @@ from django.dispatch import receiver
 from gamedays.management.schedule_update import ScheduleUpdate
 from gamedays.models import Gameinfo
 from gameday_designer.models import TemplateApplication
-from gamedays.service.schedule_resolution_service import GamedayScheduleResolutionService
+from gamedays.service.schedule_resolution_service import (
+    GamedayScheduleResolutionService,
+)
 
 FINISHED = "beendet"
 
@@ -22,5 +24,7 @@ def update_game_schedule(sender, instance: Gameinfo, created, **kwargs):
                 resolution_service.update_participants(instance.stage)
         else:
             # Fallback to legacy JSON-based logic
-            update_schedule = ScheduleUpdate(instance.gameday_id, instance.gameday.format)
+            update_schedule = ScheduleUpdate(
+                instance.gameday_id, instance.gameday.format
+            )
             update_schedule.update()

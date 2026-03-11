@@ -6,6 +6,7 @@ from gameday_designer.models import ScheduleTemplate, TemplateSlot, TemplateAppl
 
 logger = logging.getLogger(__name__)
 
+
 class GamedayPlaceholderService:
     """
     Central service for resolving human-friendly placeholder names (e.g., "Winner Game 1")
@@ -21,7 +22,7 @@ class GamedayPlaceholderService:
     def get_template(self) -> ScheduleTemplate:
         if self._template:
             return self._template
-        
+
         if not self.gameday:
             return None
 
@@ -30,13 +31,15 @@ class GamedayPlaceholderService:
         if application:
             self._template = application.template
             return self._template
-        
+
         # 2. Fallback to format-based name for migrated templates
         template_name = f"schedule_{self.gameday.format}"
         self._template = ScheduleTemplate.objects.filter(name=template_name).first()
         return self._template
 
-    def get_placeholder(self, gameinfo_id: int, is_home: bool = True, is_official: bool = False) -> str:
+    def get_placeholder(
+        self, gameinfo_id: int, is_home: bool = True, is_official: bool = False
+    ) -> str:
         """Get a specific placeholder name for a game slot."""
         try:
             gi = Gameinfo.objects.get(pk=gameinfo_id)
@@ -49,14 +52,28 @@ class GamedayPlaceholderService:
                 return "TBD"
 
             if is_official:
-                return slot.official_reference or (f"G{slot.official_group+1}_T{slot.official_team+1}" if slot.official_group is not None else "TBD")
-            
+                return slot.official_reference or (
+                    f"G{slot.official_group+1}_T{slot.official_team+1}"
+                    if slot.official_group is not None
+                    else "TBD"
+                )
+
             if is_home:
-                return slot.home_reference or (f"G{slot.home_group+1}_T{slot.home_team+1}" if slot.home_group is not None else "TBD")
+                return slot.home_reference or (
+                    f"G{slot.home_group+1}_T{slot.home_team+1}"
+                    if slot.home_group is not None
+                    else "TBD"
+                )
             else:
-                return slot.away_reference or (f"G{slot.away_group+1}_T{slot.away_team+1}" if slot.away_group is not None else "TBD")
+                return slot.away_reference or (
+                    f"G{slot.away_group+1}_T{slot.away_team+1}"
+                    if slot.away_group is not None
+                    else "TBD"
+                )
         except Exception as e:
-            logger.debug(f"Placeholder resolution failed for game {gameinfo_id}: {str(e)}")
+            logger.debug(
+                f"Placeholder resolution failed for game {gameinfo_id}: {str(e)}"
+            )
             return "TBD"
 
     def _find_slot_for_game(self, gi: Gameinfo) -> TemplateSlot:
@@ -68,19 +85,16 @@ class GamedayPlaceholderService:
         # Count how many games (including this one) happened on this field before or at this time
         # This matches the 'slot_order' logic used during template application
         game_index = Gameinfo.objects.filter(
-            gameday_id=self.gameday_id,
-            field=gi.field,
-            scheduled__lte=gi.scheduled
+            gameday_id=self.gameday_id, field=gi.field, scheduled__lte=gi.scheduled
         ).count()
 
-        slots = TemplateSlot.objects.filter(
-            template=template,
-            field=gi.field
-        ).order_by('slot_order')
+        slots = TemplateSlot.objects.filter(template=template, field=gi.field).order_by(
+            "slot_order"
+        )
 
         if game_index > slots.count():
             return None
-            
+
         return slots[game_index - 1]
 
     @classmethod

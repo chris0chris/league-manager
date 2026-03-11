@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Table, Button, Form, Alert } from 'react-bootstrap';
 import { GameResultsDisplay } from '../types/designer';
 
-interface ScoreEdit {
+export interface ScoreEdit {
   fh?: number | null;
   sh?: number | null;
   isHome?: boolean;
@@ -21,14 +21,14 @@ export const GameResultsTable: React.FC<GameResultsTableProps> = ({
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleScoreChange = (gameId: number, resultId: number, isHome: boolean, field: 'fh' | 'sh', value: string) => {
-    const key = `${gameId}-${resultId}`;
+  const handleScoreChange = (_gameId: number, resultId: number, isHome: boolean, field: 'fh' | 'sh', value: string) => {
+    const key = resultId.toString();
     setEdits({
       ...edits,
       [key]: {
         ...edits[key],
         [field]: value ? parseInt(value) : null,
-        isHome, // Preserve isHome in the edit object
+        isHome,
       },
     });
   };
@@ -38,7 +38,7 @@ export const GameResultsTable: React.FC<GameResultsTableProps> = ({
 
     games.forEach((game) => {
       game.results.forEach((result) => {
-        const key = `${game.id}-${result.id}`;
+        const key = result.id.toString();
         const edit = edits[key];
 
         if (edit && (edit.fh !== undefined || edit.sh !== undefined)) {
@@ -93,14 +93,14 @@ export const GameResultsTable: React.FC<GameResultsTableProps> = ({
           {games.map((game) => (
             <React.Fragment key={game.id}>
               {game.results.map((result) => {
-                const key = `${game.id}-${result.id}`;
+                const key = result.id.toString();
                 const edit = edits[key] || {};
                 const fh = edit.fh !== undefined ? edit.fh : result.fh;
                 const sh = edit.sh !== undefined ? edit.sh : result.sh;
-                const total = fh !== null && sh !== null ? fh + sh : null;
+                const total = fh !== null && sh !== null ? (fh as number) + (sh as number) : null;
 
                 return (
-                  <tr key={key}>
+                  <tr key={result.id}>
                     <td>{game.field}</td>
                     <td>{game.scheduled}</td>
                     <td>{result.team.name}</td>

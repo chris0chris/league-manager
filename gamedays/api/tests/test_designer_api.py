@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from gamedays.models import Gameday, GamedayDesignerState
 from gamedays.tests.setup_factories.db_setup import DBSetup
 
+
 class DesignerAPITest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_superuser(username="admin", password="password")
@@ -14,8 +15,7 @@ class DesignerAPITest(APITestCase):
 
     def test_get_designer_state(self):
         GamedayDesignerState.objects.create(
-            gameday=self.gameday,
-            state_data={"nodes": [{"id": "1"}], "edges": []}
+            gameday=self.gameday, state_data={"nodes": [{"id": "1"}], "edges": []}
         )
         url = f"/api/gamedays/{self.gameday.id}/designer-state/"
         response = self.client.get(url)
