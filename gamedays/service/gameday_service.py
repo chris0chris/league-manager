@@ -179,6 +179,10 @@ class EmptyGamedayService:
         return EmptyDefenseStatisticTable
 
     @staticmethod
+    def get_staff_passcheck_details(gameday_id):
+        return pd.DataFrame([], columns=["Zeitpunkt", "Schiedsrichter", "Account", "Team", "Notiz"])
+
+    @staticmethod
     def get_resolved_designer_data(gameday_pk):
         gameday = Gameday.objects.get(pk=gameday_pk)
         return gameday.designer_data or {"nodes": [], "edges": []}

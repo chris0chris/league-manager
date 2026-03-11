@@ -110,7 +110,7 @@ class PasscheckGamesListSerializer(Serializer):
         CHECKED_HOME,
         CHECKED_AWAY,
     ]
-    id = IntegerField()
+    id = IntegerField(required=False)
     gameday_id = IntegerField()
     field = IntegerField()
     scheduled = TimeField()

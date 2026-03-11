@@ -3,6 +3,7 @@ import pandas as pd
 from pandas import DataFrame
 
 from gamedays.models import Gameinfo, Gameresult, TeamLog
+from passcheck.models import PasscheckVerification
 from gamedays.service.gameday_settings import (
     STANDING,
     TEAM_NAME,
@@ -115,6 +116,29 @@ class GamedayModelWrapper:
                     is_home=row[IS_HOME]
                 )
                 self._games_with_result.at[index, TEAM_NAME] = placeholder
+
+    def get_staff_passcheck_details(self, gameday_id):
+        column_mapping = {
+            "created_at": "Zeitpunkt",
+            "official_name": "Schiedsrichter",
+            "user__username": "Account",
+            "team__name": "Team",
+            "note": "Notiz"
+        }
+
+        passchecks = pd.DataFrame(
+            PasscheckVerification.objects
+                .filter(gameday_id=gameday_id)
+                .values(*column_mapping.keys())
+        )
+
+        if passchecks.empty:
+            return pd.DataFrame([], columns=column_mapping.values())
+
+        passchecks["created_at"] = passchecks.created_at.dt.strftime("%Y-%m-%d %H:%M:%S")
+        passchecks["note"] = passchecks.note.apply(lambda x: x.replace("\n", "</br>"))
+
+        return passchecks.rename(columns=column_mapping)
 
     def has_finalround(self):
         return QUALIIFY_ROUND in self._gameinfo[STAGE].values
