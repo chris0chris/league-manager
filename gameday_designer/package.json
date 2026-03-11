@@ -75,7 +75,7 @@
     "@vitejs/plugin-react": "5.1.4",
     "@vitest/coverage-v8": "4.0.18",
     "@vitest/ui": "4.0.18",
-    "eslint": "10.0.0",
+    "eslint": "10.0.3",
     "eslint-formatter-junit": "9.0.1",
     "eslint-plugin-react-hooks": "7.0.1",
     "i18next-resources-for-ts": "2.0.1",

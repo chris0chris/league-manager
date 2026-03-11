@@ -91,11 +91,19 @@ describe('GamedayDashboard Coverage', () => {
   it('handles load gamedays failure', async () => {
     (gamedayApi.listGamedays as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('API Error'));
     
-    await renderDashboard(false);
+    render(
+      <MemoryRouter>
+        <GamedayProvider>
+          <GamedayDashboard />
+        </GamedayProvider>
+      </MemoryRouter>
+    );
     
     await waitFor(() => {
         expect(screen.getByText(/failed to load gamedays/i)).toBeInTheDocument();
     });
+    
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
   it('handles create gameday failure', async () => {
