@@ -99,9 +99,8 @@ jobs:
       - image: cimg/mysql:9.6
         command: [ --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --default-storage-engine=InnoDB ]
         environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
           MYSQL_DATABASE: test_test_db
-          MYSQL_USER: user
-          MYSQL_PASSWORD: user
     working_directory: ~/repo
     steps:
       - checkout
@@ -110,6 +109,10 @@ jobs:
           name: run tests
           environment:
             SECRET_KEY: 123456-TEST
+            MYSQL_HOST: 127.0.0.1
+            MYSQL_DB_NAME: test_test_db
+            MYSQL_USER: root
+            MYSQL_PWD: ""
           command: |
             uv run pytest --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
       - store_test_results:
