@@ -105,51 +105,16 @@ class GamedayModelWrapper:
 
         # Only proceed if there are missing team names
         if self._games_with_result[TEAM_NAME].isna().any():
-            from gameday_designer.models import TemplateApplication, ScheduleTemplate, TemplateSlot
+            from gamedays.service.placeholder_service import GamedayPlaceholderService
+            placeholder_service = GamedayPlaceholderService(self._gameinfo['gameday'].iloc[0])
             
-            gameday_id = self._gameinfo['gameday'].iloc[0]
-            application = TemplateApplication.objects.filter(gameday_id=gameday_id).first()
-            template = None
-            if application:
-                template = application.template
-            else:
-                from gamedays.models import Gameday
-                gameday = Gameday.objects.filter(pk=gameday_id).first()
-                if gameday:
-                    template = ScheduleTemplate.objects.filter(name=f"schedule_{gameday.format}").first()
-            
-            if not template:
-                return
-
-            slots = TemplateSlot.objects.filter(template=template).order_by('field', 'slot_order')
-            
-            # We need to associate each Gameinfo with a Slot
-            # Gameinfo objects for this gameday, ordered same as slots
-            for field in range(1, template.num_fields + 1):
-                field_slots = slots.filter(field=field)
-                field_games = self._gameinfo[self._gameinfo['field'] == field].sort_values('scheduled')
-                
-                for (_, gi_row), slot in zip(field_games.iterrows(), field_slots):
-                    gi_id = gi_row['id']
-                    
-                    # Update TEAM_NAME for this gameinfo where it's null
-                    mask = (self._games_with_result[GAMEINFO_ID] == gi_id) & (self._games_with_result[TEAM_NAME].isna())
-                    if not mask.any():
-                        continue
-                        
-                    # Find home/away results for this game
-                    home_mask = mask & (self._games_with_result[IS_HOME] == True)
-                    away_mask = mask & (self._games_with_result[IS_HOME] == False)
-                    
-                    if home_mask.any() and slot.home_reference:
-                        self._games_with_result.loc[home_mask, TEAM_NAME] = slot.home_reference
-                    elif home_mask.any() and slot.home_group is not None:
-                         self._games_with_result.loc[home_mask, TEAM_NAME] = f"G{slot.home_group+1}_T{slot.home_team+1}"
-
-                    if away_mask.any() and slot.away_reference:
-                        self._games_with_result.loc[away_mask, TEAM_NAME] = slot.away_reference
-                    elif away_mask.any() and slot.away_group is not None:
-                         self._games_with_result.loc[away_mask, TEAM_NAME] = f"G{slot.away_group+1}_T{slot.away_team+1}"
+            # Resolve each missing row
+            for index, row in self._games_with_result[self._games_with_result[TEAM_NAME].isna()].iterrows():
+                placeholder = placeholder_service.get_placeholder(
+                    row[GAMEINFO_ID], 
+                    is_home=row[IS_HOME]
+                )
+                self._games_with_result.at[index, TEAM_NAME] = placeholder
 
     def has_finalround(self):
         return QUALIIFY_ROUND in self._gameinfo[STAGE].values

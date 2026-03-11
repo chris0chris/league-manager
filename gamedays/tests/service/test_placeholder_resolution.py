@@ -9,6 +9,8 @@ class TestPlaceholderResolution(TestCase):
         self.db_setup = DBSetup()
         self.db_setup.g62_status_empty()
         self.gameday = Gameday.objects.first()
+        from gamedays.models import Team
+        self.team_a = Team.objects.create(name="Team A")
         
         # Setup Designer Template and Application
         self.template = ScheduleTemplate.objects.create(
@@ -35,11 +37,18 @@ class TestPlaceholderResolution(TestCase):
         )
 
     def test_resolve_placeholders_fills_team_names_from_references(self):
-        # Update first game to match our slot
-        gi = Gameinfo.objects.filter(gameday=self.gameday, field=1).order_by('scheduled').first()
-        gi.stage = "Finals"
-        gi.standing = "P1"
-        gi.save()
+        # Clear existing games to have a clean field
+        Gameinfo.objects.filter(gameday=self.gameday).delete()
+        
+        # Create our specific game
+        gi = Gameinfo.objects.create(
+            gameday=self.gameday,
+            field=1,
+            scheduled="10:00",
+            stage="Finals",
+            standing="P1",
+            officials=self.team_a
+        )
         
         # Create results with NULL teams
         Gameresult.objects.filter(gameinfo=gi).delete()
@@ -55,3 +64,37 @@ class TestPlaceholderResolution(TestCase):
         
         assert home_result['team__name'] == "Winner Game 1"
         assert away_result['team__name'] == "Winner Game 2"
+
+    def test_get_game_placeholder_group_team(self):
+        # Ensure we have a game on field 1
+        gi = Gameinfo.objects.create(
+            gameday=self.gameday,
+            field=1,
+            scheduled="12:00",
+            stage="Preliminary",
+            standing="Gruppe 1",
+            officials=Gameinfo.objects.first().officials
+        )
+        
+        from gameday_designer.models import TemplateSlot
+        # Clear existing slots to avoid index confusion
+        TemplateSlot.objects.filter(template=self.template, field=1).delete()
+        
+        # Create 5 slots because DBSetup created 4 games + our 1 new game
+        for i in range(1, 6):
+            TemplateSlot.objects.create(
+                template=self.template,
+                field=1,
+                slot_order=i,
+                stage="Preliminary",
+                standing="Gruppe 1",
+                home_group=0,
+                home_team=i-1,
+                away_group=0,
+                away_team=i
+            )
+        
+        from gamedays.service.schedule_resolution_service import GamedayScheduleResolutionService
+        home_placeholder = GamedayScheduleResolutionService.get_game_placeholder(gi.pk, is_home=True)
+        # For the 5th game, home_team was i-1 = 4
+        assert home_placeholder == "G1_T5"

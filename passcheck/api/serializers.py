@@ -99,6 +99,7 @@ class PasscheckGamesListSerializer(Serializer):
     CHECKED_AWAY = "is_checked_away"
 
     ALL_FIELD_VALUES = [
+        "id",
         GAMEDAY_ID_C,
         FIELD_C,
         SCHEDULED_C,
@@ -109,6 +110,7 @@ class PasscheckGamesListSerializer(Serializer):
         CHECKED_HOME,
         CHECKED_AWAY,
     ]
+    id = IntegerField()
     gameday_id = IntegerField()
     field = IntegerField()
     scheduled = TimeField()
@@ -116,13 +118,25 @@ class PasscheckGamesListSerializer(Serializer):
     away = SerializerMethodField()
 
     def get_home(self, obj: dict):
+        name = obj[self.HOME_C]
+        if name is None:
+            from gamedays.service.placeholder_service import GamedayPlaceholderService
+            game_id = obj.get('id')
+            if game_id:
+                name = GamedayPlaceholderService.resolve_placeholder(game_id, is_home=True)
         return self._get_team_values(
-            obj[self.HOME_C], obj[self.HOME_ID_C], obj[self.CHECKED_HOME]
+            name, obj[self.HOME_ID_C], obj[self.CHECKED_HOME]
         )
 
     def get_away(self, obj: dict):
+        name = obj[self.AWAY_C]
+        if name is None:
+            from gamedays.service.placeholder_service import GamedayPlaceholderService
+            game_id = obj.get('id')
+            if game_id:
+                name = GamedayPlaceholderService.resolve_placeholder(game_id, is_home=False)
         return self._get_team_values(
-            obj[self.AWAY_C], obj[self.AWAY_ID_C], obj[self.CHECKED_AWAY]
+            name, obj[self.AWAY_ID_C], obj[self.CHECKED_AWAY]
         )
 
     # noinspection PyMethodMayBeStatic

@@ -3,11 +3,17 @@ from gamedays.models import Gameresult, Gameinfo
 
 
 class GameResultSerializer(serializers.ModelSerializer):
-    team_name = serializers.CharField(source="team.name", read_only=True)
+    team_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Gameresult
         fields = ["id", "team_id", "team_name", "fh", "sh", "pa", "isHome"]
+
+    def get_team_name(self, obj):
+        if obj.team:
+            return obj.team.name
+        from gamedays.service.placeholder_service import GamedayPlaceholderService
+        return GamedayPlaceholderService.resolve_placeholder(obj.gameinfo_id, obj.isHome)
 
 
 class GameResultsUpdateSerializer(serializers.Serializer):

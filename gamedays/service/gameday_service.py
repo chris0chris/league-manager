@@ -363,10 +363,21 @@ class GamedayGameService:
         self.away_team_id = 0
 
         if len(self.gameresult) > 0:
-            self.home_team_name = self.gameresult.iloc[1]["team__description"]
-            self.home_team_id = self.gameresult.iloc[1]["team"]
-            self.away_team_name = self.gameresult.iloc[0]["team__description"]
-            self.away_team_id = self.gameresult.iloc[0]["team"]
+            from gamedays.service.placeholder_service import GamedayPlaceholderService
+            placeholder_service = GamedayPlaceholderService(self.game.gameday_id)
+            
+            home_row = self.gameresult[self.gameresult['isHome'] == True].iloc[0]
+            away_row = self.gameresult[self.gameresult['isHome'] == False].iloc[0]
+            
+            self.home_team_id = home_row["team"]
+            self.home_team_name = home_row["team__description"]
+            if pd.isna(self.home_team_name) or self.home_team_name is None:
+                self.home_team_name = placeholder_service.get_placeholder(pk, is_home=True)
+                
+            self.away_team_id = away_row["team"]
+            self.away_team_name = away_row["team__description"]
+            if pd.isna(self.away_team_name) or self.away_team_name is None:
+                self.away_team_name = placeholder_service.get_placeholder(pk, is_home=False)
 
         self._score_column_mapping = {
             # "created_time": "Zeit",
