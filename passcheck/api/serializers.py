@@ -8,6 +8,7 @@ from rest_framework.fields import (
 )
 from rest_framework.serializers import Serializer
 
+from gamedays.service.placeholder_service import GamedayPlaceholderService
 from league_manager.utils.serializer_utils import ObfuscatorSerializer, ObfuscateField
 from passcheck.service.eligibility_validation import (
     EligibilityValidator,
@@ -120,7 +121,6 @@ class PasscheckGamesListSerializer(Serializer):
     def get_home(self, obj: dict):
         name = obj[self.HOME_C]
         if name is None:
-            from gamedays.service.placeholder_service import GamedayPlaceholderService
             game_id = obj.get('id')
             if game_id is not None:
                 name = GamedayPlaceholderService.resolve_placeholder(game_id, is_home=True)
@@ -133,7 +133,6 @@ class PasscheckGamesListSerializer(Serializer):
     def get_away(self, obj: dict):
         name = obj[self.AWAY_C]
         if name is None:
-            from gamedays.service.placeholder_service import GamedayPlaceholderService
             game_id = obj.get('id')
             if game_id is not None:
                 name = GamedayPlaceholderService.resolve_placeholder(game_id, is_home=False)

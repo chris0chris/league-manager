@@ -3,6 +3,7 @@ import pandas as pd
 from pandas import DataFrame
 
 from gamedays.models import Gameinfo, Gameresult, TeamLog
+from gamedays.service.placeholder_service import GamedayPlaceholderService
 from passcheck.models import PasscheckVerification
 from gamedays.service.gameday_settings import (
     STANDING,
@@ -109,12 +110,13 @@ class GamedayModelWrapper:
 
         # Only proceed if there are missing team names
         if self._games_with_result[TEAM_NAME].isna().any():
-            from gamedays.service.placeholder_service import GamedayPlaceholderService
 
             placeholder_service = GamedayPlaceholderService(
                 self._gameinfo["gameday"].iloc[0]
             )
 
+            placeholder_service = GamedayPlaceholderService(self._gameinfo['gameday'].iloc[0])
+            
             # Resolve each missing row
             for index, row in self._games_with_result[
                 self._games_with_result[TEAM_NAME].isna()

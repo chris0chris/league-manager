@@ -12,6 +12,7 @@ from gamedays.models import (
     League,
     Gameresult,
 )
+from gamedays.service.placeholder_service import GamedayPlaceholderService
 
 logger = logging.getLogger(__name__)
 
@@ -183,8 +184,6 @@ class GameLogSerializer(Serializer):
         )
         name = obj[self.HOME_TEAM] if is_home else obj[self.AWAY_TEAM]
         if name is None:
-            from gamedays.service.placeholder_service import GamedayPlaceholderService
-
             name = GamedayPlaceholderService.resolve_placeholder(obj[self.ID], is_home)
         return {
             "name": name,
