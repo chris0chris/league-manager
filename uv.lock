@@ -361,15 +361,15 @@ wheels = [
 
 [[package]]
 name = "django-rest-knox"
-version = "5.0.2"
+version = "5.0.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "djangorestframework" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ba/7e/6ef520fbfa0cb902fe32c6f921426b1dcfa50cb2471a0ddca31ba770fa72/django_rest_knox-5.0.2.tar.gz", hash = "sha256:f283622bcf5d28a6a0203845c065d06c7432efa54399ae32070c61ac03af2d6f", size = 16292, upload-time = "2024-09-30T21:21:07.606Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4a/dd/92d89fb625003a35e94258845ea9d5e3216024e5db206d7f45e37133c35b/django_rest_knox-5.0.4.tar.gz", hash = "sha256:0155c0df3d5f66810d98e16d226603fcca224c1cc4c1283faf569b72b726c93c", size = 19184, upload-time = "2026-03-10T17:00:22.114Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/13/29/09468c086fd19f34b00a9698ee9cc1864dfae8c171be140657b965577472/django_rest_knox-5.0.2-py3-none-any.whl", hash = "sha256:694da5d0ad6eb3edbfd7cdc8d69c089fc074e6b0e548e00ff2750bf2fdfadb6f", size = 14960, upload-time = "2024-09-30T21:21:04.896Z" },
+    { url = "https://files.pythonhosted.org/packages/a7/2d/e5d76075bec24354474a30652d3aa6c52345ea07853c38d4bb8a3057d0de/django_rest_knox-5.0.4-py3-none-any.whl", hash = "sha256:b4a00d0298286198636ef78a7c9c83be8be2156e5ea771d421fb713d20787414", size = 15946, upload-time = "2026-03-10T17:00:20.489Z" },
 ]
 
 [[package]]
@@ -513,7 +513,7 @@ requires-dist = [
     { name = "django-formtools", specifier = "==2.5.1" },
     { name = "django-health-check", specifier = "==4.0.4" },
     { name = "django-pandas", specifier = "==0.6.7" },
-    { name = "django-rest-knox", specifier = "==5.0.2" },
+    { name = "django-rest-knox", specifier = "==5.0.4" },
     { name = "django-webtest", marker = "extra == 'test'", specifier = "==1.9.14" },
     { name = "djangorestframework", specifier = "==3.16.1" },
     { name = "factory-boy", marker = "extra == 'test'", specifier = "==3.3.3" },

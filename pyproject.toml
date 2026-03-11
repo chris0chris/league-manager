@@ -19,7 +19,7 @@ dependencies = [
     "Markdown==3.10.2",
     "django-cors-headers==4.9.0",
     "Pillow==12.1.1",
-    "django-rest-knox==5.0.2",
+    "django-rest-knox==5.0.4",
     "python-dotenv==1.2.1",
     "mysqlclient==2.2.8",
     "requests==2.32.5",
