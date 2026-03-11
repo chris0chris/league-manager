@@ -363,26 +363,24 @@ class TemplateApplicationService:
             )
 
             # Create home Gameresult
-            if home_team:
-                Gameresult.objects.create(
-                    gameinfo=gameinfo,
-                    team=home_team,
-                    isHome=True,
-                    fh=None,  # To be filled in during game
-                    sh=None,
-                    pa=None,
-                )
+            Gameresult.objects.create(
+                gameinfo=gameinfo,
+                team=home_team,
+                isHome=True,
+                fh=None,  # To be filled in during game
+                sh=None,
+                pa=None,
+            )
 
             # Create away Gameresult
-            if away_team:
-                Gameresult.objects.create(
-                    gameinfo=gameinfo,
-                    team=away_team,
-                    isHome=False,
-                    fh=None,  # To be filled in during game
-                    sh=None,
-                    pa=None,
-                )
+            Gameresult.objects.create(
+                gameinfo=gameinfo,
+                team=away_team,
+                isHome=False,
+                fh=None,  # To be filled in during game
+                sh=None,
+                pa=None,
+            )
 
     def _create_audit_record(self):
         """
