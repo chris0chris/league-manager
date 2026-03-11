@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: 🐳🛠️ Setup Docker buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: 🐳🏗️ Build Docker image
         uses: docker/build-push-action@v6
@@ -40,7 +40,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: 📤 Upload Docker image as artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: docker-image-${{ inputs.image_name }}
           path: /tmp/${{ inputs.image_name }}.tar

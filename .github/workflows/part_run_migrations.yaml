@@ -40,7 +40,7 @@ jobs:
     environment: ${{ inputs.environment_name }}
     steps:
       - name: 📥 Download Docker image artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: ${{ inputs.artifact_name }}
           path: /tmp
