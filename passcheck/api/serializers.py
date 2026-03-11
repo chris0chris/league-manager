@@ -122,8 +122,10 @@ class PasscheckGamesListSerializer(Serializer):
         if name is None:
             from gamedays.service.placeholder_service import GamedayPlaceholderService
             game_id = obj.get('id')
-            if game_id:
+            if game_id is not None:
                 name = GamedayPlaceholderService.resolve_placeholder(game_id, is_home=True)
+            else:
+                name = "TBD"
         return self._get_team_values(
             name, obj[self.HOME_ID_C], obj[self.CHECKED_HOME]
         )
@@ -133,8 +135,10 @@ class PasscheckGamesListSerializer(Serializer):
         if name is None:
             from gamedays.service.placeholder_service import GamedayPlaceholderService
             game_id = obj.get('id')
-            if game_id:
+            if game_id is not None:
                 name = GamedayPlaceholderService.resolve_placeholder(game_id, is_home=False)
+            else:
+                name = "TBD"
         return self._get_team_values(
             name, obj[self.AWAY_ID_C], obj[self.CHECKED_AWAY]
         )
