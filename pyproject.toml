@@ -8,7 +8,7 @@ version = "3.1.7"
 requires-python = ">=3.12"
 dependencies = [
     "Django==6.0.3",
-    "django-crispy-forms==2.5",
+    "django-crispy-forms==2.6",
     "crispy-bootstrap5==2025.6",
     "numpy==2.4.3",
     "pandas==3.0.1",
@@ -36,7 +36,7 @@ test = [
     "django-debug-toolbar==6.2.0",
     "WebTest==3.0.7",
     "bump2version==1.0.1",
-    "black==26.1.0",
+    "black==26.3.0",
     "types-factory_boy==0.4.1",
 ]
 prod = [
