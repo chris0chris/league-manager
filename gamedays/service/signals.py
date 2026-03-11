@@ -6,12 +6,10 @@ from gamedays.models import Gameinfo
 from gameday_designer.models import TemplateApplication
 from gamedays.service.schedule_resolution_service import GamedayScheduleResolutionService
 
-FINISHED = "beendet"
-
 
 @receiver(post_save, sender=Gameinfo)
 def update_game_schedule(sender, instance: Gameinfo, created, **kwargs):
-    if instance.status == FINISHED:
+    if instance.status == Gameinfo.STATUS_COMPLETED:
         # Check for Designer-based gameday
         if TemplateApplication.objects.filter(gameday=instance.gameday).exists():
             resolution_service = GamedayScheduleResolutionService(instance.gameday_id)
