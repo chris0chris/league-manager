@@ -38,16 +38,26 @@ class GamedayScheduleResolutionService:
     def _apply_rule(self, rule: TemplateUpdateRule):
         # Find the Gameinfo object in this gameday that matches the slot
         # We match by field, stage, and standing
-        target_gi = Gameinfo.objects.filter(
+        target_gis = Gameinfo.objects.filter(
             gameday=self.gameday,
             field=rule.slot.field,
             stage=rule.slot.stage,
-            standing=rule.slot.standing,
-        ).first()
+            standing=rule.slot.standing
+        )
 
-        if not target_gi:
+        if target_gis.count() == 0:
             logger.warning(f"Could not find target Gameinfo for rule {rule.id}")
             return
+
+        if target_gis.count() > 1:
+            logger.warning(
+                f"Ambiguous match: found {target_gis.count()} Gameinfo objects for rule {rule.id} "
+                f"(field={rule.slot.field}, stage={rule.slot.stage}, standing={rule.slot.standing}). "
+                f"Skipping to avoid updating the wrong game."
+            )
+            return
+
+        target_gi = target_gis.first()
 
         for team_rule in rule.team_rules.all():
             try:
