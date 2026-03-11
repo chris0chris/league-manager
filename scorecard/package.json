@@ -7,7 +7,7 @@
     "test": "__tests__"
   },
   "dependencies": {
-    "@redux-devtools/extension": "^3.3.0",
+    "@redux-devtools/extension": "^4.0.0",
     "@reduxjs/toolkit": "^2.11.1",
     "axios": "^1.13.2",
     "jquery": "^4.0.0",
