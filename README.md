@@ -7,6 +7,7 @@
 
 ## Installation
 
+
 This project uses [uv](https://docs.astral.sh/uv/) for package management.
 
 ```bash
