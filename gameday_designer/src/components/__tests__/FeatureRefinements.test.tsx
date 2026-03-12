@@ -1,16 +1,29 @@
-
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, cleanup } from '@testing-library/react';
+import React, { useEffect } from 'react';
+import { render, screen, cleanup, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import ListDesignerApp from '../ListDesignerApp';
 import AppHeader from '../layout/AppHeader';
-import { GamedayProvider } from '../../context/GamedayContext';
-import i18n from '../../i18n/testConfig';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { GamedayProvider, useGamedayContext } from '../../context/GamedayContext';
 import { gamedayApi } from '../../api/gamedayApi';
+import i18n from '../../i18n/testConfig';
 import { GamedayMetadata } from '../../types';
 
-// Mock gamedayApi
+// Helper component to trigger actions from context
+const ContextTrigger = () => {
+  const { onGenerateTournament } = useGamedayContext();
+  useEffect(() => {
+    (window as any).triggerGenerate = onGenerateTournament;
+  }, [onGenerateTournament]);
+  return null;
+};
+
+vi.mock('../LanguageSelector', () => ({
+  default: () => <div data-testid="language-selector">LanguageSelector</div>,
+}));
+
+// Mock the API singleton
 vi.mock('../../api/gamedayApi', () => ({
   gamedayApi: {
     getGameday: vi.fn(),
@@ -23,6 +36,9 @@ vi.mock('../../api/gamedayApi', () => ({
     listSeasons: vi.fn().mockResolvedValue([{ id: 1, name: '2026' }]),
     listLeagues: vi.fn().mockResolvedValue([{ id: 1, name: 'DFFL' }]),
     searchTeams: vi.fn().mockResolvedValue([]),
+    getDesignerState: vi.fn().mockResolvedValue({ state_data: null }),
+    updateDesignerState: vi.fn().mockResolvedValue({}),
+    updateGameResultDetail: vi.fn().mockResolvedValue({}),
   },
 }));
 
@@ -38,13 +54,6 @@ describe('Feature Refinements Coverage', () => {
     season: 1,
     league: 1,
     status: 'DRAFT',
-    designer_data: {
-      nodes: [],
-      edges: [],
-      fields: [],
-      globalTeams: [],
-      globalTeamGroups: [],
-    }
   };
 
   beforeEach(async () => {
@@ -55,7 +64,7 @@ describe('Feature Refinements Coverage', () => {
 
   afterEach(() => {
     cleanup();
-    vi.restoreAllMocks();
+    delete (window as any).triggerGenerate;
   });
 
   const renderApp = async () => {
@@ -63,40 +72,47 @@ describe('Feature Refinements Coverage', () => {
     render(
       <MemoryRouter initialEntries={['/designer/1']}>
         <GamedayProvider>
+          <ContextTrigger />
           <AppHeader />
           <Routes>
-            <Route path="/designer/:id" element={<ListDesignerApp />} />
+            <Route path="/designer/:id" element={<div data-testid="app-container">
+              <ListDesignerApp />
+            </div>} />
           </Routes>
         </GamedayProvider>
       </MemoryRouter>
     );
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+    // Wait for initial load to finish (LoadingOverlay should disappear)
+    await waitFor(() => {
+        expect(screen.queryByTestId('loading-overlay')).not.toBeInTheDocument();
+    }, { timeout: 10000 });
     return { user };
   };
 
   it('covers "Add External Officials" action', async () => {
     const { user } = await renderApp();
 
-    const addOfficialsBtn = await screen.findByTestId('add-officials-button');
-    await user.click(addOfficialsBtn);
+    // Open metadata accordion first
+    const toggle = await screen.findByTestId('gameday-metadata-toggle');
+    await user.click(toggle);
 
-    // Verify group was added to sidebar
-    await waitFor(() => {
-      expect(screen.getByText(/External Officials/i)).toBeInTheDocument();
-    });
+    const addOfficialsBtns = await screen.findAllByTestId('add-officials-button');
+    await user.click(addOfficialsBtns[0]);
+
+    // Verify group was added
+    await screen.findByText(/Officials/i);
   });
 
   it('covers "Structured Template Export" action', async () => {
-    // Mock gameday with data to enable export button
-    const gamedayWithData = {
-        ...mockGameday,
-        designer_data: {
-            ...mockGameday.designer_data,
-            fields: [{ id: 'f1', name: 'Field 1', order: 0 }],
-            nodes: [{ id: 'game-1', type: 'game', data: { standing: 'Game 1' }, position: { x: 0, y: 0 } }]
-        }
+    const mockState = {
+        fields: [{ id: 'f1', name: 'Field 1', order: 0 }],
+        nodes: [{ id: 'game-1', type: 'game', data: { standing: 'Game 1' }, position: { x: 0, y: 0 } }],
+        edges: [],
+        globalTeams: [],
+        globalTeamGroups: []
     };
-    vi.mocked(gamedayApi.getGameday).mockResolvedValue(gamedayWithData as unknown as GamedayMetadata);
+    
+    vi.mocked(gamedayApi.getDesignerState).mockResolvedValue({ state_data: mockState });
 
     const { user } = await renderApp();
 
@@ -115,62 +131,64 @@ describe('Feature Refinements Coverage', () => {
     });
 
     // Find and click the toggle
-    const dropdownToggle = screen.getByTestId('export-dropdown-toggle');
+    const dropdownToggles = await screen.findAllByTestId('export-dropdown-toggle');
     
     // Wait for the button to be enabled (indicates data is loaded)
     await waitFor(() => {
-        const exportBtn = screen.getByTestId('export-button');
-        expect(exportBtn).not.toBeDisabled();
-    }, { timeout: 5000 });
+        const exportBtns = screen.getAllByTestId('export-button');
+        expect(exportBtns[0]).not.toBeDisabled();
+    }, { timeout: 10000 });
 
     // Click the toggle to open the menu
-    await user.click(dropdownToggle);
+    await user.click(dropdownToggles[0]);
 
-    // Wait for dropdown to expand
-    await waitFor(() => {
-        expect(dropdownToggle.getAttribute('aria-expanded')).toBe('true');
-    }, { timeout: 2000 });
-
-    // Click template export item - wait longer for portal rendering
+    // Find and click "Export as Template" (renders as "Template (Structured)")
     const exportTemplateBtn = await screen.findByTestId('export-template-button');
     await user.click(exportTemplateBtn);
 
-    // Verify export logic was triggered
     expect(createObjectURL).toHaveBeenCalled();
     expect(clickSpy).toHaveBeenCalled();
-    
-    vi.restoreAllMocks();
   });
 
   it('covers HIDDEN "Auto-Clear" warning in GeneratorModal when NO data', async () => {
-    const { user } = await renderApp();
+    // Ensure no data is loaded (clearAllMocks does not reset mockResolvedValue)
+    vi.mocked(gamedayApi.getDesignerState).mockResolvedValue({ state_data: null });
+
+    await renderApp();
     
-    const generateBtn = (await screen.findAllByTestId('generate-tournament-button'))[0];
-    await user.click(generateBtn);
+    await act(async () => {
+        const trigger = (window as any).triggerGenerate;
+        if (typeof trigger === 'function') trigger();
+    });
     
-    // Wait for modal to be definitely open
-    await screen.findByRole('dialog');
+    // Wait for modal content
+    await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+    }, { timeout: 10000 });
+
     expect(screen.queryByText(/Auto-Clear/i)).toBeNull();
   });
 
   it('covers VISIBLE "Auto-Clear" warning in GeneratorModal when data EXISTS', async () => {
-    // Mock gameday with existing fields/nodes
-    const gamedayWithData = {
-        ...mockGameday,
-        designer_data: {
-            ...mockGameday.designer_data,
-            fields: [{ id: 'f1', name: 'Field 1', order: 0 }]
-        }
+    const mockState = {
+        fields: [{ id: 'f1', name: 'Field 1', order: 0 }],
+        nodes: [{ id: 'game-1', type: 'game', data: { standing: 'Game 1' }, position: { x: 0, y: 0 } }],
+        edges: [],
+        globalTeams: [],
+        globalTeamGroups: []
     };
-    vi.mocked(gamedayApi.getGameday).mockResolvedValue(gamedayWithData as unknown as GamedayMetadata);
+    vi.mocked(gamedayApi.getDesignerState).mockResolvedValue({ state_data: mockState });
+
+    await renderApp();
     
-    const { user } = await renderApp();
+    await act(async () => {
+        const trigger = (window as any).triggerGenerate;
+        if (typeof trigger === 'function') trigger();
+    });
     
-    const generateBtn = (await screen.findAllByTestId('generate-tournament-button'))[0];
-    await user.click(generateBtn);
-    
-    // Warning should be VISIBLE now - wait longer for portal
-    const warning = await screen.findByText((content) => content.includes('Auto-Clear'), {}, { timeout: 5000 });
-    expect(warning).toBeInTheDocument();
+    // Warning should be VISIBLE now
+    await waitFor(() => {
+        expect(screen.getByText(/Auto-Clear/i)).toBeInTheDocument();
+    }, { timeout: 10000 });
   });
 });

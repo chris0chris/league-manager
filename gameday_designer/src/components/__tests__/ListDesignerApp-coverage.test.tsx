@@ -261,14 +261,11 @@ describe('ListDesignerApp Coverage', () => {
 
   it('handles publish success', async () => {
     (gamedayApi.publish as Mock).mockResolvedValue({ ...defaultMockReturn.metadata, status: 'PUBLISHED' });
-    
+
     await renderApp();
 
     const publishBtn = screen.getByTestId('publish-schedule-button');
     fireEvent.click(publishBtn);
-
-    const confirmBtn = screen.getByRole('button', { name: /publish now/i });
-    fireEvent.click(confirmBtn);
 
     await waitFor(() => {
         expect(gamedayApi.publish).toHaveBeenCalledWith(1);
@@ -306,14 +303,11 @@ describe('ListDesignerApp Coverage', () => {
 
   it('handles publish failure', async () => {
     (gamedayApi.publish as Mock).mockRejectedValue(new Error('Publish Error'));
-    
+
     await renderApp();
 
     const publishBtn = screen.getByTestId('publish-schedule-button');
     fireEvent.click(publishBtn);
-
-    const confirmBtn = screen.getByRole('button', { name: /publish now/i });
-    fireEvent.click(confirmBtn);
 
     await waitFor(() => {
         expect(mockHandlers.addNotification).toHaveBeenCalledWith(

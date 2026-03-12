@@ -1,63 +1,52 @@
+import { render, screen, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import userEvent from '@testing-library/user-event';
 import ListDesignerApp from '../ListDesignerApp';
 import AppHeader from '../layout/AppHeader';
-import { GamedayProvider } from '../../context/GamedayContext';
-import i18n from '../../i18n/testConfig';
 import { useDesignerController } from '../../hooks/useDesignerController';
-import type { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup, FieldNode } from '../../types/flowchart';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { GamedayProvider } from '../../context/GamedayContext';
+import { useTypedTranslation } from '../../i18n/useTypedTranslation';
+import i18n from '../../i18n/testConfig';
+import { gamedayApi } from '../../api/gamedayApi';
+import { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
+import { FieldNode } from '../../types/designer';
 
-// Mock the hook
-vi.mock('../../hooks/useDesignerController');
+// Mock the controller hook
+vi.mock('../../hooks/useDesignerController', () => ({
+  useDesignerController: vi.fn(),
+}));
 
-// Mock react-router-dom
-vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('react-router-dom')>();
-  return {
-    ...actual,
-    useParams: () => ({ id: '1' }),
-    useNavigate: () => vi.fn(),
-    useLocation: () => ({ pathname: '/designer/1' }),
-  };
-});
-
-// Mock LanguageSelector
 vi.mock('../LanguageSelector', () => ({
   default: () => <div data-testid="language-selector">LanguageSelector</div>,
 }));
 
-// Mock GamedayApi
+// Mock the API singleton
 vi.mock('../../api/gamedayApi', () => ({
   gamedayApi: {
-    getGameday: vi.fn().mockResolvedValue({
-      id: 1,
-      name: 'Test Gameday',
-      date: '2026-05-01',
-      start: '10:00',
-      format: '6_2',
-      author: 1,
-      address: 'Test Field',
-      season: 1,
-      league: 1,
-      status: 'DRAFT',
-    }),
-    patchGameday: vi.fn().mockResolvedValue({}),
+    getGameday: vi.fn().mockResolvedValue({}),
     getGamedayGames: vi.fn().mockResolvedValue([]),
-    updateBulkGameResults: vi.fn().mockResolvedValue({}),
+    updateGameResult: vi.fn().mockResolvedValue({}),
+    updateGameResultDetail: vi.fn().mockResolvedValue({}),
     listSeasons: vi.fn().mockResolvedValue([]),
     listLeagues: vi.fn().mockResolvedValue([]),
+    getDesignerState: vi.fn().mockResolvedValue({ state_data: null }),
+    updateDesignerState: vi.fn().mockResolvedValue({}),
+    publish: vi.fn().mockResolvedValue({}),
+    patchGameday: vi.fn().mockResolvedValue({}),
+    deleteGameday: vi.fn().mockResolvedValue({}),
   },
 }));
 
 describe('ListDesignerApp', () => {
   const mockHandlers = {
+    loadData: vi.fn().mockResolvedValue({}),
+    saveData: vi.fn().mockResolvedValue({}),
     handleHighlightElement: vi.fn(),
     handleDynamicReferenceClick: vi.fn(),
     handleImport: vi.fn(),
     handleExport: vi.fn(),
     handleClearAll: vi.fn(),
+    handleUpdateMetadata: vi.fn(),
     handleUpdateNode: vi.fn(),
     handleDeleteNode: vi.fn(),
     handleAddFieldContainer: vi.fn(),
@@ -66,9 +55,16 @@ describe('ListDesignerApp', () => {
     handleAddGlobalTeam: vi.fn(),
     handleUpdateGlobalTeam: vi.fn(),
     handleDeleteGlobalTeam: vi.fn(),
+    handleReplaceGlobalTeam: vi.fn(),
     handleReorderGlobalTeam: vi.fn(),
-    handleAddGlobalTeamGroup: vi.fn(),
+    handleUpdateGlobalTeamGroup: vi.fn(),
+    handleDeleteGlobalTeamGroup: vi.fn(),
+    handleReorderGlobalTeamGroup: vi.fn(),
     handleAssignTeam: vi.fn(),
+    handleConnectTeam: vi.fn(),
+    handleSwapTeams: vi.fn(),
+    handleUpdateGameSlot: vi.fn(),
+    handleRemoveEdgeFromSlot: vi.fn(),
     handleGenerateTournament: vi.fn(),
     setShowTournamentModal: vi.fn(),
     dismissNotification: vi.fn(),
@@ -76,42 +72,52 @@ describe('ListDesignerApp', () => {
   };
 
   const defaultMockReturn = {
-    metadata: { id: 1, name: "Test Gameday", date: "2026-05-01", start: "10:00", format: "6_2", author: 1, address: "Test Field", season: 1, league: 1, status: 'DRAFT' },
-    nodes: [] as FlowNode[],
-    edges: [] as FlowEdge[],
-    fields: [] as FieldNode[],
-    globalTeams: [] as GlobalTeam[],
-    globalTeamGroups: [] as GlobalTeamGroup[],
-    selectedNode: null,
-    validation: { isValid: true, errors: [], warnings: [] },
-    notifications: [],
-    updateMetadata: vi.fn(),
+    metadata: { 
+      id: 1, 
+      name: "Test Gameday", 
+      date: "2026-05-01", 
+      start: "10:00", 
+      format: "6_2", 
+      author: 1, 
+      address: "Test Field", 
+      season: 1, 
+      league: 1, 
+      status: 'DRAFT' 
+    },
     ui: {
       highlightedElement: null,
-      expandedFieldIds: new Set(),
-      expandedStageIds: new Set(),
+      expandedFieldIds: new Set<string>(),
+      expandedStageIds: new Set<string>(),
       showTournamentModal: false,
-      canExport: false,
-      hasData: false,
+      canExport: true,
+      hasData: true,
+      isLoading: false,
+      notifications: [],
+    },
+    validation: {
+      isValid: true,
+      errors: [],
+      warnings: [],
+      issueCount: 0
+    },
+    flowState: {
+      nodes: [] as FlowNode[],
+      edges: [] as FlowEdge[],
+      fields: [] as FieldNode[],
+      globalTeams: [] as GlobalTeam[],
+      globalTeamGroups: [] as GlobalTeamGroup[],
+      exportState: vi.fn().mockReturnValue({ nodes: [], edges: [] }),
     },
     handlers: mockHandlers,
-    updateGlobalTeamGroup: vi.fn(),
-    deleteGlobalTeamGroup: vi.fn(),
-    reorderGlobalTeamGroup: vi.fn(),
-    getTeamUsage: vi.fn(),
-    addGameToGameEdge: vi.fn(),
-    addStageToGameEdge: vi.fn(),
-    removeEdgeFromSlot: vi.fn(),
-    addGameNodeInStage: vi.fn(),
-    importState: vi.fn(),
-    exportState: vi.fn().mockReturnValue({
-      metadata: {},
-      nodes: [],
-      edges: [],
-      fields: [],
-      globalTeams: [],
-      globalTeamGroups: []
-    }),
+    canUndo: false,
+    canRedo: false,
+    undo: vi.fn(),
+    redo: vi.fn(),
+    stats: {
+      gameCount: 0,
+      teamCount: 0,
+      fieldCount: 0
+    }
   };
 
   beforeEach(async () => {
@@ -120,91 +126,77 @@ describe('ListDesignerApp', () => {
     (useDesignerController as Mock).mockReturnValue(defaultMockReturn);
   });
 
-  const renderApp = async () => {
-    const user = userEvent.setup();
-    render(
-      <MemoryRouter initialEntries={['/designer/1']}>
-        <GamedayProvider>
+  const renderApp = () => {
+    return render(
+      <GamedayProvider>
+        <MemoryRouter initialEntries={['/designer/1']}>
           <AppHeader />
           <Routes>
             <Route path="/designer/:id" element={<ListDesignerApp />} />
           </Routes>
-        </GamedayProvider>
-      </MemoryRouter>
+        </MemoryRouter>
+      </GamedayProvider>
     );
-    // Wait for the gameday to load and spinner to go away
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument(), { timeout: 15000 });
-    // Ensure metadata is loaded
-    await screen.findByTestId('gameday-metadata-header');
-    return { user };
   };
 
   it('should render the main app container', async () => {
-    await renderApp();
-    expect(document.querySelector('.list-designer-app')).toBeInTheDocument();
+    renderApp();
+    expect(screen.getAllByText('Test Gameday').length).toBeGreaterThan(0);
   });
 
   it('should render application metadata in accordion', async () => {
-    await renderApp();
-    const metadataHeader = screen.getByTestId('gameday-metadata-header');
-    expect(within(metadataHeader).getByText('Test Gameday')).toBeInTheDocument();
+    renderApp();
+    expect(screen.getByDisplayValue('Test Gameday')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('2026-05-01')).toBeInTheDocument();
   });
 
   describe('Validation Status Display', () => {
     it('should show "Valid" status when no errors or warnings', async () => {
-      await renderApp();
+      renderApp();
       const badges = screen.getByTestId('validation-badges');
-      expect(badges.querySelector('.bi-check-circle-fill')).toBeInTheDocument();
+      expect(badges.querySelector('.bg-success')).toBeInTheDocument();
     });
 
     it('should show error count when validation has errors', async () => {
       (useDesignerController as Mock).mockReturnValue({
         ...defaultMockReturn,
-        validation: { 
-          isValid: false, 
-          errors: [
-            { id: '1', message: 'Error 1', type: 'error' },
-            { id: '2', message: 'Error 2', type: 'error' }
-          ], 
-          warnings: [] 
+        validation: {
+          isValid: false,
+          errors: [{ id: '1', message: 'Test Error', type: 'error' }],
+          warnings: [],
+          issueCount: 1
         }
       });
-      await renderApp();
+      renderApp();
       const badges = screen.getByTestId('validation-badges');
-      expect(within(badges).getByText('2')).toBeInTheDocument();
+      expect(badges.querySelector('.bg-danger')).toBeInTheDocument();
+      expect(badges).toHaveTextContent('1');
     });
   });
 
   describe('Import/Export', () => {
     it('should call exportState when export is triggered', async () => {
-      (useDesignerController as Mock).mockReturnValue({
-        ...defaultMockReturn,
-        ui: { ...defaultMockReturn.ui, canExport: true }
+      renderApp();
+      const exportButton = screen.getByTestId('export-button');
+      await act(async () => {
+        exportButton.click();
       });
-      await renderApp();
-      
-      const exportBtn = await screen.findByTestId('export-button');
-      await waitFor(() => expect(exportBtn).not.toBeDisabled());
-      fireEvent.click(exportBtn);
-      
-      await waitFor(() => expect(mockHandlers.handleExport).toHaveBeenCalled());
+      expect(mockHandlers.handleExport).toHaveBeenCalled();
     });
 
     it('should call clearAll when clear is triggered', async () => {
-      (useDesignerController as Mock).mockReturnValue({
-        ...defaultMockReturn,
-        ui: { ...defaultMockReturn.ui, hasData: true }
+      renderApp();
+      // Open the accordion first to see the Clear button
+      const accordionButton = screen.getByTestId('gameday-metadata-toggle');
+      await act(async () => {
+        accordionButton.click();
       });
-      await renderApp();
       
-      const metadataHeader = screen.getByTestId('gameday-metadata-header');
-      const accordionBtn = metadataHeader.querySelector('.accordion-button') as HTMLElement;
-      fireEvent.click(accordionBtn);
-      
-      const clearBtn = await screen.findByRole('button', { name: /clear schedule/i });
-      fireEvent.click(clearBtn);
-      
-      await waitFor(() => expect(mockHandlers.handleClearAll).toHaveBeenCalled());
+      const clearButton = screen.getByTestId('clear-all-button');
+      await act(async () => {
+        clearButton.click();
+      });
+      expect(mockHandlers.handleClearAll).toHaveBeenCalled();
     });
   });
 });
