@@ -5,9 +5,7 @@ import AppHeader from '../layout/AppHeader';
 import { useDesignerController } from '../../hooks/useDesignerController';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { GamedayProvider } from '../../context/GamedayContext';
-import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import i18n from '../../i18n/testConfig';
-import { gamedayApi } from '../../api/gamedayApi';
 import { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
 import { FieldNode } from '../../types/designer';
 

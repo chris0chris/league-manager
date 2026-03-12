@@ -1,5 +1,12 @@
 import React, { useEffect } from 'react';
-import { render, screen, cleanup, waitFor, act, within } from '@testing-library/react';
+
+// Extend window for test-only trigger helpers
+declare global {
+  interface Window {
+    triggerGenerate?: () => void;
+  }
+}
+import { render, screen, cleanup, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import ListDesignerApp from '../ListDesignerApp';
@@ -14,7 +21,7 @@ import { GamedayMetadata } from '../../types';
 const ContextTrigger = () => {
   const { onGenerateTournament } = useGamedayContext();
   useEffect(() => {
-    (window as any).triggerGenerate = onGenerateTournament;
+    window.triggerGenerate = onGenerateTournament;
   }, [onGenerateTournament]);
   return null;
 };
@@ -64,7 +71,7 @@ describe('Feature Refinements Coverage', () => {
 
   afterEach(() => {
     cleanup();
-    delete (window as any).triggerGenerate;
+    delete window.triggerGenerate;
   });
 
   const renderApp = async () => {
@@ -157,7 +164,7 @@ describe('Feature Refinements Coverage', () => {
     await renderApp();
     
     await act(async () => {
-        const trigger = (window as any).triggerGenerate;
+        const trigger = window.triggerGenerate;
         if (typeof trigger === 'function') trigger();
     });
     
@@ -182,7 +189,7 @@ describe('Feature Refinements Coverage', () => {
     await renderApp();
     
     await act(async () => {
-        const trigger = (window as any).triggerGenerate;
+        const trigger = window.triggerGenerate;
         if (typeof trigger === 'function') trigger();
     });
     

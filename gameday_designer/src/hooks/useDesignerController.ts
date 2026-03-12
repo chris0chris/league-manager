@@ -5,7 +5,7 @@
  * event handlers, and orchestration of multiple state domains.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { useFlowValidation } from './useFlowValidation';
 import { downloadFlowchartAsJson, validateForExport } from '../utils/flowchartExport';
 import { importFromScheduleJson, validateScheduleJson } from '../utils/flowchartImport';
@@ -21,7 +21,7 @@ import {
   TOURNAMENT_GENERATION_STATE_DELAY,
   DEFAULT_TOURNAMENT_GROUP_NAME,
 } from '../utils/tournamentConstants';
-import type { GlobalTeam, GlobalTeamGroup, FlowNode, HighlightedElement, Notification, NotificationType, FlowState } from '../types/flowchart';
+import type { GlobalTeam, HighlightedElement, Notification, NotificationType, FlowState } from '../types/flowchart';
 import type { TournamentGenerationConfig, RoundRobinConfig } from '../types/tournament';
 import type { UseFlowStateReturn, GamedayMetadata } from '../types/designer';
 import { v4 as uuidv4 } from 'uuid';
@@ -32,36 +32,18 @@ export function useDesignerController(
   flowState: UseFlowStateReturn,
   onMetadataHighlight?: () => void
 ) {
-  const {
-    metadata = {} as GamedayMetadata,
-    nodes = [],
-    edges = [],
-    fields = [],
-    globalTeams = [],
-    globalTeamGroups = [],
-    addFieldNode = () => ({} as FlowNode),
-    addStageNode = () => {},
-    addBulkTournament = () => {},
-    updateNode = () => {},
-    deleteNode = () => {},
-    selectNode = () => {},
-    updateMetadata = () => {},
-    clearAll = () => {},
-    clearSchedule = () => {},
-    importState = () => {},
-    exportState = () => ({} as FlowState),
-    addGlobalTeam = () => ({} as GlobalTeam),
-    updateGlobalTeam = () => {},
-    deleteGlobalTeam = () => {},
-    reorderGlobalTeam = () => {},
-    addGlobalTeamGroup = () => ({} as GlobalTeamGroup),
-    assignTeamToGame = () => {},
-    replaceGlobalTeam = () => {},
-    addBulkGameToGameEdges = () => {},
-    addBulkFields = () => {},
-  } = flowState || {};
-
   const [isLoading, setIsLoading] = useState(false);
+  const [showTournamentModal, setShowTournamentModal] = useState(false);
+  const [highlightedElement, setHighlightedElement] = useState<HighlightedElement | null>(null);
+  const [expandedFieldIds, setExpandedFieldIds] = useState<Set<string>>(new Set());
+  const [expandedStageIds, setExpandedStageIds] = useState<Set<string>>(new Set());
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Stable references to flowState methods to avoid stale closures without triggering re-renders of handlers
+  const flowStateRef = useRef(flowState);
+  useEffect(() => {
+    flowStateRef.current = flowState;
+  }, [flowState]);
 
   const loadData = useCallback(async () => {
     if (!gamedayId) return;
@@ -69,12 +51,12 @@ export function useDesignerController(
     try {
       const state = await gamedayApi.getDesignerState(parseInt(gamedayId));
       if (state && state.state_data) {
-        importState(state.state_data);
+        flowStateRef.current?.importState(state.state_data);
       }
     } finally {
       setIsLoading(false);
     }
-  }, [gamedayId, importState]);
+  }, [gamedayId]);
 
   const saveData = useCallback(async (state: FlowState) => {
     if (!gamedayId) return;
@@ -86,16 +68,14 @@ export function useDesignerController(
   }, [gamedayId]);
 
   // Validate the current flowchart
-  const validation = useFlowValidation(nodes, edges, fields, globalTeams, globalTeamGroups, metadata);
-
-  // --- UI State ---
-  const [highlightedElement, setHighlightedElement] = useState<HighlightedElement | null>(null);
-  const [expandedFieldIds, setExpandedFieldIds] = useState<Set<string>>(new Set());
-  const [expandedStageIds, setExpandedStageIds] = useState<Set<string>>(new Set());
-  const [showTournamentModal, setShowTournamentModal] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  // --- UI Actions ---
+  const validation = useFlowValidation(
+    flowState?.nodes || [], 
+    flowState?.edges || [], 
+    flowState?.fields || [], 
+    flowState?.globalTeams || [], 
+    flowState?.globalTeamGroups || [], 
+    flowState?.metadata || {} as GamedayMetadata
+  );
 
   const addNotification = useCallback((message: string, type: NotificationType = 'info', title?: string, undoAction?: () => void, duration?: number) => {
     const id = uuidv4();
@@ -107,7 +87,6 @@ export function useDesignerController(
 
   const dismissNotification = useCallback((id: string) => {
     setNotifications((prev) => prev.map(n => n.id === id ? { ...n, show: false } : n));
-    // Clean up after animation
     setTimeout(() => {
       setNotifications((prev) => prev.filter(n => n.id !== id));
     }, 300);
@@ -127,12 +106,12 @@ export function useDesignerController(
         onMetadataHighlight();
       }
       setHighlightedElement({ id, type });
-      await scrollToElementWithExpansion(id, type, nodes, expandField, expandStage, true);
+      await scrollToElementWithExpansion(id, type, flowStateRef.current?.nodes || [], expandField, expandStage, true);
       setTimeout(() => {
         setHighlightedElement(null);
       }, HIGHLIGHT_AUTO_CLEAR_DELAY);
     },
-    [nodes, expandField, expandStage, onMetadataHighlight]
+    [expandField, expandStage, onMetadataHighlight]
   );
 
   const handleDynamicReferenceClick = useCallback(
@@ -156,14 +135,14 @@ export function useDesignerController(
         return;
       }
 
-      importState(result.state);
+      flowStateRef.current?.importState(result.state);
       addNotification('Schedule imported successfully', 'success', 'Import Success');
     },
-    [importState, addNotification]
+    [addNotification]
   );
 
   const handleExport = useCallback(() => {
-    const state = exportState();
+    const state = flowStateRef.current?.exportState();
     const errors = validateForExport(state);
     if (errors.length > 0) {
       addNotification(
@@ -174,20 +153,20 @@ export function useDesignerController(
     }
     downloadFlowchartAsJson(state);
     addNotification('Schedule exported successfully', 'success', 'Export Success');
-  }, [exportState, addNotification]);
+  }, [addNotification]);
 
   const assignTeamsToTournament = useCallback(
     (structure: TournamentStructure, teams: GlobalTeam[], clearExisting: boolean = false) => {
       const operations = assignTeamsToTournamentGames(structure, teams);
       operations.forEach((op) => {
         if (op.type === 'assign_team') {
-          assignTeamToGame(op.gameId, op.teamId, op.slot);
+          flowStateRef.current?.assignTeamToGame(op.gameId, op.teamId, op.slot);
         } else if (op.type === 'add_edges') {
-          addBulkGameToGameEdges(op.edges, clearExisting);
+          flowStateRef.current?.addBulkGameToGameEdges(op.edges, clearExisting);
         }
       });
     },
-    [assignTeamToGame, addBulkGameToGameEdges]
+    []
   );
 
   const handleGenerateTournament = useCallback(
@@ -197,28 +176,26 @@ export function useDesignerController(
       selectedTeamIds?: string[];
     }) => {
       try {
-        // Auto-clear existing structure before generating new one
-        let teamsToUse = globalTeams;
+        const fs = flowStateRef.current;
+        const currentTeams = fs?.globalTeams || [];
+        let teamsToUse = currentTeams;
+        
         if (config.generateTeams) {
-          clearAll();
-          teamsToUse = []; // Start fresh if generating new teams
+          fs?.clearAll();
+          teamsToUse = [];
         } else {
-          clearSchedule();
-          // If we have selected teams, filter the pool
+          fs?.clearSchedule();
           if (config.selectedTeamIds && config.selectedTeamIds.length > 0) {
-            teamsToUse = globalTeams.filter(t => config.selectedTeamIds!.includes(t.id));
+            teamsToUse = currentTeams.filter(t => config.selectedTeamIds!.includes(t.id));
           }
         }
 
         if (config.generateTeams) {
           const teamCount = config.template.teamCount.exact || config.template.teamCount.min;
-          
-          // Determine group count from template
           const firstStage = config.template.stages?.[0];
           let groupCount = 1;
           if (firstStage && firstStage.fieldAssignment === 'split') {
             groupCount = firstStage.splitCount || config.fieldCount;
-            // Round robin calculation fallback
             if (firstStage.splitCount === undefined && firstStage.progressionMode === 'round_robin') {
               const teamsPerGroup = (firstStage.config as RoundRobinConfig).teamCount;
               if (teamsPerGroup > 0) {
@@ -227,12 +204,11 @@ export function useDesignerController(
             }
           }
 
-          // Create groups if they don't exist
           const groupIds: string[] = [];
           for (let i = 0; i < groupCount; i++) {
             const groupName = groupCount > 1 ? `Gruppe ${String.fromCharCode(65 + i)}` : DEFAULT_TOURNAMENT_GROUP_NAME;
-            const newGroup = addGlobalTeamGroup(groupName);
-            groupIds.push(newGroup.id);
+            const newGroup = fs?.addGlobalTeamGroup(groupName);
+            if (newGroup) groupIds.push(newGroup.id);
           }
 
           const teamData = generateTeamsForTournament(teamCount);
@@ -240,18 +216,16 @@ export function useDesignerController(
           
           const newTeams: GlobalTeam[] = teamData.map((data, index) => {
             const groupIndex = Math.min(Math.floor(index / teamsPerGroupCount), groupIds.length - 1);
-            const team = addGlobalTeam(data.label, groupIds[groupIndex]);
-            updateGlobalTeam(team.id, { color: data.color });
+            const team = fs?.addGlobalTeam(data.label, groupIds[groupIndex]);
+            fs?.updateGlobalTeam(team.id, { color: data.color });
             return { ...team, color: data.color };
           });
 
-          teamsToUse = [...globalTeams, ...newTeams];
+          teamsToUse = [...teamsToUse, ...newTeams];
         }
 
         const structure = generateTournament(teamsToUse, config);
         
-        // 1. Pre-resolve team assignments within the structure object 
-        // so that the referee assignment logic knows which teams are playing in each game.
         if (config.autoAssignTeams && teamsToUse.length > 0) {
           const operations = assignTeamsToTournamentGames(structure, teamsToUse);
           operations.forEach((op) => {
@@ -265,18 +239,15 @@ export function useDesignerController(
           });
         }
 
-        // 2. Assign referees to all games using smart round-robin.
-        // This will now correctly identify playing teams because they are set in game.data.
         const gamesWithRefs = assignRefereesToGames(structure.games, structure.stages, teamsToUse);
         const structureWithRefs = {
           ...structure,
           games: gamesWithRefs,
         };
         
-        addBulkTournament(structureWithRefs, true);
-        addBulkFields(structureWithRefs.fields.map(f => ({ id: f.id, name: f.data.name, order: f.data.order, color: f.data.color })), true);
+        fs?.addBulkTournament(structureWithRefs, true);
+        fs?.addBulkFields(structureWithRefs.fields.map(f => ({ id: f.id, name: f.data.name, order: f.data.order, color: f.data.color })), true);
 
-        // 3. Perform the actual stateful team assignments (handles edges, etc.)
         if (config.autoAssignTeams && teamsToUse.length > 0) {
           setTimeout(() => {
             assignTeamsToTournament(structureWithRefs, teamsToUse, true);
@@ -290,28 +261,29 @@ export function useDesignerController(
         addNotification('Failed to generate tournament. See console for details.', 'danger', 'Generation Error');
       }
     },
-    [globalTeams, clearAll, clearSchedule, addBulkTournament, addBulkFields, addGlobalTeam, addGlobalTeamGroup, updateGlobalTeam, assignTeamsToTournament, addNotification]
+    [addNotification, assignTeamsToTournament]
   );
 
   const handleSwapTeams = useCallback(
     (gameId: string) => {
-      const game = nodes.find((n) => n.id === gameId);
+      const fs = flowStateRef.current;
+      const game = (fs?.nodes || []).find((n) => n.id === gameId);
       if (!game || game.type !== 'game') return;
 
       const { homeTeamId, awayTeamId, homeTeamDynamic, awayTeamDynamic } = game.data;
-      updateNode(gameId, {
+      fs?.updateNode(gameId, {
         homeTeamId: awayTeamId,
         awayTeamId: homeTeamId,
         homeTeamDynamic: awayTeamDynamic,
         awayTeamDynamic: homeTeamDynamic,
       });
     },
-    [nodes, updateNode]
+    []
   );
 
   const canExport = useMemo(() => {
-    return nodes.some((n) => n.type === 'game') && fields.length > 0;
-  }, [nodes, fields]);
+    return (flowState?.nodes || []).some((n) => n.type === 'game') && (flowState?.fields || []).length > 0;
+  }, [flowState?.nodes, flowState?.fields]);
 
   const uiInternal = useMemo(() => ({
     highlightedElement,
@@ -319,11 +291,11 @@ export function useDesignerController(
     expandedStageIds,
     showTournamentModal,
     canExport,
-    hasData: nodes.length > 0 || globalTeams.length > 0 || fields.length > 0,
+    hasData: (flowState?.nodes?.length ?? 0) > 0 || (flowState?.globalTeams?.length ?? 0) > 0 || (flowState?.fields?.length ?? 0) > 0,
     saveTrigger: flowState?.saveTrigger,
     isLoading,
     notifications,
-  }), [highlightedElement, expandedFieldIds, expandedStageIds, showTournamentModal, canExport, nodes.length, globalTeams.length, fields.length, flowState?.saveTrigger, isLoading, notifications]);
+  }), [highlightedElement, expandedFieldIds, expandedStageIds, showTournamentModal, canExport, flowState?.nodes?.length, flowState?.globalTeams?.length, flowState?.fields?.length, flowState?.saveTrigger, isLoading, notifications]);
 
   const handlersInternal = useMemo(() => ({
     loadData,
@@ -334,68 +306,65 @@ export function useDesignerController(
     handleDynamicReferenceClick,
     handleImport,
     handleExport,
-    handleClearAll: clearAll,
-    handleUpdateNode: updateNode,
-    handleUpdateGlobalTeam: updateGlobalTeam,
-    handleDeleteGlobalTeam: deleteGlobalTeam,
-    handleReplaceGlobalTeam: replaceGlobalTeam,
-    handleReorderGlobalTeam: reorderGlobalTeam,
-    handleAssignTeam: assignTeamToGame,
+    handleClearAll: () => flowStateRef.current?.clearAll(),
+    handleUpdateMetadata: (data: Partial<GamedayMetadata>) => flowStateRef.current?.updateMetadata(data),
+    handleUpdateNode: (id: string, data: Record<string, unknown>) => flowStateRef.current?.updateNode(id, data),
+    handleUpdateGlobalTeam: (id: string, data: Record<string, unknown>) => flowStateRef.current?.updateGlobalTeam(id, data),
+    handleDeleteGlobalTeam: (id: string) => flowStateRef.current?.deleteGlobalTeam(id),
+    handleReplaceGlobalTeam: (oldId: string, newId: string) => flowStateRef.current?.replaceGlobalTeam(oldId, newId),
+    handleReorderGlobalTeam: (id: string, index: number) => flowStateRef.current?.reorderGlobalTeam(id, index),
+    handleUpdateGlobalTeamGroup: (id: string, name: string) => flowStateRef.current?.updateGlobalTeamGroup(id, name),
+    handleDeleteGlobalTeamGroup: (id: string) => flowStateRef.current?.deleteGlobalTeamGroup(id),
+    handleReorderGlobalTeamGroup: (id: string, index: number) => flowStateRef.current?.reorderGlobalTeamGroup(id, index),
+    handleAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => flowStateRef.current?.assignTeamToGame(gameId, teamId, slot),
     handleConnectTeam: (team: { id: number; text: string }, groupId: string) => {
-      addGlobalTeam(team.text, groupId, team.id);
+      flowStateRef.current?.addGlobalTeam(team.text, groupId, team.id);
     },
     handleSwapTeams,
-    handleDeleteNode: deleteNode,
-    handleSelectNode: selectNode,
+    handleDeleteNode: (id: string) => flowStateRef.current?.deleteNode(id),
+    handleSelectNode: (id: string | null) => flowStateRef.current?.selectNode(id),
     handleGenerateTournament,
-    setShowTournamentModal,
-    handleAddGlobalTeam: (groupId: string) => addGlobalTeam(undefined, groupId),
-    handleAddGlobalTeamGroup: () => addGlobalTeamGroup(),
-    handleAddFieldContainer: () => addFieldNode({}, true),
-    handleAddStage: (fieldId: string) => addStageNode(fieldId),
+    showTournamentModal,
+    setShowTournamentModal: (show: boolean) => setShowTournamentModal(show),
+    handleAddGlobalTeam: (groupId: string) => flowStateRef.current?.addGlobalTeam(undefined, groupId),
+    handleAddGlobalTeamGroup: () => flowStateRef.current?.addGlobalTeamGroup(),
+    handleAddFieldContainer: () => flowStateRef.current?.addFieldNode({}, true),
+    handleAddStage: (fieldId: string) => flowStateRef.current?.addStageNode(fieldId),
     dismissNotification,
     addNotification,
     onMetadataHighlight,
-    replaceGlobalTeam
+    handleRemoveEdgeFromSlot: (gameId: string, slot: 'home' | 'away') => flowStateRef.current?.removeEdgeFromSlot(gameId, slot),
+    handleUpdateGameSlot: (gameId: string, slot: 'home' | 'away', type: string, refId: string) => flowStateRef.current?.addGameNodeInStage(gameId, slot, type, refId),
   }), [
     loadData, saveData, expandField, expandStage, handleHighlightElement, 
-    handleDynamicReferenceClick, handleImport, handleExport, clearAll, 
-    updateNode, updateGlobalTeam, deleteGlobalTeam, reorderGlobalTeam, 
-    assignTeamToGame, handleSwapTeams, deleteNode, selectNode, 
-    handleGenerateTournament, addGlobalTeam, addGlobalTeamGroup, 
-    addFieldNode, addStageNode, dismissNotification, addNotification, 
-    onMetadataHighlight, replaceGlobalTeam
+    handleDynamicReferenceClick, handleImport, handleExport,
+    handleSwapTeams, handleGenerateTournament, showTournamentModal, 
+    dismissNotification, addNotification, onMetadataHighlight
   ]);
 
   return useMemo(() => ({
-    // State
-    ...flowState,
+    metadata: flowState?.metadata,
+    nodes: flowState?.nodes || [],
+    edges: flowState?.edges || [],
+    fields: flowState?.fields || [],
+    globalTeams: flowState?.globalTeams || [],
+    globalTeamGroups: flowState?.globalTeamGroups || [],
     validation,
     notifications,
-    updateMetadata,
+    updateMetadata: flowState?.updateMetadata,
     ui: uiInternal,
-    // Explicitly expose these from flowState if not already in ...flowState
-    updateGlobalTeamGroup: flowState?.updateGlobalTeamGroup,
-    deleteGlobalTeamGroup: flowState?.deleteGlobalTeamGroup,
-    reorderGlobalTeamGroup: flowState?.reorderGlobalTeamGroup,
-    replaceGlobalTeam: flowState?.replaceGlobalTeam,
-    getTeamUsage: flowState?.getTeamUsage,
-    addGameToGameEdge: flowState?.addGameToGameEdge,
-    addStageToGameEdge: flowState?.addStageToGameEdge,
-    removeEdgeFromSlot: flowState?.removeEdgeFromSlot,
-    addGameNodeInStage: flowState?.addGameNodeInStage,
-    importState: flowState?.importState,
-    exportState: flowState?.exportState,
-    undo: flowState?.undo,
-    redo: flowState?.redo,
+    handlers: handlersInternal,
     canUndo: flowState?.canUndo,
     canRedo: flowState?.canRedo,
+    undo: flowState?.undo,
+    redo: flowState?.redo,
     stats: flowState?.stats,
     onMetadataHighlight,
-    
-    // Handlers
-    handlers: handlersInternal
   }), [
-    flowState, validation, notifications, updateMetadata, uiInternal, handlersInternal, onMetadataHighlight
+    flowState?.metadata, flowState?.nodes, flowState?.edges, flowState?.fields, 
+    flowState?.globalTeams, flowState?.globalTeamGroups, flowState?.canUndo, 
+    flowState?.canRedo, flowState?.undo, flowState?.redo, flowState?.stats,
+    flowState?.updateMetadata,
+    validation, notifications, uiInternal, handlersInternal, onMetadataHighlight
   ]);
 }
