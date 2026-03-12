@@ -47,6 +47,7 @@ const CustomAccordionHeader: React.FC<{
         type="button"
         className={`accordion-button d-flex w-100 justify-content-between align-items-center flex-wrap gap-2 ${isCurrentEventKey ? '' : 'collapsed'}`}
         onClick={decoratedOnClick}
+        data-testid="gameday-metadata-toggle"
       >
         <div className="d-flex align-items-center gap-2">
           <span className="fw-bold me-2">{metadata.name || t('ui:placeholder.gamedayName')}</span>
@@ -180,7 +181,6 @@ const CustomAccordionHeader: React.FC<{
     </h2>
   );
 };
-
 interface GamedayMetadataAccordionProps {
   metadata: GamedayMetadata;
   onUpdate: (data: Partial<GamedayMetadata>) => void;
@@ -188,26 +188,30 @@ interface GamedayMetadataAccordionProps {
   onDelete: () => void;
   onPublish: () => void;
   onUnlock: () => void;
+  onAddOfficials: () => void;
   onHighlight: (id: string, type: HighlightedElement['type']) => void;
   validation: FlowValidationResult;
   highlightedElement?: HighlightedElement | null;
   readOnly: boolean;
   hasData: boolean;
+  saveTrigger?: number;
 }
 
-const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
+const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({ 
   metadata,
   onUpdate,
   onClearAll,
   onDelete,
   onPublish,
   onUnlock,
+  onAddOfficials,
   onHighlight,
   validation,
   highlightedElement,
   readOnly,
   hasData,
 }) => {
+
   const { t } = useTypedTranslation(['ui', 'domain', 'validation']);
   const [seasons, setSeasons] = useState<{ id: number; name: string }[]>([]);
   const [leagues, setLeagues] = useState<{ id: number; name: string }[]>([]);
@@ -455,9 +459,22 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                   onClick={onClearAll}
                   disabled={!hasData || metadata.status !== 'DRAFT'}
                   className="px-3"
+                  data-testid="clear-all-button"
                 >
                   <i className={`bi ${ICONS.CLEAR} me-2`}></i>
                   {t('ui:button.clearSchedule')}
+                </Button>
+
+                <Button 
+                  variant="outline-secondary" 
+                  size="sm"
+                  onClick={onAddOfficials}
+                  disabled={metadata.status !== 'DRAFT'}
+                  className="px-3"
+                  data-testid="add-officials-button"
+                >
+                  <i className={`bi ${ICONS.TEAM} me-2`}></i>
+                  {t('ui:button.addOfficials')}
                 </Button>
               </div>
 
@@ -467,6 +484,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                 onClick={onDelete}
                 disabled={metadata.status !== 'DRAFT'}
                 className="px-3"
+                data-testid="delete-gameday-button"
               >
                 <i className={`bi ${ICONS.TRASH} me-2`}></i>
                 {t('ui:button.deleteGameday')}

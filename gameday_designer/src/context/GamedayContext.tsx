@@ -43,7 +43,7 @@ export const GamedayProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [gameResults, setGameResultsInternal] = useState<GameResultsDisplay[]>([]);
 
   const setGamedayNameCb = useCallback((name: string) => setGamedayName(name), []);
-  const setOnGenerateTournament = useCallback((handler: (() => void) | null) => setOnGenerateTournamentInternal(() => handler), []);
+  const setOnGenerateTournament = useCallback((handler: (() => void) | null) => setOnGenerateTournamentInternal(handler), []);
   const setToolbarProps = useCallback((props: GamedayContextType['toolbarProps']) => setToolbarPropsInternal(props), []);
   const setIsLockedCb = useCallback((locked: boolean) => setIsLocked(locked), []);
   const setGameResults = useCallback(
