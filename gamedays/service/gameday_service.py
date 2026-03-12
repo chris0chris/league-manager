@@ -379,22 +379,26 @@ class GamedayGameService:
 
             placeholder_service = GamedayPlaceholderService(self.game.gameday_id)
 
-            home_row = self.gameresult[self.gameresult["isHome"] == True].iloc[0]
-            away_row = self.gameresult[self.gameresult["isHome"] == False].iloc[0]
+            home_rows = self.gameresult[self.gameresult['isHome'] == True]
+            away_rows = self.gameresult[self.gameresult['isHome'] == False]
 
-            self.home_team_id = home_row["team"]
-            self.home_team_name = home_row["team__description"]
-            if pd.isna(self.home_team_name) or self.home_team_name is None:
-                self.home_team_name = placeholder_service.get_placeholder(
-                    pk, is_home=True
-                )
+            if not home_rows.empty:
+                home_row = home_rows.iloc[0]
+                self.home_team_id = home_row["team"]
+                self.home_team_name = home_row["team__description"]
+                if pd.isna(self.home_team_name) or self.home_team_name is None:
+                    self.home_team_name = placeholder_service.get_placeholder(pk, is_home=True)
+            else:
+                self.home_team_name = placeholder_service.get_placeholder(pk, is_home=True)
 
-            self.away_team_id = away_row["team"]
-            self.away_team_name = away_row["team__description"]
-            if pd.isna(self.away_team_name) or self.away_team_name is None:
-                self.away_team_name = placeholder_service.get_placeholder(
-                    pk, is_home=False
-                )
+            if not away_rows.empty:
+                away_row = away_rows.iloc[0]
+                self.away_team_id = away_row["team"]
+                self.away_team_name = away_row["team__description"]
+                if pd.isna(self.away_team_name) or self.away_team_name is None:
+                    self.away_team_name = placeholder_service.get_placeholder(pk, is_home=False)
+            else:
+                self.away_team_name = placeholder_service.get_placeholder(pk, is_home=False)
 
         self._score_column_mapping = {
             # "created_time": "Zeit",
