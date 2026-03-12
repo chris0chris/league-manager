@@ -14,6 +14,7 @@ import NotificationToast from './ui/NotificationToast';
 import LoadingOverlay from './ui/LoadingOverlay';
 import { useGamedayContext } from '../context/GamedayContext';
 import { GameNode } from '../types/designer';
+import { isGameNode } from '../types/flowchart';
 import { exportToStructuredTemplate } from '../utils/flowchartExport';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { gamedayApi } from '../api/gamedayApi';
@@ -241,23 +242,26 @@ const ListDesignerApp: React.FC = () => {
     }
   }, [id, loadData, addNotification, t]);
 
-  const handleOpenResultModal = useCallback((game: GameNode) => {
-    setSelectedGameForResult(game);
-    setShowResultModal(true);
-  }, []);
+  const handleOpenResultModal = useCallback((gameId: string) => {
+    const gameNode = flowState.nodes.find((n) => n.id === gameId && isGameNode(n)) as GameNode | undefined;
+    if (gameNode) {
+      setSelectedGameForResult(gameNode);
+      setShowResultModal(true);
+    }
+  }, [flowState.nodes]);
 
-  const handleSaveResult = useCallback(async (halftime: { home: number; away: number }, final: { home: number; away: number }) => {
+  const handleSaveResult = useCallback(async (data: { halftime_score: { home: number; away: number }; final_score: { home: number; away: number } }) => {
     if (!selectedGameForResult) return;
-    
+
     try {
       handleUpdateNode(selectedGameForResult.id, {
-        halftime_score: halftime,
-        final_score: final
+        halftime_score: data.halftime_score,
+        final_score: data.final_score,
       });
 
       const dbIdPart = selectedGameForResult.id.split('-').pop();
       if (dbIdPart && !isNaN(parseInt(dbIdPart))) {
-        await gamedayApi.updateGameResult(parseInt(dbIdPart), { halftime_score: halftime, final_score: final });
+        await gamedayApi.updateGameResult(parseInt(dbIdPart), { halftime_score: data.halftime_score, final_score: data.final_score });
       }
 
       setShowResultModal(false);
@@ -417,8 +421,17 @@ const ListDesignerApp: React.FC = () => {
 
       <GameResultModal
         show={showResultModal}
-        onHide={() => setShowResultModal(false)}
+        onHide={() => {
+          setShowResultModal(false);
+          handleSelectNode(null);
+        }}
         game={selectedGameForResult}
+        homeTeamName={selectedGameForResult
+          ? (flowState.globalTeams.find(t => t.id === selectedGameForResult.data.homeTeamId)?.label ?? '')
+          : ''}
+        awayTeamName={selectedGameForResult
+          ? (flowState.globalTeams.find(t => t.id === selectedGameForResult.data.awayTeamId)?.label ?? '')
+          : ''}
         onSave={handleSaveResult}
       />
 

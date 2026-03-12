@@ -361,6 +361,11 @@ describe('ListDesignerApp Coverage', () => {
         { id: 'team-20', label: 'Team B', color: '#e74c3c', groupId: 'group-1', order: 1 }
     ];
 
+    (useFlowState as Mock).mockReturnValue({
+        ...mockFlowState,
+        nodes: [mockField, mockStage, mockGame],
+        globalTeams: mockTeams,
+    });
     (useDesignerController as Mock).mockReturnValue({
         ...defaultMockReturn,
         metadata: { ...defaultMockReturn.metadata, status: 'PUBLISHED' },
