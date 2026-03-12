@@ -196,19 +196,32 @@ uv sync --extra test
 ```
 
 **Run development server:**
+
+The recommended way to start the dev server is via the all-in-one script:
 ```bash
-# Use --insecure to serve static files during development
-python manage.py runserver --insecure
+./container/start_dev_server.sh          # Normal start (reuse existing DB)
+./container/start_dev_server.sh --fresh  # Fresh DB + import test data from dump
+```
 
-# With dev environment
-league_manager=dev python manage.py runserver --insecure
+This script:
+1. Starts the LXC container and test DB (`spinup_test_db.sh`)
+2. Auto-discovers the container IP (no hardcoded IP needed)
+3. Builds all React apps (`passcheck`, `liveticker`, `scorecard`, `gameday_designer`)
+4. Collects static files
+5. Runs database migrations
+6. Creates default superuser **`admin` / `admin`** (if not already present)
+7. Starts Django at `http://localhost:8000`
 
-# With test database
-MYSQL_HOST=10.185.182.207 \
+With `--fresh`: also imports `container/test_db_dump.sql` after migrations.
+
+Alternatively, run manually:
+```bash
+MYSQL_HOST=<container-ip> \
 MYSQL_DB_NAME=test_db \
 MYSQL_USER=user \
 MYSQL_PWD=user \
 SECRET_KEY=test-secret-key \
+league_manager=dev \
 python manage.py runserver --insecure
 ```
 

@@ -27,11 +27,9 @@ export MYSQL_DB_NAME=test_db
 export MYSQL_USER=user
 export MYSQL_PWD=user
 
-# 3.5 Activate virtual environment
-if [ -f "./.venv/bin/activate" ]; then
-    echo "🐍 Activating virtual environment..."
-    source ./.venv/bin/activate
-fi
+# 3.5 Sync Python dependencies
+echo "🐍 Syncing Python dependencies..."
+uv sync --extra test
 
 # 3.6 Build React apps and collect static files
 echo "🏗️ Building React apps..."
