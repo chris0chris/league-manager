@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Stack, Alert } from 'react-bootstrap';
 import { useDesignerController } from '../hooks/useDesignerController';
+import { useFlowState } from '../hooks/useFlowState';
 import ListCanvas from './ListCanvas';
 import { GameResultsTable, ScoreEdit } from './GameResultsTable';
-import FlowToolbar from './FlowToolbar';
+import { FlowToolbarProps } from './FlowToolbar';
 import GamedayMetadataAccordion from './GamedayMetadataAccordion';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
 import GameResultModal from './modals/GameResultModal';
@@ -12,7 +13,7 @@ import TeamSelectionModal from './modals/TeamSelectionModal';
 import NotificationToast from './ui/NotificationToast';
 import LoadingOverlay from './ui/LoadingOverlay';
 import { useGamedayContext } from '../context/GamedayContext';
-import { FlowState, GameNode } from '../types/designer';
+import { GameNode } from '../types/designer';
 import { exportToStructuredTemplate } from '../utils/flowchartExport';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { gamedayApi } from '../api/gamedayApi';
@@ -32,7 +33,6 @@ const ListDesignerApp: React.FC = () => {
     setOnGenerateTournament
   } = useGamedayContext();
 
-  const [showTournamentModal, setShowTournamentModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [selectedGameForResult, setSelectedGameForResult] = useState<GameNode | null>(null);
   const [showTeamSelectionModal, setShowTeamSelectionModal] = useState(false);
@@ -41,17 +41,19 @@ const ListDesignerApp: React.FC = () => {
     side: 'home' | 'away' | 'official';
   } | null>(null);
 
+  const flowState = useFlowState();
+
   const {
-    flowState,
     metadata,
     ui,
+    validation,
     handlers,
     canUndo,
     canRedo,
     undo,
     redo,
     stats,
-  } = useDesignerController(id);
+  } = useDesignerController(id, flowState);
 
   const {
     loadData,
@@ -59,6 +61,7 @@ const ListDesignerApp: React.FC = () => {
     handleUpdateNode,
     handleImport,
     handleExport,
+    handleClearAll,
     handleUpdateMetadata,
     handleUpdateGlobalTeam,
     handleDeleteGlobalTeam,
@@ -83,10 +86,13 @@ const ListDesignerApp: React.FC = () => {
     handleAddStage,
     dismissNotification,
     addNotification,
+    showTournamentModal,
+    setShowTournamentModal,
   } = handlers;
 
   const handleExportTemplate = useCallback(() => {
-    const template = exportToStructuredTemplate(flowState);
+    const state = flowState.exportState();
+    const template = exportToStructuredTemplate(state);
     const jsonString = JSON.stringify(template, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -106,86 +112,95 @@ const ListDesignerApp: React.FC = () => {
 
   const isLocked = metadata?.status ? metadata.status !== 'DRAFT' : true;
 
-  const onGenerateTournamentHandler = useCallback(() => setShowTournamentModal(true), []);
-
-  const toolbarPropsValue = useMemo(() => ({
-    onImport: handleImport,
-    onExport: handleExport,
-    onExportTemplate: handleExportTemplate,
-    gamedayStatus: metadata?.status,
-    canExport: ui?.canExport ?? false,
-    onNotify: addNotification,
-    onUndo: undo,
-    onRedo: redo,
-    canUndo,
-    canRedo,
-    stats,
-  }), [handleImport, handleExport, handleExportTemplate, metadata?.status, ui?.canExport, addNotification, undo, redo, canUndo, canRedo, stats]);
-
-  // Sync with context for AppHeader
+  // Sync basic metadata with context
   useEffect(() => {
     if (metadata?.name) {
-      setGamedayName(prev => prev === metadata.name ? prev : metadata.name);
+      setGamedayName(metadata.name);
     }
-    setContextLocked(prev => prev === isLocked ? prev : isLocked);
-    
-    // Pass the handler wrapped in another function to avoid React's functional update behavior for functions in state
-    setOnGenerateTournament(() => onGenerateTournamentHandler);
+    setContextLocked(isLocked);
+  }, [metadata?.name, isLocked, setGamedayName, setContextLocked]);
 
-    setToolbarProps(prev => {
-      const resultsModeHandler = async () => {
-        if (!id) return;
-        if (!resultsMode) {
-          const games = await gamedayApi.getGamedayGames(parseInt(id));
-          setGameResults(updatedGames => updatedGames === games ? updatedGames : games);
-          setResultsMode(true);
-        } else {
-          setResultsMode(false);
-        }
-      };
+  const showModalRef = useRef(setShowTournamentModal);
+  useEffect(() => {
+    showModalRef.current = setShowTournamentModal;
+  }, [setShowTournamentModal]);
 
-      const newProps = {
-        ...toolbarPropsValue,
-        onResultsMode: resultsModeHandler,
-        resultsMode
-      };
-      
-      // Strict equality check or JSON stringify check to avoid infinite loops
-      if (prev && prev.resultsMode === newProps.resultsMode && 
-          prev.gamedayStatus === newProps.gamedayStatus &&
-          prev.canUndo === newProps.canUndo &&
-          prev.canRedo === newProps.canRedo) {
-        return prev;
-      }
-      return newProps;
+  useEffect(() => {
+    setOnGenerateTournament(() => () => showModalRef.current(true));
+  }, [setOnGenerateTournament]);
+
+  const resultsModeHandler = useCallback(async () => {
+    if (!id) return;
+    if (!resultsMode) {
+      const games = await gamedayApi.getGamedayGames(parseInt(id));
+      setGameResults(games);
+      setResultsMode(true);
+    } else {
+      setResultsMode(false);
+    }
+  }, [id, resultsMode, setGameResults, setResultsMode]);
+
+  const lastToolbarPropsRef = useRef<string>('');
+
+  useEffect(() => {
+    const newProps: FlowToolbarProps = {
+      onImport: handleImport,
+      onExport: handleExport,
+      onExportTemplate: handleExportTemplate,
+      gamedayStatus: metadata?.status,
+      canExport: ui?.canExport ?? false,
+      onNotify: addNotification,
+      onUndo: undo,
+      onRedo: redo,
+      canUndo,
+      canRedo,
+      stats,
+      onResultsMode: resultsModeHandler,
+      resultsMode
+    };
+
+    const propsStateStr = JSON.stringify({
+      gamedayStatus: newProps.gamedayStatus,
+      canExport: newProps.canExport,
+      canUndo: newProps.canUndo,
+      canRedo: newProps.canRedo,
+      stats: newProps.stats,
+      resultsMode: newProps.resultsMode
     });
-  }, [metadata?.name, isLocked, onGenerateTournamentHandler, toolbarPropsValue, setGamedayName, setContextLocked, setOnGenerateTournament, setToolbarProps, id, resultsMode, setGameResults, setResultsMode]);
+
+    if (propsStateStr !== lastToolbarPropsRef.current) {
+      lastToolbarPropsRef.current = propsStateStr;
+      setToolbarProps(newProps);
+    }
+  }, [
+    handleImport, handleExport, handleExportTemplate, metadata?.status, ui?.canExport, 
+    addNotification, undo, redo, canUndo, canRedo, stats, resultsModeHandler, 
+    resultsMode, setToolbarProps
+  ]);
 
   const lastSavedStateRef = useRef<string>('');
   const initialLoadRef = useRef(true);
   const isSavingRef = useRef(false);
   const pendingSaveRef = useRef<{ timer: NodeJS.Timeout | null; data: unknown }>({ timer: null, data: null });
   
-  // Ref to always hold the LATEST state for the async saveData function to access
-  const latestStateRef = useRef<FlowState | null>(null);
+  const latestStateRef = useRef<typeof flowState | null>(null);
   useEffect(() => {
     latestStateRef.current = flowState;
   }, [flowState]);
 
-  // Handle auto-save
   useEffect(() => {
     if (initialLoadRef.current) {
       initialLoadRef.current = false;
-      lastSavedStateRef.current = JSON.stringify(flowState);
+      lastSavedStateRef.current = JSON.stringify(flowState.exportState());
       return;
     }
 
     if (isLocked) return;
 
-    const currentStateStr = JSON.stringify(flowState);
+    const currentState = flowState.exportState();
+    const currentStateStr = JSON.stringify(currentState);
     if (currentStateStr === lastSavedStateRef.current) return;
 
-    // Throttle saves
     if (pendingSaveRef.current.timer) {
       clearTimeout(pendingSaveRef.current.timer);
     }
@@ -195,12 +210,12 @@ const ListDesignerApp: React.FC = () => {
       
       try {
         isSavingRef.current = true;
-        // Use the ref to get the absolute latest state at the moment the timer fires
-        const stateToSave = latestStateRef.current || flowState;
+        const stateToSave = latestStateRef.current?.exportState() || currentState;
         await saveData(stateToSave);
         lastSavedStateRef.current = JSON.stringify(stateToSave);
       } catch (error) {
         console.error('Auto-save failed', error);
+        addNotification(t('ui:notification.autoSaveFailed'), 'warning', t('ui:notification.title.autoSave'));
       } finally {
         isSavingRef.current = false;
         pendingSaveRef.current.timer = null;
@@ -220,7 +235,8 @@ const ListDesignerApp: React.FC = () => {
     if (id) {
       loadData().catch(err => {
         console.error('Failed to load gameday data', err);
-        addNotification(t('ui:notification.loadFailed'), 'danger', t('ui:notification.title.error'));
+        addNotification(t('ui:notification.loadGamedayFailed'), 'danger', t('ui:notification.title.error'));
+        navigate('/');
       });
     }
   }, [id, loadData, addNotification, t]);
@@ -234,24 +250,22 @@ const ListDesignerApp: React.FC = () => {
     if (!selectedGameForResult) return;
     
     try {
-      // 1. Update node in flow state local state
       handleUpdateNode(selectedGameForResult.id, {
         halftime_score: halftime,
         final_score: final
       });
 
-      // 2. Save to backend Gameinfo/Gameresult records
       const dbIdPart = selectedGameForResult.id.split('-').pop();
       if (dbIdPart && !isNaN(parseInt(dbIdPart))) {
-        await gamedayApi.updateGameResult(parseInt(dbIdPart), halftime, final);
+        await gamedayApi.updateGameResult(parseInt(dbIdPart), { halftime_score: halftime, final_score: final });
       }
 
       setShowResultModal(false);
       setSelectedGameForResult(null);
-      addNotification(t('ui:notification.resultSaved'), 'success', t('ui:notification.title.success'));
+      addNotification(t('ui:notification.gameResultSaved'), 'success', t('ui:notification.title.success'));
     } catch (error) {
       console.error('Failed to save result', error);
-      addNotification(t('ui:notification.resultSaveFailed'), 'danger', t('ui:notification.title.error'));
+      addNotification(t('ui:notification.saveResultFailed'), 'danger', t('ui:notification.title.error'));
     }
   }, [selectedGameForResult, handleUpdateNode, addNotification, t]);
 
@@ -271,7 +285,6 @@ const ListDesignerApp: React.FC = () => {
   const handleSaveBulkResults = useCallback(async (results: Record<string, ScoreEdit>) => {
     if (!id) return;
     try {
-      // results is Map<resultId, ScoreEdit>
       const updatePromises = Object.entries(results).map(([resultId, scores]) => {
         return gamedayApi.updateGameResultDetail(parseInt(resultId), {
           fh: scores.fh ?? undefined,
@@ -281,14 +294,13 @@ const ListDesignerApp: React.FC = () => {
       
       await Promise.all(updatePromises);
       
-      // Refresh results
       const updatedGames = await gamedayApi.getGamedayGames(parseInt(id));
       setGameResults(updatedGames);
       
       addNotification(t('ui:notification.resultsSaved'), 'success', t('ui:notification.title.success'));
     } catch (error) {
       console.error('Failed to save bulk results', error);
-      addNotification(t('ui:notification.resultSaveFailed'), 'danger', t('ui:notification.title.error'));
+      addNotification(t('ui:notification.resultsSaveFailed'), 'danger', t('ui:notification.title.error'));
     }
   }, [id, setGameResults, addNotification, t]);
 
@@ -302,21 +314,6 @@ const ListDesignerApp: React.FC = () => {
 
   return (
     <div className="list-designer-app bg-light min-vh-100 pb-5">
-      <FlowToolbar
-        onImport={handleImport}
-        onExport={handleExport}
-        onExportTemplate={handleExportTemplate}
-        onNotify={addNotification}
-        canExport={ui?.canExport ?? false}
-        onUndo={undo}
-        onRedo={redo}
-        canUndo={canUndo}
-        canRedo={canRedo}
-        stats={stats}
-        gamedayStatus={metadata?.status}
-        readOnly={isLocked}
-      />
-
       <Container fluid className="px-4 mt-4">
         <Stack gap={4}>
           <GamedayMetadataAccordion
@@ -329,13 +326,24 @@ const ListDesignerApp: React.FC = () => {
               }
             }}
             onPublish={async () => {
-              await gamedayApi.publish(parseInt(id));
-              loadData();
+              try {
+                await gamedayApi.publish(parseInt(id));
+                addNotification(t('ui:notification.publishSuccess'), 'success', t('ui:notification.title.success'));
+                loadData();
+              } catch {
+                addNotification(t('ui:notification.publishFailed'), 'danger', t('ui:notification.title.error'));
+              }
             }}
             onUnlock={async () => {
-              await gamedayApi.patchGameday(parseInt(id), { status: 'DRAFT' });
-              loadData();
+              try {
+                await gamedayApi.patchGameday(parseInt(id), { status: 'DRAFT' });
+                addNotification(t('ui:notification.unlockSuccess'), 'success', t('ui:notification.title.success'));
+                loadData();
+              } catch {
+                addNotification(t('ui:notification.unlockFailed'), 'danger', t('ui:notification.title.error'));
+              }
             }}
+            onAddOfficials={() => handleAddGlobalTeam(t('domain:team.officials'))}
             validation={validation}
             highlightedElement={ui?.highlightedElement}
             onHighlight={handleHighlightElement}
@@ -374,16 +382,15 @@ const ListDesignerApp: React.FC = () => {
               onDeleteGlobalTeamGroup={handleDeleteGlobalTeamGroup}
               onReorderGlobalTeamGroup={handleReorderGlobalTeamGroup}
               onShowTeamSelection={handleShowTeamSelection}
-              getTeamUsage={() => ({ count: 0, games: [] })} // TODO: Implement
+              getTeamUsage={() => ({ count: 0, games: [] })}
               onAssignTeam={handleAssignTeam}
-
               onSwapTeams={handleSwapTeams}
               onAddGame={handleUpdateGameSlot}
               onAddGameToGameEdge={handleConnectTeam}
               onAddStageToGameEdge={handleConnectTeam}
               onRemoveEdgeFromSlot={handleRemoveEdgeFromSlot}
               onOpenResultModal={handleOpenResultModal}
-              onGenerateTournament={onGenerateTournamentHandler}
+              onGenerateTournament={() => setShowTournamentModal(true)}
               expandedFieldIds={ui?.expandedFieldIds || new Set()}
               expandedStageIds={ui?.expandedStageIds || new Set()}
               highlightedElement={ui?.highlightedElement}
@@ -405,6 +412,7 @@ const ListDesignerApp: React.FC = () => {
         onHide={() => setShowTournamentModal(false)}
         onGenerate={handleGenerateTournament}
         teams={flowState.globalTeams}
+        hasData={ui?.hasData ?? false}
       />
 
       <GameResultModal

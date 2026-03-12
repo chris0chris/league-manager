@@ -10,11 +10,13 @@ import AppHeader from '../layout/AppHeader';
 import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 import { useDesignerController } from '../../hooks/useDesignerController';
+import { useFlowState } from '../../hooks/useFlowState';
 import { gamedayApi } from '../../api/gamedayApi';
 import type { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup, FieldNode } from '../../types/flowchart';
 
-// Mock the hook
+// Mock the hooks
 vi.mock('../../hooks/useDesignerController');
+vi.mock('../../hooks/useFlowState');
 
 const mockNavigate = vi.fn();
 // Mock react-router-dom
@@ -48,6 +50,77 @@ vi.mock('../../api/gamedayApi', () => ({
 }));
 
 describe('ListDesignerApp Coverage', () => {
+  const mockFlowState = {
+    nodes: [] as FlowNode[],
+    edges: [] as FlowEdge[],
+    fields: [] as FieldNode[],
+    globalTeams: [] as GlobalTeam[],
+    globalTeamGroups: [] as GlobalTeamGroup[],
+    selectedNode: null,
+    selection: { nodeIds: [], edgeIds: [] },
+    saveTrigger: 0,
+    canUndo: false,
+    canRedo: false,
+    stats: { fieldCount: 0, gameCount: 0, teamCount: 0 },
+    exportState: vi.fn().mockReturnValue({
+      metadata: { id: 1, name: 'Test Gameday', date: '2026-05-01', start: '10:00', format: '6_2', author: 1, address: 'Test Field', season: 1, league: 1, status: 'DRAFT' },
+      nodes: [],
+      edges: [],
+      fields: [],
+      globalTeams: [],
+      globalTeamGroups: [],
+    }),
+    importState: vi.fn(),
+    updateMetadata: vi.fn(),
+    addField: vi.fn(),
+    updateField: vi.fn(),
+    deleteField: vi.fn(),
+    addGameNode: vi.fn(),
+    deleteNode: vi.fn(),
+    selectNode: vi.fn(),
+    clearAll: vi.fn(),
+    clearSchedule: vi.fn(),
+    addFieldNode: vi.fn(),
+    addStageNode: vi.fn(),
+    addBulkTournament: vi.fn(),
+    addBulkGames: vi.fn(),
+    addBulkFields: vi.fn(),
+    addGlobalTeam: vi.fn(),
+    updateGlobalTeam: vi.fn(),
+    deleteGlobalTeam: vi.fn(),
+    reorderGlobalTeam: vi.fn(),
+    addGlobalTeamGroup: vi.fn(),
+    assignTeamToGame: vi.fn(),
+    ensureOfficialsGroup: vi.fn(),
+    addOfficialsGroup: vi.fn(),
+    updateNode: vi.fn(),
+    getTargetStage: vi.fn().mockReturnValue(null),
+    ensureContainerHierarchy: vi.fn().mockReturnValue({ fieldId: '', stageId: '' }),
+    getGameField: vi.fn().mockReturnValue(null),
+    getGameStage: vi.fn().mockReturnValue(null),
+    getFieldStages: vi.fn().mockReturnValue([]),
+    getStageGames: vi.fn().mockReturnValue([]),
+    getTeamField: vi.fn().mockReturnValue(null),
+    getTeamStage: vi.fn().mockReturnValue(null),
+    getTeamUsage: vi.fn().mockReturnValue({ games: [] }),
+    onNodesChange: vi.fn(),
+    onEdgesChange: vi.fn(),
+    setSelection: vi.fn(),
+    setEdges: vi.fn(),
+    addGameToGameEdge: vi.fn(),
+    addBulkGameToGameEdges: vi.fn(),
+    addStageToGameEdge: vi.fn(),
+    removeEdgeFromSlot: vi.fn(),
+    addGameNodeInStage: vi.fn(),
+    moveNodeToStage: vi.fn(),
+    matchNames: [],
+    groupNames: [],
+    selectedContainerField: null,
+    selectedContainerStage: null,
+    undo: vi.fn(),
+    redo: vi.fn(),
+  };
+
   const mockHandlers = {
     handleHighlightElement: vi.fn(),
     handleDynamicReferenceClick: vi.fn(),
@@ -69,6 +142,8 @@ describe('ListDesignerApp Coverage', () => {
     setShowTournamentModal: vi.fn(),
     dismissNotification: vi.fn(),
     addNotification: vi.fn(),
+    loadData: vi.fn().mockResolvedValue(undefined),
+    saveData: vi.fn().mockResolvedValue(undefined),
   };
 
   const defaultMockReturn = {
@@ -117,6 +192,7 @@ describe('ListDesignerApp Coverage', () => {
     await i18n.changeLanguage('en');
     vi.clearAllMocks();
     vi.useRealTimers();
+    (useFlowState as Mock).mockReturnValue(mockFlowState);
     (useDesignerController as Mock).mockReturnValue(defaultMockReturn);
     (gamedayApi.getGameday as Mock).mockResolvedValue(defaultMockReturn.metadata);
   });
@@ -171,31 +247,16 @@ describe('ListDesignerApp Coverage', () => {
   });
 
   it('handles load gameday failure', async () => {
-    (gamedayApi.getGameday as Mock).mockRejectedValue(new Error('Load Error'));
-    
+    (mockHandlers.loadData as Mock).mockRejectedValueOnce(new Error('Load Error'));
+
     await renderApp();
-    
+
     expect(mockHandlers.addNotification).toHaveBeenCalledWith(
         expect.stringContaining('Failed to load gameday'),
         'danger',
         'Error'
     );
     expect(mockNavigate).toHaveBeenCalledWith('/');
-  });
-
-  it('handles legacy fields loading', async () => {
-    (gamedayApi.getGameday as Mock).mockResolvedValue({
-        id: 1,
-        designer_data: {
-            fields: [{ id: 'f1', name: 'Field 1', order: 0 }]
-        }
-    });
-
-    await renderApp();
-
-    expect(defaultMockReturn.importState).toHaveBeenCalledWith(expect.objectContaining({
-        fields: [{ id: 'f1', name: 'Field 1', order: 0 }]
-    }));
   });
 
   it('handles publish success', async () => {
@@ -333,12 +394,29 @@ describe('ListDesignerApp Coverage', () => {
   });
 
   it('handles auto-save failure', async () => {
-    vi.stubEnv('NODE_ENV', 'development');
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-01-21T10:00:00Z'));
-    
-    (gamedayApi.patchGameday as Mock).mockRejectedValue(new Error('Save Error'));
-    
+
+    // State recorded during the initial load (initialLoadRef sets lastSavedStateRef to this).
+    const stateA = {
+      metadata: { id: 1, name: 'Test Gameday', date: '2026-05-01', start: '10:00', format: '6_2', author: 1, address: 'Test Field', season: 1, league: 1, status: 'DRAFT' },
+      nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [],
+    };
+    // State returned after a "change" — differs from stateA so the auto-save diff check passes.
+    const stateB = { ...stateA, metadata: { ...stateA.metadata, name: 'Changed' } };
+
+    // Configure saveData to reject so the error notification path is exercised.
+    const rejectingSaveData = vi.fn().mockRejectedValue(new Error('Save Error'));
+    const failingHandlers = { ...mockHandlers, saveData: rejectingSaveData };
+    (useDesignerController as Mock).mockReturnValue({ ...defaultMockReturn, handlers: failingHandlers });
+
+    // flowState A: initial load records stateA in lastSavedStateRef
+    const flowStateA = { ...mockFlowState, exportState: vi.fn().mockReturnValue(stateA) };
+    // flowState B: different reference; exportState returns stateB (≠ stateA) → triggers save
+    const flowStateB = { ...mockFlowState, exportState: vi.fn().mockReturnValue(stateB) };
+
+    (useFlowState as Mock).mockReturnValue(flowStateA);
+
     const { rerender } = render(
         <MemoryRouter initialEntries={['/designer/1']}>
           <GamedayProvider>
@@ -348,27 +426,14 @@ describe('ListDesignerApp Coverage', () => {
           </GamedayProvider>
         </MemoryRouter>
     );
-    
-    // 1. Let loadGameday effects run
-    await act(async () => {
-        await Promise.resolve();
-    });
 
-    // 2. Advance time past the 2000ms pause from loadGameday
-    await act(async () => {
-        vi.advanceTimersByTime(3000);
-    });
+    // Let initial effects settle: initialLoadRef runs, records stateA, sets initialLoadRef=false.
+    await act(async () => { await Promise.resolve(); });
 
-    // 3. Trigger FIRST real change to clear initialLoadRef.current
-    const firstChange = {
-        ...defaultMockReturn,
-        metadata: { ...defaultMockReturn.metadata, name: 'Initial' },
-        exportState: vi.fn().mockReturnValue({
-            metadata: { id: 1, name: 'Initial' },
-            nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: []
-        })
-    };
-    (useDesignerController as Mock).mockReturnValue(firstChange);
+    // Switch to flowStateB so next render gives a new flowState reference.
+    // The auto-save effect re-runs because flowState changed.
+    // exportState() returns stateB ≠ stateA → timer is scheduled with rejectingSaveData.
+    (useFlowState as Mock).mockReturnValue(flowStateB);
 
     rerender(
         <MemoryRouter initialEntries={['/designer/1']}>
@@ -380,38 +445,12 @@ describe('ListDesignerApp Coverage', () => {
         </MemoryRouter>
     );
 
-    // Let the effect run to set initialLoadRef = false
+    // Advance past the 2000ms debounce so the scheduled save timer fires.
     await act(async () => {
-        vi.advanceTimersByTime(100);
+        vi.advanceTimersByTime(2500);
     });
 
-    // 4. Trigger SECOND change to actually schedule a save
-    const secondChange = {
-        ...defaultMockReturn,
-        metadata: { ...defaultMockReturn.metadata, name: 'Changed' },
-        exportState: vi.fn().mockReturnValue({
-            metadata: { id: 1, name: 'Changed' },
-            nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: []
-        })
-    };
-    (useDesignerController as Mock).mockReturnValue(secondChange);
-
-    rerender(
-        <MemoryRouter initialEntries={['/designer/1']}>
-          <GamedayProvider>
-            <Routes>
-              <Route path="/designer/:id" element={<ListDesignerApp />} />
-            </Routes>
-          </GamedayProvider>
-        </MemoryRouter>
-    );
-
-    // 5. Advance time past the 1500ms debounce
-    await act(async () => {
-        vi.advanceTimersByTime(2000);
-    });
-
-    // 6. Handle async patchGameday call
+    // Let the rejected saveData promise settle so the catch block runs.
     await act(async () => {
         await Promise.resolve();
         await Promise.resolve();
