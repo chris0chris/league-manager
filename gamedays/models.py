@@ -184,7 +184,7 @@ class Gameinfo(models.Model):
     STATUS_DRAFT = "DRAFT"
     STATUS_PUBLISHED = "Geplant"
     STATUS_IN_PROGRESS = "Gestartet"
-    STATUS_COMPLETED = "Beendet"
+    STATUS_COMPLETED = "beendet"
 
     # Retaining existing "Geplant" for backward compatibility if needed,
     # but strictly defining new flow constants.

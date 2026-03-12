@@ -8,7 +8,7 @@ from league_table.models import LeagueGroup
 
 STATUS_HALFTIME = "2. Halbzeit"
 STATUS_FIRST_HALF = "1. Halbzeit"
-STATUS_FINISHED = "beendet"
+STATUS_FINISHED = Gameinfo.STATUS_COMPLETED
 
 
 class GameinfoWrapper(object):
