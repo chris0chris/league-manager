@@ -30,6 +30,8 @@ vi.mock('../../api/gamedayApi', () => ({
     updateBulkGameResults: vi.fn().mockResolvedValue({}),
     listSeasons: vi.fn().mockResolvedValue([]),
     listLeagues: vi.fn().mockResolvedValue([]),
+    getDesignerState: vi.fn().mockResolvedValue(null),
+    updateDesignerState: vi.fn().mockResolvedValue({}),
   },
 }));
 
@@ -69,6 +71,9 @@ describe('Auto-Clear on Generate Integration', () => {
     await i18n.changeLanguage('en');
     vi.clearAllMocks();
     vi.mocked(gamedayApi.getGameday).mockResolvedValue(mockGameday as unknown as Awaited<ReturnType<typeof gamedayApi.getGameday>>);
+    vi.mocked(gamedayApi.getDesignerState).mockResolvedValue({
+      state_data: mockGameday.designer_data as unknown as import('../../types/flowchart').FlowState,
+    });
   });
 
   const renderApp = async () => {

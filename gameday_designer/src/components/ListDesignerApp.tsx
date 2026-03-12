@@ -357,7 +357,7 @@ const ListDesignerApp: React.FC = () => {
 
           {resultsMode ? (
             <div className="bg-white p-4 rounded shadow-sm">
-              <h3 className="mb-4">{t('ui:title.resultsMode')}</h3>
+              <h3 className="mb-4">{t('ui:label.gameResults')}</h3>
               <GameResultsTable 
                 games={gameResults} 
                 onSave={handleSaveBulkResults} 
