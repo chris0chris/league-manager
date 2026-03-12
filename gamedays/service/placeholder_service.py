@@ -70,10 +70,8 @@ class GamedayPlaceholderService:
                     if slot.away_group is not None
                     else "TBD"
                 )
-        except Exception as e:
-            logger.debug(
-                f"Placeholder resolution failed for game {gameinfo_id}: {str(e)}"
-            )
+        except (Gameinfo.DoesNotExist, IndexError, AttributeError) as e:
+            logger.warning(f"Placeholder resolution failed for game {gameinfo_id}: {str(e)}")
             return "TBD"
 
     def _find_slot_for_game(self, gi: Gameinfo) -> TemplateSlot:
@@ -104,5 +102,5 @@ class GamedayPlaceholderService:
             gi = Gameinfo.objects.get(pk=gameinfo_id)
             service = cls(gi.gameday_id)
             return service.get_placeholder(gameinfo_id, is_home)
-        except Exception:
+        except Gameinfo.DoesNotExist:
             return "TBD"

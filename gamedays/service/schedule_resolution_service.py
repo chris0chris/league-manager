@@ -66,8 +66,8 @@ class GamedayScheduleResolutionService:
                     if target_gi.officials != team:
                         target_gi.officials = team
                         target_gi.save()
-            except Exception as e:
-                logger.error(f"Error applying team rule {team_rule.id}: {str(e)}")
+            except (IndexError, Team.DoesNotExist, KeyError) as e:
+                logger.warning(f"Error applying team rule {team_rule.id}: {str(e)}")
 
     def _update_gameresult(self, gi: Gameinfo, team: Team, is_home: bool):
         gameresult, created = Gameresult.objects.get_or_create(
