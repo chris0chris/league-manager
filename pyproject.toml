@@ -8,8 +8,8 @@ version = "3.1.8-rc.3"
 requires-python = ">=3.12"
 dependencies = [
     "Django==6.0.3",
-    "django-crispy-forms==2.5",
-    "crispy-bootstrap5==2025.6",
+    "django-crispy-forms==2.6",
+    "crispy-bootstrap5==2026.3",
     "numpy==2.4.3",
     "pandas==3.0.1",
     "django-pandas==0.6.7",
@@ -23,7 +23,7 @@ dependencies = [
     "python-dotenv==1.2.2",
     "mysqlclient==2.2.8",
     "requests==2.32.5",
-    "django-health-check==4.0.4",
+    "django-health-check==4.1.2",
 ]
 
 [project.optional-dependencies]
@@ -38,7 +38,7 @@ test = [
     "WebTest==3.0.7",
     "pytest-playwright>=0.7.2",
     "bump2version==1.0.1",
-    "black==26.1.0",
+    "black==26.3.1",
     "types-factory_boy==0.4.1",
 ]
 prod = [
