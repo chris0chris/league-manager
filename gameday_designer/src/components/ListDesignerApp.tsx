@@ -8,6 +8,7 @@ import { GameResultsTable, ScoreEdit } from './GameResultsTable';
 import { FlowToolbarProps } from './FlowToolbar';
 import GamedayMetadataAccordion from './GamedayMetadataAccordion';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
+import PublishConfirmationModal from './modals/PublishConfirmationModal';
 import GameResultModal from './modals/GameResultModal';
 import TeamSelectionModal from './modals/TeamSelectionModal';
 import NotificationToast from './ui/NotificationToast';
@@ -35,6 +36,7 @@ const ListDesignerApp: React.FC = () => {
     setOnGenerateTournament
   } = useGamedayContext();
 
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [selectedGameForResult, setSelectedGameForResult] = useState<GameNode | null>(null);
   const [showTeamSelectionModal, setShowTeamSelectionModal] = useState(false);
@@ -320,6 +322,17 @@ const ListDesignerApp: React.FC = () => {
     }
   }, [id, setGameResults, addNotification, t]);
 
+  const handleConfirmPublish = useCallback(async () => {
+    setShowPublishModal(false); // close immediately before awaiting API
+    try {
+      await gamedayApi.publish(parseInt(id!));
+      addNotification(t('ui:notification.publishSuccess'), 'success', t('ui:notification.title.success'));
+      loadData();
+    } catch {
+      addNotification(t('ui:notification.publishFailed'), 'danger', t('ui:notification.title.error'));
+    }
+  }, [id, addNotification, t, loadData]);
+
   if (!id) {
     return (
       <Container className="py-5">
@@ -342,15 +355,7 @@ const ListDesignerApp: React.FC = () => {
                 gamedayApi.deleteGameday(parseInt(id)).then(() => navigate('/'));
               }
             }}
-            onPublish={async () => {
-              try {
-                await gamedayApi.publish(parseInt(id));
-                addNotification(t('ui:notification.publishSuccess'), 'success', t('ui:notification.title.success'));
-                loadData();
-              } catch {
-                addNotification(t('ui:notification.publishFailed'), 'danger', t('ui:notification.title.error'));
-              }
-            }}
+            onPublish={() => setShowPublishModal(true)}
             onUnlock={async () => {
               try {
                 await gamedayApi.patchGameday(parseInt(id), { status: 'DRAFT' });
@@ -432,6 +437,14 @@ const ListDesignerApp: React.FC = () => {
         onGenerate={handleGenerateTournament}
         teams={flowState.globalTeams}
         hasData={ui?.hasData ?? false}
+      />
+
+      <PublishConfirmationModal
+        show={showPublishModal}
+        onHide={() => setShowPublishModal(false)}
+        onConfirm={handleConfirmPublish}
+        validation={validation}
+        onHighlight={handleHighlightElement}
       />
 
       <GameResultModal

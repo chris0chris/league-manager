@@ -4,6 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach, Mock, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ListDesignerApp from '../ListDesignerApp';
 import AppHeader from '../layout/AppHeader';
@@ -267,6 +268,10 @@ describe('ListDesignerApp Coverage', () => {
     const publishBtn = screen.getByTestId('publish-schedule-button');
     fireEvent.click(publishBtn);
 
+    // Modal should now be visible; click the confirm button
+    const confirmBtn = await screen.findByRole('button', { name: /Publish Now/i });
+    fireEvent.click(confirmBtn);
+
     await waitFor(() => {
         expect(gamedayApi.publish).toHaveBeenCalledWith(1);
         expect(mockHandlers.addNotification).toHaveBeenCalledWith(
@@ -308,6 +313,10 @@ describe('ListDesignerApp Coverage', () => {
 
     const publishBtn = screen.getByTestId('publish-schedule-button');
     fireEvent.click(publishBtn);
+
+    // Modal should now be visible; click the confirm button
+    const confirmBtn = await screen.findByRole('button', { name: /Publish Now/i });
+    fireEvent.click(confirmBtn);
 
     await waitFor(() => {
         expect(mockHandlers.addNotification).toHaveBeenCalledWith(
@@ -504,6 +513,32 @@ describe('ListDesignerApp Coverage', () => {
       expect(scrollRemovals.length).toBeGreaterThan(0);
 
       removeEventSpy.mockRestore();
+    });
+  });
+
+  describe('BEH-003: publish validation modal', () => {
+    it('shows PublishConfirmationModal when publish is clicked, does not call API immediately', async () => {
+      const user = userEvent.setup();
+      await renderApp();
+
+      const publishBtn = screen.getByTestId('publish-schedule-button');
+      await user.click(publishBtn);
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(gamedayApi.publish).not.toHaveBeenCalled();
+    });
+
+    it('calls publish API when modal confirm is clicked', async () => {
+      (gamedayApi.publish as Mock).mockResolvedValue({});
+      const user = userEvent.setup();
+      await renderApp();
+
+      await user.click(screen.getByTestId('publish-schedule-button'));
+      // Confirm button is enabled because defaultMockReturn has isValid: true
+      const confirmBtn = screen.getByRole('button', { name: /Publish Now/i });
+      await user.click(confirmBtn);
+
+      await waitFor(() => expect(gamedayApi.publish).toHaveBeenCalledWith(1));
     });
   });
 
