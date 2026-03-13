@@ -5,6 +5,21 @@
 ![Last Commit](https://img.shields.io/github/last-commit/dachrisch/leaguesphere?style=for-the-badge)
 [![codecov](https://img.shields.io/codecov/c/github/dachrisch/leaguesphere?style=for-the-badge)](https://codecov.io/gh/dachrisch/leaguesphere)
 
+## Documentation
+
+The project uses a structured documentation approach in the `docs/` directory for clarity and accessibility.
+
+- `docs/arch/`: Architectural Decision Records (ADR) and system design.
+- `docs/features/`: Feature-specific documentation (Current and History).
+- `docs/guides/`: Setup, onboarding, and contributor guides.
+- `docs/plans/`: Historical and current implementation plans.
+- `docs/reports/`: Verification reports, summaries, and performance analysis.
+- `docs/testing/`: Test scenarios and testing strategies.
+
+**Essential Guides:**
+- **Contributor Guide**: `docs/guides/contributor-guide.md` (Build, Test, Style)
+- **Setup Guide**: `docs/guides/setup-guide.md` (Local environment)
+
 ## Installation
 
 

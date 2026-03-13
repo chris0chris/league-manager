@@ -41,10 +41,16 @@ We strictly follow the TDD cycle:
 - **Merging**: Branches are only merged into `master` after explicit user approval.
 
 ### 3. Documentation & Progress Tracking
-- **`feature-dev/` Directory**: Progress documentation for all features must be maintained in this directory.
-- **Tracking**: All features (excluding minor bugs and quick fixes) must track their progress here.
-- **History Entry**: Once a feature is finished, it must contain a history entry summarizing the implementation.
-- **Coverage Requirements**: Patch coverage for each PR must be at least **90%** to maintain an overall project coverage of above **80%**.
+The project documentation is organized in the `docs/` directory for clarity and accessibility.
+- `docs/arch/`: Architectural Decision Records (ADR) and system design.
+- `docs/features/`: Feature documentation (Current and History).
+- `docs/guides/`: Setup and Contributor guides.
+- `docs/plans/`: Historical and current implementation plans.
+- `docs/reports/`: Verification and test reports.
+- `docs/testing/`: Test scenarios and strategies.
+
+**Contributor Guide**: Refer to `docs/guides/contributor-guide.md` for a comprehensive overview of build, test, and style guidelines.
+**Setup Guide**: Refer to `docs/guides/setup-guide.md` for local environment configuration.
 
 ### 4. Memory Management (MCP)
 - **Persistence**: Use the `save_memory` tool to persist critical session facts, user-specific preferences, or significant architectural insights that should be retained for future sessions.

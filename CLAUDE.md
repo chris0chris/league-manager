@@ -132,6 +132,21 @@ npm --prefix scorecard/ run test:run
 
 **Important:** Never push code with failing tests. The CI/CD pipeline will catch failures, but local verification prevents wasted CI time and maintains code quality.
 
+## Documentation
+
+The project uses a structured documentation approach in the `docs/` directory:
+
+- `docs/arch/`: Architectural Decision Records (ADR) and system design.
+- `docs/features/`: Feature-specific documentation (Current and History).
+- `docs/guides/`: Setup, onboarding, and contributor guides.
+- `docs/plans/`: Historical and current implementation plans.
+- `docs/reports/`: Verification reports, summaries, and performance analysis.
+- `docs/testing/`: Test scenarios and testing strategies.
+
+**Essential Guides:**
+- **Contributor Guide**: `docs/guides/contributor-guide.md` (Build, Test, Style)
+- **Setup Guide**: `docs/guides/setup-guide.md` (Local environment)
+
 ## Architecture
 
 ### Backend (Django)
