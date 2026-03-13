@@ -4,12 +4,13 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-
-  // Enable JSX in .js files
-  esbuild: {
-    loader: 'jsx',
-    include: /src\/.*\.jsx?$/,
-    exclude: [],
+  legacy: {
+    inconsistentCjsInterop: true,
+  },
+  oxc: {
+    jsx: {
+      runtime: 'automatic',
+    },
   },
 
   optimizeDeps: {
@@ -36,7 +37,7 @@ export default defineConfig({
     outDir: 'static/scorecard/js',
     emptyOutDir: true,
     rollupOptions: {
-      input: path.resolve(__dirname, 'src/index.js'),
+      input: path.resolve(__dirname, 'src/index.jsx'),
       output: {
         // Single bundle output to match Django expectations
         entryFileNames: 'scorecard.js',
