@@ -246,7 +246,7 @@ const ListDesignerApp: React.FC = () => {
         clearTimeout(currentPendingSave.timer);
       }
     };
-  }, [flowState, saveData, isLocked]);
+  }, [flowState, saveData, isLocked, addNotification, t]);
 
   useEffect(() => {
     if (id) {
@@ -256,7 +256,7 @@ const ListDesignerApp: React.FC = () => {
         navigate('/');
       });
     }
-  }, [id, loadData, addNotification, t]);
+  }, [id, loadData, addNotification, t, navigate]);
 
   const handleOpenResultModal = useCallback((gameId: string) => {
     const gameNode = flowState.nodes.find((n) => n.id === gameId && isGameNode(n)) as GameNode | undefined;

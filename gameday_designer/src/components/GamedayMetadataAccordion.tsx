@@ -205,13 +205,15 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   const { t } = useTypedTranslation(['ui', 'domain', 'validation']);
   const [seasons, setSeasons] = useState<{ id: number; name: string }[]>([]);
   const [leagues, setLeagues] = useState<{ id: number; name: string }[]>([]);
-  const [activeKey, setActiveKey] = useState<string | undefined>("0");
+  const [activeKey, setActiveKey] = useState<string | undefined>(forceCollapsed ? undefined : "0");
+  const [prevForceCollapsed, setPrevForceCollapsed] = useState(forceCollapsed);
 
-  useEffect(() => {
+  if (forceCollapsed !== prevForceCollapsed) {
+    setPrevForceCollapsed(forceCollapsed);
     if (forceCollapsed) {
       setActiveKey(undefined);
     }
-  }, [forceCollapsed]);
+  }
 
   console.log('[MetadataAccordion] metadata:', metadata.name, metadata.date);
 
