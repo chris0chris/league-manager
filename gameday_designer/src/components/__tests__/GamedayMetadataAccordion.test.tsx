@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import GamedayMetadataAccordion from '../GamedayMetadataAccordion';
@@ -32,8 +32,11 @@ describe('GamedayMetadataAccordion', () => {
 
   const mockValidation: FlowValidationResult = { isValid: true, errors: [], warnings: [] };
 
-  function renderAccordion(extraProps: Partial<React.ComponentProps<typeof GamedayMetadataAccordion>> = {}) {
-    return render(
+  async function renderAccordion(extraProps: Partial<React.ComponentProps<typeof GamedayMetadataAccordion>> = {}) {
+    vi.mocked(gamedayApi.listSeasons).mockResolvedValue([]);
+    vi.mocked(gamedayApi.listLeagues).mockResolvedValue([]);
+
+    const result = render(
       <GamedayMetadataAccordion
         metadata={mockMetadata}
         onUpdate={vi.fn()}
@@ -49,10 +52,17 @@ describe('GamedayMetadataAccordion', () => {
         {...extraProps}
       />
     );
+
+    // Wait for async effects to settle
+    await waitFor(() => {
+      expect(vi.mocked(gamedayApi.listSeasons)).toHaveBeenCalled();
+    });
+
+    return result;
   }
 
-  it('renders accordion open by default', () => {
-    renderAccordion();
+  it('renders accordion open by default', async () => {
+    await renderAccordion();
 
     expect(screen.getByText('Test Gameday')).toBeInTheDocument();
     expect(screen.getByText('01.05.2026')).toBeInTheDocument();
@@ -61,8 +71,8 @@ describe('GamedayMetadataAccordion', () => {
     expect(button).not.toHaveClass('collapsed');
   });
 
-  it('shows form fields and action buttons when open', () => {
-    renderAccordion();
+  it('shows form fields and action buttons when open', async () => {
+    await renderAccordion();
     // Accordion starts open — no click needed
     expect(screen.getByLabelText('Gameday Name')).toBeVisible();
     expect(screen.getByLabelText('Gameday Date')).toBeVisible();
@@ -73,8 +83,8 @@ describe('GamedayMetadataAccordion', () => {
     expect(screen.getByText('Delete Gameday')).toBeInTheDocument();
   });
 
-  it('calls onUpdate when fields change', () => {
-    renderAccordion({ onUpdate: mockOnUpdate });
+  it('calls onUpdate when fields change', async () => {
+    await renderAccordion({ onUpdate: mockOnUpdate });
     // Accordion starts open — no click needed
     const nameInput = screen.getByLabelText('Gameday Name');
     fireEvent.change(nameInput, { target: { value: 'Updated Name' } });
