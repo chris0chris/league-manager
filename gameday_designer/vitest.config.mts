@@ -3,6 +3,20 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  oxc: {
+    jsx: {
+      runtime: 'automatic',
+    },
+    // Enable JSX in .js files (including test files)
+    include: [
+      '/src\/.*\.(js|mjs|cjs|ts|jsx|tsx)$/',
+      // Also include test files
+      '/__tests__\/.*\.(js|mjs|cjs|ts|jsx|tsx)$/',
+    ],
+    exclude: [
+      'node_modules',
+    ],
+  },
   test: {
     environment: 'jsdom',
     globals: true,

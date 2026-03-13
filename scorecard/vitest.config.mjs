@@ -4,14 +4,16 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-
-  // Enable JSX in .js files (including test files)
-  esbuild: {
-    loader: 'jsx',
-    include: /src\/.*\.jsx?$/,
-    exclude: [],
+  legacy: {
+    inconsistentCjsInterop: true,
   },
-
+  oxc: {
+    jsx: {
+      runtime: 'automatic',
+    },
+    // Enable JSX in .js files
+    include: /\.(js|mjs|cjs|ts|jsx|tsx)$/,
+  },
   test: {
     // Global test timeout
     testTimeout: 10000,
@@ -54,5 +56,21 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+  },
+  
+  // Oxc configuration for JSX support
+  oxc: {
+    jsx: {
+      runtime: 'automatic',
+    },
+    // Enable JSX in .js files (including test files)
+    include: [
+      '/src\/.*\.(js|mjs|cjs|ts|jsx|tsx)$/',
+      // Also include test files
+      '/__tests__\/.*\.(js|mjs|cjs|ts|jsx|tsx)$/',
+    ],
+    exclude: [
+      'node_modules',
+    ],
   },
 });
