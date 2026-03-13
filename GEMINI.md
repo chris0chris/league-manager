@@ -2,7 +2,7 @@
 
 This file provides comprehensive instructional context specifically for the **Gemini CLI** (google-gemini-cli) and its specialized tools.
 
-For all project-wide standards, technical commands, and deployment safety policies, see the **[LeagueSphere Contributor Guide](docs/guides/contributor-guide.md)**.
+> **CRITICAL:** For project-wide standards, build/test commands, and deployment safety policies, you MUST refer to the **[LeagueSphere Contributor Guide](docs/guides/contributor-guide.md)**.
 
 ## 🤖 Gemini-Specific Workflow
 
@@ -11,16 +11,17 @@ Operate using a **Research -> Strategy -> Execution** lifecycle. For the Executi
 
 ### Memory Management (MCP)
 - **Persistence**: Use the `save_memory` tool to persist critical session facts, user-specific preferences, or significant architectural insights.
-- **Conciseness**: Ensure that each saved fact is clear, self-contained, and brief.
+- **Conciseness**: Ensure each saved fact is clear, self-contained, and brief.
 - **Proactivity**: Proactively save information that will streamline future development (e.g., "User prefers SQLite for local backend testing due to LXC connectivity issues").
 
 ### Testing Protocol
 - **Empirical Reproduction**: Prioritize empirical reproduction of reported issues to confirm the failure state.
 - **Verification**: Run tests and workspace standards before committing or finishing a task.
 
-## 🛠 Central Resources
-Refer to the following for technical details:
+## 🛠 Central Authority
+Refer to the following sections in the **[LeagueSphere Contributor Guide](docs/guides/contributor-guide.md)** for:
+- **Git Operations**: `docs/guides/contributor-guide.md#2-git--branching`
 - **Build/Test Commands**: `docs/guides/contributor-guide.md#build-lint--test-commands`
-- **Deployment Safety**: `docs/guides/contributor-guide.md#-security--deployment-safety`
-- **Code Style**: `docs/guides/contributor-guide.md#coding-style`
+- **Deployment Safety**: `docs/guides/contributor-guide.md#infrastructure-policy-critical`
+- **Code Style**: `docs/guides/contributor-guide.md#3-coding-style`
 - **Setup Guide**: `docs/guides/setup-guide.md`

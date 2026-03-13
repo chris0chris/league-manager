@@ -1,58 +1,57 @@
 # LeagueSphere Contributor Guide
 
-Welcome to the LeagueSphere repository! This guide provides technical instructions and project-specific guidelines for developers and autonomous agents.
+Welcome to the LeagueSphere repository! This guide is the **central source of truth** for technical standards, commands, and workflows. All agents and developers should refer to this file for shared information.
 
 ## 📁 Project Overview
-**LeagueSphere** is a sophisticated flag football league management system built with Django 5.2+ and multiple React frontends.
+**LeagueSphere** is a sophisticated flag football league management system.
 - **Backend**: Django 5.2, DRF, Knox Token Auth.
-- **Frontend**: Multiple independent React apps (Gameday Designer, Passcheck, Liveticker, Scorecard) bundled via Vite.
+- **Frontend**: Multiple React apps (Gameday Designer, Passcheck, Liveticker, Scorecard) via Vite.
 - **Infrastructure**: Managed via Ansible; Dockerized deployment (Gunicorn/Nginx).
 
 ## 📂 Project Structure
-- `docs/arch/`: Architectural Decision Records (ADR) and system design documents.
+- `docs/arch/`: Architectural Decision Records (ADR) and system design.
 - `docs/features/`: Feature documentation (Current and History).
-- `docs/guides/`: Onboarding, setup, and contribution guides.
-- `docs/plans/`: Implementation plans and roadmaps.
-- `docs/reports/`: Verification reports, test summaries, and performance analysis.
-- `docs/testing/`: Test scenarios, E2E test documentation, and testing strategies.
+- `docs/guides/`: Setup and contribution guides.
+- `docs/plans/`: Implementation roadmaps (Current and History).
+- `docs/reports/`: Verification and test reports.
+- `docs/testing/`: Test scenarios and strategies.
 
 ## 🏗 Build, Lint & Test Commands
 
 ### Python / Django
 - **Install Dependencies**: `uv sync --extra test`
-- **Run Dev Server**: `./container/start_dev_server.sh` (Recommended)
-- **Manual Dev Server**: `league_manager=dev python manage.py runserver --insecure`
+- **Run Dev Server**: `./container/start_dev_server.sh`
 - **Database Migrations**: `python manage.py makemigrations` and `python manage.py migrate`
-- **Run All Tests**: `pytest` (Requires LXC container `servyy-test` running)
-- **Single Test File**: `pytest gamedays/tests/test_views.py`
-- **Format Code**: `black .`
-- **Lint Code**: `black --check .`
+- **Format/Lint**: `black .`
+- **Run All Tests**:
+  ```bash
+  MYSQL_HOST=<container_ip> MYSQL_DB_NAME=test_db MYSQL_USER=user MYSQL_PWD=user SECRET_KEY=test-secret-key pytest
+  ```
 
 ### JavaScript / TypeScript (React)
 Apps: `passcheck/`, `liveticker/`, `scorecard/`, `gameday_designer/`.
-- **Install Dependencies**: `npm --prefix <app>/ install`
+- **Install**: `npm --prefix <app>/ install`
 - **Build**: `npm --prefix <app>/ run build`
-- **Dev Server**: `npm --prefix <app>/ run start`
-- **Run All Tests**: `npm --prefix <app>/ run test:run`
+- **Run Tests**: `npm --prefix <app>/ run test:run`
 - **Lint**: `npm --prefix <app>/ run eslint`
 
 ## 🎨 Development Workflow & Standards
 
 ### 1. Test-Driven Development (TDD)
-We follow the TDD cycle:
-1. **RED**: Write a failing test.
-2. **GREEN**: Implement minimum code to pass.
-3. **REFACTOR**: Clean up while remaining green.
+We strictly follow the TDD cycle: **RED -> GREEN -> REFACTOR**.
 **Mandatory QA**: Run the full suite and lint before reporting completion.
 
 ### 2. Git & Branching
 - **Branching**: No direct commits to `master`. Use feature branches.
-- **Commits**: Use conventional commit format (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `ci:`).
-- **Non-Interactive PRs**: Use `gh pr create --repo dachrisch/leaguesphere --base master --title "..." --body "..."`.
+- **Conventional Commits**: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `ci:`.
+- **Non-Interactive Commands**:
+  - **Upstream**: `git push -u origin <branch_name>`
+  - **PR Creation**: `gh pr create --repo dachrisch/leaguesphere --base master --title "..." --body "..."`
+  - **PR Merging**: `gh pr merge <pr_number> --merge --delete-branch`
 
 ### 3. Coding Style
-- **Python**: Strict Django patterns. Format with `black .`.
-- **TypeScript**: Prefer Functional Components and Hooks. Use `Context API` or `Redux` as per app convention.
+- **Python**: Strict Django patterns.
+- **TypeScript**: Functional Components and Hooks. No `any`.
 - **Comments**: Focus on "Why", not "What".
 
 ## 🛡 Security & Deployment Safety
@@ -62,13 +61,13 @@ We follow the TDD cycle:
 1. **Develop Fix**: Modify Ansible playbooks in `infrastructure/container`.
 2. **Test First**: Deploy to `servyy-test.lxd` (`10.185.182.207`).
 3. **Validate**: Verify on the test host.
-4. **Production**: Only deploy to `lehel.xyz` AFTER successful verification.
+4. **Production**: Only deploy to `lehel.xyz` AFTER verification.
 
 ### Staging
-- **Validation**: All changes MUST be validated on the staging environment (`stage.leaguesphere.app`) before merging.
-- **Verification**: Provide the staging URL and await user confirmation before closing tasks.
+- **Validation**: All changes MUST be validated on `stage.leaguesphere.app`.
+- **Verification**: Provide staging URL/version and await user confirmation.
 
 ## 🧪 Test Infrastructure
-- **LXC Container**: `servyy-test` (IP varies, check `lxc list`).
-- **Setup**: Run `container/spinup_test_db.sh` to initialize the test environment.
-- **Detailed Setup**: See `docs/guides/setup-guide.md`.
+- **LXC Container**: `servyy-test` (MariaDB instance).
+- **Setup**: `container/spinup_test_db.sh`.
+- **Guide**: `docs/guides/setup-guide.md`.
