@@ -92,6 +92,41 @@ describe('GamedayMetadataAccordion', () => {
     expect(mockOnUpdate).toHaveBeenCalledWith({ name: 'Updated Name' });
   });
 
+  it('collapses when forceCollapsed becomes true', async () => {
+    const { rerender } = await renderAccordion({ forceCollapsed: false });
+    expect(document.querySelector('.accordion-button')).not.toHaveClass('collapsed');
+
+    rerender(
+      <GamedayMetadataAccordion
+        metadata={mockMetadata}
+        onUpdate={vi.fn()} onClearAll={vi.fn()} onDelete={vi.fn()}
+        onPublish={vi.fn()} onUnlock={vi.fn()} onAddOfficials={vi.fn()}
+        onHighlight={vi.fn()} validation={mockValidation}
+        readOnly={false} hasData={false}
+        forceCollapsed={true}
+      />
+    );
+    expect(document.querySelector('.accordion-button')).toHaveClass('collapsed');
+  });
+
+  it('stays collapsed after forceCollapsed returns to false (no auto-reopen)', async () => {
+    const { rerender } = await renderAccordion({ forceCollapsed: true });
+    expect(document.querySelector('.accordion-button')).toHaveClass('collapsed');
+
+    rerender(
+      <GamedayMetadataAccordion
+        metadata={mockMetadata}
+        onUpdate={vi.fn()} onClearAll={vi.fn()} onDelete={vi.fn()}
+        onPublish={vi.fn()} onUnlock={vi.fn()} onAddOfficials={vi.fn()}
+        onHighlight={vi.fn()} validation={mockValidation}
+        readOnly={false} hasData={false}
+        forceCollapsed={false}
+      />
+    );
+    // Must still be collapsed — scroll-back-up must not re-open the accordion
+    expect(document.querySelector('.accordion-button')).toHaveClass('collapsed');
+  });
+
   it('triggers unlock schedule when button is clicked', async () => {
     const user = userEvent.setup();
     const publishedMetadata = { ...mockMetadata, status: 'PUBLISHED' };

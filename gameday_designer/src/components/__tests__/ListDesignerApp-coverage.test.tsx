@@ -463,6 +463,50 @@ describe('ListDesignerApp Coverage', () => {
     );
   });
 
+  describe('BEH-002: scroll collapses accordion', () => {
+    it('registers a passive scroll listener on window', () => {
+      const addEventSpy = vi.spyOn(window, 'addEventListener');
+
+      render(
+        <MemoryRouter initialEntries={['/designer/1']}>
+          <GamedayProvider>
+            <Routes>
+              <Route path="/designer/:id" element={<ListDesignerApp />} />
+            </Routes>
+          </GamedayProvider>
+        </MemoryRouter>
+      );
+
+      const scrollCalls = addEventSpy.mock.calls.filter(([event]) => event === 'scroll');
+      expect(scrollCalls.length).toBeGreaterThan(0);
+      const lastScrollCall = scrollCalls[scrollCalls.length - 1];
+      expect(lastScrollCall[2]).toEqual({ passive: true });
+
+      addEventSpy.mockRestore();
+    });
+
+    it('removes the scroll listener on unmount', () => {
+      const removeEventSpy = vi.spyOn(window, 'removeEventListener');
+
+      const { unmount } = render(
+        <MemoryRouter initialEntries={['/designer/1']}>
+          <GamedayProvider>
+            <Routes>
+              <Route path="/designer/:id" element={<ListDesignerApp />} />
+            </Routes>
+          </GamedayProvider>
+        </MemoryRouter>
+      );
+
+      unmount();
+
+      const scrollRemovals = removeEventSpy.mock.calls.filter(([event]) => event === 'scroll');
+      expect(scrollRemovals.length).toBeGreaterThan(0);
+
+      removeEventSpy.mockRestore();
+    });
+  });
+
   describe('BEH-005: auto-save debounce', () => {
     it('fires saveData at 1500ms, not 2000ms', async () => {
       const stateA = { version: 1, nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [] };

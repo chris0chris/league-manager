@@ -38,6 +38,7 @@ const ListDesignerApp: React.FC = () => {
   const [showResultModal, setShowResultModal] = useState(false);
   const [selectedGameForResult, setSelectedGameForResult] = useState<GameNode | null>(null);
   const [showTeamSelectionModal, setShowTeamSelectionModal] = useState(false);
+  const [isMetadataCollapsed, setIsMetadataCollapsed] = useState(false);
   const [teamSelectionContext, setTeamSelectionModalContext] = useState<{
     slotId: string;
     side: 'home' | 'away' | 'official';
@@ -130,6 +131,16 @@ const ListDesignerApp: React.FC = () => {
   useEffect(() => {
     setOnGenerateTournament(() => () => showModalRef.current(true));
   }, [setOnGenerateTournament]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsMetadataCollapsed(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const resultsModeHandler = useCallback(async () => {
     if (!id) return;
@@ -355,6 +366,7 @@ const ListDesignerApp: React.FC = () => {
             onHighlight={handleHighlightElement}
             readOnly={isLocked}
             hasData={ui?.hasData ?? false}
+            forceCollapsed={isMetadataCollapsed}
           />
         </div>
 
