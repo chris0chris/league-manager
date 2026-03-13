@@ -2,6 +2,18 @@
  * GamedayMetadataAccordion Styles
  */
 
+.gameday-metadata-accordion {
+  width: 100%;
+  max-width: 70vw;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .gameday-metadata-accordion {
+    max-width: 100%;
+  }
+}
+
 .gameday-metadata-accordion .accordion-header .accordion-button {
   transition: background-color 0.2s;
 }
