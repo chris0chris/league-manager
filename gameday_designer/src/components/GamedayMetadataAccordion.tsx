@@ -195,6 +195,7 @@ interface GamedayMetadataAccordionProps {
   readOnly: boolean;
   hasData: boolean;
   saveTrigger?: number;
+  forceCollapsed?: boolean;
 }
 
 const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({ 
@@ -210,11 +211,19 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   highlightedElement,
   readOnly,
   hasData,
+  forceCollapsed = false,
 }) => {
 
   const { t } = useTypedTranslation(['ui', 'domain', 'validation']);
   const [seasons, setSeasons] = useState<{ id: number; name: string }[]>([]);
   const [leagues, setLeagues] = useState<{ id: number; name: string }[]>([]);
+  const [activeKey, setActiveKey] = useState<string | undefined>("0");
+
+  useEffect(() => {
+    if (forceCollapsed) {
+      setActiveKey(undefined);
+    }
+  }, [forceCollapsed]);
 
   console.log('[MetadataAccordion] metadata:', metadata.name, metadata.date);
 
@@ -326,7 +335,10 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
 
   return (
     <div className={`gameday-metadata-accordion ${isHighlighted ? 'is-highlighted' : ''}`} id="gameday-metadata" data-testid="gameday-metadata-accordion">
-      <Accordion defaultActiveKey="0">
+      <Accordion 
+        activeKey={activeKey} 
+        onSelect={(key) => setActiveKey(key as string)}
+      >
         <Accordion.Item eventKey="0">
           <CustomAccordionHeader 
             eventKey="0" 
