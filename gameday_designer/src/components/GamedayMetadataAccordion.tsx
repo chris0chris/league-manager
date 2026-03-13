@@ -337,7 +337,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
     <div className={`gameday-metadata-accordion ${isHighlighted ? 'is-highlighted' : ''}`} id="gameday-metadata" data-testid="gameday-metadata-accordion">
       <Accordion 
         activeKey={activeKey} 
-        onSelect={(key) => setActiveKey(key as string)}
+        onSelect={(k) => setActiveKey(k ?? undefined)}
       >
         <Accordion.Item eventKey="0">
           <CustomAccordionHeader 
