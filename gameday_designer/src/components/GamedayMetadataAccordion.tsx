@@ -57,9 +57,8 @@ const CustomAccordionHeader: React.FC<{
           {validation && (
             <div 
               ref={validationBadgeRef}
-              className="d-flex gap-1 ms-2" 
+              className="d-flex gap-1 ms-2 validation-badges-container" 
               data-testid="validation-badges"
-              style={{ cursor: 'pointer' }}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
               onClick={(e) => e.stopPropagation()}
@@ -96,13 +95,6 @@ const CustomAccordionHeader: React.FC<{
       {metadata.status === 'DRAFT' && !readOnly && (
         <div 
           className="publish-button-container"
-          style={{ 
-            position: 'absolute', 
-            right: '60px', 
-            top: '50%', 
-            transform: 'translateY(-50%)', 
-            zIndex: 10 
-          }}
           onClick={(e) => e.stopPropagation()}
         >
           <Button 
@@ -112,8 +104,7 @@ const CustomAccordionHeader: React.FC<{
               e.stopPropagation();
               onPublish?.();
             }}
-            className="rounded-pill py-0 px-3 border-0 shadow-sm fw-bold d-flex align-items-center"
-            style={{ fontSize: '0.7rem', height: '22px' }}
+            className="rounded-pill py-0 px-3 border-0 shadow-sm fw-bold d-flex align-items-center publish-button"
             data-testid="publish-schedule-button"
           >
             <i className="bi bi-send-fill me-1"></i>
@@ -134,8 +125,7 @@ const CustomAccordionHeader: React.FC<{
             <Popover 
               id="validation-popover" 
               {...props} 
-              className="shadow border-danger" 
-              style={{ ...props.style, maxWidth: '400px', zIndex: 1060 }}
+              className="shadow border-danger validation-popover" 
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
             >
@@ -143,16 +133,15 @@ const CustomAccordionHeader: React.FC<{
                 {t('ui:label.validation', 'Validation')}
               </Popover.Header>
               <Popover.Body className="p-0">
-                <div className="list-group list-group-flush small overflow-auto" style={{ maxHeight: '300px' }}>
+                <div className="list-group list-group-flush small overflow-auto validation-list">
                   {validation.errors?.map((error, idx) => (
                     <div 
                       key={`error-${idx}`} 
-                      className="list-group-item list-group-item-action list-group-item-danger border-0 d-flex align-items-start py-2"
+                      className="list-group-item list-group-item-action list-group-item-danger border-0 d-flex align-items-start py-2 validation-item"
                       onClick={(e) => {
                         e.stopPropagation();
                         onHighlight(error.affectedNodes[0], getHighlightType(error));
                       }}
-                      style={{ cursor: 'pointer' }}
                     >
                       <i className={`bi ${ICONS.ERROR} me-2 mt-1`}></i>
                       <div>{getMessage(error)}</div>
@@ -161,12 +150,11 @@ const CustomAccordionHeader: React.FC<{
                   {validation.warnings?.map((warning, idx) => (
                     <div 
                       key={`warning-${idx}`} 
-                      className="list-group-item list-group-item-action list-group-item-warning border-0 d-flex align-items-start py-2"
+                      className="list-group-item list-group-item-action list-group-item-warning border-0 d-flex align-items-start py-2 validation-item"
                       onClick={(e) => {
                         e.stopPropagation();
                         onHighlight(warning.affectedNodes[0], getHighlightType(warning));
                       }}
-                      style={{ cursor: 'pointer' }}
                     >
                       <i className={`bi ${ICONS.WARNING} me-2 mt-1`}></i>
                       <div>{getMessage(warning)}</div>
