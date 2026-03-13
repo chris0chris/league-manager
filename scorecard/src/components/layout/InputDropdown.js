@@ -119,6 +119,7 @@ const InputDropdown = (props) => {
               show={displaySearchInput}
               onChange={onChange}
               text={placeholderText}
+              required={false}
               value={searchInput} />
             <ul
               className='list-group'
