@@ -222,7 +222,7 @@ const ListDesignerApp: React.FC = () => {
         isSavingRef.current = false;
         pendingSaveRef.current.timer = null;
       }
-    }, 2000);
+    }, 1500);
 
     return () => {
       // eslint-disable-next-line react-hooks/exhaustive-deps

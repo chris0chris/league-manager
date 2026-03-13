@@ -444,7 +444,7 @@ describe('ListDesignerApp Coverage', () => {
         </MemoryRouter>
     );
 
-    // Advance past the 2000ms debounce so the scheduled save timer fires.
+    // Advance past the 1500ms debounce so the scheduled save timer fires.
     await act(async () => {
         vi.advanceTimersByTime(2500);
     });
@@ -461,5 +461,55 @@ describe('ListDesignerApp Coverage', () => {
         'warning',
         'Auto-save'
     );
+  });
+
+  describe('BEH-005: auto-save debounce', () => {
+    it('fires saveData at 1500ms, not 2000ms', async () => {
+      const stateA = { version: 1, nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [] };
+      const stateB = { version: 2, nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [] };
+
+      const flowStateA = { ...mockFlowState, exportState: vi.fn().mockReturnValue(stateA) };
+      const flowStateB = { ...mockFlowState, exportState: vi.fn().mockReturnValue(stateB) };
+
+      // Initial render uses flowStateA — initialLoadRef bails, records stateA
+      (useFlowState as Mock).mockReturnValue(flowStateA);
+
+      vi.useFakeTimers();
+
+      const { rerender } = render(
+        <MemoryRouter initialEntries={['/designer/1']}>
+          <GamedayProvider>
+            <Routes>
+              <Route path="/designer/:id" element={<ListDesignerApp />} />
+            </Routes>
+          </GamedayProvider>
+        </MemoryRouter>
+      );
+
+      // Let initial effects settle so initialLoadRef is set to false
+      await act(async () => { await Promise.resolve(); });
+
+      // Switch to flowStateB — next render gives a different flowState reference
+      // exportState() returns stateB ≠ stateA → auto-save timer is scheduled
+      (useFlowState as Mock).mockReturnValue(flowStateB);
+
+      rerender(
+        <MemoryRouter initialEntries={['/designer/1']}>
+          <GamedayProvider>
+            <Routes>
+              <Route path="/designer/:id" element={<ListDesignerApp />} />
+            </Routes>
+          </GamedayProvider>
+        </MemoryRouter>
+      );
+
+      // At 1499ms the save timer must not have fired yet
+      await act(async () => { vi.advanceTimersByTime(1499); });
+      expect(mockHandlers.saveData).not.toHaveBeenCalled();
+
+      // At exactly 1500ms it must fire
+      await act(async () => { vi.advanceTimersByTime(1); });
+      expect(mockHandlers.saveData).toHaveBeenCalled();
+    });
   });
 });
