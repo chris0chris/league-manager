@@ -92,7 +92,8 @@
     "loserOf": "Loser of {{match}}",
     "placeFrom": "{{place}}. Place from {{stage}}",
     "ungrouped": "Ungrouped",
-    "assignedGamesCount": "Number of games this team is assigned to"
+    "assignedGamesCount": "Number of games this team is assigned to",
+    "confirmDeleteGameday": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
   },
   "tooltip": {
     "addTeamToGroup": "Add a new team to this group",
@@ -153,7 +154,17 @@
       "autoSave": "Auto-save",
       "importError": "Import Error",
       "deletion": "Deletion",
-      "timeFormat": "Time Format"
-    }
+      "timeFormat": "Time Format",
+      "templateExport": "Template Export"
+    },
+    "templateExported": {
+      "title": "Template exported"
+    },
+    "resultsSaved": "Results saved successfully",
+    "resultsSaveFailed": "Failed to save results"
+  },
+  "title": {
+    "selectTeam": "Select Team",
+    "selectOfficial": "Select Official"
   }
 }

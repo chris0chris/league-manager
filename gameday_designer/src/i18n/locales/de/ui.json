@@ -122,7 +122,8 @@
     "loserOf": "Verlierer von {{match}}",
     "placeFrom": "{{place}}. Platz aus {{stage}}",
     "ungrouped": "Ungruppiert",
-    "assignedGamesCount": "Anzahl der Spiele, denen dieses Team zugewiesen ist"
+    "assignedGamesCount": "Anzahl der Spiele, denen dieses Team zugewiesen ist",
+    "confirmDeleteGameday": "Möchten Sie \"{{name}}\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "tooltip": {
     "addTeamToGroup": "Ein neues Team zu dieser Gruppe hinzufügen",
@@ -183,7 +184,17 @@
       "autoSave": "Auto-Speichern",
       "importError": "Import-Fehler",
       "deletion": "Löschen",
-      "timeFormat": "Zeitformat"
-    }
+      "timeFormat": "Zeitformat",
+      "templateExport": "Vorlage exportiert"
+    },
+    "templateExported": {
+      "title": "Vorlage exportiert"
+    },
+    "resultsSaved": "Ergebnisse erfolgreich gespeichert",
+    "resultsSaveFailed": "Fehler beim Speichern der Ergebnisse"
+  },
+  "title": {
+    "selectTeam": "Team auswählen",
+    "selectOfficial": "Schiedsrichter auswählen"
   }
 }

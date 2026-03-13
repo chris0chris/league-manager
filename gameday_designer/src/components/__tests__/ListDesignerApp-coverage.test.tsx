@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, Mock, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ListDesignerApp from '../ListDesignerApp';
@@ -47,6 +47,7 @@ vi.mock('../../api/gamedayApi', () => ({
     updateBulkGameResults: vi.fn().mockResolvedValue({}),
     listSeasons: vi.fn().mockResolvedValue([]),
     listLeagues: vi.fn().mockResolvedValue([]),
+    deleteGameday: vi.fn().mockResolvedValue({}),
   },
 }));
 
@@ -539,6 +540,36 @@ describe('ListDesignerApp Coverage', () => {
       await user.click(confirmBtn);
 
       await waitFor(() => expect(gamedayApi.publish).toHaveBeenCalledWith(1));
+    });
+  });
+
+  describe('BEH-004: delete confirmation modal', () => {
+    it('shows DeleteGamedayConfirmModal when delete is clicked, does not navigate immediately', async () => {
+      const user = userEvent.setup();
+      await renderApp();
+
+      const deleteBtn = screen.getByTestId('delete-gameday-button');
+      await user.click(deleteBtn);
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('calls deleteGameday API and navigates on confirm', async () => {
+      (gamedayApi.deleteGameday as Mock).mockResolvedValue({});
+      const user = userEvent.setup();
+      await renderApp();
+
+      await user.click(screen.getByTestId('delete-gameday-button'));
+      
+      const modal = screen.getByRole('dialog');
+      // The button text is "Delete Gameday", same as title.
+      // Use the button role to distinguish.
+      const deleteButton = within(modal).getByRole('button', { name: /Delete Gameday/i });
+      await user.click(deleteButton);
+
+      await waitFor(() => expect(gamedayApi.deleteGameday).toHaveBeenCalledWith(1));
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/'));
     });
   });
 

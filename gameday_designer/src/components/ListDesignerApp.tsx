@@ -9,6 +9,7 @@ import { FlowToolbarProps } from './FlowToolbar';
 import GamedayMetadataAccordion from './GamedayMetadataAccordion';
 import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
 import PublishConfirmationModal from './modals/PublishConfirmationModal';
+import DeleteGamedayConfirmModal from './modals/DeleteGamedayConfirmModal';
 import GameResultModal from './modals/GameResultModal';
 import TeamSelectionModal from './modals/TeamSelectionModal';
 import NotificationToast from './ui/NotificationToast';
@@ -37,6 +38,7 @@ const ListDesignerApp: React.FC = () => {
   } = useGamedayContext();
 
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [selectedGameForResult, setSelectedGameForResult] = useState<GameNode | null>(null);
   const [showTeamSelectionModal, setShowTeamSelectionModal] = useState(false);
@@ -333,6 +335,16 @@ const ListDesignerApp: React.FC = () => {
     }
   }, [id, addNotification, t, loadData]);
 
+  const handleConfirmDelete = useCallback(async () => {
+    setShowDeleteModal(false);
+    try {
+      await gamedayApi.deleteGameday(parseInt(id!));
+      navigate('/');
+    } catch {
+      addNotification(t('ui:notification.deleteGamedayPermanentlyFailed'), 'danger', t('ui:notification.title.error'));
+    }
+  }, [id, addNotification, t, navigate]);
+
   if (!id) {
     return (
       <Container className="py-5">
@@ -343,18 +355,14 @@ const ListDesignerApp: React.FC = () => {
 
   return (
     <div className="list-designer-app bg-light">
-      <div className="list-designer-app__content flex-grow-1 overflow-auto px-4 pt-3 pb-5">
+      <div className="list-designer-app__content flex-grow-1 overflow-auto px-4 pb-5">
         <Stack gap={4}>
-          <div className="sticky-top bg-light py-2" style={{ zIndex: 1020, marginTop: '-0.75rem' }}>
+          <div className="sticky-top bg-light py-2" style={{ zIndex: 1020 }}>
             <GamedayMetadataAccordion
             metadata={metadata}
             onUpdate={handleUpdateMetadata}
             onClearAll={handleClearAll}
-            onDelete={() => {
-              if (window.confirm(t('ui:message.confirmDeleteGameday'))) {
-                gamedayApi.deleteGameday(parseInt(id)).then(() => navigate('/'));
-              }
-            }}
+            onDelete={() => setShowDeleteModal(true)}
             onPublish={() => setShowPublishModal(true)}
             onUnlock={async () => {
               try {
@@ -365,7 +373,7 @@ const ListDesignerApp: React.FC = () => {
                 addNotification(t('ui:notification.unlockFailed'), 'danger', t('ui:notification.title.error'));
               }
             }}
-            onAddOfficials={() => handleAddGlobalTeam(t('domain:team.officials'))}
+            onAddOfficials={() => handleAddGlobalTeam(t('domain:officials'))}
             validation={validation}
             highlightedElement={ui?.highlightedElement}
             onHighlight={handleHighlightElement}
@@ -421,7 +429,7 @@ const ListDesignerApp: React.FC = () => {
               highlightedSourceGameId={ui?.highlightedSourceGameId}
               onDynamicReferenceClick={handleDynamicReferenceClick}
               onNotify={addNotification}
-              onAddOfficials={() => handleAddGlobalTeam(t('domain:team.officials'))}
+              onAddOfficials={() => handleAddGlobalTeam(t('domain:officials'))}
               resultsMode={resultsMode}
               gameResults={gameResults}
               onSaveBulkResults={handleSaveBulkResults}
@@ -445,6 +453,13 @@ const ListDesignerApp: React.FC = () => {
         onConfirm={handleConfirmPublish}
         validation={validation}
         onHighlight={handleHighlightElement}
+      />
+
+      <DeleteGamedayConfirmModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        gamedayName={metadata?.name}
       />
 
       <GameResultModal
