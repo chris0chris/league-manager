@@ -33,7 +33,8 @@
     "result": "Ergebnis",
     "enterResults": "Ergebnisse eintragen",
     "exitResults": "Designer-Ansicht",
-    "backToDashboard": "Zurück zum Dashboard"
+    "backToDashboard": "Zurück zum Dashboard",
+    "addOfficials": "Offizielle hinzufügen"
   },
   "label": {
     "dashboard": "Dashboard",

@@ -33,7 +33,8 @@
     "result": "Result",
     "enterResults": "Enter Results",
     "exitResults": "Designer View",
-    "backToDashboard": "Back to Dashboard"
+    "backToDashboard": "Back to Dashboard",
+    "addOfficials": "Add Officials"
   },
   "label": {
     "dashboard": "Dashboard",

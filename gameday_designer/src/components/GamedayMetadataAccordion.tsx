@@ -325,29 +325,30 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   };
 
   return (
-    <div className={`gameday-metadata-accordion-container ${isHighlighted ? 'is-highlighted' : ''}`} id="gameday-metadata" data-testid="gameday-metadata-accordion">
-      <Accordion.Item eventKey="0">
-        <CustomAccordionHeader 
-          eventKey="0" 
-          metadata={metadata} 
-          statusColor={getStatusColor(metadata.status)} 
-          onPublish={onPublish}
-          readOnly={readOnly}
-          validation={validation}
-          t={t}
-          formatDate={formatDate}
-          getStatusBadge={getStatusBadge}
-          onHighlight={onHighlight}
-          handleMouseEnter={handleMouseEnter}
-          handleMouseLeave={handleMouseLeave}
-          validationBadgeRef={validationBadgeRef}
-          showValidationPopover={showValidationPopover}
-          getHighlightType={getHighlightType}
-          getMessage={getMessage}
-          isHighlighted={isHighlighted}
-        />
-        <Accordion.Body>
-          <Form>
+    <div className={`gameday-metadata-accordion ${isHighlighted ? 'is-highlighted' : ''}`} id="gameday-metadata" data-testid="gameday-metadata-accordion">
+      <Accordion>
+        <Accordion.Item eventKey="0">
+          <CustomAccordionHeader 
+            eventKey="0" 
+            metadata={metadata} 
+            statusColor={getStatusColor(metadata.status)} 
+            onPublish={onPublish}
+            readOnly={readOnly}
+            validation={validation}
+            t={t}
+            formatDate={formatDate}
+            getStatusBadge={getStatusBadge}
+            onHighlight={onHighlight}
+            handleMouseEnter={handleMouseEnter}
+            handleMouseLeave={handleMouseLeave}
+            validationBadgeRef={validationBadgeRef}
+            showValidationPopover={showValidationPopover}
+            getHighlightType={getHighlightType}
+            getMessage={getMessage}
+            isHighlighted={isHighlighted}
+          />
+          <Accordion.Body>
+            <Form>
             <Row className="mb-3">
               <Col md={6}>
                 <Form.Group controlId="gamedayName">
@@ -493,8 +494,9 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
           </Form>
         </Accordion.Body>
       </Accordion.Item>
-    </div>
-  );
+    </Accordion>
+  </div>
+);
 };
 
 export default GamedayMetadataAccordion;
