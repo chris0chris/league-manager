@@ -1,174 +1,26 @@
-# GEMINI.md
+# GEMINI.md (Gemini CLI Guide)
 
-This file provides a comprehensive instructional context for Gemini (and other AI agents) working in the LeagueSphere repository.
+This file provides comprehensive instructional context specifically for the **Gemini CLI** (google-gemini-cli) and its specialized tools.
 
-## Project Overview
+For all project-wide standards, technical commands, and deployment safety policies, see the **[LeagueSphere Contributor Guide](docs/guides/contributor-guide.md)**.
 
-**LeagueSphere** is a sophisticated flag football league management system built with Django 5.2+ and multiple React frontends. It handles complex tournament scheduling, player eligibility (passcheck), live scoring, and league standings.
+## 🤖 Gemini-Specific Workflow
 
-### Key Architectural Pillars
-- **Backend**: Django 5.2 with Django REST Framework (DRF) and Knox Token Auth.
-- **Frontend Architecture**: Multiple independent React apps bundled via Vite and served as Django static files.
-  - **Gameday Designer**: Advanced flowchart-based scheduling tool (Vite/TypeScript/React Flow).
-  - **Passcheck**: Player eligibility verification (Vite/TypeScript).
-  - **Liveticker & Scorecard**: Real-time game monitoring and scoring (Vite/React/Redux).
-- **Database**: MySQL/MariaDB (MariaDB preferred for local/test environments).
-- **Infrastructure**: Managed via Ansible; Dockerized deployment (Backend: Gunicorn; Frontend: Nginx).
+### Development Lifecycle
+Operate using a **Research -> Strategy -> Execution** lifecycle. For the Execution phase, resolve each sub-task through an iterative **Plan -> Act -> Validate** cycle.
 
----
+### Memory Management (MCP)
+- **Persistence**: Use the `save_memory` tool to persist critical session facts, user-specific preferences, or significant architectural insights.
+- **Conciseness**: Ensure that each saved fact is clear, self-contained, and brief.
+- **Proactivity**: Proactively save information that will streamline future development (e.g., "User prefers SQLite for local backend testing due to LXC connectivity issues").
 
-## Development Workflow & Protocol
+### Testing Protocol
+- **Empirical Reproduction**: Prioritize empirical reproduction of reported issues to confirm the failure state.
+- **Verification**: Run tests and workspace standards before committing or finishing a task.
 
-### 1. Test-Driven Development (TDD)
-We strictly follow the TDD cycle:
-1.  **RED**: Write a test for the desired functionality and verify that it fails.
-2.  **GREEN**: Implement the minimum code necessary to make the test pass.
-3.  **REFACTOR**: Clean up the code while ensuring the tests remain GREEN.
-
-**Mandatory Internal QA**: Before involving the user or reporting a task as finished, you MUST:
--   **Run All Tests**: Execute the full test suite (Backend & Frontend) and ensure all pass.
--   **LINT & FIX**: Run the project's linting commands, fix all errors, and resolve any formatting issues.
--   **Targeted Tests**: Use isolated test runs during development, but verify the final result with the full suite.
-
-### 2. Branching & Pull Requests
-- **NO Commits to Master**: Direct commits to the `master` branch are strictly forbidden.
-- **Feature Branches**: All work must be performed on a dedicated branch created for the specific task or feature.
-- **Mandatory Local QA**: Before pushing anything to remote, all QA checks (Tests, Lint, Security) MUST pass locally. **LINTING IS MANDATORY BEFORE EVERY PUSH.**
-- **Pull Requests**: Every change must receive a Pull Request (PR). PRs must always be created in **origin** (`dachrisch/leaguesphere`). 
-- **Non-Interactive PRs**: To avoid interactive prompts, always use:
-  `gh pr create --repo dachrisch/leaguesphere --base master --title "..." --body "..."`
-- **Issues**: Task tracking and issue management are performed on **upstream github**.
-- **Merging**: Branches are only merged into `master` after explicit user approval.
-
-### 3. Documentation & Progress Tracking
-The project documentation is organized in the `docs/` directory for clarity and accessibility.
-- `docs/arch/`: Architectural Decision Records (ADR) and system design.
-- `docs/features/`: Feature documentation (Current and History).
-- `docs/guides/`: Setup and Contributor guides.
-- `docs/plans/`: Historical and current implementation plans.
-- `docs/reports/`: Verification and test reports.
-- `docs/testing/`: Test scenarios and strategies.
-
-**Contributor Guide**: Refer to `docs/guides/contributor-guide.md` for a comprehensive overview of build, test, and style guidelines.
-**Setup Guide**: Refer to `docs/guides/setup-guide.md` for local environment configuration.
-
-### 4. Memory Management (MCP)
-- **Persistence**: Use the `save_memory` tool to persist critical session facts, user-specific preferences, or significant architectural insights that should be retained for future sessions.
-- **Conciseness**: Ensure that each saved fact is clear, self-contained, and brief. Avoid saving long or ephemeral context.
-- **Proactivity**: Proactively identify and save information that will streamline future development or improve personalized assistance (e.g., "User prefers SQLite for local backend testing due to LXC connectivity issues").
-
----
-
-## Testing Strategy
-
-### 1. Pre-flight Checklist (Always check these first)
-- [ ] **LXC Container**: Ensure `servyy-test` is running (`lxc list`).
-- [ ] **Database IP**: The IP changes! Always verify with `lxc list servyy-test`.
-- [ ] **Environment Variables**: Must be exported in the CURRENT shell session.
-- [ ] **Migrations**: Run `python manage.py migrate` if any models changed.
-- [ ] **Dependencies**: Run `uv sync --extra test` if any python imports fail.
-
-### 2. Backend Testing (pytest)
-Backend tests require a MariaDB instance in the `servyy-test` LXC container.
-
-**Mandatory Setup Command:**
-```bash
-# 1. Spin up/Reset DB
-cd container && ./spinup_test_db.sh && cd ..
-
-# 2. Get current IP (e.g. 10.185.182.62)
-lxc list servyy-test
-
-# 3. Export all variables (Update IP if needed)
-export MYSQL_HOST=10.185.182.62
-export MYSQL_DB_NAME=test_db
-export MYSQL_USER=user
-export MYSQL_PWD=user
-export SECRET_KEY=test-secret-key
-export league_manager=dev
-
-# 4. Migrate and Test
-python manage.py migrate
-pytest
-```
-
-**Troubleshooting DB Connection:**
-If you get `OperationalError: (2003, "Can't connect to MySQL server")`:
-1. Re-run `./container/spinup_test_db.sh`.
-2. Check `lxc list` to see if the IP address has changed.
-3. Ensure no local firewall is blocking the connection.
-
-### 3. Frontend Testing (vitest)
-Run tests for the specific app you are working on, or all of them to ensure no regressions.
-
-```bash
-# Gameday Designer
-npm --prefix gameday_designer/ run test:run
-
-# Passcheck
-npm --prefix passcheck/ run test:run
-
-# Liveticker
-npm --prefix liveticker/ run test:run
-
-# Scorecard
-npm --prefix scorecard/ run test:run
-```
-
----
-
-## Deployment & Staging
-
-### 1. Staging Deployments
-- **Requirement**: Only create deployments (staging or production) if the underlying Pull Request or branch CI checks are successful (**GREEN**).
-- **Trigger**: When a feature is "almost ready" and CI is green, it should be deployed to the staging environment.
-- **Process**: Use the `./container/deploy.sh stage` script to trigger the deployment.
-- **Validation**: All changes MUST be validated on the staging environment before the PR is merged or a production deployment is initiated.
-- **Verification Gate**: **CRITICAL**: Before closing any issue, subtask, or finishing a task, you MUST provide the staging URL/version to the user and await explicit confirmation that they have verified the fix on the staging environment. Do NOT close tasks prematurely.
-
-### 2. Production Safety Policies (Ansible)
-**CRITICAL: Mandatory Deployment Process**
-1. **Develop Fix**: Modify Ansible playbooks in `infrastructure/container`.
-2. **Test First**: Deploy to `servyy-test.lxd` (`10.185.182.207`) using the Ansible test inventory.
-3. **Validate**: Verify all configurations and services on the test host.
-4. **Production**: Only deploy to `lehel.xyz` AFTER successful verification on `servyy-test`.
-
-**Forbidden Actions:**
-- Direct manual edits on production servers (SSH + vi/nano).
-- Hotfixes without Ansible automation.
-- Deploying to production without prior test environment validation.
-
----
-
-## Feature-Specific Context
-
-### Gameday Designer
-- **Paradigm**: Uses a **Flowchart/Node-Wiring** model (React Flow) rather than a grid.
-- **Hierarchy**: `Field (Container) > Stage (Container) > Game (Node)`.
-- **Progression**: Supports automatic winner/loser progression patterns (e.g., SF1 winner -> Final).
-- **Services**: `TemplateValidationService` (business rule validation) and `TemplateApplicationService` (atomic application of templates to gamedays).
-
-### Passcheck
-- **Verification**: Enforces complex eligibility rules across leagues (e.g., max gamedays, relegation rules).
-- **Integration**: Links `Player` records to `Gameday` events via `PlayerlistGameday`.
-
----
-
-## Conventions & Standards
-
-### Coding Style
-- **Python**: Strict Django patterns. Format with `black .`.
-- **TypeScript**: Prefer Functional Components and Hooks. Use `Context API` for new state management (Redux exists in legacy apps).
-
-### Versioning
-Managed via `bump2version` (or `bump-my-version`). Synchronized across:
-- `league_manager/__init__.py`
-- Frontend `package.json` files
-- `uv.lock`
-- `pyproject.toml`
-
-### Key Files for Context
-- `CLAUDE.md`: Detailed agent workflows and deployment safety policies.
-- `feature-dev/`: Contains ADRs, tournament play mode docs, and implementation progress.
-- `pytest.ini`: Configures test discovery and DB reuse.
-- `pyproject.toml`: Defines dependencies and versioning logic.
+## 🛠 Central Resources
+Refer to the following for technical details:
+- **Build/Test Commands**: `docs/guides/contributor-guide.md#build-lint--test-commands`
+- **Deployment Safety**: `docs/guides/contributor-guide.md#-security--deployment-safety`
+- **Code Style**: `docs/guides/contributor-guide.md#coding-style`
+- **Setup Guide**: `docs/guides/setup-guide.md`
