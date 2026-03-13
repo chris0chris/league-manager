@@ -18,6 +18,7 @@ import { isGameNode } from '../types/flowchart';
 import { exportToStructuredTemplate } from '../utils/flowchartExport';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { gamedayApi } from '../api/gamedayApi';
+import './ListDesignerApp.css';
 
 const ListDesignerApp: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -317,10 +318,11 @@ const ListDesignerApp: React.FC = () => {
   }
 
   return (
-    <div className="list-designer-app bg-light min-vh-100 pb-5">
-      <Container fluid className="px-4 mt-4">
+    <div className="list-designer-app bg-light">
+      <div className="list-designer-app__content flex-grow-1 overflow-auto px-4 pt-3 pb-5">
         <Stack gap={4}>
-          <GamedayMetadataAccordion
+          <div className="sticky-top bg-light py-2" style={{ zIndex: 1020, marginTop: '-0.75rem' }}>
+            <GamedayMetadataAccordion
             metadata={metadata}
             onUpdate={handleUpdateMetadata}
             onClearAll={handleClearAll}
@@ -354,8 +356,9 @@ const ListDesignerApp: React.FC = () => {
             readOnly={isLocked}
             hasData={ui?.hasData ?? false}
           />
+        </div>
 
-          {resultsMode ? (
+        {resultsMode ? (
             <div className="bg-white p-4 rounded shadow-sm">
               <h3 className="mb-4">{t('ui:label.gameResults')}</h3>
               <GameResultsTable 
@@ -409,7 +412,7 @@ const ListDesignerApp: React.FC = () => {
             />
           )}
         </Stack>
-      </Container>
+      </div>
 
       <TournamentGeneratorModal
         show={showTournamentModal}
