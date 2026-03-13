@@ -21,9 +21,10 @@ This project uses specialized Claude Code agents for different tasks. Fulfill th
 Claude Code should automatically delegate tasks to appropriate specialized agents. Each agent has specific expertise and tools to handle their domain effectively.
 
 ## 🛠 Central Authority
-Refer to the following sections in the **[Contributor Guide](docs/guides/contributor-guide.md)** for:
-- **Git Operations**: `docs/guides/contributor-guide.md#2-git--branching`
-- **Build/Test Commands**: `docs/guides/contributor-guide.md#build-lint--test-commands`
-- **Deployment Safety**: `docs/guides/contributor-guide.md#infrastructure-policy-critical`
-- **Code Style**: `docs/guides/contributor-guide.md#3-coding-style`
-- **Setup Guide**: `docs/guides/setup-guide.md`
+
+Refer to these specialized guides for detailed protocols:
+- **[Architecture Overview](docs/arch/architecture-overview.md)**: System design and tech stack.
+- **[Coding Standards](docs/guides/coding-standards.md)**: Python (Django) and TypeScript (React) conventions.
+- **[Infrastructure Policy](docs/guides/infrastructure-policy.md)**: Deployment safety and Ansible rules.
+- **[Setup Guide](docs/guides/setup-guide.md)**: Local environment configuration.
+- **[Git Operations](docs/guides/contributor-guide.md#2-git--branching-protocol)**: PR and branching rules.
