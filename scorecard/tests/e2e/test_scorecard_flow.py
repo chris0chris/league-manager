@@ -133,6 +133,8 @@ def test_schedule_update_resolves_finalrunde_teams(live_server, page: Page):
     expect(page.get_by_text("A1 vs A3")).to_be_visible(timeout=5000)
 
     # Placeholder matchup text must be gone from Finalrunde rows
+    # Positive assertions above act as sync point — page is fully loaded once these pass,
+    # ensuring the negative assertions below reflect the actual updated state.
     expect(page.get_by_text("Gewinner Spiel 1 vs Gewinner Spiel 2")).not_to_be_visible(
         timeout=5000
     )
