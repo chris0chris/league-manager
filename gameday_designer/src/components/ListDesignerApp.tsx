@@ -345,6 +345,20 @@ const ListDesignerApp: React.FC = () => {
     }
   }, [id, addNotification, t, navigate]);
 
+  const handleAddOfficialsLocal = useCallback(() => {
+    handleAddGlobalTeam(t('domain:officials'));
+  }, [handleAddGlobalTeam, t]);
+
+  const handleGetTeamUsage = useCallback((teamId: string) => {
+    return flowState.nodes
+      .filter(isGameNode)
+      .filter(g => g.data.homeTeamId === teamId || g.data.awayTeamId === teamId)
+      .map(g => ({ 
+        gameId: g.id, 
+        slot: g.data.homeTeamId === teamId ? 'home' as const : 'away' as const 
+      }));
+  }, [flowState.nodes]);
+
   if (!id) {
     return (
       <Container className="py-5">
@@ -373,7 +387,7 @@ const ListDesignerApp: React.FC = () => {
                 addNotification(t('ui:notification.unlockFailed'), 'danger', t('ui:notification.title.error'));
               }
             }}
-            onAddOfficials={() => handleAddGlobalTeam(t('domain:officials'))}
+            onAddOfficials={handleAddOfficialsLocal}
             validation={validation}
             highlightedElement={ui?.highlightedElement}
             onHighlight={handleHighlightElement}
@@ -414,7 +428,7 @@ const ListDesignerApp: React.FC = () => {
               onDeleteGlobalTeamGroup={handleDeleteGlobalTeamGroup}
               onReorderGlobalTeamGroup={handleReorderGlobalTeamGroup}
               onShowTeamSelection={handleShowTeamSelection}
-              getTeamUsage={() => ({ count: 0, games: [] })}
+              getTeamUsage={handleGetTeamUsage}
               onAssignTeam={handleAssignTeam}
               onSwapTeams={handleSwapTeams}
               onAddGame={handleUpdateGameSlot}
@@ -429,7 +443,7 @@ const ListDesignerApp: React.FC = () => {
               highlightedSourceGameId={ui?.highlightedSourceGameId}
               onDynamicReferenceClick={handleDynamicReferenceClick}
               onNotify={addNotification}
-              onAddOfficials={() => handleAddGlobalTeam(t('domain:officials'))}
+              onAddOfficials={handleAddOfficialsLocal}
               resultsMode={resultsMode}
               gameResults={gameResults}
               onSaveBulkResults={handleSaveBulkResults}
@@ -489,7 +503,7 @@ const ListDesignerApp: React.FC = () => {
 
       <NotificationToast
         notifications={ui?.notifications || []}
-        onDismiss={dismissNotification}
+        onClose={dismissNotification}
       />
 
       {ui?.isLoading && <LoadingOverlay message={t('ui:message.loading')} />}

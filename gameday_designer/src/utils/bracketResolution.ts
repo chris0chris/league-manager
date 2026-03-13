@@ -58,17 +58,20 @@ export function resolveBracketReferences(nodes: FlowNode[], teams: GlobalTeam[])
   };
 
   // Perform up to 3 passes to handle nested references (SF -> Final)
-  let updatedNodes = [...nodes];
+  let currentNodes = nodes;
+  let overallChanged = false;
+
   for (let pass = 0; pass < 3; pass++) {
-    let changed = false;
-    updatedNodes = updatedNodes.map(node => {
+    let passChanged = false;
+    const nextNodes = currentNodes.map(node => {
       if (!isGameNode(node)) return node;
 
-      const newResolvedHome = resolveTeam(node.data.homeTeamDynamic, updatedNodes);
-      const newResolvedAway = resolveTeam(node.data.awayTeamDynamic, updatedNodes);
+      const newResolvedHome = resolveTeam(node.data.homeTeamDynamic, currentNodes);
+      const newResolvedAway = resolveTeam(node.data.awayTeamDynamic, currentNodes);
 
       if (newResolvedHome !== node.data.resolvedHomeTeam || newResolvedAway !== node.data.resolvedAwayTeam) {
-        changed = true;
+        passChanged = true;
+        overallChanged = true;
         return {
           ...node,
           data: {
@@ -80,10 +83,12 @@ export function resolveBracketReferences(nodes: FlowNode[], teams: GlobalTeam[])
       }
       return node;
     });
-    if (!changed) break;
+
+    if (!passChanged) break;
+    currentNodes = nextNodes;
   }
 
-  return updatedNodes;
+  return overallChanged ? currentNodes : nodes;
 }
 
 (window as unknown as { resolveBracketReferences: typeof resolveBracketReferences }).resolveBracketReferences = resolveBracketReferences;

@@ -137,7 +137,7 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
     if (isInternalUpdateRef.current) return;
 
     const resolvedNodes = resolveBracketReferences(nodes, globalTeams);
-    if (JSON.stringify(resolvedNodes) !== JSON.stringify(nodes)) {
+    if (resolvedNodes !== nodes) {
       isInternalUpdateRef.current = true;
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setNodes(resolvedNodes);
@@ -280,6 +280,7 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
   const clearSchedule = useCallback(() => {
     setNodes([]);
     setEdges([]);
+    setFields([]);
     setSelection({ nodeIds: [], edgeIds: [] });
     handleStateChange();
   }, [handleStateChange]);
