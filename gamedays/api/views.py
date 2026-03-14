@@ -118,6 +118,17 @@ class GamedayViewSet(viewsets.ModelViewSet):
             state.state_data = request.data.get("state_data", {})
             state.last_modified_by = request.user
             state.save()
+
+            metadata = state.state_data.get("metadata", {})
+            update_fields = []
+            for field in ("name", "date", "start", "address"):
+                value = metadata.get(field)
+                if value is not None and value != "" and getattr(gameday, field) != value:
+                    setattr(gameday, field, value)
+                    update_fields.append(field)
+            if update_fields:
+                gameday.save(update_fields=update_fields)
+
             return Response({"state_data": state.state_data})
 
 
