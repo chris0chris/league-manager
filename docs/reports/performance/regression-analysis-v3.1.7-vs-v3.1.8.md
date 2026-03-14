@@ -8,13 +8,13 @@ Source: screenshots + `git diff v3.1.7 v3.1.8-rc.3` analysis on 2026-03-13.
 
 ---
 
-## UI-001 — Whitespace gap between LS navbar and designer navbar
+## [x] UI-001 — Whitespace gap between LS navbar and designer navbar
 
 | Field    | Value       |
 |----------|-------------|
 | Category | UI / Layout |
 | Severity | Medium      |
-| Priority | _TBD_       |
+| Priority | Done        |
 
 **v3.1.7:** No gap — `sticky-top` metadata panel bridged the space between the two navbars.
 **v3.1.8-rc.3:** Visible white gap — `<Container fluid className="px-4 mt-4">` adds 16px top margin, combined with
@@ -25,13 +25,13 @@ imported.
 
 ---
 
-## UI-002 — Adaptive button sizes broken (icon-only → full label always shown)
+## [x] UI-002 — Adaptive button sizes broken (icon-only → full label always shown)
 
 | Field    | Value       |
 |----------|-------------|
 | Category | UI / Layout |
 | Severity | Medium      |
-| Priority | _TBD_       |
+| Priority | Done        |
 
 **v3.1.7:** Buttons collapsed to icon-only at smaller widths via `btn-adaptive` / `btn-label-adaptive` CSS classes.
 **v3.1.8-rc.3:** Classes still referenced in JSX but `ListDesignerApp.css` is no longer imported — no styling applied,
@@ -42,13 +42,13 @@ buttons always show full text label.
 
 ---
 
-## UI-003 — Metadata section not height-constrained (expands freely)
+## [x] UI-003 — Metadata section not height-constrained (expands freely)
 
 | Field    | Value       |
 |----------|-------------|
 | Category | UI / Layout |
 | Severity | Medium      |
-| Priority | _TBD_       |
+| Priority | Done        |
 
 **v3.1.7:** Metadata accordion was inside a scroll-bounded container (`h-100 d-flex flex-column overflow-auto`) —
 content couldn't expand beyond viewport.
@@ -59,13 +59,13 @@ limit.
 
 ---
 
-## BEH-001 — Accordion starts CLOSED (was open by default)
+## [x] BEH-001 — Accordion starts CLOSED (was open by default)
 
 | Field    | Value    |
 |----------|----------|
 | Category | Behavior |
 | Severity | High     |
-| Priority | _TBD_    |
+| Priority | Done     |
 
 **v3.1.7:** `useState<string | null>('0')` controlled accordion — starts open on every load.
 **v3.1.8-rc.3:** `<Accordion>` is uncontrolled with no `defaultActiveKey` — React-Bootstrap defaults to closed.
@@ -74,13 +74,13 @@ limit.
 
 ---
 
-## BEH-002 — Accordion auto-close on scroll removed
+## [x] BEH-002 — Accordion auto-close on scroll removed
 
 | Field    | Value    |
 |----------|----------|
 | Category | Behavior |
 | Severity | Low      |
-| Priority | _TBD_    |
+| Priority | Done     |
 
 **v3.1.7:** `onScroll` handler collapsed the metadata accordion when scroll position exceeded 50px.
 **v3.1.8-rc.3:** No scroll handler — accordion does not auto-collapse on scroll.
@@ -89,13 +89,13 @@ limit.
 
 ---
 
-## BEH-003 — Publish validation modal removed (no replacement)
+## [x] BEH-003 — Publish validation modal removed (no replacement)
 
 | Field    | Value         |
 |----------|---------------|
 | Category | Behavior / UX |
 | Severity | Medium        |
-| Priority | _TBD_         |
+| Priority | Done          |
 
 **v3.1.7:** `PublishConfirmationModal` displayed validation errors and warnings before confirming publish.
 **v3.1.8-rc.3:** Modal is imported but unused — publish fires immediately with no pre-confirmation review step.
@@ -104,13 +104,13 @@ limit.
 
 ---
 
-## BEH-004 — Delete uses window.confirm with missing i18n key
+## [x] BEH-004 — Delete uses window.confirm with missing i18n key
 
 | Field    | Value    |
 |----------|----------|
 | Category | Behavior |
 | Severity | Medium   |
-| Priority | _TBD_    |
+| Priority | Done     |
 
 **v3.1.7:** Delete navigated with `{ state: { pendingDeleteId } }` — handled gracefully by dashboard.
 **v3.1.8-rc.3:** `window.confirm(t('ui:message.confirmDeleteGameday'))` — the i18n key does not exist; raw key string
@@ -120,13 +120,13 @@ shown to user.
 
 ---
 
-## BEH-005 — Auto-save debounce increased (1500ms → 2000ms)
+## [x] BEH-005 — Auto-save debounce increased (1500ms → 2000ms)
 
 | Field    | Value    |
 |----------|----------|
 | Category | Behavior |
 | Severity | Low      |
-| Priority | _TBD_    |
+| Priority | Done     |
 
 **v3.1.7:** Auto-save triggered 1500ms after last change.
 **v3.1.8-rc.3:** Auto-save triggered 2000ms after last change.
@@ -346,16 +346,16 @@ operations.
 
 ## Issue Index
 
-| ID       | Title                                             | Category    | Severity |
-|----------|---------------------------------------------------|-------------|----------|
-| UI-001   | Whitespace gap between navbars                    | UI/Layout   | Medium   |
-| UI-002   | Adaptive button sizes broken                      | UI/Layout   | Medium   |
-| UI-003   | Metadata section not height-constrained           | UI/Layout   | Medium   |
-| BEH-001  | Accordion starts closed                           | Behavior    | High     |
-| BEH-002  | Accordion auto-close on scroll removed            | Behavior    | Low      |
-| BEH-003  | Publish validation modal removed                  | Behavior/UX | Medium   |
-| BEH-004  | Delete uses window.confirm with missing i18n      | Behavior    | Medium   |
-| BEH-005  | Auto-save debounce increased                      | Behavior    | Low      |
+| ID       | Title                                             | Category    | Severity | Status |
+|----------|---------------------------------------------------|-------------|----------|--------|
+| UI-001   | Whitespace gap between navbars                    | UI/Layout   | Medium   | [x]    |
+| UI-002   | Adaptive button sizes broken                      | UI/Layout   | Medium   | [x]    |
+| UI-003   | Metadata section not height-constrained           | UI/Layout   | Medium   | [x]    |
+| BEH-001  | Accordion starts closed                           | Behavior    | High     | [x]    |
+| BEH-002  | Accordion auto-close on scroll removed            | Behavior    | Low      | [x]    |
+| BEH-003  | Publish validation modal removed                  | Behavior/UX | Medium   | [x]    |
+| BEH-004  | Delete uses window.confirm with missing i18n      | Behavior    | Medium   | [x]    |
+| BEH-005  | Auto-save debounce increased                      | Behavior    | Low      | [x]    |
 | BUG-001  | TeamSelectionModal incompatible props             | Bug         | **High** |
 | BUG-002  | Bulk result save sends wrong primary key          | Bug         | **High** |
 | BUG-003  | STATUS_COMPLETED value changed, no data migration | Bug         | **High** |
