@@ -47,6 +47,7 @@ describe('GamedayDashboard', () => {
       league: 1,
       status: 'PUBLISHED',
       designer_data: {},
+      has_designer_state: true,
     },
     {
       id: 2,
@@ -60,6 +61,7 @@ describe('GamedayDashboard', () => {
       league: 1,
       status: 'DRAFT',
       designer_data: {},
+      has_designer_state: true,
     },
   ];
 
