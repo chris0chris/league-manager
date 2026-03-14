@@ -205,17 +205,14 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   const { t } = useTypedTranslation(['ui', 'domain', 'validation']);
   const [seasons, setSeasons] = useState<{ id: number; name: string }[]>([]);
   const [leagues, setLeagues] = useState<{ id: number; name: string }[]>([]);
-  const [activeKey, setActiveKey] = useState<string | undefined>(forceCollapsed ? undefined : "0");
-  const [prevForceCollapsed, setPrevForceCollapsed] = useState(forceCollapsed);
+  const [activeKey, setActiveKey] = useState<string | undefined>("0");
 
-  if (forceCollapsed !== prevForceCollapsed) {
-    setPrevForceCollapsed(forceCollapsed);
-    if (forceCollapsed) {
+  useEffect(() => {
+    if (forceCollapsed && activeKey !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveKey(undefined);
     }
-  }
-
-  console.log('[MetadataAccordion] metadata:', metadata.name, metadata.date);
+  }, [forceCollapsed, activeKey]);
 
   React.useEffect(() => {
     const fetchMetadata = async () => {
@@ -322,6 +319,8 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
     const controlId = `gameday${capitalizedFieldName}`;
     return highlightedElement?.id === `metadata-${controlId}`;
   };
+
+  if (!metadata) return null;
 
   return (
     <div className={`gameday-metadata-accordion ${isHighlighted ? 'is-highlighted' : ''}`} id="gameday-metadata" data-testid="gameday-metadata-accordion">

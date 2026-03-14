@@ -106,11 +106,8 @@ const GamedayDashboard: React.FC = () => {
     setLoading(true);
     try {
       const response = await gamedayApi.listGamedays({ search: searchTerm });
-      // Filter: only show gamedays that have designer_data (created via Designer)
-      // We allow null/empty object for NEW gamedays, but exclude ones without the property entirely
-      const designerGamedays = response.results.filter(g => 
-        g.designer_data !== undefined
-      );
+      // Filter: only show gamedays that have a designer state (created/opened via Designer)
+      const designerGamedays = response.results.filter(g => g.has_designer_state === true);
       setGamedays(designerGamedays);
     } catch (error) {
       console.error('Failed to load gamedays', error);

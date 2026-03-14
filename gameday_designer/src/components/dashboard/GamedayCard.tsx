@@ -44,10 +44,11 @@ const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick, onDelete })
 
   return (
     <Col xs={12} sm={6} lg={4} xl={3} className="mb-4">
-      <Card 
-        className="h-100 shadow-sm cursor-pointer hover-lift position-relative" 
+      <Card
+        className="h-100 shadow-sm cursor-pointer hover-lift position-relative"
         onClick={() => onClick(gameday.id)}
         role="button"
+        data-testid={`gameday-card-${gameday.id}`}
         style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
         onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
         onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}

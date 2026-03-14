@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Stack, Alert } from 'react-bootstrap';
 import { useDesignerController } from '../hooks/useDesignerController';
@@ -117,14 +117,21 @@ const ListDesignerApp: React.FC = () => {
     addNotification(t('ui:notification.autoSaveSuccess'), 'success', t('ui:notification.templateExported.title'));
   }, [flowState, metadata?.name, addNotification, t]);
 
-  const isLocked = metadata?.status ? metadata.status !== 'DRAFT' : true;
+  const isLocked = metadata?.status ? metadata.status !== 'DRAFT' : false;
+
+  const lastGamedayNameRef = useRef('');
+  const lastIsLockedRef = useRef<boolean | null>(null);
 
   // Sync basic metadata with context
   useEffect(() => {
-    if (metadata?.name) {
+    if (metadata?.name && metadata.name !== lastGamedayNameRef.current) {
+      lastGamedayNameRef.current = metadata.name;
       setGamedayName(metadata.name);
     }
-    setContextLocked(isLocked);
+    if (isLocked !== lastIsLockedRef.current) {
+      lastIsLockedRef.current = isLocked;
+      setContextLocked(isLocked);
+    }
   }, [metadata?.name, isLocked, setGamedayName, setContextLocked]);
 
   const showModalRef = useRef(setShowTournamentModal);
@@ -135,16 +142,6 @@ const ListDesignerApp: React.FC = () => {
   useEffect(() => {
     setOnGenerateTournament(() => () => showModalRef.current(true));
   }, [setOnGenerateTournament]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsMetadataCollapsed(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   const resultsModeHandler = useCallback(async () => {
     if (!id) return;
@@ -369,7 +366,17 @@ const ListDesignerApp: React.FC = () => {
 
   return (
     <div className="list-designer-app bg-light">
-      <div className="list-designer-app__content flex-grow-1 overflow-auto px-4 pb-5">
+      <div 
+        className="list-designer-app__content flex-grow-1 overflow-auto px-4 pb-5"
+        onScroll={(e) => {
+          const scrollTop = (e.target as HTMLDivElement).scrollTop;
+          if (scrollTop > 50 && !isMetadataCollapsed) {
+            setIsMetadataCollapsed(true);
+          } else if (scrollTop <= 50 && isMetadataCollapsed) {
+            setIsMetadataCollapsed(false);
+          }
+        }}
+      >
         <Stack gap={4}>
           <div className="sticky-top bg-light py-2" style={{ zIndex: 1020 }}>
             <GamedayMetadataAccordion

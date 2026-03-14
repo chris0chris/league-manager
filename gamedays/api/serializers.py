@@ -5,6 +5,7 @@ from rest_framework.serializers import ModelSerializer, Serializer
 
 from gamedays.models import (
     Gameday,
+    GamedayDesignerState,
     Gameinfo,
     GameOfficial,
     GameSetup,
@@ -40,6 +41,7 @@ class GamedaySerializer(ModelSerializer):
 class GamedayListSerializer(ModelSerializer):
     season_display = SerializerMethodField()
     league_display = SerializerMethodField()
+    has_designer_state = SerializerMethodField()
 
     class Meta:
         model = Gameday
@@ -56,6 +58,7 @@ class GamedayListSerializer(ModelSerializer):
             "author",
             "address",
             "status",
+            "has_designer_state",
         ]
         read_only_fields = ["author"]
         extra_kwargs = {"start": {"format": "%H:%M"}}
@@ -65,6 +68,9 @@ class GamedayListSerializer(ModelSerializer):
 
     def get_league_display(self, obj):
         return obj.league.name if obj.league else ""
+
+    def get_has_designer_state(self, obj):
+        return GamedayDesignerState.objects.filter(gameday_id=obj.pk).exists()
 
 
 class GamedayInfoSerializer(Serializer):

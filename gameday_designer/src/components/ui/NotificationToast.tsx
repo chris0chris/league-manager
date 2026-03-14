@@ -87,6 +87,14 @@ const ToastWithProgress: React.FC<{ notification: Notification; onClose: (id: st
  * Positioned to avoid clipping by viewport boundaries.
  */
 const NotificationToast: React.FC<NotificationToastProps> = ({ notifications, onClose }) => {
+  const handleClose = (id: string) => {
+    if (typeof onClose === 'function') {
+      onClose(id);
+    } else {
+      console.warn('NotificationToast: onClose prop is missing or not a function', onClose);
+    }
+  };
+
   return (
     <ToastContainer 
       position="bottom-end" 
@@ -97,7 +105,7 @@ const NotificationToast: React.FC<NotificationToastProps> = ({ notifications, on
         <ToastWithProgress 
           key={notification.id} 
           notification={notification} 
-          onClose={onClose} 
+          onClose={handleClose} 
         />
       ))}
     </ToastContainer>

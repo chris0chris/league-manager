@@ -224,14 +224,19 @@ jobs:
       - setup_uv
       - node/install-packages:
           app-dir: scorecard/
+      - node/install-packages:
+          app-dir: gameday_designer/
       - run:
           name: Build scorecard
           command: npm --prefix scorecard/ run build
       - run:
+          name: Build gameday_designer
+          command: npm --prefix gameday_designer/ run build
+      - run:
           name: Install Playwright browsers
           command: uv run playwright install chromium --with-deps
       - run:
-          name: Run e2e tests
+          name: Run scorecard e2e tests
           environment:
             SECRET_KEY: 123456-TEST
             MYSQL_HOST: 127.0.0.1
@@ -240,7 +245,15 @@ jobs:
             MYSQL_PWD: ""
           command: |
             uv run pytest scorecard/tests/e2e/ -v \
-              --junitxml=test-reports/e2e-results.xml
+              --junitxml=test-reports/e2e-scorecard-results.xml
+      - run:
+          name: Run gameday_designer e2e tests
+          environment:
+            SECRET_KEY: 123456-TEST
+          command: |
+            uv run pytest gameday_designer/tests/e2e/ -v \
+              --ds=test_settings \
+              --junitxml=test-reports/e2e-designer-results.xml
       - store_test_results:
           path: test-reports
 
