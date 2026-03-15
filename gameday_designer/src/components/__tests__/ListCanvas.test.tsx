@@ -60,6 +60,23 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
     await i18n.changeLanguage('en');
   });
 
+  describe('Team pool - officials button', () => {
+    it('disables the add officials button when group-officials already exists', () => {
+      const officialGroup = { id: 'group-officials', name: 'External Officials', order: -1 };
+      renderCanvas(createDefaultProps({
+        onAddOfficials: vi.fn(),
+        globalTeamGroups: [officialGroup],
+      }));
+
+      expect(screen.getByTestId('add-officials-button')).toBeDisabled();
+    });
+
+    it('enables the add officials button when no group-officials exists', () => {
+      renderCanvas(createDefaultProps({ onAddOfficials: vi.fn() }));
+      expect(screen.getByTestId('add-officials-button')).not.toBeDisabled();
+    });
+  });
+
   describe('Fields section Card wrapper', () => {
     it('renders Fields section with Card wrapper and header', () => {
       renderCanvas(createDefaultProps());

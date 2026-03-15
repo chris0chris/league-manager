@@ -98,6 +98,7 @@
   "tooltip": {
     "addTeamToGroup": "Add a new team to this group",
     "connectTeam": "Connect an existing team from the database pool",
+    "editGroupName": "Click to edit the name of this team group",
     "addFirstTeamToGroup": "Add your first team to this group",
     "moveGroupUp": "Move this team group one position up",
     "moveGroupDown": "Move this team group one position down",

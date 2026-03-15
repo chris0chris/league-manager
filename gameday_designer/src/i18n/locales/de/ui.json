@@ -128,6 +128,7 @@
   "tooltip": {
     "addTeamToGroup": "Ein neues Team zu dieser Gruppe hinzufügen",
     "connectTeam": "Ein existierendes Team aus der Datenbank verbinden",
+    "editGroupName": "Klicken, um den Namen dieser Teamgruppe zu bearbeiten",
     "addFirstTeamToGroup": "Erstes Team zu dieser Gruppe hinzufügen",
     "moveGroupUp": "Diese Teamgruppe um eine Position nach oben verschieben",
     "moveGroupDown": "Diese Teamgruppe um eine Position nach unten verschieben",
