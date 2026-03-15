@@ -115,6 +115,16 @@ class GamedayViewSet(viewsets.ModelViewSet):
             metadata = state_data.get("metadata")
             if isinstance(metadata, dict):
                 state_data["metadata"] = {**metadata, "status": gameday.status}
+            else:
+                state_data["metadata"] = {
+                    "name": gameday.name,
+                    "date": str(gameday.date) if gameday.date else "",
+                    "start": str(gameday.start) if gameday.start else "",
+                    "address": gameday.address or "",
+                    "season": gameday.season_id,
+                    "league": gameday.league_id,
+                    "status": gameday.status,
+                }
             return Response({"state_data": state_data})
 
         if request.method == "PUT":

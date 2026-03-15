@@ -30,6 +30,17 @@ class DesignerAPITest(APITestCase):
         state = GamedayDesignerState.objects.get(gameday=self.gameday)
         assert state.state_data["nodes"][0]["id"] == "2"
 
+    def test_get_designer_state_seeds_metadata_from_gameday_when_state_is_empty(self):
+        """For a new gameday with no stored state_data, GET should return metadata
+        seeded from the Gameday model so the designer form shows correct defaults."""
+        url = f"/api/gamedays/{self.gameday.id}/designer-state/"
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        metadata = response.data["state_data"]["metadata"]
+        assert metadata["name"] == self.gameday.name
+        assert str(metadata["date"]) == str(self.gameday.date)
+        assert metadata["status"] == self.gameday.status
+
     def test_publish_gameday(self):
         self.gameday.status = Gameday.STATUS_DRAFT
         self.gameday.save()
