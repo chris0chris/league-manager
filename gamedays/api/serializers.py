@@ -5,6 +5,7 @@ from rest_framework.serializers import ModelSerializer, Serializer
 
 from gamedays.models import (
     Gameday,
+    GamedayDesignerState,
     Gameinfo,
     GameOfficial,
     GameSetup,
@@ -12,6 +13,7 @@ from gamedays.models import (
     League,
     Gameresult,
 )
+from gamedays.service.placeholder_service import GamedayPlaceholderService
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +41,7 @@ class GamedaySerializer(ModelSerializer):
 class GamedayListSerializer(ModelSerializer):
     season_display = SerializerMethodField()
     league_display = SerializerMethodField()
+    has_designer_state = SerializerMethodField()
 
     class Meta:
         model = Gameday
@@ -55,6 +58,7 @@ class GamedayListSerializer(ModelSerializer):
             "author",
             "address",
             "status",
+            "has_designer_state",
         ]
         read_only_fields = ["author"]
         extra_kwargs = {"start": {"format": "%H:%M"}}
@@ -64,6 +68,9 @@ class GamedayListSerializer(ModelSerializer):
 
     def get_league_display(self, obj):
         return obj.league.name if obj.league else ""
+
+    def get_has_designer_state(self, obj):
+        return GamedayDesignerState.objects.filter(gameday_id=obj.pk).exists()
 
 
 class GamedayInfoSerializer(Serializer):
@@ -181,8 +188,11 @@ class GameLogSerializer(Serializer):
         entries_firsthalf, entries_secondhalf = self._get_entries(
             is_home=is_home, obj=obj
         )
+        name = obj[self.HOME_TEAM] if is_home else obj[self.AWAY_TEAM]
+        if name is None:
+            name = GamedayPlaceholderService.resolve_placeholder(obj[self.ID], is_home)
         return {
-            "name": obj[self.HOME_TEAM] if is_home else obj[self.AWAY_TEAM],
+            "name": name,
             "score": obj[score_key],
             "firsthalf": {"score": obj[fh_key], "entries": entries_firsthalf},
             "secondhalf": {"score": obj[sh_key], "entries": entries_secondhalf},

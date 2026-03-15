@@ -6,7 +6,7 @@ import { gamedayApi } from '../../api/gamedayApi';
 import type { GamedayListEntry } from '../../types';
 import type { Notification, NotificationType } from '../../types/designer';
 import GamedayCard from './GamedayCard';
-import NotificationToast from '../NotificationToast';
+import NotificationToast from '../ui/NotificationToast';
 import { v4 as uuidv4 } from 'uuid';
 import { ProgressBar } from 'react-bootstrap';
 
@@ -106,11 +106,8 @@ const GamedayDashboard: React.FC = () => {
     setLoading(true);
     try {
       const response = await gamedayApi.listGamedays({ search: searchTerm });
-      // Filter: only show gamedays that have designer_data (created via Designer)
-      // We allow null/empty object for NEW gamedays, but exclude ones without the property entirely
-      const designerGamedays = response.results.filter(g => 
-        g.designer_data !== undefined
-      );
+      // Filter: only show gamedays that have a designer state (created/opened via Designer)
+      const designerGamedays = response.results.filter(g => g.has_designer_state === true);
       setGamedays(designerGamedays);
     } catch (error) {
       console.error('Failed to load gamedays', error);
@@ -130,16 +127,22 @@ const GamedayDashboard: React.FC = () => {
 
       if (seasons.length === 0 || leagues.length === 0) {
         addNotification(
-          'Please ensure at least one Season and one League exist in the database before creating a gameday.', 
+          t('ui:message.prerequisitesMissing'), 
           'warning', 
-          'Prerequisites missing'
+          t('ui:notification.title.prerequisites')
         );
         return;
       }
 
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      const defaultName = t('ui:message.defaultGamedayName', { date: `${dd}.${mm}.${yyyy}` });
+
       const newGameday = await gamedayApi.createGameday({
-        name: t('ui:placeholder.gamedayName'),
-        date: new Date().toISOString().split('T')[0],
+        name: defaultName,
+        date: `${yyyy}-${mm}-${dd}`,
         start: '10:00',
         format: '6_2',
         author: 1, // TODO: Use actual user ID

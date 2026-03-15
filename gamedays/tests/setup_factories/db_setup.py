@@ -309,6 +309,38 @@ class DBSetup:
         TeamFactory(name="P1 Gruppe 3")
         # TeamFactory(name='')
 
+    def create_4_final4_1_placeholder_teams(self):
+        for name in [
+            "Gewinner Spiel 1",
+            "Gewinner Spiel 2",
+            "Verlierer Spiel 1",
+            "Verlierer Spiel 2",
+            "Gewinner Spiel 3",
+            "Verlierer Spiel 3",
+            "Gewinner Spiel 4",
+            "Verlierer Spiel 4",
+            "Gewinner Spiel 5",
+            "Verlierer Spiel 5",
+        ]:
+            TeamFactory(name=name)
+
+    def g4_final4_1_status_empty(self) -> "Gameday":
+        from gamedays.management.schedule_manager import ScheduleCreator, Schedule, GroupSchedule
+
+        gameday = self.create_empty_gameday()
+        gameday.format = "4_final4_1"
+        gameday.save()
+
+        teams = self.create_teams("A", 4)
+        self.create_4_final4_1_placeholder_teams()
+
+        groups = [GroupSchedule(name="", league_group=None, teams=teams)]
+        ScheduleCreator(
+            gameday=Gameday.objects.get(pk=gameday.pk),
+            schedule=Schedule(gameday.format, groups),
+        ).create()
+        return Gameday.objects.get(pk=gameday.pk)
+
     def create_finalround_game(
         self, gameday, standing, status, home, away, scheduled="10:00"
     ):

@@ -185,15 +185,16 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
                         <span className="btn-label-adaptive">{t('ui:button.addGroup')}</span>
                       </Button>
                       {onAddOfficials && (
-                        <Button 
-                          size="sm" 
-                          variant="outline-secondary" 
+                        <Button
+                          size="sm"
+                          variant="outline-secondary"
                           onClick={(e) => {
                             e.stopPropagation();
                             onAddOfficials();
-                          }} 
+                          }}
                           title={t('ui:tooltip.addExternalOfficials')}
                           data-testid="add-officials-button"
+                          disabled={globalTeamGroups.some(g => g.id === 'group-officials')}
                         >
                           <i className="bi bi-person-badge" />
                         </Button>

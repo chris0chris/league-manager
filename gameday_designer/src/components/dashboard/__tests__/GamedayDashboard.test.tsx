@@ -47,6 +47,7 @@ describe('GamedayDashboard', () => {
       league: 1,
       status: 'PUBLISHED',
       designer_data: {},
+      has_designer_state: true,
     },
     {
       id: 2,
@@ -60,6 +61,7 @@ describe('GamedayDashboard', () => {
       league: 1,
       status: 'DRAFT',
       designer_data: {},
+      has_designer_state: true,
     },
   ];
 
@@ -107,6 +109,21 @@ describe('GamedayDashboard', () => {
     const card = screen.getByText('Gameday 1').closest('.card');
     fireEvent.click(card!);
     expect(mockNavigate).toHaveBeenCalledWith('/designer/1');
+  });
+
+  it('creates new gameday with name "Gameday on DD.MM.YYYY"', async () => {
+    vi.mocked(gamedayApi.createGameday).mockResolvedValue({ id: 3, name: 'x' } as never);
+    await renderDashboard();
+    fireEvent.click(screen.getByRole('button', { name: /Create Gameday/i }));
+
+    await waitFor(() => {
+      const name = (vi.mocked(gamedayApi.createGameday).mock.calls[0][0] as { name: string }).name;
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      expect(name).toBe(`Gameday on ${dd}.${mm}.${yyyy}`);
+    });
   });
 
   it('creates new gameday and navigates to editor', async () => {

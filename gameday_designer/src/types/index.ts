@@ -21,6 +21,8 @@ export type {
   ValidationWarningType,
 } from './designer';
 
+export type { FlowState } from './flowchart';
+
 export {
   isGroupTeamReference,
   isStandingReference,

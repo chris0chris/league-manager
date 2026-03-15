@@ -12,6 +12,7 @@ import React from 'react';
 import { Row, Col, Alert } from 'react-bootstrap';
 import type { Field } from '../types/designer';
 import FieldColumn from './FieldColumn';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
 
 export interface DesignerCanvasProps {
   /** All fields to display */
@@ -47,12 +48,14 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   onDeleteGameSlot,
   onDuplicateGameSlot,
 }) => {
+  const { t } = useTypedTranslation(['ui']);
+
   // Show empty state when no fields
   if (fields.length === 0) {
     return (
       <Alert variant="info" className="text-center">
-        <Alert.Heading>No fields yet</Alert.Heading>
-        <p>Click "Add Field" in the toolbar to create your first playing field.</p>
+        <Alert.Heading>{t('ui:message.noFieldsYet')}</Alert.Heading>
+        <p>{t('ui:message.createFirstField')}</p>
       </Alert>
     );
   }

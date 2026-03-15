@@ -12,6 +12,7 @@ class TestGamedaySerializers:
         assert "id" in serializer.data
         assert "name" in serializer.data
         assert "status" in serializer.data
+        assert "has_designer_state" in serializer.data
         assert "designer_data" not in serializer.data
 
     def test_gameday_serializer_fields(self):

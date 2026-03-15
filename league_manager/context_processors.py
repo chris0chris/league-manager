@@ -16,3 +16,7 @@ def pages_links(request):
     return {
         "PAGES_LINKS": getattr(settings, "PAGES_LINKS", {}),
     }
+
+
+def debug_status(request):
+    return {"DEBUG": settings.DEBUG}

@@ -105,7 +105,7 @@ const CustomSingleValue = memo((props: { data: TeamOption; children?: React.Reac
         )}
         <span className={data.isWinner ? 'fw-bold text-success' : ''}>
           {data.label}
-          {data.isWinner && <i className="bi bi-trophy-fill text-warning ms-2" title="Winner" />}
+          {data.isWinner && <i className="bi bi-trophy-fill text-warning ms-2" title={t('ui:label.winner')} />}
         </span>
       </div>
     </components.SingleValue>
@@ -689,7 +689,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
           {resolvedName ? (
             <div className={isWinner ? 'text-success d-flex align-items-center' : 'text-primary'}>
               <strong className={isWinner ? 'fw-bold' : ''}>{resolvedName}</strong>
-              {isWinner && <i className="bi bi-trophy-fill text-warning ms-2" title="Winner" />}
+              {isWinner && <i className="bi bi-trophy-fill text-warning ms-2" title={t('ui:label.winner')} />}
             </div>
           ) : (
             <span className="text-muted italic">{t('ui:label.tbd')}</span>

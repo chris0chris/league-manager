@@ -15,9 +15,13 @@ class TestGamedayGameServiceDataErrors(TestCase):
         # Create game with two teams
         gameday = DBSetup().g62_finished()
         gameinfo = list(Gameinfo.objects.filter(gameday=gameday.pk))[0]
-        home_team = list(Gameresult.objects.filter(gameinfo=gameinfo, isHome=True))[0].team
-        away_team = list(Gameresult.objects.filter(gameinfo=gameinfo, isHome=False))[0].team
-        
+        home_team = list(Gameresult.objects.filter(gameinfo=gameinfo, isHome=True))[
+            0
+        ].team
+        away_team = list(Gameresult.objects.filter(gameinfo=gameinfo, isHome=False))[
+            0
+        ].team
+
         # Create events ONLY for home team
         author = gameday.author
         TeamLog.objects.create(
@@ -30,11 +34,11 @@ class TestGamedayGameServiceDataErrors(TestCase):
             half=1,
             author=author,
         )
-        
+
         # Service should detect mismatch
         ggs = GamedayGameService.create(gameinfo.pk)
         events_table = ggs.get_events_table()
-        
+
         # Should return error object, not crash
         assert isinstance(events_table, EventsTableError)
         assert ggs.home_team_name in events_table.error_message
@@ -47,13 +51,19 @@ class TestGamedayGameServiceDataErrors(TestCase):
         # Create game with two teams
         gameday = DBSetup().g62_finished()
         gameinfo = list(Gameinfo.objects.filter(gameday=gameday.pk))[0]
-        home_team = list(Gameresult.objects.filter(gameinfo=gameinfo, isHome=True))[0].team
-        away_team = list(Gameresult.objects.filter(gameinfo=gameinfo, isHome=False))[0].team
-        
+        home_team = list(Gameresult.objects.filter(gameinfo=gameinfo, isHome=True))[
+            0
+        ].team
+        away_team = list(Gameresult.objects.filter(gameinfo=gameinfo, isHome=False))[
+            0
+        ].team
+
         # Create a third team with events
-        extra_team = Team.objects.create(name="Extra Team", description="Extra Team Desc")
+        extra_team = Team.objects.create(
+            name="Extra Team", description="Extra Team Desc"
+        )
         author = gameday.author
-        
+
         # Create events for all three teams (should fail)
         TeamLog.objects.create(
             gameinfo=gameinfo,
@@ -82,10 +92,10 @@ class TestGamedayGameServiceDataErrors(TestCase):
             half=1,
             author=author,
         )
-        
+
         ggs = GamedayGameService.create(gameinfo.pk)
         events_table = ggs.get_events_table()
-        
+
         assert isinstance(events_table, EventsTableError)
         assert "Extra Team Desc" in events_table.error_message
 
@@ -97,7 +107,7 @@ class TestGamedayGameServiceDataErrors(TestCase):
         gameday = DBSetup().g62_finished()
         gameinfo = list(Gameinfo.objects.filter(gameday=gameday.pk))[0]
         author = gameday.author
-        
+
         # Create a static event (team=None) to keep events_ready=True
         # This ensures the validation code runs instead of returning EmptyEventsTable
         TeamLog.objects.create(
@@ -108,12 +118,12 @@ class TestGamedayGameServiceDataErrors(TestCase):
             half=1,
             author=author,
         )
-        
+
         # Clear all team-specific events (only delete events where team is not None)
         TeamLog.objects.filter(gameinfo=gameinfo, team__isnull=False).delete()
-        
+
         ggs = GamedayGameService.create(gameinfo.pk)
         events_table = ggs.get_events_table()
-        
+
         assert isinstance(events_table, EventsTableError)
         assert "nicht verfügbar" in events_table.error_message.lower()

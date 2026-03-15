@@ -12,6 +12,7 @@ import type {
   PaginatedResponse,
   Season,
   League,
+  FlowState,
 } from '../types';
 import { mockGamedayService } from './mockGamedayApi';
 
@@ -193,6 +194,20 @@ class GamedayApi {
     return response.data;
   }
 
+  async getDesignerState(id: number): Promise<{ state_data: FlowState } | null> {
+    if (this.isDev && !this.forceClient) return null;
+    const response = await this.client.get(`/gamedays/${id}/designer-state/`);
+    return response.data;
+  }
+
+  async updateDesignerState(id: number, state: FlowState): Promise<{ state_data: FlowState }> {
+    if (this.isDev && !this.forceClient) return { state_data: state };
+    const response = await this.client.put(`/gamedays/${id}/designer-state/`, {
+      state_data: state
+    });
+    return response.data;
+  }
+
   /**
    * Update game result.
    */
@@ -201,6 +216,11 @@ class GamedayApi {
     if (this.isDev && !this.forceClient) return { ...data, status: data.final_score ? 'COMPLETED' : 'IN_PROGRESS' };
     const response = await this.client.patch(`/gamedays/gameinfo/${gameId}/result/`, data);
     return response.data;
+  }
+
+  async updateGameResultDetail(resultId: number, data: { fh?: number; sh?: number; pa?: number }): Promise<void> {
+    if (this.isDev && !this.forceClient) return;
+    await this.client.patch(`/gamedays/gameinfo/${resultId}/result/`, data);
   }
 
   /**

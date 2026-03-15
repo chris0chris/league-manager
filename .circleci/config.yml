@@ -114,7 +114,7 @@ jobs:
             MYSQL_USER: root
             MYSQL_PWD: ""
           command: |
-            uv run pytest --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
+            uv run pytest -n auto --nomigrations --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
       - store_test_results:
           path: test-reports
 
@@ -209,6 +209,53 @@ jobs:
       - run:
           name: "JavaScript Build"
           command: npm --prefix gameday_designer/ run build
+
+  e2e:
+    docker:
+      - image: cimg/python:3.14.3-node
+      - image: cimg/mysql:9.6
+        command: [ --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --default-storage-engine=InnoDB ]
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          MYSQL_DATABASE: test_test_db
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_uv
+      - node/install-packages:
+          app-dir: scorecard/
+      - node/install-packages:
+          app-dir: gameday_designer/
+      - run:
+          name: Build scorecard
+          command: npm --prefix scorecard/ run build
+      - run:
+          name: Build gameday_designer
+          command: npm --prefix gameday_designer/ run build
+      - run:
+          name: Install Playwright browsers
+          command: uv run playwright install chromium --with-deps
+      - run:
+          name: Run scorecard e2e tests
+          environment:
+            SECRET_KEY: 123456-TEST
+            MYSQL_HOST: 127.0.0.1
+            MYSQL_DB_NAME: test_test_db
+            MYSQL_USER: root
+            MYSQL_PWD: ""
+          command: |
+            uv run pytest scorecard/tests/e2e/ -v \
+              --junitxml=test-reports/e2e-scorecard-results.xml
+      - run:
+          name: Run gameday_designer e2e tests
+          environment:
+            SECRET_KEY: 123456-TEST
+          command: |
+            uv run pytest gameday_designer/tests/e2e/ -v \
+              --ds=test_settings \
+              --junitxml=test-reports/e2e-designer-results.xml
+      - store_test_results:
+          path: test-reports
 
   build_backend:
     docker:
@@ -471,6 +518,10 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - e2e:
+          filters:
+            tags:
+              only: /.*/
       - scorecard_js:
           filters:
             tags:
@@ -491,6 +542,7 @@ workflows:
       - build_backend:
           requires:
             - python
+            - e2e
           filters:
             tags:
               only: /.*/

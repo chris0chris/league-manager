@@ -3,6 +3,8 @@ import pandas as pd
 from pandas import DataFrame
 
 from gamedays.models import Gameinfo, Gameresult, TeamLog
+from gamedays.service.placeholder_service import GamedayPlaceholderService
+from passcheck.models import PasscheckVerification
 from gamedays.service.gameday_settings import (
     STANDING,
     TEAM_NAME,
@@ -33,7 +35,6 @@ from gamedays.service.gameday_settings import (
     IN_POSSESSION,
     IS_HOME,
 )
-from passcheck.models import PasscheckVerification
 
 
 class DfflPoints(object):
@@ -98,6 +99,57 @@ class GamedayModelWrapper:
         tmp[POINTS] = np.where(tmp[PF] == tmp[PA], 1, np.where(tmp[PF] > tmp[PA], 2, 0))
         games_with_result[POINTS] = tmp[POINTS]
         self._games_with_result: DataFrame = games_with_result
+        self._resolve_placeholders()
+
+    def _resolve_placeholders(self):
+        if (
+            self._games_with_result.empty
+            or TEAM_NAME not in self._games_with_result.columns
+        ):
+            return
+
+        # Only proceed if there are missing team names
+        if self._games_with_result[TEAM_NAME].isna().any():
+
+            placeholder_service = GamedayPlaceholderService(
+                self._gameinfo["gameday"].iloc[0]
+            )
+
+            placeholder_service = GamedayPlaceholderService(self._gameinfo['gameday'].iloc[0])
+            
+            # Resolve each missing row
+            for index, row in self._games_with_result[
+                self._games_with_result[TEAM_NAME].isna()
+            ].iterrows():
+                placeholder = placeholder_service.get_placeholder(
+                    row[GAMEINFO_ID], is_home=row[IS_HOME]
+                )
+                self._games_with_result.at[index, TEAM_NAME] = placeholder
+
+    def get_staff_passcheck_details(self, gameday_id):
+        column_mapping = {
+            "created_at": "Zeitpunkt",
+            "official_name": "Schiedsrichter",
+            "user__username": "Account",
+            "team__name": "Team",
+            "note": "Notiz",
+        }
+
+        passchecks = pd.DataFrame(
+            PasscheckVerification.objects.filter(gameday_id=gameday_id).values(
+                *column_mapping.keys()
+            )
+        )
+
+        if passchecks.empty:
+            return pd.DataFrame([], columns=column_mapping.values())
+
+        passchecks["created_at"] = passchecks.created_at.dt.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+        passchecks["note"] = passchecks.note.apply(lambda x: x.replace("\n", "</br>"))
+
+        return passchecks.rename(columns=column_mapping)
 
     def has_finalround(self):
         return QUALIIFY_ROUND in self._gameinfo[STAGE].values
@@ -444,27 +496,3 @@ class GamedayModelWrapper:
             results_with_standing[POINTS] == points
         ]
         return results_with_standing_and_according_points
-
-    def get_staff_passcheck_details(self, gameday_id):
-        column_mapping = {
-            "created_at": "Zeitpunkt",
-            "official_name": "Schiedsrichter",
-            "user__username": "Account",
-            "team__name": "Team",
-            "note": "Notiz"
-        }
-
-
-        passchecks = pd.DataFrame(
-            PasscheckVerification.objects
-                .filter(gameday_id=gameday_id)
-                .values(*column_mapping.keys())
-        )
-
-        if passchecks.empty:
-            return pd.DataFrame([], columns=column_mapping.values())
-
-        passchecks["created_at"] = passchecks.created_at.dt.strftime("%Y-%m-%d %H:%M:%S")
-        passchecks["note"] = passchecks.note.apply(lambda x: x.replace("\n", "</br>"))
-
-        return passchecks.rename(columns=column_mapping)

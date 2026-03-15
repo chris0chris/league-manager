@@ -15,6 +15,7 @@ import type {
   GlobalTeam,
   GlobalTeamGroup,
 } from '../types/flowchart';
+import type { TeamReference } from '../types/designer';
 import { isGameNode } from '../types/flowchart';
 import { TEAM_COLORS } from '../utils/tournamentConstants';
 
@@ -79,7 +80,11 @@ export function useTeamPoolState(
           
           if (data.homeTeamId === oldTeamId) updates.homeTeamId = newId;
           if (data.awayTeamId === oldTeamId) updates.awayTeamId = newId;
-          if (data.official === oldTeamId) updates.official = newId;
+          const official = data.official;
+          const officialMatchesOld =
+            (typeof official === 'string' && official === oldTeamId) ||
+            (official !== null && typeof official === 'object' && official.type === 'static' && official.name === oldTeamId);
+          if (officialMatchesOld) updates.official = { type: 'static', name: newId } as TeamReference;
           
           if (Object.keys(updates).length === 0) return n;
           

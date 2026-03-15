@@ -70,6 +70,21 @@ describe('TeamGroupCard', () => {
     totalGroups: 2,
   });
 
+  it('calls onShowTeamSelection with group mode when link button is clicked', () => {
+    const onShowTeamSelection = vi.fn();
+    render(<TeamGroupCard {...getDefaultProps()} onShowTeamSelection={onShowTeamSelection} />);
+
+    const linkBtn = screen.getByTitle('Connect an existing team from the database pool');
+    fireEvent.click(linkBtn);
+
+    expect(onShowTeamSelection).toHaveBeenCalledWith('group-1', 'group');
+  });
+
+  it('shows a pencil edit button next to the group name when not readOnly', () => {
+    const { container } = render(<TeamGroupCard {...getDefaultProps()} />);
+    expect(container.querySelector('.bi-pencil-fill')).toBeInTheDocument();
+  });
+
   it('renders group name and team count', () => {
     render(<TeamGroupCard {...getDefaultProps()} />);
     expect(screen.getByText('Group A')).toBeInTheDocument();

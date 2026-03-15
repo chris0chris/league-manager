@@ -48,7 +48,7 @@ describe('useDesignerController', () => {
     it('initializes with default UI state', () => {
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       expect(result.current.ui.showTournamentModal).toBe(false);
       expect(result.current.ui.highlightedElement).toBeNull();
@@ -59,7 +59,7 @@ describe('useDesignerController', () => {
     it('manages tournament modal visibility', () => {
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       act(() => {
@@ -71,7 +71,7 @@ describe('useDesignerController', () => {
     it('can expand fields and stages', () => {
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       act(() => {
@@ -87,7 +87,7 @@ describe('useDesignerController', () => {
       vi.useFakeTimers();
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       act(() => {
@@ -114,7 +114,7 @@ describe('useDesignerController', () => {
       vi.useFakeTimers();
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       let promise: Promise<void>;
@@ -139,7 +139,7 @@ describe('useDesignerController', () => {
     it('handles successful export', () => {
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       act(() => {
@@ -153,7 +153,7 @@ describe('useDesignerController', () => {
       vi.mocked(flowchartExport.validateForExport).mockReturnValueOnce(['Error 1']);
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       act(() => {
@@ -169,7 +169,7 @@ describe('useDesignerController', () => {
       vi.mocked(flowchartExport.validateForExport).mockReturnValueOnce(['Error 1']);
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       act(() => {
@@ -183,7 +183,7 @@ describe('useDesignerController', () => {
       vi.mocked(flowchartImport.validateScheduleJson).mockReturnValueOnce(['Invalid JSON']);
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       act(() => {
@@ -205,7 +205,7 @@ describe('useDesignerController', () => {
       });
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       act(() => {
@@ -222,7 +222,7 @@ describe('useDesignerController', () => {
       });
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       act(() => {
@@ -259,7 +259,7 @@ describe('useDesignerController', () => {
     it('generates tournament without teams', async () => {
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       vi.mocked(tournamentGenerator.generateTournament).mockReturnValueOnce(mockStructure);
       
@@ -274,7 +274,7 @@ describe('useDesignerController', () => {
     it('creates new group if none exist during team generation', async () => {
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       vi.mocked(tournamentGenerator.generateTournament).mockReturnValue(mockStructure);
@@ -293,12 +293,13 @@ describe('useDesignerController', () => {
 
     it('generates teams and assigns them if requested', async () => {
       vi.useFakeTimers();
-      const { result: flowStateResult } = renderHook(() => useFlowState());
-      const assignSpy = vi.spyOn(flowStateResult.current, 'assignTeamToGame');
-      const { result } = renderHook(() => useDesignerController(flowStateResult.current));
-      
+      const { result } = renderHook(() => {
+        const fs = useFlowState();
+        return { fs, controller: useDesignerController(undefined, fs) };
+      });
+
       const mockTeams = [{ id: 'team-1', label: 'Team 1', color: '#ff0000' }];
-      
+
       vi.mocked(tournamentGenerator.generateTournament).mockReturnValue(mockStructure);
       vi.mocked(teamAssignment.generateTeamsForTournament).mockReturnValue(mockTeams as unknown as Array<{ label: string; color: string }>);
        vi.mocked(teamAssignment.assignTeamsToTournamentGames).mockReturnValue([
@@ -306,21 +307,24 @@ describe('useDesignerController', () => {
          // @ts-expect-error - partial edge for testing
          { type: 'add_edges', edges: [{ id: 'e1' } as unknown as FlowEdge] }
        ]);
-      
+
       await act(async () => {
-        await result.current.handlers.handleGenerateTournament({
+        await result.current.controller.handlers.handleGenerateTournament({
           ...mockConfig,
           generateTeams: true,
           autoAssignTeams: true
         });
       });
-      
+
       expect(teamAssignment.generateTeamsForTournament).toHaveBeenCalled();
-      
+
+      // Spy after state mutations to ensure it's on the current fs reference
+      const assignSpy = vi.spyOn(result.current.fs, 'assignTeamToGame');
+
       await act(async () => {
-        vi.advanceTimersByTime(1500);
+        vi.advanceTimersByTime(3000);
       });
-      
+
       expect(teamAssignment.assignTeamsToTournamentGames).toHaveBeenCalled();
       expect(assignSpy).toHaveBeenCalled();
       vi.useRealTimers();
@@ -334,7 +338,7 @@ describe('useDesignerController', () => {
       
       const { result } = renderHook(() => {
         const flowState = useFlowState();
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       await act(async () => {
@@ -352,7 +356,7 @@ describe('useDesignerController', () => {
             { id: 't2', label: 'T2', groupId: null, order: 1 }
           ]
         });
-        return useDesignerController(flowState);
+        return useDesignerController(undefined, flowState);
       });
       
       vi.mocked(tournamentGenerator.generateTournament).mockReturnValue(mockStructure);
@@ -376,34 +380,40 @@ describe('useDesignerController', () => {
 
   describe('Other Handlers', () => {
     it('calls addFieldNode with includeStage=true', () => {
-      const { result: flowStateResult } = renderHook(() => useFlowState());
-      const spy = vi.spyOn(flowStateResult.current, 'addFieldNode');
-      const { result } = renderHook(() => useDesignerController(flowStateResult.current));
+      const { result } = renderHook(() => {
+        const fs = useFlowState();
+        return { fs, controller: useDesignerController(undefined, fs) };
+      });
+      const spy = vi.spyOn(result.current.fs, 'addFieldNode');
       
       act(() => {
-        result.current.handlers.handleAddFieldContainer();
+        result.current.controller.handlers.handleAddFieldContainer();
       });
       expect(spy).toHaveBeenCalledWith({}, true);
     });
 
     it('calls addStageNode', () => {
-      const { result: flowStateResult } = renderHook(() => useFlowState());
-      const spy = vi.spyOn(flowStateResult.current, 'addStageNode');
-      const { result } = renderHook(() => useDesignerController(flowStateResult.current));
+      const { result } = renderHook(() => {
+        const fs = useFlowState();
+        return { fs, controller: useDesignerController(undefined, fs) };
+      });
+      const spy = vi.spyOn(result.current.fs, 'addStageNode');
       
       act(() => {
-        result.current.handlers.handleAddStage('f1');
+        result.current.controller.handlers.handleAddStage('f1');
       });
       expect(spy).toHaveBeenCalledWith('f1');
     });
 
     it('calls addGlobalTeam', () => {
-      const { result: flowStateResult } = renderHook(() => useFlowState());
-      const spy = vi.spyOn(flowStateResult.current, 'addGlobalTeam');
-      const { result } = renderHook(() => useDesignerController(flowStateResult.current));
+      const { result } = renderHook(() => {
+        const fs = useFlowState();
+        return { fs, controller: useDesignerController(undefined, fs) };
+      });
+      const spy = vi.spyOn(result.current.fs, 'addGlobalTeam');
       
       act(() => {
-        result.current.handlers.handleAddGlobalTeam('g1');
+        result.current.controller.handlers.handleAddGlobalTeam('g1');
       });
       expect(spy).toHaveBeenCalledWith(undefined, 'g1');
     });
@@ -413,7 +423,7 @@ describe('useDesignerController', () => {
     it('swaps home and away teams in a game', async () => {
       const TestComponent = () => {
         const flowState = useFlowState();
-        const controller = useDesignerController(flowState);
+        const controller = useDesignerController(undefined, flowState);
         return { flowState, controller };
       };
 

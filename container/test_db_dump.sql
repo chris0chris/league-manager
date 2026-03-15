@@ -1,9 +1,9 @@
-/*M!999999\- enable the sandbox mode */ 
--- MariaDB dump 10.19-11.8.5-MariaDB, for debian-linux-gnu (x86_64)
+/*M!999999\- enable the sandbox mode */
+-- MariaDB dump 10.19  Distrib 10.11.11-MariaDB, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: test_db
+-- Host: localhost    Database: leaguesphere_staging
 -- ------------------------------------------------------
--- Server version	11.8.5-MariaDB-ubu2404
+-- Source: gameday 633 from staging (leaguesphere@lehel.xyz)
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -17,13 +17,27 @@
 /*M!100616 SET @OLD_NOTE_VERBOSITY=@@NOTE_VERBOSITY, NOTE_VERBOSITY=0 */;
 
 --
+-- Dumping data for table `gamedays_association`
+--
+
+LOCK TABLES `gamedays_association` WRITE;
+/*!40000 ALTER TABLE `gamedays_association` DISABLE KEYS */;
+set autocommit=0;
+INSERT INTO `gamedays_association` (`id`, `abbr`, `name`) VALUES (3,'AFCVBW','Baden-Württemberg'),
+(7,'AFCVN','Niedersachsen'),
+(8,'AFCVNORD','Nord');
+/*!40000 ALTER TABLE `gamedays_association` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
 -- Dumping data for table `gamedays_league`
 --
 
 LOCK TABLES `gamedays_league` WRITE;
 /*!40000 ALTER TABLE `gamedays_league` DISABLE KEYS */;
 set autocommit=0;
-INSERT INTO `gamedays_league` (`id`, `name`) VALUES (1,'Test League');
+INSERT INTO `gamedays_league` (`id`, `name`) VALUES (1,'Süd');
 /*!40000 ALTER TABLE `gamedays_league` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -35,7 +49,7 @@ commit;
 LOCK TABLES `gamedays_season` WRITE;
 /*!40000 ALTER TABLE `gamedays_season` DISABLE KEYS */;
 set autocommit=0;
-INSERT INTO `gamedays_season` (`id`, `name`) VALUES (1,'2025');
+INSERT INTO `gamedays_season` (`id`, `name`) VALUES (5,'2025');
 /*!40000 ALTER TABLE `gamedays_season` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -47,16 +61,11 @@ commit;
 LOCK TABLES `gamedays_team` WRITE;
 /*!40000 ALTER TABLE `gamedays_team` DISABLE KEYS */;
 set autocommit=0;
-INSERT INTO `gamedays_team` (`id`, `name`, `description`, `location`, `logo`, `association_id`) VALUES (1,'Team 1','Team 1','','',NULL),
-(2,'Team 2','Team 2','','',NULL),
-(3,'Team 3','Team 3','','',NULL),
-(4,'Team 4','Team 4','','',NULL),
-(5,'Team 5','Team 5','','',NULL),
-(6,'Team 6','Team 6','','',NULL),
+INSERT INTO `gamedays_team` (`id`, `name`, `description`, `location`, `logo`, `association_id`) VALUES
 (7,'Test Placeholder','Test Placeholder','','',NULL),
 (8,'A1','A1','dummy','',NULL),
 (9,'A2','A2','dummy','',NULL),
-(10,'A3','F','dummy','',NULL),
+(10,'A3','A3','dummy','',NULL),
 (11,'B1','B1','dummy','',NULL),
 (12,'B2','B2','dummy','',NULL),
 (13,'B3','B3','dummy','',NULL),
@@ -67,12 +76,76 @@ INSERT INTO `gamedays_team` (`id`, `name`, `description`, `location`, `logo`, `a
 (18,'P1 Gruppe 2','P1 Gruppe 2','dummy','',NULL),
 (19,'P1 Gruppe 1','P1 Gruppe 1','dummy','',NULL),
 (20,'Gewinner HF1','Gewinner HF1','dummy','',NULL),
+(24,'Greifs','1. ASC Badener Greifs','Baden','',3),
 (31,'Gewinner HF2','Gewinner HF2','dummy','',NULL),
 (32,'Gewinner P3','Gewinner P3','dummy','',NULL),
 (33,'Verlierer HF1','Verlierer HF1','dummy','',NULL),
 (34,'Verlierer HF2','Verlierer HF2','dummy','',NULL),
 (35,'Verlierer P3','Verlierer P3','dummy','',NULL),
-(36,'P4 Gruppe 1','P4 Gruppe 1','dummy','',NULL);
+(36,'P4 Gruppe 1','P4 Gruppe 1','dummy','',NULL),
+(218,'1FFCB','1. FFC Braunschweig e.V.','Braunschweig',NULL,7),
+(252,'Ritterhude','1. ASC Ritterhude v. 1994 e.V.','Ritterhude',NULL,8),
+(260,'Greifs2','1. ASC Badener Greifs II','Baden','',3),
+(303,'Verlierer Spiel 3','Verlierer Spiel 3','dummy','',NULL),
+(305,'Verlierer Spiel 4','Verlierer Spiel 4','dummy','',NULL),
+(306,'Gewinner Spiel 3','Gewinner Spiel 3','dummy','',NULL),
+(307,'Verlierer Spiel 5','Verlierer Spiel 5','dummy','',NULL),
+(308,'Gewinner Spiel 5','Gewinner Spiel 5','dummy','',NULL),
+(309,'Gewinner Spiel 4','Gewinner Spiel 4','dummy','',NULL),
+(1000,'Bester P1','Bester P1','dummy','',NULL),
+(1001,'Bester P2','Bester P2','dummy','',NULL),
+(1002,'Bester Zweitplatzierter Gruppe 1+2','Bester Zweitplatzierter Gruppe 1+2','dummy','',NULL),
+(1003,'Erster P2','Erster P2','dummy','',NULL),
+(1004,'Gewinner HF 1','Gewinner HF 1','dummy','',NULL),
+(1005,'Gewinner HF 2','Gewinner HF 2','dummy','',NULL),
+(1006,'Gewinner P02','Gewinner P02','dummy','',NULL),
+(1007,'Gewinner P10','Gewinner P10','dummy','',NULL),
+(1008,'Gewinner P5','Gewinner P5','dummy','',NULL),
+(1009,'Gewinner P7','Gewinner P7','dummy','',NULL),
+(1010,'Gewinner PD 1','Gewinner PD 1','dummy','',NULL),
+(1011,'Gewinner PD 2','Gewinner PD 2','dummy','',NULL),
+(1012,'Gewinner PO1','Gewinner PO1','dummy','',NULL),
+(1013,'Gewinner PO2','Gewinner PO2','dummy','',NULL),
+(1014,'Gewinner Spiel 1','Gewinner Spiel 1','dummy','',NULL),
+(1015,'Gewinner Spiel 2','Gewinner Spiel 2','dummy','',NULL),
+(1016,'Gewinner Spiel 6','Gewinner Spiel 6','dummy','',NULL),
+(1017,'Gewinner Spiel 7','Gewinner Spiel 7','dummy','',NULL),
+(1018,'Gewinner Spiel 8','Gewinner Spiel 8','dummy','',NULL),
+(1019,'Gewinner VF 1','Gewinner VF 1','dummy','',NULL),
+(1020,'Gewinner VF 2','Gewinner VF 2','dummy','',NULL),
+(1021,'Gewinner VF 3','Gewinner VF 3','dummy','',NULL),
+(1022,'Gewinner VF 4','Gewinner VF 4','dummy','',NULL),
+(1023,'P1 Gruppe 3','P1 Gruppe 3','dummy','',NULL),
+(1024,'P2 Gruppe 3','P2 Gruppe 3','dummy','',NULL),
+(1025,'P3 Gruppe 3','P3 Gruppe 3','dummy','',NULL),
+(1026,'P3 Gruppe B','P3 Gruppe B','dummy','',NULL),
+(1027,'P4 Gruppe 2','P4 Gruppe 2','dummy','',NULL),
+(1028,'Schlechterer Zweitplatzierter Gruppe 1+2','Schlechterer Zweitplatzierter Gruppe 1+2','dummy','',NULL),
+(1029,'Schlechtester P1','Schlechtester P1','dummy','',NULL),
+(1030,'Schlechtester P2','Schlechtester P2','dummy','',NULL),
+(1031,'Team Officials','Team Officials','dummy','',NULL),
+(1032,'Verlierer HF','Verlierer HF','dummy','',NULL),
+(1033,'Verlierer HF 1','Verlierer HF 1','dummy','',NULL),
+(1034,'Verlierer HF 2','Verlierer HF 2','dummy','',NULL),
+(1035,'Verlierer P10','Verlierer P10','dummy','',NULL),
+(1036,'Verlierer P5','Verlierer P5','dummy','',NULL),
+(1037,'Verlierer P7','Verlierer P7','dummy','',NULL),
+(1038,'Verlierer PD 1','Verlierer PD 1','dummy','',NULL),
+(1039,'Verlierer PD 2','Verlierer PD 2','dummy','',NULL),
+(1040,'Verlierer PO1','Verlierer PO1','dummy','',NULL),
+(1041,'Verlierer PO2','Verlierer PO2','dummy','',NULL),
+(1042,'Verlierer Spiel 1','Verlierer Spiel 1','dummy','',NULL),
+(1043,'Verlierer Spiel 2','Verlierer Spiel 2','dummy','',NULL),
+(1044,'Verlierer Spiel 7','Verlierer Spiel 7','dummy','',NULL),
+(1045,'Verlierer Spiel 8','Verlierer Spiel 8','dummy','',NULL),
+(1046,'Verlierer VF 1','Verlierer VF 1','dummy','',NULL),
+(1047,'Verlierer VF 2','Verlierer VF 2','dummy','',NULL),
+(1048,'Verlierer VF 3','Verlierer VF 3','dummy','',NULL),
+(1049,'Verlierer VF 4','Verlierer VF 4','dummy','',NULL),
+(1050,'Zweitbester P1','Zweitbester P1','dummy','',NULL),
+(1051,'Zweitbester P2','Zweitbester P2','dummy','',NULL),
+(1052,'beste Rangfolge','beste Rangfolge','dummy','',NULL),
+(1053,'schlechtere Rangfolge','schlechtere Rangfolge','dummy','',NULL);
 /*!40000 ALTER TABLE `gamedays_team` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -84,8 +157,7 @@ commit;
 LOCK TABLES `gamedays_gameday` WRITE;
 /*!40000 ALTER TABLE `gamedays_gameday` DISABLE KEYS */;
 set autocommit=0;
-INSERT INTO `gamedays_gameday` (`id`, `name`, `date`, `start`, `format`, `author_id`, `league_id`, `season_id`, `address`, `published_at`, `status`, `designer_data`) VALUES (1,'Test-Gameday-Designer','2026-02-08','10:00:00.000000','6_2',1,1,1,'Munich','2026-02-08 23:18:05.885132','PUBLISHED','{\"nodes\": [{\"id\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"type\": \"field\", \"position\": {\"x\": 50, \"y\": 50}, \"data\": {\"type\": \"field\", \"name\": \"Feld 1\", \"order\": 0, \"color\": \"#d1ecf1\"}, \"style\": {\"width\": 350, \"height\": 300}, \"draggable\": false, \"selectable\": true}, {\"id\": \"stage-d6089225-624b-4292-8e48-0081597345b6\", \"type\": \"stage\", \"parentId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"position\": {\"x\": 20, \"y\": 60}, \"data\": {\"type\": \"stage\", \"name\": \"Group Stage A\", \"category\": \"preliminary\", \"stageType\": \"STANDARD\", \"order\": 0, \"startTime\": \"10:00\", \"defaultGameDuration\": 70, \"defaultBreakBetweenGames\": 10, \"progressionMode\": \"round_robin\", \"progressionConfig\": {\"mode\": \"round_robin\", \"teamCount\": 3, \"doubleRound\": false}}, \"style\": {\"width\": 300, \"height\": 150}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"stage-f0e4b1ee-b9ae-46eb-bce6-28125e82e6e8\", \"type\": \"stage\", \"parentId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"position\": {\"x\": 20, \"y\": 60}, \"data\": {\"type\": \"stage\", \"name\": \"Group Stage B\", \"category\": \"preliminary\", \"stageType\": \"STANDARD\", \"order\": 0, \"startTime\": \"14:00\", \"defaultGameDuration\": 70, \"defaultBreakBetweenGames\": 10, \"progressionMode\": \"round_robin\", \"progressionConfig\": {\"mode\": \"round_robin\", \"teamCount\": 3, \"doubleRound\": false}}, \"style\": {\"width\": 300, \"height\": 150}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"stage-ceb899fb-7a9c-44d3-8754-a550eb345c23\", \"type\": \"stage\", \"parentId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"position\": {\"x\": 20, \"y\": 60}, \"data\": {\"type\": \"stage\", \"name\": \"Playoffs\", \"category\": \"preliminary\", \"stageType\": \"STANDARD\", \"order\": 1, \"startTime\": \"18:00\", \"defaultGameDuration\": 70, \"defaultBreakBetweenGames\": 10, \"progressionMode\": \"placement\", \"progressionConfig\": {\"mode\": \"placement\", \"positions\": 4, \"format\": \"single_elimination\"}, \"progressionMapping\": {\"SF1\": {\"home\": {\"sourceIndex\": 0, \"type\": \"winner\"}, \"away\": {\"sourceIndex\": 3, \"type\": \"winner\"}}, \"SF2\": {\"home\": {\"sourceIndex\": 2, \"type\": \"winner\"}, \"away\": {\"sourceIndex\": 5, \"type\": \"winner\"}}, \"3rd Place\": {\"home\": {\"sourceIndex\": 0, \"type\": \"loser\"}, \"away\": {\"sourceIndex\": 1, \"type\": \"loser\"}}}}, \"style\": {\"width\": 300, \"height\": 150}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"game-1\", \"type\": \"game\", \"parentId\": \"stage-d6089225-624b-4292-8e48-0081597345b6\", \"position\": {\"x\": 30, \"y\": 50}, \"data\": {\"type\": \"game\", \"stage\": \"Preliminary\", \"stageType\": \"STANDARD\", \"standing\": \"A Game 1\", \"fieldId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"official\": {\"type\": \"static\", \"name\": \"team-97b84e5b-c2a6-41b0-ac74-d9ed7cbaffa4\"}, \"breakAfter\": 10, \"homeTeamId\": \"team-8c76143a-ddce-4779-be50-4f4d01550842\", \"awayTeamId\": \"team-6cd106c7-9aae-41c2-9e26-25ff9116a56e\", \"homeTeamDynamic\": null, \"awayTeamDynamic\": null, \"duration\": 70, \"startTime\": \"10:00\", \"manualTime\": false}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"game-2\", \"type\": \"game\", \"parentId\": \"stage-d6089225-624b-4292-8e48-0081597345b6\", \"position\": {\"x\": 30, \"y\": 50}, \"data\": {\"type\": \"game\", \"stage\": \"Preliminary\", \"stageType\": \"STANDARD\", \"standing\": \"A Game 2\", \"fieldId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"official\": {\"type\": \"static\", \"name\": \"team-6cd106c7-9aae-41c2-9e26-25ff9116a56e\"}, \"breakAfter\": 10, \"homeTeamId\": \"team-97b84e5b-c2a6-41b0-ac74-d9ed7cbaffa4\", \"awayTeamId\": \"team-8c76143a-ddce-4779-be50-4f4d01550842\", \"homeTeamDynamic\": null, \"awayTeamDynamic\": null, \"duration\": 70, \"startTime\": \"11:20\", \"manualTime\": false}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"game-3\", \"type\": \"game\", \"parentId\": \"stage-d6089225-624b-4292-8e48-0081597345b6\", \"position\": {\"x\": 30, \"y\": 50}, \"data\": {\"type\": \"game\", \"stage\": \"Preliminary\", \"stageType\": \"STANDARD\", \"standing\": \"A Game 3\", \"fieldId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"official\": {\"type\": \"static\", \"name\": \"team-8c76143a-ddce-4779-be50-4f4d01550842\"}, \"breakAfter\": 10, \"homeTeamId\": \"team-6cd106c7-9aae-41c2-9e26-25ff9116a56e\", \"awayTeamId\": \"team-97b84e5b-c2a6-41b0-ac74-d9ed7cbaffa4\", \"homeTeamDynamic\": null, \"awayTeamDynamic\": null, \"duration\": 70, \"startTime\": \"12:40\", \"manualTime\": false}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"game-4\", \"type\": \"game\", \"parentId\": \"stage-f0e4b1ee-b9ae-46eb-bce6-28125e82e6e8\", \"position\": {\"x\": 30, \"y\": 50}, \"data\": {\"type\": \"game\", \"stage\": \"Preliminary\", \"stageType\": \"STANDARD\", \"standing\": \"B Game 1\", \"fieldId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"official\": {\"type\": \"static\", \"name\": \"team-cac2bd9a-4059-4094-a734-b4cf4f6547e0\"}, \"breakAfter\": 10, \"homeTeamId\": \"team-35ffa3c8-a241-4f53-a53e-e20a2c3e92ca\", \"awayTeamId\": \"team-72b72535-849e-4c3e-9a49-f9e66d2327bc\", \"homeTeamDynamic\": null, \"awayTeamDynamic\": null, \"duration\": 70, \"startTime\": \"14:00\", \"manualTime\": false}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"game-5\", \"type\": \"game\", \"parentId\": \"stage-f0e4b1ee-b9ae-46eb-bce6-28125e82e6e8\", \"position\": {\"x\": 30, \"y\": 50}, \"data\": {\"type\": \"game\", \"stage\": \"Preliminary\", \"stageType\": \"STANDARD\", \"standing\": \"B Game 2\", \"fieldId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"official\": {\"type\": \"static\", \"name\": \"team-72b72535-849e-4c3e-9a49-f9e66d2327bc\"}, \"breakAfter\": 10, \"homeTeamId\": \"team-cac2bd9a-4059-4094-a734-b4cf4f6547e0\", \"awayTeamId\": \"team-35ffa3c8-a241-4f53-a53e-e20a2c3e92ca\", \"homeTeamDynamic\": null, \"awayTeamDynamic\": null, \"duration\": 70, \"startTime\": \"15:20\", \"manualTime\": false}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"game-6\", \"type\": \"game\", \"parentId\": \"stage-f0e4b1ee-b9ae-46eb-bce6-28125e82e6e8\", \"position\": {\"x\": 30, \"y\": 50}, \"data\": {\"type\": \"game\", \"stage\": \"Preliminary\", \"stageType\": \"STANDARD\", \"standing\": \"B Game 3\", \"fieldId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"official\": {\"type\": \"static\", \"name\": \"team-35ffa3c8-a241-4f53-a53e-e20a2c3e92ca\"}, \"breakAfter\": 10, \"homeTeamId\": \"team-72b72535-849e-4c3e-9a49-f9e66d2327bc\", \"awayTeamId\": \"team-cac2bd9a-4059-4094-a734-b4cf4f6547e0\", \"homeTeamDynamic\": null, \"awayTeamDynamic\": null, \"duration\": 70, \"startTime\": \"16:40\", \"manualTime\": false}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"game-7\", \"type\": \"game\", \"parentId\": \"stage-ceb899fb-7a9c-44d3-8754-a550eb345c23\", \"position\": {\"x\": 30, \"y\": 50}, \"data\": {\"type\": \"game\", \"stage\": \"Preliminary\", \"stageType\": \"STANDARD\", \"standing\": \"SF1\", \"fieldId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"official\": {\"type\": \"static\", \"name\": \"team-8c76143a-ddce-4779-be50-4f4d01550842\"}, \"breakAfter\": 10, \"homeTeamId\": null, \"awayTeamId\": null, \"homeTeamDynamic\": {\"type\": \"winner\", \"matchName\": \"A Game 1\"}, \"awayTeamDynamic\": {\"type\": \"winner\", \"matchName\": \"B Game 1\"}, \"duration\": 70, \"startTime\": \"18:00\", \"manualTime\": false, \"resolvedHomeTeam\": null, \"resolvedAwayTeam\": null}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"game-8\", \"type\": \"game\", \"parentId\": \"stage-ceb899fb-7a9c-44d3-8754-a550eb345c23\", \"position\": {\"x\": 30, \"y\": 50}, \"data\": {\"type\": \"game\", \"stage\": \"Preliminary\", \"stageType\": \"STANDARD\", \"standing\": \"SF2\", \"fieldId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"official\": {\"type\": \"static\", \"name\": \"team-6cd106c7-9aae-41c2-9e26-25ff9116a56e\"}, \"breakAfter\": 10, \"homeTeamId\": null, \"awayTeamId\": null, \"homeTeamDynamic\": {\"type\": \"winner\", \"matchName\": \"A Game 3\"}, \"awayTeamDynamic\": {\"type\": \"winner\", \"matchName\": \"B Game 3\"}, \"duration\": 70, \"startTime\": \"19:20\", \"manualTime\": false, \"resolvedHomeTeam\": null, \"resolvedAwayTeam\": null}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"game-9\", \"type\": \"game\", \"parentId\": \"stage-ceb899fb-7a9c-44d3-8754-a550eb345c23\", \"position\": {\"x\": 30, \"y\": 50}, \"data\": {\"type\": \"game\", \"stage\": \"Preliminary\", \"stageType\": \"STANDARD\", \"standing\": \"Final\", \"fieldId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"official\": {\"type\": \"static\", \"name\": \"team-97b84e5b-c2a6-41b0-ac74-d9ed7cbaffa4\"}, \"breakAfter\": 10, \"homeTeamId\": null, \"awayTeamId\": null, \"homeTeamDynamic\": {\"type\": \"winner\", \"matchName\": \"SF1\"}, \"awayTeamDynamic\": {\"type\": \"winner\", \"matchName\": \"SF2\"}, \"duration\": 70, \"startTime\": \"22:00\", \"manualTime\": false, \"resolvedHomeTeam\": null, \"resolvedAwayTeam\": null}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}, {\"id\": \"game-10\", \"type\": \"game\", \"parentId\": \"stage-ceb899fb-7a9c-44d3-8754-a550eb345c23\", \"position\": {\"x\": 30, \"y\": 50}, \"data\": {\"type\": \"game\", \"stage\": \"Preliminary\", \"stageType\": \"STANDARD\", \"standing\": \"3rd Place\", \"fieldId\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"official\": {\"type\": \"static\", \"name\": \"team-35ffa3c8-a241-4f53-a53e-e20a2c3e92ca\"}, \"breakAfter\": 10, \"homeTeamId\": null, \"awayTeamId\": null, \"homeTeamDynamic\": {\"type\": \"loser\", \"matchName\": \"SF1\"}, \"awayTeamDynamic\": {\"type\": \"loser\", \"matchName\": \"SF2\"}, \"duration\": 70, \"startTime\": \"20:40\", \"manualTime\": false, \"resolvedHomeTeam\": null, \"resolvedAwayTeam\": null}, \"extent\": \"parent\", \"expandParent\": true, \"draggable\": false, \"selectable\": true}], \"edges\": [{\"id\": \"edge-a2c43f77-81df-473c-a65b-d63bc641eb27\", \"type\": \"gameToGame\", \"source\": \"game-1\", \"target\": \"game-7\", \"sourceHandle\": \"winner\", \"targetHandle\": \"home\", \"data\": {\"sourcePort\": \"winner\", \"targetPort\": \"home\"}}, {\"id\": \"edge-3070e958-ba81-4839-9465-ac582020a842\", \"type\": \"gameToGame\", \"source\": \"game-4\", \"target\": \"game-7\", \"sourceHandle\": \"winner\", \"targetHandle\": \"away\", \"data\": {\"sourcePort\": \"winner\", \"targetPort\": \"away\"}}, {\"id\": \"edge-7a0d6a90-bb9c-4b5a-81f7-9e98ffd791ef\", \"type\": \"gameToGame\", \"source\": \"game-3\", \"target\": \"game-8\", \"sourceHandle\": \"winner\", \"targetHandle\": \"home\", \"data\": {\"sourcePort\": \"winner\", \"targetPort\": \"home\"}}, {\"id\": \"edge-ca511b89-d103-495b-bb99-1d6dfc28346d\", \"type\": \"gameToGame\", \"source\": \"game-6\", \"target\": \"game-8\", \"sourceHandle\": \"winner\", \"targetHandle\": \"away\", \"data\": {\"sourcePort\": \"winner\", \"targetPort\": \"away\"}}, {\"id\": \"edge-ed555495-97bb-4a5c-8f85-965096a51569\", \"type\": \"gameToGame\", \"source\": \"game-1\", \"target\": \"game-10\", \"sourceHandle\": \"loser\", \"targetHandle\": \"home\", \"data\": {\"sourcePort\": \"loser\", \"targetPort\": \"home\"}}, {\"id\": \"edge-45bc2a34-38ea-4362-85ab-bcf7f02ce10e\", \"type\": \"gameToGame\", \"source\": \"game-2\", \"target\": \"game-10\", \"sourceHandle\": \"loser\", \"targetHandle\": \"away\", \"data\": {\"sourcePort\": \"loser\", \"targetPort\": \"away\"}}, {\"id\": \"edge-27bffca4-d4a8-40e4-b09e-cc9faa2456ff\", \"type\": \"gameToGame\", \"source\": \"game-7\", \"target\": \"game-9\", \"sourceHandle\": \"winner\", \"targetHandle\": \"home\", \"data\": {\"sourcePort\": \"winner\", \"targetPort\": \"home\"}}, {\"id\": \"edge-e8666057-c833-4c5c-a498-1399b208142b\", \"type\": \"gameToGame\", \"source\": \"game-8\", \"target\": \"game-9\", \"sourceHandle\": \"winner\", \"targetHandle\": \"away\", \"data\": {\"sourcePort\": \"winner\", \"targetPort\": \"away\"}}, {\"id\": \"edge-54e2c528-1e49-45e1-a741-9844e9ac6967\", \"type\": \"gameToGame\", \"source\": \"game-7\", \"target\": \"game-10\", \"sourceHandle\": \"loser\", \"targetHandle\": \"home\", \"data\": {\"sourcePort\": \"loser\", \"targetPort\": \"home\"}}, {\"id\": \"edge-bad8b138-a24a-4a79-b181-87daa34f46e3\", \"type\": \"gameToGame\", \"source\": \"game-8\", \"target\": \"game-10\", \"sourceHandle\": \"loser\", \"targetHandle\": \"away\", \"data\": {\"sourcePort\": \"loser\", \"targetPort\": \"away\"}}], \"fields\": [{\"id\": \"field-d4073eb5-ee6b-4cb8-a2dc-bf8f527d207d\", \"name\": \"Feld 1\", \"order\": 0, \"color\": \"#d1ecf1\"}], \"globalTeams\": [{\"id\": \"team-8c76143a-ddce-4779-be50-4f4d01550842\", \"label\": \"Team 1\", \"groupId\": \"group-43cd8ed7-cfd2-4c0f-a176-464aeb9b573d\", \"order\": 0, \"color\": \"#3498db\"}, {\"id\": \"team-6cd106c7-9aae-41c2-9e26-25ff9116a56e\", \"label\": \"Team 2\", \"groupId\": \"group-43cd8ed7-cfd2-4c0f-a176-464aeb9b573d\", \"order\": 0, \"color\": \"#e74c3c\"}, {\"id\": \"team-97b84e5b-c2a6-41b0-ac74-d9ed7cbaffa4\", \"label\": \"Team 3\", \"groupId\": \"group-43cd8ed7-cfd2-4c0f-a176-464aeb9b573d\", \"order\": 0, \"color\": \"#2ecc71\"}, {\"id\": \"team-35ffa3c8-a241-4f53-a53e-e20a2c3e92ca\", \"label\": \"Team 4\", \"groupId\": \"group-8d97b0a6-bfb2-4973-b090-baea200202e0\", \"order\": 0, \"color\": \"#f39c12\"}, {\"id\": \"team-72b72535-849e-4c3e-9a49-f9e66d2327bc\", \"label\": \"Team 5\", \"groupId\": \"group-8d97b0a6-bfb2-4973-b090-baea200202e0\", \"order\": 0, \"color\": \"#9b59b6\"}, {\"id\": \"team-cac2bd9a-4059-4094-a734-b4cf4f6547e0\", \"label\": \"Team 6\", \"groupId\": \"group-8d97b0a6-bfb2-4973-b090-baea200202e0\", \"order\": 0, \"color\": \"#1abc9c\"}], \"globalTeamGroups\": [{\"id\": \"group-43cd8ed7-cfd2-4c0f-a176-464aeb9b573d\", \"name\": \"Gruppe A\", \"order\": 0}, {\"id\": \"group-8d97b0a6-bfb2-4973-b090-baea200202e0\", \"name\": \"Gruppe B\", \"order\": 0}]}'),
-(2,'Test-Original','2026-02-09','10:00:00.000000','6_2',1,1,1,'munich',NULL,'DRAFT',NULL);
+INSERT INTO `gamedays_gameday` (`id`, `name`, `date`, `start`, `format`, `author_id`, `league_id`, `season_id`, `address`, `published_at`, `status`) VALUES (633,'Test','2026-03-10','10:00:00.000000','4_final4_1',1,1,5,'tbd',NULL,'DRAFT');
 /*!40000 ALTER TABLE `gamedays_gameday` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -97,27 +169,13 @@ commit;
 LOCK TABLES `gamedays_gameinfo` WRITE;
 /*!40000 ALTER TABLE `gamedays_gameinfo` DISABLE KEYS */;
 set autocommit=0;
-INSERT INTO `gamedays_gameinfo` (`id`, `scheduled`, `field`, `status`, `gameStarted`, `gameHalftime`, `gameFinished`, `stage`, `standing`, `gameday_id`, `officials_id`, `in_possession`, `league_group_id`, `final_score`, `halftime_score`, `is_locked`) VALUES (1,'10:00:00.000000',1,'Geplant',NULL,NULL,NULL,'Preliminary','A Game 1',1,3,NULL,NULL,NULL,NULL,0),
-(2,'11:20:00.000000',1,'Geplant',NULL,NULL,NULL,'Preliminary','A Game 2',1,2,NULL,NULL,NULL,NULL,0),
-(3,'12:40:00.000000',1,'Geplant',NULL,NULL,NULL,'Preliminary','A Game 3',1,1,NULL,NULL,NULL,NULL,0),
-(4,'14:00:00.000000',1,'Geplant',NULL,NULL,NULL,'Preliminary','B Game 1',1,6,NULL,NULL,NULL,NULL,0),
-(5,'15:20:00.000000',1,'Geplant',NULL,NULL,NULL,'Preliminary','B Game 2',1,5,NULL,NULL,NULL,NULL,0),
-(6,'16:40:00.000000',1,'Geplant',NULL,NULL,NULL,'Preliminary','B Game 3',1,4,NULL,NULL,NULL,NULL,0),
-(7,'18:00:00.000000',1,'Geplant',NULL,NULL,NULL,'Preliminary','SF1',1,1,NULL,NULL,NULL,NULL,0),
-(8,'19:20:00.000000',1,'Geplant',NULL,NULL,NULL,'Preliminary','SF2',1,2,NULL,NULL,NULL,NULL,0),
-(9,'22:00:00.000000',1,'Geplant',NULL,NULL,NULL,'Preliminary','Final',1,3,NULL,NULL,NULL,NULL,0),
-(10,'20:40:00.000000',1,'Geplant',NULL,NULL,NULL,'Preliminary','3rd Place',1,4,NULL,NULL,NULL,NULL,0),
-(14,'10:00:00.000000',1,'Geplant',NULL,NULL,NULL,'Vorrunde','Gruppe 1',2,6,NULL,NULL,NULL,NULL,0),
-(15,'11:10:00.000000',1,'Geplant',NULL,NULL,NULL,'Vorrunde','Gruppe 1',2,5,NULL,NULL,NULL,NULL,0),
-(16,'12:20:00.000000',1,'Geplant',NULL,NULL,NULL,'Vorrunde','Gruppe 1',2,4,NULL,NULL,NULL,NULL,0),
-(17,'13:30:00.000000',1,'Geplant',NULL,NULL,NULL,'Finalrunde','HF',2,14,NULL,NULL,NULL,NULL,0),
-(18,'14:40:00.000000',1,'Geplant',NULL,NULL,NULL,'Finalrunde','P3',2,31,NULL,NULL,NULL,NULL,0),
-(19,'15:50:00.000000',1,'Geplant',NULL,NULL,NULL,'Finalrunde','P1',2,32,NULL,NULL,NULL,NULL,0),
-(20,'10:00:00.000000',2,'Geplant',NULL,NULL,NULL,'Vorrunde','Gruppe 2',2,3,NULL,NULL,NULL,NULL,0),
-(21,'11:10:00.000000',2,'Geplant',NULL,NULL,NULL,'Vorrunde','Gruppe 2',2,2,NULL,NULL,NULL,NULL,0),
-(22,'12:20:00.000000',2,'Geplant',NULL,NULL,NULL,'Vorrunde','Gruppe 2',2,1,NULL,NULL,NULL,NULL,0),
-(23,'13:30:00.000000',2,'Geplant',NULL,NULL,NULL,'Finalrunde','HF',2,15,NULL,NULL,NULL,NULL,0),
-(24,'14:40:00.000000',2,'Geplant',NULL,NULL,NULL,'Finalrunde','P5',2,20,NULL,NULL,NULL,NULL,0);
+INSERT INTO `gamedays_gameinfo` (`id`, `scheduled`, `field`, `status`, `gameStarted`, `gameHalftime`, `gameFinished`, `stage`, `standing`, `gameday_id`, `officials_id`, `in_possession`, `league_group_id`) VALUES
+(7269,'10:00:00.000000',1,'beendet','19:59:33.248375','19:59:41.806903','20:00:05.644230','Vorrunde','Spiel 1',633,252,'Greifs',NULL),
+(7270,'11:10:00.000000',1,'beendet','20:00:27.842284','20:00:34.655475','20:00:44.056587','Vorrunde','Spiel 2',633,24,'Greifs2',NULL),
+(7271,'12:20:00.000000',1,'beendet','20:01:14.863120','20:01:21.384161','20:01:25.845517','Finalrunde','Spiel 3',633,24,'Greifs2',NULL),
+(7272,'13:30:00.000000',1,'Geplant',NULL,NULL,NULL,'Finalrunde','Spiel 4',633,260,NULL,NULL),
+(7273,'14:40:00.000000',1,'Geplant',NULL,NULL,NULL,'Finalrunde','Spiel 5',633,303,NULL,NULL),
+(7274,'15:50:00.000000',1,'Geplant',NULL,NULL,NULL,'Finalrunde','P1',633,307,NULL,NULL);
 /*!40000 ALTER TABLE `gamedays_gameinfo` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -129,51 +187,23 @@ commit;
 LOCK TABLES `gamedays_gameresult` WRITE;
 /*!40000 ALTER TABLE `gamedays_gameresult` DISABLE KEYS */;
 set autocommit=0;
-INSERT INTO `gamedays_gameresult` (`id`, `fh`, `sh`, `pa`, `isHome`, `gameinfo_id`, `team_id`) VALUES (1,NULL,NULL,NULL,1,1,1),
-(2,NULL,NULL,NULL,0,1,2),
-(3,NULL,NULL,NULL,1,2,3),
-(4,NULL,NULL,NULL,0,2,1),
-(5,NULL,NULL,NULL,1,3,2),
-(6,NULL,NULL,NULL,0,3,3),
-(7,NULL,NULL,NULL,1,4,4),
-(8,NULL,NULL,NULL,0,4,5),
-(9,NULL,NULL,NULL,1,5,6),
-(10,NULL,NULL,NULL,0,5,4),
-(11,NULL,NULL,NULL,1,6,5),
-(12,NULL,NULL,NULL,0,6,6),
-(13,NULL,NULL,NULL,1,7,NULL),
-(14,NULL,NULL,NULL,0,7,NULL),
-(15,NULL,NULL,NULL,1,8,NULL),
-(16,NULL,NULL,NULL,0,8,NULL),
-(17,NULL,NULL,NULL,1,9,NULL),
-(18,NULL,NULL,NULL,0,9,NULL),
-(19,NULL,NULL,NULL,1,10,NULL),
-(20,NULL,NULL,NULL,0,10,NULL),
-(27,NULL,NULL,NULL,1,14,1),
-(28,NULL,NULL,NULL,0,14,2),
-(29,NULL,NULL,NULL,1,15,3),
-(30,NULL,NULL,NULL,0,15,1),
-(31,NULL,NULL,NULL,1,16,2),
-(32,NULL,NULL,NULL,0,16,3),
-(33,NULL,NULL,NULL,1,17,16),
-(34,NULL,NULL,NULL,0,17,19),
-(35,NULL,NULL,NULL,1,18,33),
-(36,NULL,NULL,NULL,0,18,34),
-(37,NULL,NULL,NULL,1,19,20),
-(38,NULL,NULL,NULL,0,19,31),
-(39,NULL,NULL,NULL,1,20,4),
-(40,NULL,NULL,NULL,0,20,5),
-(41,NULL,NULL,NULL,1,21,6),
-(42,NULL,NULL,NULL,0,21,4),
-(43,NULL,NULL,NULL,1,22,5),
-(44,NULL,NULL,NULL,0,22,6),
-(45,NULL,NULL,NULL,1,23,17),
-(46,NULL,NULL,NULL,0,23,18),
-(47,NULL,NULL,NULL,1,24,15),
-(48,NULL,NULL,NULL,0,24,14);
+INSERT INTO `gamedays_gameresult` (`id`, `fh`, `sh`, `pa`, `isHome`, `gameinfo_id`, `team_id`) VALUES
+(14361,6,7,7,1,7269,24),
+(14362,0,7,13,0,7269,218),
+(14363,6,0,0,1,7270,252),
+(14364,0,0,6,0,7270,260),
+(14365,6,0,0,1,7271,218),
+(14366,0,0,6,0,7271,260),
+(14367,NULL,NULL,NULL,1,7272,24),
+(14368,NULL,NULL,NULL,0,7272,252),
+(14369,NULL,NULL,NULL,1,7273,305),
+(14370,NULL,NULL,NULL,0,7273,306),
+(14371,NULL,NULL,NULL,1,7274,308),
+(14372,NULL,NULL,NULL,0,7274,309);
 /*!40000 ALTER TABLE `gamedays_gameresult` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -183,4 +213,4 @@ commit;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-02-08 23:23:00
+-- Dump completed on 2026-03-12 (gameday 633 from leaguesphere_staging)

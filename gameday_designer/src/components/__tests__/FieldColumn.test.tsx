@@ -12,6 +12,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import FieldColumn from '../FieldColumn';
+import i18n from '../../i18n/testConfig';
 import type { Field, GameSlot } from '../../types/designer';
 
 describe('FieldColumn', () => {
@@ -86,14 +87,14 @@ describe('FieldColumn', () => {
 
     it('has an editable field name input', () => {
       renderFieldColumn();
-      expect(screen.getByRole('textbox', { name: /field name/i })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: new RegExp(i18n.t('ui:label.fieldName'), 'i') })).toBeInTheDocument();
     });
 
     it('calls onUpdateFieldName when field name is changed', async () => {
       const user = userEvent.setup();
       renderFieldColumn();
 
-      const input = screen.getByRole('textbox', { name: /field name/i });
+      const input = screen.getByRole('textbox', { name: new RegExp(i18n.t('ui:label.fieldName'), 'i') });
       await user.clear(input);
       await user.type(input, 'Main Field');
 
@@ -110,7 +111,7 @@ describe('FieldColumn', () => {
     it('has a delete field button', () => {
       renderFieldColumn();
       expect(
-        screen.getByRole('button', { name: /delete field/i })
+        screen.getByRole('button', { name: new RegExp(i18n.t('ui:tooltip.deleteField'), 'i') })
       ).toBeInTheDocument();
     });
 
@@ -118,7 +119,7 @@ describe('FieldColumn', () => {
       const user = userEvent.setup();
       renderFieldColumn();
 
-      await user.click(screen.getByRole('button', { name: /delete field/i }));
+      await user.click(screen.getByRole('button', { name: new RegExp(i18n.t('ui:tooltip.deleteField'), 'i') }));
 
       expect(mockOnRemoveField).toHaveBeenCalledWith('field-1');
     });
@@ -202,19 +203,19 @@ describe('FieldColumn', () => {
   describe('accessibility', () => {
     it('has accessible field name input', () => {
       renderFieldColumn();
-      expect(screen.getByRole('textbox', { name: /field name/i })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: new RegExp(i18n.t('ui:label.fieldName'), 'i') })).toBeInTheDocument();
     });
 
     it('has accessible delete field button', () => {
       renderFieldColumn();
       expect(
-        screen.getByRole('button', { name: /delete field/i })
+        screen.getByRole('button', { name: new RegExp(i18n.t('ui:tooltip.deleteField'), 'i') })
       ).toBeInTheDocument();
     });
 
     it('has accessible add game button', () => {
       renderFieldColumn();
-      expect(screen.getByRole('button', { name: /add game/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: new RegExp(i18n.t('ui:button.addGame'), 'i') })).toBeInTheDocument();
     });
   });
 });

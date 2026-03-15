@@ -157,11 +157,34 @@ class Gameday(models.Model):
         return f"{self.pk}__{self.date} {self.name}"
 
 
+class GamedayDesignerState(models.Model):
+    """Visual designer state for draft gamedays."""
+
+    gameday = models.OneToOneField(
+        Gameday,
+        on_delete=models.CASCADE,
+        related_name="designer_state",
+        primary_key=True,
+    )
+
+    state_data = models.JSONField(
+        default=dict, help_text="React Flow designer state (nodes, edges, teams)"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_modified_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    objects: QuerySet["GamedayDesignerState"] = models.Manager()
+
+
 class Gameinfo(models.Model):
     STATUS_DRAFT = "DRAFT"
     STATUS_PUBLISHED = "Geplant"
     STATUS_IN_PROGRESS = "Gestartet"
-    STATUS_COMPLETED = "Beendet"
+    STATUS_COMPLETED = "beendet"
 
     # Retaining existing "Geplant" for backward compatibility if needed,
     # but strictly defining new flow constants.

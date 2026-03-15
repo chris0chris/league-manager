@@ -32,6 +32,8 @@ class HealthCheckView(_BaseHealthCheckView):
         "health_check.checks.DNS",
         "health_check.checks.Storage",
     ]
+
+
 from league_manager.views import homeview, ClearCacheView, robots_txt_view
 from league_manager.sitemaps import (
     StaticViewSitemap,

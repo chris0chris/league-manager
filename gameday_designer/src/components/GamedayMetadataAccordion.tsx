@@ -47,6 +47,7 @@ const CustomAccordionHeader: React.FC<{
         type="button"
         className={`accordion-button d-flex w-100 justify-content-between align-items-center flex-wrap gap-2 ${isCurrentEventKey ? '' : 'collapsed'}`}
         onClick={decoratedOnClick}
+        data-testid="gameday-metadata-toggle"
       >
         <div className="d-flex align-items-center gap-2">
           <span className="fw-bold me-2">{metadata.name || t('ui:placeholder.gamedayName')}</span>
@@ -56,9 +57,8 @@ const CustomAccordionHeader: React.FC<{
           {validation && (
             <div 
               ref={validationBadgeRef}
-              className="d-flex gap-1 ms-2" 
+              className="d-flex gap-1 ms-2 validation-badges-container" 
               data-testid="validation-badges"
-              style={{ cursor: 'pointer' }}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
               onClick={(e) => e.stopPropagation()}
@@ -95,13 +95,6 @@ const CustomAccordionHeader: React.FC<{
       {metadata.status === 'DRAFT' && !readOnly && (
         <div 
           className="publish-button-container"
-          style={{ 
-            position: 'absolute', 
-            right: '60px', 
-            top: '50%', 
-            transform: 'translateY(-50%)', 
-            zIndex: 10 
-          }}
           onClick={(e) => e.stopPropagation()}
         >
           <Button 
@@ -111,8 +104,7 @@ const CustomAccordionHeader: React.FC<{
               e.stopPropagation();
               onPublish?.();
             }}
-            className="rounded-pill py-0 px-3 border-0 shadow-sm fw-bold d-flex align-items-center"
-            style={{ fontSize: '0.7rem', height: '22px' }}
+            className="rounded-pill py-0 px-3 border-0 shadow-sm fw-bold d-flex align-items-center publish-button"
             data-testid="publish-schedule-button"
           >
             <i className="bi bi-send-fill me-1"></i>
@@ -133,8 +125,7 @@ const CustomAccordionHeader: React.FC<{
             <Popover 
               id="validation-popover" 
               {...props} 
-              className="shadow border-danger" 
-              style={{ ...props.style, maxWidth: '400px', zIndex: 1060 }}
+              className="shadow border-danger validation-popover" 
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
             >
@@ -142,16 +133,15 @@ const CustomAccordionHeader: React.FC<{
                 {t('ui:label.validation', 'Validation')}
               </Popover.Header>
               <Popover.Body className="p-0">
-                <div className="list-group list-group-flush small overflow-auto" style={{ maxHeight: '300px' }}>
+                <div className="list-group list-group-flush small overflow-auto validation-list">
                   {validation.errors?.map((error, idx) => (
                     <div 
                       key={`error-${idx}`} 
-                      className="list-group-item list-group-item-action list-group-item-danger border-0 d-flex align-items-start py-2"
+                      className="list-group-item list-group-item-action list-group-item-danger border-0 d-flex align-items-start py-2 validation-item"
                       onClick={(e) => {
                         e.stopPropagation();
                         onHighlight(error.affectedNodes[0], getHighlightType(error));
                       }}
-                      style={{ cursor: 'pointer' }}
                     >
                       <i className={`bi ${ICONS.ERROR} me-2 mt-1`}></i>
                       <div>{getMessage(error)}</div>
@@ -160,12 +150,11 @@ const CustomAccordionHeader: React.FC<{
                   {validation.warnings?.map((warning, idx) => (
                     <div 
                       key={`warning-${idx}`} 
-                      className="list-group-item list-group-item-action list-group-item-warning border-0 d-flex align-items-start py-2"
+                      className="list-group-item list-group-item-action list-group-item-warning border-0 d-flex align-items-start py-2 validation-item"
                       onClick={(e) => {
                         e.stopPropagation();
                         onHighlight(warning.affectedNodes[0], getHighlightType(warning));
                       }}
-                      style={{ cursor: 'pointer' }}
                     >
                       <i className={`bi ${ICONS.WARNING} me-2 mt-1`}></i>
                       <div>{getMessage(warning)}</div>
@@ -180,7 +169,6 @@ const CustomAccordionHeader: React.FC<{
     </h2>
   );
 };
-
 interface GamedayMetadataAccordionProps {
   metadata: GamedayMetadata;
   onUpdate: (data: Partial<GamedayMetadata>) => void;
@@ -193,9 +181,11 @@ interface GamedayMetadataAccordionProps {
   highlightedElement?: HighlightedElement | null;
   readOnly: boolean;
   hasData: boolean;
+  saveTrigger?: number;
+  forceCollapsed?: boolean;
 }
 
-const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
+const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({ 
   metadata,
   onUpdate,
   onClearAll,
@@ -207,12 +197,20 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   highlightedElement,
   readOnly,
   hasData,
+  forceCollapsed = false,
 }) => {
-  const { t } = useTypedTranslation(['ui', 'domain', 'validation']);
+
+  const { t, i18n } = useTypedTranslation(['ui', 'domain', 'validation']);
   const [seasons, setSeasons] = useState<{ id: number; name: string }[]>([]);
   const [leagues, setLeagues] = useState<{ id: number; name: string }[]>([]);
+  const [activeKey, setActiveKey] = useState<string | undefined>("0");
 
-  console.log('[MetadataAccordion] metadata:', metadata.name, metadata.date);
+  useEffect(() => {
+    if (forceCollapsed && activeKey !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveKey(undefined);
+    }
+  }, [forceCollapsed, activeKey]);
 
   React.useEffect(() => {
     const fetchMetadata = async () => {
@@ -268,7 +266,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date.toLocaleDateString(i18n.language === 'en' ? 'en-GB' : 'de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
   const getStatusColor = (status: string) => {
@@ -320,30 +318,36 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
     return highlightedElement?.id === `metadata-${controlId}`;
   };
 
+  if (!metadata) return null;
+
   return (
-    <div className={`gameday-metadata-accordion-container ${isHighlighted ? 'is-highlighted' : ''}`} id="gameday-metadata" data-testid="gameday-metadata-accordion">
-      <Accordion.Item eventKey="0">
-        <CustomAccordionHeader 
-          eventKey="0" 
-          metadata={metadata} 
-          statusColor={getStatusColor(metadata.status)} 
-          onPublish={onPublish}
-          readOnly={readOnly}
-          validation={validation}
-          t={t}
-          formatDate={formatDate}
-          getStatusBadge={getStatusBadge}
-          onHighlight={onHighlight}
-          handleMouseEnter={handleMouseEnter}
-          handleMouseLeave={handleMouseLeave}
-          validationBadgeRef={validationBadgeRef}
-          showValidationPopover={showValidationPopover}
-          getHighlightType={getHighlightType}
-          getMessage={getMessage}
-          isHighlighted={isHighlighted}
-        />
-        <Accordion.Body>
-          <Form>
+    <div className={`gameday-metadata-accordion ${isHighlighted ? 'is-highlighted' : ''}`} id="gameday-metadata" data-testid="gameday-metadata-accordion">
+      <Accordion 
+        activeKey={activeKey} 
+        onSelect={(k) => setActiveKey(k ?? undefined)}
+      >
+        <Accordion.Item eventKey="0">
+          <CustomAccordionHeader 
+            eventKey="0" 
+            metadata={metadata} 
+            statusColor={getStatusColor(metadata.status)} 
+            onPublish={onPublish}
+            readOnly={readOnly}
+            validation={validation}
+            t={t}
+            formatDate={formatDate}
+            getStatusBadge={getStatusBadge}
+            onHighlight={onHighlight}
+            handleMouseEnter={handleMouseEnter}
+            handleMouseLeave={handleMouseLeave}
+            validationBadgeRef={validationBadgeRef}
+            showValidationPopover={showValidationPopover}
+            getHighlightType={getHighlightType}
+            getMessage={getMessage}
+            isHighlighted={isHighlighted}
+          />
+          <Accordion.Body>
+            <Form>
             <Row className="mb-3">
               <Col md={6}>
                 <Form.Group controlId="gamedayName">
@@ -455,10 +459,12 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                   onClick={onClearAll}
                   disabled={!hasData || metadata.status !== 'DRAFT'}
                   className="px-3"
+                  data-testid="clear-all-button"
                 >
                   <i className={`bi ${ICONS.CLEAR} me-2`}></i>
                   {t('ui:button.clearSchedule')}
                 </Button>
+
               </div>
 
               <Button 
@@ -467,6 +473,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                 onClick={onDelete}
                 disabled={metadata.status !== 'DRAFT'}
                 className="px-3"
+                data-testid="delete-gameday-button"
               >
                 <i className={`bi ${ICONS.TRASH} me-2`}></i>
                 {t('ui:button.deleteGameday')}
@@ -475,8 +482,9 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
           </Form>
         </Accordion.Body>
       </Accordion.Item>
-    </div>
-  );
+    </Accordion>
+  </div>
+);
 };
 
 export default GamedayMetadataAccordion;

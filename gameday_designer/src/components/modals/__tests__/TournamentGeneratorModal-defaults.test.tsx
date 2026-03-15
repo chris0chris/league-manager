@@ -39,7 +39,7 @@ describe('TournamentGeneratorModal - Defaults and Duration', () => {
   it('should initialize start time with new default (10:00)', () => {
     renderModal();
 
-    const startTimeInput = screen.getByLabelText(/label.startTime/i) as HTMLInputElement;
+    const startTimeInput = screen.getByLabelText(i18n.t('ui:label.startTime')) as HTMLInputElement;
     expect(startTimeInput.value).toBe(DEFAULT_START_TIME);
     expect(DEFAULT_START_TIME).toBe('10:00');
   });
@@ -47,7 +47,7 @@ describe('TournamentGeneratorModal - Defaults and Duration', () => {
   it('should display a game duration input initialized with 70', () => {
     renderModal();
 
-    const durationInput = screen.getByLabelText(/label.gameDuration/i) as HTMLInputElement;
+    const durationInput = screen.getByLabelText(i18n.t('ui:label.gameDuration')) as HTMLInputElement;
     expect(durationInput.value).toBe(DEFAULT_GAME_DURATION.toString());
     expect(DEFAULT_GAME_DURATION).toBe(70);
   });
@@ -56,7 +56,7 @@ describe('TournamentGeneratorModal - Defaults and Duration', () => {
     const user = userEvent.setup();
     renderModal();
 
-    const durationInput = screen.getByLabelText(/label.gameDuration/i) as HTMLInputElement;
+    const durationInput = screen.getByLabelText(i18n.t('ui:label.gameDuration')) as HTMLInputElement;
     await user.clear(durationInput);
     await user.type(durationInput, '45');
     
@@ -67,22 +67,22 @@ describe('TournamentGeneratorModal - Defaults and Duration', () => {
     const user = userEvent.setup();
     renderModal();
 
-    const durationInput = screen.getByLabelText(/label.gameDuration/i) as HTMLInputElement;
-    const generateButton = screen.getByRole('button', { name: /generate/i });
+    const durationInput = screen.getByLabelText(i18n.t('ui:label.gameDuration')) as HTMLInputElement;
+    const generateButton = screen.getByRole('button', { name: new RegExp(i18n.t('ui:button.generate'), 'i') });
 
     // Too low
     await user.clear(durationInput);
     await user.type(durationInput, '10');
     await user.click(generateButton);
     expect(mockOnGenerate).not.toHaveBeenCalled();
-    expect(screen.getByText(/between 15 and 180/i)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(i18n.t('modal:tournamentGenerator.durationValidation'), 'i'))).toBeInTheDocument();
 
     // Too high
     await user.clear(durationInput);
     await user.type(durationInput, '200');
     await user.click(generateButton);
     expect(mockOnGenerate).not.toHaveBeenCalled();
-    expect(screen.getByText(/between 15 and 180/i)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(i18n.t('modal:tournamentGenerator.durationValidation'), 'i'))).toBeInTheDocument();
 
     // Valid
     await user.clear(durationInput);
