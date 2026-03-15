@@ -115,7 +115,7 @@ describe('GameTable', () => {
 
   it('renders empty message when no games provided', () => {
     renderTable({ games: [] });
-    expect(screen.getByText(/No games in this stage/i)).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('ui:message.noGames'))).toBeInTheDocument();
   });
 
   describe('Inline editing', () => {

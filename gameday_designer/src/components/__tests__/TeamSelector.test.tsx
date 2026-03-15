@@ -13,42 +13,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TeamSelector from '../TeamSelector';
+import i18n from '../../i18n/testConfig';
 import type { TeamReference } from '../../types/designer';
 
 describe('TeamSelector', () => {
   const mockOnChange = vi.fn();
-
-  const TestWrapper = ({ 
-    initialValue, 
-    ...props 
-  }: { 
-    initialValue: TeamReference; 
-    label?: string;
-    matchNames?: string[];
-    groupNames?: string[];
-    availableStages?: Array<{ id: string; name: string }>;
-  }) => {
-    const [value, setValue] = React.useState(initialValue);
-    const handleChange = (newValue: TeamReference) => {
-      setValue(newValue);
-      mockOnChange(newValue);
-    };
-
-    return (
-      <TeamSelector
-        value={value}
-        onChange={handleChange}
-        label={props.label || 'Team'}
-        matchNames={props.matchNames || ['HF1', 'HF2', 'Spiel 3', 'Finale']}
-        groupNames={props.groupNames || ['Gruppe 1', 'Gruppe 2']}
-        availableStages={props.availableStages || []}
-      />
-    );
-  };
-
-  beforeEach(() => {
+...
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
     vi.clearAllMocks();
   });
+
 
   const renderSelector = (
     value: TeamReference = { type: 'static', name: '' },
@@ -81,14 +56,14 @@ describe('TeamSelector', () => {
     it('shows group and team inputs for groupTeam type', () => {
       renderSelector({ type: 'groupTeam', group: 0, team: 1 });
 
-      expect(screen.getByLabelText(/group/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/position/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(i18n.t('ui:label.groups'))).toBeInTheDocument();
+      expect(screen.getByLabelText(i18n.t('ui:label.start'))).toBeInTheDocument();
     });
 
     it('calls onChange with new groupTeam reference when group changes', async () => {
       renderSelector({ type: 'groupTeam', group: 0, team: 1 });
 
-      const groupInput = screen.getByLabelText(/group/i);
+      const groupInput = screen.getByLabelText(i18n.t('ui:label.groups'));
       fireEvent.change(groupInput, { target: { value: '2' } });
 
       expect(mockOnChange).toHaveBeenLastCalledWith(expect.objectContaining({
@@ -100,7 +75,7 @@ describe('TeamSelector', () => {
     it('calls onChange with new groupTeam reference when team changes', async () => {
       renderSelector({ type: 'groupTeam', group: 0, team: 1 });
 
-      const teamInput = screen.getByLabelText(/position/i);
+      const teamInput = screen.getByLabelText(i18n.t('ui:label.start'));
       fireEvent.change(teamInput, { target: { value: '3' } });
 
       expect(mockOnChange).toHaveBeenLastCalledWith(expect.objectContaining({
@@ -114,18 +89,18 @@ describe('TeamSelector', () => {
     it('shows place and group inputs for standing type', () => {
       renderSelector({ type: 'standing', place: 1, groupName: 'Gruppe 1' });
 
-      expect(screen.getByLabelText(/place/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/group name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(i18n.t('ui:label.rank'))).toBeInTheDocument();
+      expect(screen.getByLabelText(i18n.t('ui:label.groups'))).toBeInTheDocument();
     });
 
     it('calls onChange when place or group changes', async () => {
       renderSelector({ type: 'standing', place: 1, groupName: 'Gruppe 1' });
 
-      const placeInput = screen.getByLabelText(/place/i);
+      const placeInput = screen.getByLabelText(i18n.t('ui:label.rank'));
       fireEvent.change(placeInput, { target: { value: '2' } });
       expect(mockOnChange).toHaveBeenLastCalledWith(expect.objectContaining({ place: 2 }));
 
-      const groupInput = screen.getByLabelText(/group name/i);
+      const groupInput = screen.getByLabelText(i18n.t('ui:label.groups'));
       fireEvent.change(groupInput, { target: { value: 'New Group' } });
       expect(mockOnChange).toHaveBeenLastCalledWith(expect.objectContaining({ groupName: 'New Group' }));
     });
@@ -135,7 +110,7 @@ describe('TeamSelector', () => {
     it('calls onChange when match name changes', async () => {
       renderSelector({ type: 'winner', matchName: 'HF1' });
 
-      const matchInput = screen.getByLabelText(/match/i);
+      const matchInput = screen.getByLabelText(i18n.t('ui:label.games'));
       fireEvent.change(matchInput, { target: { value: 'Final' } });
 
       expect(mockOnChange).toHaveBeenLastCalledWith(expect.objectContaining({
@@ -154,8 +129,8 @@ describe('TeamSelector', () => {
         />
       );
 
-      expect(screen.getByLabelText(/rank/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/stage/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(i18n.t('ui:label.rank'))).toBeInTheDocument();
+      expect(screen.getByLabelText(i18n.t('ui:label.stages'))).toBeInTheDocument();
     });
 
     it('calls onChange when stage is selected', async () => {
@@ -167,7 +142,7 @@ describe('TeamSelector', () => {
         />
       );
 
-      const stageSelect = screen.getByLabelText(/stage/i);
+      const stageSelect = screen.getByLabelText(i18n.t('ui:label.stages'));
       await user.selectOptions(stageSelect, 's1');
 
       expect(mockOnChange).toHaveBeenLastCalledWith(expect.objectContaining({
@@ -185,7 +160,7 @@ describe('TeamSelector', () => {
         />
       );
 
-      const placeInput = screen.getByLabelText(/rank/i);
+      const placeInput = screen.getByLabelText(i18n.t('ui:label.rank'));
       fireEvent.change(placeInput, { target: { value: '3' } });
 
       expect(mockOnChange).toHaveBeenLastCalledWith(expect.objectContaining({
@@ -205,15 +180,15 @@ describe('TeamSelector', () => {
         />
       );
 
-      const placeInput = screen.getByLabelText(/rank/i);
+      const placeInput = screen.getByLabelText(i18n.t('ui:label.rank'));
       fireEvent.change(placeInput, { target: { value: '2' } });
       expect(mockOnChange).toHaveBeenLastCalledWith(expect.objectContaining({ place: 2 }));
 
-      const groupInput = screen.getByLabelText(/group/i);
+      const groupInput = screen.getByLabelText(i18n.t('ui:label.groups'));
       fireEvent.change(groupInput, { target: { value: 'Group B' } });
       expect(mockOnChange).toHaveBeenLastCalledWith(expect.objectContaining({ groupName: 'Group B' }));
 
-      const stageSelect = screen.getByLabelText(/stage/i);
+      const stageSelect = screen.getByLabelText(i18n.t('ui:label.stages'));
       fireEvent.change(stageSelect, { target: { value: 's2' } });
       expect(mockOnChange).toHaveBeenLastCalledWith(expect.objectContaining({ stageId: 's2', stageName: 'Stage 2' }));
     });
@@ -223,7 +198,7 @@ describe('TeamSelector', () => {
     it('calls onChange when name changes', async () => {
       renderSelector({ type: 'static', name: '' });
 
-      const nameInput = screen.getByLabelText(/team name/i);
+      const nameInput = screen.getByLabelText(i18n.t('ui:label.teams'));
       fireEvent.change(nameInput, { target: { value: 'New Team' } });
 
       expect(mockOnChange).toHaveBeenLastCalledWith({

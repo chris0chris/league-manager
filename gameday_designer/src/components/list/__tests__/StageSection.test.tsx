@@ -99,7 +99,7 @@ describe('StageSection', () => {
     );
 
     // Should be expanded - there are now TWO "Add Game" buttons (header + body)
-    const addGameButtons = screen.getAllByTitle(/add a new game/i);
+    const addGameButtons = screen.getAllByTitle(i18n.t('ui:tooltip.addGame'));
     expect(addGameButtons.length).toBeGreaterThan(0);
   });
 
@@ -114,7 +114,7 @@ describe('StageSection', () => {
       })
     );
 
-    const deleteButton = screen.getByTitle(/Permanently remove this phase/i);
+    const deleteButton = screen.getByTitle(i18n.t('ui:tooltip.deleteStage'));
     fireEvent.click(deleteButton);
 
     expect(mockOnDelete).toHaveBeenCalledWith('stage-1');
@@ -152,7 +152,7 @@ describe('StageSection', () => {
     );
 
     // Click the edit button
-    const editButton = screen.getByTitle(/edit the name of this tournament phase/i);
+    const editButton = screen.getByTitle(i18n.t('ui:tooltip.editStageName'));
     fireEvent.click(editButton);
 
     const input = screen.getByDisplayValue('Preliminary');
@@ -321,7 +321,7 @@ describe('StageSection', () => {
       })
     );
 
-    const timeInput = screen.getByLabelText(i18n.t('ui:label.start'));
+    const timeInput = screen.getByLabelText(`${i18n.t('ui:label.start')}:`);
     fireEvent.change(timeInput, { target: { value: '10:30' } });
 
     expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { startTime: '10:30' });
@@ -337,7 +337,7 @@ describe('StageSection', () => {
       })
     );
 
-    const colorInput = screen.getByTitle(/Change the accent color/i);
+    const colorInput = screen.getByTitle(i18n.t('ui:tooltip.stageColor'));
     fireEvent.change(colorInput, { target: { value: '#00ff00' } });
 
     expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { color: '#00ff00' });
@@ -379,7 +379,7 @@ describe('StageSection', () => {
         })
       );
 
-      expect(screen.getByText(/Ranking Stage/i)).toBeInTheDocument();
+      expect(screen.getByText(i18n.t('domain:stageTypeRanking'))).toBeInTheDocument();
     });
 
     it('allows changing stage type in edit mode', () => {
@@ -393,14 +393,14 @@ describe('StageSection', () => {
       );
 
       // Enter edit mode
-      fireEvent.click(screen.getByTitle(/edit the name/i));
+      fireEvent.click(screen.getByTitle(i18n.t('ui:tooltip.editStageName')));
 
       // Select Ranking Stage
-      const typeSelect = screen.getByLabelText(i18n.t('ui:label.type'));
+      const typeSelect = screen.getByLabelText(`${i18n.t('ui:label.type')}:`);
       fireEvent.change(typeSelect, { target: { value: 'RANKING' } });
 
       // Click Save
-      fireEvent.click(screen.getByTitle(/Save/i));
+      fireEvent.click(screen.getByTitle(i18n.t('ui:button.save')));
 
       expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', {
         stageType: 'RANKING',
@@ -416,11 +416,11 @@ describe('StageSection', () => {
       );
 
       // Enter edit mode
-      fireEvent.click(screen.getByTitle(/edit the name/i));
+      fireEvent.click(screen.getByTitle(i18n.t('ui:tooltip.editStageName')));
       expect(screen.getByDisplayValue('Preliminary')).toBeInTheDocument();
 
       // Click on type select - should not close edit mode
-      const typeSelect = screen.getByLabelText(i18n.t('ui:label.type'));
+      const typeSelect = screen.getByLabelText(`${i18n.t('ui:label.type')}:`);
       const nameInput = screen.getByDisplayValue('Preliminary');
       
       // Simulate blur with relatedTarget being the select
@@ -441,7 +441,7 @@ describe('StageSection', () => {
       );
 
       // Enter edit mode
-      fireEvent.click(screen.getByTitle(/edit the name/i));
+      fireEvent.click(screen.getByTitle(i18n.t('ui:tooltip.editStageName')));
       const nameInput = screen.getByDisplayValue('Preliminary');
 
       // Simulate blur with relatedTarget being null (e.g. clicking body)
@@ -463,18 +463,18 @@ describe('StageSection', () => {
       );
 
       // Enter edit mode
-      fireEvent.click(screen.getByTitle(/edit the name/i));
+      fireEvent.click(screen.getByTitle(i18n.t('ui:tooltip.editStageName')));
 
       // Change name
       const input = screen.getByDisplayValue('Preliminary');
       fireEvent.change(input, { target: { value: 'New Name' } });
 
       // Change type
-      const typeSelect = screen.getByLabelText(i18n.t('ui:label.type'));
+      const typeSelect = screen.getByLabelText(`${i18n.t('ui:label.type')}:`);
       fireEvent.change(typeSelect, { target: { value: 'RANKING' } });
 
       // Click Save
-      fireEvent.click(screen.getByTitle(/Save/i));
+      fireEvent.click(screen.getByTitle(i18n.t('ui:button.save')));
 
       expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', {
         name: 'New Name',
@@ -493,13 +493,12 @@ describe('StageSection', () => {
       );
 
       // Enter edit mode
-      fireEvent.click(screen.getByTitle(/edit the name/i));
+      fireEvent.click(screen.getByTitle(i18n.t('ui:tooltip.editStageName')));
 
       // Click Save without changing anything
-      fireEvent.click(screen.getByTitle(/Save/i));
+      fireEvent.click(screen.getByTitle(i18n.t('ui:button.save')));
 
       expect(mockOnUpdate).not.toHaveBeenCalled();
       expect(screen.queryByDisplayValue('Preliminary')).not.toBeInTheDocument();
     });
-  });
 });
