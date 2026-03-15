@@ -1,3 +1,4 @@
+import os
 from django.conf import settings
 
 from league_manager.utils.utils import get_menu_items
@@ -15,4 +16,11 @@ def version_number(request):
 def pages_links(request):
     return {
         "PAGES_LINKS": getattr(settings, "PAGES_LINKS", {}),
+    }
+
+
+def debug_status(request):
+    return {
+        "DEBUG": settings.DEBUG,
+        "HOT_APPS": os.environ.get("HOT_APPS", "").split(","),
     }

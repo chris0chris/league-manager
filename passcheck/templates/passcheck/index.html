@@ -18,7 +18,15 @@
 <body>
 <noscript>You need to enable JavaScript to run this app.</noscript>
 <div id="passcheck"></div>
-<script src='{% static "passcheck/js/passcheck.js" %}'></script>
+
+{% if DEBUG and 'passcheck' in HOT_APPS or 'all' in HOT_APPS %}
+    <!-- Vite Dev Server for Hot Module Replacement -->
+    <script type="module" src="http://localhost:3003/@vite/client"></script>
+    <script type="module" src="http://localhost:3003/src/index.tsx"></script>
+{% else %}
+    <script src='{% static "passcheck/js/passcheck.js" %}'></script>
+{% endif %}
+
 <script>
     const handleBeforeUnload = (e) => {
       // Cancel the event

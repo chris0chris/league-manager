@@ -326,7 +326,7 @@ export function useDesignerController(
     handleUpdateNode: (id: string, data: Record<string, unknown>) => flowStateRef.current?.updateNode(id, data),
     handleUpdateGlobalTeam: (id: string, data: Record<string, unknown>) => flowStateRef.current?.updateGlobalTeam(id, data),
     handleDeleteGlobalTeam: (id: string) => flowStateRef.current?.deleteGlobalTeam(id),
-    handleReplaceGlobalTeam: (oldId: string, newId: string) => flowStateRef.current?.replaceGlobalTeam(oldId, newId),
+    handleReplaceGlobalTeam: (oldId: string, newTeamData: { id: number; text: string }) => flowStateRef.current?.replaceGlobalTeam(oldId, newTeamData),
     handleReorderGlobalTeam: (id: string, index: number) => flowStateRef.current?.reorderGlobalTeam(id, index),
     handleUpdateGlobalTeamGroup: (id: string, name: string) => flowStateRef.current?.updateGlobalTeamGroup(id, name),
     handleDeleteGlobalTeamGroup: (id: string) => flowStateRef.current?.deleteGlobalTeamGroup(id),

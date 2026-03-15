@@ -299,7 +299,7 @@ const ListDesignerApp: React.FC = () => {
       if (teamSelectionContext.side === 'group') {
         handleConnectTeam(team, teamSelectionContext.slotId);
       } else if (teamSelectionContext.side === 'replace') {
-        handleReplaceGlobalTeam(teamSelectionContext.slotId, String(team.id));
+        handleReplaceGlobalTeam(teamSelectionContext.slotId, team);
       } else {
         handleAssignTeam(teamSelectionContext.slotId, teamSelectionContext.side as 'home' | 'away', String(team.id));
       }

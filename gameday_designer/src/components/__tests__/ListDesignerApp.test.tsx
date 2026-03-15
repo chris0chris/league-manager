@@ -251,7 +251,7 @@ describe('ListDesignerApp', () => {
       const selectBtn = screen.getByTestId('mock-team-select');
       await act(async () => { selectBtn.click(); });
 
-      expect(mockHandlers.handleReplaceGlobalTeam).toHaveBeenCalledWith('team-1', '99');
+      expect(mockHandlers.handleReplaceGlobalTeam).toHaveBeenCalledWith('team-1', { id: 99, text: 'Replaced Team' });
       expect(mockHandlers.handleAssignTeam).not.toHaveBeenCalled();
     });
   });

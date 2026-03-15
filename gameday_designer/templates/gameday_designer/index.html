@@ -61,5 +61,11 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script type="module" src="{% static 'gameday_designer/js/index.js' %}"></script>
+    {% if DEBUG and 'gameday_designer' in HOT_APPS or 'all' in HOT_APPS %}
+        <!-- Vite Dev Server for Hot Module Replacement -->
+        <script type="module" src="http://localhost:3001/@vite/client"></script>
+        <script type="module" src="http://localhost:3001/src/index.tsx"></script>
+    {% else %}
+        <script type="module" src="{% static 'gameday_designer/js/index.js' %}"></script>
+    {% endif %}
 {% endblock %}
