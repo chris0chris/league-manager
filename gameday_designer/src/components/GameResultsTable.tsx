@@ -6,6 +6,7 @@ export interface ScoreEdit {
   fh?: number | null;
   sh?: number | null;
   isHome?: boolean;
+  gameInfoId?: number;
 }
 
 interface GameResultsTableProps {
@@ -21,7 +22,7 @@ export const GameResultsTable: React.FC<GameResultsTableProps> = ({
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleScoreChange = (_gameId: number, resultId: number, isHome: boolean, field: 'fh' | 'sh', value: string) => {
+  const handleScoreChange = (gameId: number, resultId: number, isHome: boolean, field: 'fh' | 'sh', value: string) => {
     const key = resultId.toString();
     setEdits({
       ...edits,
@@ -29,6 +30,7 @@ export const GameResultsTable: React.FC<GameResultsTableProps> = ({
         ...edits[key],
         [field]: value ? parseInt(value) : null,
         isHome,
+        gameInfoId: gameId,
       },
     });
   };

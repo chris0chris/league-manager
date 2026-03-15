@@ -304,8 +304,8 @@ const ListDesignerApp: React.FC = () => {
   const handleSaveBulkResults = useCallback(async (results: Record<string, ScoreEdit>) => {
     if (!id) return;
     try {
-      const updatePromises = Object.entries(results).map(([resultId, scores]) => {
-        return gamedayApi.updateGameResultDetail(parseInt(resultId), {
+      const updatePromises = Object.entries(results).map(([, scores]) => {
+        return gamedayApi.updateGameResultDetail(scores.gameInfoId!, {
           fh: scores.fh ?? undefined,
           sh: scores.sh ?? undefined,
         });
