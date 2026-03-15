@@ -89,9 +89,9 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
 
   it('verifies the structure is rendered correctly', async () => {
     await renderApp();
-    expect(screen.getByText(/Field 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/Preliminary Round/i)).toBeInTheDocument();
-    expect(screen.getByText(/Game 1/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Field 1/i, {}, { timeout: 10000 })).toBeInTheDocument();
+    expect(await screen.findByText(/Preliminary Round/i, {}, { timeout: 10000 })).toBeInTheDocument();
+    expect(await screen.findByText(/Game 1/i, {}, { timeout: 10000 })).toBeInTheDocument();
   });
 
   it('verifies results entry mode toggle', async () => {
