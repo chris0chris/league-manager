@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import ListDesignerApp from '../ListDesignerApp';
 import AppHeader from '../layout/AppHeader';
 import { useDesignerController } from '../../hooks/useDesignerController';
+import { useFlowState } from '../../hooks/useFlowState';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
@@ -12,6 +13,20 @@ import { FieldNode } from '../../types/designer';
 // Mock the controller hook
 vi.mock('../../hooks/useDesignerController', () => ({
   useDesignerController: vi.fn(),
+}));
+
+vi.mock('../../hooks/useFlowState', () => ({
+  useFlowState: vi.fn(),
+}));
+
+// Mock TeamSelectionModal to expose a trigger button for tests
+vi.mock('../modals/TeamSelectionModal', () => ({
+  default: ({ show, onSelect }: { show: boolean; onSelect: (t: { id: number; text: string }) => void }) =>
+    show ? (
+      <button data-testid="mock-team-select" onClick={() => onSelect({ id: 99, text: 'Replaced Team' })}>
+        Select Team
+      </button>
+    ) : null,
 }));
 
 vi.mock('../LanguageSelector', () => ({
@@ -34,6 +49,46 @@ vi.mock('../../api/gamedayApi', () => ({
     deleteGameday: vi.fn().mockResolvedValue({}),
   },
 }));
+
+const defaultFlowState = {
+  nodes: [] as FlowNode[],
+  edges: [] as FlowEdge[],
+  fields: [] as FieldNode[],
+  globalTeams: [] as GlobalTeam[],
+  globalTeamGroups: [] as GlobalTeamGroup[],
+  metadata: null,
+  saveTrigger: 0,
+  canUndo: false,
+  canRedo: false,
+  stats: { fieldCount: 0, gameCount: 0, teamCount: 0 },
+  exportState: vi.fn().mockReturnValue({ nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [] }),
+  importState: vi.fn(),
+  updateMetadata: vi.fn(),
+  addGlobalTeam: vi.fn(),
+  updateGlobalTeam: vi.fn(),
+  deleteGlobalTeam: vi.fn(),
+  replaceGlobalTeam: vi.fn(),
+  reorderGlobalTeam: vi.fn(),
+  addGlobalTeamGroup: vi.fn(),
+  updateGlobalTeamGroup: vi.fn(),
+  deleteGlobalTeamGroup: vi.fn(),
+  reorderGlobalTeamGroup: vi.fn(),
+  addOfficialsGroup: vi.fn(),
+  addGameNode: vi.fn(),
+  deleteNode: vi.fn(),
+  selectNode: vi.fn(),
+  clearAll: vi.fn(),
+  clearSchedule: vi.fn(),
+  addFieldNode: vi.fn(),
+  addStageNode: vi.fn(),
+  assignTeamToGame: vi.fn(),
+  onNodesChange: vi.fn(),
+  onEdgesChange: vi.fn(),
+  removeEdgeFromSlot: vi.fn(),
+  addGameNodeInStage: vi.fn(),
+  undo: vi.fn(),
+  redo: vi.fn(),
+};
 
 describe('ListDesignerApp', () => {
   const mockHandlers = {
@@ -121,6 +176,7 @@ describe('ListDesignerApp', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en');
     vi.clearAllMocks();
+    (useFlowState as Mock).mockReturnValue(defaultFlowState);
     (useDesignerController as Mock).mockReturnValue(defaultMockReturn);
   });
 
@@ -169,6 +225,34 @@ describe('ListDesignerApp', () => {
       const badges = screen.getByTestId('validation-badges');
       expect(badges.querySelector('.bg-danger')).toBeInTheDocument();
       expect(badges).toHaveTextContent('1');
+    });
+  });
+
+  describe('Team replace flow', () => {
+    it('routes replace mode to handleReplaceGlobalTeam, not handleAssignTeam', async () => {
+      const team: GlobalTeam = { id: 'team-1', label: 'Team 1', groupId: 'group-1', order: 0, color: '#aaa' };
+      const group: GlobalTeamGroup = { id: 'group-1', name: 'Group A', order: 0 };
+      (useFlowState as Mock).mockReturnValue({
+        ...defaultFlowState,
+        globalTeams: [team],
+        globalTeamGroups: [group],
+      });
+      renderApp();
+
+      // Open the move/replace dropdown on the team row
+      const dropdownToggle = await screen.findByTitle(/Move this team to a different group/i);
+      await act(async () => { dropdownToggle.click(); });
+
+      // Click "Replace Team" inside the dropdown
+      const replaceBtn = await screen.findByText('Replace Team');
+      await act(async () => { replaceBtn.click(); });
+
+      // The mocked modal renders a trigger button — click it to simulate team selection
+      const selectBtn = screen.getByTestId('mock-team-select');
+      await act(async () => { selectBtn.click(); });
+
+      expect(mockHandlers.handleReplaceGlobalTeam).toHaveBeenCalledWith('team-1', '99');
+      expect(mockHandlers.handleAssignTeam).not.toHaveBeenCalled();
     });
   });
 

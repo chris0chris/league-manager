@@ -45,7 +45,7 @@ const ListDesignerApp: React.FC = () => {
   const [isMetadataCollapsed, setIsMetadataCollapsed] = useState(false);
   const [teamSelectionContext, setTeamSelectionModalContext] = useState<{
     slotId: string;
-    side: 'home' | 'away' | 'official' | 'group';
+    side: 'home' | 'away' | 'official' | 'group' | 'replace';
   } | null>(null);
 
   const flowState = useFlowState();
@@ -289,7 +289,7 @@ const ListDesignerApp: React.FC = () => {
     }
   }, [selectedGameForResult, handleUpdateNode, addNotification, t]);
 
-  const handleShowTeamSelection = useCallback((slotId: string, side: 'home' | 'away' | 'official' | 'group') => {
+  const handleShowTeamSelection = useCallback((slotId: string, side: 'home' | 'away' | 'official' | 'group' | 'replace') => {
     setTeamSelectionModalContext({ slotId, side });
     setShowTeamSelectionModal(true);
   }, []);
@@ -298,13 +298,15 @@ const ListDesignerApp: React.FC = () => {
     if (teamSelectionContext) {
       if (teamSelectionContext.side === 'group') {
         handleConnectTeam(team, teamSelectionContext.slotId);
+      } else if (teamSelectionContext.side === 'replace') {
+        handleReplaceGlobalTeam(teamSelectionContext.slotId, String(team.id));
       } else {
         handleAssignTeam(teamSelectionContext.slotId, teamSelectionContext.side as 'home' | 'away', String(team.id));
       }
     }
     setShowTeamSelectionModal(false);
     setTeamSelectionModalContext(null);
-  }, [teamSelectionContext, handleAssignTeam, handleConnectTeam]);
+  }, [teamSelectionContext, handleAssignTeam, handleConnectTeam, handleReplaceGlobalTeam]);
 
   const handleSaveBulkResults = useCallback(async (results: Record<string, ScoreEdit>) => {
     if (!id) return;
