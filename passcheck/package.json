@@ -72,7 +72,7 @@
     "eslint": "^10.0.0",
     "eslint-formatter-junit": "^9.0.1",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "jsdom": "^26.0.0",
+    "jsdom": "^29.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.49.0",
     "vite": "^8.0.0",
