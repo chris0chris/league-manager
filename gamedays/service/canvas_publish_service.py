@@ -63,12 +63,14 @@ class CanvasPublishService:
 
             Gameresult.objects.create(
                 gameinfo=gi,
-                team=self._resolve_team(data.get("homeTeamId"), global_teams),
+                team=self._resolve_team(data.get("homeTeamId"), global_teams)
+                    or self._resolve_dynamic_team(data.get("homeTeamDynamic")),
                 isHome=True,
             )
             Gameresult.objects.create(
                 gameinfo=gi,
-                team=self._resolve_team(data.get("awayTeamId"), global_teams),
+                team=self._resolve_team(data.get("awayTeamId"), global_teams)
+                    or self._resolve_dynamic_team(data.get("awayTeamDynamic")),
                 isHome=False,
             )
 
@@ -86,6 +88,45 @@ class CanvasPublishService:
             defaults={"description": label, "location": ""},
         )
         return team
+
+    def _resolve_dynamic_team(self, dynamic_ref):
+        if not dynamic_ref:
+            return None
+        label = self._format_dynamic_ref(dynamic_ref)
+        if not label:
+            return None
+        team, _ = Team.objects.get_or_create(
+            name=label,
+            defaults={"description": label, "location": ""},
+        )
+        return team
+
+    @staticmethod
+    def _format_dynamic_ref(ref) -> str:
+        """
+        Maps a canvas TeamReference dict to its canonical label string.
+        Mirrors teamReference.ts formatTeamReference().
+        """
+        if not ref:
+            return ""
+        ref_type = ref.get("type", "")
+        if ref_type == "winner":
+            return f"Gewinner {ref.get('matchName', '')}"
+        if ref_type == "loser":
+            return f"Verlierer {ref.get('matchName', '')}"
+        if ref_type == "standing":
+            return f"P{ref.get('place', '')} {ref.get('groupName', '')}"
+        if ref_type == "rank":
+            return f"Rank {ref.get('place', '')} {ref.get('stageName', '')}"
+        if ref_type == "groupRank":
+            return (
+                f"Rank {ref.get('place', '')} in "
+                f"{ref.get('groupName', '')} of {ref.get('stageName', '')}"
+            )
+        if ref_type == "groupTeam":
+            return f"{ref.get('group', '')}_{ref.get('team', '')}"
+        # "static" type: caller resolves via global_teams; nothing to do here
+        return ""
 
     def _resolve_official(self, official_ref, global_teams, fallback):
         if not official_ref:

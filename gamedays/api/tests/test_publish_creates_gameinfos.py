@@ -3,6 +3,66 @@ from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from gamedays.models import Gameday, Gameinfo, Gameresult, GamedayDesignerState, Season, League
 
+
+def _make_dynamic_canvas(home_dynamic, away_dynamic):
+    """Canvas with one playoff game whose teams come from dynamic refs."""
+    return {
+        "globalTeams": [
+            {"id": "t1", "label": "Alpha", "groupId": None, "order": 0},
+            {"id": "t2", "label": "Beta",  "groupId": None, "order": 1},
+        ],
+        "globalTeamGroups": [],
+        "nodes": [
+            {"id": "field-1", "type": "field", "parentId": None,
+             "data": {"type": "field", "name": "Field 1", "order": 0}, "position": {"x": 0, "y": 0}},
+            {"id": "stage-1", "type": "stage", "parentId": "field-1",
+             "data": {"type": "stage", "name": "Final", "category": "final"}, "position": {"x": 0, "y": 0}},
+            {"id": "game-1", "type": "game", "parentId": "stage-1",
+             "data": {
+                 "type": "game", "stage": "Final", "standing": "FIN",
+                 "startTime": "14:00", "homeTeamId": None, "awayTeamId": None,
+                 "homeTeamDynamic": home_dynamic,
+                 "awayTeamDynamic": away_dynamic,
+                 "official": None,
+             }, "position": {"x": 0, "y": 0}},
+        ],
+        "edges": [],
+    }
+
+
+DYNAMIC_REF_CASES = [
+    (
+        {"type": "winner", "matchName": "SF1"},
+        {"type": "loser",  "matchName": "SF1"},
+        "Gewinner SF1",
+        "Verlierer SF1",
+    ),
+    (
+        {"type": "standing", "place": 1, "groupName": "Gruppe A"},
+        {"type": "standing", "place": 2, "groupName": "Gruppe A"},
+        "P1 Gruppe A",
+        "P2 Gruppe A",
+    ),
+    (
+        {"type": "rank", "place": 1, "stageName": "Vorrunde", "stageId": ""},
+        {"type": "rank", "place": 2, "stageName": "Vorrunde", "stageId": ""},
+        "Rank 1 Vorrunde",
+        "Rank 2 Vorrunde",
+    ),
+    (
+        {"type": "groupRank", "place": 1, "groupName": "Pool B", "stageName": "Quali", "stageId": ""},
+        {"type": "groupRank", "place": 2, "groupName": "Pool B", "stageName": "Quali", "stageId": ""},
+        "Rank 1 in Pool B of Quali",
+        "Rank 2 in Pool B of Quali",
+    ),
+    (
+        {"type": "groupTeam", "group": 0, "team": 0},
+        {"type": "groupTeam", "group": 0, "team": 1},
+        "0_0",
+        "0_1",
+    ),
+]
+
 MINIMAL_CANVAS_STATE = {
     "globalTeams": [
         {"id": "t1", "label": "Team Alpha", "groupId": None, "order": 0},
@@ -208,13 +268,16 @@ class TestPublishCreatesGameinfos:
         gi = Gameinfo.objects.get(gameday=self.gameday)
         assert gi.standing == "Gruppe 2"
 
-    def test_publish_playoff_game_has_no_team_initially(self):
+    def test_publish_playoff_game_has_placeholder_teams(self):
         GamedayDesignerState.objects.create(
             gameday=self.gameday, state_data=PROGRESSION_CANVAS_STATE
         )
         self._publish()
         sf1 = Gameinfo.objects.get(gameday=self.gameday, standing="SF1")
-        assert Gameresult.objects.filter(gameinfo=sf1, team__isnull=False).count() == 0
+        home = Gameresult.objects.get(gameinfo=sf1, isHome=True)
+        away = Gameresult.objects.get(gameinfo=sf1, isHome=False)
+        assert home.team.name == "Gewinner Game A1"
+        assert away.team.name == "Verlierer Game A1"
 
     def test_progression_resolves_team_after_game_completes(self):
         GamedayDesignerState.objects.create(
@@ -236,3 +299,29 @@ class TestPublishCreatesGameinfos:
         away_result = Gameresult.objects.get(gameinfo=sf1, isHome=False)
         assert home_result.team.name == "Team Alpha"   # winner
         assert away_result.team.name == "Team Beta"    # loser
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("home_ref,away_ref,expected_home,expected_away", DYNAMIC_REF_CASES)
+def test_publish_dynamic_ref_creates_placeholder_team(home_ref, away_ref, expected_home, expected_away):
+    user = User.objects.create_superuser("dyn_test", password="pw")
+    client = APIClient()
+    client.force_authenticate(user)
+    season = Season.objects.create(name="2026dyn")
+    league = League.objects.create(name="Dyn League")
+    gameday = Gameday.objects.create(
+        name="Dyn Day", season=season, league=league,
+        date="2026-03-15", start="10:00",
+        status=Gameday.STATUS_DRAFT, author=user,
+    )
+    GamedayDesignerState.objects.create(
+        gameday=gameday,
+        state_data=_make_dynamic_canvas(home_ref, away_ref),
+    )
+    client.post(f"/api/gamedays/{gameday.id}/publish/")
+
+    gi = Gameinfo.objects.get(gameday=gameday, standing="FIN")
+    home = Gameresult.objects.get(gameinfo=gi, isHome=True)
+    away = Gameresult.objects.get(gameinfo=gi, isHome=False)
+    assert home.team.name == expected_home
+    assert away.team.name == expected_away
