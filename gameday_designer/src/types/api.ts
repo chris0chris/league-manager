@@ -172,6 +172,7 @@ export interface GamedayMetadata {
  */
 export interface GamedayListEntry extends GamedayMetadata {
   status: string;
+  has_designer_state?: boolean;
 }
 
 import type { 

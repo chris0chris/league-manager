@@ -13,6 +13,7 @@ import React from 'react';
 import { Card, Badge, Button } from 'react-bootstrap';
 import type { GameSlot } from '../types/designer';
 import { formatTeamReference } from '../utils/teamReference';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
 
 export interface GameSlotCardProps {
   /** The game slot data to display */
@@ -38,6 +39,8 @@ const GameSlotCard: React.FC<GameSlotCardProps> = ({
   onDelete,
   onDuplicate,
 }) => {
+  const { t } = useTypedTranslation(['ui', 'domain']);
+
   /**
    * Handle card click for selection.
    */
@@ -82,8 +85,8 @@ const GameSlotCard: React.FC<GameSlotCardProps> = ({
             variant="outline-secondary"
             size="sm"
             onClick={handleDuplicateClick}
-            aria-label="Duplicate game slot"
-            title="Duplicate"
+            aria-label={t('ui:tooltip.duplicate')}
+            title={t('ui:tooltip.duplicate')}
             className="me-1"
           >
             <i className="bi bi-copy"></i>
@@ -92,8 +95,8 @@ const GameSlotCard: React.FC<GameSlotCardProps> = ({
             variant="outline-danger"
             size="sm"
             onClick={handleDeleteClick}
-            aria-label="Delete game slot"
-            title="Delete"
+            aria-label={t('ui:tooltip.deleteGame')}
+            title={t('ui:tooltip.deleteGame')}
           >
             <i className="bi bi-trash"></i>
           </Button>
@@ -102,15 +105,15 @@ const GameSlotCard: React.FC<GameSlotCardProps> = ({
       <Card.Body className="py-2">
         <div className="d-flex flex-column gap-1">
           <div className="d-flex justify-content-between">
-            <span className="text-muted small">Home:</span>
+            <span className="text-muted small">{t('ui:label.home')}:</span>
             <span>{formatTeamReference(gameSlot.home)}</span>
           </div>
           <div className="d-flex justify-content-between">
-            <span className="text-muted small">Away:</span>
+            <span className="text-muted small">{t('ui:label.away')}:</span>
             <span>{formatTeamReference(gameSlot.away)}</span>
           </div>
           <div className="d-flex justify-content-between">
-            <span className="text-muted small">Official:</span>
+            <span className="text-muted small">{t('ui:label.official')}:</span>
             <span>{formatTeamReference(gameSlot.official)}</span>
           </div>
         </div>
@@ -118,7 +121,7 @@ const GameSlotCard: React.FC<GameSlotCardProps> = ({
           <div className="mt-2 text-center">
             <Badge bg="info" className="small">
               <i className="bi bi-clock me-1"></i>
-              {gameSlot.breakAfter} min break
+              {gameSlot.breakAfter} {t('domain:minutes')} {t('ui:label.breakAfter')}
             </Badge>
           </div>
         )}

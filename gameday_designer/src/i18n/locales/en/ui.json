@@ -33,22 +33,55 @@
     "result": "Result",
     "enterResults": "Enter Results",
     "exitResults": "Designer View",
-    "backToDashboard": "Back to Dashboard"
+    "backToDashboard": "Back to Dashboard",
+    "addOfficials": "Add Officials",
+    "saveResults": "Save Results",
+    "saving": "Saving..."
   },
   "label": {
     "dashboard": "Dashboard",
     "gameResults": "Game Results",
     "back": "Back",
+    "language": "Language",
+    "german": "Deutsch",
+    "english": "English",
+    "stage": "Phase",
+    "standing": "Standing",
+    "time": "Time",
+    "home": "Home",
+    "away": "Away",
+    "score": "Score",
+    "official": "Official",
+    "externalOfficials": "External Officials",
+    "breakAfter": "Break after",
+    "breakAfterMinutes": "Break after (minutes)",
+    "actions": "Actions",
+    "validation": "Validation",
+    "tournamentFormat": "Tournament Format",
+    "numberOfFields": "Number of Fields",
+    "startTime": "Start Time",
+    "gameDuration": "Game Duration (min)",
+    "breakDuration": "Break between games (min)",
+    "preview": "Preview",
     "fields": "Fields",
     "stages": "Stages",
     "teams": "Teams",
     "games": "Games",
-    "official": "Official",
-    "externalOfficials": "External Officials",
-    "german": "Deutsch",
-    "english": "English",
+    "teamPool": "Team Pool",
+    "globalTeamPool": "Global Team Pool",
+    "start": "Start",
+    "type": "Phase Type",
+    "readOnly": "Read-only",
+    "halftimeScore": "Halftime Score",
+    "finalScore": "Final Score",
+    "halftime": "Halftime",
+    "final": "Final",
     "undo": "Undo",
+    "winner": "Winner",
+    "loser": "Loser",
+    "tbd": "TBD",
     "searchDatabase": "Search from database...",
+    "selectTeam": "-- Select Team --",
     "gamedayName": "Gameday Name",
     "gamedayDate": "Gameday Date",
     "gamedayStartTime": "Start Time",
@@ -58,17 +91,27 @@
     "ranking": "Ranking",
     "rank": "Rank",
     "in": "in",
-    "of": "of"
+    "of": "of",
+    "user": "User",
+    "fh": "1H",
+    "sh": "2H",
+    "total": "Total",
+    "fieldName": "Field Name"
   },
   "title": {
-    "enterGameResult": "Enter Game Result"
+    "enterGameResult": "Enter Game Result",
+    "selectTeam": "Select Team",
+    "selectOfficial": "Select Official"
   },
   "placeholder": {
     "standing": "e.g., Group 1, HF1, P1",
     "gamedayName": "New Gameday",
     "searchGamedays": "Search gamedays...",
     "selectSeason": "Select Season",
-    "selectLeague": "Select League"
+    "selectLeague": "Select League",
+    "fieldName": "New field name...",
+    "match": "e.g., HF1, Finale",
+    "teamOfficials": "e.g., Team Officials"
   },
   "message": {
     "noTeamsYet": "No teams yet",
@@ -76,9 +119,9 @@
     "noStagesYet": "No stages yet",
     "noGamesYet": "No games yet",
     "noGamesInStage": "No games in this stage",
-    "noFieldsYet": "No fields yet",
+    "noFieldsYet": "No fields defined. Add a field above.",
     "noGroupsYet": "No groups yet",
-    "createFirstField": "Create your first field to organize games",
+    "createFirstField": "Click \"Add Field\" in the toolbar to create your first playing field.",
     "createFirstGroup": "Create your first team group to organize teams",
     "doubleClickToEdit": "Double-click to edit",
     "doubleClickToEditTeam": "Double-click to edit team label",
@@ -91,11 +134,17 @@
     "loserOf": "Loser of {{match}}",
     "placeFrom": "{{place}}. Place from {{stage}}",
     "ungrouped": "Ungrouped",
-    "assignedGamesCount": "Number of games this team is assigned to"
+    "assignedGamesCount": "Number of games this team is assigned to",
+    "confirmDeleteGameday": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+    "enterBothHalves": "Game {{id}}: Enter both halves for {{team}}",
+    "loading": "Loading...",
+    "prerequisitesMissing": "Please ensure at least one Season and one League exist in the database before creating a gameday.",
+    "defaultGamedayName": "Gameday on {{date}}"
   },
   "tooltip": {
     "addTeamToGroup": "Add a new team to this group",
     "connectTeam": "Connect an existing team from the database pool",
+    "editGroupName": "Click to edit the name of this team group",
     "addFirstTeamToGroup": "Add your first team to this group",
     "moveGroupUp": "Move this team group one position up",
     "moveGroupDown": "Move this team group one position down",
@@ -128,7 +177,9 @@
     "enterResult": "Enter result",
     "deleteGame": "Delete game",
     "autoTimeHint": "Auto-calculated - click to override",
-    "manualTimeHint": "Manually set - click to edit"
+    "manualTimeHint": "Manually set - click to edit",
+    "renameField": "Rename field",
+    "duplicate": "Duplicate"
   },
   "notification": {
     "gameResultSaved": "Game result saved",
@@ -152,7 +203,14 @@
       "autoSave": "Auto-save",
       "importError": "Import Error",
       "deletion": "Deletion",
-      "timeFormat": "Time Format"
-    }
+      "timeFormat": "Time Format",
+      "templateExport": "Template Export",
+      "prerequisites": "Prerequisites missing"
+    },
+    "templateExported": {
+      "title": "Template exported"
+    },
+    "resultsSaved": "Results saved successfully",
+    "resultsSaveFailed": "Failed to save results"
   }
 }

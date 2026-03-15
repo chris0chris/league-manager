@@ -5,6 +5,7 @@ import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import LanguageSelector from '../LanguageSelector';
 import FlowToolbar from '../FlowToolbar';
 import { useGamedayContext } from '../../context/GamedayContext';
+import '../ListDesignerApp.css';
 
 /**
  * Global App Header for Gameday Designer.
@@ -23,7 +24,7 @@ const AppHeader: React.FC = () => {
     : t('ui:label.dashboard');
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" className="mb-2 shadow-sm py-1">
+    <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm py-1" data-testid="app-header">
       <Container fluid>
         <div className="d-flex align-items-center">
           <Navbar.Brand 
@@ -86,7 +87,7 @@ const AppHeader: React.FC = () => {
             
             <div className="d-flex align-items-center text-light border-start ps-3 ms-1" style={{ height: '24px' }}>
               <i className="bi bi-person-circle me-2 fs-5"></i>
-              <span className="small fw-medium">User</span>
+              <span className="small fw-medium">{t('ui:label.user')}</span>
             </div>
           </Nav>
         </Navbar.Collapse>

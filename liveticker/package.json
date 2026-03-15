@@ -1,6 +1,6 @@
 {
   "name": "liveticker",
-  "version": "3.1.7",
+  "version": "3.2.0",
   "private": true,
   "main": "index.js",
   "directories": {
@@ -49,6 +49,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
+    "watch": "vite build --watch",
     "preview": "vite preview",
     "eslint": "eslint ./src",
     "eslint:junit": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-liveticker.xml",

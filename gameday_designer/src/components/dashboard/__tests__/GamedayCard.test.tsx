@@ -4,11 +4,16 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import GamedayCard from '../GamedayCard';
 import type { GamedayListEntry } from '../../../types';
+import i18n from '../../../i18n/testConfig';
 
 describe('GamedayCard', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
+  });
+
   const mockGameday: GamedayListEntry = {
     id: 1,
     name: 'DFFL Gameday 1',
@@ -29,7 +34,7 @@ describe('GamedayCard', () => {
     render(<GamedayCard gameday={mockGameday} onClick={vi.fn()} onDelete={vi.fn()} />);
 
     expect(screen.getByText('DFFL Gameday 1')).toBeInTheDocument();
-    expect(screen.getByText('13.04.2026')).toBeInTheDocument(); // German format
+    expect(screen.getByText('13/04/2026')).toBeInTheDocument(); // en-GB format
     expect(screen.getByText('Season 2026')).toBeInTheDocument();
     expect(screen.getByText('DFFL')).toBeInTheDocument();
     expect(screen.getByText('Sportpark Mitte')).toBeInTheDocument();
@@ -72,7 +77,7 @@ describe('GamedayCard', () => {
     const handleDelete = vi.fn();
     render(<GamedayCard gameday={mockGameday} onClick={vi.fn()} onDelete={handleDelete} />);
 
-    const deleteBtn = screen.getByTitle('Delete Gameday');
+    const deleteBtn = screen.getByTitle(i18n.t('ui:button.deleteGameday'));
     
     fireEvent.click(deleteBtn);
     expect(handleDelete).toHaveBeenCalledTimes(1);

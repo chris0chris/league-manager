@@ -30,6 +30,8 @@ vi.mock('../../api/gamedayApi', () => ({
     updateBulkGameResults: vi.fn().mockResolvedValue({}),
     listSeasons: vi.fn().mockResolvedValue([]),
     listLeagues: vi.fn().mockResolvedValue([]),
+    getDesignerState: vi.fn().mockResolvedValue(null),
+    updateDesignerState: vi.fn().mockResolvedValue({}),
   },
 }));
 
@@ -69,6 +71,9 @@ describe('Auto-Clear on Generate Integration', () => {
     await i18n.changeLanguage('en');
     vi.clearAllMocks();
     vi.mocked(gamedayApi.getGameday).mockResolvedValue(mockGameday as unknown as Awaited<ReturnType<typeof gamedayApi.getGameday>>);
+    vi.mocked(gamedayApi.getDesignerState).mockResolvedValue({
+      state_data: mockGameday.designer_data as unknown as import('../../types/flowchart').FlowState,
+    });
   });
 
   const renderApp = async () => {
@@ -101,8 +106,12 @@ describe('Auto-Clear on Generate Integration', () => {
     // 2. Select Template
     const modal = await screen.findByRole('dialog');
     
-    // 3. Generate
-    const confirmBtn = within(modal).getByTestId('confirm-generate-button');
+    // 3. Generate — wait for auto-select effect to enable the button before clicking
+    const confirmBtn = await waitFor(() => {
+      const btn = within(modal).getByTestId('confirm-generate-button');
+      expect(btn).not.toBeDisabled();
+      return btn;
+    });
     await user.click(confirmBtn);
 
     // 4. Verify old structure is GONE and new structure is present

@@ -16,6 +16,7 @@ class TestPasscheckGamesListSerializer:
     def test_serializer_output(self):
         input_data = [
             {
+                "id": 1,
                 "home": "TeamA",
                 "home_id": 101,
                 "away": "TeamB",
@@ -30,6 +31,7 @@ class TestPasscheckGamesListSerializer:
         serializer = PasscheckGamesListSerializer(input_data, many=True)
 
         assert dict(serializer.data[0]) == {
+            "id": 1,
             "gameday_id": 1,
             "field": 2,
             "scheduled": "14:30:00",

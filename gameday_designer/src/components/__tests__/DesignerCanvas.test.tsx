@@ -12,6 +12,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DesignerCanvas from '../DesignerCanvas';
 import { GamedayProvider } from '../../context/GamedayContext';
+import i18n from '../../i18n/testConfig';
 import type { Field } from '../../types/designer';
 
 describe('DesignerCanvas', () => {
@@ -83,12 +84,12 @@ describe('DesignerCanvas', () => {
   describe('empty state', () => {
     it('shows empty state message when no fields', () => {
       renderCanvas([]);
-      expect(screen.getByText(/no fields yet/i)).toBeInTheDocument();
+      expect(screen.getByText(new RegExp(i18n.t('ui:message.noFieldsYet'), 'i'))).toBeInTheDocument();
     });
 
     it('suggests adding a field in empty state', () => {
       renderCanvas([]);
-      expect(screen.getByText(/add field/i)).toBeInTheDocument();
+      expect(screen.getByText(new RegExp(i18n.t('ui:message.createFirstField'), 'i'))).toBeInTheDocument();
     });
   });
 
@@ -104,13 +105,13 @@ describe('DesignerCanvas', () => {
       renderCanvas([field1, field2]);
 
       // Each field has a name input
-      const fieldInputs = screen.getAllByRole('textbox', { name: /field name/i });
+      const fieldInputs = screen.getAllByRole('textbox', { name: new RegExp(i18n.t('ui:label.fieldName'), 'i') });
       expect(fieldInputs).toHaveLength(2);
     });
 
     it('does not show empty state when fields exist', () => {
       renderCanvas([field1]);
-      expect(screen.queryByText(/no fields yet/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(new RegExp(i18n.t('ui:message.noFieldsYet'), 'i'))).not.toBeInTheDocument();
     });
 
     it('shows game slots within fields', () => {
@@ -126,7 +127,7 @@ describe('DesignerCanvas', () => {
       const user = userEvent.setup();
       renderCanvas([field1]);
 
-      const input = screen.getByRole('textbox', { name: /field name/i });
+      const input = screen.getByRole('textbox', { name: new RegExp(i18n.t('ui:label.fieldName'), 'i') });
       await user.clear(input);
       await user.type(input, 'New Name');
 
@@ -138,7 +139,7 @@ describe('DesignerCanvas', () => {
       const user = userEvent.setup();
       renderCanvas([field1]);
 
-      await user.click(screen.getByRole('button', { name: /delete field/i }));
+      await user.click(screen.getByRole('button', { name: new RegExp(i18n.t('ui:tooltip.deleteField'), 'i') }));
 
       expect(mockOnRemoveField).toHaveBeenCalledWith('field-1');
     });
@@ -147,7 +148,7 @@ describe('DesignerCanvas', () => {
       const user = userEvent.setup();
       renderCanvas([field1]);
 
-      await user.click(screen.getByRole('button', { name: /add game/i }));
+      await user.click(screen.getByRole('button', { name: new RegExp(i18n.t('ui:button.addGame'), 'i') }));
 
       expect(mockOnAddGameSlot).toHaveBeenCalledWith('field-1');
     });
@@ -168,7 +169,7 @@ describe('DesignerCanvas', () => {
       const user = userEvent.setup();
       renderCanvas([field1]);
 
-      await user.click(screen.getByRole('button', { name: /delete game/i }));
+      await user.click(screen.getByRole('button', { name: new RegExp(i18n.t('ui:tooltip.deleteGame'), 'i') }));
 
       expect(mockOnDeleteGameSlot).toHaveBeenCalledWith('slot-1');
     });
@@ -177,7 +178,7 @@ describe('DesignerCanvas', () => {
       const user = userEvent.setup();
       renderCanvas([field1]);
 
-      await user.click(screen.getByRole('button', { name: /duplicate/i }));
+      await user.click(screen.getByRole('button', { name: new RegExp(i18n.t('ui:tooltip.duplicate'), 'i') }));
 
       expect(mockOnDuplicateGameSlot).toHaveBeenCalledWith('slot-1');
     });

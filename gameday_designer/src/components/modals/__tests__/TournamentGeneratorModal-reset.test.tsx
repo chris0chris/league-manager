@@ -41,13 +41,13 @@ describe('TournamentGeneratorModal - Reset Behavior', () => {
     const { rerender } = renderModal();
 
     // 1. Change the start time
-    const startTimeInput = screen.getByLabelText(/label.startTime/i) as HTMLInputElement;
+    const startTimeInput = screen.getByLabelText(i18n.t('ui:label.startTime')) as HTMLInputElement;
     await user.clear(startTimeInput);
     await user.type(startTimeInput, '12:00');
     expect(startTimeInput.value).toBe('12:00');
 
     // 2. Generate
-    const generateButton = screen.getByRole('button', { name: /generate/i });
+    const generateButton = screen.getByRole('button', { name: new RegExp(i18n.t('ui:button.generate'), 'i') });
     await user.click(generateButton);
     expect(mockOnGenerate).toHaveBeenCalled();
 
@@ -74,7 +74,7 @@ describe('TournamentGeneratorModal - Reset Behavior', () => {
     );
 
     // 4. Verify start time is reset to default
-    const startTimeInputAfter = screen.getByLabelText(/label.startTime/i) as HTMLInputElement;
+    const startTimeInputAfter = screen.getByLabelText(i18n.t('ui:label.startTime')) as HTMLInputElement;
     expect(startTimeInputAfter.value).toBe(DEFAULT_START_TIME);
   });
 });

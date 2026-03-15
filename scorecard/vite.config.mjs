@@ -23,7 +23,7 @@ export default defineConfig({
 
   // Development server configuration
   server: {
-    port: 3000,
+    port: 3002,
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

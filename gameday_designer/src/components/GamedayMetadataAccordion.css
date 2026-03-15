@@ -2,6 +2,18 @@
  * GamedayMetadataAccordion Styles
  */
 
+.gameday-metadata-accordion {
+  width: 100%;
+  max-width: 70vw;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .gameday-metadata-accordion {
+    max-width: 100%;
+  }
+}
+
 .gameday-metadata-accordion .accordion-header .accordion-button {
   transition: background-color 0.2s;
 }
@@ -44,8 +56,32 @@
 
 .gameday-metadata-accordion .publish-button-container {
   position: absolute;
-  right: 3.5rem; /* Space for the accordion arrow */
-  z-index: 5;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.gameday-metadata-accordion .publish-button {
+  font-size: 0.7rem;
+  height: 22px;
+}
+
+.gameday-metadata-accordion .validation-badges-container {
+  cursor: pointer;
+}
+
+.gameday-metadata-accordion .validation-popover {
+  max-width: 400px;
+  z-index: 1060;
+}
+
+.gameday-metadata-accordion .validation-list {
+  max-height: 300px;
+}
+
+.gameday-metadata-accordion .validation-item {
+  cursor: pointer;
 }
 
 /* Ensure the accordion button doesn't respond to clicks on the publish button */

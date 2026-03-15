@@ -26,7 +26,15 @@ from gamedays.serializers.game_results import (
     GameResultsUpdateSerializer,
     GameInfoSerializer,
 )
-from gamedays.models import Gameday, Gameinfo, GameOfficial, Season, League, Gameresult
+from gamedays.models import (
+    Gameday,
+    Gameinfo,
+    GameOfficial,
+    Season,
+    League,
+    Gameresult,
+    GamedayDesignerState,
+)
 from gamedays.service.gameday_service import GamedayService
 
 
@@ -91,12 +99,54 @@ class GamedayViewSet(viewsets.ModelViewSet):
             )
 
         from django.utils import timezone
+        from gamedays.service.canvas_publish_service import CanvasPublishService
 
         gameday.status = Gameday.STATUS_PUBLISHED
         gameday.published_at = timezone.now()
         gameday.save()
 
+        CanvasPublishService(gameday).apply()
+
         return Response(GamedaySerializer(gameday).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get", "put"], url_path="designer-state")
+    def designer_state(self, request, pk=None):
+        gameday = self.get_object()
+        if request.method == "GET":
+            state, created = GamedayDesignerState.objects.get_or_create(gameday=gameday)
+            state_data = dict(state.state_data) if state.state_data else {}
+            metadata = state_data.get("metadata")
+            if isinstance(metadata, dict):
+                state_data["metadata"] = {**metadata, "status": gameday.status}
+            else:
+                state_data["metadata"] = {
+                    "name": gameday.name,
+                    "date": str(gameday.date) if gameday.date else "",
+                    "start": str(gameday.start) if gameday.start else "",
+                    "address": gameday.address or "",
+                    "season": gameday.season_id,
+                    "league": gameday.league_id,
+                    "status": gameday.status,
+                }
+            return Response({"state_data": state_data})
+
+        if request.method == "PUT":
+            state, created = GamedayDesignerState.objects.get_or_create(gameday=gameday)
+            state.state_data = request.data.get("state_data", {})
+            state.last_modified_by = request.user
+            state.save()
+
+            metadata = state.state_data.get("metadata", {})
+            update_fields = []
+            for field in ("name", "date", "start", "address"):
+                value = metadata.get(field)
+                if value is not None and value != "" and getattr(gameday, field) != value:
+                    setattr(gameday, field, value)
+                    update_fields.append(field)
+            if update_fields:
+                gameday.save(update_fields=update_fields)
+
+            return Response({"state_data": state.state_data})
 
 
 class GamedayListAPIView(ListAPIView):
@@ -215,8 +265,16 @@ class GameResultUpdateAPIView(APIView):
             home_res = Gameresult.objects.filter(gameinfo=game, isHome=True).first()
             away_res = Gameresult.objects.filter(gameinfo=game, isHome=False).first()
 
-            home_fh = halftime_score.get("home", 0) if halftime_score else (home_res.fh if home_res else 0)
-            away_fh = halftime_score.get("away", 0) if halftime_score else (away_res.fh if away_res else 0)
+            home_fh = (
+                halftime_score.get("home", 0)
+                if halftime_score
+                else (home_res.fh if home_res else 0)
+            )
+            away_fh = (
+                halftime_score.get("away", 0)
+                if halftime_score
+                else (away_res.fh if away_res else 0)
+            )
 
             Gameresult.objects.filter(gameinfo=game, isHome=True).update(
                 fh=home_fh, sh=final_score.get("home", 0) - (home_fh or 0)

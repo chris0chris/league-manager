@@ -25,6 +25,8 @@ vi.mock('../../api/gamedayApi', () => ({
     listSeasons: vi.fn().mockResolvedValue([{ id: 1, name: '2026' }]),
     listLeagues: vi.fn().mockResolvedValue([{ id: 1, name: 'DFFL' }]),
     searchTeams: vi.fn().mockResolvedValue([]),
+    getDesignerState: vi.fn().mockResolvedValue(null),
+    updateDesignerState: vi.fn().mockResolvedValue({}),
   },
 }));
 
@@ -60,7 +62,7 @@ describe('Coverage Expansion - ListDesignerApp & useFlowState', () => {
   });
 
   it('covers loadGameday failure and navigation', async () => {
-    vi.mocked(gamedayApi.getGameday).mockRejectedValueOnce(new Error('Load Error'));
+    vi.mocked(gamedayApi.getDesignerState).mockRejectedValueOnce(new Error('Load Error'));
     
     render(
       <MemoryRouter initialEntries={['/designer/1']}>
@@ -138,10 +140,10 @@ describe('Coverage Expansion - ListDesignerApp & useFlowState', () => {
       </MemoryRouter>
     );
 
-    const addOfficialsBtn = await screen.findByTestId('add-officials-button');
-    await userEvent.click(addOfficialsBtn);
+    const addOfficialsBtns = await screen.findAllByTestId('add-officials-button');
+    await userEvent.click(addOfficialsBtns[0]);
     
-    expect(await screen.findByText(/External Officials/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Officials/i)).toBeInTheDocument();
   });
 
   describe('useFlowState logic coverage', () => {

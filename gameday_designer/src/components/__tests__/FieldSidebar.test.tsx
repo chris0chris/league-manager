@@ -14,10 +14,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import FieldSidebar from '../FieldSidebar';
 import type { FlowField, FlowNode } from '../../types/flowchart';
+import i18n from '../../i18n/testConfig';
 
 describe('FieldSidebar', () => {
   const mockOnAddField = vi.fn();
@@ -88,7 +89,8 @@ describe('FieldSidebar', () => {
     },
   ];
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
     vi.clearAllMocks();
   });
 
@@ -118,7 +120,7 @@ describe('FieldSidebar', () => {
         />
       );
 
-      expect(screen.getByText('Fields')).toBeInTheDocument();
+      expect(screen.getByText(i18n.t('ui:label.fields'))).toBeInTheDocument();
     });
 
     it('should render add field input', () => {
@@ -133,7 +135,7 @@ describe('FieldSidebar', () => {
       );
 
       expect(screen.getByTestId('new-field-input')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('New field name...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(i18n.t('ui:placeholder.fieldName'))).toBeInTheDocument();
     });
 
     it('should render add button', () => {
@@ -161,7 +163,7 @@ describe('FieldSidebar', () => {
         />
       );
 
-      expect(screen.getByText(/No fields defined/i)).toBeInTheDocument();
+      expect(screen.getByText(i18n.t('ui:message.noFieldsYet'))).toBeInTheDocument();
     });
 
     it('should render field list when fields exist', () => {
@@ -339,7 +341,7 @@ describe('FieldSidebar', () => {
         />
       );
 
-      const renameButton = screen.getAllByTitle('Rename field')[0];
+      const renameButton = screen.getAllByTitle(i18n.t('ui:tooltip.renameField'))[0];
       await user.click(renameButton);
 
       const editInput = screen.getByDisplayValue('Field 1');
@@ -360,7 +362,7 @@ describe('FieldSidebar', () => {
         />
       );
 
-      const renameButton = screen.getAllByTitle('Rename field')[0];
+      const renameButton = screen.getAllByTitle(i18n.t('ui:tooltip.renameField'))[0];
       await user.click(renameButton);
 
       const editInput = screen.getByDisplayValue('Field 1');
@@ -389,7 +391,7 @@ describe('FieldSidebar', () => {
         />
       );
 
-      const renameButton = screen.getAllByTitle('Rename field')[0];
+      const renameButton = screen.getAllByTitle(i18n.t('ui:tooltip.renameField'))[0];
       await user.click(renameButton);
 
       const editInput = screen.getByDisplayValue('Field 1');
@@ -412,7 +414,7 @@ describe('FieldSidebar', () => {
         />
       );
 
-      const renameButton = screen.getAllByTitle('Rename field')[0];
+      const renameButton = screen.getAllByTitle(i18n.t('ui:tooltip.renameField'))[0];
       await user.click(renameButton);
 
       const editInput = screen.getByDisplayValue('Field 1');
@@ -436,7 +438,7 @@ describe('FieldSidebar', () => {
         />
       );
 
-      const renameButton = screen.getAllByTitle('Rename field')[0];
+      const renameButton = screen.getAllByTitle(i18n.t('ui:tooltip.renameField'))[0];
       await user.click(renameButton);
 
       const editInput = screen.getByDisplayValue('Field 1');
@@ -465,7 +467,7 @@ describe('FieldSidebar', () => {
         />
       );
 
-      const renameButton = screen.getAllByTitle('Rename field')[0];
+      const renameButton = screen.getAllByTitle(i18n.t('ui:tooltip.renameField'))[0];
       await user.click(renameButton);
 
       const editInput = screen.getByDisplayValue('Field 1');
@@ -491,10 +493,10 @@ describe('FieldSidebar', () => {
         />
       );
 
-      const deleteButton = screen.getAllByTitle('Delete field')[0];
+      const deleteButton = screen.getAllByTitle(i18n.t('ui:tooltip.deleteField'))[0];
       await user.click(deleteButton);
 
-      expect(confirmSpy).toHaveBeenCalledWith('Delete field "Field 1"?');
+      expect(confirmSpy).toHaveBeenCalledWith(`Delete field "Field 1"?`);
       expect(mockOnDeleteField).toHaveBeenCalledWith('field1');
 
       confirmSpy.mockRestore();
@@ -514,7 +516,7 @@ describe('FieldSidebar', () => {
         />
       );
 
-      const deleteButton = screen.getAllByTitle('Delete field')[0];
+      const deleteButton = screen.getAllByTitle(i18n.t('ui:tooltip.deleteField'))[0];
       await user.click(deleteButton);
 
       expect(confirmSpy).toHaveBeenCalled();
@@ -537,7 +539,7 @@ describe('FieldSidebar', () => {
         />
       );
 
-      const deleteButton = screen.getAllByTitle('Delete field')[0];
+      const deleteButton = screen.getAllByTitle(i18n.t('ui:tooltip.deleteField'))[0];
       await user.click(deleteButton);
 
       expect(confirmSpy).toHaveBeenCalledWith(
@@ -560,8 +562,11 @@ describe('FieldSidebar', () => {
         />
       );
 
-      expect(screen.getByText('2 games')).toBeInTheDocument(); // Field 1
-      expect(screen.getByText('1 game')).toBeInTheDocument(); // Field 2
+      // Scoping to field-item to avoid multiple matches
+      const field1Item = screen.getByTestId('field-item-field1');
+      expect(within(field1Item).getByText(new RegExp(`2 ${i18n.t('ui:label.games')}`, 'i'))).toBeInTheDocument();
+      const field2Item = screen.getByTestId('field-item-field2');
+      expect(within(field2Item).getByText(new RegExp(`1 ${i18n.t('ui:label.games').slice(0, -1)}`, 'i'))).toBeInTheDocument();
     });
 
     it('should show singular "game" for single game', () => {
@@ -575,7 +580,8 @@ describe('FieldSidebar', () => {
         />
       );
 
-      expect(screen.getByText('1 game')).toBeInTheDocument();
+      const field2Item = screen.getByTestId('field-item-field2');
+      expect(within(field2Item).getByText(new RegExp(`1 ${i18n.t('ui:label.games').slice(0, -1)}`, 'i'))).toBeInTheDocument();
     });
 
     it('should show plural "games" for multiple games', () => {
@@ -589,7 +595,8 @@ describe('FieldSidebar', () => {
         />
       );
 
-      expect(screen.getByText('2 games')).toBeInTheDocument();
+      const field1Item = screen.getByTestId('field-item-field1');
+      expect(within(field1Item).getByText(new RegExp(`2 ${i18n.t('ui:label.games')}`, 'i'))).toBeInTheDocument();
     });
 
     it('should show 0 games for field with no games', () => {
@@ -605,7 +612,8 @@ describe('FieldSidebar', () => {
         />
       );
 
-      expect(screen.getByText('0 games')).toBeInTheDocument();
+      const fieldItem = screen.getByTestId('field-item-field3');
+      expect(within(fieldItem).getByText(new RegExp(`0 ${i18n.t('ui:label.games')}`, 'i'))).toBeInTheDocument();
     });
   });
 
@@ -621,7 +629,11 @@ describe('FieldSidebar', () => {
         />
       );
 
-      expect(screen.getByText(/1 game has no field assigned/i)).toBeInTheDocument();
+      // We need to be more specific here.
+      // The warning element does not have a test-id, but it is in a div with a class 'p-3 border-top bg-warning-subtle'.
+      const warningElement = document.querySelector('.bg-warning-subtle');
+      expect(warningElement).toBeInTheDocument();
+      expect(within(warningElement!).getByText(new RegExp(`1 ${i18n.t('ui:label.games').slice(0, -1)} has no field assigned`, 'i'))).toBeInTheDocument();
     });
 
     it('should show plural message for multiple unassigned games', () => {
@@ -666,7 +678,9 @@ describe('FieldSidebar', () => {
         />
       );
 
-      expect(screen.getByText(/2 games have no field assigned/i)).toBeInTheDocument();
+      const warningElement = document.querySelector('.bg-warning-subtle');
+      expect(warningElement).toBeInTheDocument();
+      expect(within(warningElement!).getByText(new RegExp(`2 ${i18n.t('ui:label.games')} have no field assigned`, 'i'))).toBeInTheDocument();
     });
 
     it('should not show warning when all games have fields assigned', () => {
@@ -697,7 +711,7 @@ describe('FieldSidebar', () => {
         />
       );
 
-      expect(screen.queryByText(/no field assigned/i)).not.toBeInTheDocument();
+      expect(document.querySelector('.bg-warning-subtle')).not.toBeInTheDocument();
     });
   });
 
@@ -733,3 +747,4 @@ describe('FieldSidebar', () => {
     });
   });
 });
+

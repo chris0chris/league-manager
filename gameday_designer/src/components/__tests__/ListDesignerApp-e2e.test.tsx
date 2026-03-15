@@ -29,6 +29,8 @@ vi.mock('../../api/gamedayApi', () => ({
     updateBulkGameResults: vi.fn().mockResolvedValue({}),
     listSeasons: vi.fn().mockResolvedValue([]),
     listLeagues: vi.fn().mockResolvedValue([]),
+    getDesignerState: vi.fn().mockResolvedValue(null),
+    updateDesignerState: vi.fn().mockResolvedValue({}),
   },
 }));
 
@@ -63,6 +65,9 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     vi.clearAllMocks();
     vi.mocked(gamedayApi.getGameday).mockResolvedValue({ ...mockGameday });
     vi.mocked(gamedayApi.getGamedayGames).mockResolvedValue([]);
+    vi.mocked(gamedayApi.getDesignerState).mockResolvedValue({
+      state_data: mockGameday.designer_data as unknown as import('../../types/flowchart').FlowState,
+    });
   });
 
   const renderApp = async () => {
@@ -84,15 +89,21 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
 
   it('verifies the structure is rendered correctly', async () => {
     await renderApp();
-    expect(screen.getByText(/Field 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/Preliminary Round/i)).toBeInTheDocument();
-    expect(screen.getByText(/Game 1/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Field 1/i, {}, { timeout: 10000 })).toBeInTheDocument();
+    expect(await screen.findByText(/Preliminary Round/i, {}, { timeout: 10000 })).toBeInTheDocument();
+    expect(await screen.findByText(/Game 1/i, {}, { timeout: 10000 })).toBeInTheDocument();
   });
 
   it('verifies results entry mode toggle', async () => {
     // Start in PUBLISHED state to show results button
     vi.mocked(gamedayApi.getGameday).mockResolvedValue({ ...mockGameday, status: 'PUBLISHED' });
-    
+    vi.mocked(gamedayApi.getDesignerState).mockResolvedValue({
+      state_data: {
+        ...mockGameday.designer_data,
+        metadata: { ...mockGameday, status: 'PUBLISHED' },
+      } as unknown as import('../../types/flowchart').FlowState,
+    });
+
     const { user } = await renderApp();
     
     const resultsModeBtn = await screen.findByTestId('results-mode-button');

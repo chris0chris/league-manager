@@ -5,11 +5,11 @@ class EmptyStatisticsTable:
 
     @staticmethod
     def to_html(*args, **kwargs):
-            return "Die Statistiken erscheinen nach den ersten Spielen."
+        return "Die Statistiken erscheinen nach den ersten Spielen."
 
     @staticmethod
     def to_json(*args, **kwargs):
-            return "[]"
+        return "[]"
 
 
 class EmptyLeagueStatisticsService:

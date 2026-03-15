@@ -194,17 +194,28 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
               autoFocus
             />
           ) : (
-            <strong
-              onDoubleClick={(e) => {
-                if (readOnly) return;
-                e.stopPropagation();
-                handleStartEditGroupName();
-              }}
-              style={{ cursor: readOnly ? 'default' : 'text' }}
-              title={readOnly ? undefined : t('ui:message.doubleClickToEdit')}
-            >
-              {group.name}
-            </strong>
+            <>
+              {!readOnly && (
+                <button
+                  className="btn btn-sm btn-link p-0 me-1"
+                  onClick={(e) => { e.stopPropagation(); handleStartEditGroupName(); }}
+                  title={t('ui:tooltip.editGroupName')}
+                >
+                  <i className={`bi ${ICONS.PENCIL_SMALL}`} />
+                </button>
+              )}
+              <strong
+                onDoubleClick={(e) => {
+                  if (readOnly) return;
+                  e.stopPropagation();
+                  handleStartEditGroupName();
+                }}
+                style={{ cursor: readOnly ? 'default' : 'text' }}
+                title={readOnly ? undefined : t('ui:message.doubleClickToEdit')}
+              >
+                {group.name}
+              </strong>
+            </>
           )}
         </div>
 
@@ -227,7 +238,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                 className="btn btn-sm btn-outline-info"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onShowTeamSelection(group.id);
+                  onShowTeamSelection(group.id, 'group');
                 }}
                 title={t('ui:tooltip.connectTeam')}
               >

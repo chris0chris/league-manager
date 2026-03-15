@@ -6,6 +6,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useTeamPoolState } from '../useTeamPoolState';
 import { FlowNode, GlobalTeam, GlobalTeamGroup, createGameNode, GameNode } from '../../types/flowchart';
+import type { TeamReference } from '../../types/designer';
 
 describe('useTeamPoolState', () => {
   describe('core team operations', () => {
@@ -165,10 +166,10 @@ describe('useTeamPoolState', () => {
       expect(usage).toContainEqual({ gameId: 'g2', slot: 'away' });
     });
 
-    it('replaces a global team and updates all game assignments', () => {
+    it('replaces a global team and updates all game assignments (legacy string official)', () => {
       let teams: GlobalTeam[] = [{ id: 'old-id', label: 'Old Name', groupId: 'group-1', order: 0 }];
       let nodes: FlowNode[] = [
-        createGameNode('g1', { x: 0, y: 0 }, { homeTeamId: 'old-id', awayTeamId: 'other', official: 'old-id' }),
+        createGameNode('g1', { x: 0, y: 0 }, { homeTeamId: 'old-id', awayTeamId: 'other', official: 'old-id' as unknown as TeamReference }),
       ];
       
       const setGlobalTeams = vi.fn((update) => {
@@ -194,7 +195,35 @@ describe('useTeamPoolState', () => {
       const game = nodes[0] as GameNode;
       expect(game.data.homeTeamId).toBe('team-123');
       expect(game.data.awayTeamId).toBe('other');
-      expect(game.data.official).toBe('team-123');
+      expect(game.data.official).toEqual({ type: 'static', name: 'team-123' });
+    });
+
+    it('replaces a global team when official is stored as a static TeamReference', () => {
+      let teams: GlobalTeam[] = [{ id: 'old-id', label: 'Old Name', groupId: 'group-1', order: 0 }];
+      let nodes: FlowNode[] = [
+        createGameNode('g1', { x: 0, y: 0 }, {
+          homeTeamId: 'old-id',
+          awayTeamId: 'other',
+          official: { type: 'static', name: 'old-id' } as TeamReference,
+        }),
+      ];
+      const setGlobalTeams = vi.fn((update) => {
+        teams = typeof update === 'function' ? update(teams) : update;
+      });
+      const setNodes = vi.fn((update) => {
+        nodes = typeof update === 'function' ? update(nodes) : update;
+      });
+
+      const { result } = renderHook(
+        () => useTeamPoolState(teams, setGlobalTeams, [], vi.fn(), nodes, setNodes)
+      );
+
+      act(() => {
+        result.current.replaceGlobalTeam('old-id', { id: 123, text: 'New Name' });
+      });
+
+      const game = nodes[0] as GameNode;
+      expect(game.data.official).toEqual({ type: 'static', name: 'team-123' });
     });
   });
 });

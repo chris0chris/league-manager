@@ -14,7 +14,8 @@ from django.views.generic import (
     UpdateView,
     CreateView,
     FormView,
-    DeleteView, TemplateView,
+    DeleteView,
+    TemplateView,
 )
 from formtools.wizard.views import SessionWizardView
 
@@ -77,9 +78,10 @@ class GamedayListView(View):
                 "current_league": league,
                 "season_year_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR,
                 "season_year_league_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
-                "season_year_league_statistic_pattern": LEAGUE_GAMEDAY_LEAGUE_STATISTICS
+                "season_year_league_statistic_pattern": LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
             },
         )
+
 
 class GamedayLeagueStatisticView(TemplateView):
     model = Gameday
@@ -175,8 +177,9 @@ class GamedayDetailView(DetailView):
         passcheck_info_table = ""
 
         if self.request.user.is_staff:
-            passcheck_info_table = gs.get_staff_passcheck_details().to_html(**render_configs)
-
+            passcheck_info_table = gs.get_staff_passcheck_details().to_html(
+                **render_configs
+            )
 
         context["info"] = {
             "schedule": gs.get_schedule().to_html(**render_configs),

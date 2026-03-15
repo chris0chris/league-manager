@@ -5,7 +5,8 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import NotificationToast from '../NotificationToast';
+import NotificationToast from "../ui/NotificationToast";
+
 import { Notification } from '../../types/designer';
 
 describe('NotificationToast Coverage', () => {

@@ -22,7 +22,8 @@
     "previewGameDuration": "Default game duration: {{duration}} minutes",
     "durationValidation": "Duration must be between 15 and 180 minutes.",
     "insufficientTeams": "Not enough teams in the pool. This format requires at least {{min}} teams, or select 'Generate teams automatically'.",
-    "generateTeamsDisabledHint": "Disable manual teams first"
+    "generateTeamsDisabledHint": "Disable manual teams first",
+    "selectTeamsTitle": "Select Teams"
   },
   "publishConfirmation": {
     "title": "Publish Schedule",

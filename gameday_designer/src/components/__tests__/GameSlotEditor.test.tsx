@@ -75,35 +75,35 @@ describe('GameSlotEditor', () => {
     it('displays stage input with current value', () => {
       renderEditor();
       // Using data-testid or finding by role is safer if label text is translated
-      const stageInput = screen.getByLabelText(/label.stage/i) as HTMLSelectElement;
+      const stageInput = screen.getByLabelText(i18n.t('ui:label.stage')) as HTMLSelectElement;
       expect(stageInput.value).toBe('Preliminary');
     });
 
     it('displays standing input with current value', () => {
       renderEditor();
-      const standingInput = screen.getByLabelText(/label.standing/i) as HTMLInputElement;
+      const standingInput = screen.getByLabelText(i18n.t('ui:label.standing')) as HTMLInputElement;
       expect(standingInput.value).toBe('Gruppe 1');
     });
 
     it('displays home team selector', () => {
       renderEditor();
       // Option text is now translated
-      expect(screen.getByText(/label.home/i)).toBeInTheDocument();
+      expect(screen.getByText(i18n.t('ui:label.home'))).toBeInTheDocument();
     });
 
     it('displays away team selector', () => {
       renderEditor();
-      expect(screen.getByText(/label.away/i)).toBeInTheDocument();
+      expect(screen.getByText(i18n.t('ui:label.away'))).toBeInTheDocument();
     });
 
      it('displays official team selector', () => {
        renderEditor();
-       expect(screen.getByText(/Official \*/)).toBeInTheDocument();
+       expect(screen.getByText(`${i18n.t('ui:label.official')} *`)).toBeInTheDocument();
      });
 
     it('displays break time input', () => {
       renderEditor();
-      const breakInput = screen.getByLabelText(/label.breakAfter/i) as HTMLInputElement;
+      const breakInput = screen.getByLabelText(i18n.t('ui:label.breakAfter')) as HTMLInputElement;
       expect(breakInput.value).toBe('0');
     });
 
@@ -113,7 +113,7 @@ describe('GameSlotEditor', () => {
         breakAfter: 15,
       };
       renderEditor(slotWithBreak);
-      const breakInput = screen.getByLabelText(/label.breakAfter/i) as HTMLInputElement;
+      const breakInput = screen.getByLabelText(i18n.t('ui:label.breakAfter')) as HTMLInputElement;
       expect(breakInput.value).toBe('15');
     });
   });
@@ -156,7 +156,7 @@ describe('GameSlotEditor', () => {
       const user = userEvent.setup();
       renderEditor();
 
-      await user.selectOptions(screen.getByLabelText(/label.stage/i), 'Final');
+      await user.selectOptions(screen.getByLabelText(i18n.t('ui:label.stage')), 'Final');
       await user.click(screen.getByRole('button', { name: /save/i }));
 
       expect(mockOnSave).toHaveBeenCalledWith(expect.objectContaining({
@@ -168,7 +168,7 @@ describe('GameSlotEditor', () => {
       const user = userEvent.setup();
       renderEditor();
 
-      const standingInput = screen.getByLabelText(/label.standing/i);
+      const standingInput = screen.getByLabelText(i18n.t('ui:label.standing'));
       await user.clear(standingInput);
       await user.type(standingInput, 'HF1');
       await user.click(screen.getByRole('button', { name: /save/i }));

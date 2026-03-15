@@ -30,6 +30,8 @@ vi.mock('../../api/gamedayApi', () => ({
     updateBulkGameResults: vi.fn().mockResolvedValue({}),
     listSeasons: vi.fn().mockResolvedValue([]),
     listLeagues: vi.fn().mockResolvedValue([]),
+    getDesignerState: vi.fn().mockResolvedValue(null),
+    updateDesignerState: vi.fn().mockResolvedValue({}),
   },
 }));
 
@@ -66,6 +68,15 @@ describe('Tournament Progression Integration', () => {
     vi.clearAllMocks();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(gamedayApi.getGameday).mockResolvedValue(mockGameday as unknown as Parameters<typeof gamedayApi.getGameday>[0] extends number ? any : any); // Keep it simple but fix lint
+    vi.mocked(gamedayApi.getDesignerState).mockResolvedValue({
+      state_data: {
+        nodes: [],
+        edges: [],
+        fields: [],
+        globalTeams: mockGameday.designer_data.globalTeams,
+        globalTeamGroups: mockGameday.designer_data.globalTeamGroups,
+      } as unknown as import('../../types/flowchart').FlowState,
+    });
   });
 
   const renderApp = async () => {
@@ -95,8 +106,12 @@ describe('Tournament Progression Integration', () => {
     // 2. Select Template (F6-2-2 is default)
     const modal = await screen.findByRole('dialog');
     
-    // 3. Generate
-    const confirmBtn = within(modal).getByRole('button', { name: /generate tournament/i });
+    // 3. Generate — wait for auto-select effect to enable the button before clicking
+    const confirmBtn = await waitFor(() => {
+      const btn = within(modal).getByRole('button', { name: /generate tournament/i });
+      expect(btn).not.toBeDisabled();
+      return btn;
+    });
     await user.click(confirmBtn);
 
     // 4. Verify games were created in the UI

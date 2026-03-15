@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NotificationToast from '../NotificationToast';
+import NotificationToast from "../ui/NotificationToast";
+
 import { Notification } from '../../types/designer';
 
 describe('NotificationToast', () => {

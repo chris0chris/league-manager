@@ -7,10 +7,12 @@ import AppHeader from '../layout/AppHeader';
 import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 import { useDesignerController } from '../../hooks/useDesignerController';
+import { useFlowState } from '../../hooks/useFlowState';
 import type { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup, FieldNode } from '../../types/flowchart';
 
-// Mock the hook
+// Mock the hooks
 vi.mock('../../hooks/useDesignerController');
+vi.mock('../../hooks/useFlowState');
 
 // Mock react-router-dom
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -47,8 +49,74 @@ vi.mock('../../api/gamedayApi', () => ({
     updateBulkGameResults: vi.fn().mockResolvedValue({}),
     listSeasons: vi.fn().mockResolvedValue([{ id: 1, name: 'Season 1' }]),
     listLeagues: vi.fn().mockResolvedValue([{ id: 1, name: 'League 1' }]),
+    getDesignerState: vi.fn().mockResolvedValue(null),
+    updateDesignerState: vi.fn().mockResolvedValue({}),
   },
 }));
+
+const defaultFlowState = {
+  nodes: [] as FlowNode[],
+  edges: [] as FlowEdge[],
+  fields: [] as FieldNode[],
+  globalTeams: [] as GlobalTeam[],
+  globalTeamGroups: [] as GlobalTeamGroup[],
+  selectedNode: null,
+  selection: { nodeIds: [], edgeIds: [] },
+  saveTrigger: 0,
+  canUndo: false,
+  canRedo: false,
+  stats: { fieldCount: 0, gameCount: 0, teamCount: 0 },
+  exportState: vi.fn().mockReturnValue({ nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [] }),
+  importState: vi.fn(),
+  updateMetadata: vi.fn(),
+  addField: vi.fn(),
+  updateField: vi.fn(),
+  deleteField: vi.fn(),
+  addGameNode: vi.fn(),
+  deleteNode: vi.fn(),
+  selectNode: vi.fn(),
+  clearAll: vi.fn(),
+  clearSchedule: vi.fn(),
+  addFieldNode: vi.fn(),
+  addStageNode: vi.fn(),
+  addBulkTournament: vi.fn(),
+  addBulkGames: vi.fn(),
+  addBulkFields: vi.fn(),
+  addGlobalTeam: vi.fn(),
+  updateGlobalTeam: vi.fn(),
+  deleteGlobalTeam: vi.fn(),
+  reorderGlobalTeam: vi.fn(),
+  addGlobalTeamGroup: vi.fn(),
+  assignTeamToGame: vi.fn(),
+  ensureOfficialsGroup: vi.fn(),
+  addOfficialsGroup: vi.fn(),
+  updateNode: vi.fn(),
+  getTargetStage: vi.fn().mockReturnValue(null),
+  ensureContainerHierarchy: vi.fn().mockReturnValue({ fieldId: '', stageId: '' }),
+  getGameField: vi.fn().mockReturnValue(null),
+  getGameStage: vi.fn().mockReturnValue(null),
+  getFieldStages: vi.fn().mockReturnValue([]),
+  getStageGames: vi.fn().mockReturnValue([]),
+  getTeamField: vi.fn().mockReturnValue(null),
+  getTeamStage: vi.fn().mockReturnValue(null),
+  getTeamUsage: vi.fn().mockReturnValue({ games: [] }),
+  onNodesChange: vi.fn(),
+  onEdgesChange: vi.fn(),
+  setSelection: vi.fn(),
+  setEdges: vi.fn(),
+  addGameToGameEdge: vi.fn(),
+  addBulkGameToGameEdges: vi.fn(),
+  addStageToGameEdge: vi.fn(),
+  removeEdgeFromSlot: vi.fn(),
+  addGameNodeInStage: vi.fn(),
+  moveNodeToStage: vi.fn(),
+  matchNames: [],
+  groupNames: [],
+  selectedContainerField: null,
+  selectedContainerStage: null,
+  undo: vi.fn(),
+  redo: vi.fn(),
+};
 
 describe('ListDesignerApp - Integration Tests', () => {
   const mockHandlers = {
@@ -73,6 +141,8 @@ describe('ListDesignerApp - Integration Tests', () => {
     setShowTournamentModal: vi.fn(),
     dismissNotification: vi.fn(),
     addNotification: vi.fn(),
+    loadData: vi.fn().mockResolvedValue(undefined),
+    saveData: vi.fn().mockResolvedValue(undefined),
   };
 
   const defaultMockReturn = {
@@ -117,6 +187,7 @@ describe('ListDesignerApp - Integration Tests', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en');
     vi.clearAllMocks();
+    (useFlowState as Mock).mockReturnValue(defaultFlowState);
     (useDesignerController as Mock).mockReturnValue(defaultMockReturn);
   });
 
@@ -178,16 +249,21 @@ describe('ListDesignerApp - Integration Tests', () => {
 
   describe('Callbacks and Handlers', () => {
     it('should show fields when they exist', async () => {
+      const fieldNode = {
+        id: 'field1',
+        type: 'field',
+        data: { name: 'Field 1', order: 0 },
+        position: { x: 0, y: 0 },
+      };
+      (useFlowState as Mock).mockReturnValue({
+        ...defaultFlowState,
+        nodes: [fieldNode],
+      });
       (useDesignerController as Mock).mockReturnValue({
         ...defaultMockReturn,
-        nodes: [{ 
-          id: 'field1', 
-          type: 'field', 
-          data: { name: 'Field 1', order: 0 },
-          position: { x: 0, y: 0 }
-        }]
+        nodes: [fieldNode],
       });
-      
+
       await renderApp();
       await screen.findByText('Field 1');
     });

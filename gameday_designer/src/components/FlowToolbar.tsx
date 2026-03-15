@@ -83,7 +83,7 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
         onImport(json);
       } catch (error) {
         console.error('Failed to parse JSON file:', error);
-        onNotify?.(t('error:invalidScheduleFormat', { errors: 'Invalid JSON' }), 'danger', t('ui:notification.title.importError'));
+        onNotify?.(t('error:invalidJson'), 'danger', t('ui:notification.title.importError'));
       }
     };
     reader.readAsText(file);

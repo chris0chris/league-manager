@@ -3,15 +3,14 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import GamedayMetadataAccordion from '../GamedayMetadataAccordion';
 import type { GamedayMetadata } from '../../types';
+import type { FlowValidationResult } from '../../types/flowchart';
 import { gamedayApi } from '../../api/gamedayApi';
 import '../../i18n/testConfig';
-
-import { Accordion } from 'react-bootstrap';
 
 vi.mock('../../api/gamedayApi');
 
@@ -31,69 +30,114 @@ describe('GamedayMetadataAccordion', () => {
 
   const mockOnUpdate = vi.fn();
 
-  it('renders accordion collapsed by default', () => {
-    render(
-      <Accordion>
-        <GamedayMetadataAccordion metadata={mockMetadata} onUpdate={mockOnUpdate} />
-      </Accordion>
+  const mockValidation: FlowValidationResult = { isValid: true, errors: [], warnings: [] };
+
+  async function renderAccordion(extraProps: Partial<React.ComponentProps<typeof GamedayMetadataAccordion>> = {}) {
+    vi.mocked(gamedayApi.listSeasons).mockResolvedValue([]);
+    vi.mocked(gamedayApi.listLeagues).mockResolvedValue([]);
+
+    const result = render(
+      <GamedayMetadataAccordion
+        metadata={mockMetadata}
+        onUpdate={vi.fn()}
+        onClearAll={vi.fn()}
+        onDelete={vi.fn()}
+        onPublish={vi.fn()}
+        onUnlock={vi.fn()}
+        onHighlight={vi.fn()}
+        validation={mockValidation}
+        readOnly={false}
+        hasData={false}
+        {...extraProps}
+      />
     );
-    
+
+    // Wait for async effects to settle
+    await waitFor(() => {
+      expect(vi.mocked(gamedayApi.listSeasons)).toHaveBeenCalled();
+    });
+
+    return result;
+  }
+
+  it('renders accordion open by default', async () => {
+    await renderAccordion();
+
     expect(screen.getByText('Test Gameday')).toBeInTheDocument();
-    expect(screen.getByText('01.05.2026')).toBeInTheDocument();
-    
+    expect(screen.getByText('01/05/2026')).toBeInTheDocument();
+
     const button = document.querySelector('.accordion-button');
-    expect(button).toHaveClass('collapsed');
+    expect(button).not.toHaveClass('collapsed');
   });
 
-  it('expands to show form fields and action buttons', () => {
-    render(
-      <Accordion>
-        <GamedayMetadataAccordion metadata={mockMetadata} onUpdate={mockOnUpdate} />
-      </Accordion>
-    );
-    
-    fireEvent.click(document.querySelector('.accordion-button')!);
-    
+  it('shows form fields and action buttons when open', async () => {
+    await renderAccordion();
+    // Accordion starts open — no click needed
     expect(screen.getByLabelText('Gameday Name')).toBeVisible();
     expect(screen.getByLabelText('Gameday Date')).toBeVisible();
-    
+
     // Action buttons should now be in the body
     expect(screen.getByTestId('publish-schedule-button')).toBeInTheDocument();
     expect(screen.getByText('Clear Schedule')).toBeInTheDocument();
     expect(screen.getByText('Delete Gameday')).toBeInTheDocument();
   });
 
-  it('calls onUpdate when fields change', () => {
-    render(
-      <Accordion>
-        <GamedayMetadataAccordion metadata={mockMetadata} onUpdate={mockOnUpdate} />
-      </Accordion>
-    );
-    fireEvent.click(document.querySelector('.accordion-button')!);
-
+  it('calls onUpdate when fields change', async () => {
+    await renderAccordion({ onUpdate: mockOnUpdate });
+    // Accordion starts open — no click needed
     const nameInput = screen.getByLabelText('Gameday Name');
     fireEvent.change(nameInput, { target: { value: 'Updated Name' } });
 
     expect(mockOnUpdate).toHaveBeenCalledWith({ name: 'Updated Name' });
   });
 
+  it('collapses when forceCollapsed becomes true', async () => {
+    const { rerender } = await renderAccordion({ forceCollapsed: false });
+    expect(document.querySelector('.accordion-button')).not.toHaveClass('collapsed');
+
+    rerender(
+      <GamedayMetadataAccordion
+        metadata={mockMetadata}
+        onUpdate={vi.fn()} onClearAll={vi.fn()} onDelete={vi.fn()}
+        onPublish={vi.fn()} onUnlock={vi.fn()}
+        onHighlight={vi.fn()} validation={mockValidation}
+        readOnly={false} hasData={false}
+        forceCollapsed={true}
+      />
+    );
+    expect(document.querySelector('.accordion-button')).toHaveClass('collapsed');
+  });
+
+  it('stays collapsed after forceCollapsed returns to false (no auto-reopen)', async () => {
+    const { rerender } = await renderAccordion({ forceCollapsed: true });
+    expect(document.querySelector('.accordion-button')).toHaveClass('collapsed');
+
+    rerender(
+      <GamedayMetadataAccordion
+        metadata={mockMetadata}
+        onUpdate={vi.fn()} onClearAll={vi.fn()} onDelete={vi.fn()}
+        onPublish={vi.fn()} onUnlock={vi.fn()}
+        onHighlight={vi.fn()} validation={mockValidation}
+        readOnly={false} hasData={false}
+        forceCollapsed={false}
+      />
+    );
+    // Must still be collapsed — scroll-back-up must not re-open the accordion
+    expect(document.querySelector('.accordion-button')).toHaveClass('collapsed');
+  });
+
   it('triggers unlock schedule when button is clicked', async () => {
     const user = userEvent.setup();
     const publishedMetadata = { ...mockMetadata, status: 'PUBLISHED' };
     const mockOnUnlock = vi.fn();
-    
+
     vi.mocked(gamedayApi.listSeasons).mockResolvedValue([]);
     vi.mocked(gamedayApi.listLeagues).mockResolvedValue([]);
 
-    render(
-      <Accordion defaultActiveKey="0">
-        <GamedayMetadataAccordion 
-          metadata={publishedMetadata} 
-          onUpdate={mockOnUpdate}
-          onUnlock={mockOnUnlock}
-        />
-      </Accordion>
-    );
+    renderAccordion({
+      metadata: publishedMetadata,
+      onUnlock: mockOnUnlock,
+    });
 
     const unlockBtn = await screen.findByRole('button', { name: /Unlock Schedule/i });
     await user.click(unlockBtn);

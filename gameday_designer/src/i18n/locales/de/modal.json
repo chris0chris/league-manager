@@ -22,7 +22,8 @@
     "previewFirstGame": "Erstes Spiel um {{time}}",
     "previewGameDuration": "Standard-Spieldauer: {{duration}} Minuten",
     "durationValidation": "Die Dauer muss zwischen 15 und 180 Minuten liegen.",
-    "generateTeamsDisabledHint": "Zuerst manuelle Teams entfernen"
+    "generateTeamsDisabledHint": "Zuerst manuelle Teams entfernen",
+    "selectTeamsTitle": "Teams auswählen"
   },
   "publishConfirmation": {
     "title": "Spielplan veröffentlichen",
