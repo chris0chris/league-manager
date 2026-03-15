@@ -111,7 +111,11 @@ class GamedayViewSet(viewsets.ModelViewSet):
         gameday = self.get_object()
         if request.method == "GET":
             state, created = GamedayDesignerState.objects.get_or_create(gameday=gameday)
-            return Response({"state_data": state.state_data})
+            state_data = dict(state.state_data) if state.state_data else {}
+            metadata = state_data.get("metadata")
+            if isinstance(metadata, dict):
+                state_data["metadata"] = {**metadata, "status": gameday.status}
+            return Response({"state_data": state_data})
 
         if request.method == "PUT":
             state, created = GamedayDesignerState.objects.get_or_create(gameday=gameday)
