@@ -69,15 +69,21 @@ export function resolveBracketReferences(nodes: FlowNode[], teams: GlobalTeam[])
       const newResolvedHome = resolveTeam(node.data.homeTeamDynamic, currentNodes);
       const newResolvedAway = resolveTeam(node.data.awayTeamDynamic, currentNodes);
 
-      if (newResolvedHome !== node.data.resolvedHomeTeam || newResolvedAway !== node.data.resolvedAwayTeam) {
+      const normalizedHome = newResolvedHome ?? undefined;
+      const normalizedAway = newResolvedAway ?? undefined;
+      
+      const currentHome = node.data.resolvedHomeTeam ?? undefined;
+      const currentAway = node.data.resolvedAwayTeam ?? undefined;
+
+      if (normalizedHome !== currentHome || normalizedAway !== currentAway) {
         passChanged = true;
         overallChanged = true;
         return {
           ...node,
           data: {
             ...node.data,
-            resolvedHomeTeam: newResolvedHome || undefined,
-            resolvedAwayTeam: newResolvedAway || undefined
+            resolvedHomeTeam: normalizedHome,
+            resolvedAwayTeam: normalizedAway
           }
         };
       }

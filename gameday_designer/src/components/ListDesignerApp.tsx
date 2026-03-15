@@ -253,7 +253,9 @@ const ListDesignerApp: React.FC = () => {
         navigate('/');
       });
     }
-  }, [id, loadData, addNotification, t, navigate]);
+    // Only run when ID changes. loadData is stable but we avoid any risk of loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const handleOpenResultModal = useCallback((gameId: string) => {
     const gameNode = flowState.nodes.find((n) => n.id === gameId && isGameNode(n)) as GameNode | undefined;

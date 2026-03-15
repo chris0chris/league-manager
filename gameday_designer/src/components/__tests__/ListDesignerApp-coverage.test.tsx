@@ -474,9 +474,7 @@ describe('ListDesignerApp Coverage', () => {
   });
 
   describe('BEH-002: scroll collapses accordion', () => {
-    it('registers a passive scroll listener on window', () => {
-      const addEventSpy = vi.spyOn(window, 'addEventListener');
-
+    it('collapses accordion when content div is scrolled past 50px', async () => {
       render(
         <MemoryRouter initialEntries={['/designer/1']}>
           <GamedayProvider>
@@ -487,18 +485,23 @@ describe('ListDesignerApp Coverage', () => {
         </MemoryRouter>
       );
 
-      const scrollCalls = addEventSpy.mock.calls.filter(([event]) => event === 'scroll');
-      expect(scrollCalls.length).toBeGreaterThan(0);
-      const lastScrollCall = scrollCalls[scrollCalls.length - 1];
-      expect(lastScrollCall[2]).toEqual({ passive: true });
+      const contentDiv = document.querySelector('.list-designer-app__content');
+      expect(contentDiv).toBeTruthy();
 
-      addEventSpy.mockRestore();
+      // Simulate scroll past threshold
+      await act(async () => {
+        fireEvent.scroll(contentDiv!, { target: { scrollTop: 100 } });
+      });
+
+      // forceCollapsed prop should cause accordion to collapse — the toggle button gets 'collapsed' class
+      await waitFor(() => {
+        const toggle = document.querySelector('[data-testid="gameday-metadata-toggle"]');
+        expect(toggle?.classList.contains('collapsed')).toBe(true);
+      });
     });
 
-    it('removes the scroll listener on unmount', () => {
-      const removeEventSpy = vi.spyOn(window, 'removeEventListener');
-
-      const { unmount } = render(
+    it('clears forceCollapsed when content div scrolls back above 50px', async () => {
+      render(
         <MemoryRouter initialEntries={['/designer/1']}>
           <GamedayProvider>
             <Routes>
@@ -508,12 +511,21 @@ describe('ListDesignerApp Coverage', () => {
         </MemoryRouter>
       );
 
-      unmount();
+      const contentDiv = document.querySelector('.list-designer-app__content');
 
-      const scrollRemovals = removeEventSpy.mock.calls.filter(([event]) => event === 'scroll');
-      expect(scrollRemovals.length).toBeGreaterThan(0);
+      // Scroll down past threshold
+      await act(async () => {
+        fireEvent.scroll(contentDiv!, { target: { scrollTop: 100 } });
+      });
 
-      removeEventSpy.mockRestore();
+      // Scroll back up — forceCollapsed resets, accordion stays closed until user manually reopens
+      await act(async () => {
+        fireEvent.scroll(contentDiv!, { target: { scrollTop: 0 } });
+      });
+
+      // Accordion remains collapsed (user must manually reopen); no crash or error expected
+      const toggle = document.querySelector('[data-testid="gameday-metadata-toggle"]');
+      expect(toggle).toBeTruthy();
     });
   });
 

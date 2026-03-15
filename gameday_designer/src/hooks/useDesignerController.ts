@@ -180,16 +180,7 @@ export function useDesignerController(
         const currentTeams = fs?.globalTeams || [];
         let teamsToUse = currentTeams;
         
-        if (config.generateTeams) {
-          fs?.clearAll();
-          teamsToUse = [];
-        } else {
-          fs?.clearSchedule();
-          if (config.selectedTeamIds && config.selectedTeamIds.length > 0) {
-            teamsToUse = currentTeams.filter(t => config.selectedTeamIds!.includes(t.id));
-          }
-        }
-
+        let generatedGroups: GlobalTeamGroup[] = [];
         if (config.generateTeams) {
           const teamCount = config.template.teamCount.exact || config.template.teamCount.min;
           const firstStage = config.template.stages?.[0];
@@ -208,7 +199,10 @@ export function useDesignerController(
           for (let i = 0; i < groupCount; i++) {
             const groupName = groupCount > 1 ? `Gruppe ${String.fromCharCode(65 + i)}` : DEFAULT_TOURNAMENT_GROUP_NAME;
             const newGroup = fs?.addGlobalTeamGroup(groupName);
-            if (newGroup) groupIds.push(newGroup.id);
+            if (newGroup) {
+              groupIds.push(newGroup.id);
+              generatedGroups.push(newGroup);
+            }
           }
 
           const teamData = generateTeamsForTournament(teamCount);
@@ -221,9 +215,14 @@ export function useDesignerController(
             return { ...team, color: data.color };
           });
 
-          teamsToUse = [...teamsToUse, ...newTeams];
+          teamsToUse = newTeams;
+        } else {
+          if (config.selectedTeamIds && config.selectedTeamIds.length > 0) {
+            teamsToUse = currentTeams.filter(t => config.selectedTeamIds!.includes(t.id));
+          }
         }
 
+        // Prepare structure
         const structure = generateTournament(teamsToUse, config);
         
         if (config.autoAssignTeams && teamsToUse.length > 0) {
@@ -245,8 +244,24 @@ export function useDesignerController(
           games: gamesWithRefs,
         };
         
-        fs?.addBulkTournament(structureWithRefs, true);
-        fs?.addBulkFields(structureWithRefs.fields.map(f => ({ id: f.id, name: f.data.name, order: f.data.order, color: f.data.color })), true);
+        // Atomic update of the entire structure using importState
+        // We use the latest values from ref to ensure we don't overwrite teams/groups added during this function
+        const latestFs = flowStateRef.current;
+        fs?.importState({
+          metadata: latestFs?.metadata || {} as GamedayMetadata,
+          nodes: [...structureWithRefs.fields, ...structureWithRefs.stages, ...structureWithRefs.games],
+          edges: [], // Edges will be added by assignTeamsToTournament if needed
+          fields: structureWithRefs.fields.map(f => ({ 
+            id: f.id, 
+            name: f.data.name, 
+            order: f.data.order, 
+            color: f.data.color 
+          })),
+          globalTeams: config.generateTeams ? teamsToUse : (latestFs?.globalTeams || []),
+          globalTeamGroups: config.generateTeams ? generatedGroups : (latestFs?.globalTeamGroups || []),
+        });
+
+        fs?.setSelection({ nodeIds: [], edgeIds: [] });
 
         if (config.autoAssignTeams && teamsToUse.length > 0) {
           setTimeout(() => {

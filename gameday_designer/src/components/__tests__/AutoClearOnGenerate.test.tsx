@@ -106,8 +106,12 @@ describe('Auto-Clear on Generate Integration', () => {
     // 2. Select Template
     const modal = await screen.findByRole('dialog');
     
-    // 3. Generate
-    const confirmBtn = within(modal).getByTestId('confirm-generate-button');
+    // 3. Generate — wait for auto-select effect to enable the button before clicking
+    const confirmBtn = await waitFor(() => {
+      const btn = within(modal).getByTestId('confirm-generate-button');
+      expect(btn).not.toBeDisabled();
+      return btn;
+    });
     await user.click(confirmBtn);
 
     // 4. Verify old structure is GONE and new structure is present

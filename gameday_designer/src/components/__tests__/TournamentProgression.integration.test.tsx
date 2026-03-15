@@ -106,8 +106,12 @@ describe('Tournament Progression Integration', () => {
     // 2. Select Template (F6-2-2 is default)
     const modal = await screen.findByRole('dialog');
     
-    // 3. Generate
-    const confirmBtn = within(modal).getByRole('button', { name: /generate tournament/i });
+    // 3. Generate — wait for auto-select effect to enable the button before clicking
+    const confirmBtn = await waitFor(() => {
+      const btn = within(modal).getByRole('button', { name: /generate tournament/i });
+      expect(btn).not.toBeDisabled();
+      return btn;
+    });
     await user.click(confirmBtn);
 
     // 4. Verify games were created in the UI
