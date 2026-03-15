@@ -42,7 +42,7 @@ class CanvasPublishService:
             stage_node = node_by_id.get(node.get("parentId"), {})
             field_node = node_by_id.get(stage_node.get("parentId", ""), {})
 
-            field_num = field_node.get("data", {}).get("order", 1)
+            field_num = field_node.get("data", {}).get("order", 0) + 1
             stage_name = stage_node.get("data", {}).get("name", "")
             standing = data.get("standing", "")
             start_time = data.get("startTime") or str(self.gameday.start)
@@ -92,6 +92,9 @@ class CanvasPublishService:
             return fallback
         if official_ref.get("type") == "static":
             name = official_ref.get("name", "")
+            # Canvas stores canvas team-ID as name; resolve to label if possible
+            if name in global_teams:
+                name = global_teams[name].get("label", name)
             if name:
                 team, _ = Team.objects.get_or_create(
                     name=name,
