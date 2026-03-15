@@ -108,9 +108,9 @@ describe('GameTable', () => {
 
   it('renders table headers', () => {
     renderTable();
-    expect(screen.getByText(/label.standing/i)).toBeInTheDocument();
-    expect(screen.getByText(/label.home/i)).toBeInTheDocument();
-    expect(screen.getByText(/label.away/i)).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('ui:label.standing'))).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('ui:label.home'))).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('ui:label.away'))).toBeInTheDocument();
   });
 
   it('renders empty message when no games provided', () => {
@@ -306,7 +306,7 @@ describe('GameTable', () => {
         data: { ...game2.data, homeTeamDynamic: { type: 'winner', matchName: 'Quali 1' } }
       } as GameNode;
       renderTable({ games: [gameWithWinner], readOnly: true });
-      expect(screen.getByText(/label.tbd/i)).toBeInTheDocument();
+      expect(screen.getByText(i18n.t('ui:label.tbd'))).toBeInTheDocument();
     });
   });
 

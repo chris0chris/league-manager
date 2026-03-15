@@ -34,7 +34,9 @@
     "enterResults": "Ergebnisse eintragen",
     "exitResults": "Designer-Ansicht",
     "backToDashboard": "Zurück zum Dashboard",
-    "addOfficials": "Offizielle hinzufügen"
+    "addOfficials": "Offizielle hinzufügen",
+    "saveResults": "Ergebnisse speichern",
+    "saving": "Speichere..."
   },
   "label": {
     "dashboard": "Dashboard",
@@ -90,16 +92,26 @@
     "rank": "Platz",
     "in": "in",
     "of": "von",
-    "fields": "Felder",
-    "games": "Spiele",
-    "teams": "Teams"
+    "user": "Benutzer",
+    "fh": "1H",
+    "sh": "2H",
+    "total": "Gesamt",
+    "fieldName": "Feldname"
+  },
+  "title": {
+    "enterGameResult": "Ergebnis eingeben",
+    "selectTeam": "Team auswählen",
+    "selectOfficial": "Schiedsrichter auswählen"
   },
   "placeholder": {
     "standing": "z.B. Gruppe 1, HF1, P1",
     "gamedayName": "Neuer Spieltag",
     "searchGamedays": "Spieltage suchen...",
     "selectSeason": "Saison wählen",
-    "selectLeague": "Liga wählen"
+    "selectLeague": "Liga wählen",
+    "fieldName": "Neuer Feldname...",
+    "match": "z.B. HF1, Finale",
+    "teamOfficials": "z.B. Team-Schiedsrichter"
   },
   "message": {
     "noTeamsYet": "Noch keine Teams",
@@ -109,7 +121,7 @@
     "noGamesInStage": "Keine Spiele in dieser Phase",
     "noFieldsYet": "Noch keine Felder",
     "noGroupsYet": "Noch keine Gruppen",
-    "createFirstField": "Erstellen Sie Ihr erstes Feld, um Spiele zu organisieren",
+    "createFirstField": "Klicken Sie auf \"Feld hinzufügen\" in der Toolbar, um Ihr erstes Spielfeld zu erstellen.",
     "createFirstGroup": "Erstellen Sie Ihre erste Team-Gruppe, um Teams zu organisieren",
     "doubleClickToEdit": "Doppelklick zum Bearbeiten",
     "doubleClickToEditTeam": "Doppelklick zum Bearbeiten des Teamnamens",
@@ -123,7 +135,11 @@
     "placeFrom": "{{place}}. Platz aus {{stage}}",
     "ungrouped": "Ungruppiert",
     "assignedGamesCount": "Anzahl der Spiele, denen dieses Team zugewiesen ist",
-    "confirmDeleteGameday": "Möchten Sie \"{{name}}\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+    "confirmDeleteGameday": "Möchten Sie \"{{name}}\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "enterBothHalves": "Spiel {{id}}: Geben Sie beide Halbzeiten für {{team}} ein",
+    "loading": "Lade...",
+    "prerequisitesMissing": "Bitte stellen Sie sicher, dass mindestens eine Saison und eine Liga in der Datenbank vorhanden sind, bevor Sie einen Spieltag erstellen.",
+    "defaultGamedayName": "Spieltag am {{date}}"
   },
   "tooltip": {
     "addTeamToGroup": "Ein neues Team zu dieser Gruppe hinzufügen",
@@ -144,7 +160,7 @@
     "deleteStage": "Diese Phase und alle darin enthaltenen Spiele dauerhaft entfernen",
     "stageColor": "Die Akzentfarbe für diese Phase ändern",
     "importFromJson": "Einen Spielplan aus einer JSON-Datei importieren",
-    "exportFromJson": "Den aktuellen Spielplan in eine JSON-Datei exportieren",
+    "exportToJson": "Den aktuellen Spielplan in eine JSON-Datei exportieren",
     "exportTemplateToJson": "Die logische Turnierstruktur als portable Vorlage exportieren",
     "undo": "Die letzte Aktion rückgängig machen",
     "redo": "Die zuvor rückgängig gemachte Aktion wiederholen",
@@ -161,7 +177,9 @@
     "enterResult": "Ergebnis eingeben",
     "deleteGame": "Spiel löschen",
     "autoTimeHint": "Automatisch berechnet - Klicken zum Überschreiben",
-    "manualTimeHint": "Manuell gesetzt - Klicken zum Bearbeiten"
+    "manualTimeHint": "Manuell gesetzt - Klicken zum Bearbeiten",
+    "renameField": "Feld umbenennen",
+    "duplicate": "Duplizieren"
   },
   "notification": {
     "gameResultSaved": "Spielergebnis gespeichert",
@@ -186,16 +204,13 @@
       "importError": "Import-Fehler",
       "deletion": "Löschen",
       "timeFormat": "Zeitformat",
-      "templateExport": "Vorlage exportiert"
+      "templateExport": "Vorlage exportiert",
+      "prerequisites": "Voraussetzungen fehlen"
     },
     "templateExported": {
       "title": "Vorlage exportiert"
     },
     "resultsSaved": "Ergebnisse erfolgreich gespeichert",
     "resultsSaveFailed": "Fehler beim Speichern der Ergebnisse"
-  },
-  "title": {
-    "selectTeam": "Team auswählen",
-    "selectOfficial": "Schiedsrichter auswählen"
   }
 }

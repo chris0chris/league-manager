@@ -10,6 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import StageSection from '../StageSection';
 import { GamedayProvider } from '../../../context/GamedayContext';
+import i18n from '../../../i18n/testConfig';
 import type { StageNode, GameNode } from '../../../types/flowchart';
 import type { StageSectionProps } from '../StageSection';
 
@@ -320,7 +321,7 @@ describe('StageSection', () => {
       })
     );
 
-    const timeInput = screen.getByLabelText(/label.start/i);
+    const timeInput = screen.getByLabelText(i18n.t('ui:label.start'));
     fireEvent.change(timeInput, { target: { value: '10:30' } });
 
     expect(mockOnUpdate).toHaveBeenCalledWith('stage-1', { startTime: '10:30' });
@@ -395,7 +396,7 @@ describe('StageSection', () => {
       fireEvent.click(screen.getByTitle(/edit the name/i));
 
       // Select Ranking Stage
-      const typeSelect = screen.getByLabelText(/label.type/i);
+      const typeSelect = screen.getByLabelText(i18n.t('ui:label.type'));
       fireEvent.change(typeSelect, { target: { value: 'RANKING' } });
 
       // Click Save
@@ -419,7 +420,7 @@ describe('StageSection', () => {
       expect(screen.getByDisplayValue('Preliminary')).toBeInTheDocument();
 
       // Click on type select - should not close edit mode
-      const typeSelect = screen.getByLabelText(/label.type/i);
+      const typeSelect = screen.getByLabelText(i18n.t('ui:label.type'));
       const nameInput = screen.getByDisplayValue('Preliminary');
       
       // Simulate blur with relatedTarget being the select
@@ -469,7 +470,7 @@ describe('StageSection', () => {
       fireEvent.change(input, { target: { value: 'New Name' } });
 
       // Change type
-      const typeSelect = screen.getByLabelText(/label.type/i);
+      const typeSelect = screen.getByLabelText(i18n.t('ui:label.type'));
       fireEvent.change(typeSelect, { target: { value: 'RANKING' } });
 
       // Click Save

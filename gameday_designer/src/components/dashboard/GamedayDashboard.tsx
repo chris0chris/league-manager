@@ -127,9 +127,9 @@ const GamedayDashboard: React.FC = () => {
 
       if (seasons.length === 0 || leagues.length === 0) {
         addNotification(
-          'Please ensure at least one Season and one League exist in the database before creating a gameday.', 
+          t('ui:message.prerequisitesMissing'), 
           'warning', 
-          'Prerequisites missing'
+          t('ui:notification.title.prerequisites')
         );
         return;
       }
@@ -138,7 +138,7 @@ const GamedayDashboard: React.FC = () => {
       const dd = String(today.getDate()).padStart(2, '0');
       const mm = String(today.getMonth() + 1).padStart(2, '0');
       const yyyy = today.getFullYear();
-      const defaultName = `Gameday on ${dd}.${mm}.${yyyy}`;
+      const defaultName = t('ui:message.defaultGamedayName', { date: `${dd}.${mm}.${yyyy}` });
 
       const newGameday = await gamedayApi.createGameday({
         name: defaultName,

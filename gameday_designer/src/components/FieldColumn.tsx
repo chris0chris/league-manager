@@ -12,6 +12,7 @@ import React from 'react';
 import { Card, Form, Button } from 'react-bootstrap';
 import type { Field } from '../types/designer';
 import GameSlotCard from './GameSlotCard';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
 
 export interface FieldColumnProps {
   /** The field data to display */
@@ -46,6 +47,8 @@ const FieldColumn: React.FC<FieldColumnProps> = ({
   onDeleteGameSlot,
   onDuplicateGameSlot,
 }) => {
+  const { t } = useTypedTranslation(['ui']);
+
   /**
    * Handle field name change.
    */
@@ -74,7 +77,7 @@ const FieldColumn: React.FC<FieldColumnProps> = ({
           type="text"
           value={field.name}
           onChange={handleNameChange}
-          aria-label="Field name"
+          aria-label={t('ui:label.fieldName')}
           className="flex-grow-1"
           size="sm"
         />
@@ -82,8 +85,8 @@ const FieldColumn: React.FC<FieldColumnProps> = ({
           variant="outline-danger"
           size="sm"
           onClick={handleDeleteField}
-          aria-label="Delete field"
-          title="Delete field"
+          aria-label={t('ui:tooltip.deleteField')}
+          title={t('ui:tooltip.deleteField')}
         >
           <i className="bi bi-x-lg"></i>
         </Button>
@@ -91,7 +94,7 @@ const FieldColumn: React.FC<FieldColumnProps> = ({
       <Card.Body className="d-flex flex-column" style={{ minHeight: '300px' }}>
         {field.gameSlots.length === 0 ? (
           <div className="text-center text-muted py-4 flex-grow-1 d-flex align-items-center justify-content-center">
-            <span>No games yet. Click "Add Game" to create one.</span>
+            <span>{t('ui:message.noGamesYet')}</span>
           </div>
         ) : (
           <div className="game-slots-container flex-grow-1 overflow-auto">
@@ -112,10 +115,10 @@ const FieldColumn: React.FC<FieldColumnProps> = ({
             variant="outline-primary"
             className="w-100"
             onClick={handleAddGame}
-            aria-label="Add game"
+            aria-label={t('ui:button.addGame')}
           >
             <i className="bi bi-plus-lg me-1"></i>
-            Add Game
+            {t('ui:button.addGame')}
           </Button>
         </div>
       </Card.Body>

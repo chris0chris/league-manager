@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Table, Button, Form, Alert } from 'react-bootstrap';
 import { GameResultsDisplay } from '../types/designer';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
 
 export interface ScoreEdit {
   fh?: number | null;
@@ -18,6 +19,7 @@ export const GameResultsTable: React.FC<GameResultsTableProps> = ({
   games,
   onSave,
 }) => {
+  const { t } = useTypedTranslation(['ui']);
   const [edits, setEdits] = useState<Record<string, ScoreEdit>>({});
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -46,7 +48,12 @@ export const GameResultsTable: React.FC<GameResultsTableProps> = ({
         if (edit && (edit.fh !== undefined || edit.sh !== undefined)) {
           // If one half is entered, both must be entered
           if ((edit.fh ?? result.fh) === null || (edit.sh ?? result.sh) === null) {
-            newErrors.push(`Game ${game.id}: Enter both halves for ${result.team.name}`);
+            newErrors.push(
+              t('ui:message.enterBothHalves', {
+                id: game.id,
+                team: result.team.name,
+              })
+            );
           }
         }
       });
@@ -64,7 +71,7 @@ export const GameResultsTable: React.FC<GameResultsTableProps> = ({
       await onSave(edits);
       setEdits({});
     } catch (error) {
-      setErrors([`Failed to save: ${error}`]);
+      setErrors([`${t('ui:notification.resultsSaveFailed')}: ${error}`]);
     } finally {
       setLoading(false);
     }
@@ -83,12 +90,12 @@ export const GameResultsTable: React.FC<GameResultsTableProps> = ({
       <Table striped bordered hover>
         <thead>
           <tr>
-            <th>Field</th>
-            <th>Time</th>
-            <th>Team</th>
-            <th>1H</th>
-            <th>2H</th>
-            <th>Total</th>
+            <th>{t('ui:label.fields')}</th>
+            <th>{t('ui:label.time')}</th>
+            <th>{t('ui:label.teams')}</th>
+            <th>{t('ui:label.fh')}</th>
+            <th>{t('ui:label.sh')}</th>
+            <th>{t('ui:label.total')}</th>
           </tr>
         </thead>
         <tbody>
@@ -140,7 +147,7 @@ export const GameResultsTable: React.FC<GameResultsTableProps> = ({
         onClick={handleSave}
         disabled={loading || Object.keys(edits).length === 0}
       >
-        {loading ? 'Saving...' : 'Save Results'}
+        {loading ? t('ui:button.saving') : t('ui:button.saveResults')}
       </Button>
     </div>
   );

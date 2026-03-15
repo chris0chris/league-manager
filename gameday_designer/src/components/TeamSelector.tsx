@@ -11,6 +11,7 @@
 import React from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 import type { TeamReference } from '../types/designer';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
 
 type ReferenceType = TeamReference['type'];
 
@@ -86,6 +87,8 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
   availableStages = [],
   isRequired = false,
 }) => {
+  const { t } = useTypedTranslation(['ui']);
+
   /**
    * Handle type change.
    */
@@ -104,7 +107,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
           <Row className="g-2">
             <Col xs={6}>
               <Form.Group controlId={`${label}-group`}>
-                <Form.Label className="small mb-1">Group</Form.Label>
+                <Form.Label className="small mb-1">{t('ui:label.groups')}</Form.Label>
                 <Form.Control
                   type="number"
                   min={0}
@@ -121,7 +124,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
             </Col>
             <Col xs={6}>
               <Form.Group controlId={`${label}-position`}>
-                <Form.Label className="small mb-1">Position</Form.Label>
+                <Form.Label className="small mb-1">{t('ui:label.start')}</Form.Label>
                 <Form.Control
                   type="number"
                   min={0}
@@ -144,7 +147,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
           <Row className="g-2">
             <Col xs={4}>
               <Form.Group controlId={`${label}-place`}>
-                <Form.Label className="small mb-1">Place</Form.Label>
+                <Form.Label className="small mb-1">{t('ui:label.standing')}</Form.Label>
                 <Form.Control
                   type="number"
                   min={1}
@@ -161,7 +164,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
             </Col>
             <Col xs={8}>
               <Form.Group controlId={`${label}-groupName`}>
-                <Form.Label className="small mb-1">Group Name</Form.Label>
+                <Form.Label className="small mb-1">{t('ui:label.groups')}</Form.Label>
                 <Form.Control
                   type="text"
                   value={value.groupName}
@@ -188,7 +191,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
       case 'loser':
         return (
           <Form.Group controlId={`${label}-match`}>
-            <Form.Label className="small mb-1">Match</Form.Label>
+            <Form.Label className="small mb-1">{t('ui:label.games')}</Form.Label>
             <Form.Control
               type="text"
               value={value.matchName}
@@ -200,7 +203,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
               }
               list={`${label}-matchNames`}
               size="sm"
-              placeholder="e.g., HF1, Finale"
+              placeholder={t('ui:placeholder.match')}
             />
             <datalist id={`${label}-matchNames`}>
               {matchNames.map((name) => (
@@ -215,7 +218,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
           <Row className="g-2">
             <Col xs={4}>
               <Form.Group controlId={`${label}-place`}>
-                <Form.Label className="small mb-1">Rank</Form.Label>
+                <Form.Label className="small mb-1">{t('ui:label.rank')}</Form.Label>
                 <Form.Control
                   type="number"
                   min={1}
@@ -232,7 +235,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
             </Col>
             <Col xs={8}>
               <Form.Group controlId={`${label}-stage`}>
-                <Form.Label className="small mb-1">Stage</Form.Label>
+                <Form.Label className="small mb-1">{t('ui:label.stages')}</Form.Label>
                 <Form.Select
                   value={value.stageId}
                   onChange={(e) => {
@@ -245,7 +248,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
                   }}
                   size="sm"
                 >
-                  <option value="">Select Stage...</option>
+                  <option value="">{t('ui:label.stage')}...</option>
                   {availableStages.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}</option>
                   ))}
@@ -261,7 +264,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
             <Row className="g-2 mb-2">
               <Col xs={4}>
                 <Form.Group controlId={`${label}-place`}>
-                  <Form.Label className="small mb-1">Rank</Form.Label>
+                  <Form.Label className="small mb-1">{t('ui:label.rank')}</Form.Label>
                   <Form.Control
                     type="number"
                     min={1}
@@ -278,7 +281,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
               </Col>
               <Col xs={8}>
                 <Form.Group controlId={`${label}-groupName`}>
-                  <Form.Label className="small mb-1">Group</Form.Label>
+                  <Form.Label className="small mb-1">{t('ui:label.groups')}</Form.Label>
                   <Form.Control
                     type="text"
                     value={value.groupName}
@@ -295,7 +298,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
               </Col>
             </Row>
             <Form.Group controlId={`${label}-stage`}>
-              <Form.Label className="small mb-1">Stage</Form.Label>
+              <Form.Label className="small mb-1">{t('ui:label.stages')}</Form.Label>
               <Form.Select
                 value={value.stageId}
                 onChange={(e) => {
@@ -308,7 +311,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
                 }}
                 size="sm"
               >
-                <option value="">Select Stage...</option>
+                <option value="">{t('ui:label.stage')}...</option>
                 {availableStages.map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
@@ -321,7 +324,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
       default:
         return (
           <Form.Group controlId={`${label}-name`}>
-            <Form.Label className="small mb-1">Team Name</Form.Label>
+            <Form.Label className="small mb-1">{t('ui:label.teams')}</Form.Label>
             <Form.Control
               type="text"
               value={value.name}
@@ -332,7 +335,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
                 })
               }
               size="sm"
-              placeholder="e.g., Team Officials"
+              placeholder={t('ui:placeholder.teamOfficials')}
             />
           </Form.Group>
         );
@@ -345,19 +348,19 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({
          {label}
        </Form.Label>
        <Form.Group controlId={`${label}-type`} className="mb-2">
-        <Form.Label className="small mb-1">Type</Form.Label>
+        <Form.Label className="small mb-1">{t('ui:label.type')}</Form.Label>
         <Form.Select
           value={value.type}
           onChange={handleTypeChange}
           size="sm"
         >
-          <option value="groupTeam">Group-Team (0_1)</option>
-          <option value="standing">Standing (P1 Gruppe 1)</option>
-          <option value="winner">Winner (Gewinner)</option>
-          <option value="loser">Loser (Verlierer)</option>
-          <option value="rank">Rank (1st Overall)</option>
-          <option value="groupRank">Group Rank (1st in Group)</option>
-          <option value="static">Static (Custom Name)</option>
+          <option value="groupTeam">{t('ui:label.teamPool')} (0_1)</option>
+          <option value="standing">{t('ui:label.standing')} (P1 Gruppe 1)</option>
+          <option value="winner">{t('ui:label.winner')}</option>
+          <option value="loser">{t('ui:label.loser')}</option>
+          <option value="rank">{t('ui:label.rank')} (1st Overall)</option>
+          <option value="groupRank">{t('ui:label.rank')} (1st in Group)</option>
+          <option value="static">{t('ui:label.teams')} (Custom Name)</option>
         </Form.Select>
       </Form.Group>
       {renderInputs()}

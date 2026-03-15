@@ -200,7 +200,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   forceCollapsed = false,
 }) => {
 
-  const { t } = useTypedTranslation(['ui', 'domain', 'validation']);
+  const { t, i18n } = useTypedTranslation(['ui', 'domain', 'validation']);
   const [seasons, setSeasons] = useState<{ id: number; name: string }[]>([]);
   const [leagues, setLeagues] = useState<{ id: number; name: string }[]>([]);
   const [activeKey, setActiveKey] = useState<string | undefined>("0");
@@ -266,7 +266,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date.toLocaleDateString(i18n.language === 'en' ? 'en-GB' : 'de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
   const getStatusColor = (status: string) => {

@@ -16,7 +16,7 @@ interface GamedayCardProps {
 }
 
 const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick, onDelete }) => {
-  const { t } = useTypedTranslation(['ui', 'domain']);
+  const { t, i18n } = useTypedTranslation(['ui', 'domain']);
 
   const getStatusVariant = (status: string) => {
     switch (status.toUpperCase()) {
@@ -34,7 +34,7 @@ const GamedayCard: React.FC<GamedayCardProps> = ({ gameday, onClick, onDelete })
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date.toLocaleDateString(i18n.language === 'en' ? 'en-GB' : 'de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
   const handleDelete = (e: React.MouseEvent) => {

@@ -87,7 +87,7 @@ const AppHeader: React.FC = () => {
             
             <div className="d-flex align-items-center text-light border-start ps-3 ms-1" style={{ height: '24px' }}>
               <i className="bi bi-person-circle me-2 fs-5"></i>
-              <span className="small fw-medium">User</span>
+              <span className="small fw-medium">{t('ui:label.user')}</span>
             </div>
           </Nav>
         </Navbar.Collapse>

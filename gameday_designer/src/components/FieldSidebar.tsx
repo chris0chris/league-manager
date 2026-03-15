@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { Card, ListGroup, Button, Form, InputGroup, Badge } from 'react-bootstrap';
 import type { FlowField, FlowNode } from '../types/flowchart';
 import { isGameNode } from '../types/flowchart';
+import { useTypedTranslation } from '../i18n/useTypedTranslation';
 
 import './FieldSidebar.css';
 
@@ -40,6 +41,7 @@ const FieldSidebar: React.FC<FieldSidebarProps> = ({
   onUpdateField,
   onDeleteField,
 }) => {
+  const { t } = useTypedTranslation(['ui']);
   const [newFieldName, setNewFieldName] = useState('');
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
@@ -126,7 +128,7 @@ const FieldSidebar: React.FC<FieldSidebarProps> = ({
     <Card className="field-sidebar" data-testid="field-sidebar">
       <Card.Header>
         <i className="bi bi-geo-alt-fill me-2"></i>
-        Fields
+        {t('ui:label.fields')}
       </Card.Header>
       <Card.Body className="p-0">
         {/* Add new field form */}
@@ -134,7 +136,7 @@ const FieldSidebar: React.FC<FieldSidebarProps> = ({
           <InputGroup size="sm">
             <Form.Control
               type="text"
-              placeholder="New field name..."
+              placeholder={t('ui:placeholder.fieldName')}
               value={newFieldName}
               onChange={(e) => setNewFieldName(e.target.value)}
               data-testid="new-field-input"
@@ -155,7 +157,7 @@ const FieldSidebar: React.FC<FieldSidebarProps> = ({
           {fields.length === 0 ? (
             <ListGroup.Item className="text-muted text-center py-4">
               <i className="bi bi-info-circle me-2"></i>
-              No fields defined. Add a field above.
+              {t('ui:message.noFieldsYet')}
             </ListGroup.Item>
           ) : (
             fields.map((field) => {
@@ -193,7 +195,7 @@ const FieldSidebar: React.FC<FieldSidebarProps> = ({
                         <i className="bi bi-geo-alt me-2 text-secondary"></i>
                         <span>{field.name}</span>
                         <Badge bg="info" className="ms-2">
-                          {gameCount} {gameCount === 1 ? 'game' : 'games'}
+                          {gameCount} {gameCount === 1 ? t('ui:label.games').slice(0, -1) : t('ui:label.games')}
                         </Badge>
                       </div>
                       <div>
@@ -202,7 +204,7 @@ const FieldSidebar: React.FC<FieldSidebarProps> = ({
                           size="sm"
                           className="p-0 me-2"
                           onClick={() => handleStartEdit(field)}
-                          title="Rename field"
+                          title={t('ui:tooltip.renameField')}
                         >
                           <i className="bi bi-pencil"></i>
                         </Button>
@@ -211,7 +213,7 @@ const FieldSidebar: React.FC<FieldSidebarProps> = ({
                           size="sm"
                           className="p-0 text-danger"
                           onClick={() => handleDeleteField(field.id, field.name)}
-                          title="Delete field"
+                          title={t('ui:tooltip.deleteField')}
                         >
                           <i className="bi bi-trash"></i>
                         </Button>
@@ -229,7 +231,7 @@ const FieldSidebar: React.FC<FieldSidebarProps> = ({
           <div className="p-3 border-top bg-warning-subtle">
             <i className="bi bi-exclamation-triangle me-2 text-warning"></i>
             <span className="text-muted small">
-              {unassignedCount} {unassignedCount === 1 ? 'game has' : 'games have'} no field assigned
+              {unassignedCount} {unassignedCount === 1 ? t('ui:label.games').slice(0, -1) : t('ui:label.games')} {unassignedCount === 1 ? 'has' : 'have'} no field assigned
             </span>
           </div>
         )}
