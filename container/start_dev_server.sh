@@ -5,7 +5,12 @@ set -e
 echo "📦 Initializing test container and database..."
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
-./spinup_test_db.sh "$@"
+# Only pass --fresh to spinup if it was requested; other flags are not relevant to DB setup
+SPINUP_ARGS=()
+for arg in "$@"; do
+    [[ "$arg" == "--fresh" ]] && SPINUP_ARGS+=(--fresh)
+done
+./spinup_test_db.sh "${SPINUP_ARGS[@]}"
 cd ..
 
 # 2. Get the actual IP of servyy-test
@@ -32,70 +37,17 @@ echo "🐍 Syncing Python dependencies..."
 uv sync --extra test
 
 # 3.6 Build React apps and collect static files
-HOT_MODE=false
-HOT_APPS=""
-
-# Parse arguments for hot mode
-# Zsh arrays are 1-indexed
-local_args=("$@")
-for ((i=1; i<=$#; i++)); do
-    if [[ "${local_args[$i]}" == "--hot" ]]; then
-        HOT_MODE=true
-        # Check next argument
-        if [[ $((i+1)) -le $# ]]; then
-            next_arg="${local_args[$((i+1))]}"
-            if [[ -n "$next_arg" && "$next_arg" != --* ]]; then
-                HOT_APPS="$next_arg"
-            else
-                HOT_APPS="all"
-            fi
-        else
-            HOT_APPS="all"
-        fi
-        break
+echo "🏗️ Building React apps..."
+for app in passcheck liveticker scorecard gameday_designer; do
+    if [ -d "$app" ]; then
+        echo "  Building $app..."
+        npm --prefix "$app/" install
+        npm --prefix "$app/" run build
     fi
 done
 
-if [ "$HOT_MODE" = true ]; then
-    export HOT_APPS="$HOT_APPS"
-    echo "🔥 Hot-reloading mode enabled for: $HOT_APPS"
-    
-    # Define all apps
-    apps=("gameday_designer" "passcheck" "liveticker" "scorecard")
-    
-    for app in "${apps[@]}"; do
-        if [ -d "$app" ]; then
-            # Check if we should start this app (hot) or build it (static)
-            if [[ "$HOT_APPS" == "all" ]] || [[ "$HOT_APPS" == *"$app"* ]]; then
-                echo "  Starting $app dev server..."
-                npm --prefix "$app/" install --silent
-                npm --prefix "$app/" start > "/tmp/vite-$app.log" 2>&1 &
-            else
-                echo "  Building $app (static)..."
-                npm --prefix "$app/" install --silent
-                npm --prefix "$app/" run build
-            fi
-        fi
-    done
-else
-    echo "🏗️ Building React apps..."
-    for app in passcheck liveticker scorecard gameday_designer; do
-        if [ -d "$app" ]; then
-            echo "  Building $app..."
-            npm --prefix "$app/" install --silent
-            npm --prefix "$app/" run build
-        fi
-    done
-    echo "📦 Collecting static files..."
-    python manage.py collectstatic --noinput
-fi
-
-if [ "$HOT_MODE" = true ]; then
-    # We still need to collect static for the apps that were built statically
-    # And potentially for Django's own static files (admin, etc)
-    echo "📦 Collecting static files..."
-    python manage.py collectstatic --noinput
-fi
+echo "📦 Collecting static files..."
+python manage.py collectstatic --noinput
 
 # 4. Run migrations
 echo "🔄 Running database migrations..."

@@ -21,13 +21,7 @@
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
 ></script>
 
-{% if DEBUG and 'scorecard' in HOT_APPS or 'all' in HOT_APPS %}
-    <!-- Vite Dev Server for Hot Module Replacement -->
-    <script type="module" src="http://localhost:3002/@vite/client"></script>
-    <script type="module" src="http://localhost:3002/src/index.tsx"></script>
-{% else %}
-    <script src='{% static "scorecard/js/scorecard.js" %}'></script>
-{% endif %}
+<script src='{% static "scorecard/js/scorecard.js" %}'></script>
 
 <script>
     const handleBeforeUnload = (e) => {

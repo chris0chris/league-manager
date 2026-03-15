@@ -77,7 +77,6 @@ TEMPLATES = [
                 "league_manager.context_processors.global_menu",
                 "league_manager.context_processors.version_number",
                 "league_manager.context_processors.pages_links",
-                "league_manager.context_processors.debug_status",
             ],
         },
     },

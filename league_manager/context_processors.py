@@ -1,4 +1,3 @@
-import os
 from django.conf import settings
 
 from league_manager.utils.utils import get_menu_items
@@ -20,7 +19,4 @@ def pages_links(request):
 
 
 def debug_status(request):
-    return {
-        "DEBUG": settings.DEBUG,
-        "HOT_APPS": os.environ.get("HOT_APPS", "").split(","),
-    }
+    return {"DEBUG": settings.DEBUG}
