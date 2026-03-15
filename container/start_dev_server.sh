@@ -37,14 +37,70 @@ echo "🐍 Syncing Python dependencies..."
 uv sync --extra test
 
 # 3.6 Build React apps and collect static files
-echo "🏗️ Building React apps..."
-for app in passcheck liveticker scorecard gameday_designer; do
-    if [ -d "$app" ]; then
-        echo "  Building $app..."
-        npm --prefix "$app/" install
-        npm --prefix "$app/" run build
+HOT_MODE=false
+HOT_APPS=""
+
+# Parse arguments using a simple loop that handles flags and values
+args=("$@")
+for ((i=1; i<=$#; i++)); do
+    arg="${args[$i]}"
+    
+    if [[ "$arg" == "--hot" ]]; then
+        HOT_MODE=true
+        # Check if next argument exists and is not a flag
+        if [[ $((i+1)) -le $# ]]; then
+            next_arg="${args[$((i+1))]}"
+            if [[ "$next_arg" != --* ]]; then
+                HOT_APPS="$next_arg"
+                # Skip the app name in the next iteration
+                ((i++))
+            else
+                HOT_APPS="all"
+            fi
+        else
+            HOT_APPS="all"
+        fi
     fi
 done
+
+if [ "$HOT_MODE" = true ]; then
+    echo "🔥 Watch mode enabled for: $HOT_APPS"
+    
+    # Define all apps
+    apps=("gameday_designer" "passcheck" "liveticker" "scorecard")
+    
+    for app in "${apps[@]}"; do
+        if [ -d "$app" ]; then
+            # Check if we should watch this app or build it once
+            SHOULD_WATCH=false
+            if [[ "$HOT_APPS" == "all" ]]; then
+                SHOULD_WATCH=true
+            elif [[ "$HOT_APPS" == *"$app"* ]]; then
+                SHOULD_WATCH=true
+            fi
+
+            if [ "$SHOULD_WATCH" = true ]; then
+                echo "  Starting $app in watch mode..."
+                npm --prefix "$app/" install --silent
+                # Run watch in background
+                npm --prefix "$app/" run watch > "/tmp/vite-$app-watch.log" 2>&1 &
+            else
+                echo "  Building $app (static)..."
+                npm --prefix "$app/" install --silent
+                npm --prefix "$app/" run build
+            fi
+        fi
+    done
+else
+    echo "🏗️ Building React apps..."
+    for app in passcheck liveticker scorecard gameday_designer; do
+        if [ -d "$app" ]; then
+            echo "  Building $app..."
+            npm --prefix "$app/" install --silent
+            npm --prefix "$app/" run build
+        fi
+    done
+fi
 
 echo "📦 Collecting static files..."
 python manage.py collectstatic --noinput

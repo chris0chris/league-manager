@@ -39,6 +39,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
+    "watch": "vite build --watch",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
