@@ -134,13 +134,13 @@ shown to user.
 
 ---
 
-## BUG-001 — TeamSelectionModal receives incompatible props (team assignment broken)
+## [x] BUG-001 — TeamSelectionModal receives incompatible props (team assignment broken)
 
 | Field    | Value    |
 |----------|----------|
 | Category | Bug      |
 | Severity | **High** |
-| Priority | _TBD_    |
+| Priority | Done     |
 
 `ListDesignerApp` passes `teams`, `groups`, and `onSelect: (teamId: string) => void` to `TeamSelectionModal`.
 The component interface does not accept `teams`/`groups` as props, and `onSelect` expects
@@ -151,13 +151,13 @@ The component interface does not accept `teams`/`groups` as props, and `onSelect
 
 ---
 
-## BUG-002 — Bulk result save sends wrong primary key to backend
+## [x] BUG-002 — Bulk result save sends wrong primary key to backend
 
 | Field    | Value    |
 |----------|----------|
 | Category | Bug      |
 | Severity | **High** |
-| Priority | _TBD_    |
+| Priority | Done     |
 
 `updateGameResultDetail(resultId, ...)` passes `Gameresult.id` to an endpoint that expects `Gameinfo.id`.
 **Effect:** Bulk game result saves update the wrong records or return 404.
@@ -165,13 +165,13 @@ The component interface does not accept `teams`/`groups` as props, and `onSelect
 
 ---
 
-## BUG-003 — STATUS_COMPLETED value changed without data migration
+## [x] BUG-003 — STATUS_COMPLETED value changed without data migration
 
 | Field    | Value    |
 |----------|----------|
 | Category | Bug      |
 | Severity | **High** |
-| Priority | _TBD_    |
+| Priority | Done     |
 
 `Gameinfo.STATUS_COMPLETED` changed from `"Beendet"` (capital B) to `"beendet"` (lowercase).
 No Django data migration exists for existing rows with `status = "Beendet"`.
@@ -259,13 +259,13 @@ The following keys are used but absent from `ui.json`:
 
 ---
 
-## FEAT-001 — "Add Officials" button in metadata accordion (new feature)
+## [x] FEAT-001 — "Add Officials" button in metadata accordion (new feature)
 
 | Field    | Value       |
 |----------|-------------|
 | Category | New Feature |
 | Severity | —           |
-| Priority | _TBD_       |
+| Priority | Done        |
 
 New button in metadata accordion action bar to add an officials group to the schedule.
 Currently broken due to BUG-005 and BUG-001.
@@ -273,13 +273,13 @@ Currently broken due to BUG-005 and BUG-001.
 
 ---
 
-## FEAT-002 — External official slot in TeamSelectionModal (new feature)
+## [x] FEAT-002 — External official slot in TeamSelectionModal (new feature)
 
 | Field    | Value       |
 |----------|-------------|
 | Category | New Feature |
 | Severity | —           |
-| Priority | _TBD_       |
+| Priority | Done        |
 
 `TeamSelectionModal` extended to support `side: 'official'` for assigning an official to a game slot.
 Currently broken due to BUG-001 and BUG-006.
@@ -287,13 +287,13 @@ Currently broken due to BUG-001 and BUG-006.
 
 ---
 
-## FEAT-003 — Dedicated GamedayDesignerState backend model (new feature)
+## [x] FEAT-003 — Dedicated GamedayDesignerState backend model (new feature)
 
 | Field    | Value       |
 |----------|-------------|
 | Category | New Feature |
 | Severity | —           |
-| Priority | _TBD_       |
+| Priority | Done        |
 
 New `GamedayDesignerState` Django model (OneToOne with Gameday) replaces embedded `designer_data` field.
 New API: `GET/PUT /api/gamedays/{id}/designer-state/`.
@@ -302,13 +302,13 @@ Requires migration 0030 to be applied.
 
 ---
 
-## FEAT-004 — Dual-progression schedule resolution (new feature)
+## [x] FEAT-004 — Dual-progression schedule resolution (new feature)
 
 | Field    | Value       |
 |----------|-------------|
 | Category | New Feature |
 | Severity | —           |
-| Priority | _TBD_       |
+| Priority | Done        |
 
 When a game completes, signals now route to either the designer-based `GamedayScheduleResolutionService` or the legacy
 `ScheduleUpdate` path based on whether a `TemplateApplication` exists.
@@ -316,13 +316,13 @@ When a game completes, signals now route to either the designer-based `GamedaySc
 
 ---
 
-## FEAT-005 — Placeholder resolution for unassigned bracket slots (new feature)
+## [x] FEAT-005 — Placeholder resolution for unassigned bracket slots (new feature)
 
 | Field    | Value       |
 |----------|-------------|
 | Category | New Feature |
 | Severity | —           |
-| Priority | _TBD_       |
+| Priority | Done        |
 
 `GamedayPlaceholderService` resolves human-readable names ("Winner Game 1") for unassigned bracket positions in schedule
 views and the game log API.
@@ -330,13 +330,13 @@ views and the game log API.
 
 ---
 
-## FEAT-006 — Full-screen LoadingOverlay component (new feature)
+## [x] FEAT-006 — Full-screen LoadingOverlay component (new feature)
 
 | Field    | Value       |
 |----------|-------------|
 | Category | New Feature |
 | Severity | —           |
-| Priority | _TBD_       |
+| Priority | Done        |
 
 Replaces inline spinner with a fixed-position, semi-transparent full-screen overlay (z-index 9999) during async
 operations.
@@ -356,17 +356,17 @@ operations.
 | BEH-003  | Publish validation modal removed                  | Behavior/UX | Medium   | [x]    |
 | BEH-004  | Delete uses window.confirm with missing i18n      | Behavior    | Medium   | [x]    |
 | BEH-005  | Auto-save debounce increased                      | Behavior    | Low      | [x]    |
-| BUG-001  | TeamSelectionModal incompatible props             | Bug         | **High** |
-| BUG-002  | Bulk result save sends wrong primary key          | Bug         | **High** |
-| BUG-003  | STATUS_COMPLETED value changed, no data migration | Bug         | **High** |
+| BUG-001  | TeamSelectionModal incompatible props             | Bug         | **High** | [x]    |
+| BUG-002  | Bulk result save sends wrong primary key          | Bug         | **High** | [x]    |
+| BUG-003  | STATUS_COMPLETED value changed, no data migration | Bug         | **High** | [x]    |
 | BUG-004  | NotificationToast prop name mismatch              | Bug         | Medium   | [x]    |
 | BUG-005  | "Add Officials" i18n key wrong path               | Bug         | Medium   | [x]    |
 | BUG-006  | "Select Official" modal title i18n key missing    | Bug         | Medium   | [x]    |
 | BUG-007  | Several notification i18n keys missing            | Bug         | Low      | [x]    |
 | BUG-008  | getTeamUsage always returns empty                 | Bug         | Low      | [x]    |
-| FEAT-001 | "Add Officials" button (broken)                   | New Feature | —        |
-| FEAT-002 | External official slot (broken)                   | New Feature | —        |
-| FEAT-003 | Dedicated GamedayDesignerState model              | New Feature | —        |
-| FEAT-004 | Dual-progression schedule resolution              | New Feature | —        |
-| FEAT-005 | Placeholder resolution for bracket slots          | New Feature | —        |
-| FEAT-006 | Full-screen LoadingOverlay                        | New Feature | —        |
+| FEAT-001 | "Add Officials" button (broken)                   | New Feature | —        | [x]    |
+| FEAT-002 | External official slot (broken)                   | New Feature | —        | [x]    |
+| FEAT-003 | Dedicated GamedayDesignerState model              | New Feature | —        | [x]    |
+| FEAT-004 | Dual-progression schedule resolution              | New Feature | —        | [x]    |
+| FEAT-005 | Placeholder resolution for bracket slots          | New Feature | —        | [x]    |
+| FEAT-006 | Full-screen LoadingOverlay                        | New Feature | —        | [x]    |
