@@ -180,7 +180,7 @@ export function useDesignerController(
         const currentTeams = fs?.globalTeams || [];
         let teamsToUse = currentTeams;
         
-        let generatedGroups: GlobalTeamGroup[] = [];
+        const generatedGroups: GlobalTeamGroup[] = [];
         if (config.generateTeams) {
           const teamCount = config.template.teamCount.exact || config.template.teamCount.min;
           const firstStage = config.template.stages?.[0];
