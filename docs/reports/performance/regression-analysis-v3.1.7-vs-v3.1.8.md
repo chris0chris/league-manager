@@ -181,13 +181,13 @@ historical data.
 
 ---
 
-## BUG-004 — NotificationToast prop name mismatch
+## [x] BUG-004 — NotificationToast prop name mismatch
 
 | Field    | Value  |
 |----------|--------|
 | Category | Bug    |
 | Severity | Medium |
-| Priority | _TBD_  |
+| Priority | Done   |
 
 `ListDesignerApp` passes `onDismiss` prop; `NotificationToast` interface expects `onClose`.
 **Effect:** Toast dismiss callback silently ignored — notifications may not close on user action.
@@ -196,13 +196,13 @@ historical data.
 
 ---
 
-## BUG-005 — "Add Officials" i18n key resolves to missing path
+## [x] BUG-005 — "Add Officials" i18n key resolves to missing path
 
 | Field    | Value  |
 |----------|--------|
 | Category | Bug    |
 | Severity | Medium |
-| Priority | _TBD_  |
+| Priority | Done   |
 
 `t('domain:team.officials')` used as group name for the officials slot.
 `domain.json` has `"team": "Team"` (a string), not an object with an `officials` sub-key.
@@ -211,13 +211,13 @@ historical data.
 
 ---
 
-## BUG-006 — "Select Official" modal title i18n key missing
+## [x] BUG-006 — "Select Official" modal title i18n key missing
 
 | Field    | Value  |
 |----------|--------|
 | Category | Bug    |
 | Severity | Medium |
-| Priority | _TBD_  |
+| Priority | Done   |
 
 `t('ui:title.selectOfficial')` used as `TeamSelectionModal` title when `side === 'official'`.
 Key does not exist in `ui.json`.
@@ -226,13 +226,13 @@ Key does not exist in `ui.json`.
 
 ---
 
-## BUG-007 — Several notification i18n keys missing
+## [x] BUG-007 — Several notification i18n keys missing
 
 | Field    | Value |
 |----------|-------|
 | Category | Bug   |
 | Severity | Low   |
-| Priority | _TBD_ |
+| Priority | Done  |
 
 The following keys are used but absent from `ui.json`:
 
@@ -245,13 +245,13 @@ The following keys are used but absent from `ui.json`:
 
 ---
 
-## BUG-008 — getTeamUsage always returns empty (team usage tracking disabled)
+## [x] BUG-008 — getTeamUsage always returns empty (team usage tracking disabled)
 
 | Field    | Value |
 |----------|-------|
 | Category | Bug   |
 | Severity | Low   |
-| Priority | _TBD_ |
+| Priority | Done  |
 
 `getTeamUsage` callback hardcoded to return `{ count: 0, games: [] }` — actual usage not computed.
 **Effect:** UI cannot warn when a team is already assigned elsewhere.
@@ -359,11 +359,11 @@ operations.
 | BUG-001  | TeamSelectionModal incompatible props             | Bug         | **High** |
 | BUG-002  | Bulk result save sends wrong primary key          | Bug         | **High** |
 | BUG-003  | STATUS_COMPLETED value changed, no data migration | Bug         | **High** |
-| BUG-004  | NotificationToast prop name mismatch              | Bug         | Medium   |
-| BUG-005  | "Add Officials" i18n key wrong path               | Bug         | Medium   |
-| BUG-006  | "Select Official" modal title i18n key missing    | Bug         | Medium   |
-| BUG-007  | Several notification i18n keys missing            | Bug         | Low      |
-| BUG-008  | getTeamUsage always returns empty                 | Bug         | Low      |
+| BUG-004  | NotificationToast prop name mismatch              | Bug         | Medium   | [x]    |
+| BUG-005  | "Add Officials" i18n key wrong path               | Bug         | Medium   | [x]    |
+| BUG-006  | "Select Official" modal title i18n key missing    | Bug         | Medium   | [x]    |
+| BUG-007  | Several notification i18n keys missing            | Bug         | Low      | [x]    |
+| BUG-008  | getTeamUsage always returns empty                 | Bug         | Low      | [x]    |
 | FEAT-001 | "Add Officials" button (broken)                   | New Feature | —        |
 | FEAT-002 | External official slot (broken)                   | New Feature | —        |
 | FEAT-003 | Dedicated GamedayDesignerState model              | New Feature | —        |
