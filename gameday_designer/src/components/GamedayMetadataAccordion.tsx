@@ -176,7 +176,6 @@ interface GamedayMetadataAccordionProps {
   onDelete: () => void;
   onPublish: () => void;
   onUnlock: () => void;
-  onAddOfficials: () => void;
   onHighlight: (id: string, type: HighlightedElement['type']) => void;
   validation: FlowValidationResult;
   highlightedElement?: HighlightedElement | null;
@@ -193,7 +192,6 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
   onDelete,
   onPublish,
   onUnlock,
-  onAddOfficials,
   onHighlight,
   validation,
   highlightedElement,
@@ -467,17 +465,6 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                   {t('ui:button.clearSchedule')}
                 </Button>
 
-                <Button 
-                  variant="outline-secondary" 
-                  size="sm"
-                  onClick={onAddOfficials}
-                  disabled={metadata.status !== 'DRAFT'}
-                  className="px-3"
-                  data-testid="add-officials-button"
-                >
-                  <i className={`bi ${ICONS.TEAM} me-2`}></i>
-                  {t('ui:button.addOfficials')}
-                </Button>
               </div>
 
               <Button 

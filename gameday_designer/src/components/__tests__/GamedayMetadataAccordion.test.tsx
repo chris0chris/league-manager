@@ -44,7 +44,6 @@ describe('GamedayMetadataAccordion', () => {
         onDelete={vi.fn()}
         onPublish={vi.fn()}
         onUnlock={vi.fn()}
-        onAddOfficials={vi.fn()}
         onHighlight={vi.fn()}
         validation={mockValidation}
         readOnly={false}
@@ -100,7 +99,7 @@ describe('GamedayMetadataAccordion', () => {
       <GamedayMetadataAccordion
         metadata={mockMetadata}
         onUpdate={vi.fn()} onClearAll={vi.fn()} onDelete={vi.fn()}
-        onPublish={vi.fn()} onUnlock={vi.fn()} onAddOfficials={vi.fn()}
+        onPublish={vi.fn()} onUnlock={vi.fn()}
         onHighlight={vi.fn()} validation={mockValidation}
         readOnly={false} hasData={false}
         forceCollapsed={true}
@@ -117,7 +116,7 @@ describe('GamedayMetadataAccordion', () => {
       <GamedayMetadataAccordion
         metadata={mockMetadata}
         onUpdate={vi.fn()} onClearAll={vi.fn()} onDelete={vi.fn()}
-        onPublish={vi.fn()} onUnlock={vi.fn()} onAddOfficials={vi.fn()}
+        onPublish={vi.fn()} onUnlock={vi.fn()}
         onHighlight={vi.fn()} validation={mockValidation}
         readOnly={false} hasData={false}
         forceCollapsed={false}

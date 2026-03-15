@@ -89,6 +89,7 @@ const ListDesignerApp: React.FC = () => {
     handleGenerateTournament,
     handleAddGlobalTeam,
     handleAddGlobalTeamGroup,
+    handleAddOfficialsGroup,
     handleAddFieldContainer,
     handleAddStage,
     dismissNotification,
@@ -345,8 +346,8 @@ const ListDesignerApp: React.FC = () => {
   }, [id, addNotification, t, navigate]);
 
   const handleAddOfficialsLocal = useCallback(() => {
-    handleAddGlobalTeam(t('domain:officials'));
-  }, [handleAddGlobalTeam, t]);
+    handleAddOfficialsGroup();
+  }, [handleAddOfficialsGroup]);
 
   const handleGetTeamUsage = useCallback((teamId: string) => {
     return flowState.nodes
@@ -396,7 +397,6 @@ const ListDesignerApp: React.FC = () => {
                 addNotification(t('ui:notification.unlockFailed'), 'danger', t('ui:notification.title.error'));
               }
             }}
-            onAddOfficials={handleAddOfficialsLocal}
             validation={validation}
             highlightedElement={ui?.highlightedElement}
             onHighlight={handleHighlightElement}

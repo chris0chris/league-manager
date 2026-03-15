@@ -342,6 +342,7 @@ export function useDesignerController(
     showTournamentModal,
     setShowTournamentModal: (show: boolean) => setShowTournamentModal(show),
     handleAddGlobalTeam: (groupId: string) => flowStateRef.current?.addGlobalTeam(undefined, groupId),
+    handleAddOfficialsGroup: () => flowStateRef.current?.addOfficialsGroup(),
     handleAddGlobalTeamGroup: () => flowStateRef.current?.addGlobalTeamGroup(),
     handleAddFieldContainer: () => flowStateRef.current?.addFieldNode({}, true),
     handleAddStage: (fieldId: string) => flowStateRef.current?.addStageNode(fieldId),

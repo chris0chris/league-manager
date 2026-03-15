@@ -96,18 +96,17 @@ describe('Feature Refinements Coverage', () => {
     return { user };
   };
 
-  it('covers "Add External Officials" action', async () => {
+  it('teams pool officials button creates an External Officials group', async () => {
     const { user } = await renderApp();
 
-    // Open metadata accordion first
-    const toggle = await screen.findByTestId('gameday-metadata-toggle');
-    await user.click(toggle);
+    // Only the teams pool button should exist — metadata button is removed
+    const officialsBtns = screen.getAllByTestId('add-officials-button');
+    expect(officialsBtns).toHaveLength(1);
 
-    const addOfficialsBtns = await screen.findAllByTestId('add-officials-button');
-    await user.click(addOfficialsBtns[0]);
+    await user.click(officialsBtns[0]);
 
-    // Verify group was added
-    await screen.findByText(/Officials/i);
+    // Should create the "External Officials" group, not an ungrouped team named "Officials"
+    await screen.findByText('External Officials');
   });
 
   it('covers "Structured Template Export" action', async () => {
