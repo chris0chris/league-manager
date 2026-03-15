@@ -351,6 +351,10 @@ export function useDesignerController(
     onMetadataHighlight,
     handleRemoveEdgeFromSlot: (gameId: string, slot: 'home' | 'away') => flowStateRef.current?.removeEdgeFromSlot(gameId, slot),
     handleUpdateGameSlot: (gameId: string, slot: 'home' | 'away', type: string, refId: string) => flowStateRef.current?.addGameNodeInStage(gameId, slot, type, refId),
+    handleAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') =>
+      flowStateRef.current?.addGameToGameEdge(sourceGameId, outputType, targetGameId, targetSlot),
+    handleAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) =>
+      flowStateRef.current?.addStageToGameEdge(sourceStageId, sourceRank, targetGameId, targetSlot, sourceGroup),
   }), [
     loadData, saveData, expandField, expandStage, handleHighlightElement, 
     handleDynamicReferenceClick, handleImport, handleExport,

@@ -31,6 +31,7 @@ Refer to the **[Project README](@README.md)** for a full directory list.
   ```bash
   # Requires LXC test DB
   ./container/spinup_test_db.sh
+  export MYSQL_HOST=$(lxc list servyy-test --format json | jq -r '.[0].state.network.eth0.addresses[] | select(.family=="inet") | .address' | head -n 1)
   pytest
   ```
 

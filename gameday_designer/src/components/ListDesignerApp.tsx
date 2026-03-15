@@ -83,6 +83,8 @@ const ListDesignerApp: React.FC = () => {
     handleRemoveEdgeFromSlot,
     handleAssignTeam,
     handleConnectTeam,
+    handleAddGameToGameEdge,
+    handleAddStageToGameEdge,
     handleSwapTeams,
     handleDeleteNode,
     handleSelectNode,
@@ -447,8 +449,8 @@ const ListDesignerApp: React.FC = () => {
               onAssignTeam={handleAssignTeam}
               onSwapTeams={handleSwapTeams}
               onAddGame={handleUpdateGameSlot}
-              onAddGameToGameEdge={handleConnectTeam}
-              onAddStageToGameEdge={handleConnectTeam}
+              onAddGameToGameEdge={handleAddGameToGameEdge}
+              onAddStageToGameEdge={handleAddStageToGameEdge}
               onRemoveEdgeFromSlot={handleRemoveEdgeFromSlot}
               onOpenResultModal={handleOpenResultModal}
               onGenerateTournament={() => setShowTournamentModal(true)}
