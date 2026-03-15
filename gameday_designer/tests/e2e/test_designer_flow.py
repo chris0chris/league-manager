@@ -48,21 +48,11 @@ def _navigate_to_dashboard(page: Page, live_server_url: str) -> None:
     )
 
 
-@pytest.mark.django_db(transaction=True)
-def test_create_gameday_generate_tournament_and_publish(live_server, page: Page):
+def _setup_published_gameday(page: Page, live_server) -> str:
     """
-    Full E2E flow for the Gameday Designer:
-      1. Setup — create a League and Season in the database.
-      2. Login   — inject Knox auth token into localStorage.
-      3. Dashboard — navigate to the designer dashboard.
-      4. Create   — click "Create Gameday"; the app creates a DRAFT gameday with
-                    the first available season/league and navigates to the editor.
-      5. Metadata  — fill in name, date, start time and venue.
-      6. Generate  — open the Tournament Generator modal, enable "Generate teams
-                    automatically", confirm → the tournament structure is built.
-      7. Publish   — click "Publish Schedule" in the accordion header, then confirm
-                    in the Publish Confirmation modal.
-      8. Dashboard — navigate back and assert the card shows "Published" status.
+    Full create-generate-publish flow. Returns the gameday ID string.
+    Leaves the browser on the designer editor page after the publish
+    success toast appears.
     """
     # ---- 1. Setup: ensure at least one League and Season exist ---------------
     LeagueFactory(name="E2E Test League")
@@ -182,6 +172,27 @@ def test_create_gameday_generate_tournament_and_publish(live_server, page: Page)
         timeout=10000
     )
 
+    return gameday_id
+
+
+@pytest.mark.django_db(transaction=True)
+def test_create_gameday_generate_tournament_and_publish(live_server, page: Page):
+    """
+    Full E2E flow for the Gameday Designer:
+      1. Setup — create a League and Season in the database.
+      2. Login   — inject Knox auth token into localStorage.
+      3. Dashboard — navigate to the designer dashboard.
+      4. Create   — click "Create Gameday"; the app creates a DRAFT gameday with
+                    the first available season/league and navigates to the editor.
+      5. Metadata  — fill in name, date, start time and venue.
+      6. Generate  — open the Tournament Generator modal, enable "Generate teams
+                    automatically", confirm → the tournament structure is built.
+      7. Publish   — click "Publish Schedule" in the accordion header, then confirm
+                    in the Publish Confirmation modal.
+      8. Dashboard — navigate back and assert the card shows "Published" status.
+    """
+    gameday_id = _setup_published_gameday(page, live_server)
+
     # ---- 8. Navigate back to dashboard and verify Published card ------------
     page.get_by_role("button", name="Back").click()
 
@@ -190,3 +201,31 @@ def test_create_gameday_generate_tournament_and_publish(live_server, page: Page)
     gameday_card = page.get_by_test_id(f"gameday-card-{gameday_id}")
     expect(gameday_card).to_be_visible(timeout=10000)
     expect(gameday_card.get_by_text("Published")).to_be_visible()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_published_gameday_shows_games_in_spielplan(live_server, page: Page):
+    """
+    After creating, generating, and publishing a gameday via the designer,
+    the public detail page /gamedays/gameday/<id>/ must show the schedule
+    table (Spielplan) with at least one game row.
+    """
+    gameday_id = _setup_published_gameday(page, live_server)
+
+    # Navigate to the Django-rendered gameday detail page
+    page.goto(f"{live_server.url}/gamedays/gameday/{gameday_id}/")
+
+    # The "Spielplan" card is expanded by default (class="collapse show")
+    # Scope to the Spielplan collapse section to avoid strict-mode violations
+    # when multiple tables share id="schedule" across different page sections.
+    spielplan = page.locator("#collapseSchedule")
+    schedule_table = spielplan.locator("#schedule")
+    expect(schedule_table).to_be_visible(timeout=10000)
+
+    # At least one game row must exist
+    expect(spielplan.locator("#schedule tbody tr").first).to_be_visible(timeout=5000)
+
+    # Sanity-check: "not created" message must NOT appear
+    expect(
+        page.get_by_text("Spielplan wurde noch nicht erstellt.")
+    ).not_to_be_visible()

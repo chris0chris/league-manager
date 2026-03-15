@@ -99,10 +99,13 @@ class GamedayViewSet(viewsets.ModelViewSet):
             )
 
         from django.utils import timezone
+        from gamedays.service.canvas_publish_service import CanvasPublishService
 
         gameday.status = Gameday.STATUS_PUBLISHED
         gameday.published_at = timezone.now()
         gameday.save()
+
+        CanvasPublishService(gameday).apply()
 
         return Response(GamedaySerializer(gameday).data, status=status.HTTP_200_OK)
 
