@@ -134,9 +134,15 @@ const GamedayDashboard: React.FC = () => {
         return;
       }
 
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      const defaultName = `Gameday on ${dd}.${mm}.${yyyy}`;
+
       const newGameday = await gamedayApi.createGameday({
-        name: t('ui:placeholder.gamedayName'),
-        date: new Date().toISOString().split('T')[0],
+        name: defaultName,
+        date: `${yyyy}-${mm}-${dd}`,
         start: '10:00',
         format: '6_2',
         author: 1, // TODO: Use actual user ID

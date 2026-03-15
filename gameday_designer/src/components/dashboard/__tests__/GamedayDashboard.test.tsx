@@ -111,6 +111,21 @@ describe('GamedayDashboard', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/designer/1');
   });
 
+  it('creates new gameday with name "Gameday on DD.MM.YYYY"', async () => {
+    vi.mocked(gamedayApi.createGameday).mockResolvedValue({ id: 3, name: 'x' } as never);
+    await renderDashboard();
+    fireEvent.click(screen.getByRole('button', { name: /Create Gameday/i }));
+
+    await waitFor(() => {
+      const name = (vi.mocked(gamedayApi.createGameday).mock.calls[0][0] as { name: string }).name;
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      expect(name).toBe(`Gameday on ${dd}.${mm}.${yyyy}`);
+    });
+  });
+
   it('creates new gameday and navigates to editor', async () => {
     const newGameday = { id: 3, name: 'New Gameday' };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
