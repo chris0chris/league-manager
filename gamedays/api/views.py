@@ -285,10 +285,6 @@ class GameResultUpdateAPIView(APIView):
 
         game.save()
 
-        if game.status == Gameinfo.STATUS_COMPLETED:
-            from gamedays.service.canvas_progression_service import CanvasBracketProgressionService
-            CanvasBracketProgressionService(game).apply()
-
         # Update gameday status
         gameday = game.gameday
         if gameday.status == Gameday.STATUS_PUBLISHED:
