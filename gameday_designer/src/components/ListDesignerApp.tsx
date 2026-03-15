@@ -293,9 +293,9 @@ const ListDesignerApp: React.FC = () => {
     setShowTeamSelectionModal(true);
   }, []);
 
-  const handleTeamSelected = useCallback((teamId: string) => {
+  const handleTeamSelected = useCallback((team: { id: number; text: string }) => {
     if (teamSelectionContext) {
-      handleAssignTeam(teamSelectionContext.slotId, teamSelectionContext.side, teamId);
+      handleAssignTeam(teamSelectionContext.slotId, teamSelectionContext.side, String(team.id));
     }
     setShowTeamSelectionModal(false);
     setTeamSelectionModalContext(null);
@@ -504,8 +504,7 @@ const ListDesignerApp: React.FC = () => {
       <TeamSelectionModal
         show={showTeamSelectionModal}
         onHide={() => setShowTeamSelectionModal(false)}
-        teams={flowState.globalTeams}
-        groups={flowState.globalTeamGroups}
+        groupId={teamSelectionContext?.slotId ?? ''}
         onSelect={handleTeamSelected}
         title={teamSelectionContext?.side === 'official' ? t('ui:title.selectOfficial') : t('ui:title.selectTeam')}
       />
