@@ -279,6 +279,33 @@ class TestPublishCreatesGameinfos:
         assert home.team.name == "Gewinner Game A1"
         assert away.team.name == "Verlierer Game A1"
 
+    def test_progression_resolves_team_via_finalize_endpoint(self):
+        """Progression fires through the post_save signal, not just GameResultUpdateAPIView.
+        The scorecard uses PUT /api/game/<pk>/finalize to complete a game."""
+        GamedayDesignerState.objects.create(
+            gameday=self.gameday, state_data=PROGRESSION_CANVAS_STATE
+        )
+        self._publish()
+
+        prelim = Gameinfo.objects.get(gameday=self.gameday, standing="Game A1")
+        # Set scores directly (simulating in-game scoring)
+        Gameresult.objects.filter(gameinfo=prelim, isHome=True).update(fh=3, sh=4)
+        Gameresult.objects.filter(gameinfo=prelim, isHome=False).update(fh=0, sh=0)
+
+        # Finalize via the scorecard endpoint — this triggers the post_save signal
+        resp = self.client.put(
+            f"/api/game/{prelim.id}/finalize",
+            {},
+            format="json",
+        )
+        assert resp.status_code == 200
+
+        sf1 = Gameinfo.objects.get(gameday=self.gameday, standing="SF1")
+        home_result = Gameresult.objects.get(gameinfo=sf1, isHome=True)
+        away_result = Gameresult.objects.get(gameinfo=sf1, isHome=False)
+        assert home_result.team.name == "Team Alpha"   # winner (7 points)
+        assert away_result.team.name == "Team Beta"    # loser (0 points)
+
     def test_progression_resolves_team_after_game_completes(self):
         GamedayDesignerState.objects.create(
             gameday=self.gameday, state_data=PROGRESSION_CANVAS_STATE
