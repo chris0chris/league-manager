@@ -23,8 +23,8 @@
         <br/>
         <h3>
             {{ team.roster | length }} Personen
-            {% if is_user_or_staff %}
-            <a class="btn btn-primary" href="{% url 'passcheck-player-create' %}" role="button"><i
+            {% if is_admin_of_team %}
+            <a class="btn btn-primary" href="{% url 'passcheck-player-create' %}?team_id={{ pk }}" role="button"><i
                     class="bi bi-person-plus-fill"></i> Person hinzufügen</a>
             {% endif %}
         </h3>
@@ -32,8 +32,8 @@
         <table class="table table-hover align-middle">
             <thead>
             <tr>
-                {% if is_user_or_staff %}
-                <th><a href="{% url 'passcheck-player-create' %}" class="btn btn-primary" role="button" title="Neue Person zum Roster hinzufügen"><i
+                {% if is_admin_of_team %}
+                <th><a href="{% url 'passcheck-player-create' %}?team_id={{ pk }}" class="btn btn-primary" role="button" title="Neue Person zum Roster hinzufügen"><i
                         class="bi bi-person-plus-fill"></i></a></th>
                 {% endif %}
                 <th scope="col">Trikot</th>
@@ -50,7 +50,7 @@
             <tbody>
             {% for player in team.roster %}
             <tr>
-                {% if is_user_or_staff  %}
+                {% if is_admin_of_team  %}
                     {% if player.left_on is None%}
                     <td><a href="{% url 'passcheck-player-update' pk=player.id %}" role="button" class="btn btn-primary"
                            title="{{player.first_name}} {{player.last_name}} bearbeiten"><i

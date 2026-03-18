@@ -1,0 +1,55 @@
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Bestätigen</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmModalMessage">Bist du sicher?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelConfirm" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+        <form method="post" id="confirmModalForm" action="">
+          {% csrf_token %}
+          <button id="confirmConfirm" type="submit" class="btn btn-danger">
+            Bestätigen
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmButton = document.getElementById('confirmConfirm');
+    const cancelButton = document.getElementById('cancelConfirm');
+    const form = document.getElementById('confirmModalForm');
+
+    // Set message + URL when modal opens
+    confirmModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const message = button.getAttribute('data-message');
+        const url = button.getAttribute('data-url');
+
+        confirmModal.querySelector('#confirmModalMessage').innerHTML = message;
+        form.action = url;
+
+        confirmButton.disabled = false;
+        cancelButton.disabled = false;
+        confirmButton.innerHTML = 'Bestätigen';
+    });
+
+    form.addEventListener('submit', function() {
+        confirmButton.disabled = true;
+        cancelButton.disabled = true;
+
+        confirmButton.innerHTML = `
+          <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          Bestätigen ...
+        `;
+    });
+});
+</script>

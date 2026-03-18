@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'teammanager',
     'officials',
     'accounts',
+    'accesscontrol',
     'knox',
     'passcheck',
     'health_check',
@@ -185,6 +186,10 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
         },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG",
     },
     "loggers": {
         "django": {

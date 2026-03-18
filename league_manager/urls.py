@@ -50,6 +50,7 @@ urlpatterns = [
                        name='logout'),
                   # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
                   path('accounts/', include('accounts.urls')),
+                  path('accesscontrol/', include('accesscontrol.urls')),
                   path(r'health/', include('health_check.urls')),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

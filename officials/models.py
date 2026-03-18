@@ -1,6 +1,7 @@
 import datetime
 from datetime import date
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import QuerySet, ExpressionWrapper, Case, When, F, FloatField, Value, Sum
 
@@ -9,6 +10,7 @@ from gamedays.models import Association, Team, Gameday
 
 class Official(models.Model):
     OHNE_TEAM_ID = 213
+    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.SET_NULL)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     team: Team = models.ForeignKey(Team, on_delete=models.SET(OHNE_TEAM_ID))

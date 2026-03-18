@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+{% for association, sub_associations in association_subassociations.items %}
+<div class="card" style="overflow: auto">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2
+        id="collapseTrigger"
+        role="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseAssociation{{ association.id }}"
+        aria-expanded="false"
+        aria-controls="collapseAssociation{{ association.id }}"
+        class="mb-0"
+    >
+    {{ association.abbr }}
+    </h2>
+    <span>
+        <a href="{% url 'create-association' pk=association.id%}" class="btn btn-primary me-2">
+            <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Neuen Verband anlegen</span>
+        </a>
+    </span>
+    </div>
+    <div aria-labelledby="headingSchedule" class="collapse show" id="collapseAssociation{{ association.id }}">
+        <div class="card-body">
+            {% for sub_association in sub_associations %}
+            <div class="row mb-3">
+                <div class="col-12 col-md-10">
+                    {{ sub_association.name}}: {{ sub_association.abbr }}
+                </div>
+                <div class="col-12 col-md-2">
+                    <span>
+                        <a href="{% url 'update-association' pk=sub_association.id%}" class="btn btn-primary me-2">
+                            <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Bearbeiten</span>
+                        </a>
+                    </span>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                            data-message="Bist du dir wirklich sicher, dass der Verband <strong>{{ sub_association.abbr }}</strong> und alle dazugehörigen Ligen, Spiele und Einträge <strong>dauerhaft gelöscht</strong> werden sollen?"
+                            data-url="{% url 'delete-association' pk=sub_association.pk %}" title="Verband löschen">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% include "partials/delete_modal.html" %}
+
+{% endblock content %}

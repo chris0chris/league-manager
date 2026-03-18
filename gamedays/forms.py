@@ -5,6 +5,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.forms import modelformset_factory, BaseFormSet, formset_factory
 
+from accesscontrol.models import LeagueAdminAssignment
 from gamedays.models import Season, League, Gameday, Gameinfo, Team
 
 SCHEDULE_CUSTOM_CHOICE_C = "CUSTOM"
@@ -163,6 +164,12 @@ class GamedayForm(forms.ModelForm):
     def __init__(self, *args, context: GamedayFormContext | None = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.context = context or GamedayFormContext(init_format=False, author=None)
+        user = self.context.author
+
+        if user and user.groups.filter(name='Liga-Admin').exists():
+            league_ids = LeagueAdminAssignment.objects.filter(user=user).values_list('league_id', flat=True)
+            self.fields['league'].queryset = League.objects.filter(id__in=league_ids).order_by('name')
+
         last_season = Season.objects.last()
         if last_season:
             self.fields['season'].initial = last_season.id

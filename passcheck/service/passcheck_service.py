@@ -3,6 +3,7 @@ import datetime
 from django.conf import settings
 from django.db.models import Count, Q, Value, OuterRef, Exists, Subquery, IntegerField
 
+from accesscontrol.models import TeamAdminAssignment
 from gamedays.api.serializers import GamedayInfoSerializer
 from gamedays.models import Team, Gameinfo, Gameday
 from gamedays.service.model_helper import GameresultHelper
@@ -85,7 +86,7 @@ class PasscheckService:
         except Team.DoesNotExist:
             return None
 
-    def get_roster(self, team_id: int, year: int, gameday_id: int = None):
+    def get_roster(self, user, team_id: int, year: int, gameday_id: int = None):
         team = self._get_team(team_id)
         years = Playerlist.objects.filter(team=team).exclude(gamedays__league__name=None).values_list(
             'gamedays__date__year', flat=True).distinct()
@@ -103,16 +104,17 @@ class PasscheckService:
             league in all_leagues
         }
         roster = self._get_roster(team, gameday_id, league_annotations, year).values(*RosterSerializer.ALL_FIELD_VALUES,
-                                                                                     *list(league_annotations.keys()))
+                                                                     *list(league_annotations.keys()))
+        is_admin_of_team = TeamAdminAssignment.objects.filter(team_id=team_id, user=user).exists() or user.is_superuser
         team_data = TeamData(
             name=team.description,
-            roster=RosterSerializer(instance=roster, is_staff=(self.user_permission.is_user_or_staff()),
+            roster=RosterSerializer(instance=roster, is_staff=is_admin_of_team,
                                     context={'all_leagues': list(all_leagues)},
                                     many=True).data,
             validator='',
         )
         return {
-            'is_user_or_staff': self.user_permission.is_user_or_staff(),
+            'is_admin_of_team': is_admin_of_team,
             'all_leagues': list(all_leagues),
             'team': team_data,
             'team_id': team_id,

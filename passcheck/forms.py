@@ -3,6 +3,7 @@ from datetime import datetime
 from dal import autocomplete
 from django import forms
 
+from accesscontrol.models import TeamAdminAssignment
 from gamedays.models import Team, Person
 from passcheck.models import Playerlist, Player, PlayerlistTransfer
 from passcheck.service.transfer_service import TransferService
@@ -17,36 +18,19 @@ class PlayerlistCreateForm(forms.ModelForm):
 
     class Meta:
         model = Playerlist
-        fields = ['team', 'jersey_number']
+        fields = ['jersey_number']
         labels = {
-            'team': 'Team',
             'jersey_number': 'Trikotnummer',
-        }
-        widgets = {
-            'team': autocomplete.ModelSelect2(
-                url='/dal/team'
-            )
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.user = kwargs.get('initial', {}).get('user')
+        self.team = kwargs.get('initial', {}).get('team')
         current_year = datetime.today().year
         self.fields['year_of_birth'].widget.attrs['min'] = current_year - 70
         self.fields['year_of_birth'].widget.attrs['max'] = current_year - 5
-        is_staff = self.user and self.user.is_staff
-
-        try:
-            self.fields['team'].initial = Team.objects.get(name=self.user.username)
-            self.fields['team'].label_from_instance = lambda obj: obj.description
-        except Team.DoesNotExist:
-            pass
-
-        if is_staff:
-            self.fields['team'].queryset = Team.objects.all()
-        else:
-            self.fields['team'].widget = forms.HiddenInput()
 
         if self.instance and self.instance.pk:
             self.fields['first_name'].initial = self.instance.player.person.first_name
@@ -54,7 +38,7 @@ class PlayerlistCreateForm(forms.ModelForm):
             self.fields['pass_number'].initial = self.instance.player.pass_number
             self.fields['year_of_birth'].initial = self.instance.player.person.year_of_birth
             self.fields['sex'].initial = self.instance.player.person.sex
-            self.fields['team'].label_from_instance = lambda obj: obj.description
+            self.team = self.instance.team
 
     def save(self, commit=True):
         first_name = self.cleaned_data.get('first_name')
@@ -77,6 +61,7 @@ class PlayerlistCreateForm(forms.ModelForm):
 
         playerlist = super().save(commit=False)
         playerlist.player = player
+        playerlist.team = self.team
 
         if commit:
             playerlist.save()

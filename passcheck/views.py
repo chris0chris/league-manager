@@ -7,12 +7,13 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, TemplateView, UpdateView, ListView, DeleteView
 
+from accesscontrol.models import TeamAdminAssignment
 from gamedays.models import Team
 from league_manager.utils.decorators import get_user_request_permission
 from league_manager.utils.serializer_utils import Obfuscator
 from league_manager.utils.view_utils import PermissionHelper
 from .forms import PlayerlistCreateForm, PlayerlistUpdateForm, PlayerlistTransferForm
-from .models import Playerlist, PlayerlistTransfer
+from .models import Playerlist, PlayerlistTransfer, Player
 from .service.passcheck_service import PasscheckService
 
 
@@ -30,7 +31,7 @@ class RosterView(View):
             'season': year,
             'url_pattern': PASSCHECK_ROSTER_LIST_FOR_YEAR,
             'pk': team_id,
-            **passcheck_service.get_roster(team_id, year)
+            **passcheck_service.get_roster(self.request.user, team_id, year)
         }
         return render(request, self.template_name, context)
 
@@ -48,16 +49,20 @@ class PlayerlistCommonMixin(LoginRequiredMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        try:
-            team_id = Team.objects.get(name=self.request.user).pk
-        except Team.DoesNotExist:
-            team_id = None
-        context['team_id'] = team_id
+        context['team'] = self.get_team()
         return context
+
+    def get_team(self):
+        team_id = self.request.GET.get('team_id')
+        try:
+            return Team.objects.get(pk=team_id)
+        except Team.DoesNotExist:
+            return None
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['initial']['user'] = self.request.user
+        kwargs['initial']['team'] = self.get_team()
         return kwargs
 
     def form_valid(self, form):
@@ -88,13 +93,10 @@ class PlayerlistCreateView(PlayerlistCommonMixin, UserPassesTestMixin, CreateVie
         return super().handle_no_permission()
 
     def test_func(self):
+        team_id = self.request.GET.get('team_id')
+        team = Team.objects.get(pk=team_id)
         user = self.request.user
-        try:
-            Team.objects.get(name=user)
-        except Team.DoesNotExist:
-            if not user.is_staff:
-                return False
-        return True
+        return TeamAdminAssignment.objects.filter(team=team, user=user).exists() or user.is_superuser
 
 
 class PlayerlistUpdateView(PlayerlistCommonMixin, UserPassesTestMixin, UpdateView):
@@ -113,8 +115,9 @@ class PlayerlistUpdateView(PlayerlistCommonMixin, UserPassesTestMixin, UpdateVie
         return reverse(PASSCHECK_ROSTER_LIST, kwargs={'pk': self.object.team_id})
 
     def test_func(self):
-        player = Playerlist.objects.get(pk=self.kwargs.get('pk'))
-        return PermissionHelper.has_staff_or_user_permission(self.request, player.team_id)
+        team = Playerlist.objects.get(pk=self.kwargs.get('pk')).team
+        user = self.request.user
+        return TeamAdminAssignment.objects.filter(team=team, user=user).exists() or user.is_superuser
 
 
 class PlayerlistDeleteView(UserPassesTestMixin, View):
@@ -135,7 +138,8 @@ class PlayerlistDeleteView(UserPassesTestMixin, View):
 
     def test_func(self):
         playerlist = self.get_object(pk=self.kwargs.get('pk'))
-        return PermissionHelper.has_staff_or_user_permission(self.request, playerlist.team_id)
+        user = self.request.user
+        return TeamAdminAssignment.objects.filter(team=playerlist.team, user=user).exists() or user.is_superuser
 
 
 class PlayerlistTransferView(PlayerlistCommonMixin, UserPassesTestMixin, UpdateView):

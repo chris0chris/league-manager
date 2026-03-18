@@ -17,6 +17,7 @@ from django.views.generic import (
 )
 from formtools.wizard.views import SessionWizardView
 
+from accesscontrol.models import LeagueAdminAssignment
 from .constants import (
     LEAGUE_GAMEDAY_DETAIL,
     LEAGUE_GAMEDAY_LIST_AND_YEAR,
@@ -107,6 +108,8 @@ class GamedayDetailView(DetailView):
             officials = []
             url_pattern_official = ''
             url_pattern_official_signup = ''
+        league = Gameday.objects.get(pk=pk).league
+        is_admin_of_league = LeagueAdminAssignment.objects.filter(user=self.request.user, league=league).exists() or self.request.user.is_superuser
         context['info'] = {
             'schedule': gs.get_schedule().to_html(**render_configs),
             'qualify_table': qualify_table,
@@ -117,6 +120,7 @@ class GamedayDetailView(DetailView):
             'url_pattern_official': url_pattern_official,
             'url_pattern_official_signup': url_pattern_official_signup,
         }
+        context['is_admin_of_league'] = is_admin_of_league
         return context
 
 
@@ -156,7 +160,7 @@ class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return reverse(url_name, kwargs=kwargs)
 
     def test_func(self):
-        return self.request.user.is_staff
+        return self.request.user.groups.filter(name='Liga-Admin').exists() or self.request.user.is_superuser
 
 
 class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -185,7 +189,7 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return reverse('league-gameday-detail', kwargs={'pk': self.object.pk})
 
     def test_func(self):
-        return self.request.user.is_staff
+        return self.request.user.groups.filter(name='Liga-Admin').exists() or self.request.user.is_superuser
 
 
 class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView):
@@ -267,7 +271,7 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
         return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday_id}))
 
     def test_func(self):
-        return self.request.user.is_staff
+        return self.request.user.groups.filter(name='Liga-Admin').exists() or self.request.user.is_superuser
 
 
 class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
@@ -334,7 +338,7 @@ class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk}))
 
     def test_func(self):
-        return self.request.user.is_staff
+        return self.request.user.groups.filter(name='Liga-Admin').exists() or self.request.user.is_superuser
 
 
 class StaffDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

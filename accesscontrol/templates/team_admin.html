@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+{% for league, teams in league_teams.items %}
+<div class="card" style="overflow: auto">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2
+        id="collapseTrigger"
+        role="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseLeague{{ league.id }}"
+        aria-expanded="false"
+        aria-controls="collapseLeague{{ league.id }}"
+        class="mb-0"
+    >
+    {{ league }}
+    </h2>
+    <span>
+        <a href="{% url 'create-team' pk=league.id%}" class="btn btn-primary me-2">
+            <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Neues Team anlegen</span>
+        </a>
+    </span>
+    </div>
+    <div aria-labelledby="headingSchedule" class="collapse show" id="collapseLeague{{ league.id }}">
+        <div class="card-body">
+            {% for team in teams %}
+            <div class="row mb-3">
+                <div class="col-12 col-md-10">
+                    {{ team.description}}
+                </div>
+                <div class="col-12 col-md-2">
+                    <span>
+                        <a href="{% url 'update-team' pk=team.id%}" class="btn btn-primary me-2">
+                            <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Bearbeiten</span>
+                        </a>
+                    </span>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                            data-message="Bist du dir wirklich sicher, dass das Team <strong>{{ team.name }}</strong> <strong>dauerhaft gelöscht</strong> werden sollen?"
+                            data-url="{% url 'delete-team' pk=team.pk %}" title="Team löschen">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% include "partials/delete_modal.html" %}
+
+{% endblock content %}

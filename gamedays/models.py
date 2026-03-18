@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import QuerySet, CASCADE
 from django.utils import timezone
 
+from accesscontrol.models import Association
 
 class Season(models.Model):
     name = models.CharField(max_length=20)
@@ -20,16 +21,6 @@ class League(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class Association(models.Model):
-    abbr = models.CharField(max_length=10, unique=True)
-    name = models.CharField(max_length=100)
-
-    objects: QuerySet["Association"] = models.Manager()
-
-    def __str__(self):
-        return f'{self.pk}: {self.abbr} - {self.name}'
 
 
 class Team(models.Model):
@@ -266,6 +257,7 @@ class Person(models.Model):
         (MALE, 'Männlich'),
     ]
 
+    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.SET_NULL)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     sex = models.IntegerField(choices=SEX_CHOICES, null=True, blank=True, default=None)
