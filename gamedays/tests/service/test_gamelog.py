@@ -33,39 +33,57 @@ class TestGamelog(TestCase):
 
     def test_secondhalf_is_played(self):
         firstGameEntry = DBSetup().create_teamlog_home_and_away()
-        firstGameEntry.gameHalftime = '09:57'
+        firstGameEntry.gameHalftime = "09:57"
         firstGameEntry.save()
         gamelog = GameLog(firstGameEntry)
         assert not gamelog.is_firsthalf()
 
     def test_json_representation_of_gamelog_object(self):
-        g = GameLogObject(81, 'White', 'Red')
+        g = GameLogObject(81, "White", "Red")
         g.home.score = 18
         g.away.score = 7
         assert json.dumps(g.as_json(), cls=AsJsonEncoder) == json.dumps(
-            {'gameId': 81,
-             'isFirstHalf': True,
-             'home': {
-                 'name': 'White',
-                 'score': 18,
-                 'firsthalf': {'score': None, 'entries': []},
-                 'secondhalf': {'score': None, 'entries': []}},
-             'away': {
-                 'name': 'Red',
-                 'score': 7,
-                 'firsthalf': {'score': None, 'entries': []},
-                 'secondhalf': {'score': None, 'entries': []}}})
+            {
+                "gameId": 81,
+                "isFirstHalf": True,
+                "home": {
+                    "name": "White",
+                    "score": 18,
+                    "firsthalf": {"score": None, "entries": []},
+                    "secondhalf": {"score": None, "entries": []},
+                },
+                "away": {
+                    "name": "Red",
+                    "score": 7,
+                    "firsthalf": {"score": None, "entries": []},
+                    "secondhalf": {"score": None, "entries": []},
+                },
+            }
+        )
 
     def test_create_entries(self):
         first_game_entry = DBSetup().create_teamlog_home_and_away()
         first_team = Team.objects.first()
         gamelog = GameLog(first_game_entry)
-        actual_gamelog = TeamLog.objects.filter(gameinfo=first_game_entry, team=first_team, half=1)
+        actual_gamelog = TeamLog.objects.filter(
+            gameinfo=first_game_entry, team=first_team, half=1
+        )
         actual_gamelog_entries_as_json = gamelog.create_entries_for_half(actual_gamelog)
         assert actual_gamelog_entries_as_json == [
-            {'sequence': 1, 'td': 19, },
-            {'sequence': 2, 'td': 19, 'pat2': 7, },
-            {'sequence': 3, 'td': 19, 'pat1': 7, }
+            {
+                "sequence": 1,
+                "td": 19,
+            },
+            {
+                "sequence": 2,
+                "td": 19,
+                "pat2": 7,
+            },
+            {
+                "sequence": 3,
+                "td": 19,
+                "pat1": 7,
+            },
         ]
 
     def test_get_half_score(self):
@@ -83,14 +101,23 @@ class TestGamelog(TestCase):
         gamelog = GameLog(gameinfo)
         gamelog.mark_entries_as_deleted(sequence)
         gamelog_list = TeamLog.objects.filter(sequence=sequence)
-        assert gamelog_list[0].isDeleted, 'touchdown should be marked as deleted'
-        assert gamelog_list[1].isDeleted, 'PAT should be marked as deleted'
-        actual_gamelog = TeamLog.objects.filter(gameinfo=gameinfo, team=first_team, half=1)
+        assert gamelog_list[0].isDeleted, "touchdown should be marked as deleted"
+        assert gamelog_list[1].isDeleted, "PAT should be marked as deleted"
+        actual_gamelog = TeamLog.objects.filter(
+            gameinfo=gameinfo, team=first_team, half=1
+        )
         actual_gamelog_entries_as_json = gamelog.create_entries_for_half(actual_gamelog)
         assert actual_gamelog_entries_as_json == [
-            {'sequence': 1, 'td': 19, },
-            {'sequence': 2, 'td': 19, 'pat2': 7, 'isDeleted': True},
-            {'sequence': 3, 'td': 19, 'pat1': 7, }
+            {
+                "sequence": 1,
+                "td": 19,
+            },
+            {"sequence": 2, "td": 19, "pat2": 7, "isDeleted": True},
+            {
+                "sequence": 3,
+                "td": 19,
+                "pat1": 7,
+            },
         ]
         assert gamelog.get_home_firsthalf_score() == 13
         assert gamelog.get_home_score() == 34
@@ -102,12 +129,14 @@ class TestGamelogCreator(TestCase):
         firstGame = Gameinfo.objects.first()
         team = Team.objects.first()
         user = User.objects.first()
-        gamelog_creator = GameLogCreator(firstGame, team, [{"name": "Auszeit", "input": "00:01"}], user)
+        gamelog_creator = GameLogCreator(
+            firstGame, team, [{"name": "Auszeit", "input": "00:01"}], user
+        )
         gamelog_creator.create()
         assert len(TeamLog.objects.all()) == 1
         teamlog = TeamLog.objects.first()
         assert teamlog.sequence == 0
-        assert teamlog.input == '00:01'
+        assert teamlog.input == "00:01"
         assert teamlog.value == 0
         assert teamlog.half == 1
 
@@ -116,12 +145,14 @@ class TestGamelogCreator(TestCase):
         firstGame = Gameinfo.objects.first()
         team = Team.objects.first()
         user = User.objects.first()
-        gamelog_creator = GameLogCreator(firstGame, team, [{"name": "Strafe", "input": "illegaler Kontakt"}], user)
+        gamelog_creator = GameLogCreator(
+            firstGame, team, [{"name": "Strafe", "input": "illegaler Kontakt"}], user
+        )
         gamelog_creator.create()
         assert len(TeamLog.objects.all()) == 1
         teamlog = TeamLog.objects.first()
         assert teamlog.sequence == 0
-        assert teamlog.input == 'illegaler Kontakt'
+        assert teamlog.input == "illegaler Kontakt"
         assert teamlog.value == 0
         assert teamlog.half == 1
 
@@ -140,9 +171,12 @@ class TestGamelogCreator(TestCase):
                 {"name": "Safety (+1)", "player": "22"},
                 {"name": "Safety (+2)", "player": "12"},
             ],
-            user)
+            user,
+        )
         gamelog_creator.create()
-        gamelog_creator = GameLogCreator(firstGame, team, [{'name': 'Turnover'}], user, 2)
+        gamelog_creator = GameLogCreator(
+            firstGame, team, [{"name": "Turnover"}], user, 2
+        )
         gamelog_creator.create()
         first_team_log = TeamLog.objects.first()
         assert len(TeamLog.objects.all()) == 6

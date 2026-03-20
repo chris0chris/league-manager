@@ -1,0 +1,45 @@
+{
+  "clearAll": {
+    "title": "Clear All",
+    "message": "Are you sure you want to clear all fields, stages, games, teams, and groups? This action cannot be undone."
+  },
+  "editGame": {
+    "title": "Edit Game"
+  },
+  "tournamentGenerator": {
+    "title": "Generate Tournament",
+    "noTemplates": "No tournament templates available.",
+    "warningTitle": "Attention: Auto-Clear",
+    "warningMessage": "Generating a new tournament will PERMANENTLY delete your current schedule and fields. This action cannot be undone.",
+    "generateTeams": "Generate {{count}} teams automatically",
+    "autoAssignTeams": "Auto-assign teams to games",
+    "previewTitle": "Preview:",
+    "previewFields_one": "{{count}} field",
+    "previewFields_other": "{{count}} fields",
+    "previewStages_one": "{{count}} stage",
+    "previewStages_other": "{{count}} stages",
+    "previewFirstGame": "First game at {{time}}",
+    "previewGameDuration": "Default game duration: {{duration}} minutes",
+    "durationValidation": "Duration must be between 15 and 180 minutes.",
+    "insufficientTeams": "Not enough teams in the pool. This format requires at least {{min}} teams, or select 'Generate teams automatically'.",
+    "generateTeamsDisabledHint": "Disable manual teams first",
+    "selectTeamsTitle": "Select Teams"
+  },
+  "publishConfirmation": {
+    "title": "Publish Schedule",
+    "description": "Publishing the schedule will lock its structure. Results can be entered, but games and teams cannot be added or removed.",
+    "errorsTitle": "Blocking Errors Found",
+    "errorsDescription": "The following issues must be resolved before the schedule can be published:",
+    "warningsTitle": "Warnings Found",
+    "warningsDescription": "The schedule has some potential issues. You can still publish, but please review these items:",
+    "ready": "The schedule is valid and ready to be published.",
+    "confirmWithWarnings": "Publish Anyway",
+    "confirm": "Publish Now"
+  },
+  "teamSelection": {
+    "title": "Connect Existing Team",
+    "placeholder": "Search by team name...",
+    "noResults": "No teams found matching your search.",
+    "hint": "Enter at least 2 characters to search."
+  }
+}

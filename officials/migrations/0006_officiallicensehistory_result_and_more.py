@@ -5,18 +5,20 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('officials', '0005_alter_officialexternalgames_comment'),
+        ("officials", "0005_alter_officialexternalgames_comment"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='officiallicensehistory',
-            name='result',
+            model_name="officiallicensehistory",
+            name="result",
             field=models.PositiveSmallIntegerField(default=0),
         ),
         migrations.AlterField(
-            model_name='official',
-            name='external_id',
-            field=models.CharField(default=None, max_length=100, null=True, unique=True),
+            model_name="official",
+            name="external_id",
+            field=models.CharField(
+                default=None, max_length=100, null=True, unique=True
+            ),
         ),
     ]

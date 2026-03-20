@@ -10,8 +10,8 @@ class PlayerlistRepository:
     @staticmethod
     def create(team, player, jersey_number, joined_on):
         return Playerlist.objects.create(
-                team=team,
-                player=player,
-                jersey_number=jersey_number,
-                joined_on = joined_on,
-            )
+            team=team,
+            player=player,
+            jersey_number=jersey_number,
+            joined_on=joined_on,
+        )

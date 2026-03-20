@@ -5,8 +5,9 @@ import pandas as pd
 
 # ToDo extract method for reuseability
 def get_df_from_json(filename):
-    return pd.read_json(pathlib.Path(__file__).parent / 'testdata/{0}'.format(filename),
-                        orient='table')
+    return pd.read_json(
+        pathlib.Path(__file__).parent / "testdata/{0}".format(filename), orient="table"
+    )
 
 
 # class TestLeagueTable(TestCase):

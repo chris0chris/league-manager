@@ -6,17 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('officials', '0010_officialgamessignup'),
+        ("officials", "0010_officialgamessignup"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='officialgamessignup',
-            old_name='signed_up_at',
-            new_name='created_at',
+            model_name="officialgamessignup",
+            old_name="signed_up_at",
+            new_name="created_at",
         ),
         migrations.AddConstraint(
-            model_name='officialgamessignup',
-            constraint=models.UniqueConstraint(fields=('gameday', 'official'), name='unique_gameday_and_official_id'),
+            model_name="officialgamessignup",
+            constraint=models.UniqueConstraint(
+                fields=("gameday", "official"), name="unique_gameday_and_official_id"
+            ),
         ),
     ]

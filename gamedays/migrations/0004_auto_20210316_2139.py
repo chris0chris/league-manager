@@ -9,18 +9,22 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('gamedays', '0003_auto_20210309_1802'),
+        ("gamedays", "0003_auto_20210309_1802"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='teamlog',
-            name='author',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.SET_DEFAULT, to=settings.AUTH_USER_MODEL),
+            model_name="teamlog",
+            name="author",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.SET_DEFAULT,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='teamlog',
-            name='created_time',
+            model_name="teamlog",
+            name="created_time",
             field=models.TimeField(default=django.utils.timezone.now),
         ),
     ]

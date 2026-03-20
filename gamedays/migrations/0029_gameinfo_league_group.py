@@ -13,8 +13,13 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='gameinfo',
-            name='league_group',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='league_table.leaguegroup'),
+            model_name="gameinfo",
+            name="league_group",
+            field=models.ForeignKey(
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="league_table.leaguegroup",
+            ),
         ),
     ]

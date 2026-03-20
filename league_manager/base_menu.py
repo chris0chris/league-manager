@@ -20,9 +20,7 @@ class BaseMenu(ABC):
 class MenuDivider:
     @staticmethod
     def create():
-        return {
-            'is_divider': True
-        }
+        return {"is_divider": True}
 
 
 class MenuItem:
@@ -31,8 +29,8 @@ class MenuItem:
         permissions = permissions or []
         url_kwargs = url_kwargs or {}
         return {
-            'name': name,
-            'static': is_static,
-            'url': url if is_static else reverse(url, kwargs=url_kwargs),
+            "name": name,
+            "static": is_static,
+            "url": url if is_static else reverse(url, kwargs=url_kwargs),
             # 'permissions': permissions,
         }

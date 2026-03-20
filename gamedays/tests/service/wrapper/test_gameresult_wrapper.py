@@ -27,15 +27,15 @@ class TestGameresultWrapper(TestCase):
         DBSetup().g62_status_empty()
         last_game = Gameinfo.objects.last()
         gameresult_wrapper = GameresultWrapper(last_game)
-        assert gameresult_wrapper.get_home_name() == 'A1'
-        assert gameresult_wrapper.get_away_name() == 'B1'
+        assert gameresult_wrapper.get_home_name() == "A1"
+        assert gameresult_wrapper.get_away_name() == "B1"
 
     def test_get_team_fullnames(self):
         DBSetup().g62_status_empty()
         last_game = Gameinfo.objects.last()
         gameresult_wrapper = GameresultWrapper(last_game)
-        assert gameresult_wrapper.get_home_fullname() == 'AAAAAAA1'
-        assert gameresult_wrapper.get_away_fullname() == 'BBBBBBB1'
+        assert gameresult_wrapper.get_home_fullname() == "AAAAAAA1"
+        assert gameresult_wrapper.get_away_fullname() == "BBBBBBB1"
 
     def test_get_team_scores(self):
         DBSetup().g62_status_empty()
@@ -46,10 +46,12 @@ class TestGameresultWrapper(TestCase):
         assert gameresult_wrapper.get_away_score() == 0
 
     def test_create_gameresult(self):
-        expected_team = DBSetup().create_teams('new_team', 1)[0]
+        expected_team = DBSetup().create_teams("new_team", 1)[0]
         expected_gameinfo = DBSetup.create_gameinfo()
         gameresult_wrapper = GameresultWrapper(expected_gameinfo)
-        gameresult, _ = gameresult_wrapper.create(team=expected_team, fh=6, sh=7, pa=5, is_home=True)
+        gameresult, _ = gameresult_wrapper.create(
+            team=expected_team, fh=6, sh=7, pa=5, is_home=True
+        )
         assert gameresult.gameinfo == expected_gameinfo
         assert gameresult.team == expected_team
         assert gameresult.isHome == True

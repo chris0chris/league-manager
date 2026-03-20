@@ -17,6 +17,8 @@ from gamedays.constants import (
     LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
     LEAGUE_GAMEDAY_GAMEINFOS_DELETE,
     LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
+    LEAGUE_GAMEDAY_GAME_DETAIL,
+    LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
 )
 from gamedays.forms import (
     GamedayForm,
@@ -24,17 +26,23 @@ from gamedays.forms import (
     GamedayFormatForm,
     GameinfoForm,
 )
-from gamedays.models import Gameday, League, Gameinfo
+from gamedays.models import Gameday, League, Gameinfo, TeamLog, Gameresult, GameSetup
 from gamedays.service.builders import TableContextBuilder
 from gamedays.service.gameday_service import (
     EmptySchedule,
     EmptyFinalTable,
     EmptyQualifyTable,
     EmptyDefenseStatisticTable,
-    EmptyOffenseStatisticTable
+    EmptyOffenseStatisticTable,
+    EmptyEventsTable,
+    EmptySplitScoreTable,
 )
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from gamedays.tests.setup_factories.factories import UserFactory, GamedayFactory
+from gamedays.tests.setup_factories.factories import (
+    UserFactory,
+    GamedayFactory,
+    SeasonFactory,
+)
 from gamedays.wizard import FIELD_GROUP_STEP, GAMEDAY_FORMAT_STEP, GAMEINFO_STEP
 from league_table.tests.setup_factories.db_setup_leaguetable import LEAGUE_TABLE_TEST_RULESET
 from league_table.tests.setup_factories.factories_leaguetable import (
@@ -87,12 +95,12 @@ class TestGamedayDetailView(TestCase):
         )
         assert resp.status_code == HTTPStatus.OK
         context = resp.context_data
-        assert context['object'].pk == gameday.pk
-        assert context['info']['schedule'] != ''
-        assert context['info']['qualify_table'] != ''
-        assert context['info']['final_table'] != ''
-        assert context['info']['offense_table'] != EmptyOffenseStatisticTable().to_html()
-        assert context['info']['defense_table'] != EmptyDefenseStatisticTable().to_html()
+        assert context["object"].pk == gameday.pk
+        assert context["info"]["schedule"] != ""
+        assert context["info"]["qualify_table"] != ""
+        assert context["info"]["final_table"] != ""
+        assert context["info"]["offense_table"] != EmptyOffenseStatisticTable().to_html()
+        assert context["info"]["defense_table"] != EmptyDefenseStatisticTable().to_html()
 
     def test_detail_view_with_empty_gameday(self):
         gameday = DBSetup().create_empty_gameday()
@@ -101,16 +109,148 @@ class TestGamedayDetailView(TestCase):
         )
         assert resp.status_code == HTTPStatus.OK
         context = resp.context_data
-        assert context['object'].pk == gameday.pk
-        assert context['info']['schedule'] == EmptySchedule().to_html()
-        assert context['info']['qualify_table'] == TableContextBuilder.build(EmptyQualifyTable())
-        assert context['info']['final_table'] == TableContextBuilder.build(EmptyFinalTable())
-        assert context['info']['offense_table'] == EmptyOffenseStatisticTable().to_html()
-        assert context['info']['defense_table'] == EmptyDefenseStatisticTable().to_html()
+        assert context["object"].pk == gameday.pk
+        assert context["info"]["schedule"] == EmptySchedule().to_html()
+        assert context["info"]["qualify_table"] == TableContextBuilder.build(EmptyQualifyTable())
+        assert context["info"]["final_table"] == TableContextBuilder.build(EmptyFinalTable())
+        assert context["info"]["offense_table"] == EmptyOffenseStatisticTable().to_html()
+        assert context["info"]["defense_table"] == EmptyDefenseStatisticTable().to_html()
 
     def test_detail_view_gameday_not_available(self):
         resp = self.client.get(reverse(LEAGUE_GAMEDAY_DETAIL, args=[00]))
         assert resp.status_code == HTTPStatus.NOT_FOUND
+
+
+class TestGamedayLeagueStatisticView(TestCase):
+
+    def test_league_statistic_view_with_invalid_league_and_season(self):
+        resp = self.client.get(
+            reverse(
+                LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
+                kwargs={
+                    "league": 0,
+                    "season": 0,
+                },
+            )
+        )
+        assert resp.status_code == HTTPStatus.OK
+
+    def test_league_statistic_view_with_gameday_game_no_team_log(self):
+        gameday = DBSetup().g62_finished(season=SeasonFactory(name="2025"))
+
+        resp = self.client.get(
+            reverse(
+                LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
+                kwargs={
+                    "league": gameday.league.name,
+                    "season": gameday.season.name,
+                },
+            )
+        )
+
+        assert resp.status_code == HTTPStatus.OK
+        context = resp.context_data
+
+        for v in context["info"].values():
+            assert v == "Die Statistiken erscheinen nach den ersten Spielen."
+
+    def test_league_statistic_view_with_gameday_team_log(self):
+        gameday = DBSetup().g62_finished(season=SeasonFactory(name="2025"))
+        for gameinfo in list(gameday.gameinfo_set.all()):
+            team_1_result, team_2_result = list(gameinfo.gameresult_set.all())
+            DBSetup().create_teamlog_home_and_away(
+                team_1_result.team, team_2_result.team, gameinfo=gameinfo
+            )
+
+        resp = self.client.get(
+            reverse(
+                LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
+                kwargs={
+                    "league": gameday.league.name,
+                    "season": gameday.season.name,
+                },
+            )
+        )
+
+        assert resp.status_code == HTTPStatus.OK
+        context = resp.context_data
+
+        for v in context["info"].values():
+            assert v != "Die Statistiken erscheinen nach den ersten Spielen."
+
+
+class TestGamedayGameDetailView(TestCase):
+
+    def test_detail_view_with_no_gameday_game(self):
+        resp = self.client.get(
+            reverse(
+                LEAGUE_GAMEDAY_GAME_DETAIL,
+                kwargs={
+                    "gameday_pk": 0,
+                    "pk": 0,
+                },
+            )
+        )
+        resp = self.client.get(reverse(LEAGUE_GAMEDAY_DETAIL, args=[00]))
+        assert resp.status_code == HTTPStatus.NOT_FOUND
+
+    def test_detail_view_with_gameday_game_no_team_log(self):
+        gameday = DBSetup().g62_finished()
+        gameinfo = Gameinfo.objects.first()
+        resp = self.client.get(
+            reverse(
+                LEAGUE_GAMEDAY_GAME_DETAIL,
+                kwargs={
+                    "gameday_pk": gameday.pk,
+                    "pk": gameinfo.pk,
+                },
+            )
+        )
+
+        home_team = list(Gameresult.objects.filter(gameinfo=gameinfo.pk, isHome=True))
+        away_team = list(Gameresult.objects.filter(gameinfo=gameinfo.pk, isHome=False))
+
+        assert len(home_team) > 0
+        assert len(away_team) > 0
+
+        assert resp.status_code == HTTPStatus.OK
+        context = resp.context_data
+        assert context["object"].pk == gameinfo.pk
+        assert context["info"]["home_team"] == home_team[0].team.description
+        assert context["info"]["away_team"] == away_team[0].team.description
+        assert context["info"]["events_table"] == EmptyEventsTable.to_html()
+        assert context["info"]["split_score_table"].startswith(
+            EmptySplitScoreTable.to_html()
+        )
+
+    def test_detail_view_with_gameday_game_team_log(self):
+        gameinfo = DBSetup().create_teamlog_home_and_away()
+
+        home_team = list(Gameresult.objects.filter(gameinfo=gameinfo.pk, isHome=True))
+        away_team = list(Gameresult.objects.filter(gameinfo=gameinfo.pk, isHome=False))
+
+        assert len(home_team) > 0
+        assert len(away_team) > 0
+
+        resp = self.client.get(
+            reverse(
+                LEAGUE_GAMEDAY_GAME_DETAIL,
+                kwargs={
+                    "gameday_pk": gameinfo.pk,
+                    "pk": gameinfo.pk,
+                },
+            )
+        )
+        # test = list(Gameresult.objects.filter(Gameresult.pk == gameinfo.pk).values("team__name"))
+        assert resp.status_code == HTTPStatus.OK
+        context = resp.context_data
+        assert context["object"].pk == gameinfo.pk
+        assert context["info"]["home_team"] == home_team[0].team.description
+        assert context["info"]["away_team"] == away_team[0].team.description
+        assert context["info"]["events_table"] != EmptyEventsTable.to_html()
+        assert not context["info"]["split_score_table"].startswith(
+            EmptySplitScoreTable.to_html()
+        )
 
 
 class TestGamedayUpdateView(WebTest):
@@ -276,7 +416,7 @@ class TestGameinfoWizard(WebTest):
         gameday.refresh_from_db()
         gameinfo = gameday.gameinfo_set.first()
 
-        assert gameinfo.standing == 'Gruppe 1'
+        assert gameinfo.standing == "Gruppe 1"
         assert gameinfo.league_group is None
 
     def test_wizard_with_league_group(self):
@@ -285,11 +425,11 @@ class TestGameinfoWizard(WebTest):
         self.app.set_user(user)
         gameday = GamedayFactory()
         LeagueGroupFactory(
-                name="Gruppe 1", season=gameday.season, league=gameday.league
-            )
+            name="Gruppe 1", season=gameday.season, league=gameday.league
+        )
         group_2 = LeagueGroupFactory(
-                name="Gruppe 2", season=gameday.season, league=gameday.league
-            )
+            name="Gruppe 2", season=gameday.season, league=gameday.league
+        )
 
         field_group_step = self.app.get(
             reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
@@ -318,7 +458,6 @@ class TestGameinfoWizard(WebTest):
             LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={"pk": gameday.pk}
         )
         assert isinstance(gameinfo_update_page.context["form"][0], GameinfoForm)
-
 
         gameday.refresh_from_db()
         gameinfo = gameday.gameinfo_set.first()

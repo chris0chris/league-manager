@@ -7,19 +7,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gamedays', '0022_person'),
-        ('passcheck', '0008_alter_player_pass_number'),
+        ("gamedays", "0022_person"),
+        ("passcheck", "0008_alter_player_pass_number"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='player',
-            name='person',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gamedays.person'),
+            model_name="player",
+            name="person",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="gamedays.person"
+            ),
         ),
         migrations.AlterField(
-            model_name='playerlist',
-            name='player',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='passcheck.player'),
+            model_name="playerlist",
+            name="player",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="passcheck.player"
+            ),
         ),
     ]

@@ -12,15 +12,15 @@ class GameService(object):
 
     def update_halftime(self, user):
         self.gameinfo.set_halftime_to_now()
-        self._create_log_entry('2. Halbzeit gestartet', user)
+        self._create_log_entry("2. Halbzeit gestartet", user)
 
     def update_gamestart(self, user):
         self.gameinfo.set_gamestarted_to_now()
-        self._create_log_entry('Spiel gestartet', user)
+        self._create_log_entry("Spiel gestartet", user)
 
     def update_game_finished(self, user):
         self.gameinfo.set_game_finished_to_now()
-        self._create_log_entry('Spiel beendet', user)
+        self._create_log_entry("Spiel beendet", user)
 
     def get_gamelog(self):
         return GameLog(self.gameinfo.gameinfo)
@@ -32,10 +32,18 @@ class GameService(object):
         return gamelog.create()
 
     def update_score(self, gamelog: GameLog):
-        self.gameresult.save_home_first_half(gamelog.get_home_firsthalf_score(), gamelog.get_away_firsthalf_score())
-        self.gameresult.save_away_first_half(gamelog.get_away_firsthalf_score(), gamelog.get_home_firsthalf_score())
-        self.gameresult.save_home_second_half(gamelog.get_home_secondhalf_score(), gamelog.get_away_secondhalf_score())
-        self.gameresult.save_away_second_half(gamelog.get_away_secondhalf_score(), gamelog.get_home_secondhalf_score())
+        self.gameresult.save_home_first_half(
+            gamelog.get_home_firsthalf_score(), gamelog.get_away_firsthalf_score()
+        )
+        self.gameresult.save_away_first_half(
+            gamelog.get_away_firsthalf_score(), gamelog.get_home_firsthalf_score()
+        )
+        self.gameresult.save_home_second_half(
+            gamelog.get_home_secondhalf_score(), gamelog.get_away_secondhalf_score()
+        )
+        self.gameresult.save_away_second_half(
+            gamelog.get_away_secondhalf_score(), gamelog.get_home_secondhalf_score()
+        )
 
     def delete_gamelog(self, sequence):
         gamelog = GameLog(self.gameinfo.gameinfo)
@@ -44,11 +52,7 @@ class GameService(object):
 
     def _create_log_entry(self, event_text, user):
         TeamLog.objects.get_or_create(
-            gameinfo_id=self.game_id,
-            event=event_text,
-            half=0,
-            sequence=0,
-            author=user
+            gameinfo_id=self.game_id, event=event_text, half=0, sequence=0, author=user
         )
 
     def update_team_in_possesion(self, team_name):

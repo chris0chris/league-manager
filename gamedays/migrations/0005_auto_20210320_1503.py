@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gamedays', '0004_auto_20210316_2139'),
+        ("gamedays", "0004_auto_20210316_2139"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='teamlog',
-            name='input',
-            field=models.CharField(default='', max_length=100, null=True),
+            model_name="teamlog",
+            name="input",
+            field=models.CharField(default="", max_length=100, null=True),
         ),
         migrations.AlterField(
-            model_name='gameinfo',
-            name='status',
-            field=models.CharField(default='Geplant', max_length=100),
+            model_name="gameinfo",
+            name="status",
+            field=models.CharField(default="Geplant", max_length=100),
         ),
     ]

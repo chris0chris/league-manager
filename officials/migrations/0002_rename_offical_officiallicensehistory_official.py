@@ -5,13 +5,13 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('officials', '0001_initial'),
+        ("officials", "0001_initial"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='officiallicensehistory',
-            old_name='offical',
-            new_name='official',
+            model_name="officiallicensehistory",
+            old_name="offical",
+            new_name="official",
         ),
     ]

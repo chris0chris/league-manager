@@ -1,0 +1,177 @@
+/**
+ * Global body lock and height when designer is active
+ */
+html, body, #gameday-designer {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body.designer-active {
+  overflow: hidden !important;
+}
+
+.navbar {
+  z-index: 1025; /* Below Django navbar (1030+) */
+}
+
+.metadata-container-wrapper {
+  z-index: 1020; /* Below designer navbar */
+}
+
+.list-designer-app {
+  height: 100% !important;
+  max-height: 100% !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.list-designer-app__header {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.list-designer-app__content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.min-height-0 {
+  min-height: 0 !important;
+}
+
+.list-designer-app__status-bar {
+  flex-shrink: 0;
+  background-color: #f8f9fa;
+}
+
+/**
+ * Adaptive Button Labels
+ * Hides the text label by default, reveals on hover with smooth transition.
+ */
+.btn-label-adaptive {
+  display: inline-block;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
+  transition: max-width 0.3s ease, opacity 0.2s ease, margin-left 0.3s ease;
+}
+
+.btn-adaptive:hover .btn-label-adaptive {
+  max-width: 200px; /* Large enough for any label */
+  opacity: 1;
+  margin-left: 0.25rem;
+}
+
+/**
+ * Empty state buttons should ALWAYS show labels
+ */
+.text-center .btn-label-adaptive,
+.empty-state .btn-label-adaptive,
+.list-canvas__content .text-center .btn-label-adaptive {
+  max-width: 500px !important;
+  opacity: 1 !important;
+  margin-left: 0.25rem !important;
+}
+
+/* Ensure no extra margin when label is hidden */
+.btn-adaptive i {
+  margin-right: 0 !important;
+  transition: margin-right 0.3s ease;
+}
+
+.btn-adaptive:hover i:not(:last-child),
+.text-center .btn-adaptive i:not(:last-child),
+.empty-state .btn-adaptive i:not(:last-child),
+.list-canvas__content .text-center .btn-adaptive i:not(:last-child) {
+  margin-right: 0.25rem !important;
+}
+
+/**
+ * Pulse Highlighting
+ * Used for validation errors and dynamic reference selection.
+ */
+@keyframes pulse-highlight {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+    border-color: rgba(0, 123, 255, 1);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+    border-color: rgba(0, 123, 255, 1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+    border-color: inherit;
+  }
+}
+
+.element-highlighted {
+  animation: pulse-highlight 1.5s infinite;
+  z-index: 10;
+  position: relative;
+  border-width: 2px !important;
+}
+
+.btn-destructive-hover {
+  transition: all 0.2s ease;
+  border: 1px solid #dee2e6 !important;
+  background-color: transparent !important;
+}
+
+.btn-destructive-hover:hover {
+  color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  background-color: rgba(220, 53, 69, 0.05) !important;
+}
+
+/**
+ * Metadata Accordion Header States
+ */
+.header-status-warning .accordion-button {
+  background-color: #fff3cd !important;
+  color: #664d03 !important;
+}
+.header-status-warning .accordion-button:not(.collapsed) {
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+}
+
+.header-status-success .accordion-button {
+  background-color: #d1e7dd !important;
+  color: #0f5132 !important;
+}
+.header-status-success .accordion-button:not(.collapsed) {
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+}
+
+.header-status-primary .accordion-button {
+  background-color: #cfe2ff !important;
+  color: #084298 !important;
+}
+.header-status-primary .accordion-button:not(.collapsed) {
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+}
+
+.header-status-secondary .accordion-button {
+  background-color: #e2e3e5 !important;
+  color: #41464b !important;
+}
+.header-status-secondary .accordion-button:not(.collapsed) {
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+}
+
+.accordion-button::after {
+  filter: grayscale(1) brightness(0.5);
+}
+
+.delete-button-grow:hover {
+  color: #dc3545 !important;
+}

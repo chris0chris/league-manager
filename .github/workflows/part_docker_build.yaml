@@ -25,13 +25,13 @@ jobs:
     outputs:
       artifact_name: ${{ steps.set-artifact-name.outputs.artifact_name }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: 🐳🛠️ Setup Docker buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: 🐳🏗️ Build Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           file: ${{ inputs.dockerfile }}
           tags: ${{ inputs.image_name }}:latest
@@ -40,11 +40,11 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: 📤 Upload Docker image as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docker-image-${{ inputs.image_name }}
           path: /tmp/${{ inputs.image_name }}.tar
-          retention-days: 1
+          retention-days: 7
 
       - name: 🏷️ Set artifact name output
         id: set-artifact-name

@@ -10,35 +10,76 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('gamedays', '0008_alter_team_name'),
+        ("gamedays", "0008_alter_team_name"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Official',
+            name="Official",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_name', models.CharField(max_length=100)),
-                ('last_name', models.CharField(max_length=100)),
-                ('team',
-                 models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='gamedays.team')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("first_name", models.CharField(max_length=100)),
+                ("last_name", models.CharField(max_length=100)),
+                (
+                    "team",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="gamedays.team",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='OfficialLicense',
+            name="OfficialLicense",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
             ],
         ),
         migrations.CreateModel(
-            name='OfficialLicenseHistory',
+            name="OfficialLicenseHistory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateField(default=datetime.date.today)),
-                ('license',
-                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='officials.officiallicense')),
-                ('offical', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='officials.official')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateField(default=datetime.date.today)),
+                (
+                    "license",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="officials.officiallicense",
+                    ),
+                ),
+                (
+                    "offical",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="officials.official",
+                    ),
+                ),
             ],
         ),
     ]

@@ -6,10 +6,10 @@ class Obfuscator:
 
     @staticmethod
     def obfuscate(*args: str):
-        obfuscated_text = ''
+        obfuscated_text = ""
         for current_arg in args:
-            if current_arg is not None and current_arg != '':
-                obfuscated_text += current_arg[0] + 4 * '*'
+            if current_arg is not None and current_arg != "":
+                obfuscated_text += current_arg[0] + 4 * "*"
         return obfuscated_text
 
 
@@ -27,7 +27,7 @@ class ObfuscatorSerializer(Serializer):
 
 class ObfuscateField(SerializerMethodField):
     def __init__(self, field_name, **kwargs):
-        super().__init__(method_name='obfuscate_field_if_necessary', **kwargs)
+        super().__init__(method_name="obfuscate_field_if_necessary", **kwargs)
         self.db_field_name = field_name
 
     def to_representation(self, value):

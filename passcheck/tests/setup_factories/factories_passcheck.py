@@ -2,8 +2,18 @@ import factory
 from factory import post_generation, SubFactory
 from factory.django import DjangoModelFactory
 
-from gamedays.tests.setup_factories.factories import TeamFactory, PersonFactory, GamedayFactory
-from passcheck.models import Playerlist, EligibilityRule, Player, PlayerlistGameday, PlayerlistTransfer
+from gamedays.tests.setup_factories.factories import (
+    TeamFactory,
+    PersonFactory,
+    GamedayFactory,
+)
+from passcheck.models import (
+    Playerlist,
+    EligibilityRule,
+    Player,
+    PlayerlistGameday,
+    PlayerlistTransfer,
+)
 
 
 class PlayerFactory(DjangoModelFactory):
@@ -11,7 +21,7 @@ class PlayerFactory(DjangoModelFactory):
         model = Player
 
     person = SubFactory(PersonFactory)
-    pass_number = factory.Faker('random_int', min=10000, max=100000)
+    pass_number = factory.Faker("random_int", min=10000, max=100000)
 
 
 class PlayerlistFactory(DjangoModelFactory):
@@ -20,7 +30,7 @@ class PlayerlistFactory(DjangoModelFactory):
 
     team = SubFactory(TeamFactory)
     player = SubFactory(PlayerFactory)
-    jersey_number = factory.Faker('random_int', min=0, max=99)
+    jersey_number = factory.Faker("random_int", min=0, max=99)
 
     @post_generation
     def gamedays(self, create, extracted, **kwargs):
@@ -40,7 +50,7 @@ class PlayerlistGamedayFactory(DjangoModelFactory):
 
     playerlist = SubFactory(PlayerlistFactory)
     gameday = SubFactory(GamedayFactory)
-    gameday_jersey = factory.Faker('random_int', min=0, max=99)
+    gameday_jersey = factory.Faker("random_int", min=0, max=99)
 
 
 class PlayerlistTransferFactory(DjangoModelFactory):
@@ -49,8 +59,6 @@ class PlayerlistTransferFactory(DjangoModelFactory):
 
     current_team = SubFactory(PlayerlistFactory)
     new_team = SubFactory(TeamFactory)
-
-
 
 
 class EligibilityRuleFactory(DjangoModelFactory):

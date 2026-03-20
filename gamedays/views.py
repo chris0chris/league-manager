@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pandas as pd
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -15,6 +16,7 @@ from django.views.generic import (
     CreateView,
     FormView,
     DeleteView,
+    TemplateView,
 )
 from formtools.wizard.views import SessionWizardView
 
@@ -28,6 +30,7 @@ from .constants import (
     LEAGUE_GAMEDAY_GAMEINFOS_WIZARD,
     LEAGUE_GAMEDAY_GAMEINFOS_UPDATE,
     LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
+    LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
 )
 from .forms import (
     GamedayForm,
@@ -42,7 +45,8 @@ from .forms import (
 from .models import Gameday, Gameinfo
 from .service.builders import TableContextBuilder
 from .service.gameday_form_service import GamedayFormService
-from .service.gameday_service import GamedayService
+from .service.gameday_service import GamedayService, GamedayGameService
+from .service.league_statistics_service import LeagueStatisticsService
 from .wizard import (
     FIELD_GROUP_STEP,
     GAMEDAY_FORMAT_STEP,
@@ -54,59 +58,121 @@ from .wizard import (
 
 class GamedayListView(View):
     model = Gameday
-    template_name = 'gamedays/gameday_list.html'
+    template_name = "gamedays/gameday_list.html"
 
     def get(self, request, **kwargs):
-        year = kwargs.get('season', datetime.today().year)
-        league = kwargs.get('league')
-        gamedays = Gameday.objects.filter(date__year=year).order_by('-date')
-        gamedays_filtered_by_league = gamedays.filter(league__name=league) if league else gamedays
+        year = kwargs.get("season", datetime.today().year)
+        league = kwargs.get("league")
+        gamedays = Gameday.objects.filter(date__year=year).order_by("-date")
+        gamedays_filtered_by_league = (
+            gamedays.filter(league__name=league) if league else gamedays
+        )
         return render(
             request,
             self.template_name,
             {
                 "gamedays": gamedays_filtered_by_league,
-                "years": Gameday.objects.annotate(year=ExtractYear('date')).values_list('year',
-                                                                                        flat=True).distinct().order_by(
-                    '-year'),
+                "years": Gameday.objects.annotate(year=ExtractYear("date"))
+                .values_list("year", flat=True)
+                .distinct()
+                .order_by("-year"),
                 "season": year,
-                "leagues": gamedays.values_list('league__name', flat=True).distinct().order_by(
-                    '-league__name'),
+                "leagues": gamedays.values_list("league__name", flat=True)
+                .distinct()
+                .order_by("-league__name"),
                 "current_league": league,
                 "season_year_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR,
                 "season_year_league_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
-            }
+                "season_year_league_statistic_pattern": LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
+            },
         )
+
+
+class GamedayLeagueStatisticView(TemplateView):
+    model = Gameday
+    template_name = "gamedays/statistics/league_statistics.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(GamedayLeagueStatisticView, self).get_context_data()
+        context["season_year_league_pattern"] = LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE
+        context = {**context, **kwargs}
+
+        render_configs = {
+            "index": False,
+            "classes": [
+                "table",
+                "table-hover",
+                "table-condensed",
+                "table-responsive",
+                "text-center",
+            ],
+            "border": 0,
+            "justify": "center",
+            "escape": False,
+        }
+
+        lss = LeagueStatisticsService.create(**kwargs, top_n_players=10)
+
+        td_table = lss.get_touchdowns_table()
+        int_table = lss.get_interception_table()
+        one_xp_table = lss.get_one_extra_point_table()
+        two_xp_table = lss.get_two_extra_point_table()
+        safety_table = lss.get_safety_table()
+        scoring_players_table = lss.get_top_scoring_players()
+        team_statistics_table = lss.get_team_event_summary_table()
+
+        context["info"] = {
+            "player_touchdown_table": td_table.to_html(**render_configs),
+            "player_interception_table": int_table.to_html(**render_configs),
+            "player_one_extra_point_table": one_xp_table.to_html(**render_configs),
+            "player_two_extra_point_table": two_xp_table.to_html(**render_configs),
+            "player_safety_table": safety_table.to_html(**render_configs),
+            "player_scoring_table": scoring_players_table.to_html(**render_configs),
+            "team_statistics_table": team_statistics_table.to_html(**render_configs),
+        }
+
+        return context
 
 
 class GamedayDetailView(DetailView):
     model = Gameday
-    template_name = 'gamedays/gameday_detail.html'
+    template_name = "gamedays/gameday_detail.html"
 
     def get_context_data(self, **kwargs):
         context = super(GamedayDetailView, self).get_context_data()
         gameday = context["gameday"]
         gs = GamedayService.create(gameday.pk)
         render_configs = {
-            'index': False,
-            'classes': ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center'],
-            'border': 0,
-            'justify': 'left',
-            'escape': False,
-            'table_id': 'schedule',
+            "index": False,
+            "classes": [
+                "table",
+                "table-hover",
+                "table-condensed",
+                "table-responsive",
+                "text-center",
+            ],
+            "border": 0,
+            "justify": "left",
+            "escape": False,
+            "table_id": "schedule",
         }
         qualify_table = gs.get_qualify_table()
-        if 'officials' in settings.INSTALLED_APPS:
+        if "officials" in settings.INSTALLED_APPS:
             show_official_names = False
             if self.request.user.is_staff:
                 show_official_names = True
             elif self.request.user.username:
                 show_official_names = self.request.user.username in qualify_table
             from officials.service.signup_service import OfficialSignupService
-            officials = OfficialSignupService.get_signed_up_officials(gameday.pk, show_official_names)
+
+            officials = OfficialSignupService.get_signed_up_officials(
+                gameday.pk, show_official_names
+            )
             from officials.urls import OFFICIALS_PROFILE_LICENSE
+
             url_pattern_official = OFFICIALS_PROFILE_LICENSE
             from officials.urls import OFFICIALS_SIGN_UP_LIST
+
             url_pattern_official_signup = OFFICIALS_SIGN_UP_LIST
         else:
             officials = []
@@ -146,6 +212,13 @@ class GamedayDetailView(DetailView):
             qualify_table = qualify_table.to_html(**render_configs)
             final_table = final_table.to_html(**render_configs)
 
+        passcheck_info_table = ""
+
+        if self.request.user.is_staff:
+            passcheck_info_table = gs.get_staff_passcheck_details().to_html(
+                **render_configs
+            )
+
         context["info"] = {
             "schedule": gs.get_schedule().to_html(**render_configs),
             "qualify_table": qualify_table,
@@ -157,29 +230,30 @@ class GamedayDetailView(DetailView):
             "defense_table": gs.get_defense_player_statistic_table().to_html(
                 **render_configs
             ),
+            "passcheck_info_table": passcheck_info_table,
             "url_pattern_official": url_pattern_official,
             "url_pattern_official_signup": url_pattern_official_signup,
         }
+
         return context
 
 
 class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = GamedayForm
-    template_name = 'gamedays/gameday_form.html'
+    template_name = "gamedays/gameday_form.html"
     model = Gameday
     pk = None
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_LIST)
-        context['action_label'] = 'Spieltag erstellen'
+        context["cancel_url"] = reverse(LEAGUE_GAMEDAY_LIST)
+        context["action_label"] = "Spieltag erstellen"
         return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["context"] = GamedayFormContext(
-            author=self.request.user,
-            init_format=True
+            author=self.request.user, init_format=True
         )
         return kwargs
 
@@ -204,14 +278,16 @@ class GamedayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = GamedayForm
-    template_name = 'gamedays/gameday_form.html'
+    template_name = "gamedays/gameday_form.html"
     model = Gameday
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        gameday = Gameday.objects.get(pk=self.kwargs['pk'])
-        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk})
-        context['action_label'] = 'Spieltag aktualisieren'
+        gameday = Gameday.objects.get(pk=self.kwargs["pk"])
+        context["cancel_url"] = reverse(
+            LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk}
+        )
+        context["action_label"] = "Spieltag aktualisieren"
         return context
 
     def get_form_kwargs(self):
@@ -225,10 +301,72 @@ class GamedayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return super(GamedayUpdateView, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse('league-gameday-detail', kwargs={'pk': self.object.pk})
+        return reverse("league-gameday-detail", kwargs={"pk": self.object.pk})
 
     def test_func(self):
         return self.request.user.is_staff
+
+    # noinspection PyMethodMayBeStatic
+    def _format_array(self, data):
+        return [value.strip() for value in data.split(",")]
+
+
+class GamedayGameDetailView(DetailView):
+    model = Gameinfo
+    template_name = "gamedays/games/game_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(GamedayGameDetailView, self).get_context_data()
+        gameinfo = context["gameinfo"]
+        ggs = GamedayGameService(gameinfo.pk)
+        render_configs = {
+            "index": False,
+            "border": 0,
+            "justify": "center",
+            "escape": False,
+            "table_id": "team_log_events",
+        }
+        classes = [
+            "table",
+            "table-hover",
+            "table-condensed",
+            "table-responsive",
+            "text-center",
+        ]
+
+        split_score_table, split_score_repaired = ggs.get_split_score_table()
+
+        split_score_table_html = split_score_table.to_html(
+            **{**render_configs, "classes": classes + ["game-split-score-table"]}
+        )
+
+        game_setup_details = {}
+
+        if self.request.user.is_staff:
+            game_setup_details = ggs.get_staff_game_end_notes()
+
+        if split_score_repaired:
+            split_score_table_html = f"""{split_score_table_html}</ br>
+<small>Die Aufteilung der Punkte je Halbzeit kann eventuell inkorrekt sein.</small>"""
+
+        events_table = ggs.get_events_table()
+        context["info"] = {
+            "away_team": ggs.away_team_name,
+            "home_team": ggs.home_team_name,
+            "events_table": (
+                events_table.to_html(
+                    **{
+                        **render_configs,
+                        "classes": classes + ["game-log-table"],
+                    }
+                )
+                if isinstance(events_table, pd.DataFrame)
+                else events_table.to_html()  # EventsTableError.to_html() returns plain text
+            ),
+            "split_score_table": split_score_table_html,
+            "game_setup_details": game_setup_details,
+        }
+        return context
 
 
 class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView):
@@ -255,11 +393,15 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': self.gameday.pk})
-        context['action_label'] = 'Spielplan erstellen'
+        context["cancel_url"] = reverse(
+            LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": self.gameday.pk}
+        )
+        context["action_label"] = "Spielplan erstellen"
         if self.steps.current == GAMEDAY_FORMAT_STEP:
             field_group_step = self.wizard_state.get(FIELD_GROUP_STEP) or {}
-            schedule_format = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
+            schedule_format = field_group_step.get(
+                GamedayGaminfoFieldsAndGroupsForm.FORMAT_C
+            )
             schedule_name = SCHEDULE_MAP.get(schedule_format, {}).get(
                 "name", "ERROR - Name nicht gefunden für Format!"
             )
@@ -274,9 +416,13 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
         format_value = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
 
         if format_value == SCHEDULE_CUSTOM_CHOICE_C:
-            form_list = {key: val for key, val in form_list.items() if key != GAMEDAY_FORMAT_STEP}
+            form_list = {
+                key: val for key, val in form_list.items() if key != GAMEDAY_FORMAT_STEP
+            }
         else:
-            form_list = {key: val for key, val in form_list.items() if key != GAMEINFO_STEP}
+            form_list = {
+                key: val for key, val in form_list.items() if key != GAMEINFO_STEP
+            }
 
         return form_list
 
@@ -306,8 +452,10 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
         format_value = field_group_step.get(GamedayGaminfoFieldsAndGroupsForm.FORMAT_C)
 
         if format_value != SCHEDULE_CUSTOM_CHOICE_C:
-            return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={'pk': gameday_id}))
-        return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday_id}))
+            return redirect(
+                reverse(LEAGUE_GAMEDAY_GAMEINFOS_UPDATE, kwargs={"pk": gameday_id})
+            )
+        return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday_id}))
 
     def test_func(self):
         return self.request.user.is_staff
@@ -315,57 +463,72 @@ class GameinfoWizard(LoginRequiredMixin, UserPassesTestMixin, SessionWizardView)
 
 class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
     form_class = None
-    template_name = 'gamedays/wizard_form/gameinfos.html'
+    template_name = "gamedays/wizard_form/gameinfos.html"
 
     def get_form_class(self):
         return get_gameinfo_formset(extra=0)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        gameday = Gameday.objects.get(pk=self.kwargs['pk'])
-        context['cancel_url'] = reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk})
-        context['action_label'] = 'Spielplan aktualisieren'
+        gameday = Gameday.objects.get(pk=self.kwargs["pk"])
+        context["cancel_url"] = reverse(
+            LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk}
+        )
+        context["action_label"] = "Spielplan aktualisieren"
         return context
 
     def get(self, request, *args, **kwargs):
-        gameday = get_object_or_404(Gameday, pk=self.kwargs['pk'])
+        gameday = get_object_or_404(Gameday, pk=self.kwargs["pk"])
         qs = Gameinfo.objects.filter(gameday=gameday)
 
         if not qs.exists():
-            return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={'pk': gameday.pk}))
+            return redirect(
+                reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": gameday.pk})
+            )
 
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if request.POST.get('wizard_goto_step') == "reset_gameinfos":
-            return redirect(reverse(LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={'pk': self.kwargs['pk']}))
+        if request.POST.get("wizard_goto_step") == "reset_gameinfos":
+            return redirect(
+                reverse(
+                    LEAGUE_GAMEDAY_GAMEINFOS_WIZARD, kwargs={"pk": self.kwargs["pk"]}
+                )
+            )
         return super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        gameday = get_object_or_404(Gameday, pk=self.kwargs['pk'])
+        gameday = get_object_or_404(Gameday, pk=self.kwargs["pk"])
         qs = Gameinfo.objects.filter(gameday=gameday)
 
         group_choices = {
-            (g.league_group.id, g.league_group.name) if g.league_group else (g.standing, g.standing)
-            for g in qs if g.league_group or g.standing
+            (
+                (g.league_group.id, g.league_group.name)
+                if g.league_group
+                else (g.standing, g.standing)
+            )
+            for g in qs
+            if g.league_group or g.standing
         }
-        number_fields = qs.aggregate(Max('field'))['field__max'] or 1
+        number_fields = qs.aggregate(Max("field"))["field__max"] or 1
 
-        field_choices = [(f'{n}', f'Feld {n}') for n in range(1, number_fields + 1)]
+        field_choices = [(f"{n}", f"Feld {n}") for n in range(1, number_fields + 1)]
 
-        kwargs.update({
-            'queryset': qs,
-            'prefix': GAMEINFO_STEP,
-            'form_kwargs': {
-                'group_choices': group_choices,
-                'field_choices': field_choices
+        kwargs.update(
+            {
+                "queryset": qs,
+                "prefix": GAMEINFO_STEP,
+                "form_kwargs": {
+                    "group_choices": group_choices,
+                    "field_choices": field_choices,
+                },
             }
-        })
+        )
         return kwargs
 
     def form_valid(self, formset):
-        gameday = get_object_or_404(Gameday, pk=self.kwargs['pk'])
+        gameday = get_object_or_404(Gameday, pk=self.kwargs["pk"])
         gameday_form_service = GamedayFormService(gameday)
 
         for current_form in formset:
@@ -374,7 +537,7 @@ class GameinfoUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
                     current_form.cleaned_data, current_form.instance
                 )
 
-        return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={'pk': gameday.pk}))
+        return redirect(reverse(LEAGUE_GAMEDAY_DETAIL, kwargs={"pk": gameday.pk}))
 
     def test_func(self):
         return self.request.user.is_staff
@@ -386,6 +549,7 @@ class StaffDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     Subclasses must define:
         - model
     """
+
     template_name = None
 
     def test_func(self):
@@ -397,6 +561,7 @@ class GamedayDeleteView(StaffDeleteView):
 
     def get_success_url(self):
         from django.contrib import messages
+
         messages.success(self.request, "Der Spieltag wurde erfolgreich gelöscht.")
 
         return reverse(LEAGUE_GAMEDAY_LIST)
@@ -411,6 +576,10 @@ class GameinfoDeleteView(StaffDeleteView):
         Gameinfo.objects.filter(gameday=gameday).delete()
 
         from django.contrib import messages
-        messages.success(self.request, "Der Spielplan für diesen Spieltag wurde erfolgreich gelöscht.")
+
+        messages.success(
+            self.request,
+            "Der Spielplan für diesen Spieltag wurde erfolgreich gelöscht.",
+        )
 
         return redirect(LEAGUE_GAMEDAY_DETAIL, pk=gameday.pk)

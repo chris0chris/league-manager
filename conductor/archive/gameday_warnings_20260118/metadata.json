@@ -1,0 +1,8 @@
+{
+  "track_id": "gameday_warnings_20260118",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-18T14:40:00Z",
+  "updated_at": "2026-01-18T14:40:00Z",
+  "description": "add new warning: no teams, no games, teams without games, unsused fields"
+}

@@ -2,7 +2,7 @@ from django.apps import AppConfig
 
 
 class GamedaysConfig(AppConfig):
-    name = 'gamedays'
+    name = "gamedays"
 
     def ready(self):
         # noinspection PyUnresolvedReferences

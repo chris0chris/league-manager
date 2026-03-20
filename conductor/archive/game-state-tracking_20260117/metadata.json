@@ -1,0 +1,8 @@
+{
+  "track_id": "game-state-tracking_20260117",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-17T04:41:00Z",
+  "updated_at": "2026-01-17T04:41:00Z",
+  "description": "track games process: create gameday, configure, mark complete. resolve indirect references (Winner Game 1 (Team A)). update status."
+}

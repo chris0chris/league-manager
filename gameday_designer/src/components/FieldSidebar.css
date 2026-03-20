@@ -1,0 +1,42 @@
+/**
+ * FieldSidebar Styles
+ */
+
+.field-sidebar {
+  width: 250px;
+  border-radius: 0;
+  border-right: 1px solid #dee2e6;
+  height: 100%;
+}
+
+.field-sidebar .card-header {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.field-sidebar .list-group-item {
+  padding: 10px 12px;
+}
+
+.field-sidebar .list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+.field-sidebar .badge {
+  font-weight: 400;
+  font-size: 10px;
+}
+
+.field-sidebar .btn-link {
+  color: #6c757d;
+}
+
+.field-sidebar .btn-link:hover {
+  color: #0d6efd;
+}
+
+.field-sidebar .btn-link.text-danger:hover {
+  color: #dc3545 !important;
+}

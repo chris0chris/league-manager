@@ -21,6 +21,6 @@ class TeamRepositoryService:
         if cached_teams is not None:
             return cached_teams
 
-        teams = Team.objects.all().exclude(location='dummy').order_by('description')
+        teams = Team.objects.all().exclude(location="dummy").order_by("description")
         cache.set(cache_key, teams, timeout=60 * 60 * 24)
         return teams

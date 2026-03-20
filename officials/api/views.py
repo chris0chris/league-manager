@@ -15,9 +15,11 @@ class OfficialsTeamListAPIView(APIView):
 
     # noinspection PyMethodMayBeStatic
     def get(self, request, **kwargs):
-        team_id = kwargs.get('pk')
-        officials = Official.objects.filter(team_id=team_id).order_by('first_name', 'last_name').values(
-            *OfficialTeamListScorecardSerializer.ALL_FIELD_VALUES
+        team_id = kwargs.get("pk")
+        officials = (
+            Official.objects.filter(team_id=team_id)
+            .order_by("first_name", "last_name")
+            .values(*OfficialTeamListScorecardSerializer.ALL_FIELD_VALUES)
         )
         serializer = OfficialTeamListScorecardSerializer(instance=officials, many=True)
         return Response(serializer.data, status=HTTPStatus.OK)
@@ -25,23 +27,33 @@ class OfficialsTeamListAPIView(APIView):
 
 class OfficialsSearchName(APIView):
     permission_classes = (permissions.IsAuthenticated,)
+
     # noinspection PyMethodMayBeStatic
     def get(self, request: Request, **kwargs):
-        name_param = request.query_params.get('name')
-        team_id = kwargs.get('pk')
+        name_param = request.query_params.get("name")
+        team_id = kwargs.get("pk")
         if name_param is None:
-            raise ValidationError(detail='You need to specify a \'name\' param to search for official')
+            raise ValidationError(
+                detail="You need to specify a 'name' param to search for official"
+            )
         name = name_param.split()
         if len(name) < 2:
             raise ValidationError(
-                detail='Bitte Vor- und Nachname getrennt durch Leerzeichen eingeben und Suche erneut starten')
+                detail="Bitte Vor- und Nachname getrennt durch Leerzeichen eingeben und Suche erneut starten"
+            )
         if len(name[0]) < 3:
-            raise ValidationError('Vorname muss mindestens 3 Zeichen haben')
-        officials = Official.objects.filter(first_name__istartswith=name[0], last_name__istartswith=name[-1]).exclude(
-            team=team_id).order_by('first_name', 'last_name').values(
-            *OfficialTeamListScorecardSerializer.ALL_FIELD_VALUES
+            raise ValidationError("Vorname muss mindestens 3 Zeichen haben")
+        officials = (
+            Official.objects.filter(
+                first_name__istartswith=name[0], last_name__istartswith=name[-1]
+            )
+            .exclude(team=team_id)
+            .order_by("first_name", "last_name")
+            .values(*OfficialTeamListScorecardSerializer.ALL_FIELD_VALUES)
         )
         if not officials.exists():
-            raise NotFound(f'Es wurden keine Offiziellen gefunden für: {" ".join(name)}')
+            raise NotFound(
+                f'Es wurden keine Offiziellen gefunden für: {" ".join(name)}'
+            )
         serializer = OfficialTeamListScorecardSerializer(instance=officials, many=True)
         return Response(serializer.data, status=HTTPStatus.OK)

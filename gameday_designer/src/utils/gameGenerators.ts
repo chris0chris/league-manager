@@ -1,0 +1,243 @@
+/**
+ * Game Generation Utilities
+ *
+ * Provides template-based game generation for different progression modes:
+ * - Round Robin: Circular algorithm for group stage scheduling
+ * - Placement: Bracket structures for determining final positions
+ */
+
+import { v4 as uuidv4 } from 'uuid';
+import type { RoundRobinConfig, PlacementConfig, GameNode } from '../types/flowchart';
+import { createGameNodeInStage } from '../types/flowchart';
+import { getRoundRobinPairings } from './roundRobinLogic';
+
+/**
+ * Generates games for a round robin tournament using the circular rotation algorithm.
+ *
+ * The circular algorithm ensures balanced scheduling where each team plays
+ * against every other team exactly once (or twice for double round robin).
+ *
+ * @param stageId - The parent stage ID
+ * @param config - Round robin configuration (team count, single/double round)
+ * @returns Array of GameNode objects ready to be added to the stage
+ *
+ * @example
+ * ```typescript
+ * const config = { mode: 'round_robin', teamCount: 4, doubleRound: false };
+ * const games = generateRoundRobinGames('stage-1', config);
+ * // Returns 6 games (4 teams * 3 opponents / 2)
+ * ```
+ */
+export function generateRoundRobinGames(
+  stageId: string,
+  config: RoundRobinConfig,
+  duration?: number,
+  breakDuration?: number,
+  namePrefix?: string,
+  fieldId?: string
+): GameNode[] {
+  const { teamCount, doubleRound } = config;
+  const games: GameNode[] = [];
+  const gameDuration = duration ?? 50;
+  const gameBreak = breakDuration ?? 0;
+  const prefix = namePrefix ? `${namePrefix} ` : '';
+
+  const pairings = getRoundRobinPairings(teamCount, doubleRound);
+
+  pairings.forEach((pairing, index) => {
+    const gameId = uuidv4();
+    const game = createGameNodeInStage(
+      gameId,
+      stageId,
+      {
+        standing: `${prefix}Game ${index + 1}`,
+        duration: gameDuration,
+        breakAfter: gameBreak,
+        manualTime: false,
+        startTime: undefined,
+        homeTeamId: null,
+        awayTeamId: null,
+        homeTeamDynamic: null,
+        awayTeamDynamic: null,
+        fieldId: fieldId ?? null,
+      },
+      { x: 30, y: 50 }
+    );
+    games.push(game);
+  });
+
+  return games;
+}
+
+/**
+ * Generates games for placement rounds using bracket structures.
+ *
+ * Supports two formats:
+ * - single_elimination: Traditional bracket (semifinals, finals, third-place)
+ * - crossover: Crossover format (1st vs 4th, 2nd vs 3rd, then finals)
+ *
+ * @param stageId - The parent stage ID
+ * @param config - Placement configuration (positions, format)
+ * @param duration - Game duration in minutes
+ * @param breakDuration - Break duration in minutes
+ * @param namePrefix - Optional prefix for game labels
+ * @param fieldId - Optional field ID to assign
+ * @returns Array of GameNode objects ready to be added to the stage
+ *
+ * @example
+ * ```typescript
+ * const config = { mode: 'placement', positions: 4, format: 'single_elimination' };
+ * const games = generatePlacementGames('stage-1', config);
+ * // Returns 4 games: SF1, SF2, Final, 3rd Place
+ * ```
+ */
+export function generatePlacementGames(
+  stageId: string,
+  config: PlacementConfig,
+  duration?: number,
+  breakDuration?: number,
+  namePrefix?: string,
+  fieldId?: string
+): GameNode[] {
+  const { positions, format } = config;
+  const games: GameNode[] = [];
+
+  if (format === 'single_elimination') {
+    return generateSingleEliminationGames(stageId, positions, duration, breakDuration, namePrefix, fieldId);
+  } else if (format === 'crossover') {
+    return generateCrossoverGames(stageId, positions, duration, breakDuration, namePrefix, fieldId);
+  }
+
+  return games;
+}
+
+/**
+ * Generates single elimination bracket games.
+ *
+ * Structure for 4 positions: SF1, SF2, Final, 3rd Place
+ * Structure for 8 positions: QF1-4, SF1-2, Final, 3rd Place
+ *
+ * @param stageId - The parent stage ID
+ * @param positions - Number of positions to determine
+ * @param duration - Game duration
+ * @param breakDuration - Break duration
+ * @param namePrefix - Optional prefix for game labels
+ * @param fieldId - Optional field ID
+ * @returns Array of GameNode objects
+ */
+function generateSingleEliminationGames(
+  stageId: string,
+  positions: number,
+  duration?: number,
+  breakDuration?: number,
+  namePrefix?: string,
+  fieldId?: string
+): GameNode[] {
+  const games: GameNode[] = [];
+  const prefix = namePrefix ? `${namePrefix} ` : '';
+
+  if (positions === 2) {
+    // Just a final
+    games.push(createPlacementGame(stageId, `${prefix}Final`, duration, breakDuration, fieldId));
+    return games;
+  }
+
+  if (positions === 4) {
+    // 2 semifinals + final + 3rd place
+    games.push(createPlacementGame(stageId, `${prefix}SF1`, duration, breakDuration, fieldId));
+    games.push(createPlacementGame(stageId, `${prefix}SF2`, duration, breakDuration, fieldId));
+    games.push(createPlacementGame(stageId, `${prefix}Final`, duration, breakDuration, fieldId));
+    games.push(createPlacementGame(stageId, `${prefix}3rd Place`, duration, breakDuration, fieldId));
+    return games;
+  }
+
+  if (positions === 8) {
+    // 4 quarterfinals + 2 semifinals + final + 3rd place
+    games.push(createPlacementGame(stageId, `${prefix}QF1`, duration, breakDuration, fieldId));
+    games.push(createPlacementGame(stageId, `${prefix}QF2`, duration, breakDuration, fieldId));
+    games.push(createPlacementGame(stageId, `${prefix}QF3`, duration, breakDuration, fieldId));
+    games.push(createPlacementGame(stageId, `${prefix}QF4`, duration, breakDuration, fieldId));
+    games.push(createPlacementGame(stageId, `${prefix}SF1`, duration, breakDuration, fieldId));
+    games.push(createPlacementGame(stageId, `${prefix}SF2`, duration, breakDuration, fieldId));
+    games.push(createPlacementGame(stageId, `${prefix}Final`, duration, breakDuration, fieldId));
+    games.push(createPlacementGame(stageId, `${prefix}3rd Place`, duration, breakDuration, fieldId));
+    return games;
+  }
+
+  // For other position counts, just create a final
+  games.push(createPlacementGame(stageId, `${prefix}Final`, duration, breakDuration, fieldId));
+  return games;
+}
+
+/**
+ * Generates crossover format games.
+ *
+ * Structure for 4 positions: CO1 (1v4), CO2 (2v3), Final, 3rd Place
+ *
+ * @param stageId - The parent stage ID
+ * @param positions - Number of positions to determine
+ * @param duration - Game duration
+ * @param breakDuration - Break duration
+ * @param namePrefix - Optional prefix for game labels
+ * @param fieldId - Optional field ID
+ * @returns Array of GameNode objects
+ */
+function generateCrossoverGames(
+  stageId: string,
+  positions: number,
+  duration?: number,
+  breakDuration?: number,
+  namePrefix?: string,
+  fieldId?: string
+): GameNode[] {
+  const games: GameNode[] = [];
+  const prefix = namePrefix ? `${namePrefix} ` : '';
+
+  if (positions === 2) {
+    // Just a final
+    games.push(createPlacementGame(stageId, `${prefix}Final`, duration, breakDuration, fieldId));
+    return games;
+  }
+
+  if (positions === 4) {
+    // Crossover: 1v4, 2v3, then finals
+    games.push(createPlacementGame(stageId, `${prefix}CO1`, duration, breakDuration, fieldId)); // 1st vs 4th
+    games.push(createPlacementGame(stageId, `${prefix}CO2`, duration, breakDuration, fieldId)); // 2nd vs 3rd
+    games.push(createPlacementGame(stageId, `${prefix}Final`, duration, breakDuration, fieldId));
+    games.push(createPlacementGame(stageId, `${prefix}3rd Place`, duration, breakDuration, fieldId));
+    return games;
+  }
+
+  // For other position counts, fallback to simple final
+  games.push(createPlacementGame(stageId, `${prefix}Final`, duration, breakDuration, fieldId));
+  return games;
+}
+
+/**
+ * Helper to create a single placement game with standard settings.
+ *
+ * @param stageId - The parent stage ID
+ * @param standing - The standing/label for the game
+ * @returns A GameNode object
+ */
+function createPlacementGame(stageId: string, standing: string, duration?: number, breakDuration?: number, fieldId?: string): GameNode {
+  const gameId = uuidv4();
+  return createGameNodeInStage(
+    gameId,
+    stageId,
+    {
+      standing,
+      duration: duration ?? 50,
+      breakAfter: breakDuration ?? 0,
+      manualTime: false,
+      startTime: undefined,
+      homeTeamId: null,
+      awayTeamId: null,
+      homeTeamDynamic: null,
+      awayTeamDynamic: null,
+      fieldId: fieldId ?? null,
+    },
+    { x: 30, y: 50 }
+  );
+}
+

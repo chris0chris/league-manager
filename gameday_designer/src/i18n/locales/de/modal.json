@@ -1,0 +1,45 @@
+{
+  "clearAll": {
+    "title": "Alles löschen",
+    "message": "Sind Sie sicher, dass Sie alle Felder, Phasen, Spiele, Teams und Gruppen löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "editGame": {
+    "title": "Spiel bearbeiten"
+  },
+  "tournamentGenerator": {
+    "title": "Turnier generieren",
+    "noTemplates": "Keine Turniervorlagen verfügbar.",
+    "warningTitle": "Achtung: Automatisches Löschen",
+    "warningMessage": "Das Generieren eines neuen Turniers löscht UNWIDERRUFLICH Ihren aktuellen Spielplan und die Felder. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "generateTeams": "{{count}} Teams automatisch generieren",
+    "autoAssignTeams": "Teams automatisch Spielen zuweisen",
+    "insufficientTeams": "Nicht genügend Teams im Pool. Dieses Format benötigt mindestens {{min}} Teams, oder wählen Sie 'Teams automatisch generieren'.",
+    "previewTitle": "Vorschau:",
+    "previewFields_one": "{{count}} Feld",
+    "previewFields_other": "{{count}} Felder",
+    "previewStages_one": "{{count}} Phase",
+    "previewStages_other": "{{count}} Phasen",
+    "previewFirstGame": "Erstes Spiel um {{time}}",
+    "previewGameDuration": "Standard-Spieldauer: {{duration}} Minuten",
+    "durationValidation": "Die Dauer muss zwischen 15 und 180 Minuten liegen.",
+    "generateTeamsDisabledHint": "Zuerst manuelle Teams entfernen",
+    "selectTeamsTitle": "Teams auswählen"
+  },
+  "publishConfirmation": {
+    "title": "Spielplan veröffentlichen",
+    "description": "Das Veröffentlichen des Spielplans sperrt dessen Struktur. Ergebnisse können eingegeben werden, aber Spiele und Teams können nicht mehr hinzugefügt oder entfernt werden.",
+    "errorsTitle": "Blockierende Fehler gefunden",
+    "errorsDescription": "Die folgenden Probleme müssen behoben werden, bevor der Spielplan veröffentlicht werden kann:",
+    "warningsTitle": "Warnungen gefunden",
+    "warningsDescription": "Der Spielplan weist einige potenzielle Probleme auf. Sie können trotzdem veröffentlichen, aber bitte überprüfen Sie diese Punkte:",
+    "ready": "Der Spielplan ist gültig und bereit zur Veröffentlichung.",
+    "confirmWithWarnings": "Trotzdem veröffentlichen",
+    "confirm": "Jetzt veröffentlichen"
+  },
+  "teamSelection": {
+    "title": "Existierendes Team verbinden",
+    "placeholder": "Nach Teamname suchen...",
+    "noResults": "Keine passenden Teams gefunden.",
+    "hint": "Geben Sie mindestens 2 Zeichen ein, um zu suchen."
+  }
+}

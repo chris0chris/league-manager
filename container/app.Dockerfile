@@ -1,17 +1,26 @@
 FROM python:3.14-slim AS app-builder
 
-RUN apt -y update
-RUN apt -y install pkg-config
-RUN apt -y install python3-dev
-RUN apt -y install build-essential
-RUN apt -y install default-libmysqlclient-dev   # to build the mysql client
-RUN apt -y install git                          # for development dependency in requirements.txt
+# Install build dependencies
+RUN apt -y update && \
+    apt -y install pkg-config python3-dev build-essential default-libmysqlclient-dev
 
-COPY ../requirements.txt .
+# Copy uv from official image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-RUN pip install --upgrade pip
-RUN pip install --target=/py-install -r requirements.txt
-RUN pip install --target=/py-install django-debug-toolbar
+WORKDIR /app
+
+# Install dependencies first (without source code for better caching)
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project --no-editable --extra prod
+
+# Copy the project into the image
+ADD . /app
+
+# Sync the project (installs the local package)
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-editable --extra prod
 
 FROM python:3.14-slim AS app
 
@@ -20,29 +29,27 @@ ENV PYTHONUNBUFFERED=1
 ARG APP_USER="django"
 ARG APP_DIR="/app"
 
-RUN apt -y update
-RUN apt -y install curl                          # install curl for healthcheck
-RUN apt -y install jq                            # install jq for healthcheck
-RUN apt -y install default-libmysqlclient-dev    # to run the mysql client
-RUN pip install gunicorn
+RUN apt -y update && \
+    apt -y install curl jq default-libmysqlclient-dev
 
 # add user
 RUN adduser --disabled-password --home ${APP_DIR} ${APP_USER}
-RUN chown ${APP_USER}:${APP_USER} -R ${APP_DIR}
+
+# Copy the virtual environment from builder
+COPY --from=app-builder --chown=${APP_USER}:${APP_USER} /app/.venv ${APP_DIR}/.venv
+
+# Copy the application code
+COPY --chown=${APP_USER}:${APP_USER} . ${APP_DIR}
+COPY --chown=${APP_USER}:${APP_USER} container/entrypoint.sh /app/entrypoint.sh
 
 USER ${APP_USER}
-COPY --chown=${APP_USER} ../ ${APP_DIR}
-RUN rm -rf .git/
-
-COPY --chown=${APP_USER} --from=app-builder /py-install ${APP_DIR}/python-packages/
-
-ENV PYTHONPATH="${APP_DIR}/python-packages:${PYTHONPATH}"
-
-COPY --chown=${APP_USER} ../container/entrypoint.sh /app/entrypoint.sh
-
-RUN chmod 740 /app/entrypoint.sh
-
 WORKDIR ${APP_DIR}
+
+RUN rm -rf .git/ && chmod 740 /app/entrypoint.sh
+
+# Use the virtual environment
+ENV PATH="${APP_DIR}/.venv/bin:${PATH}"
+
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -A healthcheck -H "Accept: application/json" http://localhost:8000/health/?format=json
 

@@ -29,7 +29,7 @@ class ScheduleEntry:
 
     def __repr__(self):
         return (
-            f'ScheduleEntry({{break_before: {self.break_after}, '
+            f"ScheduleEntry({{break_before: {self.break_after}, "
             f'stage: "{self.stage}", standing: "{self.standing}", league_group: None,'
             f'home: "{self.home}", away: "{self.away}", official: "{self.officials}"}})'
         )
@@ -50,7 +50,7 @@ class ScheduleEntry:
 
 class EmptyScheduleEntry:
     def __repr__(self):
-        return f'EmptyScheduleEntry()'
+        return f"EmptyScheduleEntry()"
 
 
 class FieldSchedule:
@@ -69,7 +69,7 @@ class FieldSchedule:
         return entries
 
     def __repr__(self):
-        return f'FieldSchedule(field={self.field}, games={str([schedule_entry for schedule_entry in self.games])})'
+        return f"FieldSchedule(field={self.field}, games={str([schedule_entry for schedule_entry in self.games])})"
 
 
 @dataclass
@@ -77,6 +77,7 @@ class GroupSchedule:
     name: str
     league_group: Optional["LeagueGroup"]
     teams: list[Team]
+
 
 class Schedule:
     def __init__(self, gameday_format: str, groups: list[GroupSchedule]):
@@ -90,8 +91,8 @@ class Schedule:
         data = self._replace_group_name()
         entries = []
         for field_entry in data:
-            field = field_entry['field']
-            games = field_entry['games']
+            field = field_entry["field"]
+            games = field_entry["games"]
             entries = entries + [FieldSchedule(field, games)]
         entries = self._replace_placeholders(entries)
         return entries
@@ -99,8 +100,11 @@ class Schedule:
     def _replace_group_name(self):
         mapping = self._init_mapping()
 
-        with open(pathlib.Path(__file__).parent / 'schedules/schedule_{0}.json'.format(self.format),
-                  encoding="utf-8") as f:
+        with open(
+            pathlib.Path(__file__).parent
+            / "schedules/schedule_{0}.json".format(self.format),
+            encoding="utf-8",
+        ) as f:
             text = f.read()
 
         # Build regex that matches *any* key in mapping — longest first to handle overlaps
@@ -136,7 +140,9 @@ class Schedule:
                 if isinstance(game, ScheduleEntry):
                     game.home = self._replace_placeholder_by_group_entry(game.home)
                     game.away = self._replace_placeholder_by_group_entry(game.away)
-                    game.officials = self._replace_placeholder_by_group_entry(game.officials)
+                    game.officials = self._replace_placeholder_by_group_entry(
+                        game.officials
+                    )
                     try:
                         league_group_index = int(game.standing)
                         league_group = self.groups[league_group_index].league_group
@@ -148,7 +154,7 @@ class Schedule:
 
     def _replace_placeholder_by_group_entry(self, home_placeholder: str):
         # expected format groupIndex_teamIndex: 0_0
-        tmp = home_placeholder.split('_')
+        tmp = home_placeholder.split("_")
         # if other format
         if len(tmp) < 2:
             return home_placeholder
@@ -157,7 +163,7 @@ class Schedule:
         return self.groups[group_index].teams[team_index]
 
     def _format_match_number_of_teams(self):
-        number_of_teams = int(self.format.split('_')[0])
+        number_of_teams = int(self.format.split("_")[0])
         sum_of_teams = 0
         for group in self.groups:
             sum_of_teams += len(group.teams)
@@ -216,7 +222,11 @@ class ScheduleCreator:
 
     # noinspection PyMethodMayBeStatic
     def _calc_next_time_slot(self, scheduled, break_before=0):
-        scheduled_to_datetime_object = datetime.datetime.combine(datetime.date(1, 1, 1), scheduled)
+        scheduled_to_datetime_object = datetime.datetime.combine(
+            datetime.date(1, 1, 1), scheduled
+        )
         slot_length = self.DEFAULT_GAME_LENGTH + break_before
-        new_scheduled_time = (scheduled_to_datetime_object + datetime.timedelta(minutes=slot_length)).time()
+        new_scheduled_time = (
+            scheduled_to_datetime_object + datetime.timedelta(minutes=slot_length)
+        ).time()
         return new_scheduled_time

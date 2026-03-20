@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'gameday_designer/js/index.css' %}">
+    <style>
+        /* Lock body height to viewport and use flex layout */
+        html {
+            height: 100vh;
+        }
+        body {
+            height: 100vh;
+            overflow: hidden !important;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Make main container fill remaining space exactly */
+        main.container {
+            flex: 1;
+            max-width: 100%;
+            padding: 0;
+            margin-top: 70px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 0; /* Force flex child to respect parent container */
+        }
+
+        /* Make content area fill available space */
+        main.container > div {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Designer container fills the content area */
+        #gameday-designer {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Ensure footer stays at the very bottom without margin-top */
+        .footer {
+            position: sticky;
+            bottom: 0;
+            z-index: 1000;
+            flex-shrink: 0;
+            margin-top: 0 !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="gameday-designer"></div>
+{% endblock %}
+
+{% block extra_js %}
+    <script type="module" src="{% static 'gameday_designer/js/index.js' %}"></script>
+{% endblock %}

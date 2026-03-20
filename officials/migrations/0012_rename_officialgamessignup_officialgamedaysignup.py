@@ -6,13 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gamedays', '0020_gamesetup_note'),
-        ('officials', '0011_rename_signed_up_at_officialgamessignup_created_at_and_more'),
+        ("gamedays", "0020_gamesetup_note"),
+        (
+            "officials",
+            "0011_rename_signed_up_at_officialgamessignup_created_at_and_more",
+        ),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='OfficialGamesSignup',
-            new_name='OfficialGamedaySignup',
+            old_name="OfficialGamesSignup",
+            new_name="OfficialGamedaySignup",
         ),
     ]

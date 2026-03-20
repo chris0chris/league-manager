@@ -1,0 +1,28 @@
+{
+  "field": "Feld",
+  "fields": "Felder",
+  "stage": "Phase",
+  "stages": "Phasen",
+  "game": "Spiel",
+  "games": "Spiele",
+  "team": "Team",
+  "teams": "Teams",
+  "group": "Gruppe",
+  "groups": "Gruppen",
+  "officials": "Schiedsrichter",
+  "preliminary": "Vorrunde",
+  "final": "Finalrunde",
+  "minute": "Minute",
+  "minutes": "Minuten",
+  "firstGame": "Erstes Spiel",
+  "teamPool": "Team-Pool",
+  "globalTeamPool": "Globaler Team-Pool",
+  "stageTypeStandard": "Standard-Phase",
+  "stageTypeRanking": "Platzierungs-Phase",
+  "status": {
+    "draft": "Entwurf",
+    "published": "Veröffentlicht",
+    "in_progress": "In Bearbeitung",
+    "completed": "Abgeschlossen"
+  }
+}

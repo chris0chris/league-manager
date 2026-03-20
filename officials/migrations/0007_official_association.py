@@ -6,15 +6,18 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('gamedays', '0013_association'),
-        ('officials', '0006_officiallicensehistory_result_and_more'),
+        ("gamedays", "0013_association"),
+        ("officials", "0006_officiallicensehistory_result_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='official',
-            name='association',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL,
-                                    to='gamedays.association'),
+            model_name="official",
+            name="association",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="gamedays.association",
+            ),
         ),
     ]

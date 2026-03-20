@@ -4,6 +4,7 @@ from django.apps import apps
 from pandas import DataFrame
 
 from gamedays.models import Gameinfo, Gameresult, TeamLog
+from gamedays.service.placeholder_service import GamedayPlaceholderService
 from gamedays.service.gameday_settings import (
     STANDING,
     TEAM_NAME,
@@ -12,6 +13,7 @@ from gamedays.service.gameday_settings import (
     POINTS_AWAY,
     PA,
     PF,
+    GROUP1,
     GAMEINFO_ID,
     DIFF,
     SCHEDULED,
@@ -72,8 +74,14 @@ class GamedayModelWrapper:
             raise Gameinfo.DoesNotExist
         self.gameday = gameinfo.first().gameday
         self._gameinfo: DataFrame = pd.DataFrame(gameinfo.values(
-            # select the fields which should be in the dataframe
-            *([f.name for f in Gameinfo._meta.local_fields] + ['officials__name'] + additional_columns)))
+                # select the fields which should be in the dataframe
+                *(
+                    [f.name for f in Gameinfo._meta.local_fields]
+                    + ["officials__name"]
+                    + additional_columns
+                )
+            )
+        )
         if self._gameinfo.empty:
             raise Gameinfo.DoesNotExist
 
@@ -86,7 +94,9 @@ class GamedayModelWrapper:
         games_with_result = pd.merge(self._gameinfo, gameresult, left_on='id', right_on=GAMEINFO_ID)
         games_with_result[IN_POSSESSION] = games_with_result[IN_POSSESSION].astype(str)
         games_with_result = games_with_result.convert_dtypes()
-        games_with_result = games_with_result.astype({FH: 'Int64', SH: 'Int64', PA: 'Int64'})
+        games_with_result = games_with_result.astype(
+            {FH: "Int64", SH: "Int64", PA: "Int64"}
+        )
         games_with_result[PF] = games_with_result[FH] + games_with_result[SH]
         games_with_result[DIFF] = games_with_result[PF] - games_with_result[PA]
         tmp = games_with_result.fillna({PF: 0, PA: 0, FH: 0, SH: 0})
@@ -97,6 +107,57 @@ class GamedayModelWrapper:
         )
         games_with_result[POINTS] = tmp[POINTS]
         self._games_with_result: DataFrame = games_with_result
+        self._resolve_placeholders()
+
+    def _resolve_placeholders(self):
+        if (
+            self._games_with_result.empty
+            or TEAM_NAME not in self._games_with_result.columns
+        ):
+            return
+
+        # Only proceed if there are missing team names
+        if self._games_with_result[TEAM_NAME].isna().any():
+
+            placeholder_service = GamedayPlaceholderService(
+                self._gameinfo["gameday"].iloc[0]
+            )
+
+            placeholder_service = GamedayPlaceholderService(self._gameinfo['gameday'].iloc[0])
+
+            # Resolve each missing row
+            for index, row in self._games_with_result[
+                self._games_with_result[TEAM_NAME].isna()
+            ].iterrows():
+                placeholder = placeholder_service.get_placeholder(
+                    row[GAMEINFO_ID], is_home=row[IS_HOME]
+                )
+                self._games_with_result.at[index, TEAM_NAME] = placeholder
+
+    def get_staff_passcheck_details(self, gameday_id):
+        column_mapping = {
+            "created_at": "Zeitpunkt",
+            "official_name": "Schiedsrichter",
+            "user__username": "Account",
+            "team__name": "Team",
+            "note": "Notiz",
+        }
+
+        passchecks = pd.DataFrame(
+            PasscheckVerification.objects.filter(gameday_id=gameday_id).values(
+                *column_mapping.keys()
+            )
+        )
+
+        if passchecks.empty:
+            return pd.DataFrame([], columns=column_mapping.values())
+
+        passchecks["created_at"] = passchecks.created_at.dt.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+        passchecks["note"] = passchecks.note.apply(lambda x: x.replace("\n", "</br>"))
+
+        return passchecks.rename(columns=column_mapping)
 
     def has_finalround(self):
         return QUALIIFY_ROUND in self._gameinfo[STAGE].values
@@ -149,116 +210,172 @@ class GamedayModelWrapper:
 
 
     def get_offense_player_statistics_table(self):
-        scoring_events = [
-            "Touchdown",
-            "1-Extra-Punkt",
-            "2-Extra-Punkte"
-        ]
+        scoring_events = ["Touchdown", "1-Extra-Punkt", "2-Extra-Punkte"]
 
         output_columns = ["Platz", "Spieler"] + scoring_events + ["Punkte"]
 
-        events = pd.DataFrame(TeamLog.objects \
-            .filter(gameinfo__in=self._gameinfo['id'], isDeleted=False, event__in=scoring_events) \
-            .exclude(team=None) \
-            .exclude(player=None) \
-            .values(TEAM_NAME, "event", "player", "value"))
+        events = pd.DataFrame(
+            TeamLog.objects.filter(
+                gameinfo__in=self._gameinfo["id"],
+                isDeleted=False,
+                event__in=scoring_events,
+            )
+            .exclude(team=None)
+            .exclude(player=None)
+            .values(TEAM_NAME, "event", "player", "value")
+        )
 
         if events.empty:
             return pd.DataFrame(columns=output_columns)
 
         events["player"] = events.apply(lambda x: f"{x.team__name} #{x.player}", axis=1)
 
-        table = pd.crosstab(events['player'], events['event'], values=events.event, aggfunc='count').fillna(0).astype(int)
+        table = (
+            pd.crosstab(
+                events["player"], events["event"], values=events.event, aggfunc="count"
+            )
+            .fillna(0)
+            .astype(int)
+        )
 
         for missing_event in set(scoring_events) - set(table.columns):
             table[missing_event] = 0
 
-        points = events \
-            .groupby("player") \
-            .value.sum()
+        points = events.groupby("player").value.sum()
 
-        table = table \
-            .merge(left_index=True, right=points, right_index=True) \
-            .reset_index() \
+        table = (
+            table.merge(left_index=True, right=points, right_index=True)
+            .reset_index()
             .sort_values(by="value", ascending=False)
+        )
 
         table["Platz"] = table.value.rank(method="min", ascending=False).astype(int)
 
-        table = table.rename(columns={
-            "player": "Spieler",
-            "value": "Punkte"
-        })[output_columns]
+        table = table.rename(columns={"player": "Spieler", "value": "Punkte"})[
+            output_columns
+        ]
 
         return table.head(10)
 
     def get_defense_statistic_table(self):
-        ints = self._get_player_events_table(event_name="Interception", event_plural_name="Interceptions") \
-            .reset_index(drop=True) \
+        ints = (
+            self._get_player_events_table(
+                event_name="Interception", event_plural_name="Interceptions"
+            )
+            .reset_index(drop=True)
             .astype(str)
-        safeties = self._get_player_events_table(event_name="Safety (+2)", event_plural_name="Safety (+2)", ) \
-            .reset_index(drop=True) \
+        )
+        safeties = (
+            self._get_player_events_table(
+                event_name="Safety (+2)",
+                event_plural_name="Safety (+2)",
+            )
+            .reset_index(drop=True)
             .astype(str)
+        )
 
-        result = ints.merge(safeties, how="outer", left_index=True, right_index=True) \
-            .fillna('') \
-            .rename(columns={
-                "Platz_x": "Platz",
-                "Platz_y": "Platz",
-                "Spieler_x": "Spieler",
-                "Spieler_y": "Spieler"
-            })
+        result = (
+            ints.merge(safeties, how="outer", left_index=True, right_index=True)
+            .fillna("")
+            .rename(
+                columns={
+                    "Platz_x": "Platz",
+                    "Platz_y": "Platz",
+                    "Spieler_x": "Spieler",
+                    "Spieler_y": "Spieler",
+                }
+            )
+        )
 
         return result
 
     def _get_player_events_table(self, event_name: str, event_plural_name: str):
         output_columns = ["Platz", "Spieler", event_plural_name]
-        events = pd.DataFrame(TeamLog.objects \
-                              .filter(gameinfo__in=self._gameinfo['id'], isDeleted=False, event=event_name) \
-                              .exclude(team=None) \
-                              .exclude(player=None) \
-                              .values(TEAM_NAME, "event", "player"))
+        events = pd.DataFrame(
+            TeamLog.objects.filter(
+                gameinfo__in=self._gameinfo["id"], isDeleted=False, event=event_name
+            )
+            .exclude(team=None)
+            .exclude(player=None)
+            .values(TEAM_NAME, "event", "player")
+        )
 
         if events.empty:
             return pd.DataFrame(columns=output_columns)
 
         events["player"] = events.apply(lambda x: f"{x.team__name} #{x.player}", axis=1)
-        events = events.groupby("player", as_index=False) \
-            .event.count() \
+        events = (
+            events.groupby("player", as_index=False)
+            .event.count()
             .sort_values(by="event", ascending=False)
+        )
 
         events["Platz"] = events.event.rank(method="min", ascending=False).astype(int)
-        return events[["Platz", "player", "event"]].rename(
-            columns={"player": "Spieler", "event": event_plural_name}).head()
+        return (
+            events[["Platz", "player", "event"]]
+            .rename(columns={"player": "Spieler", "event": event_plural_name})
+            .head()
+        )
 
     def _get_standing_list(self, standings):
-        final_standing = self._games_with_result.groupby([STANDING, TEAM_NAME], as_index=False)
-        final_standing = final_standing.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'})
-        final_standing = final_standing.sort_values(by=[STANDING, POINTS, DIFF, PF, PA], ascending=False)
+        final_standing = self._games_with_result.groupby(
+            [STANDING, TEAM_NAME], as_index=False
+        )
+        final_standing = final_standing.agg(
+            {POINTS: "sum", PF: "sum", PA: "sum", DIFF: "sum"}
+        )
+        final_standing = final_standing.sort_values(
+            by=[STANDING, POINTS, DIFF, PF, PA], ascending=False
+        )
         # final_standing = final_standing.sort_values(by=STANDING)
         final_team_list = []
         for current_standing in standings:
-            current_standing_table = final_standing[final_standing[STANDING] == current_standing]
+            current_standing_table = final_standing[
+                final_standing[STANDING] == current_standing
+            ]
             if current_standing_table.shape[0] == 2:
-                final_team_list = final_team_list + current_standing_table[TEAM_NAME].to_list()
+                final_team_list = (
+                    final_team_list + current_standing_table[TEAM_NAME].to_list()
+                )
             else:
-                current_standing_table = current_standing_table.groupby([TEAM_NAME], as_index=False)
-                current_standing_table = current_standing_table.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'})
-                current_standing_table = current_standing_table.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
-                final_team_list = final_team_list + current_standing_table[TEAM_NAME].to_list()
+                current_standing_table = current_standing_table.groupby(
+                    [TEAM_NAME], as_index=False
+                )
+                current_standing_table = current_standing_table.agg(
+                    {POINTS: "sum", PF: "sum", PA: "sum", DIFF: "sum"}
+                )
+                current_standing_table = current_standing_table.sort_values(
+                    by=[POINTS, DIFF, PF, PA], ascending=False
+                )
+                final_team_list = (
+                    final_team_list + current_standing_table[TEAM_NAME].to_list()
+                )
 
         return final_team_list
 
     def _get_schedule(self):
         home_teams = self._games_with_result.groupby(GAMEINFO_ID).nth(0).reset_index()
         away_teams = self._games_with_result.groupby(GAMEINFO_ID).nth(1).reset_index()
-        home_teams = home_teams.rename(columns={TEAM_NAME: HOME, PF: POINTS_HOME, ID_Y: ID_HOME})
-        away_teams = away_teams.rename(columns={TEAM_NAME: AWAY, PF: POINTS_AWAY, ID_Y: ID_AWAY})
+        home_teams = home_teams.rename(
+            columns={TEAM_NAME: HOME, PF: POINTS_HOME, ID_Y: ID_HOME}
+        )
+        away_teams = away_teams.rename(
+            columns={TEAM_NAME: AWAY, PF: POINTS_AWAY, ID_Y: ID_AWAY}
+        )
         away_teams = away_teams[[ID_AWAY, POINTS_AWAY, AWAY]]
-        qualify_round = pd.concat([home_teams, away_teams], axis=1).sort_values(by=[FIELD, SCHEDULED])
-        qualify_round = qualify_round[[GAMEINFO_ID, ID_HOME, HOME, POINTS_HOME, POINTS_AWAY, AWAY, ID_AWAY]]
+        qualify_round = pd.concat([home_teams, away_teams], axis=1).sort_values(
+            by=[FIELD, SCHEDULED]
+        )
+        qualify_round = qualify_round[
+            [GAMEINFO_ID, ID_HOME, HOME, POINTS_HOME, POINTS_AWAY, AWAY, ID_AWAY]
+        ]
 
-        schedule = self._gameinfo.merge(qualify_round, how='left', right_on=GAMEINFO_ID, left_on='id')
-        schedule = schedule.fillna({ID_HOME: '', ID_AWAY: ''}).astype({ID_HOME: 'string', ID_AWAY: 'string'})
+        schedule = self._gameinfo.merge(
+            qualify_round, how="left", right_on=GAMEINFO_ID, left_on="id"
+        )
+        schedule = schedule.fillna({ID_HOME: "", ID_AWAY: ""}).astype(
+            {ID_HOME: "string", ID_AWAY: "string"}
+        )
         return schedule
 
     def _get_table(self):
@@ -288,11 +405,18 @@ class GamedayModelWrapper:
 
     def is_finished(self, check):
         if self._has_standing(check):
-            return len(self._gameinfo[(self._gameinfo[STANDING] == check) & (self._gameinfo[STATUS] == FINISHED)]) \
-                == len(self._gameinfo[(self._gameinfo[STANDING] == check)])
+            return len(
+                self._gameinfo[
+                    (self._gameinfo[STANDING] == check)
+                    & (self._gameinfo[STATUS] == FINISHED)
+                ]
+            ) == len(self._gameinfo[(self._gameinfo[STANDING] == check)])
 
-        return len(self._gameinfo[(self._gameinfo[STAGE] == check) & (self._gameinfo[STATUS] == FINISHED)]) == len(
-            self._gameinfo[(self._gameinfo[STAGE] == check)])
+        return len(
+            self._gameinfo[
+                (self._gameinfo[STAGE] == check) & (self._gameinfo[STATUS] == FINISHED)
+            ]
+        ) == len(self._gameinfo[(self._gameinfo[STAGE] == check)])
 
     def get_games_to_whistle(self, team):
         games_to_whistle = self._get_schedule()
@@ -300,24 +424,43 @@ class GamedayModelWrapper:
         if not team:
             return games_to_whistle[games_to_whistle[GAME_FINISHED].isna()]
         return games_to_whistle[
-            (games_to_whistle[OFFICIALS_NAME].str.contains(team)) & (games_to_whistle[GAME_FINISHED].isna())]
+            (games_to_whistle[OFFICIALS_NAME].str.contains(team))
+            & (games_to_whistle[GAME_FINISHED].isna())
+        ]
 
     def get_team_by_qualify_for(self, place, index):
-        qualify_standing_by_place = self._get_table().groupby(STANDING).nth(place - 1).sort_values(
-            by=[POINTS, DIFF, PF, PA], ascending=False)
+        qualify_standing_by_place = (
+            self._get_table()
+            .groupby(STANDING)
+            .nth(place - 1)
+            .sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
+        )
         return qualify_standing_by_place.iloc[index][TEAM_NAME]
 
     def get_team_aggregate_by(self, aggregate_standings, aggregate_place, place):
-        return self._games_with_result[self._games_with_result[STANDING].isin(aggregate_standings)].groupby(
-            [STANDING, TEAM_NAME], as_index=False).agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum'}).sort_values(
-            by=[POINTS, DIFF, PF, PA], ascending=False).sort_values(by=STANDING).groupby(STANDING).nth(
-            aggregate_place - 1).sort_values(by=[POINTS, DIFF, PF, PA], ascending=False).iloc[place - 1][TEAM_NAME]
+        return (
+            self._games_with_result[
+                self._games_with_result[STANDING].isin(aggregate_standings)
+            ]
+            .groupby([STANDING, TEAM_NAME], as_index=False)
+            .agg({POINTS: "sum", PF: "sum", PA: "sum", DIFF: "sum"})
+            .sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
+            .sort_values(by=STANDING)
+            .groupby(STANDING)
+            .nth(aggregate_place - 1)
+            .sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
+            .iloc[place - 1][TEAM_NAME]
+        )
 
     def get_teams_by(self, standing, points):
         teams = self._get_teams_by(standing, points)
         return list(teams[TEAM_NAME])
 
     def _get_teams_by(self, standing, points):
-        results_with_standing = self._games_with_result[self._games_with_result[STANDING] == standing]
-        results_with_standing_and_according_points = results_with_standing[results_with_standing[POINTS] == points]
+        results_with_standing = self._games_with_result[
+            self._games_with_result[STANDING] == standing
+        ]
+        results_with_standing_and_according_points = results_with_standing[
+            results_with_standing[POINTS] == points
+        ]
         return results_with_standing_and_according_points

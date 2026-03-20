@@ -1,0 +1,862 @@
+/**
+ * GameTable Component
+ *
+ * Displays games in a stage as a table.
+ */
+
+import React, { useState, useCallback, memo, useMemo } from 'react';
+import { Table, Form, Button } from 'react-bootstrap';
+import Select, { components, StylesConfig, GroupBase } from 'react-select';
+import { useTypedTranslation } from '../../i18n/useTypedTranslation';
+import type { 
+  GameNode, 
+  FlowEdge, 
+  FlowNode, 
+  GlobalTeam, 
+  GlobalTeamGroup, 
+  GameNodeData,
+  HighlightedElement
+} from '../../types/flowchart';
+import { isGameNode, isStageNode } from '../../types/flowchart';
+import { isRankReference } from '../../types/designer';
+import { findSourceGameForReference, findSourceStageForReference, getGamePath } from '../../utils/edgeAnalysis';
+import { getStageParticipants, getStageGroups, getGroupParticipants } from '../../utils/rankingEngine';
+import { isValidTimeFormat } from '../../utils/timeCalculation';
+import { ICONS } from '../../utils/iconConstants';
+import './GameTable.css';
+
+// Type for select options
+interface TeamOption {
+  value: string;
+  label: string;
+  color?: string;
+  isTeam?: boolean;
+  isStageHeader?: boolean;
+  isDisabled?: boolean;
+  isWinner?: boolean;
+}
+
+// Custom Option component with colored dot for teams and stage headers
+const CustomOption = memo((props: { data: TeamOption; isDisabled?: boolean; children?: React.ReactNode; innerProps?: Record<string, unknown> }) => {
+  const { data } = props;
+
+  if (data.isStageHeader) {
+    return (
+      <components.Option {...props} isDisabled={true}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontWeight: 'bold',
+            fontSize: '0.8rem',
+            textTransform: 'uppercase',
+            color: '#6c757d',
+            borderLeft: `3px solid ${data.color || '#dee2e6'}`,
+            paddingLeft: '8px',
+            marginLeft: '-12px',
+            paddingTop: '4px',
+            paddingBottom: '4px',
+            backgroundColor: '#f8f9fa'
+          }}
+        >
+          <span>{data.label}</span>
+        </div>
+      </components.Option>
+    );
+  }
+
+  return (
+    <components.Option {...props}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {data.color && (
+          <div
+            style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: data.color,
+              flexShrink: 0
+            }}
+          />
+        )}
+        <span>{data.label}</span>
+      </div>
+    </components.Option>
+  );
+});
+
+// Custom SingleValue component with colored dot for selected value
+const CustomSingleValue = memo((props: { data: TeamOption; children?: React.ReactNode }) => {
+  const { data } = props;
+  return (
+    <components.SingleValue {...props}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {data.color && (
+          <div
+            style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: data.color,
+              flexShrink: 0
+            }}
+          />
+        )}
+        <span className={data.isWinner ? 'fw-bold text-success' : ''}>
+          {data.label}
+          {data.isWinner && <i className="bi bi-trophy-fill text-warning ms-2" title={t('ui:label.winner')} />}
+        </span>
+      </div>
+    </components.SingleValue>
+  );
+});
+
+/**
+ * Helper function to build team options grouped by team groups.
+ */
+function buildGroupedTeamOptions(
+  teams: GlobalTeam[],
+  groups: GlobalTeamGroup[],
+  t: (key: string) => string
+): TeamOption[] {
+  const options: TeamOption[] = [];
+  
+  // 1. Prioritize officials group if it exists
+  const officialsGroup = groups.find(g => g.id === 'group-officials');
+  if (officialsGroup) {
+    const groupTeams = teams
+      .filter(team => team.groupId === officialsGroup.id)
+      .sort((a, b) => a.order - b.order);
+
+    if (groupTeams.length > 0) {
+      options.push({
+        value: `group-header-${officialsGroup.id}`,
+        label: officialsGroup.name,
+        color: officialsGroup.color || '#6c757d',
+        isStageHeader: true,
+        isDisabled: true
+      });
+
+      groupTeams.forEach(team => {
+        options.push({
+          value: team.id,
+          label: team.label,
+          color: team.color || '#6c757d',
+          isTeam: true
+        });
+      });
+    }
+  }
+
+  // 2. Regular groups (excluding officials)
+  const sortedGroups = [...groups]
+    .filter(g => g.id !== 'group-officials')
+    .sort((a, b) => a.order - b.order);
+
+  sortedGroups.forEach(group => {
+    const groupTeams = teams
+      .filter(team => team.groupId === group.id)
+      .sort((a, b) => a.order - b.order);
+
+    if (groupTeams.length > 0) {
+      options.push({
+        value: `group-header-${group.id}`,
+        label: group.name,
+        color: group.color || '#6c757d',
+        isStageHeader: true,
+        isDisabled: true
+      });
+
+      groupTeams.forEach(team => {
+        options.push({
+          value: team.id,
+          label: team.label,
+          color: team.color || '#6c757d',
+          isTeam: true
+        });
+      });
+    }
+  });
+
+  const ungroupedTeams = teams
+    .filter(team => team.groupId === null)
+    .sort((a, b) => a.order - b.order);
+
+  if (ungroupedTeams.length > 0) {
+    options.push({
+      value: 'group-header-ungrouped',
+      label: t('ui:message.ungrouped'),
+      color: '#adb5bd',
+      isStageHeader: true,
+      isDisabled: true
+    });
+
+    ungroupedTeams.forEach(team => {
+      options.push({
+        value: team.id,
+        label: team.label,
+        color: team.color || '#6c757d',
+        isTeam: true
+      });
+    });
+  }
+
+  return options;
+}
+
+const customSelectStyles: StylesConfig<TeamOption, false, GroupBase<TeamOption>> = {
+  control: (provided) => ({ ...provided, minHeight: '31px', fontSize: '0.875rem', borderColor: '#dee2e6' }),
+  option: (provided) => ({ ...provided, fontSize: '0.875rem', padding: '6px 12px' }),
+  singleValue: (provided) => ({ ...provided, fontSize: '0.875rem' }),
+  menu: (provided) => ({ ...provided, zIndex: 9999 }),
+  menuPortal: (provided) => ({ ...provided, zIndex: 9999 })
+};
+
+export interface GameTableProps {
+  games: GameNode[];
+  edges: FlowEdge[];
+  allNodes: FlowNode[];
+  globalTeams: GlobalTeam[];
+  globalTeamGroups: GlobalTeamGroup[];
+  highlightedElement?: HighlightedElement | null;
+  onUpdate: (nodeId: string, data: Partial<GameNode['data']>) => void;
+  onDelete: (nodeId: string) => void;
+  onSelectNode: (nodeId: string | null) => void;
+  onHighlightElement: (id: string, type: HighlightedElement['type']) => void;
+  selectedNodeId: string | null;
+  onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
+  onSwapTeams: (gameId: string) => void;
+  onAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) => void;
+  onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
+  onOpenResultModal: (gameId: string) => void;
+  highlightedSourceGameId?: string | null;
+  onDynamicReferenceClick: (sourceGameId: string) => void;
+  onNotify?: (message: string, type: import('../../types/designer').NotificationType, title?: string) => void;
+  readOnly?: boolean;
+}
+
+const GameTable: React.FC<GameTableProps> = memo(({
+  games,
+  edges,
+  allNodes,
+  globalTeams,
+  globalTeamGroups,
+  highlightedElement,
+  onDelete,
+  onSelectNode,
+  onHighlightElement,
+  selectedNodeId,
+  onAssignTeam,
+  onSwapTeams,
+  onUpdate,
+  onAddGameToGameEdge,
+  onAddStageToGameEdge,
+  onRemoveEdgeFromSlot,
+  onOpenResultModal,
+  highlightedSourceGameId,
+  onDynamicReferenceClick,
+  onNotify,
+  readOnly = false,
+}) => {
+  const { t } = useTypedTranslation(['ui', 'domain', 'error']);
+  const [editingGameId, setEditingGameId] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<'standing' | 'breakAfter' | 'time' | null>(null);
+  const [editedValue, setEditedValue] = useState<string>('');
+
+  const upstreamSourceMatchNames = useMemo(() => {
+    if (!highlightedElement || highlightedElement.type !== 'game') return new Set<string>();
+    
+    const highlightedGame = allNodes.find(n => n.id === highlightedElement.id) as GameNode | undefined;
+    if (!highlightedGame) return new Set<string>();
+    
+    const sources = new Set<string>();
+    const data = highlightedGame.data as GameNodeData;
+    
+    if (data.homeTeamDynamic && !isRankReference(data.homeTeamDynamic)) sources.add(data.homeTeamDynamic.matchName);
+    if (data.awayTeamDynamic && !isRankReference(data.awayTeamDynamic)) sources.add(data.awayTeamDynamic.matchName);
+    
+    const official = data.official;
+    if (official && typeof official !== 'string' && (official.type === 'winner' || official.type === 'loser')) {
+      sources.add(official.matchName);
+    }
+    
+    return sources;
+  }, [highlightedElement, allNodes]);
+
+  const handleRowClick = useCallback((gameId: string) => {
+    onSelectNode(gameId);
+    onHighlightElement(gameId, 'game');
+  }, [onSelectNode, onHighlightElement]);
+
+  const handleDelete = useCallback((e: React.MouseEvent, gameId: string) => {
+    e.stopPropagation();
+    onDelete(gameId);
+  }, [onDelete]);
+
+  const handleStartEdit = useCallback(
+    (e: React.MouseEvent, game: GameNode, field: 'standing' | 'breakAfter' | 'time') => {
+      e.stopPropagation();
+      setEditingGameId(game.id);
+      setEditingField(field);
+      if (field === 'standing') {
+        setEditedValue(game.data.standing);
+      } else if (field === 'breakAfter') {
+        setEditedValue(String(game.data.breakAfter || 0));
+      } else if (field === 'time') {
+        setEditedValue(game.data.startTime || '');
+      }
+    },
+    []
+  );
+
+  const handleSaveEdit = useCallback(
+    (gameId: string, field: 'standing' | 'breakAfter' | 'time') => {
+      if (field === 'standing') {
+        if (editedValue.trim() !== '') {
+          onUpdate(gameId, { standing: editedValue.trim() });
+        }
+      } else if (field === 'breakAfter') {
+        if (editedValue.trim() !== '') {
+          const numValue = parseInt(editedValue, 10);
+          if (!isNaN(numValue) && numValue >= 0) {
+            onUpdate(gameId, { breakAfter: numValue });
+          }
+        }
+      } else if (field === 'time') {
+        if (editedValue.trim() !== '') {
+          if (isValidTimeFormat(editedValue.trim())) {
+            onUpdate(gameId, { startTime: editedValue.trim(), manualTime: true });
+          } else {
+            onNotify?.(t('ui:notification.invalidTimeFormat'), 'danger', t('ui:notification.title.timeFormat'));
+            return;
+          }
+        } else {
+          onUpdate(gameId, { startTime: undefined, manualTime: false });
+        }
+      }
+      setEditingGameId(null);
+      setEditingField(null);
+    },
+    [editedValue, onUpdate, onNotify, t]
+  );
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingGameId(null);
+    setEditingField(null);
+  }, []);
+
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent, gameId: string, field: 'standing' | 'breakAfter' | 'time') => {
+      if (e.key === 'Enter') {
+        handleSaveEdit(gameId, field);
+      } else if (e.key === 'Escape') {
+        handleCancelEdit();
+      }
+    },
+    [handleSaveEdit, handleCancelEdit]
+  );
+
+  const getEligibleSourceGames = useCallback((targetGame: GameNode): GameNode[] => {
+    const targetPath = getGamePath(targetGame.id, allNodes);
+    if (!targetPath) return [];
+
+    const targetStageOrder = targetPath.stage.data.order;
+    const targetStageId = targetPath.stage.id;
+    const targetNodeIndex = allNodes.findIndex(n => n.id === targetGame.id);
+
+    return allNodes
+      .filter((node): node is GameNode => {
+        if (!isGameNode(node) || node.id === targetGame.id) return false;
+        const path = getGamePath(node.id, allNodes);
+        if (!path) return false;
+        if (path.stage.data.order < targetStageOrder) return true;
+        if (path.stage.id === targetStageId) {
+          const sourceNodeIndex = allNodes.findIndex(n => n.id === node.id);
+          return sourceNodeIndex >= 0 && sourceNodeIndex < targetNodeIndex;
+        }
+        return false;
+      })
+      .sort((a, b) => {
+        const pathA = getGamePath(a.id, allNodes)!;
+        const pathB = getGamePath(b.id, allNodes)!;
+        return pathA.stage.data.order - pathB.stage.data.order;
+      });
+  }, [allNodes]);
+
+  const handleTeamChange = useCallback((gameId: string, slot: 'home' | 'away', value: string) => {
+    onRemoveEdgeFromSlot(gameId, slot);
+    if (!value) return;
+    if (value.startsWith('winner:') || value.startsWith('loser:')) {
+      const [outputType, sourceGameId] = value.split(':');
+      onAddGameToGameEdge(sourceGameId, outputType as 'winner' | 'loser', gameId, slot);
+    } else if (value.startsWith('rank:')) {
+      const parts = value.split(':');
+      if (parts.length === 5 && parts[1] === 'group') {
+        // Format: rank:group:stageId:groupName:place
+        const [, , sourceStageId, groupName, place] = parts;
+        onAddStageToGameEdge(sourceStageId, parseInt(place, 10), gameId, slot, groupName);
+      } else {
+        // Format: rank:stageId:place
+        const [, sourceStageId, place] = parts;
+        onAddStageToGameEdge(sourceStageId, parseInt(place, 10), gameId, slot);
+      }
+    } else {
+      onAssignTeam(gameId, value, slot);
+    }
+  }, [onRemoveEdgeFromSlot, onAddGameToGameEdge, onAddStageToGameEdge, onAssignTeam]);
+
+  const handleOfficialChange = useCallback(
+    (gameId: string, value: string) => {
+      if (!value) {
+        onUpdate(gameId, { official: undefined });
+        return;
+      }
+      
+      // If the value looks like a dynamic reference (winner:..., loser:..., rank:...)
+      // we should ideally parse it back to a TeamReference object.
+      // But for simplicity and backward compatibility, we can wrap it in a static ref
+      // or handle it as a string if we've updated the types.
+      // Given the backend changes, wrapping in a static reference is safe.
+      onUpdate(gameId, { 
+        official: { type: 'static', name: value } as TeamReference 
+      });
+    },
+    [onUpdate]
+  );
+
+
+  const teamOptions = useMemo(() => buildGroupedTeamOptions(globalTeams, globalTeamGroups, t), [globalTeams, globalTeamGroups, t]);
+
+  const rankingStageOptions = useMemo(() => {
+    // Determine the current stage ID (assume all games in table belong to same stage)
+    const currentStageId = games[0]?.parentId;
+    
+    const rankingStages = allNodes.filter(n => 
+      isStageNode(n) && 
+      n.data.stageType === 'RANKING' &&
+      n.id !== currentStageId // Prevent self-reference
+    ) as StageNode[];
+    const options: TeamOption[] = [];
+
+    rankingStages.forEach(stage => {
+      options.push({ 
+        value: `stage-header-${stage.id}`, 
+        label: `${stage.data.name} (${t('ui:label.ranking')})`, 
+        color: stage.data.color || '#0d6efd', 
+        isStageHeader: true, 
+        isDisabled: true 
+      });
+
+      // Find all games in this stage
+      const stageGames = allNodes.filter(n => isGameNode(n) && n.parentId === stage.id) as GameNode[];
+      const participants = getStageParticipants(stageGames);
+      
+      // For each participant, add a rank option (Overall)
+      participants.forEach((_, index) => {
+        const place = index + 1;
+        options.push({
+          value: `rank:${stage.id}:${place}`,
+          label: `🏆 ${t('ui:message.placeFrom', { place, stage: stage.data.name })}`,
+          isTeam: false
+        });
+      });
+
+      // Add Group-based ranks
+      const groups = getStageGroups(stageGames);
+      groups.forEach(groupName => {
+        const groupParticipants = getGroupParticipants(stageGames, groupName);
+        groupParticipants.forEach((_, index) => {
+          const place = index + 1;
+          options.push({
+            value: `rank:group:${stage.id}:${groupName}:${place}`,
+            label: `🎖️ ${t('ui:message.placeInGroup', { place, group: groupName, stage: stage.data.name })}`,
+            isTeam: false
+          });
+        });
+      });
+    });
+
+    return options;
+  }, [allNodes, games, t]);
+
+  const renderTimeCell = (game: GameNode) => {
+    const isEditingTime = editingGameId === game.id && editingField === 'time';
+    const timeValue = game.data.startTime || '';
+    const isManual = game.data.manualTime;
+
+    return (
+      <td style={{ backgroundColor: isManual ? '#fff3cd' : undefined }} onClick={(e) => { e.stopPropagation(); onSelectNode(game.id); onHighlightElement(game.id, 'game'); }}>
+        {isEditingTime ? (
+          <div className="d-flex align-items-center gap-1">
+            <Form.Control
+              type="time"
+              size="sm"
+              value={editedValue}
+              onChange={(e) => setEditedValue(e.target.value)}
+              onKeyDown={(e) => handleKeyPress(e, game.id, 'time')}
+              autoFocus
+              style={{ fontSize: '0.875rem', width: '110px' }}
+            />
+            <Button 
+              variant="success" 
+              size="sm" 
+              className="p-0 px-1" 
+              onClick={() => handleSaveEdit(game.id, 'time')}
+              title={t('ui:button.save')}
+            >
+              <i className="bi bi-check-lg" />
+            </Button>
+            <Button 
+              variant="outline-secondary" 
+              size="sm" 
+              className="p-0 px-1" 
+              onClick={handleCancelEdit}
+              title={t('ui:button.cancel')}
+            >
+              <i className="bi bi-x-lg" />
+            </Button>
+          </div>
+        ) : (
+          <div className="d-flex align-items-center gap-1">
+            <span 
+              onClick={(e) => !readOnly && handleStartEdit(e, game, 'time')} 
+              style={{ cursor: readOnly ? 'default' : 'text' }}
+              title={readOnly ? undefined : (isManual ? t('ui:tooltip.manualTimeHint') : t('ui:tooltip.autoTimeHint'))}
+            >
+              {timeValue || '--:--'}
+            </span>
+            {!readOnly && (
+              <i 
+                className={`bi bi-pencil-fill ${isManual ? 'text-warning' : 'text-muted'}`} 
+                style={{ fontSize: '0.7rem', cursor: 'pointer' }} 
+                onClick={(e) => handleStartEdit(e, game, 'time')}
+                title={t('ui:tooltip.clickToEdit')}
+              />
+            )}
+          </div>
+        )}
+      </td>
+    );
+  };
+
+  const renderOfficialCell = (game: GameNode) => {
+    const official = game.data.official;
+    const eligibleGames = getEligibleSourceGames(game);
+    
+    // Highlight if this specific slot in the HIGHLIGHTED game is dynamic
+    const isReferencingUpstream = highlightedElement?.id === game.id && highlightedElement?.type === 'game' && !!official && typeof official !== 'string' && (official.type === 'winner' || official.type === 'loser');
+
+    let currentValue = '';
+    if (typeof official === 'string') {
+      currentValue = official;
+    } else if (official) {
+      if (official.type === 'static') {
+        currentValue = official.name;
+      } else if (official.type === 'winner' || official.type === 'loser') {
+         const sourceGame = findSourceGameForReference(game.id, 'official', edges, allNodes);
+        if (sourceGame) {
+          currentValue = `${official.type}:${sourceGame.id}`;
+        }
+      }
+    }
+
+    // Include all global teams (grouped) and dynamic references
+    const options = [
+      ...teamOptions,
+      ...rankingStageOptions
+    ];
+    const gamesByStage = new Map<string, { name: string; games: GameNode[] }>();
+    eligibleGames.forEach((sourceGame) => {
+      const sourcePath = getGamePath(sourceGame.id, allNodes);
+      const stageId = sourcePath?.stage.id || '';
+      if (!gamesByStage.has(stageId)) {
+        gamesByStage.set(stageId, { name: sourcePath?.stage.data.name || '', games: [] });
+      }
+      gamesByStage.get(stageId)!.games.push(sourceGame);
+    });
+
+    Array.from(gamesByStage.entries()).forEach(([stageId, stageData]) => {
+      const stageNode = allNodes.find(n => n.id === stageId);
+      options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as import('../../types/flowchart').StageNodeData)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
+      stageData.games.forEach((sourceGame) => {
+        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ ${t('ui:message.winnerOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
+        options.push({ value: `loser:${sourceGame.id}`, label: `💔 ${t('ui:message.loserOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
+      });
+    });
+
+    return (
+      <div 
+        className={isReferencingUpstream ? 'referencing-highlight' : ''}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectNode(game.id);
+          onHighlightElement(game.id, 'game');
+        }}
+      >
+        <Select<TeamOption>
+          value={options.find(opt => opt.value === currentValue) || null}
+          options={options}
+          onChange={(newValue) => newValue && handleOfficialChange(game.id, newValue.value)}
+          components={{ Option: CustomOption, SingleValue: CustomSingleValue }}
+          isOptionDisabled={(option) => option.isDisabled || false}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
+          styles={customSelectStyles}
+          isClearable={false}
+          isSearchable={false}
+          isDisabled={readOnly}
+        />
+      </div>
+    );
+  };
+
+
+
+  const renderTeamCell = (game: GameNode, slot: 'home' | 'away') => {
+    const data = game.data as GameNodeData;
+    const dynamicRef = slot === 'home' ? data.homeTeamDynamic : data.awayTeamDynamic;
+    const teamId = slot === 'home' ? data.homeTeamId : data.awayTeamId;
+    const resolvedName = slot === 'home' ? data.resolvedHomeTeam : data.resolvedAwayTeam;
+    
+    const isWinner = !!(data.final_score && (
+      (slot === 'home' && data.final_score.home > data.final_score.away) ||
+      (slot === 'away' && data.final_score.away > data.final_score.home)
+    ));
+
+    const isReferencingUpstream = highlightedElement?.id === game.id && highlightedElement?.type === 'game' && !!dynamicRef;
+
+    let currentValue = '';
+    if (dynamicRef) {
+      if (isRankReference(dynamicRef)) {
+        const source = findSourceStageForReference(game.id, slot, edges, allNodes);
+        if (source) currentValue = `rank:${source.stage.id}:${source.rank}`;
+      } else {
+        const sourceGame = findSourceGameForReference(game.id, slot, edges, allNodes);
+        if (sourceGame) currentValue = `${dynamicRef.type === 'loser' ? 'loser' : 'winner'}:${sourceGame.id}`;
+      }
+    } else if (teamId) currentValue = teamId;
+
+    const options = [
+      { value: '', label: t('ui:label.selectTeam') }, 
+      ...teamOptions,
+      ...rankingStageOptions
+    ];
+    const eligibleGames = getEligibleSourceGames(game);
+    const gamesByStage = new Map<string, { name: string; games: GameNode[] }>();
+    eligibleGames.forEach((sourceGame) => {
+      const sourcePath = getGamePath(sourceGame.id, allNodes);
+      const stageId = sourcePath?.stage.id || '';
+      if (!gamesByStage.has(stageId)) {
+        gamesByStage.set(stageId, { name: sourcePath?.stage.data.name || '', games: [] });
+      }
+      gamesByStage.get(stageId)!.games.push(sourceGame);
+    });
+
+    Array.from(gamesByStage.entries()).forEach(([stageId, stageData]) => {
+      const stageNode = allNodes.find(n => n.id === stageId);
+      options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as import('../../types/flowchart').StageNodeData)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
+      stageData.games.forEach((sourceGame) => {
+        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ ${t('ui:message.winnerOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
+        options.push({ value: `loser:${sourceGame.id}`, label: `💔 ${t('ui:message.loserOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
+      });
+    });
+
+    if (readOnly && dynamicRef) {
+      return (
+        <div 
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelectNode(game.id);
+            onHighlightElement(game.id, 'game');
+            if (onDynamicReferenceClick) {
+              if (isRankReference(dynamicRef)) {
+                const source = findSourceStageForReference(game.id, slot, edges, allNodes);
+                if (source) onDynamicReferenceClick(source.stage.id);
+              } else {
+                const sourceGame = findSourceGameForReference(game.id, slot, edges, allNodes);
+                if (sourceGame) onDynamicReferenceClick(sourceGame.id);
+              }
+            }
+          }}
+          style={{ cursor: 'pointer' }}
+          className={`d-flex flex-column ${isReferencingUpstream ? 'referencing-highlight' : ''}`}
+        >
+          <span className="small text-muted mb-1">
+            {dynamicRef.type === 'winner' ? t('ui:label.winner') : t('ui:label.loser')} {dynamicRef.matchName}
+          </span>
+          {resolvedName ? (
+            <div className={isWinner ? 'text-success d-flex align-items-center' : 'text-primary'}>
+              <strong className={isWinner ? 'fw-bold' : ''}>{resolvedName}</strong>
+              {isWinner && <i className="bi bi-trophy-fill text-warning ms-2" title={t('ui:label.winner')} />}
+            </div>
+          ) : (
+            <span className="text-muted italic">{t('ui:label.tbd')}</span>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div 
+        className={isReferencingUpstream ? 'referencing-highlight' : ''}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectNode(game.id);
+          onHighlightElement(game.id, 'game');
+          if (dynamicRef && onDynamicReferenceClick) {
+            if (isRankReference(dynamicRef)) {
+              const source = findSourceStageForReference(game.id, slot, edges, allNodes);
+              if (source) onDynamicReferenceClick(source.stage.id);
+            } else {
+              const sourceGame = findSourceGameForReference(game.id, slot, edges, allNodes);
+              if (sourceGame) onDynamicReferenceClick(sourceGame.id);
+            }
+          }
+        }}
+        style={{ cursor: dynamicRef ? 'pointer' : 'default' }}
+      >
+        <Select<TeamOption>
+          value={(() => {
+            const opt = options.find(opt => opt.value === currentValue) || options[0];
+            return isWinner ? { ...opt, isWinner: true } : opt;
+          })()}
+          options={options}
+          onChange={(newValue) => newValue && handleTeamChange(game.id, slot, newValue.value)}
+          components={{ Option: CustomOption, SingleValue: CustomSingleValue }}
+          isOptionDisabled={(option) => option.isDisabled || false}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
+          styles={customSelectStyles}
+          isClearable={false}
+          isSearchable={false}
+          isDisabled={readOnly}
+        />
+      </div>
+    );
+  };
+
+  if (games.length === 0) {
+    return <div className="text-muted text-center py-2"><i className={`bi ${ICONS.TOURNAMENT} me-2`} />{t('ui:message.noGamesInStage')}</div>;
+  }
+
+  return (
+    <Table striped bordered hover size="sm">
+      <thead>
+        <tr>
+          <th>{t('ui:label.standing')}</th>
+          <th>{t('ui:label.time')}</th>
+          <th>{t('ui:label.home')}</th>
+          {!readOnly && <th style={{ width: '40px' }}></th>}
+          <th>{t('ui:label.away')}</th>
+          {readOnly && <th>{t('ui:label.score')}</th>}
+          <th>{t('ui:label.official')}</th>
+          <th>{t('ui:label.breakAfter')}</th>
+          <th>{t('ui:label.actions')}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {games.map((game) => {
+          const isHighlighted = highlightedElement?.id === game.id && highlightedElement?.type === 'game';
+          const isSourceHighlighted = highlightedSourceGameId === game.id;
+          const score = game.data.final_score ? `${game.data.final_score.home}:${game.data.final_score.away}` : (game.data.halftime_score ? `(${game.data.halftime_score.home}:${game.data.halftime_score.away})` : '--:--');
+
+          return (
+            <tr 
+              key={game.id} 
+              id={`game-${game.id}`} 
+              onClick={() => handleRowClick(game.id)} 
+              className={`${isHighlighted ? 'element-highlighted' : ''} ${isSourceHighlighted ? 'source-highlighted' : ''} ${upstreamSourceMatchNames.has(game.data.standing) ? 'element-highlighted' : ''}`}
+              style={{ 
+                cursor: 'pointer', 
+                backgroundColor: selectedNodeId === game.id ? '#fff3cd' : undefined 
+              }}
+            >
+              <td onClick={(e) => { e.stopPropagation(); onSelectNode(game.id); onHighlightElement(game.id, 'game'); }}>
+                {editingGameId === game.id && editingField === 'standing' ? (
+                  <Form.Control type="text" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'standing')} onKeyDown={(e) => handleKeyPress(e, game.id, 'standing')} autoFocus style={{ fontSize: '0.875rem' }} />
+                ) : (
+                  <span 
+                    onClick={(e) => !readOnly && handleStartEdit(e, game, 'standing')} 
+                    style={{ cursor: readOnly ? 'default' : 'text' }}
+                    title={readOnly ? undefined : t('ui:tooltip.clickToEdit')}
+                  >
+                    {game.data.standing}
+                  </span>
+                )}
+              </td>
+              {renderTimeCell(game)}
+              <td>{renderTeamCell(game, 'home')}</td>
+              {!readOnly && (
+                <td className="text-center align-middle px-0">
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    className="p-0 text-muted"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSwapTeams(game.id);
+                    }}
+                    title={t('ui:tooltip.swapTeams', 'Swap Home/Away')}
+                  >
+                    <i className="bi bi-arrow-left-right" />
+                  </Button>
+                </td>
+              )}
+              <td>{renderTeamCell(game, 'away')}</td>
+              {readOnly && (
+                <td className="text-center fw-bold">
+                  <span className={game.data.final_score ? 'text-dark' : 'text-muted italic small'}>
+                    {score}
+                  </span>
+                </td>
+              )}
+              <td>{renderOfficialCell(game)}</td>
+              <td>
+                {editingGameId === game.id && editingField === 'breakAfter' ? (
+                  <Form.Control type="number" size="sm" value={editedValue} onChange={(e) => setEditedValue(e.target.value)} onBlur={() => handleSaveEdit(game.id, 'breakAfter')} onKeyDown={(e) => handleKeyPress(e, game.id, 'breakAfter')} autoFocus min="0" style={{ fontSize: '0.875rem', width: '80px' }} />
+                ) : (
+                  <span 
+                    onClick={(e) => !readOnly && handleStartEdit(e, game, 'breakAfter')} 
+                    style={{ cursor: readOnly ? 'default' : 'text' }}
+                    title={readOnly ? undefined : t('ui:tooltip.clickToEdit')}
+                  >
+                    {game.data.breakAfter || 0}
+                  </span>
+                )}
+              </td>
+              <td>
+                {readOnly ? (
+                  <button 
+                    className="btn btn-sm btn-outline-success"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectNode(game.id);
+                      onOpenResultModal(game.id);
+                    }}
+                    title={t('ui:tooltip.enterResult')}
+                    data-testid={`enter-result-${game.id}`}
+                  >
+                    <i className="bi bi-pencil-square me-2" />
+                    <span>{t('ui:button.result')}</span>
+                  </button>
+                ) : (
+                  <button 
+                    className="btn btn-sm btn-outline-danger btn-adaptive" 
+                    onClick={(e) => handleDelete(e, game.id)}
+                    title={t('ui:tooltip.deleteGame')}
+                  >
+                    <i className={`bi ${ICONS.DELETE}`} />
+                  </button>
+                )}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </Table>
+  );
+});
+
+export default GameTable;

@@ -5,32 +5,40 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('gamedays', '0017_team_association'),
+        ("gamedays", "0017_team_association"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='gameday',
-            index=models.Index(fields=['id', 'date'], name='gamedays_ga_id_167c15_idx'),
+            model_name="gameday",
+            index=models.Index(fields=["id", "date"], name="gamedays_ga_id_167c15_idx"),
         ),
         migrations.AddIndex(
-            model_name='gameinfo',
-            index=models.Index(fields=['id', 'officials'], name='gamedays_ga_id_5c5d8e_idx'),
+            model_name="gameinfo",
+            index=models.Index(
+                fields=["id", "officials"], name="gamedays_ga_id_5c5d8e_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='gameinfo',
-            index=models.Index(fields=['id', 'gameday'], name='gamedays_ga_id_26afd5_idx'),
+            model_name="gameinfo",
+            index=models.Index(
+                fields=["id", "gameday"], name="gamedays_ga_id_26afd5_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='gameresult',
-            index=models.Index(fields=['id', 'gameinfo', 'isHome'], name='gamedays_ga_id_e28311_idx'),
+            model_name="gameresult",
+            index=models.Index(
+                fields=["id", "gameinfo", "isHome"], name="gamedays_ga_id_e28311_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='gameresult',
-            index=models.Index(fields=['id', 'gameinfo'], name='gamedays_ga_id_55dc8c_idx'),
+            model_name="gameresult",
+            index=models.Index(
+                fields=["id", "gameinfo"], name="gamedays_ga_id_55dc8c_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='gameresult',
-            index=models.Index(fields=['id', 'team'], name='gamedays_ga_id_f40410_idx'),
+            model_name="gameresult",
+            index=models.Index(fields=["id", "team"], name="gamedays_ga_id_f40410_idx"),
         ),
     ]

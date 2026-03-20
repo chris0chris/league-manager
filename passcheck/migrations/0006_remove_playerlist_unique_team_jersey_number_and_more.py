@@ -7,46 +7,52 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gamedays', '0022_person'),
-        ('passcheck', '0005_migration_from_playerlist_to_other_entities'),
+        ("gamedays", "0022_person"),
+        ("passcheck", "0005_migration_from_playerlist_to_other_entities"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='playerlist',
-            name='unique_team_jersey_number',
+            model_name="playerlist",
+            name="unique_team_jersey_number",
         ),
         migrations.RemoveConstraint(
-            model_name='playerlist',
-            name='unique_team_pass_number',
+            model_name="playerlist",
+            name="unique_team_pass_number",
         ),
         migrations.RemoveField(
-            model_name='playerlist',
-            name='first_name',
+            model_name="playerlist",
+            name="first_name",
         ),
         migrations.RemoveField(
-            model_name='playerlist',
-            name='last_name',
+            model_name="playerlist",
+            name="last_name",
         ),
         migrations.RemoveField(
-            model_name='playerlist',
-            name='pass_number',
+            model_name="playerlist",
+            name="pass_number",
         ),
         migrations.RemoveField(
-            model_name='playerlist',
-            name='sex',
+            model_name="playerlist",
+            name="sex",
         ),
         migrations.RemoveField(
-            model_name='playerlist',
-            name='year_of_birth',
+            model_name="playerlist",
+            name="year_of_birth",
         ),
         migrations.AlterField(
-            model_name='playerlist',
-            name='player',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='passcheck.player'),
+            model_name="playerlist",
+            name="player",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.DO_NOTHING, to="passcheck.player"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='playerlist',
-            constraint=models.UniqueConstraint(condition=models.Q(('left_on', None)), fields=('team', 'jersey_number'), name='unique_team_jersey_number'),
+            model_name="playerlist",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("left_on", None)),
+                fields=("team", "jersey_number"),
+                name="unique_team_jersey_number",
+            ),
         ),
     ]

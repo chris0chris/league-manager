@@ -8,32 +8,55 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gamedays', '0022_person'),
-        ('passcheck', '0003_remove_eligibilityrule_maximum_player_strength_must_be_greater_equal_minimum_and_more'),
+        ("gamedays", "0022_person"),
+        (
+            "passcheck",
+            "0003_remove_eligibilityrule_maximum_player_strength_must_be_greater_equal_minimum_and_more",
+        ),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='playerlist',
-            name='joined_on',
+            model_name="playerlist",
+            name="joined_on",
             field=models.DateField(default=datetime.date.today),
         ),
         migrations.AddField(
-            model_name='playerlist',
-            name='left_on',
+            model_name="playerlist",
+            name="left_on",
             field=models.DateField(blank=True, default=None, null=True),
         ),
         migrations.CreateModel(
-            name='Player',
+            name="Player",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('pass_number', models.IntegerField()),
-                ('person', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='gamedays.person')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("pass_number", models.IntegerField()),
+                (
+                    "person",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="gamedays.person",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='playerlist',
-            name='player',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='passcheck.player'),
+            model_name="playerlist",
+            name="player",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="passcheck.player",
+            ),
         ),
     ]

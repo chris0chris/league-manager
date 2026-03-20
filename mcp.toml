@@ -1,0 +1,13 @@
+[servers.signal]
+type = "stdio"
+command = "/home/cda/.local/bin/uv"
+args = [
+    "run",
+    "--project",
+    "/home/cda/dev/signal-mcp",
+    "/home/cda/dev/signal-mcp/signal_mcp/main.py",
+    "--user-id",
+    "+4915124154206", # Replace with your registered Signal number (e.g., +49123456789)
+    "--transport",
+    "stdio"
+]

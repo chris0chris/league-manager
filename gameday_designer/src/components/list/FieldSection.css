@@ -1,0 +1,63 @@
+/**
+ * FieldSection Component Styles
+ */
+
+.field-section {
+  border: 2px solid #6c757d;
+  background-color: #f8f9fa;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.field-section.selected {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.field-section__header {
+  background-color: #d1ecf1; /* Light cyan - Bootstrap info variant */
+  border-bottom: 1px solid #dee2e6;
+  border-left: 4px solid #0dcaf0; /* Bright cyan accent */
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.field-section__header:hover {
+  background-color: #b8e4ea; /* Slightly darker on hover */
+}
+
+.field-section__body {
+  padding: 1rem;
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.field-section .form-control-sm {
+  display: inline-block;
+}
+
+/* Ensure stages and games within fields are scrollable */
+.field-section__body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.field-section__body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.field-section__body::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.field-section__body::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Add button container at bottom of field body */
+.field-section__body .mt-2 {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}

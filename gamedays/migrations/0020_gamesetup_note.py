@@ -5,13 +5,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('gamedays', '0019_gameofficial_gamedays_ga_gameinf_d5ecbf_idx'),
+        ("gamedays", "0019_gameofficial_gamedays_ga_gameinf_d5ecbf_idx"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='gamesetup',
-            name='note',
+            model_name="gamesetup",
+            name="note",
             field=models.TextField(blank=True, default=None, null=True),
         ),
     ]
