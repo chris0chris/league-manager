@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gamedays', '0022_person'),
+        ('gamedays', '0028_remove_seasonleagueteam_team_seasonleagueteam_teams'),
         ('league_table', '0001_initial'),
     ]
 

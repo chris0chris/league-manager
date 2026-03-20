@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("gamedays", "0023_gameinfo_league_group"),
+        ("gamedays", "0022_person"),
     ]
 
     operations = [
