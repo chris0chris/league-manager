@@ -60,6 +60,8 @@ class LeagueSeasonConfigFactory(DjangoModelFactory):
     league = SubFactory(LeagueFactory)
     season = SubFactory(SeasonFactory)
     ruleset = SubFactory(LeagueRulesetFactory)
+    allow_officials_to_register = True
+    officials_per_gameday_number = 2
 
     @post_generation
     def exclude_gamedays(self, create, extracted, **kwargs):

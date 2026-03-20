@@ -27,7 +27,6 @@ class LeagueRuleset(models.Model):
     ]
 
     name = models.CharField(max_length=50, unique=True)
-    allow_official_registration = models.BooleanField(default=False)
 
     league_quotient_precision = models.PositiveSmallIntegerField(default=3)
     points_win_same_league = models.DecimalField(
@@ -151,6 +150,17 @@ class LeagueSeasonConfig(models.Model):
 
     group_by_leagues = models.BooleanField(default=False)
 
+    allow_officials_to_register = models.BooleanField(
+        help_text="Die nachfolgenden Felder funktionieren nur, wenn dieses gecheckt ist",
+        default=False,
+    )
+    officials_per_gameday_per_field = models.PositiveSmallIntegerField(
+        help_text="Dieses Feld gewinnt gegenüber dem nachfolgenden Feld", default=0
+    )
+    officials_per_gameday_number = models.PositiveSmallIntegerField(
+        help_text="Dieses Feld verliert gegenüber dem vorherigen Feld", default=0
+    )
+
     def get_team_point_adjustment_map(self):
         adjustments = TeamPointAdjustments.objects.filter(
             league_season_config=self
@@ -171,6 +181,35 @@ class LeagueSeasonConfig(models.Model):
 
     def __str__(self):
         return f"{self.league.name} - {self.season.name} -> {self.ruleset.name if self.ruleset else 'Keine Konfiguration'}"
+
+
+class OverrideOfficialGamedaySetting(models.Model):
+    league_season_config = models.ForeignKey(LeagueSeasonConfig, on_delete=models.CASCADE)
+    gameday = models.OneToOneField(
+        Gameday, on_delete=models.CASCADE, related_name="official_override"
+    )
+    allow_officials_to_register = models.BooleanField(
+        help_text="Die nachfolgenden Felder funktionieren nur, wenn dieses gecheckt ist",
+        default=False,
+    )
+    officials_per_gameday_per_field = models.PositiveSmallIntegerField(
+        help_text="Dieses Feld gewinnt gegenüber dem nachfolgenden Feld", default=0
+    )
+    officials_per_gameday_number = models.PositiveSmallIntegerField(
+        help_text="Dieses Feld verliert gegenüber dem vorherigen Feld", default=0
+    )
+
+    def get_officials_per_gameday(self, number_of_fields: int):
+        if not self.allow_officials_to_register:
+            return 0
+        if number_of_fields == 0:
+            return self.officials_per_gameday_number
+        return self.officials_per_gameday_per_field * number_of_fields
+
+    def __str__(self):
+        if not self.allow_officials_to_register:
+            return f"{self.gameday}: Offiziellen-Anmeldung deaktiviert."
+        return f"{self.gameday}: {self.officials_per_gameday_per_field if self.officials_per_gameday_per_field else self.officials_per_gameday_number} Offizielle"
 
 
 class TeamPointAdjustments(models.Model):

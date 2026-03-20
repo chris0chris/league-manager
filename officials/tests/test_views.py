@@ -1,6 +1,4 @@
 import os
-import unittest
-from datetime import datetime
 from http import HTTPStatus
 from unittest.mock import patch, MagicMock
 
@@ -13,13 +11,14 @@ from rest_framework.reverse import reverse
 
 from gamedays.models import Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
+from league_table.tests.setup_factories.factories_leaguetable import LeagueSeasonConfigFactory
 from officials.models import Official, OfficialGamedaySignup
 from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 from officials.urls import OFFICIALS_LIST_FOR_TEAM, OFFICIALS_GAMEOFFICIAL_INTERNAL_CREATE, \
     OFFICIALS_LICENSE_CHECK, OFFICIALS_MOODLE_LOGIN, OFFICIALS_SIGN_UP_LIST, OFFICIALS_SIGN_UP_FOR_GAMEDAY
-from officials.views import MOODLE_LOGGED_IN_USER, OfficialSignUpView
+from officials.views import MOODLE_LOGGED_IN_USER
 
 
 class TestOfficialListView(WebTest):
@@ -174,6 +173,7 @@ class TestOfficialSignUpView(TestCase):
     def test_user_is_already_signed_up_for_gameday(self):
         DbSetupOfficials().create_officials_and_team()
         gameday = DBSetup().create_empty_gameday()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
         official = Official.objects.first()
         OfficialGamedaySignup.objects.create(official=official, gameday=gameday)
         self.client = Client()

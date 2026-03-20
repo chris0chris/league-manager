@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from league_table.forms import LeagueSeasonConfigForm
+from league_table.forms import LeagueSeasonConfigForm, OverrideOfficialGamedaySettingForm
 from league_table.models import (
     LeagueGroup,
     LeagueRuleset,
@@ -8,6 +8,7 @@ from league_table.models import (
     TeamPointAdjustments,
     LeagueRulesetTieBreak,
     TieBreakStep,
+    OverrideOfficialGamedaySetting,
 )
 
 admin.site.register(LeagueGroup)
@@ -24,6 +25,11 @@ class LeagueRulesetTieBreakInline(admin.TabularInline):
 @admin.register(LeagueRuleset)
 class LeagueRulesetAdmin(admin.ModelAdmin):
     inlines = [LeagueRulesetTieBreakInline]
+
+
+@admin.register(OverrideOfficialGamedaySetting)
+class OverrideOfficialGamedaySettingAdmin(admin.ModelAdmin):
+    form = OverrideOfficialGamedaySettingForm
 
 
 @admin.register(LeagueSeasonConfig)

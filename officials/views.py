@@ -321,12 +321,12 @@ class OfficialSignUpListView(View):
     def get(self, request, *args, **kwargs):
         official_id = request.session.get(MOODLE_LOGGED_IN_USER)
         if official_id is None:
-            if settings.DEBUG:
-                official_id = 1
-            else:
-                from officials.urls import OFFICIALS_MOODLE_LOGIN
-                return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
-        request.session.set_expiry(600)
+            from officials.urls import OFFICIALS_MOODLE_LOGIN
+            return redirect(reverse(OFFICIALS_MOODLE_LOGIN))
+        if settings.DEBUG:
+            request.session.set_expiry(600000)
+        else:
+            request.session.set_expiry(600)
         league = request.GET.get('league')
         from officials.urls import OFFICIALS_SIGN_UP_FOR_GAMEDAY, OFFICIALS_PROFILE_LICENSE, OFFICIALS_SIGN_UP_LIST, \
             OFFICIALS_SIGN_UP_CANCEL_FOR_GAMEDAY

@@ -19,7 +19,7 @@ from django.views.generic import (
 from formtools.wizard.views import SessionWizardView
 
 from league_table.constants import LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE
-from league_table.models import LeagueSeasonConfig
+from league_table.models import LeagueSeasonConfig, OverrideOfficialGamedaySetting
 from league_table.service.leaguetable_repository import LeagueTableRepository
 from .constants import (
     LEAGUE_GAMEDAY_DETAIL,
@@ -125,14 +125,23 @@ class GamedayDetailView(DetailView):
                 )
             try:
                 league_season_config = LeagueTableRepository.get_league_season_config_by_slug(league_slug, season_slug)
-                if not league_season_config.ruleset.allow_official_registration:
-                    officials = []
-                    url_pattern_official = ''
-                    url_pattern_official_signup = ''
+                try:
+                    # if there is an override then check if officials are allowed
+                    if not league_season_config.overrideofficialgamedaysetting_set.get(gameday=gameday).allow_officials_to_register:
+                        officials = []
+                        url_pattern_official = ''
+                        url_pattern_official_signup = ''
+                except OverrideOfficialGamedaySetting.DoesNotExist:
+                    # there is obviously no override so use default league configs
+                    if not league_season_config.allow_officials_to_register:
+                        officials = []
+                        url_pattern_official = ""
+                        url_pattern_official_signup = ""
             except LeagueSeasonConfig.DoesNotExist:
                 officials = []
                 url_pattern_official = ""
                 url_pattern_official_signup = ""
+
         else:
             qualify_table = qualify_table.to_html(**render_configs)
             final_table = final_table.to_html(**render_configs)

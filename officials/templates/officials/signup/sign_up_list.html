@@ -44,7 +44,7 @@
                             <a href="{% url url_pattern_signup_cancel gameday=gameday.pk %}" role="button"
                                class="btn btn-danger">Abmelden</a>
                             {% else %}
-                            {% if gameday.count_signup == gameday.limit_signup %}
+                            {% if gameday.count_signup >= gameday.limit_signup or gameday.limit_signup is None %}
                             <a href="#" role="button" class="btn btn-warning disabled" tabindex="-1"
                                aria-disabled="true">Ausgebucht</a>
                             {% else %}
@@ -60,7 +60,7 @@
                     <td colspan="3">
                         <div class="row mt-1">
                             <div class="col">
-                                <i class="ps-1 bi bi-people-fill"></i>: {{ gameday.count_signup }}/
+                                <i class="ps-1 bi bi-people-fill"></i>: {{ gameday.count_signup }} /
                                 {{gameday.limit_signup}}
                             </div>
                         </div>
