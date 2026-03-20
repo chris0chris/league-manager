@@ -1,5 +1,53 @@
 # Spinup Guide
 
+## Local Development Setup (uv)
+
+This project uses [uv](https://docs.astral.sh/uv/) for Python dependency management.
+
+### Prerequisites
+
+- Python 3.12+
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) installed
+
+### Quick Start
+
+```bash
+# Clone and enter directory
+git clone https://github.com/dachrisch/leaguesphere.git
+cd leaguesphere
+
+# Install dependencies (including test dependencies)
+uv sync --extra test
+
+# Activate the virtual environment
+source .venv/bin/activate
+
+# Run the application (requires database, see below)
+python manage.py runserver
+```
+
+### Working with Dependencies
+
+```bash
+# Add a new dependency
+uv add <package>
+
+# Add a test-only dependency
+uv add --extra test <package>
+
+# Update lock file
+uv lock
+
+# Sync environment after pyproject.toml changes
+uv sync
+```
+
+### Database Setup
+
+The project uses MariaDB. See the [Docker-based setup](#setup-process) below or set up a local MariaDB instance and configure `DATABASE_URL` in your environment.
+
+---
+
 ## Overview
 The database initialization process creates essential test data including placeholder teams 
 required by schedule formats.
