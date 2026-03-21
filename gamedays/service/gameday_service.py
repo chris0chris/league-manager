@@ -1,6 +1,9 @@
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
+
 import pandas as pd
+
+from gamedays.service.placeholder_service import GamedayPlaceholderService
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +24,6 @@ from gamedays.service.gameday_settings import (
     ID_HOME,
     OFFICIALS,
     TEAM_NAME,
-    POINTS,
     PF,
     PA,
     DIFF,
@@ -119,14 +121,12 @@ class EmptyDefenseStatisticTable(HtmlAndJsonRendering):
     def to_html(self, *args, **kwargs):
         return "Defense Statistiken sind nach dem 1. Spiel verfügbar."
 
-    @staticmethod
-    def to_json(*args, **kwargs):
+    def to_json(self, *args, **kwargs):
         return EMPTY_DATA
 
 
 class EmptyPasscheckDetailsTable:
-    @staticmethod
-    def to_html(*args, **kwargs):
+    def to_html(self, *args, **kwargs):
         return "Empty Gameday Passcheck Details Table"
 
     def to_json(self, *args, **kwargs):
@@ -199,9 +199,8 @@ class EmptyGamedayService:
         gameday = Gameday.objects.get(pk=gameday_pk)
         return gameday.designer_data or {"nodes": [], "edges": []}
 
-    @staticmethod
-    def get_staff_passcheck_details():
-        return EmptyPasscheckDetailsTable
+    def get_staff_passcheck_details(self):
+        return EmptyPasscheckDetailsTable()
 
 
 class GamedayService:

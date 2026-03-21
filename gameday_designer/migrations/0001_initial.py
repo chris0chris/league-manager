@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("gamedays", "0023_gameinfo_league_group"),
+        ("gamedays", "0022_person"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

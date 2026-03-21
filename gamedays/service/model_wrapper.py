@@ -4,7 +4,6 @@ from django.apps import apps
 from pandas import DataFrame
 
 from gamedays.models import Gameinfo, Gameresult, TeamLog
-from gamedays.service.placeholder_service import GamedayPlaceholderService
 from gamedays.service.gameday_settings import (
     STANDING,
     TEAM_NAME,
@@ -13,7 +12,6 @@ from gamedays.service.gameday_settings import (
     POINTS_AWAY,
     PA,
     PF,
-    GROUP1,
     GAMEINFO_ID,
     DIFF,
     SCHEDULED,
@@ -36,12 +34,14 @@ from gamedays.service.gameday_settings import (
     MAIN_ROUND,
     TEAM_ID,
 )
+from gamedays.service.placeholder_service import GamedayPlaceholderService
 from league_table.models import LeagueSeasonConfig, LeagueRuleset
 from league_table.service.datatypes import LeagueConfigRuleset
 from league_table.service.ranking.engine import (
     FinalRankingEngine,
     TieBreakerEngine,
 )
+from passcheck.models import PasscheckVerification
 
 
 class DfflPoints(object):
