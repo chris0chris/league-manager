@@ -44,7 +44,7 @@ class Association(models.Model):
 class Team(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=255, unique=True)
-    location = models.CharField(max_length=20)
+    location = models.CharField(max_length=100)
     logo = models.ImageField(
         "Logo", upload_to="teammanager/logos", blank=True, null=True
     )
