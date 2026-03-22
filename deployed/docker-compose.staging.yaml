@@ -14,7 +14,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "sh", "-c", "mariadb --skip-ssl -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
+      test: ["CMD", "sh", "-c", "mariadb -h localhost --skip-ssl -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
       interval: 15s
       timeout: 5s
       retries: 15
@@ -65,6 +65,12 @@ services:
     image: leaguesphere/backend:staging
     container_name: ${COMPOSE_PROJECT_NAME}.app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
+    healthcheck:
+      test: ["CMD-SHELL", "curl -A healthcheck -H \"Accept: application/json\" http://localhost:8000/health/?format=json"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
     labels:
       - traefik.enable=false
       # portainer team
