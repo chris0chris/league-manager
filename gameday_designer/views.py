@@ -74,20 +74,31 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Filter templates based on sharing settings:
-        - GLOBAL templates
-        - ASSOCIATION templates matching user's association
-        - PRIVATE templates created by the user
+        Filter templates based on sharing settings and action:
+        - list action: apply sharing restrictions (anonymous sees only GLOBAL)
+        - detail/custom actions: exclude only PRIVATE templates from non-owners
         Staff users see all templates.
         """
         user = self.request.user
-        if not user.is_authenticated:
-            return ScheduleTemplate.objects.filter(sharing=ScheduleTemplate.SHARING_GLOBAL)
+        base_qs = ScheduleTemplate.objects.select_related(
+            "association", "created_by", "updated_by"
+        )
 
-        if user.is_staff:
-            return ScheduleTemplate.objects.all().select_related(
-                "association", "created_by", "updated_by"
+        if user.is_authenticated and user.is_staff:
+            return base_qs.all()
+
+        # For detail/custom actions, only restrict PRIVATE templates
+        is_list_action = not hasattr(self, "action") or self.action == "list"
+        if not is_list_action:
+            if not user.is_authenticated:
+                return base_qs.exclude(sharing=ScheduleTemplate.SHARING_PRIVATE)
+            return base_qs.exclude(
+                Q(sharing=ScheduleTemplate.SHARING_PRIVATE) & ~Q(created_by=user)
             )
+
+        # List action: apply full sharing filter
+        if not user.is_authenticated:
+            return base_qs.filter(sharing=ScheduleTemplate.SHARING_GLOBAL)
 
         from gamedays.models import UserProfile
 
@@ -106,11 +117,7 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
                 association=user_association, sharing=ScheduleTemplate.SHARING_ASSOCIATION
             )
 
-        return (
-            ScheduleTemplate.objects.filter(query)
-            .distinct()
-            .select_related("association", "created_by", "updated_by")
-        )
+        return base_qs.filter(query).distinct()
 
     def perform_create(self, serializer):
         """
