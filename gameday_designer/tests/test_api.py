@@ -25,15 +25,14 @@ class TestTemplateListEndpoint:
     """Test GET /api/designer/templates/ (list)."""
 
     def test_anonymous_can_list_templates(self, api_client, template, global_template):
-        """Anonymous users can list global templates."""
+        """Anonymous users can list templates."""
         response = api_client.get("/api/designer/templates/")
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) >= 1  # At least the global fixture
+        assert len(response.data) >= 2  # At least our two fixtures
 
-    def test_list_returns_lightweight_serializer(self, api_client, staff_user, template_with_slots):
+    def test_list_returns_lightweight_serializer(self, api_client, template_with_slots):
         """List endpoint uses lightweight serializer (no nested data)."""
-        api_client.force_authenticate(user=staff_user)
         response = api_client.get("/api/designer/templates/")
 
         assert response.status_code == status.HTTP_200_OK

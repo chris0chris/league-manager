@@ -63,7 +63,6 @@ def global_template(db, staff_user):
         num_groups=2,
         game_duration=60,
         association=None,
-        sharing=ScheduleTemplate.SHARING_GLOBAL,
         created_by=staff_user,
         updated_by=staff_user,
     )

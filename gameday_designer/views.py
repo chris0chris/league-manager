@@ -9,7 +9,6 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render
-from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
 import logging
@@ -25,9 +24,6 @@ from gameday_designer.serializers import (
 from gameday_designer.permissions import IsAssociationMemberOrStaff, CanApplyTemplate
 from gameday_designer.service.template_validation_service import (
     TemplateValidationService,
-)
-from gameday_designer.service.template_creation_service import (
-    TemplateCreationService,
 )
 from gameday_designer.service.template_application_service import (
     TemplateApplicationService,
@@ -56,7 +52,6 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
     - GET /templates/{id}/validate/ - Validate template
     - GET /templates/{id}/preview/ - Preview schedule
     - GET /templates/{id}/usage/ - Usage statistics
-    - POST /templates/save-from-designer/ - Create template from designer data
     """
 
     queryset = ScheduleTemplate.objects.all()
@@ -74,50 +69,20 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Filter templates based on sharing settings and action:
-        - list action: apply sharing restrictions (anonymous sees only GLOBAL)
-        - detail/custom actions: exclude only PRIVATE templates from non-owners
-        Staff users see all templates.
+        Filter queryset based on permissions and query parameters.
+
+        Staff sees all templates.
+        Non-staff users see all templates (read-only for global).
+        Supports filtering by association.
         """
-        user = self.request.user
-        base_qs = ScheduleTemplate.objects.select_related(
-            "association", "created_by", "updated_by"
-        )
+        queryset = ScheduleTemplate.objects.all()
 
-        if user.is_authenticated and user.is_staff:
-            return base_qs.all()
+        # Filter by association if provided
+        association_id = self.request.query_params.get("association")
+        if association_id:
+            queryset = queryset.filter(association_id=association_id)
 
-        # For detail/custom actions, only restrict PRIVATE templates
-        is_list_action = not hasattr(self, "action") or self.action == "list"
-        if not is_list_action:
-            if not user.is_authenticated:
-                return base_qs.exclude(sharing=ScheduleTemplate.SHARING_PRIVATE)
-            return base_qs.exclude(
-                Q(sharing=ScheduleTemplate.SHARING_PRIVATE) & ~Q(created_by=user)
-            )
-
-        # List action: apply full sharing filter
-        if not user.is_authenticated:
-            return base_qs.filter(sharing=ScheduleTemplate.SHARING_GLOBAL)
-
-        from gamedays.models import UserProfile
-
-        try:
-            profile = UserProfile.objects.get(user=user)
-            user_association = profile.team.association if profile.team else None
-        except UserProfile.DoesNotExist:
-            user_association = None
-
-        query = Q(sharing=ScheduleTemplate.SHARING_GLOBAL) | Q(
-            created_by=user, sharing=ScheduleTemplate.SHARING_PRIVATE
-        )
-
-        if user_association:
-            query |= Q(
-                association=user_association, sharing=ScheduleTemplate.SHARING_ASSOCIATION
-            )
-
-        return base_qs.filter(query).distinct()
+        return queryset.select_related("association", "created_by", "updated_by")
 
     def perform_create(self, serializer):
         """
@@ -135,65 +100,77 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
         """
         serializer.save()
 
-    @action(detail=False, methods=["post"], url_path="save-from-designer")
-    def save_from_designer(self, request):
-        """
-        Create a new template from generic designer data.
-        """
-        service = TemplateCreationService(request.user)
-        try:
-            template = service.create_template(request.data)
-            serializer = ScheduleTemplateDetailSerializer(
-                template, context={"request": request}
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=["post"])
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[CanApplyTemplate],
+        serializer_class=ApplyTemplateRequestSerializer,
+    )
     def apply(self, request, pk=None):
         """
         Apply template to a gameday.
 
-        Validates gameday exists and user has permissions.
+        POST /templates/{id}/apply/
+        Body: {gameday_id: int, team_mapping: {}}
+
+        Returns:
+            200: {success: true, gameinfos_created: int, message: str}
+            400: {error: str}
         """
         template = self.get_object()
-        gameday_id = request.data.get("gameday")
-        team_mapping = request.data.get("team_mapping", {})
 
-        if not gameday_id:
-            return Response(
-                {"error": "Gameday ID is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        # Validate request data
+        serializer = ApplyTemplateRequestSerializer(
+            data=request.data, context={"request": request}
+        )
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        gameday_id = serializer.validated_data["gameday_id"]
+        team_mapping = serializer.validated_data["team_mapping"]
+
+        # Get gameday
         gameday = get_object_or_404(Gameday, pk=gameday_id)
 
-        # Check permissions for the gameday
-        # (This is a simplified check, actual implementation might be more complex)
-        if not request.user.is_staff and gameday.author != request.user:
+        # Apply template using service
+        try:
+            service = TemplateApplicationService(
+                template=template,
+                gameday=gameday,
+                team_mapping=team_mapping,
+                applied_by=request.user if request.user.is_authenticated else None,
+            )
+            result = service.apply()
+
             return Response(
-                {"error": "You do not have permission to modify this gameday"},
-                status=status.HTTP_403_FORBIDDEN,
+                {
+                    "success": result.success,
+                    "gameinfos_created": result.gameinfos_created,
+                    "message": result.message,
+                },
+                status=status.HTTP_200_OK,
             )
 
-        service = TemplateApplicationService(template, gameday, request.user)
-        try:
-            application = service.apply(team_mapping)
-            serializer = TemplateApplicationSerializer(
-                application, context={"request": request}
+        except ApplicationError:
+            logging.exception("Error applying schedule template")
+            return Response(
+                {"error": "Failed to apply template."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except ApplicationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["post"])
     def clone(self, request, pk=None):
         """
-        Clone an existing template.
+        Clone template (with all slots and update rules).
 
-        Creates a new template with the same slots and rules.
+        POST /templates/{id}/clone/
+
+        Returns:
+            201: Cloned template data
         """
         template = self.get_object()
+
+        # Create new template with copied data
         cloned_template = ScheduleTemplate.objects.create(
             name=f"Copy of {template.name}",
             description=template.description,
@@ -202,51 +179,39 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
             num_groups=template.num_groups,
             game_duration=template.game_duration,
             association=template.association,
-            created_by=request.user,
-            updated_by=request.user,
+            created_by=request.user if request.user.is_authenticated else None,
+            updated_by=request.user if request.user.is_authenticated else None,
         )
 
-        # Clone slots and update rules
+        # Clone slots
         for slot in template.slots.all():
-            cloned_slot = TemplateSlot.objects.create(
-                template=cloned_template,
-                field=slot.field,
-                slot_order=slot.slot_order,
-                stage=slot.stage,
-                stage_type=slot.stage_type,
-                standing=slot.standing,
-                home_group=slot.home_group,
-                home_team=slot.home_team,
-                home_reference=slot.home_reference,
-                away_group=slot.away_group,
-                away_team=slot.away_team,
-                away_reference=slot.away_reference,
-                official_group=slot.official_group,
-                official_team=slot.official_team,
-                official_reference=slot.official_reference,
-                break_after=slot.break_after,
+            cloned_slot = slot
+            cloned_slot.pk = None  # Create new instance
+            cloned_slot.template = cloned_template
+            cloned_slot.save()
+
+        # Clone update rules
+        for update_rule in template.update_rules.all():
+            # Need to map old slot to new slot
+            original_slot = update_rule.slot
+            new_slot = cloned_template.slots.get(
+                field=original_slot.field, slot_order=original_slot.slot_order
             )
 
-            # Clone update rule if exists
-            try:
-                rule = slot.update_rule.get()
-                cloned_rule = TemplateUpdateRule.objects.create(
-                    template=cloned_template,
-                    slot=cloned_slot,
-                    pre_finished=rule.pre_finished,
-                )
-                for team_rule in rule.team_rules.all():
-                    TemplateUpdateRuleTeam.objects.create(
-                        update_rule=cloned_rule,
-                        role=team_rule.role,
-                        standing=team_rule.standing,
-                        place=team_rule.place,
-                        points=team_rule.points,
-                        pre_finished_override=team_rule.pre_finished_override,
-                    )
-            except TemplateUpdateRule.DoesNotExist:
-                pass
+            cloned_rule = update_rule
+            cloned_rule.pk = None
+            cloned_rule.template = cloned_template
+            cloned_rule.slot = new_slot
+            cloned_rule.save()
 
+            # Clone team rules
+            for team_rule in update_rule.team_rules.all():
+                cloned_team_rule = team_rule
+                cloned_team_rule.pk = None
+                cloned_team_rule.update_rule = cloned_rule
+                cloned_team_rule.save()
+
+        # Return cloned template
         serializer = ScheduleTemplateDetailSerializer(
             cloned_template, context={"request": request}
         )
@@ -255,29 +220,90 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"])
     def validate(self, request, pk=None):
         """
-        Validate template logic.
+        Validate template consistency.
+
+        GET /templates/{id}/validate/
+
+        Returns:
+            200: {is_valid: bool, errors: [], warnings: []}
         """
         template = self.get_object()
+
+        # Use validation service
         service = TemplateValidationService(template)
-        result = service.validate()
+        is_valid, errors, warnings = service.validate()
+
         return Response(
-            {"is_valid": result.is_valid, "errors": result.errors, "warnings": []}
+            {
+                "is_valid": is_valid,
+                "errors": [
+                    {
+                        "id": err.id,
+                        "type": err.type,
+                        "message": err.message,
+                        "affected_slots": err.affected_slots,
+                    }
+                    for err in errors
+                ],
+                "warnings": [
+                    {
+                        "id": warn.id,
+                        "type": warn.type,
+                        "message": warn.message,
+                        "affected_slots": warn.affected_slots,
+                    }
+                    for warn in warnings
+                ],
+            },
+            status=status.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["get"])
     def preview(self, request, pk=None):
         """
-        Return preview of the schedule.
+        Preview template schedule.
+
+        GET /templates/{id}/preview/
+
+        Returns:
+            200: {slots: [...]}
         """
         template = self.get_object()
-        # Preview logic here (e.g. mock game times)
-        return Response({"template": template.name, "preview": "Not implemented"})
+
+        from gameday_designer.serializers import TemplateSlotSerializer
+
+        slots = template.slots.all().order_by("field", "slot_order")
+        serializer = TemplateSlotSerializer(
+            slots, many=True, context={"request": request}
+        )
+
+        return Response({"slots": serializer.data}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["get"])
     def usage(self, request, pk=None):
         """
-        Return usage statistics for the template.
+        Get template usage statistics.
+
+        GET /templates/{id}/usage/
+
+        Returns:
+            200: {applications_count: int, recent_applications: [...]}
         """
         template = self.get_object()
-        count = template.applications.count()
-        return Response({"usage_count": count})
+
+        applications = TemplateApplication.objects.filter(template=template)
+        applications_count = applications.count()
+
+        # Get 10 most recent applications
+        recent = applications.order_by("-applied_at")[:10]
+        recent_serializer = TemplateApplicationSerializer(
+            recent, many=True, context={"request": request}
+        )
+
+        return Response(
+            {
+                "applications_count": applications_count,
+                "recent_applications": recent_serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
