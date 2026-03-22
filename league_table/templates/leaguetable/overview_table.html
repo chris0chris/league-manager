@@ -8,10 +8,12 @@
     </div>
     <div aria-labelledby="headingSchedule" class="collapse show" id="collapseSchedule">
         <div class="card-body">
+            {% if seasons %}
+            {% include 'utils/season_filter.html'  %}
+            {% endif %}
             {% if not info.table %}
             Tabelle wurde noch nicht erstellt.
             {% else %}
-            {% include 'utils/season_filter.html'  %}
             <br />
 
             {% include 'leaguetable/league_table.html' %}
