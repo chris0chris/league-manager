@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from gamedays.service.wrapper.gameinfo_wrapper import GameinfoWrapper
 from gamedays.tests.setup_factories.factories import GameinfoFactory
-from league_table.models import LeagueGroup
+from league_table.models import LeagueGroup, LeagueRuleset
 from league_table.tests.setup_factories.factories_leaguetable import LeagueGroupFactory
 
 
