@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('gamedays', '0028_remove_seasonleagueteam_team_seasonleagueteam_teams')
+        ('gamedays', '0021_gameday_address')
     ]
 
     operations = [

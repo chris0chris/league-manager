@@ -6,6 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
+        ("gamedays", "0028_remove_seasonleagueteam_team_seasonleagueteam_teams"),
         ("gamedays", "0029_gameinfo_league_group"),
         ("gamedays", "0031_migrate_gameinfo_status_completed"),
     ]

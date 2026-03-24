@@ -172,15 +172,14 @@ class GamedayModelWrapper:
         if not apps.is_installed("league_table"):
             return qualify_round
 
-        from league_table.models import LeagueSeasonConfig
-
-        try:
-            league_season_ruleset = LeagueSeasonConfig.objects.get(
-                league=self.gameday.league, season=self.gameday.season
-            ).ruleset
-        except LeagueSeasonConfig.DoesNotExist:
-            # fallback use default league ruleset
-            league_season_ruleset = LeagueRuleset.objects.get(pk=2)
+        config = LeagueSeasonConfig.objects.filter(
+            league=self.gameday.league, season=self.gameday.season
+        ).first()
+        league_season_ruleset = (
+            config.ruleset if config else LeagueRuleset.objects.filter(name="DFFL Liga Regeln").first()
+        )
+        if league_season_ruleset is None:
+            return qualify_round
         league_config_ruleset = LeagueConfigRuleset.from_ruleset(league_season_ruleset)
         engine = TieBreakerEngine(league_config_ruleset)
         # TODO
@@ -188,6 +187,8 @@ class GamedayModelWrapper:
         games_with_result = self._games_with_result
         games_with_result["gameinfo__status"] = games_with_result[STATUS]
         games_with_result = games_with_result[(games_with_result[STAGE].isin([QUALIIFY_ROUND, MAIN_ROUND]))]
+        if games_with_result.empty:
+            return qualify_round
         table = engine.rank_by_games(games_with_result)
         return table.sort_values(by=STANDING)
 
@@ -203,7 +204,9 @@ class GamedayModelWrapper:
             ).ruleset
         except LeagueSeasonConfig.DoesNotExist:
             # fallback use default league ruleset
-            league_season_ruleset = LeagueRuleset.objects.get(pk=2)
+            league_season_ruleset = LeagueRuleset.objects.first()
+            if league_season_ruleset is None:
+                return pd.DataFrame()
         league_config_ruleset = LeagueConfigRuleset.from_ruleset(league_season_ruleset)
         engine = FinalRankingEngine(league_config_ruleset)
         return engine.compute_final_table(self._games_with_result)
