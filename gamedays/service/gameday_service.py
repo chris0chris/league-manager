@@ -2,7 +2,11 @@ import logging
 from abc import ABC, abstractmethod
 
 import pandas as pd
+from django.conf import settings
+from django.urls import reverse
+from django.utils.html import format_html
 
+from gamedays.constants import LEAGUE_GAMEDAY_GAME_DETAIL
 from gamedays.service.placeholder_service import GamedayPlaceholderService
 
 logger = logging.getLogger(__name__)
@@ -299,8 +303,17 @@ class GamedayService:
 
     @staticmethod
     def _get_game_detail_button(gameday_pk: int, gameinfo_id: int):
-        return f"""<a href="game/{gameinfo_id}" class="btn btn-primary">Zum Spiel<i class="bi bi-chevron-right"></i></a>"""
+        domain = settings.SITEMAP_DOMAIN
+        protocol = 'https'
+        if 'localhost' in domain:
+            protocol = 'http'
+        game_path = reverse(LEAGUE_GAMEDAY_GAME_DETAIL, kwargs={'gameday_pk': gameday_pk, 'pk': gameinfo_id})
+        absolute_url = f"{protocol}://{domain}{game_path}"
 
+        return format_html(
+            """<a href="{}" target="_top" class="btn btn-primary">Zum Spiel<i class="bi bi-chevron-right"></i></a>""",
+            absolute_url
+        )
 
 class EmptySplitScoreTable:
     @staticmethod
