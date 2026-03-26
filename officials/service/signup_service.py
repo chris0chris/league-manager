@@ -164,8 +164,7 @@ class OfficialSignupService:
                 ).order_by('full_name').values('names'),
                 output_field=CharField()
             )
-            .order_by("date", "pk")
-        )
+        ).order_by("date", "pk")
         return {
             "gamedays": OfficialGamedaySignupSerializer(
                 all_gamedays.values(*OfficialGamedaySignupSerializer.ALL_FIELD_VALUES),
