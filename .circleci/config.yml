@@ -114,7 +114,7 @@ jobs:
             MYSQL_USER: root
             MYSQL_PWD: ""
           command: |
-            uv run pytest -n auto --nomigrations --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
+            uv run pytest -n 4 --nomigrations --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
       - store_test_results:
           path: test-reports
 
