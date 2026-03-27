@@ -61,7 +61,7 @@
                 <div class="col-12 col-md-3">
                     {% if info.url_pattern_official_signup %}
                     Gemeldete Offizielle: {% if not info.officials %} - {% endif %}<br/>
-                    <a href="{% url info.url_pattern_official_signup %}"
+                    <a href="{{ info.url_pattern_official_signup }}"
                        target="_blank" class="btn btn-secondary">Zur Anmeldung</a>
                     {% endif %}
                 </div>

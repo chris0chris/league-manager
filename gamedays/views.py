@@ -20,6 +20,7 @@ from django.views.generic import (
 )
 from formtools.wizard.views import SessionWizardView
 
+from league_manager.utils.url_service import UrlService
 from league_table.constants import LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE
 from league_table.models import LeagueSeasonConfig, OverrideOfficialGamedaySetting
 from league_table.service.leaguetable_repository import LeagueTableRepository
@@ -173,7 +174,7 @@ class GamedayDetailView(DetailView):
             url_pattern_official = OFFICIALS_PROFILE_LICENSE
             from officials.urls import OFFICIALS_SIGN_UP_LIST
 
-            url_pattern_official_signup = OFFICIALS_SIGN_UP_LIST
+            url_pattern_official_signup = UrlService.build_absolute_url(OFFICIALS_SIGN_UP_LIST)
         else:
             officials = []
             url_pattern_official = ''
