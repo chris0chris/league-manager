@@ -59,7 +59,8 @@ We strictly follow the **RED -> GREEN -> REFACTOR** cycle. All code changes MUST
 Before reporting a task as finished:
 1.  **Run Full Suite**: Ensure ALL tests (backend & frontend) are green.
 2.  **Linting**: Resolve all formatting and linting errors.
-3.  **Staging Validation**: Verify the fix on [stage.leaguesphere.app](https://stage.leaguesphere.app) and await user confirmation.
+3.  **Staging Validation**: Verify the fix on [stage.leaguesphere.app](https://stage.leaguesphere.app).
+4.  **Production Approval**: For version tags, manually approve the `hold_production` job in the CircleCI dashboard to complete the deployment.
 
 ## 🛠 Maintenance
 - Use `bump2version` (or `bump-my-version`) for version synchronization across backend and package.json files.
