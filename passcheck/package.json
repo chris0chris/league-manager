@@ -70,7 +70,7 @@
     "@vitest/coverage-v8": "^4.0.15",
     "@vitest/ui": "^4.0.15",
     "esbuild": "^0.27.0",
-    "eslint": "^10.0.0",
+    "eslint": "^10.1.0",
     "eslint-formatter-junit": "^9.0.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "jsdom": "^29.0.0",
