@@ -24,7 +24,7 @@ Staging provides a near-production environment for final validation before a rel
 - **Validation Requirement**: All changes MUST be validated on staging before merging into the `master` branch.
 
 ## 🚀 Release Management
-Releases are coordinated using the `deploy.sh` script in the `container/` directory.
+Releases are coordinated using the `deploy.sh` script in the `container/` directory and monitored via the CircleCI dashboard.
 
 ### Release Versions
 - **Major**: Breaking changes or major architectural shifts.
@@ -32,5 +32,8 @@ Releases are coordinated using the `deploy.sh` script in the `container/` direct
 - **Patch**: Bug fixes and minor improvements.
 
 ### Protocol
-- Run `./container/deploy.sh <type>` to tag and trigger the deployment pipeline.
-- Ensure all CI checks are GREEN before initiating a production release.
+1. **Trigger Release**: Run `./container/deploy.sh <type>` to tag and trigger the deployment pipeline.
+2. **Staging Automation**: CircleCI automatically builds, tests, and deploys to the staging environment.
+3. **Manual Approval (Required)**: For production deployments, you **MUST** visit the CircleCI dashboard and manually approve the `hold_production` job.
+4. **Production Deployment**: Once approved, the pipeline will proceed with the production release and database migrations.
+5. **Verify**: Ensure all CI checks are GREEN and the production site is functional.
