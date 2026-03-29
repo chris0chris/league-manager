@@ -263,8 +263,9 @@ class MoodleService:
 
     def login(self, username, password) -> int:
         self.moodle_api.confirm_user_auth(username, password)
-        user = self.moodle_api.get_user_info_by_username(username)
-        if user == -1:
+        try:
+            user = self.moodle_api.get_user_info_by_username(username)
+        except IndexError:
             user = self.moodle_api.get_user_info_by_email(username)
         return Official.objects.get(external_id=user.get_id()).pk
 

@@ -60,7 +60,7 @@ class TestLicenseCalculator:
         assert LicenseCalculator.get_license_name(LicenseStrategy.NO_LICENSE) == "-"
 
 
-class TestGameService(TestCase):
+class TestMoodleService(TestCase):
     @patch.object(MoodleApi, "update_user")
     @patch.object(MoodleApi, "get_participants_for_course")
     @patch.object(MoodleApi, "get_user_info_by_id")
@@ -454,7 +454,8 @@ class TestGameService(TestCase):
         assert updated_official.association is None
         assert (
             OfficialLicenseHistory.objects.filter(
-                official=updated_official, license=LicenseStrategy.F3_LICENSE
+                official=updated_official,
+                                                     license=LicenseStrategy.F3_LICENSE
             ).count()
             == 1
         )
@@ -670,3 +671,77 @@ class TestGameService(TestCase):
         assert result == [1, 5, 7]
 
         participants_mock.assert_called_once_with(57)
+
+    @patch.object(MoodleApi, 'confirm_user_auth')
+    @patch.object(MoodleApi, 'get_user_info_by_username')
+    @patch.object(Official.objects, 'get')
+    def test_moodle_login_with_username(self, official_mock: MagicMock, user_info_mock: MagicMock,
+                                        auth_mock: MagicMock):
+        official_mock.return_value.pk = 7
+        user_info_mock.return_value = ApiUserInfo([
+            {
+                'firstname': 'firstname',
+                'lastname': 'lastname',
+                'id': 7,
+                'customfields': [
+                    {
+                        'shortname': 'teamname',
+                        'value': 'team.description'
+                    },
+                    {
+                        'shortname': 'teamid',
+                        'value': 'team.pk'
+                    },
+                    {
+                        'shortname': 'Landesverband',
+                        'value': 'Ja.'
+                    },
+                    {
+                        'shortname': 'LandesverbandAuswahl',
+                        'value': 'Association name'
+                    },
+                ]
+            }])
+        moodle_service = MoodleService()
+        official_id = moodle_service.login('username', 'secret-password')
+        assert official_id == 7
+        auth_mock.assert_called_with('username', 'secret-password')
+        user_info_mock.assert_called_with('username')
+        pass
+
+    @patch.object(MoodleApi, 'confirm_user_auth')
+    @patch.object(MoodleApi, 'get_user_info_by_email')
+    @patch.object(MoodleApi, 'get_user_info_by_username')
+    @patch.object(Official.objects, 'get')
+    def test_moodle_login_with_email(self, official_mock: MagicMock, user_username_mock: MagicMock,
+                                     user_email_mock: MagicMock, _):
+        official_mock.return_value.pk = 5
+        user_username_mock.side_effect = IndexError('list index out of range')
+        user_email_mock.return_value = ApiUserInfo([
+            {
+                'firstname': 'firstname email',
+                'lastname': 'lastname email',
+                'id': 5,
+                'customfields': [
+                    {
+                        'shortname': 'teamname',
+                        'value': 'team.description email'
+                    },
+                    {
+                        'shortname': 'teamid',
+                        'value': 'team.pk email'
+                    },
+                    {
+                        'shortname': 'Landesverband',
+                        'value': 'Ja.'
+                    },
+                    {
+                        'shortname': 'LandesverbandAuswahl',
+                        'value': 'Association name email'
+                    },
+                ]
+            }])
+        moodle_service = MoodleService()
+        official_id = moodle_service.login('username@email.org', 'secret-password')
+        assert official_id == 5
+        user_email_mock.assert_called_with('username@email.org')

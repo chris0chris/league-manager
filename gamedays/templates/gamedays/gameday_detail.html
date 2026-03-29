@@ -4,19 +4,24 @@
 {% if not request.GET.isExtern %}
 <div class="d-flex justify-content-between align-items-center">
     <h1>{{ object.name }}</h1>
-    {% if user.is_staff %}
-    <span>
+    <div class="d-flex align-items-center">
+        <a href="{{info.url_pattern_liveticker}}" target="_blank" class="btn btn-success me-2">
+            <i class="bi bi-broadcast"></i> <span class="d-none d-md-inline">Liveticker</span>
+        </a>
+        {% if user.is_staff %}
         <a href="{% url 'league-gameday-update' pk=object.id%}" class="btn btn-primary me-2">
             <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Spieltag bearbeiten</span>
         </a>
         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-message="Bist du dir wirklich sicher, dass der Spieltag <strong>{{ object.name }}</strong> und alle dazugehörigen Spiele und Einträge <strong>dauerhaft gelöscht</strong> werden sollen?" data-url="{% url 'league-gameday-delete' pk=object.pk %}" title="Spieltag löschen">
             <i class="bi bi-trash"></i>
         </button>
-    </span>
-    {% endif %}
+        {% endif %}
+    </div>
 </div>
 {% endif %}
 <div class="row mb-1">
+    <div class="col">Liga: {{ object.league.name }}</div>
+</div><div class="row mb-1">
     <div class="col">Datum: {{ object.date | date:"l, j. F Y " }}</div>
 </div>
 <div class="row mb-1">
@@ -61,7 +66,7 @@
                 <div class="col-12 col-md-3">
                     {% if info.url_pattern_official_signup %}
                     Gemeldete Offizielle: {% if not info.officials %} - {% endif %}<br/>
-                    <a href="{% url info.url_pattern_official_signup %}"
+                    <a href="{{ info.url_pattern_official_signup }}"
                        target="_blank" class="btn btn-secondary">Zur Anmeldung</a>
                     {% endif %}
                 </div>
