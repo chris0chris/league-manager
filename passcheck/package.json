@@ -21,7 +21,7 @@
   },
   "overrides": {
     "postcss": "^8.5.3",
-    "nth-check": "^2.0.1",
+    "nth-check": "^3.0.0",
     "serialize-javascript": "^7.0.0",
     "debug": "^4.4.0",
     "xml2js": "^0.6.2",
