@@ -69,7 +69,7 @@
     "eslint-plugin-react-hooks": "7.0.1",
     "i18next-resources-for-ts": "2.0.2",
     "jsdom": "29.0.1",
-    "typescript": "5.9.3",
+    "typescript": "6.0.2",
     "typescript-eslint": "8.57.1",
     "vite": "8.0.0",
     "vitest": "4.1.0"
@@ -80,7 +80,7 @@
     "serialize-javascript": "7.0.5",
     "debug": "4.4.3",
     "xml2js": "0.6.2",
-    "typescript": "5.9.3",
+    "typescript": "6.0.2",
     "typescript-eslint": {
       "eslint": "^10.0.0"
     },
