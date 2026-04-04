@@ -1,0 +1,24 @@
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("gameday_designer", "0002_templateslot_stage_type"),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name="scheduletemplate",
+            name="sharing",
+            field=models.CharField(
+                choices=[
+                    ("PRIVATE", "Private"),
+                    ("ASSOCIATION", "Association"),
+                    ("GLOBAL", "Global"),
+                ],
+                default="GLOBAL",
+                max_length=20,
+            ),
+        ),
+    ]

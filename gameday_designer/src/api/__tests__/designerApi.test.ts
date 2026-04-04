@@ -458,32 +458,6 @@ describe('DesignerApi', () => {
       expect(result.name).toBe('Cloned Template');
     });
 
-    it('should clone a template with different association', async () => {
-      const cloneRequest: CloneTemplateRequest = {
-        new_name: 'Cloned Template',
-        association: 7,
-      };
-
-      const mockResponse: ScheduleTemplate = {
-        id: 6,
-        name: 'Cloned Template',
-        num_teams: 8,
-        num_fields: 2,
-        num_groups: 2,
-        game_duration: 15,
-        association: 7,
-        created_by: 1,
-        updated_by: 1,
-        created_at: '2024-01-07T00:00:00Z',
-        updated_at: '2024-01-07T00:00:00Z',
-      };
-
-      mockAxiosInstance.post.mockResolvedValue({ data: mockResponse });
-
-      const result = await designerApi.cloneTemplate(1, cloneRequest);
-
-      expect(result.association).toBe(7);
-    });
   });
 
   describe('previewTemplate', () => {

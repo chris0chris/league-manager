@@ -70,6 +70,8 @@ export interface ScheduleTemplate {
   num_fields: number;
   num_groups: number;
   game_duration: number;
+  description?: string;
+  sharing: 'PRIVATE' | 'ASSOCIATION' | 'GLOBAL';
   association: number | null;
   association_display?: string;
   created_by: number | null;
@@ -175,14 +177,6 @@ export interface GamedayListEntry extends GamedayMetadata {
   has_designer_state?: boolean;
 }
 
-import type { 
-  FlowNode, 
-  FlowEdge, 
-  FlowField, 
-  GlobalTeam, 
-  GlobalTeamGroup 
-} from './flowchart';
-
 /**
  * Full Gameday structure including tournament designer data.
  */
@@ -202,6 +196,10 @@ export interface Gameday extends GamedayMetadata {
 export interface ApplyTemplateRequest {
   gameday_id: number;
   team_mapping: { [key: string]: number };
+  start_time?: string;       // HH:MM format
+  game_duration?: number;
+  break_duration?: number;
+  num_fields?: number;
 }
 
 /**
@@ -209,7 +207,6 @@ export interface ApplyTemplateRequest {
  */
 export interface CloneTemplateRequest {
   new_name: string;
-  association?: number;
 }
 
 /**

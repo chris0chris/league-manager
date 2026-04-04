@@ -172,14 +172,17 @@ class GamedayModelWrapper:
         if not apps.is_installed("league_table"):
             return qualify_round
 
-        config = LeagueSeasonConfig.objects.filter(
-            league=self.gameday.league, season=self.gameday.season
-        ).first()
-        league_season_ruleset = (
-            config.ruleset if config else LeagueRuleset.objects.filter(name="DFFL Liga Regeln").first()
-        )
-        if league_season_ruleset is None:
-            return qualify_round
+        from league_table.models import LeagueSeasonConfig
+
+        try:
+            league_season_ruleset = LeagueSeasonConfig.objects.get(
+                league=self.gameday.league, season=self.gameday.season
+            ).ruleset
+        except LeagueSeasonConfig.DoesNotExist:
+            try:
+                league_season_ruleset = LeagueRuleset.objects.get(pk=2)
+            except LeagueRuleset.DoesNotExist:
+                return qualify_round
         league_config_ruleset = LeagueConfigRuleset.from_ruleset(league_season_ruleset)
         engine = TieBreakerEngine(league_config_ruleset)
         # TODO
@@ -203,10 +206,10 @@ class GamedayModelWrapper:
                 league=self.gameday.league, season=self.gameday.season
             ).ruleset
         except LeagueSeasonConfig.DoesNotExist:
-            # fallback use default league ruleset
-            league_season_ruleset = LeagueRuleset.objects.first()
-            if league_season_ruleset is None:
-                return pd.DataFrame()
+            try:
+                league_season_ruleset = LeagueRuleset.objects.get(pk=2)
+            except LeagueRuleset.DoesNotExist:
+                return None
         league_config_ruleset = LeagueConfigRuleset.from_ruleset(league_season_ruleset)
         engine = FinalRankingEngine(league_config_ruleset)
         return engine.compute_final_table(self._games_with_result)

@@ -26,6 +26,18 @@ class ScheduleTemplate(models.Model):
     num_groups = models.PositiveIntegerField(default=1)
     game_duration = models.PositiveIntegerField(default=70)  # minutes
 
+    SHARING_PRIVATE = "PRIVATE"
+    SHARING_ASSOCIATION = "ASSOCIATION"
+    SHARING_GLOBAL = "GLOBAL"
+    SHARING_CHOICES = [
+        (SHARING_PRIVATE, "Private"),
+        (SHARING_ASSOCIATION, "Association"),
+        (SHARING_GLOBAL, "Global"),
+    ]
+    sharing = models.CharField(
+        max_length=20, choices=SHARING_CHOICES, default=SHARING_ASSOCIATION
+    )
+
     # Association-specific or global
     association = models.ForeignKey(
         "gamedays.Association",

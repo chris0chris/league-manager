@@ -51,6 +51,8 @@ vi.mock('../../api/gamedayApi', () => ({
     listLeagues: vi.fn().mockResolvedValue([{ id: 1, name: 'League 1' }]),
     getDesignerState: vi.fn().mockResolvedValue(null),
     updateDesignerState: vi.fn().mockResolvedValue({}),
+    getTemplates: vi.fn().mockResolvedValue([]),
+    saveTemplate: vi.fn(),
   },
 }));
 

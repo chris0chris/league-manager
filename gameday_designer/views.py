@@ -7,14 +7,29 @@ Provides REST API for schedule template management.
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.db import IntegrityError
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 
 import logging
 
-from gamedays.models import Gameday
-from gameday_designer.models import ScheduleTemplate, TemplateApplication
+
+class TemplatePagination(PageNumberPagination):
+    page_size = 1000
+
+from gamedays.models import Gameday, Team
+from gameday_designer.models import (
+    ScheduleTemplate,
+    TemplateApplication,
+    TemplateSlot,
+    TemplateUpdateRule,
+    TemplateUpdateRuleTeam,
+)
 from gameday_designer.serializers import (
     ScheduleTemplateListSerializer,
     ScheduleTemplateDetailSerializer,
@@ -56,6 +71,15 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
 
     queryset = ScheduleTemplate.objects.all()
     permission_classes = [IsAssociationMemberOrStaff]
+    pagination_class = TemplatePagination
+
+    def get_permissions(self):
+        """
+        Return appropriate permissions based on action.
+        """
+        if self.action == "apply":
+            return [CanApplyTemplate()]
+        return super().get_permissions()
 
     def get_serializer_class(self):
         """
@@ -69,20 +93,67 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Filter queryset based on permissions and query parameters.
+        Filter templates based on sharing settings:
+        - GLOBAL templates (visible to everyone)
+        - ASSOCIATION templates (visible to all authenticated users, but restricted write)
+        - PRIVATE templates (visible to creator and staff)
+        Staff users see all templates.
 
-        Staff sees all templates.
-        Non-staff users see all templates (read-only for global).
-        Supports filtering by association.
+        Supports ?sharing=personal|association|global to narrow results further.
         """
-        queryset = ScheduleTemplate.objects.all()
+        user = self.request.user
 
-        # Filter by association if provided
-        association_id = self.request.query_params.get("association")
-        if association_id:
-            queryset = queryset.filter(association_id=association_id)
+        # Staff sees everything
+        if user and user.is_authenticated and user.is_staff:
+            queryset = ScheduleTemplate.objects.all().select_related(
+                "association", "created_by", "updated_by"
+            )
+        else:
+            # Base query: Global templates are ALWAYS visible
+            query = Q(sharing=ScheduleTemplate.SHARING_GLOBAL)
 
-        return queryset.select_related("association", "created_by", "updated_by")
+            # ASSOCIATION templates matching user's association
+            if user and user.is_authenticated:
+                from gamedays.models import UserProfile
+
+                try:
+                    profile = UserProfile.objects.get(user=user)
+                    user_association = profile.team.association if profile.team else None
+                except UserProfile.DoesNotExist:
+                    user_association = None
+
+                # Add private templates owned by this user
+                query |= Q(created_by=user, sharing=ScheduleTemplate.SHARING_PRIVATE)
+
+                # Add association templates (restricted to user's association)
+                if user_association:
+                    query |= Q(
+                        association=user_association, sharing=ScheduleTemplate.SHARING_ASSOCIATION
+                    )
+
+            # Support filtering by association if provided in query params
+            assoc_id = self.request.query_params.get("association")
+            if assoc_id:
+                query |= Q(association_id=assoc_id, sharing=ScheduleTemplate.SHARING_ASSOCIATION)
+
+            queryset = (
+                ScheduleTemplate.objects.filter(query)
+                .distinct()
+                .select_related("association", "created_by", "updated_by")
+            )
+
+        # Apply ?sharing= query param to narrow results
+        sharing_param = self.request.query_params.get("sharing")
+        if sharing_param == "personal":
+            queryset = queryset.filter(
+                sharing=ScheduleTemplate.SHARING_PRIVATE, created_by=user
+            )
+        elif sharing_param == "association":
+            queryset = queryset.filter(sharing=ScheduleTemplate.SHARING_ASSOCIATION)
+        elif sharing_param == "global":
+            queryset = queryset.filter(sharing=ScheduleTemplate.SHARING_GLOBAL)
+
+        return queryset
 
     def perform_create(self, serializer):
         """
@@ -139,6 +210,10 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
                 gameday=gameday,
                 team_mapping=team_mapping,
                 applied_by=request.user if request.user.is_authenticated else None,
+                start_time=serializer.validated_data['start_time'],
+                game_duration=serializer.validated_data['game_duration'],
+                break_duration=serializer.validated_data['break_duration'],
+                num_fields=serializer.validated_data['num_fields'],
             )
             result = service.apply()
 
@@ -151,10 +226,10 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_200_OK,
             )
 
-        except ApplicationError:
+        except ApplicationError as e:
             logging.exception("Error applying schedule template")
             return Response(
-                {"error": "Failed to apply template."},
+                {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -171,14 +246,16 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
         template = self.get_object()
 
         # Create new template with copied data
+        new_name = request.data.get("new_name") or f"Copy of {template.name}"
         cloned_template = ScheduleTemplate.objects.create(
-            name=f"Copy of {template.name}",
+            name=new_name,
             description=template.description,
             num_teams=template.num_teams,
             num_fields=template.num_fields,
             num_groups=template.num_groups,
             game_duration=template.game_duration,
-            association=template.association,
+            sharing=ScheduleTemplate.SHARING_PRIVATE,
+            association=None,
             created_by=request.user if request.user.is_authenticated else None,
             updated_by=request.user if request.user.is_authenticated else None,
         )
@@ -279,6 +356,74 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
 
         return Response({"slots": serializer.data}, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=["post"], url_path="save-from-designer")
+    def save_from_designer(self, request):
+        """
+        Create a new ScheduleTemplate from a designer GenericTemplate payload.
+
+        POST /templates/save-from-designer/
+        Body: GenericTemplate JSON (name, num_teams, num_fields, num_groups,
+              game_duration, sharing, slots[])
+
+        Returns:
+            201: {id, name, ...}
+            400: {error: str}
+        """
+        data = request.data
+
+        required = ["name", "num_teams", "num_fields", "num_groups", "slots"]
+        for field in required:
+            if field not in data:
+                return Response(
+                    {"error": f"Missing required field: {field}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        sharing = data.get("sharing", ScheduleTemplate.SHARING_PRIVATE)
+        if sharing not in (
+            ScheduleTemplate.SHARING_PRIVATE,
+            ScheduleTemplate.SHARING_ASSOCIATION,
+            ScheduleTemplate.SHARING_GLOBAL,
+        ):
+            sharing = ScheduleTemplate.SHARING_PRIVATE
+
+        template = ScheduleTemplate.objects.create(
+            name=data["name"],
+            description=data.get("description", ""),
+            num_teams=data["num_teams"],
+            num_fields=data["num_fields"],
+            num_groups=data["num_groups"],
+            game_duration=data.get("game_duration", 70),
+            sharing=sharing,
+            created_by=request.user if request.user.is_authenticated else None,
+            updated_by=request.user if request.user.is_authenticated else None,
+        )
+
+        for slot_data in data.get("slots", []):
+            TemplateSlot.objects.create(
+                template=template,
+                field=slot_data.get("field", 1),
+                slot_order=slot_data.get("slot_order", 1),
+                stage=slot_data.get("stage", ""),
+                stage_type=slot_data.get("stage_type", "STANDARD"),
+                standing=slot_data.get("standing", ""),
+                home_group=slot_data.get("home_group"),
+                home_team=slot_data.get("home_team"),
+                home_reference=slot_data.get("home_reference", ""),
+                away_group=slot_data.get("away_group"),
+                away_team=slot_data.get("away_team"),
+                away_reference=slot_data.get("away_reference", ""),
+                official_group=slot_data.get("official_group"),
+                official_team=slot_data.get("official_team"),
+                official_reference=slot_data.get("official_reference", ""),
+                break_after=slot_data.get("break_after", 0),
+            )
+
+        serializer = ScheduleTemplateDetailSerializer(
+            template, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     @action(detail=True, methods=["get"])
     def usage(self, request, pk=None):
         """
@@ -307,3 +452,120 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class TeamCreationView(APIView):
+    """
+    Create a single team by name.
+
+    POST /api/designer/teams/
+    Body: {"name": "Team Alpha"}
+
+    Returns:
+        201: {"id": 1, "name": "Team Alpha"} — team was created
+        200: {"id": 1, "name": "Team Alpha"} — team already existed
+        400: {"error": "..."} — validation error
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        name = request.data.get("name", "").strip()
+        if not name:
+            return Response(
+                {"error": "name is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            team, created = Team.objects.get_or_create(
+                name=name,
+                defaults={"description": name, "location": "placeholder"},
+            )
+        except IntegrityError:
+            return Response(
+                {"error": f"Could not create team '{name}': a team with similar name already exists."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        response_status = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response({"id": team.pk, "name": team.name}, status=response_status)
+
+
+class TeamBulkCreationView(APIView):
+    """
+    Create N auto-named teams.
+
+    POST /api/designer/teams/bulk/
+    Body: {"count": 6}
+
+    Returns:
+        201: [{"id": 1, "name": "Team 1"}, ...]
+        400: {"error": "..."} — validation error
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        count = request.data.get("count")
+        if count is None:
+            return Response(
+                {"error": "count is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            count = int(count)
+        except (TypeError, ValueError):
+            return Response(
+                {"error": "count must be an integer"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if count < 1:
+            return Response(
+                {"error": "count must be between 1 and 50"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if count > 50:
+            return Response(
+                {"error": "count must be between 1 and 50"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        teams = []
+        for i in range(1, count + 1):
+            name = f"Team {i}"
+            try:
+                team, _ = Team.objects.get_or_create(
+                    name=name,
+                    defaults={"description": name, "location": "placeholder"},
+                )
+            except IntegrityError:
+                return Response(
+                    {"error": f"Could not create team '{name}': a team with similar name already exists."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            teams.append({"id": team.pk, "name": team.name})
+
+        return Response(teams, status=status.HTTP_201_CREATED)
+
+
+class LeagueTeamsView(APIView):
+    """
+    GET /api/designer/gamedays/<gameday_id>/league-teams/
+    Returns all teams in the gameday's league+season via SeasonLeagueTeam.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, gameday_id):
+        from gamedays.models import SeasonLeagueTeam
+
+        gameday = get_object_or_404(Gameday, pk=gameday_id)
+        slt = SeasonLeagueTeam.objects.filter(
+            season=gameday.season, league=gameday.league
+        ).first()
+        teams = slt.teams.all() if slt else []
+        return Response([{"id": t.pk, "name": t.name} for t in teams])

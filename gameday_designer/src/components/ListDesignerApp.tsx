@@ -7,36 +7,40 @@ import ListCanvas from './ListCanvas';
 import { GameResultsTable, ScoreEdit } from './GameResultsTable';
 import { FlowToolbarProps } from './FlowToolbar';
 import GamedayMetadataAccordion from './GamedayMetadataAccordion';
-import TournamentGeneratorModal from './modals/TournamentGeneratorModal';
 import PublishConfirmationModal from './modals/PublishConfirmationModal';
 import DeleteGamedayConfirmModal from './modals/DeleteGamedayConfirmModal';
 import GameResultModal from './modals/GameResultModal';
 import TeamSelectionModal from './modals/TeamSelectionModal';
 import NotificationToast from './ui/NotificationToast';
 import LoadingOverlay from './ui/LoadingOverlay';
+import TemplateLibraryModal from './modals/TemplateLibraryModal';
 import { useGamedayContext } from '../context/GamedayContext';
 import { GameNode } from '../types/designer';
 import { isGameNode } from '../types/flowchart';
-import { exportToStructuredTemplate } from '../utils/flowchartExport';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { gamedayApi } from '../api/gamedayApi';
+import { getAllTemplates } from '../utils/tournamentTemplates';
+import type { GenericTemplate } from '../utils/templateMapper';
+import type { TournamentTemplate } from '../types/tournament';
 import './ListDesignerApp.css';
 
 const ListDesignerApp: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTypedTranslation(['ui', 'domain']);
-  const { 
-    setGamedayName, 
-    setToolbarProps, 
+  const {
+    setGamedayName,
+    setToolbarProps,
     setIsLocked: setContextLocked,
+    setOnOpenTemplates,
+    currentUserId,
     resultsMode,
     setResultsMode,
     gameResults,
     setGameResults,
-    setOnGenerateTournament
   } = useGamedayContext();
 
+  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
@@ -88,37 +92,16 @@ const ListDesignerApp: React.FC = () => {
     handleSwapTeams,
     handleDeleteNode,
     handleSelectNode,
-    handleGenerateTournament,
     handleAddGlobalTeam,
     handleAddGlobalTeamGroup,
     handleAddOfficialsGroup,
     handleAddFieldContainer,
     handleAddStage,
+    handleGenerateTournament,
+    handleSaveTemplate,
     dismissNotification,
     addNotification,
-    showTournamentModal,
-    setShowTournamentModal,
   } = handlers;
-
-  const handleExportTemplate = useCallback(() => {
-    const state = flowState.exportState();
-    const template = exportToStructuredTemplate(state);
-    const jsonString = JSON.stringify(template, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const filename = `template_${metadata?.name?.replace(/\s+/g, '_') || 'tournament'}.json`;
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    addNotification(t('ui:notification.autoSaveSuccess'), 'success', t('ui:notification.templateExported.title'));
-  }, [flowState, metadata?.name, addNotification, t]);
 
   const isLocked = metadata?.status ? metadata.status !== 'DRAFT' : false;
 
@@ -137,14 +120,10 @@ const ListDesignerApp: React.FC = () => {
     }
   }, [metadata?.name, isLocked, setGamedayName, setContextLocked]);
 
-  const showModalRef = useRef(setShowTournamentModal);
   useEffect(() => {
-    showModalRef.current = setShowTournamentModal;
-  }, [setShowTournamentModal]);
-
-  useEffect(() => {
-    setOnGenerateTournament(() => () => showModalRef.current(true));
-  }, [setOnGenerateTournament]);
+    setOnOpenTemplates(() => () => setShowTemplateLibrary(true));
+    return () => setOnOpenTemplates(null);
+  }, [setOnOpenTemplates]);
 
   const resultsModeHandler = useCallback(async () => {
     if (!id) return;
@@ -163,7 +142,6 @@ const ListDesignerApp: React.FC = () => {
     const newProps: FlowToolbarProps = {
       onImport: handleImport,
       onExport: handleExport,
-      onExportTemplate: handleExportTemplate,
       gamedayStatus: metadata?.status,
       canExport: ui?.canExport ?? false,
       onNotify: addNotification,
@@ -190,7 +168,7 @@ const ListDesignerApp: React.FC = () => {
       setToolbarProps(newProps);
     }
   }, [
-    handleImport, handleExport, handleExportTemplate, metadata?.status, ui?.canExport, 
+    handleImport, handleExport, metadata?.status, ui?.canExport,
     addNotification, undo, redo, canUndo, canRedo, stats, resultsModeHandler, 
     resultsMode, setToolbarProps
   ]);
@@ -453,7 +431,7 @@ const ListDesignerApp: React.FC = () => {
               onAddStageToGameEdge={handleAddStageToGameEdge}
               onRemoveEdgeFromSlot={handleRemoveEdgeFromSlot}
               onOpenResultModal={handleOpenResultModal}
-              onGenerateTournament={() => setShowTournamentModal(true)}
+              onOpenTemplates={() => setShowTemplateLibrary(true)}
               expandedFieldIds={ui?.expandedFieldIds || new Set()}
               expandedStageIds={ui?.expandedStageIds || new Set()}
               highlightedElement={ui?.highlightedElement}
@@ -469,14 +447,6 @@ const ListDesignerApp: React.FC = () => {
           )}
         </Stack>
       </div>
-
-      <TournamentGeneratorModal
-        show={showTournamentModal}
-        onHide={() => setShowTournamentModal(false)}
-        onGenerate={handleGenerateTournament}
-        teams={flowState.globalTeams}
-        hasData={ui?.hasData ?? false}
-      />
 
       <PublishConfirmationModal
         show={showPublishModal}
@@ -515,6 +485,42 @@ const ListDesignerApp: React.FC = () => {
         groupId={teamSelectionContext?.slotId ?? ''}
         onSelect={handleTeamSelected}
         title={teamSelectionContext?.side === 'official' ? t('ui:title.selectOfficial') : t('ui:title.selectTeam')}
+      />
+
+      <TemplateLibraryModal
+        show={showTemplateLibrary}
+        onHide={() => setShowTemplateLibrary(false)}
+        gamedayId={parseInt(id)}
+        currentUserId={currentUserId}
+        onScheduleApplied={() => { void loadData(); }}
+        onGenerateFromBuiltin={(config) => {
+          const template = getAllTemplates().find(t => t.id === config.templateId);
+          if (!template) return;
+          handleGenerateTournament({
+            template,
+            fieldCount: config.fieldCount,
+            startTime: config.startTime,
+            gameDuration: config.gameDuration,
+            breakDuration: config.breakDuration,
+            generateTeams: config.generateTeams ?? false,
+            autoAssignTeams: config.generateTeams ?? false,
+            selectedTeamIds: config.selectedTeamIds,
+          });
+        }}
+        onGenerateFromSavedTemplate={(templateId, config) => {
+          handleGenerateTournament({
+            template: null as unknown as TournamentTemplate,
+            fieldCount: 2,
+            startTime: config?.startTime ?? '09:00',
+            gameDuration: config?.gameDuration ?? 15,
+            breakDuration: config?.breakDuration ?? 0,
+            generateTeams: true,
+            autoAssignTeams: false,
+            customTemplate: { id: templateId } as GenericTemplate,
+          });
+        }}
+        onNotify={addNotification}
+        onSaveTemplate={handleSaveTemplate}
       />
 
       <NotificationToast

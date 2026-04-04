@@ -503,6 +503,83 @@ class TestApplyTemplateRequestSerializer:
         assert not serializer.is_valid()
         assert "team_mapping" in serializer.errors
 
+    def test_optional_override_fields_are_accepted(self, template, gameday, api_factory):
+        """ApplyTemplateRequestSerializer accepts optional override fields."""
+        from datetime import time
+        from gameday_designer.serializers import ApplyTemplateRequestSerializer
+
+        team1 = Team.objects.create(
+            name="Team A", description="Team A", association=template.association
+        )
+        team2 = Team.objects.create(
+            name="Team B", description="Team B", association=template.association
+        )
+
+        data = {
+            "gameday_id": gameday.pk,
+            "team_mapping": {"0_0": team1.pk, "0_1": team2.pk},
+            "start_time": "14:00:00",
+            "game_duration": 45,
+            "break_duration": 10,
+            "num_fields": 1,
+        }
+
+        request = api_factory.post("/")
+        serializer = ApplyTemplateRequestSerializer(
+            data=data, context={"request": request}
+        )
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data["start_time"] == time(14, 0)
+        assert serializer.validated_data["game_duration"] == 45
+        assert serializer.validated_data["break_duration"] == 10
+        assert serializer.validated_data["num_fields"] == 1
+
+    def test_optional_override_fields_default_to_none(self, template, gameday, api_factory):
+        """ApplyTemplateRequestSerializer defaults optional fields to None when omitted."""
+        from gameday_designer.serializers import ApplyTemplateRequestSerializer
+
+        team1 = Team.objects.create(
+            name="Team C", description="Team C", association=template.association
+        )
+        team2 = Team.objects.create(
+            name="Team D", description="Team D", association=template.association
+        )
+
+        data = {
+            "gameday_id": gameday.pk,
+            "team_mapping": {"0_0": team1.pk, "0_1": team2.pk},
+        }
+
+        request = api_factory.post("/")
+        serializer = ApplyTemplateRequestSerializer(
+            data=data, context={"request": request}
+        )
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data["start_time"] is None
+        assert serializer.validated_data["game_duration"] is None
+        assert serializer.validated_data["break_duration"] is None
+        assert serializer.validated_data["num_fields"] is None
+
+    def test_override_fields_reject_invalid_values(self, gameday, api_factory):
+        """ApplyTemplateRequestSerializer rejects invalid override values."""
+        from gameday_designer.serializers import ApplyTemplateRequestSerializer
+
+        data = {
+            "gameday_id": gameday.pk,
+            "team_mapping": {"0_0": 1},
+            "game_duration": 0,  # min_value=1, should fail
+        }
+
+        request = api_factory.post("/")
+        serializer = ApplyTemplateRequestSerializer(
+            data=data, context={"request": request}
+        )
+
+        assert not serializer.is_valid()
+        assert "game_duration" in serializer.errors
+
 
 @pytest.mark.django_db
 class TestTemplateApplicationSerializer:

@@ -36,7 +36,9 @@
     "backToDashboard": "Zurück zum Dashboard",
     "addOfficials": "Offizielle hinzufügen",
     "saveResults": "Ergebnisse speichern",
-    "saving": "Speichere..."
+    "saving": "Speichere...",
+    "saveTemplate": "Vorlage speichern",
+    "saveAsTemplate": "Als Vorlage speichern"
   },
   "label": {
     "dashboard": "Dashboard",
@@ -96,12 +98,34 @@
     "fh": "1H",
     "sh": "2H",
     "total": "Gesamt",
-    "fieldName": "Feldname"
+    "fieldName": "Feldname",
+    "templateName": "Name der Vorlage",
+    "description": "Beschreibung",
+    "sharingLevel": "Freigabe-Ebene",
+    "useExistingTeams": "Vorhandene Teams verwenden",
+    "generatePlaceholders": "Platzhalter generieren",
+    "autoAssignTeams": "Teams automatisch zuweisen",
+    "builtInTemplates": "Vordefinierte Vorlagen",
+    "customTemplates": "Eigene Vorlagen"
   },
   "title": {
     "enterGameResult": "Ergebnis eingeben",
     "selectTeam": "Team auswählen",
-    "selectOfficial": "Schiedsrichter auswählen"
+    "selectOfficial": "Schiedsrichter auswählen",
+    "saveAsTemplate": "Als Vorlage speichern",
+    "saveCurrentConfig": "Aktuelle Konfiguration speichern",
+    "generateTournament": "Turnier generieren",
+    "selectTemplate": "Vorlage wählen",
+    "configureTournament": "Turnier konfigurieren",
+    "teamAssignment": "Team-Zuweisung"
+  },
+  "sharing": {
+    "private": "Privat (Nur ich)",
+    "association": "Verband (Alle Mitglieder)",
+    "global": "Global (Alle Benutzer)",
+    "privateNote": "Diese Vorlage ist nur für Sie sichtbar.",
+    "associationNote": "Alle Mitglieder Ihres Verbandes können diese Vorlage sehen und nutzen.",
+    "globalNote": "Jeder Benutzer des Systems kann diese Vorlage sehen (nur Admins)."
   },
   "placeholder": {
     "standing": "z.B. Gruppe 1, HF1, P1",
@@ -111,7 +135,9 @@
     "selectLeague": "Liga wählen",
     "fieldName": "Neuer Feldname...",
     "match": "z.B. HF1, Finale",
-    "teamOfficials": "z.B. Team-Schiedsrichter"
+    "teamOfficials": "z.B. Team-Schiedsrichter",
+    "templateName": "z.B. 6 Teams - 2 Felder - MyFormat",
+    "templateDescription": "Optionale Beschreibung des Turnierformats..."
   },
   "message": {
     "noTeamsYet": "Noch keine Teams",
@@ -139,7 +165,16 @@
     "enterBothHalves": "Spiel {{id}}: Geben Sie beide Halbzeiten für {{team}} ein",
     "loading": "Lade...",
     "prerequisitesMissing": "Bitte stellen Sie sicher, dass mindestens eine Saison und eine Liga in der Datenbank vorhanden sind, bevor Sie einen Spieltag erstellen.",
-    "defaultGamedayName": "Spieltag am {{date}}"
+    "defaultGamedayName": "Spieltag am {{date}}",
+    "saveConfigDescription": "Sie können den aktuellen Aufbau als neue Vorlage speichern, um ihn für zukünftige Spieltage wiederzuverwenden.",
+    "autoAssignNote": "Teams werden basierend auf ihrer Reihenfolge im Pool zugewiesen.",
+    "manualAssignNote": "Platzhalter werden erstellt, Sie können Teams später manuell zuweisen.",
+    "autoClearTitle": "Bestehender Spielplan",
+    "autoClearWarning": "Das Generieren eines neuen Turniers überschreibt den aktuellen Spielplan."
+  },
+  "error": {
+    "nameRequired": "Name ist erforderlich",
+    "gamedayNotFound": "Spieltag nicht gefunden"
   },
   "tooltip": {
     "addTeamToGroup": "Ein neues Team zu dieser Gruppe hinzufügen",
@@ -152,7 +187,7 @@
     "moveTeamUp": "Dieses Team um eine Position nach oben verschieben",
     "moveTeamDown": "Dieses Team um eine Position nach unten verschieben",
     "deleteTeam": "Dieses Team dauerhaft aus dem Pool entfernen",
-    "teamColor": "Das Farbabzeichen für dieses Team ändern",
+    "teamColor": "Das Farbadge für dieses Team ändern",
     "editFieldName": "Klicken, um den Namen dieses Spielfelds zu bearbeiten",
     "deleteField": "Dieses Feld und alle darin enthaltenen Phasen und Spiele dauerhaft entfernen",
     "fieldColor": "Die Akzentfarbe für dieses Feld ändern",

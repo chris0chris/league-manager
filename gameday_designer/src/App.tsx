@@ -24,13 +24,12 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
  */
 const App: React.FC = () => {
   const basename = import.meta.env.DEV ? '/' : '/gamedays/gameday/design';
-  
-  // Note: These will be provided by context or local state management in a real refactor,
-  // but for now we'll keep them consistent with the user's request.
-  
+  const mountEl = document.getElementById('gameday-designer');
+  const currentUserId = parseInt(mountEl?.dataset.userId ?? '0', 10);
+
   return (
     <BrowserRouter basename={basename} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <GamedayProvider>
+      <GamedayProvider currentUserId={currentUserId}>
         <Routes>
           <Route path="/" element={<MainLayout />}>
             <Route index element={<GamedayDashboard />} />

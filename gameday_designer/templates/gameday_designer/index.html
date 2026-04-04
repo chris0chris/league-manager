@@ -57,7 +57,7 @@
 {% endblock %}
 
 {% block content %}
-    <div id="gameday-designer"></div>
+    <div id="gameday-designer" data-user-id="{{ request.user.id }}"></div>
 {% endblock %}
 
 {% block extra_js %}

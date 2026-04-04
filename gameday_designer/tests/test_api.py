@@ -29,7 +29,7 @@ class TestTemplateListEndpoint:
         response = api_client.get("/api/designer/templates/")
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) >= 2  # At least our two fixtures
+        assert len(response.data["results"]) >= 2  # At least our two fixtures
 
     def test_list_returns_lightweight_serializer(self, api_client, template_with_slots):
         """List endpoint uses lightweight serializer (no nested data)."""
@@ -37,7 +37,7 @@ class TestTemplateListEndpoint:
 
         assert response.status_code == status.HTTP_200_OK
         template_data = next(
-            (t for t in response.data if t["id"] == template_with_slots.pk), None
+            (t for t in response.data["results"] if t["id"] == template_with_slots.pk), None
         )
 
         assert template_data is not None
@@ -54,7 +54,7 @@ class TestTemplateListEndpoint:
         response = api_client.get("/api/designer/templates/")
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) >= 2
+        assert len(response.data["results"]) >= 2
 
     def test_filtering_by_association(self, api_client, template, global_template):
         """Can filter templates by association."""
@@ -64,9 +64,42 @@ class TestTemplateListEndpoint:
 
         assert response.status_code == status.HTTP_200_OK
         # Should only return templates for that association
-        for t in response.data:
+        for t in response.data["results"]:
             if t["association"] is not None:
                 assert t["association"] == template.association.pk
+
+    def test_list_filters_by_sharing_personal(self, api_client, staff_user, association, db):
+        """sharing=personal returns only PRIVATE templates created by the requesting user."""
+        other_user = User.objects.create_user(username="other_sharing", password="pw")
+        ScheduleTemplate.objects.create(
+            name="Mine", num_teams=6, num_fields=2, num_groups=1, game_duration=70,
+            sharing=ScheduleTemplate.SHARING_PRIVATE, created_by=staff_user, updated_by=staff_user,
+        )
+        ScheduleTemplate.objects.create(
+            name="Theirs", num_teams=6, num_fields=2, num_groups=1, game_duration=70,
+            sharing=ScheduleTemplate.SHARING_PRIVATE, created_by=other_user, updated_by=other_user,
+        )
+        api_client.force_authenticate(user=staff_user)
+        response = api_client.get("/api/designer/templates/?sharing=personal")
+        assert response.status_code == 200
+        names = [t["name"] for t in response.data["results"]]
+        assert "Mine" in names
+        assert "Theirs" not in names
+
+    def test_list_filters_by_sharing_global(self, api_client, staff_user, db):
+        """sharing=global returns all GLOBAL templates regardless of creator."""
+        ScheduleTemplate.objects.create(
+            name="Global One", num_teams=6, num_fields=2, num_groups=1, game_duration=70,
+            sharing=ScheduleTemplate.SHARING_GLOBAL, created_by=staff_user, updated_by=staff_user,
+        )
+        api_client.force_authenticate(user=staff_user)
+        response = api_client.get("/api/designer/templates/?sharing=global")
+        assert response.status_code == 200
+        names = [t["name"] for t in response.data["results"]]
+        assert "Global One" in names
+        # No PRIVATE or ASSOCIATION templates should appear
+        for t in response.data["results"]:
+            assert t["sharing"] == ScheduleTemplate.SHARING_GLOBAL
 
 
 @pytest.mark.django_db
@@ -569,6 +602,39 @@ class TestTemplateCloneEndpoint:
         )
 
         assert response.status_code == status.HTTP_201_CREATED
+
+    def test_clone_uses_new_name_from_request(self, api_client, staff_user, template):
+        """Clone uses new_name from request body instead of hardcoded prefix."""
+        api_client.force_authenticate(user=staff_user)
+        response = api_client.post(
+            f"/api/designer/templates/{template.pk}/clone/",
+            data={"new_name": "My Custom Clone"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["name"] == "My Custom Clone"
+
+    def test_clone_always_private_and_no_association(self, api_client, staff_user, template):
+        """Clone is always sharing=PRIVATE with association=None regardless of source."""
+        api_client.force_authenticate(user=staff_user)
+        response = api_client.post(
+            f"/api/designer/templates/{template.pk}/clone/",
+            format="json",
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        cloned = ScheduleTemplate.objects.get(pk=response.data["id"])
+        assert cloned.sharing == ScheduleTemplate.SHARING_PRIVATE
+        assert cloned.association is None
+
+    def test_clone_sets_created_by_to_requesting_user(self, api_client, staff_user, template):
+        """Clone's created_by is always the requesting user."""
+        api_client.force_authenticate(user=staff_user)
+        response = api_client.post(
+            f"/api/designer/templates/{template.pk}/clone/", format="json"
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        cloned = ScheduleTemplate.objects.get(pk=response.data["id"])
+        assert cloned.created_by == staff_user
 
 
 @pytest.mark.django_db

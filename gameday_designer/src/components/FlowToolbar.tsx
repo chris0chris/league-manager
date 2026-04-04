@@ -24,8 +24,6 @@ export interface FlowToolbarProps {
   onImport: (json: unknown) => void;
   /** Callback to export to JSON */
   onExport: () => void;
-  /** Callback to export structured template */
-  onExportTemplate?: () => void;
   /** Current gameday status */
   gamedayStatus?: string;
   /** Callback for notifications */
@@ -54,7 +52,6 @@ export interface FlowToolbarProps {
 const FlowToolbar: React.FC<FlowToolbarProps> = ({
   onImport,
   onExport,
-  onExportTemplate,
   gamedayStatus = 'DRAFT',
   onNotify,
   onUndo,
@@ -152,16 +149,6 @@ const FlowToolbar: React.FC<FlowToolbarProps> = ({
                 <i className={`bi ${ICONS.EXPORT} me-2`}></i>
                 {t('ui:button.exportSchedule')}
               </Dropdown.Item>
-              {onExportTemplate && (
-                <Dropdown.Item 
-                  onClick={onExportTemplate} 
-                  data-testid="export-template-button"
-                  title={t('ui:tooltip.exportTemplateToJson')}
-                >
-                  <i className="bi bi-file-earmark-code me-2"></i>
-                  {t('ui:button.exportTemplate')}
-                </Dropdown.Item>
-              )}
             </Dropdown.Menu>
           </Dropdown>
         </ButtonGroup>

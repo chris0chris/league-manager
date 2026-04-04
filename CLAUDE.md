@@ -4,6 +4,8 @@ This file provides guidance specifically to **Claude Code** (claude.ai/code) whe
 
 > **CRITICAL:** For project-wide standards, build/test commands, and deployment safety policies, you MUST refer to the **[LeagueSphere Contributor Guide](docs/guides/contributor-guide.md)**.
 
+> **TESTING SETUP:** Before running or skipping any backend tests, READ the contributor guide's "Build, Lint & Test Commands" section. Backend tests require an **LXC test DB** — spin it up with `./container/spinup_test_db.sh` and set `MYSQL_HOST` from the LXC instance. Do NOT assume the DB is unavailable without checking. Frontend tests run with `npm run test:run` inside the app directory (e.g., `gameday_designer/`) and need no external DB.
+
 ## 🤖 Claude-Specific Workflow
 
 ### Agent-Based Development
