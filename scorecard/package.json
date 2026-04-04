@@ -1,6 +1,6 @@
 {
   "name": "scorecard",
-  "version": "3.7.0",
+  "version": "3.8.0",
   "private": true,
   "main": "index.js",
   "directories": {
@@ -23,7 +23,7 @@
   },
   "overrides": {
     "postcss": "^8.5.3",
-    "nth-check": "^2.0.1",
+    "nth-check": "^3.0.0",
     "serialize-javascript": "^7.0.0",
     "http-proxy-middleware": "^3.0.0"
   },
@@ -36,7 +36,7 @@
     "@vitejs/plugin-react": "^6.0.0",
     "@vitest/coverage-v8": "^4.0.15",
     "@vitest/ui": "^4.0.15",
-    "esbuild": "^0.27.0",
+    "esbuild": "^0.28.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-formatter-junit": "^9.0.1",
