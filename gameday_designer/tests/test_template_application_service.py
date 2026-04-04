@@ -710,3 +710,239 @@ class TestTemplateApplicationServiceResult:
         assert result.success is True
         assert result.gameinfos_created == 1
         assert isinstance(result.message, str)
+
+
+@pytest.mark.django_db
+class TestTemplateApplicationServiceOverrides:
+    """Test override parameters: start_time, game_duration, break_duration, num_fields."""
+
+    def _make_template_and_gameday(self, num_fields=1, format_str="4_1"):
+        """Helper: create a minimal template + gameday + teams + mapping."""
+        template = ScheduleTemplate.objects.create(
+            name="Override Test",
+            num_teams=4,
+            num_fields=num_fields,
+            num_groups=1,
+            game_duration=70,
+        )
+        for i in range(num_fields):
+            field_num = i + 1
+            TemplateSlot.objects.create(
+                template=template,
+                field=field_num,
+                slot_order=0,
+                stage="Vorrunde",
+                standing="Round Robin",
+                home_group=0,
+                home_team=0,
+                away_group=0,
+                away_team=1,
+                official_group=0,
+                official_team=2,
+            )
+            TemplateSlot.objects.create(
+                template=template,
+                field=field_num,
+                slot_order=1,
+                stage="Vorrunde",
+                standing="Round Robin",
+                home_group=0,
+                home_team=2,
+                away_group=0,
+                away_team=3,
+                official_group=0,
+                official_team=0,
+            )
+
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
+        gameday = Gameday.objects.create(
+            name="Test Gameday",
+            season=season,
+            league=league,
+            date=datetime.date.today(),
+            start=datetime.time(10, 0),
+            format=format_str,
+            author=user,
+        )
+        teams = [
+            Team.objects.create(name=f"Team {i}", description=f"Desc {i}", location="City")
+            for i in range(4)
+        ]
+        team_mapping = {f"0_{i}": teams[i].pk for i in range(4)}
+        return template, gameday, team_mapping
+
+    def test_start_time_override_used_instead_of_gameday_start(self):
+        """Service uses start_time override instead of gameday.start."""
+        template, gameday, team_mapping = self._make_template_and_gameday()
+        # gameday.start is 10:00; override to 14:00
+        override_start = datetime.time(14, 0)
+
+        service = TemplateApplicationService(
+            template, gameday, team_mapping, start_time=override_start
+        )
+        service.apply()
+
+        gameinfos = Gameinfo.objects.filter(gameday=gameday).order_by("scheduled")
+        # First game should start at 14:00, not 10:00
+        assert gameinfos[0].scheduled == datetime.time(14, 0)
+
+    def test_game_duration_override_used_instead_of_template_game_duration(self):
+        """Service uses game_duration override instead of template.game_duration."""
+        template, gameday, team_mapping = self._make_template_and_gameday()
+        # template.game_duration is 70; override to 30
+        override_duration = 30
+
+        service = TemplateApplicationService(
+            template, gameday, team_mapping, game_duration=override_duration
+        )
+        service.apply()
+
+        gameinfos = Gameinfo.objects.filter(gameday=gameday).order_by("scheduled")
+        # First game at 10:00; second game at 10:00 + 30min = 10:30 (no break_after set)
+        assert gameinfos[0].scheduled == datetime.time(10, 0)
+        assert gameinfos[1].scheduled == datetime.time(10, 30)
+
+    def test_break_duration_override_adds_extra_break(self):
+        """Service applies break_duration additively to each slot's break_after."""
+        template = ScheduleTemplate.objects.create(
+            name="Break Override Test",
+            num_teams=4,
+            num_fields=1,
+            num_groups=1,
+            game_duration=70,
+        )
+        # First slot has break_after=10; second slot has break_after=0
+        TemplateSlot.objects.create(
+            template=template,
+            field=1,
+            slot_order=0,
+            stage="Vorrunde",
+            standing="Round Robin",
+            home_group=0,
+            home_team=0,
+            away_group=0,
+            away_team=1,
+            official_group=0,
+            official_team=2,
+            break_after=10,
+        )
+        TemplateSlot.objects.create(
+            template=template,
+            field=1,
+            slot_order=1,
+            stage="Vorrunde",
+            standing="Round Robin",
+            home_group=0,
+            home_team=2,
+            away_group=0,
+            away_team=3,
+            official_group=0,
+            official_team=0,
+            break_after=0,
+        )
+
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
+        gameday = Gameday.objects.create(
+            name="Test Gameday",
+            season=season,
+            league=league,
+            date=datetime.date.today(),
+            start=datetime.time(10, 0),
+            format="4_1",
+            author=user,
+        )
+        teams = [
+            Team.objects.create(name=f"Team {i}", description=f"Desc {i}", location="City")
+            for i in range(4)
+        ]
+        team_mapping = {f"0_{i}": teams[i].pk for i in range(4)}
+
+        # break_duration=5 → first slot effective break = 10+5=15, game_duration=70
+        # Game 1 at 10:00; Game 2 at 10:00 + 70 + 15 = 11:25
+        service = TemplateApplicationService(
+            template, gameday, team_mapping, break_duration=5
+        )
+        service.apply()
+
+        gameinfos = Gameinfo.objects.filter(gameday=gameday).order_by("scheduled")
+        assert gameinfos[0].scheduled == datetime.time(10, 0)
+        assert gameinfos[1].scheduled == datetime.time(11, 25)
+
+    def test_num_fields_override_redistributes_slots_round_robin(self):
+        """Service redistributes slots round-robin for num_fields override."""
+        # Template has 2 fields × 2 slots = 4 slots total
+        template, gameday, team_mapping = self._make_template_and_gameday(
+            num_fields=2, format_str="4_2"
+        )
+
+        # Override to 1 field — all 4 slots should be assigned to field 1
+        service = TemplateApplicationService(
+            template, gameday, team_mapping, num_fields=1
+        )
+        service.apply()
+
+        gameinfos = Gameinfo.objects.filter(gameday=gameday)
+        assert gameinfos.count() == 4
+        for gi in gameinfos:
+            assert gi.field == 1
+
+    def test_num_fields_override_two_fields_assigns_alternating(self):
+        """Service assigns slots 0,2 to field 1 and slots 1,3 to field 2 with num_fields=2."""
+        # Template has 1 field × 4 slots; redistribute to 2 fields
+        template = ScheduleTemplate.objects.create(
+            name="Redistribute Test",
+            num_teams=4,
+            num_fields=1,
+            num_groups=1,
+            game_duration=70,
+        )
+        for i in range(4):
+            TemplateSlot.objects.create(
+                template=template,
+                field=1,
+                slot_order=i,
+                stage="Vorrunde",
+                standing="Round Robin",
+                home_group=0,
+                home_team=i % 4,
+                away_group=0,
+                away_team=(i + 1) % 4,
+                official_group=0,
+                official_team=(i + 2) % 4,
+            )
+
+        season = Season.objects.create(name="2025")
+        league = League.objects.create(name="Test League")
+        user = User.objects.create(username="test_user")
+        gameday = Gameday.objects.create(
+            name="Test Gameday",
+            season=season,
+            league=league,
+            date=datetime.date.today(),
+            start=datetime.time(10, 0),
+            format="4_2",
+            author=user,
+        )
+        teams = [
+            Team.objects.create(name=f"Team {i}", description=f"Desc {i}", location="City")
+            for i in range(4)
+        ]
+        team_mapping = {f"0_{i}": teams[i].pk for i in range(4)}
+
+        service = TemplateApplicationService(
+            template, gameday, team_mapping, num_fields=2
+        )
+        service.apply()
+
+        gameinfos = Gameinfo.objects.filter(gameday=gameday)
+        assert gameinfos.count() == 4
+        # Round-robin: slot 0 → field 1, slot 1 → field 2, slot 2 → field 1, slot 3 → field 2
+        field_counts = {}
+        for gi in gameinfos:
+            field_counts[gi.field] = field_counts.get(gi.field, 0) + 1
+        assert field_counts.get(1, 0) == 2
+        assert field_counts.get(2, 0) == 2

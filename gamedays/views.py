@@ -187,28 +187,29 @@ class GamedayDetailView(DetailView):
             final_table = TableContextBuilder.build(final_table)
             season_slug = gameday.season.slug
             league_slug = gameday.league.slug
-            context["league_table_url"] = reverse(
+            if season_slug and league_slug:
+                context["league_table_url"] = reverse(
                     LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE,
                     kwargs={"season": season_slug, "league": league_slug},
                 )
-            try:
-                league_season_config = LeagueTableRepository.get_league_season_config_by_slug(league_slug, season_slug)
                 try:
-                    # if there is an override then check if officials are allowed
-                    if not league_season_config.overrideofficialgamedaysetting_set.get(gameday=gameday).allow_officials_to_register:
-                        officials = []
-                        url_pattern_official = ''
-                        url_pattern_official_signup = ''
-                except OverrideOfficialGamedaySetting.DoesNotExist:
-                    # there is obviously no override so use default league configs
-                    if not league_season_config.allow_officials_to_register:
-                        officials = []
-                        url_pattern_official = ""
-                        url_pattern_official_signup = ""
-            except LeagueSeasonConfig.DoesNotExist:
-                officials = []
-                url_pattern_official = ""
-                url_pattern_official_signup = ""
+                    league_season_config = LeagueTableRepository.get_league_season_config_by_slug(league_slug, season_slug)
+                    try:
+                        # if there is an override then check if officials are allowed
+                        if not league_season_config.overrideofficialgamedaysetting_set.get(gameday=gameday).allow_officials_to_register:
+                            officials = []
+                            url_pattern_official = ''
+                            url_pattern_official_signup = ''
+                    except OverrideOfficialGamedaySetting.DoesNotExist:
+                        # there is obviously no override so use default league configs
+                        if not league_season_config.allow_officials_to_register:
+                            officials = []
+                            url_pattern_official = ""
+                            url_pattern_official_signup = ""
+                except LeagueSeasonConfig.DoesNotExist:
+                    officials = []
+                    url_pattern_official = ""
+                    url_pattern_official_signup = ""
 
         else:
             qualify_table = qualify_table.to_html(**render_configs)

@@ -36,7 +36,9 @@
     "backToDashboard": "Back to Dashboard",
     "addOfficials": "Add Officials",
     "saveResults": "Save Results",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "saveTemplate": "Save Template",
+    "saveAsTemplate": "Save as Template"
   },
   "label": {
     "dashboard": "Dashboard",
@@ -96,12 +98,34 @@
     "fh": "1H",
     "sh": "2H",
     "total": "Total",
-    "fieldName": "Field Name"
+    "fieldName": "Field Name",
+    "templateName": "Template Name",
+    "description": "Description",
+    "sharingLevel": "Sharing Level",
+    "useExistingTeams": "Use existing teams",
+    "generatePlaceholders": "Generate teams automatically",
+    "autoAssignTeams": "Auto-assign teams",
+    "builtInTemplates": "Built-in Templates",
+    "customTemplates": "Custom Templates"
   },
   "title": {
     "enterGameResult": "Enter Game Result",
     "selectTeam": "Select Team",
-    "selectOfficial": "Select Official"
+    "selectOfficial": "Select Official",
+    "saveAsTemplate": "Save as Template",
+    "saveCurrentConfig": "Save Current Configuration",
+    "generateTournament": "Generate Tournament",
+    "selectTemplate": "Select Template",
+    "configureTournament": "Configure Tournament",
+    "teamAssignment": "Team Assignment"
+  },
+  "sharing": {
+    "private": "Private (Only me)",
+    "association": "Association (All members)",
+    "global": "Global (All users)",
+    "privateNote": "This template is only visible to you.",
+    "associationNote": "All members of your association can see and use this template.",
+    "globalNote": "Every user of the system can see this template (admins only)."
   },
   "placeholder": {
     "standing": "e.g., Group 1, HF1, P1",
@@ -111,7 +135,9 @@
     "selectLeague": "Select League",
     "fieldName": "New field name...",
     "match": "e.g., HF1, Finale",
-    "teamOfficials": "e.g., Team Officials"
+    "teamOfficials": "e.g., Team Officials",
+    "templateName": "e.g., 6 Teams - 2 Fields - MyFormat",
+    "templateDescription": "Optional description of the tournament format..."
   },
   "message": {
     "noTeamsYet": "No teams yet",
@@ -139,7 +165,16 @@
     "enterBothHalves": "Game {{id}}: Enter both halves for {{team}}",
     "loading": "Loading...",
     "prerequisitesMissing": "Please ensure at least one Season and one League exist in the database before creating a gameday.",
-    "defaultGamedayName": "Gameday on {{date}}"
+    "defaultGamedayName": "Gameday on {{date}}",
+    "saveConfigDescription": "You can save the current setup as a new template to reuse it for future gamedays.",
+    "autoAssignNote": "Teams will be assigned based on their order in the pool.",
+    "manualAssignNote": "Placeholders will be created, you can assign teams manually later.",
+    "autoClearTitle": "Existing Schedule",
+    "autoClearWarning": "Generating a new tournament will overwrite the current schedule."
+  },
+  "error": {
+    "nameRequired": "Name is required",
+    "gamedayNotFound": "Gameday not found"
   },
   "tooltip": {
     "addTeamToGroup": "Add a new team to this group",

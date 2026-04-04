@@ -46,7 +46,7 @@ export interface ListCanvasProps {
   onAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) => void;
   onRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
   onOpenResultModal: (gameId: string) => void;
-  onGenerateTournament?: () => void;
+  onOpenTemplates?: () => void;
   expandedFieldIds: Set<string>;
   expandedStageIds: Set<string>;
   highlightedElement?: HighlightedElement | null;
@@ -91,7 +91,7 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
     onAddStageToGameEdge,
     onRemoveEdgeFromSlot,
     onOpenResultModal,
-    onGenerateTournament,
+    onOpenTemplates,
     expandedFieldIds,
     expandedStageIds,
     highlightedElement,
@@ -272,7 +272,7 @@ const ListCanvas: React.FC<ListCanvasProps> = memo((props) => {
                     <div className="d-flex justify-content-center gap-3">
                       <Button 
                         variant="outline-success" 
-                        onClick={() => onGenerateTournament?.()} 
+                        onClick={() => onOpenTemplates?.()} 
                         className="btn-adaptive px-4"
                         title={t('ui:tooltip.generateTournament')}
                       >

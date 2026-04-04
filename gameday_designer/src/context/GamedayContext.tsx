@@ -4,12 +4,12 @@ import { NotificationType, GameResultsDisplay } from '../types/designer';
 interface GamedayContextType {
   gamedayName: string;
   setGamedayName: (name: string) => void;
-  onGenerateTournament: (() => void) | null;
-  setOnGenerateTournament: (handler: (() => void) | null) => void;
+  currentUserId: number;
+  onOpenTemplates: (() => void) | null;
+  setOnOpenTemplates: (handler: (() => void) | null) => void;
   toolbarProps: {
     onImport: (json: unknown) => void;
     onExport: () => void;
-    onExportTemplate?: () => void;
     gamedayStatus?: string;
     onNotify: (message: string, type: NotificationType, title?: string) => void;
     canExport: boolean;
@@ -34,16 +34,21 @@ interface GamedayContextType {
 
 const GamedayContext = createContext<GamedayContextType | undefined>(undefined);
 
-export const GamedayProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface GamedayProviderProps {
+  children: ReactNode;
+  currentUserId?: number;
+}
+
+export const GamedayProvider: React.FC<GamedayProviderProps> = ({ children, currentUserId = 0 }) => {
   const [gamedayName, setGamedayName] = useState('');
-  const [onGenerateTournament, setOnGenerateTournamentInternal] = useState<(() => void) | null>(null);
+  const [onOpenTemplates, setOnOpenTemplatesInternal] = useState<(() => void) | null>(null);
   const [toolbarProps, setToolbarPropsInternal] = useState<GamedayContextType['toolbarProps']>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [resultsMode, setResultsMode] = useState(false);
   const [gameResults, setGameResultsInternal] = useState<GameResultsDisplay[]>([]);
 
   const setGamedayNameCb = useCallback((name: string) => setGamedayName(name), []);
-  const setOnGenerateTournament = useCallback((handler: (() => void) | null) => setOnGenerateTournamentInternal(handler), []);
+  const setOnOpenTemplates = useCallback((handler: (() => void) | null) => setOnOpenTemplatesInternal(handler), []);
   const setToolbarProps = useCallback((props: GamedayContextType['toolbarProps']) => setToolbarPropsInternal(props), []);
   const setIsLockedCb = useCallback((locked: boolean) => setIsLocked(locked), []);
   const setGameResults = useCallback(
@@ -51,11 +56,12 @@ export const GamedayProvider: React.FC<{ children: ReactNode }> = ({ children })
     []
   );
 
-  const value = useMemo(() => ({ 
-    gamedayName, 
+  const value = useMemo(() => ({
+    gamedayName,
     setGamedayName: setGamedayNameCb,
-    onGenerateTournament,
-    setOnGenerateTournament,
+    currentUserId,
+    onOpenTemplates,
+    setOnOpenTemplates,
     toolbarProps,
     setToolbarProps,
     isLocked,
@@ -64,7 +70,7 @@ export const GamedayProvider: React.FC<{ children: ReactNode }> = ({ children })
     setResultsMode,
     gameResults,
     setGameResults
-  }), [gamedayName, setGamedayNameCb, onGenerateTournament, setOnGenerateTournament, toolbarProps, setToolbarProps, isLocked, setIsLockedCb, resultsMode, gameResults, setGameResults]);
+  }), [gamedayName, setGamedayNameCb, currentUserId, onOpenTemplates, setOnOpenTemplates, toolbarProps, setToolbarProps, isLocked, setIsLockedCb, resultsMode, gameResults, setGameResults]);
 
   return (
     <GamedayContext.Provider value={value}>

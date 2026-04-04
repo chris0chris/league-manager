@@ -21,11 +21,14 @@ import {
   TOURNAMENT_GENERATION_STATE_DELAY,
   DEFAULT_TOURNAMENT_GROUP_NAME,
 } from '../utils/tournamentConstants';
-import type { GlobalTeam, HighlightedElement, Notification, NotificationType, FlowState } from '../types/flowchart';
+import type { GlobalTeam, GlobalTeamGroup, HighlightedElement, Notification, NotificationType, FlowState } from '../types/flowchart';
+import { isFieldNode, isGameNode, isStageNode } from '../types/flowchart';
+import { calculateGameTimes } from '../utils/timeCalculation';
 import type { TournamentGenerationConfig, RoundRobinConfig } from '../types/tournament';
 import type { UseFlowStateReturn, GamedayMetadata } from '../types/designer';
 import { v4 as uuidv4 } from 'uuid';
 import { gamedayApi } from '../api/gamedayApi';
+import { genericizeFlowState, applyGenericTemplate, GenericTemplate } from '../utils/templateMapper';
 
 export function useDesignerController(
   gamedayId: string | undefined,
@@ -155,6 +158,21 @@ export function useDesignerController(
     addNotification('Schedule exported successfully', 'success', 'Export Success');
   }, [addNotification]);
 
+  const handleSaveTemplate = useCallback(async (name: string, description: string, sharing: 'PRIVATE' | 'ASSOCIATION' | 'GLOBAL') => {
+    const currentState = flowStateRef.current?.exportState();
+    if (!currentState) return;
+    
+    const genericTemplate = genericizeFlowState(currentState, name, description, sharing);
+    
+    try {
+      await gamedayApi.saveTemplate(genericTemplate);
+      addNotification('Template saved successfully', 'success', 'Template Saved');
+    } catch (error: unknown) {
+      console.error('Failed to save template', error);
+      throw error;
+    }
+  }, [addNotification]);
+
   const assignTeamsToTournament = useCallback(
     (structure: TournamentStructure, teams: GlobalTeam[], clearExisting: boolean = false) => {
       const operations = assignTeamsToTournamentGames(structure, teams);
@@ -174,12 +192,94 @@ export function useDesignerController(
       generateTeams: boolean; 
       autoAssignTeams: boolean;
       selectedTeamIds?: string[];
+      customTemplate?: GenericTemplate;
     }) => {
       try {
         const fs = flowStateRef.current;
         const currentTeams = fs?.globalTeams || [];
         let teamsToUse = currentTeams;
         
+        // Handle custom template
+        if (config.customTemplate) {
+            const latestFs = flowStateRef.current;
+            if (!latestFs) return;
+            // The list endpoint omits `slots`; fetch the full detail so applyGenericTemplate
+            // has the complete slot data.
+            const fullTemplate = await gamedayApi.getTemplateDetail(config.customTemplate.id as number) as GenericTemplate;
+
+            // Pre-generate teams and groups BEFORE calling applyGenericTemplate so that
+            // getTeamId() inside applyGenericTemplate can resolve slot indices to real IDs.
+            // (If we generate teams after, every home/awayTeamId remains null.)
+            const preState = latestFs.exportState();
+            if (config.generateTeams && preState.globalTeams.length === 0) {
+                const teamCount = fullTemplate.num_teams;
+                if (preState.globalTeamGroups.length === 0) {
+                    const groupConfig = fullTemplate.group_config ?? [];
+                    const numGroups = groupConfig.length || fullTemplate.num_groups || 1;
+                    preState.globalTeamGroups = groupConfig.length > 0
+                        ? groupConfig.map((g, i) => ({ id: `g${i + 1}`, name: g.name, order: i }))
+                        : Array.from({ length: numGroups }, (_, i) => ({
+                            id: `g${i + 1}`,
+                            name: `Gruppe ${String.fromCharCode(65 + i)}`,
+                            order: i,
+                          }));
+                }
+                const groupCount = preState.globalTeamGroups.length || 1;
+                const teamData = generateTeamsForTournament(teamCount);
+                const teamsPerGroupCount = Math.ceil(teamCount / groupCount);
+                preState.globalTeams = teamData.map((data, index) => ({
+                    id: uuidv4(),
+                    label: data.label,
+                    color: data.color,
+                    groupId: preState.globalTeamGroups[
+                        Math.min(Math.floor(index / teamsPerGroupCount), groupCount - 1)
+                    ]?.id ?? null,
+                    order: index,
+                }));
+            }
+
+            const imported = applyGenericTemplate(fullTemplate, preState);
+
+            // Calculate game start times from the user-configured startTime/gameDuration/breakDuration.
+            // applyGenericTemplate does not call calculateGameTimes (slot.start_time has no DB column),
+            // so without this step all games would render '--:--', unlike the built-in template path.
+            const importedFields = imported.nodes.filter(isFieldNode);
+            const importedStages = imported.nodes.filter(isStageNode).map(stage =>
+                stage.data.order === 0
+                    ? { ...stage, data: { ...stage.data, startTime: config.startTime } }
+                    : stage
+            );
+            const importedGames = imported.nodes.filter(isGameNode);
+            const timedGames = calculateGameTimes(
+                importedFields,
+                importedStages,
+                importedGames,
+                config.gameDuration ?? 15,
+                config.breakDuration ?? 5
+            );
+            const timedNodes = imported.nodes.map(n =>
+                isGameNode(n) ? (timedGames.find(g => g.id === n.id) ?? n) : n
+            );
+
+            latestFs.importState({
+                metadata: latestFs.metadata || {} as GamedayMetadata,
+                nodes: timedNodes,
+                edges: imported.edges,
+                fields: imported.nodes.filter(n => n.type === 'field').map(f => ({
+                    id: f.id,
+                    name: f.data.name,
+                    order: f.data.order,
+                    color: f.data.color
+                })),
+                globalTeams: imported.globalTeams,
+                globalTeamGroups: imported.globalTeamGroups
+            });
+            
+            setShowTournamentModal(false);
+            addNotification('Tournament structure applied from custom template', 'success', 'Success');
+            return;
+        }
+
         const generatedGroups: GlobalTeamGroup[] = [];
         if (config.generateTeams) {
           const teamCount = config.template.teamCount.exact || config.template.teamCount.min;
@@ -321,6 +421,7 @@ export function useDesignerController(
     handleDynamicReferenceClick,
     handleImport,
     handleExport,
+    handleSaveTemplate,
     handleClearAll: () => flowStateRef.current?.clearAll(),
     handleUpdateMetadata: (data: Partial<GamedayMetadata>) => flowStateRef.current?.updateMetadata(data),
     handleUpdateNode: (id: string, data: Record<string, unknown>) => flowStateRef.current?.updateNode(id, data),
@@ -357,7 +458,7 @@ export function useDesignerController(
       flowStateRef.current?.addStageToGameEdge(sourceStageId, sourceRank, targetGameId, targetSlot, sourceGroup),
   }), [
     loadData, saveData, expandField, expandStage, handleHighlightElement, 
-    handleDynamicReferenceClick, handleImport, handleExport,
+    handleDynamicReferenceClick, handleImport, handleExport, handleSaveTemplate,
     handleSwapTeams, handleGenerateTournament, showTournamentModal, 
     dismissNotification, addNotification, onMetadataHighlight
   ]);

@@ -117,31 +117,30 @@ def _setup_published_gameday(page: Page, live_server) -> str:
     page.select_option("#gamedaySeason", label="2026")
     page.select_option("#gamedayLeague", label="E2E Test League")
 
-    # ---- 6. Generate tournament ----------------------------------------------
-    # The "Generate Tournament" button lives in the AppHeader (data-testid).
-    page.get_by_test_id("generate-tournament-button").click()
+    # ---- 6. Generate tournament via Template Library -------------------------
+    page.get_by_test_id("open-template-library-button").click()
 
-    # Wait for the Tournament Generator modal to appear
-    expect(page.get_by_role("dialog")).to_be_visible(timeout=5000)
-    # Confirm it's the right modal by checking the title heading
-    expect(page.locator(".modal-title")).to_be_visible(timeout=5000)
+    # Wait for the Template Library modal to appear
+    expect(page.get_by_text("Template Library")).to_be_visible(timeout=5000)
 
-    # There are no teams in the pool yet, so "Generate teams automatically"
-    # checkbox (id="generate-teams") is enabled. Check it so the confirmation
-    # button becomes active (isTeamCountValid requires generateTeams=true when
-    # no teams are selected).
-    generate_teams_checkbox = page.locator("#generate-teams")
-    expect(generate_teams_checkbox).to_be_enabled(timeout=3000)
-    if not generate_teams_checkbox.is_checked():
-        generate_teams_checkbox.click()
+    # Select the first built-in tournament format
+    page.locator('[data-testid^="builtin-template-"]').first.click()
 
-    # Confirm tournament generation
-    confirm_btn = page.get_by_test_id("confirm-generate-button")
-    expect(confirm_btn).to_be_enabled(timeout=3000)
-    confirm_btn.click()
+    # Click Apply — advances to the TeamPicker step
+    expect(page.get_by_test_id("apply-template-button")).to_be_visible(timeout=5000)
+    page.get_by_test_id("apply-template-button").click()
 
-    # Modal should close after confirming
-    expect(page.get_by_role("dialog")).not_to_be_visible(timeout=5000)
+    # TeamPickerStep dialog appears; no league teams exist so auto-generate placeholder teams
+    expect(page.get_by_text("Select Teams")).to_be_visible(timeout=5000)
+    page.get_by_role("button", name=re.compile(r"Auto-generate")).click()
+
+    # Wait for teams to be generated and "Apply to Gameday" to become enabled
+    apply_btn = page.get_by_role("button", name=re.compile(r"Apply to Gameday"))
+    expect(apply_btn).to_be_enabled(timeout=10000)
+    apply_btn.click()
+
+    # Both modals should now be closed
+    expect(page.get_by_text("Select Teams")).not_to_be_visible(timeout=5000)
 
     # Wait for the canvas to populate — the auto-save debounce is 1.5 s, so we
     # give enough time for the state update to render before we publish.

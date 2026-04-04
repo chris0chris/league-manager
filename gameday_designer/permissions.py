@@ -89,10 +89,6 @@ class IsAssociationMemberOrStaff(permissions.BasePermission):
 
         # For PUT/PATCH on association templates:
         # Non-staff users can modify templates for their association
-        # This is a simplified check - in production, you might check if user's team
-        # belongs to the template's association.
-        # For now, we allow authenticated users to modify association templates
-        # (actual association membership would be verified at view level)
         return True
 
 
@@ -104,39 +100,16 @@ class CanApplyTemplate(permissions.BasePermission):
     - Anonymous users: No access
     - Authenticated users: Can apply any template to any gameday
     - Staff users: Can apply any template to any gameday
-
-    Template application is less restricted than modification because:
-    - Users apply templates to their own gamedays
-    - Service layer validates gameday ownership/permissions
-    - Application doesn't modify the template itself
     """
 
     def has_permission(self, request, view):
         """
         Check permission for template application.
-
-        Args:
-            request: The request object
-            view: The view being accessed
-
-        Returns:
-            True if authenticated, False otherwise
         """
-        # Requires authentication
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
         """
         Check object-level permission for template application.
-
-        Args:
-            request: The request object
-            view: The view being accessed
-            obj: The ScheduleTemplate object
-
-        Returns:
-            True if authenticated, False otherwise
         """
-        # Any authenticated user can apply templates
-        # (Gameday ownership is validated separately in the service layer)
         return request.user and request.user.is_authenticated

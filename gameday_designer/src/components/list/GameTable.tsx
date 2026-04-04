@@ -596,6 +596,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
         }}
       >
         <Select<TeamOption>
+          classNamePrefix="official-select"
           value={options.find(opt => opt.value === currentValue) || null}
           options={options}
           onChange={(newValue) => newValue && handleOfficialChange(game.id, newValue.value)}
@@ -718,6 +719,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
         style={{ cursor: dynamicRef ? 'pointer' : 'default' }}
       >
         <Select<TeamOption>
+          classNamePrefix="react-select"
           value={(() => {
             const opt = options.find(opt => opt.value === currentValue) || options[0];
             return isWinner ? { ...opt, isWinner: true } : opt;
