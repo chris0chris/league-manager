@@ -15,7 +15,11 @@ def get_menu_items(request):
                     menu_instance = obj()
 
                     menu_name = menu_instance.get_name()
-                    menu_items = menu_instance.get_menu_items(request)
+                    try:
+                        menu_items = menu_instance.get_menu_items(request)
+                    except Exception:
+                        # Skip this menu if it fails to retrieve items (e.g. DB connection error)
+                        continue
 
                     if menu_name in menus:
                         menus[menu_name]["items"].extend(menu_items)
