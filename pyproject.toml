@@ -34,7 +34,7 @@ test = [
     "pytest-xdist==3.8.0",
     "pytest-cov==7.1.0",
     "factory-boy==3.3.3",
-    "django-debug-toolbar==6.2.0",
+    "django-debug-toolbar==6.3.0",
     "WebTest==3.0.7",
     "pytest-playwright>=0.7.2",
     "bump2version==1.0.1",
