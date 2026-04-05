@@ -97,7 +97,7 @@ const TemplateLibraryModal: React.FC<TemplateLibraryModalProps> = ({
         const builtin = selected.template as TournamentTemplate;
         onGenerateFromBuiltin?.({
           templateId: builtin.id,
-          fieldCount: builtin.fieldOptions[0] ?? 2,
+          fieldCount: applyConfig?.numFields ?? builtin.fieldOptions[0] ?? 2,
           startTime: applyConfig?.startTime ?? '09:00',
           gameDuration: applyConfig?.gameDuration ?? 15,
           breakDuration: applyConfig?.breakDuration ?? 5,

@@ -101,12 +101,10 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
               <Form.Label className="small fw-semibold">Break after (min)</Form.Label>
               <Form.Control type="number" size="sm" min={0} max={30} value={breakDuration} onChange={e => setBreakDuration(+e.target.value)} />
             </Col>
-            {!isBuiltin && (
-              <Col xs={12} sm={3}>
-                <Form.Label htmlFor="num-fields-input" className="small fw-semibold">Number of fields</Form.Label>
-                <Form.Control id="num-fields-input" type="number" size="sm" min={1} max={10} value={numFields} onChange={e => setNumFields(+e.target.value)} />
-              </Col>
-            )}
+            <Col xs={12} sm={3}>
+              <Form.Label htmlFor="num-fields-input" className="small fw-semibold">Number of fields</Form.Label>
+              <Form.Control id="num-fields-input" type="number" size="sm" min={1} max={10} value={numFields} onChange={e => setNumFields(+e.target.value)} />
+            </Col>
           </Row>
         </div>
       </div>

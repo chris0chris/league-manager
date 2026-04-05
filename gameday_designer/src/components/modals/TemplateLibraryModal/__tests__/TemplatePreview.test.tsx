@@ -56,13 +56,13 @@ describe('TemplatePreview', () => {
     }));
   });
 
-  it('Number of fields input appears for saved template but not builtin', () => {
+  it('Number of fields input appears for both saved and builtin templates', () => {
     const selected: SelectedTemplate = { type: 'saved', template: mockSavedTemplate };
     const { rerender } = render(<TemplatePreview selected={selected} currentUserId={1} onApply={vi.fn()} onClone={vi.fn()} onDelete={vi.fn()} onSave={vi.fn()} />);
     expect(screen.getByLabelText(/number of fields/i)).toBeInTheDocument();
 
     const builtinSelected: SelectedTemplate = { type: 'builtin', template: mockBuiltinTemplate as unknown as TournamentTemplate };
     rerender(<TemplatePreview selected={builtinSelected} currentUserId={1} onApply={vi.fn()} onClone={vi.fn()} onDelete={vi.fn()} onSave={vi.fn()} />);
-    expect(screen.queryByLabelText(/number of fields/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/number of fields/i)).toBeInTheDocument();
   });
 });
