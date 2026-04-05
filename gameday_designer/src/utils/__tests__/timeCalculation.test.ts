@@ -448,4 +448,42 @@ describe('timeCalculation - calculateGameTimes', () => {
       expect(startTimes[1]).toBe('11:20');
     });
   });
+
+  describe('Break duration propagation', () => {
+    it('should set breakAfter in game data from the provided breakDuration (currently fails)', () => {
+      const fieldId = 'field-1';
+      const stageId = 'stage-1';
+
+      const field = createFieldNode(fieldId, { name: 'Feld 1', order: 0 });
+      const stage = createStageNode(stageId, fieldId, {
+        name: 'Group Stage',
+        category: 'preliminary',
+        order: 0,
+        startTime: DEFAULT_START_TIME,
+        defaultGameDuration: DEFAULT_GAME_DURATION,
+      });
+
+      const games = [
+        createMockGameNode('game-1', stageId, 'Game 1', DEFAULT_GAME_DURATION),
+        createMockGameNode('game-2', stageId, 'Game 2', DEFAULT_GAME_DURATION),
+      ];
+
+      const BREAK_DURATION = 15;
+      const result = calculateGameTimes(
+        [field],
+        [stage],
+        games,
+        DEFAULT_GAME_DURATION,
+        BREAK_DURATION
+      );
+
+      // Verify start times are correct (this should pass)
+      expect(result[0].data.startTime).toBe(DEFAULT_START_TIME);
+      expect(result[1].data.startTime).toBe('11:25'); // 10:00 + 70 + 15
+
+      // Verify breakAfter is set (this is expected to fail)
+      expect(result[0].data.breakAfter).toBe(BREAK_DURATION);
+      expect(result[1].data.breakAfter).toBe(BREAK_DURATION);
+    });
+  });
 });

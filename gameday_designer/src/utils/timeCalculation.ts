@@ -301,7 +301,7 @@ export function calculateGameTimes(
         data: {
           ...game.data,
           startTime: formatTime(gameStartAbsMinutes),
-          duration: duration,
+          duration: duration, breakAfter: breakDuration,
         },
       };
       
