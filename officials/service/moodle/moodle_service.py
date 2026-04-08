@@ -2,8 +2,8 @@ import concurrent
 import math
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from time import time
 from datetime import datetime
+from time import time
 
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned
@@ -15,7 +15,6 @@ from gamedays.models import Association, Team
 from officials.models import OfficialLicenseHistory, Official
 from officials.service.boff_license_calculation import (
     LicenseCalculator,
-    LicenseStrategy,
 )
 from officials.service.moodle.moodle_api import (
     MoodleApi,
@@ -98,11 +97,15 @@ class MoodleService:
                 result_list += [course_result]
         connections.close_all()
 
+        missed_officials_messages = [item["message"] for item in missed_officials_list]
+        missed_officials_ids = [item["id"] for item in missed_officials_list]
+
         return {
             "items_result_list": len(result_list),
             "items_missed_officials": len(missed_officials_list),
             "result_list": result_list,
-            "missed_officials": missed_officials_list,
+            "missed_officials": missed_officials_messages,
+            "missed_officials_as_user_id": missed_officials_ids,
             "missing_team_names": sorted(missing_team_names),
         }
 
@@ -154,15 +157,21 @@ class MoodleService:
             team_description = user_info.get_team()
         except FieldNotFoundException as exception:
             missed_officials = [
-                f"ERROR --- XXX -> {self._get_ahref_for_course(course.get_id())}: {self._get_ahref_for_moodle_profile(user_info.id)} - {user_info.get_last_name()} "
-                f"-> {exception}"
+                {
+                    "id": user_info.id,
+                    "message": f"ERROR --- XXX -> {self._get_ahref_for_course(course.get_id())}: {self._get_ahref_for_moodle_profile(user_info.id)} - {user_info.get_last_name()} "
+                    f"-> {exception}",
+                }
             ]
             return None, missed_officials, []
         team: Team = self._get_first(Team.objects.filter(description=team_description))
         if team is None:
             missed_officials = [
-                f"{self._get_ahref_for_moodle_profile(course.get_id())}: {self._get_ahref_for_moodle_profile(user_info.id)} - {user_info.get_last_name()} "
-                f"-> fehlendes Team: {team_description}"
+                {
+                    "id": user_info.id,
+                    "message": f"{self._get_ahref_for_moodle_profile(course.get_id())}: {self._get_ahref_for_moodle_profile(user_info.id)} - {user_info.get_last_name()} "
+                    f"-> fehlendes Team: {team_description}",
+                }
             ]
             return team_description, missed_officials, []
         else:
