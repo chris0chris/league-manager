@@ -111,7 +111,7 @@ class MoodleService:
 
     def get_participants_from_course(self, course: ApiCourse):
         result = self.get_participants_from_course_with_time_measure(course)
-        team_name_set, missed_official, officials = result[0]
+        team_name_set, missed_official, officials, skip_reason = result[0]
         formatted_time = result[1]
         course_result = {
             "course": self._get_ahref_for_course(course.get_id(), course.get_name()),
@@ -119,20 +119,32 @@ class MoodleService:
             "officials_count": len(officials),
             "officials": officials,
         }
+        if skip_reason:
+            course_result["info"] = skip_reason
+
         return team_name_set, missed_official, course_result
 
     @measure_execution_time
     def get_participants_from_course_with_time_measure(self, course: ApiCourse):
-        if course.is_relevant():
-            year = datetime.today().year
-            self.license_history = OfficialLicenseHistory.objects.filter(
-                created_at__year=year
+        if not course.is_relevant():
+            return (
+                set(),
+                [],
+                [],
+                f"Kurs als nicht relevant markiert -> Kurs-Enddatum: {course.end_date} / Kurs-Lizenzstufe: {LicenseCalculator.get_license_name(course.get_license_id())}",
             )
-            exams = self.moodle_api.get_exams_for_course(course.get_id())
-            if not exams.is_empty():
-                self.set_exams(exams)
-                return self.get_participants_from_relevant_course(course)
-        return set(), [], []
+        year = datetime.today().year
+        self.license_history = OfficialLicenseHistory.objects.filter(
+            created_at__year=year
+        )
+        exams = self.moodle_api.get_exams_for_course(course.get_id())
+        if exams.is_empty():
+            return set(), [], [], "Kurs hat kein Quiz (oder keine Ergenisse im Quiz) mit Namen 'Lizenzprüfung' oder 'Exam'."
+        self.set_exams(exams)
+        missing_teams_list, missed_officials_list, result_list = (
+            self.get_participants_from_relevant_course(course)
+        )
+        return missing_teams_list, missed_officials_list, result_list, None
 
     def get_participants_from_relevant_course(self, course):
         participants: ApiParticipants = self.moodle_api.get_participants_for_course(
