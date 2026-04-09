@@ -1,5 +1,4 @@
 import json
-import math
 from datetime import datetime
 from typing import List
 
@@ -187,10 +186,10 @@ class EmptyApiExams:
 class ApiExams:
     def __init__(self, quizzes_json):
         quizzes = quizzes_json.get("quizzes", [])
-        exam_keywords = ["Lizenzprüfung", "exam"]
+        exam_keywords = ["lizenzprüfung", "exam"]
 
         def is_exam(quiz):
-            return any(keyword in quiz["name"] for keyword in exam_keywords)
+            return any(keyword in quiz["name"].lower() for keyword in exam_keywords)
 
         self.exams = [ApiExam(quiz) for quiz in quizzes if is_exam(quiz)]
 
