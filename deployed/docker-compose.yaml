@@ -51,6 +51,7 @@ services:
     networks:
       - backend   # For www communication
       - database  # For external MySQL access
+      - proxy     # For internal DNS resolution from frontend
     restart: unless-stopped
     healthcheck:
       interval: 15s
