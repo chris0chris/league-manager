@@ -51,7 +51,6 @@ services:
     networks:
       - backend   # For www communication
       - database  # For external MySQL access
-      - proxy     # Required for DNS resolution (frontend needs to find 'app' hostname)
     restart: unless-stopped
     healthcheck:
       interval: 15s
