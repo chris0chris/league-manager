@@ -21,8 +21,9 @@ from django.contrib.auth import views as auth_view
 from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include
 from django.views.generic import TemplateView
-
 from health_check.views import HealthCheckView as _BaseHealthCheckView
+
+from league_manager.constants import CLEAR_CACHE, LEAGUE_MANAGER_MAINTENANCE
 
 
 class HealthCheckView(_BaseHealthCheckView):
@@ -42,11 +43,6 @@ from league_manager.sitemaps import (
     PasscheckTeamSitemap,
     OfficialsSitemap,
 )
-
-ADMIN_ALL_URLS = "admin-all-urls"
-CLEAR_CACHE = "clear-cache"
-
-LEAGUE_MANAGER_MAINTENANCE = "maintenance"
 
 # Sitemap configuration
 sitemaps = {
