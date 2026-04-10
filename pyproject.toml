@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "leaguesphere"
-version = "3.11.0"
+version = "3.11.3"
 requires-python = ">=3.12"
 dependencies = [
-    "Django==6.0.3",
+    "Django==6.0.4",
     "django-crispy-forms==2.6",
     "crispy-bootstrap5==2026.3",
     "numpy==2.4.4",
@@ -23,13 +23,13 @@ dependencies = [
     "python-dotenv==1.2.2",
     "mysqlclient==2.2.8",
     "requests==2.33.1",
-    "django-health-check==4.2.1",
+    "django-health-check==4.2.2",
 ]
 
 [project.optional-dependencies]
 test = [
     "django-webtest==1.9.14",
-    "pytest==9.0.2",
+    "pytest==9.0.3",
     "pytest-django==4.12.0",
     "pytest-xdist==3.8.0",
     "pytest-cov==7.1.0",
@@ -61,7 +61,7 @@ include = [
 ]
 
 [tool.bumpversion]
-current_version = "3.11.0"
+current_version = "3.11.3"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\-rc\\.(?P<rc_build>\\d+))?"
 serialize = [
     "{major}.{minor}.{patch}-rc.{rc_build}",

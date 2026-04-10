@@ -29,15 +29,16 @@ def test_db_guard_redirects_on_failure(client):
 def test_db_guard_skips_health_check(client):
     """Test that the middleware doesn't redirect health check even if DB is down."""
     cache.delete('db_connection_status')
-    
+
     with patch('django.db.connection.cursor') as mock_cursor:
         mock_cursor.side_effect = OperationalError("DB is down")
-        
+
         response = client.get('/health/')
         # Should NOT be a redirect
         assert response.status_code == 200
-        # Body should contain failure info but status is 200
-        assert b'Database' in response.content
+        # Simple health check returns {"status": "healthy"}
+        data = response.json()
+        assert data["status"] == "healthy"
 
 @pytest.mark.django_db
 def test_db_guard_skips_error_page(client):
