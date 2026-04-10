@@ -187,7 +187,18 @@ class MoodleService:
             ]
             return team_description, missed_officials, []
         else:
-            official = self.create_new_or_update_existing_official(user_info)
+            try:
+                official = self.create_new_or_update_existing_official(user_info)
+            except Association.DoesNotExist:
+                missed_officials = [
+                    {
+                        "id": user_info.id,
+                        "message": f"{self._get_ahref_for_moodle_profile(course.get_id())}: {self._get_ahref_for_moodle_profile(user_info.id)} - {user_info.get_last_name()} "
+                        f"-> Association nicht gefunden: {user_info.get_association()}",
+                    }
+                ]
+                return team_description, missed_officials, []
+
         license_history = self.create_new_or_update_license_history(
             official, course, user_info
         )
