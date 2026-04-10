@@ -223,8 +223,10 @@ class MoodleReportView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def get(self, request, *args, **kwargs):
         course_ids = request.GET.get("ids")
+        ignore_year_raw = request.GET.get("ignoreYear", "false").lower()
+        ignore_year = ignore_year_raw == "true"
         moodle_service = MoodleService()
-        result = moodle_service.update_licenses(course_ids)
+        result = moodle_service.update_licenses(course_ids, ignore_year)
         context = {"time": result[1], "result": json.dumps(result[0], indent=4)}
         return render(request, self.template_name, context)
 

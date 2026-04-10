@@ -70,14 +70,12 @@ class TestMoodleService(TestCase):
         participants_mock: MagicMock,
         update_user_mock: MagicMock,
     ):
-        course = ApiCourse(
-            {
-                "id": 1,
-                "categoryid": 5,
-                "enddate": time.time(),
-                "fullname": "course name 4",
-            }
-        )
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 5,
+            "enddate": time.time(),
+            "fullname": "course name 4",
+        })
         moodle_service = MoodleService()
         result = moodle_service.get_participants_from_course(course)
         participants_mock.assert_not_called()
@@ -105,14 +103,12 @@ class TestMoodleService(TestCase):
         user_id = 1
         user_id_2 = 2
         exam_id = 75
-        course = ApiCourse(
-            {
-                "id": 1,
-                "categoryid": 2,
-                "enddate": time.time(),
-                "fullname": "course name 1",
-            }
-        )
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 2,
+            "enddate": time.time(),
+            "fullname": "course name 1",
+        })
         participants_mock.return_value = ApiParticipants(
             [
                 {
@@ -207,14 +203,12 @@ class TestMoodleService(TestCase):
     ):
         user_id = 82
         team = DbSetupOfficials().create_officials_and_team()
-        course = ApiCourse(
-            {
-                "id": 1,
-                "categoryid": 4,
-                "enddate": time.time(),
-                "fullname": "course name",
-            }
-        )
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 4,
+            "enddate": time.time(),
+            "fullname": "course name",
+        })
         participants_mock.return_value = ApiParticipants(
             [
                 {
@@ -312,14 +306,12 @@ class TestMoodleService(TestCase):
         official: Official = Official.objects.last()
         official.external_id = 7
         official.save()
-        course = ApiCourse(
-            {
-                "id": 1,
-                "categoryid": 3,
-                "enddate": time.time(),
-                "fullname": "course name 2",
-            }
-        )
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 3,
+            "enddate": time.time(),
+            "fullname": "course name 2",
+        })
         participants_mock.return_value = ApiParticipants(
             [
                 {
@@ -402,14 +394,12 @@ class TestMoodleService(TestCase):
             license=OfficialLicenseFactory(id=2, name="F3"),
             result=60,
         )
-        course = ApiCourse(
-            {
-                "id": 1,
-                "categoryid": 3,
-                "enddate": time.time(),
-                "fullname": "course name 2",
-            }
-        )
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 3,
+            "enddate": time.time(),
+            "fullname": "course name 2",
+        })
         participants_mock.return_value = ApiParticipants(
             [
                 {
@@ -492,14 +482,12 @@ class TestMoodleService(TestCase):
         official: Official = Official.objects.last()
         official.external_id = 7
         official.save()
-        course = ApiCourse(
-            {
-                "id": 1,
-                "categoryid": 3,
-                "enddate": time.time(),
-                "fullname": "course name 3",
-            }
-        )
+        course = ApiCourse({
+            "id": 1,
+            "categoryid": 3,
+            "enddate": time.time(),
+            "fullname": "course name 3",
+        })
         participants_mock.return_value = ApiParticipants(
             [
                 {

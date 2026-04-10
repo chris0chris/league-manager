@@ -75,8 +75,8 @@ class MoodleService:
         return self.moodle_api.get_courses(course_id).get_all()[0]
 
     @measure_execution_time
-    def update_licenses(self, course_ids: str = None):
-        courses: ApiCourses = self.moodle_api.get_courses(course_ids)
+    def update_licenses(self, course_ids: str = None, ignore_year=False):
+        courses: ApiCourses = self.moodle_api.get_courses(course_ids, ignore_year)
         missing_team_names = set()
         result_list = []
         missed_officials_list = []
