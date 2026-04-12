@@ -1,0 +1,7 @@
+gameinfo,team_id,team__name,fh,sh,pa,isHome,standing,status,pf,league_id,opponent_team_id,opponent_league_id
+1001,1,Team A,20,8,13,TRUE,Group 1,beendet,28,5,2,5
+1001,2,Team B,0,13,28,FALSE,Group 1,beendet,13,5,1,5
+1002,3,Team C,0,0,0,TRUE,Group 1,geplant,0,5,2,5
+1002,2,Team B,0,0,0,FALSE,Group 1,geplant,0,5,3,5
+1003,1,Team A,0,0,0,TRUE,Group 1,geplant,0,5,3,5
+1003,3,Team C,0,0,0,FALSE,Group 1,geplant,0,5,1,5
