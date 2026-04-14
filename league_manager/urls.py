@@ -21,18 +21,23 @@ from django.contrib.auth import views as auth_view
 from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include
 from django.views.generic import TemplateView
-from health_check.views import HealthCheckView as _BaseHealthCheckView
+from django.http import JsonResponse
+from django.views import View
 
-from league_manager.constants import CLEAR_CACHE, LEAGUE_MANAGER_MAINTENANCE
 
+class HealthCheckView(View):
+    """
+    Simple synchronous health check endpoint.
 
-class HealthCheckView(_BaseHealthCheckView):
-    checks = [
-        "health_check.checks.Cache",
-        "health_check.checks.Database",
-        "health_check.checks.DNS",
-        "health_check.checks.Storage",
-    ]
+    Replaced async health_check.views.HealthCheckView which caused
+    gunicorn worker deadlocks when running under sync WSGI with
+    async-to-sync bridge (asgiref). The complex health checks
+    would hang indefinitely, triggering worker timeouts and
+    cascading failures.
+    """
+
+    def get(self, request):
+        return JsonResponse({"status": "healthy"})
 
 
 from league_manager.views import homeview, ClearCacheView, robots_txt_view, database_error_view
