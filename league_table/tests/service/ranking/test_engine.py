@@ -61,8 +61,7 @@ class TestTieBreakEngine:
             "one_game_played",
         ],
     )
-    def test_run_tie_break_step(self, table_file, games_file, expected_result_file):
-        table = pd.read_csv(BASE / table_file)
+    def test_run_tie_break_step(self, games_file, expected_result_file):
         games = pd.read_csv(BASE / games_file)
         expected_result = pd.read_csv(BASE / expected_result_file)
 
