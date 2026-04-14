@@ -24,6 +24,8 @@ from django.views.generic import TemplateView
 from django.http import JsonResponse
 from django.views import View
 
+from league_manager.constants import LEAGUE_MANAGER_MAINTENANCE, CLEAR_CACHE
+
 
 class HealthCheckView(View):
     """
