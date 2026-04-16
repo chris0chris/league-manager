@@ -24,6 +24,8 @@ from django.views.generic import TemplateView
 from django.http import JsonResponse
 from django.views import View
 
+from league_manager.constants import LEAGUE_MANAGER_MAINTENANCE, CLEAR_CACHE
+
 
 class HealthCheckView(View):
     """
@@ -48,11 +50,6 @@ from league_manager.sitemaps import (
     PasscheckTeamSitemap,
     OfficialsSitemap,
 )
-
-ADMIN_ALL_URLS = "admin-all-urls"
-CLEAR_CACHE = "clear-cache"
-
-LEAGUE_MANAGER_MAINTENANCE = "maintenance"
 
 # Sitemap configuration
 sitemaps = {

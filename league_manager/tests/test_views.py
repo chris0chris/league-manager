@@ -1,36 +1,59 @@
-import re
 from unittest.mock import patch, MagicMock
 
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.http import HttpRequest
 from django.test import TestCase, RequestFactory
 from django.urls import reverse
-from django_webtest import WebTest, DjangoWebtestResponse
+from django_webtest import WebTest
 
 from gamedays.models import Team
-from gamedays.service.team_repository_service import TeamRepositoryService
-from league_manager.urls import LEAGUE_MANAGER_MAINTENANCE, CLEAR_CACHE
-from league_manager.views import homeview, ClearCacheView, AllTeamListView
+from league_manager.constants import (
+    CLEAR_CACHE,
+    LEAGUE_MANAGER_MAINTENANCE,
+    MAINTENANCE_CONFIG_CACHE_KEY,
+)
+from league_manager.models import SiteConfiguration
+from league_manager.views import ClearCacheView, AllTeamListView
 from officials.urls import OFFICIALS_LIST_FOR_ALL_TEAMS
 from passcheck.urls import PASSCHECK_LIST_FOR_ALL_TEAMS
 
 
 class TestMaintenanceView(WebTest):
-    # @see base.py MAINTENANCE_PAGES
     def test_maintenance_page_is_delivered(self):
         expected_url = reverse(LEAGUE_MANAGER_MAINTENANCE)
-        settings.MAINTENANCE_MODE = True
 
-        for index, current_page in enumerate(settings.MAINTENANCE_PAGES):
-            if "\\d+" in current_page:
-                current_page_as_regex = current_page.replace("\\d+", str(index))
-                current_page = current_page_as_regex[1:-1]
-            response = self.client.get(current_page)
-            assert response.url == expected_url
+        maintenance_pages = [
+            "/gamedays/gameday/new/",
+            r"^/gamedays/gameday/\d+/update$",
+            r"^/passcheck/player/\d+/(update|delete|transfer)/$",
+        ]
 
-        settings.MAINTENANCE_MODE = False
+        config, _ = SiteConfiguration.objects.get_or_create(id=1)
+        config.maintenance_mode = True
+        config.maintenance_pages = maintenance_pages
+        config.save()
+
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+        for index, pattern in enumerate(maintenance_pages):
+            # Convert regex to a testable URL
+            # We strip ^ and $ and replace \d+ with a real ID
+            target_url = pattern.replace(r"\d+", str(index + 100))
+            target_url = target_url.replace(r"(update|delete|transfer)", "update")
+            target_url = target_url.lstrip("^").rstrip("$")
+
+            # Ensure it has a leading slash if the regex stripped it
+            if not target_url.startswith("/"):
+                target_url = "/" + target_url
+
+            response = self.client.get(target_url)
+
+            self.assertEqual(response.status_code, 302)
+            self.assertIn(expected_url, response.url)
+
+        config.maintenance_mode = False
+        config.save()
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
 
 
 class TestHomeView(TestCase):

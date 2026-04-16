@@ -75,8 +75,8 @@ class MoodleService:
         return self.moodle_api.get_courses(course_id).get_all()[0]
 
     @measure_execution_time
-    def update_licenses(self, course_ids: str = None):
-        courses: ApiCourses = self.moodle_api.get_courses(course_ids)
+    def update_licenses(self, course_ids: str = None, ignore_year=False):
+        courses: ApiCourses = self.moodle_api.get_courses(course_ids, ignore_year)
         missing_team_names = set()
         result_list = []
         missed_officials_list = []
@@ -187,7 +187,18 @@ class MoodleService:
             ]
             return team_description, missed_officials, []
         else:
-            official = self.create_new_or_update_existing_official(user_info)
+            try:
+                official = self.create_new_or_update_existing_official(user_info)
+            except Association.DoesNotExist:
+                missed_officials = [
+                    {
+                        "id": user_info.id,
+                        "message": f"{self._get_ahref_for_moodle_profile(course.get_id())}: {self._get_ahref_for_moodle_profile(user_info.id)} - {user_info.get_last_name()} "
+                        f"-> Association nicht gefunden: {user_info.get_association()}",
+                    }
+                ]
+                return team_description, missed_officials, []
+
         license_history = self.create_new_or_update_license_history(
             official, course, user_info
         )

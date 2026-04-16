@@ -34,7 +34,7 @@ class TeamStatsEngine:
         grouped["diff"] = grouped["pf"] - grouped["pa"]
         grouped["win_quotient"] = (
             grouped["win_points"] / grouped["max_win_points"]
-        ).round(self.ruleset.league_quotient_precision)
+        ).fillna(0.0).round(self.ruleset.league_quotient_precision)
 
         return grouped.reset_index()
 
@@ -57,7 +57,7 @@ class TeamStatsEngine:
             + draw_mask * lp.points_draw_same_league
             + loss_mask * lp.points_loss_same_league
         )
-        df["max_win_points"] = lp.max_points_same_league
+        df["max_win_points"] = finished_mask * lp.max_points_same_league
 
         return df
 
@@ -195,7 +195,7 @@ class LeagueRankingEngine:
 
         table = self.apply_team_point_adjustments(table)
 
-        table["win_quotient"] = (table["win_points"] / table["max_win_points"]).round(
+        table["win_quotient"] = (table["win_points"] / table["max_win_points"]).fillna(0.0).round(
             self.league_config.ruleset.league_quotient_precision
         )
 
@@ -279,7 +279,7 @@ class TieBreakerEngine:
     def _rank_group(self, df: pd.DataFrame, games_df: pd.DataFrame) -> pd.DataFrame:
         updated = []
 
-        for points, tied_df in df.groupby("win_quotient"):
+        for points, tied_df in df.groupby("win_quotient", dropna=False):
             tied_df = tied_df.copy()
             for tb in self.tie_breakers:
                 if tb.key not in tied_df.columns:

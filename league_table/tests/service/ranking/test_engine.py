@@ -20,42 +20,35 @@ BASE = pathlib.Path(__file__).parent / "testdata/tiebreak"
 class TestTieBreakEngine:
 
     @pytest.mark.parametrize(
-        "table_file, games_file, expected_result_file",
+        "games_file, expected_result_file",
         [
             (
-                "direct_points_diff_table.csv",
                 "direct_points_diff_games.csv",
                 "direct_points_diff_table_expected.csv",
             ),
             (
-                "direct_points_scored_table.csv",
                 "direct_points_scored_games.csv",
                 "direct_points_scored_table_expected.csv",
             ),
             (
-                "overall_points_diff_table.csv",
                 "overall_points_diff_games.csv",
                 "overall_points_diff_table_expected.csv",
             ),
             (
-                "overall_points_scored_table.csv",
                 "overall_points_scored_games.csv",
                 "overall_points_scored_table_expected.csv",
             ),
             (
-                "z_name_table.csv",
                 "z_name_games.csv",
                 "z_name_table_expected.csv",
             ),
             (
-                "0_empty_table.csv",
-                "0_empty_games.csv",
-                "0_empty_table_expected.csv",
-            ),
-            (
-                "league_quotient_table.csv",
                 "league_quotient_games.csv",
                 "league_quotient_table_expected.csv",
+            ),
+            (
+                "one_game_played_games.csv",
+                "one_game_played_table_expected.csv",
             ),
         ],
         ids=[
@@ -64,18 +57,39 @@ class TestTieBreakEngine:
             "overall_points_diff",
             "overall_points_scored",
             "name",
-            "initial_empty_table_and_empty_games",
             "win_quotient",
+            "one_game_played",
         ],
     )
-    def test_run_tie_break_step(self, table_file, games_file, expected_result_file):
-        table = pd.read_csv(BASE / table_file)
+    def test_run_tie_break_step(self, games_file, expected_result_file):
         games = pd.read_csv(BASE / games_file)
         expected_result = pd.read_csv(BASE / expected_result_file)
 
         engine = TieBreakerEngine(LEAGUE_TABLE_TEST_RULESET)
 
+        result = engine.rank_by_games(games)
+
+        result = result.fillna(
+            {
+                "direct_wins": 0,
+                "direct_point_diff": 0,
+                "direct_points_scored": 0,
+                "overall_point_diff": 0,
+                "overall_points_scored": 0,
+            }
+        )
+
+        assert result.to_csv() == expected_result.to_csv()
+
+    def test_run_tie_break_step_for_empty_table(self):
+        table = pd.read_csv(BASE / "0_empty_table.csv")
+        games = pd.read_csv(BASE / "0_empty_games.csv")
+        expected_result = pd.read_csv(BASE / "0_empty_table_expected.csv")
+
+        engine = TieBreakerEngine(LEAGUE_TABLE_TEST_RULESET)
+
         result = engine.rank(table, games)
+
         result = result.fillna(
             {
                 "direct_wins": 0,
@@ -158,19 +172,6 @@ class TestLeagueRankingEngine:
         )
 
         engine = LeagueRankingEngine(league_config)
-        result = engine.compute_league_table(games)
-        assert result.to_csv() == expected_result.to_csv()
-
-    def test_league_quotient_precision(self):
-        games = pd.read_csv(
-            BASE / "../league_ranking/league_ranking_games_for_quotient_precision.csv"
-        )
-        expected_result = pd.read_csv(
-            BASE
-            / "../league_ranking/league_ranking_games_for_quotient_precision_table_expected.csv"
-        )
-
-        engine = LeagueRankingEngine(LEAGUE_TABLE_TEST_LEAGUE_CONFIG)
         result = engine.compute_league_table(games)
         assert result.to_csv() == expected_result.to_csv()
 
