@@ -20,7 +20,7 @@ BASE = pathlib.Path(__file__).parent / "testdata/tiebreak"
 class TestTieBreakEngine:
 
     @pytest.mark.parametrize(
-        "table_file, games_file, expected_result_file",
+        "games_file, expected_result_file",
         [
             (
                 "direct_points_diff_games.csv",
