@@ -36,11 +36,41 @@ class TieBreaker:
 
 
 def _subset_direct_games(games_df: pd.DataFrame, tied_teams: list[int]) -> pd.DataFrame:
-    """Return only the games played between the tied teams."""
-    tied = set(tied_teams)
+    """Return only the rows for games where BOTH participants are in the tied group."""
+    tied_set = set(tied_teams)
+
+    # We group by gameinfo and keep only the groups (games) where
+    # both team_ids belong to our tied_set.
     return games_df.groupby("gameinfo").filter(
-        lambda g: len(g) == 2 and set(g["team_id"]).issubset(tied)
+        lambda x: len(x) == 2 and set(x["team_id"]).issubset(tied_set)
     )
+
+
+def _all_played_each_other(games_df: pd.DataFrame, tied_teams: list[int]) -> bool:
+    """
+    Checks if every team in the tied group has played against every
+    other team in the tied group at least once.
+    """
+    if len(tied_teams) <= 1:
+        return True
+
+    subset = _subset_direct_games(games_df, tied_teams)
+    tied_set = set(tied_teams)
+
+    for team in tied_teams:
+        # Find all game IDs this specific team participated in WITHIN the tied subset
+        team_game_ids = subset[subset["team_id"] == team]["gameinfo"].unique()
+
+        # Find all unique team_ids that appeared in those games
+        participants = set(
+            subset[subset["gameinfo"].isin(team_game_ids)]["team_id"].unique()
+        )
+
+        # If the participants for this team don't cover the whole tied group, return False
+        if not tied_set.issubset(participants):
+            return False
+
+    return True
 
 
 def _map_direct_metric(df: pd.DataFrame, subset: pd.DataFrame, compute_fn) -> pd.Series:
@@ -60,7 +90,11 @@ def _map_direct_metric(df: pd.DataFrame, subset: pd.DataFrame, compute_fn) -> pd
 def compute_direct_wins(
     df: pd.DataFrame, games_df: pd.DataFrame, tied_teams: list[int]
 ) -> pd.Series:
-    """Count wins against tied teams."""
+    """Count wins against tied teams, ONLY if all tied teams played each other."""
+    if not _all_played_each_other(games_df, tied_teams):
+        # Fall-through: give everyone 0 so this tiebreaker has no effect
+        return pd.Series(0, index=df.index)
+
     subset = _subset_direct_games(games_df, tied_teams)
     return _map_direct_metric(
         df, subset, lambda g: 1 if (g["fh"] + g["sh"]) > g["pa"] else 0
@@ -71,7 +105,10 @@ def compute_direct_wins(
 def compute_direct_point_diff(
     df: pd.DataFrame, games_df: pd.DataFrame, tied_teams: list[int]
 ) -> pd.Series:
-    """Sum point diff vs tied teams."""
+    """Sum point diff vs tied teams, ONLY if all tied teams played each other."""
+    if not _all_played_each_other(games_df, tied_teams):
+        return pd.Series(0, index=df.index)
+
     subset = _subset_direct_games(games_df, tied_teams)
     return _map_direct_metric(df, subset, lambda g: (g["fh"] + g["sh"]) - g["pa"])
 
@@ -80,7 +117,10 @@ def compute_direct_point_diff(
 def compute_direct_points_scored(
     df: pd.DataFrame, games_df: pd.DataFrame, tied_teams: list[int]
 ) -> pd.Series:
-    """Sum points scored vs tied teams."""
+    """Sum points scored vs tied teams, ONLY if all tied teams played each other."""
+    if not _all_played_each_other(games_df, tied_teams):
+        return pd.Series(0, index=df.index)
+
     subset = _subset_direct_games(games_df, tied_teams)
     return _map_direct_metric(df, subset, lambda g: g["fh"] + g["sh"])
 

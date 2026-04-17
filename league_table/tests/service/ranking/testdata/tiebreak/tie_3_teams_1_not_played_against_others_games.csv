@@ -1,0 +1,17 @@
+gameinfo,team_id,team__name,fh,sh,pa,isHome,standing,pf,league_id,opponent_team_id,opponent_league_id,status
+1001,1,Spatz,24,13,38,TRUE,Group 1,37,5,2,5,beendet
+1001,2,Firecats,18,20,37,FALSE,Group 1,38,5,1,5,beendet
+1002,3,LLions,20,13,8,TRUE,Group 1,33,5,2,5,beendet
+1002,2,Firecats,8,0,33,FALSE,Group 1,8,5,3,5,beendet
+1003,1,Spatz,28,12,39,TRUE,Group 1,40,5,6,5,beendet
+1003,6,Aachen,21,18,40,FALSE,Group 1,39,5,1,5,beendet
+1004,4,Dukes,37,21,21,TRUE,Group 1,58,5,5,5,beendet
+1004,5,Würz,14,7,58,FALSE,Group 1,21,5,4,5,beendet
+1005,4,Dukes,24,21,25,TRUE,Group 1,45,5,6,5,beendet
+1005,6,Aachen,19,6,45,FALSE,Group 1,25,5,4,5,beendet
+1006,4,Dukes,0,26,53,TRUE,Group 1,26,5,7,5,beendet
+1006,7,Mülh,34,19,26,FALSE,Group 1,53,5,4,5,beendet
+1007,7,Mülh,19,0,46,TRUE,Group 1,19,5,1,5,beendet
+1007,1,Spatz,16,30,19,FALSE,Group 1,46,5,7,5,beendet
+1008,2,Firecats,14,7,18,TRUE,Group 1,21,5,8,5,beendet
+1008,8,Lions,12,6,21,FALSE,Group 1,18,5,2,5,beendet

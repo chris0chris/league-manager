@@ -1,0 +1,9 @@
+team_id,team__name,pf,pa,wins,draws,losses,games_played,win_points,max_win_points,standing,diff,win_quotient,direct_wins,direct_point_diff,direct_points_scored,overall_point_diff,overall_points_scored,name_ascending,rank
+3,LLions,33,8,1,0,0,1,1.0,1.0,Group 1,25,1.0,0,0,0,0,0,,1
+4,Dukes,129,99,2,0,1,3,2.0,3.0,Group 1,30,0.667,0,0,0,30,129,dukes,2
+1,Spatz,123,96,2,0,1,3,2.0,3.0,Group 1,27,0.667,0,0,0,27,123,spatz,3
+2,Firecats,67,88,2,0,1,3,2.0,3.0,Group 1,-21,0.667,0,0,0,-21,67,firecats,4
+7,Mülh,72,72,1,0,1,2,1.0,2.0,Group 1,0,0.5,0,0,0,0,0,,5
+8,Lions,18,21,0,0,1,1,0.0,1.0,Group 1,-3,0.0,0,0,0,-3,18,lions,6
+6,Aachen,64,85,0,0,2,2,0.0,2.0,Group 1,-21,0.0,0,0,0,-21,64,aachen,7
+5,Würz,21,58,0,0,1,1,0.0,1.0,Group 1,-37,0.0,0,0,0,-37,21,würz,8

@@ -50,6 +50,10 @@ class TestTieBreakEngine:
                 "one_game_played_games.csv",
                 "one_game_played_table_expected.csv",
             ),
+            (
+                "tie_3_teams_1_not_played_against_others_games.csv",
+                "tie_3_teams_1_not_played_against_others_table_expected.csv",
+            ),
         ],
         ids=[
             "direct_points_diff",
@@ -59,6 +63,7 @@ class TestTieBreakEngine:
             "name",
             "win_quotient",
             "one_game_played",
+            "tie_3_teams_1_not_played_against_others",
         ],
     )
     def test_run_tie_break_step(self, games_file, expected_result_file):
