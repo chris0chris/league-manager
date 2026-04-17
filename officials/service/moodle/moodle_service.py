@@ -2,11 +2,10 @@ import concurrent
 import math
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 from time import time
+from typing import Any
 
 from django.conf import settings
-from django.core.exceptions import MultipleObjectsReturned
 from django.db import connections
 from django.db.models import QuerySet
 from django.urls import reverse
@@ -62,7 +61,7 @@ class MoodleService:
     def get_exams(self):
         return getattr(self._thread_local, "exams", EmptyApiExams())
 
-    def get_all_users_for_course(self, course_id) -> []:
+    def get_all_users_for_course(self, course_id) -> list[Any]:
         participants: ApiParticipants = self.moodle_api.get_participants_for_course(
             course_id
         )
@@ -90,7 +89,6 @@ class MoodleService:
             }
 
             for future in concurrent.futures.as_completed(futures):
-                course = futures[future]
                 team_name_set, missed_official, course_result = future.result()
                 missing_team_names.update(team_name_set)
                 missed_officials_list += missed_official
@@ -133,9 +131,8 @@ class MoodleService:
                 [],
                 f"Kurs als nicht relevant markiert -> Kurs-Enddatum: {course.end_date} / Kurs-Lizenzstufe: {LicenseCalculator.get_license_name(course.get_license_id())}",
             )
-        year = datetime.today().year
         self.license_history = OfficialLicenseHistory.objects.filter(
-            created_at__year=year
+            created_at__year=course.get_year()
         )
         exams = self.moodle_api.get_exams_for_course(course.get_id())
         if exams.is_empty():
@@ -283,11 +280,6 @@ class MoodleService:
 
     # noinspection PyMethodMayBeStatic
     def _get_first(self, query_set: QuerySet):
-        if query_set.count() > 1:
-            raise MultipleObjectsReturned(
-                f"For the following QuerySet multiple items found {query_set} "
-                f"with WHERE-clause {query_set.query.where}"
-            )
         return query_set.first()
 
     def get_user_info_by(self, external_id) -> ApiUserInfo:
