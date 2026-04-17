@@ -64,7 +64,7 @@
     "@vitest/coverage-v8": "4.1.4",
     "@vitest/ui": "4.1.4",
     "esbuild": "^0.28.0",
-    "eslint": "10.2.0",
+    "eslint": "10.2.1",
     "eslint-formatter-junit": "9.0.1",
     "eslint-plugin-react-hooks": "7.0.1",
     "i18next-resources-for-ts": "2.0.2",
