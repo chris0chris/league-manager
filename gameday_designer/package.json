@@ -67,7 +67,7 @@
     "eslint": "10.2.1",
     "eslint-formatter-junit": "9.0.1",
     "eslint-plugin-react-hooks": "7.0.1",
-    "i18next-resources-for-ts": "2.0.2",
+    "i18next-resources-for-ts": "2.1.0",
     "jsdom": "29.0.2",
     "typescript": "6.0.3",
     "typescript-eslint": "8.58.2",
