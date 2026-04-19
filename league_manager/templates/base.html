@@ -30,6 +30,12 @@
     <script src="https://unpkg.com/alpinejs" defer></script>
 </head>
 <body>
+{% if DEMO_MODE %}
+<div style="background-color: #ff6b35; color: white; padding: 8px; text-align: center; font-weight: bold;">
+    ⚠️ You are viewing the <strong>DEMO ENVIRONMENT</strong> • Data resets daily at midnight UTC
+    <a href="{% url 'demo_info' %}" style="color: white; text-decoration: underline; margin-left: 15px;">Learn more</a>
+</div>
+{% endif %}
 {% if not request.GET.isExtern %}
 <header class="site-header">
     <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">

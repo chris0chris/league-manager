@@ -20,3 +20,7 @@ def pages_links(request):
 
 def debug_status(request):
     return {"DEBUG": settings.DEBUG}
+
+
+def demo_mode(request):
+    return {"DEMO_MODE": getattr(settings, "DEMO_MODE", False)}

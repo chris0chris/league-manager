@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  demo-db:
+    image: mariadb:11
+    container_name: ${COMPOSE_PROJECT_NAME}.demo-db
+    environment:
+      MYSQL_ROOT_PASSWORD: demo_root_pass_change_me
+      MYSQL_DATABASE: demo_db
+      MYSQL_USER: demo_user
+      MYSQL_PASSWORD: demo_user_pass_change_me
+    volumes:
+      - demo-db-data:/var/lib/mysql
+    networks:
+      - backend
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "sh", "-c", "mariadb -h localhost --skip-ssl -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
+      interval: 15s
+      timeout: 5s
+      retries: 15
+      start_period: 90s
+    restart: unless-stopped
+
+  demo-app:
+    image: leaguesphere/backend:demo
+    container_name: ${COMPOSE_PROJECT_NAME}.demo-app
+    command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
+    environment:
+      DJANGO_SETTINGS_MODULE: league_manager.settings.demo
+    env_file:
+      - .env.demo
+    networks:
+      - backend
+      - proxy
+    depends_on:
+      demo-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -A healthcheck -H \"Accept: application/json\" http://localhost:8000/health/?format=json"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=false"
+
+  demo-nginx:
+    image: leaguesphere/frontend:demo
+    container_name: ${COMPOSE_PROJECT_NAME}.demo-nginx
+    volumes:
+      - ./container/nginx.demo.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - backend
+      - proxy
+    depends_on:
+      demo-app:
+        condition: service_healthy
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.demo.rule=Host(`demo.leaguesphere.app`)"
+      - "traefik.http.routers.demo.entrypoints=websecure"
+      - "traefik.http.routers.demo.tls.certresolver=letsencrypt"
+      - "traefik.http.services.demo.loadbalancer.server.port=80"
+      - "ofelia.enabled=true"
+      - "ofelia.job-exec.demo-reset.schedule=0 0 * * *"
+      - "ofelia.job-exec.demo-reset.command=docker restart ${COMPOSE_PROJECT_NAME}.demo-app ${COMPOSE_PROJECT_NAME}.demo-nginx ${COMPOSE_PROJECT_NAME}.demo-db"
+
+volumes:
+  demo-db-data:
+
+networks:
+  backend:
+    internal: true
+  proxy:
+    external: true
