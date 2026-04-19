@@ -7,7 +7,7 @@
     "@types/node": "25.6.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "axios": "1.15.0",
+    "axios": "1.15.1",
     "bootstrap": "5.3.8",
     "bootstrap-icons": "1.13.1",
     "i18next": "26.0.6",
