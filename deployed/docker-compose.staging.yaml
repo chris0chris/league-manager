@@ -59,7 +59,7 @@ services:
       - backend
       - proxy
     depends_on:
-      app:
+      staging-app:
         condition: service_healthy
     restart: unless-stopped
 
