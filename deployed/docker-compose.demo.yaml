@@ -64,7 +64,7 @@ services:
     restart: unless-stopped
 
   demo-app:
-    image: leaguesphere/backend:backend
+    image: leaguesphere/backend:demo
     container_name: ${COMPOSE_PROJECT_NAME}.demo-app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     healthcheck:
