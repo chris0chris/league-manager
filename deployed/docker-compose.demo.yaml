@@ -64,8 +64,8 @@ services:
     restart: unless-stopped
 
   demo-app:
-    image: leaguesphere/backend:demo-app
-    container_name: ${COMPOSE_PROJECT_NAME}.backend
+    image: leaguesphere/backend:backend
+    container_name: ${COMPOSE_PROJECT_NAME}.demo-app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     healthcheck:
       test: ["CMD-SHELL", "curl -A healthcheck -H \"Accept: application/json\" http://localhost:8000/health/?format=json"]
