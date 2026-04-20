@@ -28,7 +28,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}.www
     volumes:
       - "./nginx-default.conf:/etc/nginx/conf.d/default.conf:ro"
-      - "./healthcheck.sh:/healthcheck.sh:ro"
+      - "./healthcheck.sh:/healthcheck.sh"
     labels:
       # HTTP -> HTTPS redirect
       - traefik.http.routers.${SERVICE_NAME}-http.entrypoints=web
