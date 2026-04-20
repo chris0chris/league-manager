@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from rest_framework import permissions
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.exceptions import PermissionDenied, NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -71,21 +71,22 @@ class PasscheckRosterAPIView(APIView):
 
     @get_user_request_permission
     def get(self, request, **kwargs):
-        team = kwargs.get("pk")
+        team_id = kwargs.get("pk")
         gameday_id = kwargs.get("gameday")
         user_permission: UserRequestPermission = kwargs.get("user_permission")
         user_permission.is_user = True
-        if team:
-            passcheck = PasscheckService(user_permission)
-            try:
-                return Response(
-                    passcheck.get_roster_with_validation(team, gameday_id),
-                    status=HTTPStatus.OK,
-                )
-            except PasscheckException:
-                raise PermissionDenied(detail=f"Permission denied for Gameday: {gameday_id}")
-            except LookupError as exception:
-                raise NotFound(detail=f"Not found for Team: {team} on Gameday: {gameday_id} -> {exception}")
+        if team_id is None or gameday_id is None:
+            raise ValidationError(detail=f"Team-ID and Gameday-ID is required!")
+        passcheck = PasscheckService(user_permission)
+        try:
+            return Response(
+                passcheck.get_roster_with_validation(int(team_id), int(gameday_id)),
+                status=HTTPStatus.OK,
+            )
+        except PasscheckException:
+            raise PermissionDenied(detail=f"Permission denied for Gameday: {gameday_id}")
+        except LookupError as exception:
+            raise NotFound(detail=f"Not found for Team: {team_id} on Gameday: {gameday_id} -> {exception}")
 
     def put(self, request, **kwargs):
         data = request.data
