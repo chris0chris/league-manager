@@ -28,7 +28,7 @@ services:
     image: leaguesphere/frontend:demo
     container_name: ${COMPOSE_PROJECT_NAME}.www
     volumes:
-      - "../container/nginx.demo.conf:/etc/nginx/conf.d/default.conf:ro"
+      - "../container/nginx.conf:/etc/nginx/conf.d/default.conf:ro"
       - "../container/healthcheck.demo.sh:/healthcheck.sh"
     labels:
       # HTTP -> HTTPS redirect
