@@ -240,6 +240,9 @@ class GamedayDetailView(DetailView):
             "passcheck_info_table": passcheck_info_table,
             "url_pattern_official": url_pattern_official,
             "url_pattern_official_signup": url_pattern_official_signup,
+            "url_pattern_league_filter": UrlService.build_absolute_url(
+                LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE, {"season": gameday.season, "league": gameday.league}
+            ),
             "url_pattern_liveticker": f"{UrlService.build_absolute_url(LIVETICKER_HOME)}?league={gameday.league.name}&gameday={gameday.pk}",
         }
 
