@@ -21,9 +21,11 @@ const TeamPickerStep: React.FC<TeamPickerStepProps> = ({
 
   useEffect(() => {
     if (show) {
-      setSelectedIds([]);
-      setLocalTeams([]);
-      setCreating(false);
+      Promise.resolve().then(() => {
+        setSelectedIds([]);
+        setLocalTeams([]);
+        setCreating(false);
+      });
     }
   }, [show]);
 

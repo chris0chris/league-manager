@@ -26,8 +26,10 @@ const TeamSelectionModal: React.FC<TeamSelectionModalProps> = ({
 
   useEffect(() => {
     if (!show) {
-      setQuery('');
-      setResults([]);
+      Promise.resolve().then(() => {
+        setQuery('');
+        setResults([]);
+      });
     }
   }, [show]);
 

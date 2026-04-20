@@ -67,9 +67,11 @@ const TemplateLibraryModal: React.FC<TemplateLibraryModalProps> = ({
   // Fetch league teams and reset team picker state when entering team-picker step
   useEffect(() => {
     if (step !== 'team-picker') return;
-    setSelectedIds([]);
-    setLocalTeams([]);
-    setCreating(false);
+    Promise.resolve().then(() => {
+      setSelectedIds([]);
+      setLocalTeams([]);
+      setCreating(false);
+    });
     designerApi.getLeagueTeams(gamedayId)
       .then(teams => setLeagueTeams(
         teams.map((t, i) => ({ id: String(t.id), label: t.name, groupId: null, order: i }))
