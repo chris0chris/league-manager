@@ -26,9 +26,6 @@ SITEMAP_DOMAIN = "demo.leaguesphere.app"
 # Trust X-Forwarded-Proto header from nginx proxy
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# Trust X-Forwarded-Host header from reverse proxy chain
-USE_X_FORWARDED_HOST = True
-
 # Database configuration for demo environment
 # Local dev uses SQLite, Docker uses MySQL
 mysql_host = os.environ.get('MYSQL_HOST', 'demo-db')
