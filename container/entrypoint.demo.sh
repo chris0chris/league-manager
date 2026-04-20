@@ -39,9 +39,6 @@ init_database() {
     python manage.py migrate --noinput
     log "Migrations completed"
 
-    python manage.py collectstatic --noinput
-    log "Static files collected"
-
     python manage.py seed_demo_data
     log "Demo data seeded"
 
