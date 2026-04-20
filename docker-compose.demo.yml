@@ -56,13 +56,13 @@ services:
       - backend
       - proxy
     depends_on:
-      app:
+      backend:
         condition: service_healthy
     restart: unless-stopped
 
-  app:
+  backend:
     image: leaguesphere/backend:demo
-    container_name: ${COMPOSE_PROJECT_NAME}.app
+    container_name: ${COMPOSE_PROJECT_NAME}.backend
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     healthcheck:
       test: ["CMD-SHELL", "curl -A healthcheck -H \"Accept: application/json\" http://localhost:8000/health/?format=json"]
