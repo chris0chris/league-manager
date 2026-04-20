@@ -1,6 +1,6 @@
 {
   "name": "passcheck",
-  "version": "3.11.3+demo.6",
+  "version": "3.11.3+demo.7",
   "private": true,
   "type": "module",
   "dependencies": {
