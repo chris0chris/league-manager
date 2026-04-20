@@ -26,6 +26,7 @@ services:
 
   www:
     image: leaguesphere/frontend:staging
+    env_file: .env.staging
     container_name: ${COMPOSE_PROJECT_NAME}.www
     volumes:
       - "../container/nginx.staging.conf:/etc/nginx/conf.d/default.conf:ro"

@@ -2,6 +2,7 @@ name: ${SERVICE_NAME}
 services:
   www:
     image: leaguesphere/frontend:latest
+    env_file: .env
     container_name: ${COMPOSE_PROJECT_NAME}.www
     labels:
       # redirect service
