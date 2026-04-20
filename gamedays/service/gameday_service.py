@@ -40,6 +40,7 @@ from gamedays.service.gameday_settings import (
     OVERTIME,
     GAME_END,
     WIN_POINTS,
+    ID,
 )
 from gamedays.service.model_wrapper import GamedayModelWrapper
 
@@ -220,8 +221,7 @@ class GamedayService:
 
     def get_schedule(self):
         schedule = self.gmw.get_schedule()
-        # TODO remove id
-        columns = ['id', SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, STANDING, STAGE, STATUS,
+        columns = [ID, SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, STANDING, STAGE, STATUS,
             GAMEINFO_ID,
         ]
         schedule = schedule[columns]

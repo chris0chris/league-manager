@@ -48,6 +48,7 @@ from .models import Gameday, Gameinfo
 from .service.builders import TableContextBuilder
 from .service.gameday_form_service import GamedayFormService
 from .service.gameday_service import GamedayService, GamedayGameService
+from .service.gameday_settings import ID
 from .service.league_statistics_service import LeagueStatisticsService
 from .wizard import (
     FIELD_GROUP_STEP,
@@ -217,13 +218,16 @@ class GamedayDetailView(DetailView):
 
         passcheck_info_table = ""
 
+        schedule = gs.get_schedule()
         if self.request.user.is_staff:
             passcheck_info_table = gs.get_staff_passcheck_details().to_html(
                 **render_configs
             )
+        else:
+            del schedule[ID]
 
         context["info"] = {
-            "schedule": gs.get_schedule().to_html(**render_configs),
+            "schedule": schedule.to_html(**render_configs),
             "qualify_table": qualify_table,
             "final_table": final_table,
             "officials": officials,
