@@ -83,9 +83,9 @@ class PasscheckRosterAPIView(APIView):
                     status=HTTPStatus.OK,
                 )
             except PasscheckException:
-                raise PermissionDenied(detail=f"Permission denied for {gameday_id}")
+                raise PermissionDenied(detail=f"Permission denied for Gameday: {gameday_id}")
             except LookupError as exception:
-                raise NotFound(detail=f"Not found for {team} on {gameday_id}")
+                raise NotFound(detail=f"Not found for Team: {team} on Gameday: {gameday_id} -> {exception}")
 
     def put(self, request, **kwargs):
         data = request.data
