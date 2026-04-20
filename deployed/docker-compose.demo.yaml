@@ -52,7 +52,7 @@ services:
       - io.portainer.accesscontrol.teams=leaguesphere
 
       # Watchtower scope
-      - com.centurylinklabs.watchtower.scope=demo
+      - com.centurylinklabs.watchtower.scope=dev
     networks:
       - backend
       - proxy
@@ -76,7 +76,7 @@ services:
       # portainer team
       - io.portainer.accesscontrol.teams=leaguesphere
       # Watchtower scope
-      - com.centurylinklabs.watchtower.scope=demo
+      - com.centurylinklabs.watchtower.scope=dev
     env_file: ls.env.demo
     environment:
       DJANGO_SETTINGS_MODULE: league_manager.settings.demo
