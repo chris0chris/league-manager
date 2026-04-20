@@ -27,6 +27,8 @@ services:
   www:
     image: leaguesphere/frontend:staging
     container_name: ${COMPOSE_PROJECT_NAME}.www
+    volumes:
+      - "../container/nginx.staging.conf:/etc/nginx/conf.d/default.conf:ro"
     labels:
       # HTTP -> HTTPS redirect
       - traefik.http.routers.${SERVICE_NAME}-http.entrypoints=web
@@ -61,9 +63,9 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  app:
+  staging-app:
     image: leaguesphere/backend:staging
-    container_name: ${COMPOSE_PROJECT_NAME}.app
+    container_name: ${COMPOSE_PROJECT_NAME}.staging-app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     healthcheck:
       test: ["CMD-SHELL", "curl -A healthcheck -H \"Accept: application/json\" http://localhost:8000/health/?format=json"]

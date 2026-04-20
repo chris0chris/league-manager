@@ -42,7 +42,7 @@ services:
     labels:
       - traefik.enable=false
       # portainer team
-      - io.portainer.accesscontrol.teams=${SERVICE_NAME}
+      - io.portainer.accesscontrol.teams=leaguesphere
       - com.centurylinklabs.watchtower.scope=prod
     env_file: ls.env
     environment:
