@@ -23,7 +23,7 @@ dependencies = [
     "python-dotenv==1.2.2",
     "mysqlclient==2.2.8",
     "requests==2.33.1",
-    "django-health-check==4.2.2",
+    "django-health-check==4.4.0",
 ]
 
 [project.optional-dependencies]
