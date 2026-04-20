@@ -28,7 +28,7 @@ services:
     image: leaguesphere/frontend:demo
     container_name: ${COMPOSE_PROJECT_NAME}.www
     volumes:
-      - "../container/nginx.conf:/etc/nginx/conf.d/default.conf:ro"
+      - "../container/nginx.demo.conf:/etc/nginx/conf.d/default.conf:ro"
       - "../container/healthcheck.demo.sh:/healthcheck.sh"
     labels:
       # HTTP -> HTTPS redirect
@@ -60,11 +60,11 @@ services:
       - backend
       - proxy
     depends_on:
-      backend:
+      demo-app:
         condition: service_healthy
     restart: unless-stopped
 
-  backend:
+  demo-app:
     image: leaguesphere/backend:demo
     container_name: ${COMPOSE_PROJECT_NAME}.backend
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
