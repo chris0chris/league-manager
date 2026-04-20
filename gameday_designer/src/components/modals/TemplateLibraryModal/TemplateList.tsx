@@ -59,7 +59,9 @@ const TemplateList: React.FC<TemplateListProps> = ({ selectedId, onSelect, searc
     }
   }, [searchQuery]);
 
-  useEffect(() => { fetchTemplates(); }, [fetchTemplates]);
+  useEffect(() => { 
+    Promise.resolve().then(() => fetchTemplates()); 
+  }, [fetchTemplates]);
 
   const builtins = getAllTemplates().filter(t =>
     !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase())
