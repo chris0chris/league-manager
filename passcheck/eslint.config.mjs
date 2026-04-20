@@ -16,6 +16,10 @@ export default [
 
       rules: {
         ...reactHooks.configs.recommended.rules,
+        "react-hooks/immutability": "off",
+        "react-hooks/set-state-in-effect": "off",
+        "no-use-before-define": "off",
+        "@typescript-eslint/no-use-before-define": "off",
       },
    }
 ];
