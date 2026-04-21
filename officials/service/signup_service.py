@@ -115,7 +115,6 @@ class OfficialSignupService:
             .values_list("full_name", flat=True)
 )
         all_gamedays = Gameday.objects.filter(date__gte=datetime.today())
-        all_gamedays = Gameday.objects.filter(date__year=2025)
         relevant_leagues = all_gamedays.order_by().values_list('league__name', flat=True).distinct()
 
         # Subqueries for config and override values

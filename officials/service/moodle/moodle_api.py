@@ -70,7 +70,8 @@ class ApiUserInfo:
 
 
 class ApiCourse:
-    def __init__(self, course_json):
+    def __init__(self, course_json, ignore_year: bool = False):
+        self.ignore_year = ignore_year
         self.end_date = datetime.fromtimestamp(course_json["enddate"])
         self.license_id = self._map_category_to_license_id(course_json["categoryid"])
         self.course_id = course_json["id"]
@@ -96,7 +97,7 @@ class ApiCourse:
         year = datetime.today().year
         if self.course_id == 15:
             return True
-        return self.end_date.year == year and self.license_id in [
+        return (self.end_date.year == year or self.ignore_year) and self.license_id in [
             LicenseStrategy.F1_LICENSE,
             LicenseStrategy.F2_LICENSE,
             LicenseStrategy.F3_LICENSE,
@@ -122,11 +123,11 @@ class ApiCourse:
 
 
 class ApiCourses:
-    def __init__(self, courses_json):
+    def __init__(self, courses_json, ignore_year: bool = False):
         all_courses = courses_json.get("courses", [])
         self.courses = []
         for current_course in all_courses:
-            self.courses += [ApiCourse(current_course)]
+            self.courses += [ApiCourse(current_course, ignore_year)]
 
     def __str__(self):
         return f"Number courses: {len(self.courses)}"
@@ -267,15 +268,17 @@ class MoodleApi:
             ).json()
         )
 
-    def get_courses(self, ids: str = None) -> ApiCourses:
+    def get_courses(self, ids: str = None, ignore_year: bool = False) -> ApiCourses:
         if ids is None:
             return ApiCourses(
-                self._send_request("&wsfunction=core_course_get_courses_by_field")
+                self._send_request("&wsfunction=core_course_get_courses_by_field"),
+                ignore_year,
             )
         return ApiCourses(
             self._send_request(
                 f"&wsfunction=core_course_get_courses_by_field&field=ids&value={ids}"
-            )
+            ),
+            ignore_year,
         )
 
     def get_participants_for_course(self, course_id: int) -> ApiParticipants:
