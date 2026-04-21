@@ -41,11 +41,12 @@ COPY --from=app-builder --chown=${APP_USER}:${APP_USER} /app/.venv ${APP_DIR}/.v
 # Copy the application code
 COPY --chown=${APP_USER}:${APP_USER} . ${APP_DIR}
 COPY --chown=${APP_USER}:${APP_USER} container/entrypoint.sh /app/entrypoint.sh
+COPY --chown=${APP_USER}:${APP_USER} container/entrypoint.demo.sh /app/entrypoint.demo.sh
 
 USER ${APP_USER}
 WORKDIR ${APP_DIR}
 
-RUN rm -rf .git/ && chmod 740 /app/entrypoint.sh
+RUN rm -rf .git/ && chmod 740 /app/entrypoint.sh /app/entrypoint.demo.sh
 
 # Use the virtual environment
 ENV PATH="${APP_DIR}/.venv/bin:${PATH}"

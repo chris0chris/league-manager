@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.views.generic import TemplateView
+from django.conf import settings
 
 def homeview(request):
     return render(request, "homeview.html")
@@ -65,3 +67,37 @@ class AllTeamListView(View):
             "app": kwargs.get("app"),
         }
         return render(request, self.template_name, context)
+
+class DemoInfoView(TemplateView):
+    template_name = 'demo/demo_info.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['demo_mode'] = getattr(settings, 'DEMO_MODE', False)
+        context['demo_credentials'] = [
+            {
+                'username': 'admin@demo.local',
+                'password': 'DemoAdmin123!',
+                'role': 'Administrator',
+                'description': 'Full system access, user management',
+            },
+            {
+                'username': 'referee@demo.local',
+                'password': 'DemoRef123!',
+                'role': 'Referee',
+                'description': 'Match officiating and scoring',
+            },
+            {
+                'username': 'manager@demo.local',
+                'password': 'DemoMgr123!',
+                'role': 'Team Manager',
+                'description': 'Team management and roster control',
+            },
+            {
+                'username': 'user@demo.local',
+                'password': 'DemoUser123!',
+                'role': 'Regular User',
+                'description': 'Viewing standings and league information',
+            },
+        ]
+        return context

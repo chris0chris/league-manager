@@ -2,7 +2,7 @@
 set -e
 
 URL="http://localhost/login/"
-ORIGIN="https://leaguesphere.app"
+ORIGIN="${FRONTEND_URL:-https://leaguesphere.app}"
 
 # 0. Check if service is up
 UP_STATUS=$(curl -A healthcheck-status -s -o /dev/null -w "%{http_code}" "$URL")

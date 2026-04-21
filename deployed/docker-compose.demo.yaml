@@ -10,7 +10,7 @@ services:
     volumes:
       - "./mysql-data:/var/lib/mysql"
       - "./mysql-init:/docker-entrypoint-initdb.d:ro"
-    env_file: ls.env.staging
+    env_file: ls.env.demo
     networks:
       - backend
     healthcheck:
@@ -25,15 +25,15 @@ services:
       - io.portainer.accesscontrol.teams=leaguesphere
 
   www:
-    image: leaguesphere/frontend:staging
-    env_file: .env.staging
+    image: leaguesphere/frontend:demo
+    env_file: .env.demo
     container_name: ${COMPOSE_PROJECT_NAME}.www
     volumes:
-      - "../container/nginx.staging.conf:/etc/nginx/conf.d/default.conf:ro"
+      - "../container/nginx.demo.conf:/etc/nginx/conf.d/default.conf:ro"
     labels:
       # HTTP -> HTTPS redirect
       - traefik.http.routers.${SERVICE_NAME}-http.entrypoints=web
-      - traefik.http.routers.${SERVICE_NAME}-http.rule=Host(`stage.leaguesphere.app`)
+      - traefik.http.routers.${SERVICE_NAME}-http.rule=Host(`demo.leaguesphere.app`)
       - traefik.http.routers.${SERVICE_NAME}-http.middlewares=${SERVICE_NAME}-https
       - traefik.http.middlewares.${SERVICE_NAME}-https.redirectscheme.scheme=https
 
@@ -44,7 +44,7 @@ services:
 
       # HTTPS for leaguesphere.app (HTTP resolver)
       - traefik.http.routers.${SERVICE_NAME}_prod.tls=true
-      - traefik.http.routers.${SERVICE_NAME}_prod.rule=Host(`stage.leaguesphere.app`)
+      - traefik.http.routers.${SERVICE_NAME}_prod.rule=Host(`demo.leaguesphere.app`)
       - traefik.http.routers.${SERVICE_NAME}_prod.tls.certresolver=letsencrypthttpresolver
 
       # Local resolution (HTTP)
@@ -60,13 +60,13 @@ services:
       - backend
       - proxy
     depends_on:
-      staging-app:
+      demo-app:
         condition: service_healthy
     restart: unless-stopped
 
-  staging-app:
-    image: leaguesphere/backend:staging
-    container_name: ${COMPOSE_PROJECT_NAME}.staging-app
+  demo-app:
+    image: leaguesphere/backend:demo
+    container_name: ${COMPOSE_PROJECT_NAME}.demo-app
     command: gunicorn -b 0.0.0.0:8000 league_manager.wsgi
     healthcheck:
       test: ["CMD-SHELL", "curl -A healthcheck -H \"Accept: application/json\" http://localhost:8000/health/?format=json"]
@@ -80,9 +80,9 @@ services:
       - io.portainer.accesscontrol.teams=leaguesphere
       # Watchtower scope
       - com.centurylinklabs.watchtower.scope=dev
-    env_file: ls.env.staging
+    env_file: ls.env.demo
     environment:
-      DJANGO_SETTINGS_MODULE: league_manager.settings.stage
+      DJANGO_SETTINGS_MODULE: league_manager.settings.demo
       RUN_MIGRATIONS: true
     networks:
       - backend

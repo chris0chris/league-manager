@@ -12,6 +12,21 @@
             <button class="btn btn-outline-info" type="submit">Login</button>
         </div>
     </form>
+    {% if DEMO_MODE %}
+    <div class="alert alert-info mt-4" role="alert">
+        <h5 class="alert-heading">🎮 Demo Credentials</h5>
+        <p class="mb-2">Try logging in with one of these demo accounts:</p>
+        <ul class="mb-2">
+            <li><strong>admin@demo.local</strong> / <strong>DemoAdmin123!</strong> (Admin)</li>
+            <li><strong>referee@demo.local</strong> / <strong>DemoRef123!</strong> (Referee)</li>
+            <li><strong>manager@demo.local</strong> / <strong>DemoMgr123!</strong> (Manager)</li>
+            <li><strong>user@demo.local</strong> / <strong>DemoUser123!</strong> (User)</li>
+        </ul>
+        <p class="mb-0 small">
+            <a href="{% url 'demo_info' %}">Learn more about the demo →</a>
+        </p>
+    </div>
+    {% endif %}
     <div class="border-top pt-3">
         <small class="text-muted">
             Need An Account? <a class="ml-2" href="#">Sign Up Now</a>
