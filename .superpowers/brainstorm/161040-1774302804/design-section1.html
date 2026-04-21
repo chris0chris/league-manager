@@ -1,0 +1,133 @@
+<h2>Design Section 1 of 4: Entry Point & App Header</h2>
+<p class="subtitle">How users get into the Template Library</p>
+
+<style>
+  .section-block { margin-bottom: 28px; }
+  .section-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; color: #212529; }
+  .change-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+  .tag-removed { background: #f8d7da; color: #dc3545; }
+  .tag-added { background: #d1e7dd; color: #198754; }
+  .tag-changed { background: #fff3cd; color: #856404; }
+
+  .header-mock {
+    background: #212529; color: white;
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 14px;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .brand { font-weight: 700; font-size: 15px; }
+  .nav-sep { color: #6c757d; }
+  .page-title { color: #adb5bd; font-size: 13px; }
+  .spacer { flex: 1; }
+  .header-btn {
+    padding: 6px 14px; border-radius: 5px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-templates {
+    background: #0d6efd; color: white; border: none;
+  }
+  .btn-ghost {
+    background: transparent; color: #adb5bd; border: 1px solid #495057;
+  }
+  .header-user { color: #adb5bd; font-size: 12px; }
+
+  .toolbar-row {
+    background: #f8f9fa; border: 1px solid #dee2e6; border-top: none;
+    padding: 7px 12px; display: flex; gap: 6px; align-items: center;
+    border-radius: 0 0 6px 6px;
+  }
+  .tb-btn {
+    background: white; border: 1px solid #ced4da; border-radius: 4px;
+    padding: 5px 10px; font-size: 12px; color: #212529;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .tb-sep { width: 1px; height: 20px; background: #dee2e6; margin: 0 4px; }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .compare-panel { border-radius: 8px; overflow: hidden; }
+  .compare-label {
+    padding: 8px 12px; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .label-before { background: #f8d7da; color: #dc3545; }
+  .label-after { background: #d1e7dd; color: #198754; }
+
+  .annotation {
+    background: #fff8e1; border-left: 3px solid #ffc107;
+    padding: 10px 14px; font-size: 13px; border-radius: 0 4px 4px 0;
+    margin-top: 10px;
+  }
+  .annotation strong { color: #856404; }
+</style>
+
+<div class="section-block">
+  <div class="section-title">Before vs After: App Header</div>
+  <div class="compare-grid">
+    <div class="compare-panel">
+      <div class="compare-label label-before">Before</div>
+      <div style="padding: 10px; background: #fafafa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 6px 6px;">
+        <div class="header-mock">
+          <span class="brand">⚽ LeagueSphere</span>
+          <span class="nav-sep">|</span>
+          <span class="page-title">Summer Cup 2026</span>
+          <span class="spacer"></span>
+          <div class="header-btn" style="background:#0d6efd;color:white;border:none;">⚡ Generate Tournament</div>
+          <span class="header-user">EN · 👤</span>
+        </div>
+        <div class="toolbar-row">
+          <div class="tb-btn">📥 Import</div>
+          <div class="tb-btn">📤 Export ▾</div>
+          <div class="tb-sep"></div>
+          <div class="tb-btn">↩ Undo</div>
+          <div class="tb-btn">↪ Redo</div>
+          <span style="font-size:11px;color:#adb5bd;margin-left:8px;">← "Export Template" hidden inside dropdown</span>
+        </div>
+      </div>
+    </div>
+    <div class="compare-panel">
+      <div class="compare-label label-after">After</div>
+      <div style="padding: 10px; background: #fafafa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 6px 6px;">
+        <div class="header-mock">
+          <span class="brand">⚽ LeagueSphere</span>
+          <span class="nav-sep">|</span>
+          <span class="page-title">Summer Cup 2026</span>
+          <span class="spacer"></span>
+          <div class="header-btn btn-templates">📚 Templates</div>
+          <span class="header-user">EN · 👤</span>
+        </div>
+        <div class="toolbar-row">
+          <div class="tb-btn">📥 Import</div>
+          <div class="tb-btn">📤 Export</div>
+          <div class="tb-sep"></div>
+          <div class="tb-btn">↩ Undo</div>
+          <div class="tb-btn">↪ Redo</div>
+          <span style="font-size:11px;color:#adb5bd;margin-left:8px;">← Simplified. Template actions moved out.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotation" style="margin-top: 14px;">
+    <strong>Key changes:</strong>
+    "Generate Tournament" → replaced by "📚 Templates" (opens the library modal).
+    Export dropdown simplified — "Export Template" removed from there (save-as-template is now inside the library).
+  </div>
+</div>
+
+<div class="section-block">
+  <div class="section-title">What "Templates" button opens</div>
+  <div style="background: #e7f1ff; border: 1px solid #0d6efd; border-radius: 8px; padding: 14px; font-size: 13px; line-height: 1.8;">
+    Clicking <strong>📚 Templates</strong> opens a full-screen modal overlay — the Template Library.<br>
+    It's the single entry point for:<br>
+    <ul style="margin: 6px 0 0 18px;">
+      <li>Browsing and applying tournament formats (replaces Generate Tournament modal)</li>
+      <li>Browsing and applying saved server-side templates</li>
+      <li>Saving the current schedule as a new template</li>
+      <li>Managing templates: rename, clone, delete, preview</li>
+    </ul>
+  </div>
+</div>
+
+<p style="font-size:14px;margin-top:16px;color:#495057;">Does this entry point feel right? Next section will cover the modal layout and left panel in detail.</p>

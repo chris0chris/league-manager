@@ -1,0 +1,317 @@
+<h2>Design Section 2 of 4: Template Library Modal Layout</h2>
+<p class="subtitle">The full two-panel modal — browse on the left, preview on the right</p>
+
+<style>
+  .modal-window {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.22);
+    overflow: hidden;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .modal-titlebar {
+    background: #212529; color: white;
+    padding: 11px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-titlebar-left { display: flex; align-items: center; gap: 10px; }
+  .modal-icon { font-size: 18px; }
+  .modal-title { font-size: 15px; font-weight: 700; }
+  .modal-titlebar-right { display: flex; align-items: center; gap: 10px; }
+  .close-btn {
+    background: #dc3545; border: none; color: white;
+    border-radius: 50%; width: 22px; height: 22px;
+    font-size: 12px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .save-btn {
+    background: #198754; border: none; color: white;
+    border-radius: 5px; padding: 5px 12px; font-size: 12px;
+    font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;
+  }
+
+  .modal-search-bar {
+    padding: 10px 14px; border-bottom: 1px solid #dee2e6;
+    background: #f8f9fa;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .search-input {
+    flex: 1; background: white; border: 1px solid #ced4da; border-radius: 5px;
+    padding: 6px 12px; font-size: 13px; color: #6c757d;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .filter-pill {
+    background: white; border: 1px solid #ced4da; border-radius: 20px;
+    padding: 5px 12px; font-size: 12px; color: #495057; cursor: pointer;
+    white-space: nowrap;
+  }
+  .filter-pill.active {
+    background: #0d6efd; border-color: #0d6efd; color: white;
+  }
+
+  .two-panel { display: flex; min-height: 380px; }
+
+  /* Left panel */
+  .panel-left {
+    width: 230px; flex-shrink: 0;
+    border-right: 1px solid #dee2e6;
+    background: #fafafa;
+    overflow-y: auto;
+  }
+  .group-header {
+    padding: 10px 12px 5px;
+    font-size: 10px; font-weight: 800; text-transform: uppercase;
+    color: #6c757d; letter-spacing: 0.6px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .group-count {
+    background: #dee2e6; color: #6c757d; border-radius: 10px;
+    padding: 1px 7px; font-size: 10px;
+  }
+  .tpl-item {
+    padding: 8px 14px 8px 12px;
+    font-size: 13px; cursor: pointer;
+    border-left: 3px solid transparent;
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.1s;
+  }
+  .tpl-item:hover { background: #f0f0f0; }
+  .tpl-item.active {
+    background: #e7f1ff; border-left-color: #0d6efd; color: #0d6efd; font-weight: 600;
+  }
+  .tpl-icon { font-size: 15px; flex-shrink: 0; }
+  .tpl-meta { font-size: 10px; color: #adb5bd; display: block; font-weight: 400; }
+  .tpl-item.active .tpl-meta { color: #6ea8fe; }
+  .panel-divider { height: 1px; background: #dee2e6; margin: 6px 0; }
+
+  /* Right panel */
+  .panel-right { flex: 1; display: flex; flex-direction: column; }
+  .preview-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .preview-title { font-size: 18px; font-weight: 700; margin: 0 0 3px; }
+  .preview-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .badge {
+    background: #e9ecef; color: #495057; border-radius: 20px;
+    padding: 3px 10px; font-size: 11px; font-weight: 500;
+  }
+  .badge-blue { background: #e7f1ff; color: #0d6efd; }
+  .badge-green { background: #d1e7dd; color: #198754; }
+
+  .preview-body { flex: 1; padding: 16px 20px; overflow-y: auto; }
+
+  .stage-flow {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .stage-pill {
+    background: #e7f1ff; color: #0d6efd; border-radius: 6px;
+    padding: 5px 12px; font-size: 12px; font-weight: 600;
+    border: 1px solid #bbd6ff;
+  }
+  .stage-arrow { color: #adb5bd; font-size: 16px; }
+
+  .diagram-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6c757d; margin-bottom: 8px; letter-spacing: 0.4px; }
+  .field-diagram { display: flex; gap: 8px; }
+  .field-col { flex: 1; }
+  .field-head {
+    background: #495057; color: white;
+    text-align: center; font-size: 11px; padding: 4px;
+    border-radius: 4px 4px 0 0; font-weight: 600;
+  }
+  .game-slot {
+    border: 1px solid #dee2e6; border-top: none;
+    padding: 5px 6px; background: white;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .game-slot:last-child { border-radius: 0 0 4px 4px; }
+  .team-row {
+    display: flex; align-items: center; gap: 4px; font-size: 11px;
+  }
+  .team-chip {
+    background: #e9ecef; border-radius: 3px;
+    padding: 2px 6px; color: #495057; font-size: 10px; font-weight: 500;
+  }
+  .team-chip.highlight { background: #e7f1ff; color: #0d6efd; }
+  .vs { color: #adb5bd; font-size: 10px; }
+
+  .config-section {
+    background: #fff8e1; border: 1px solid #ffc107; border-radius: 6px;
+    padding: 12px 14px; margin-top: 14px; font-size: 13px;
+  }
+  .config-section h4 { margin: 0 0 8px; font-size: 13px; color: #856404; }
+  .config-row { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+  .config-label { font-size: 12px; color: #856404; width: 100px; }
+  .config-input {
+    background: white; border: 1px solid #ffc107; border-radius: 4px;
+    padding: 4px 10px; font-size: 12px; color: #212529; width: 80px;
+  }
+
+  .preview-footer {
+    padding: 12px 20px; border-top: 1px solid #dee2e6;
+    background: #f8f9fa; display: flex; gap: 8px; align-items: center;
+  }
+  .btn { padding: 7px 16px; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+  .btn-primary { background: #0d6efd; color: white; }
+  .btn-outline { background: white; color: #495057; border: 1px solid #ced4da; }
+  .btn-danger-outline { background: white; color: #dc3545; border: 1px solid #dc3545; }
+  .spacer { flex: 1; }
+
+  .annotation {
+    background: #f0f4ff; border-left: 3px solid #0d6efd;
+    padding: 10px 14px; font-size: 12px; border-radius: 0 5px 5px 0;
+    margin-top: 10px; color: #495057;
+  }
+  .annotation strong { color: #0d6efd; }
+</style>
+
+<div style="background:#f1f3f5;padding:20px;border-radius:10px;">
+  <div class="modal-window">
+    <!-- Title bar -->
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <span class="modal-icon">📚</span>
+        <span class="modal-title">Template Library</span>
+      </div>
+      <div class="modal-titlebar-right">
+        <button class="save-btn">💾 Save current as template</button>
+        <button class="close-btn">✕</button>
+      </div>
+    </div>
+
+    <!-- Search & filters -->
+    <div class="modal-search-bar">
+      <div class="search-input">🔍 <span>Search templates...</span></div>
+      <div class="filter-pill active">All</div>
+      <div class="filter-pill">🏆 Tournament formats</div>
+      <div class="filter-pill">📄 My templates</div>
+      <div class="filter-pill">🌐 Association</div>
+    </div>
+
+    <!-- Two-panel body -->
+    <div class="two-panel">
+      <!-- Left: template list -->
+      <div class="panel-left">
+        <div class="group-header">Tournament Formats <span class="group-count">4</span></div>
+        <div class="tpl-item active">
+          <span class="tpl-icon">🏆</span>
+          <div>6-Team Cup <span class="tpl-meta">2 groups → Semis → Final</span></div>
+        </div>
+        <div class="tpl-item">
+          <span class="tpl-icon">🏆</span>
+          <div>8-Team Playoff <span class="tpl-meta">2 groups → Playoffs</span></div>
+        </div>
+        <div class="tpl-item">
+          <span class="tpl-icon">🏆</span>
+          <div>Round Robin <span class="tpl-meta">All vs all</span></div>
+        </div>
+        <div class="tpl-item">
+          <span class="tpl-icon">🏆</span>
+          <div>10-Team League <span class="tpl-meta">5 rounds, 2 fields</span></div>
+        </div>
+        <div class="panel-divider"></div>
+        <div class="group-header">My Templates <span class="group-count">2</span></div>
+        <div class="tpl-item">
+          <span class="tpl-icon">📄</span>
+          <div>Club Standard <span class="tpl-meta">Saved 12 Jan 2026</span></div>
+        </div>
+        <div class="tpl-item">
+          <span class="tpl-icon">📄</span>
+          <div>3v3 Format <span class="tpl-meta">Saved 5 Feb 2026</span></div>
+        </div>
+        <div class="panel-divider"></div>
+        <div class="group-header">Association <span class="group-count">1</span></div>
+        <div class="tpl-item">
+          <span class="tpl-icon">🌐</span>
+          <div>Regional Cup <span class="tpl-meta">Shared by admin</span></div>
+        </div>
+      </div>
+
+      <!-- Right: preview -->
+      <div class="panel-right">
+        <div class="preview-header">
+          <div class="preview-title">6-Team Cup Format</div>
+          <div class="preview-badges">
+            <span class="badge badge-blue">Built-in</span>
+            <span class="badge">6 teams</span>
+            <span class="badge">2 fields</span>
+            <span class="badge">~90 min</span>
+          </div>
+        </div>
+        <div class="preview-body">
+          <div class="stage-flow">
+            <div class="stage-pill">Group Stage</div>
+            <div class="stage-arrow">→</div>
+            <div class="stage-pill">Semifinals</div>
+            <div class="stage-arrow">→</div>
+            <div class="stage-pill">Final + 3rd Place</div>
+          </div>
+
+          <div class="diagram-label">Schedule structure</div>
+          <div class="field-diagram">
+            <div class="field-col">
+              <div class="field-head">Field 1</div>
+              <div class="game-slot">
+                <div class="team-row"><span class="team-chip">Group A1</span><span class="vs">vs</span><span class="team-chip">Group B2</span></div>
+              </div>
+              <div class="game-slot">
+                <div class="team-row"><span class="team-chip">Group A2</span><span class="vs">vs</span><span class="team-chip">Group B1</span></div>
+              </div>
+              <div class="game-slot">
+                <div class="team-row"><span class="team-chip highlight">Semi 1 Winner</span><span class="vs">vs</span><span class="team-chip highlight">Semi 2 Winner</span></div>
+              </div>
+            </div>
+            <div class="field-col">
+              <div class="field-head">Field 2</div>
+              <div class="game-slot">
+                <div class="team-row"><span class="team-chip">Group A3</span><span class="vs">vs</span><span class="team-chip">Group B3</span></div>
+              </div>
+              <div class="game-slot">
+                <div class="team-row"><span class="team-chip">Group B#1</span><span class="vs">vs</span><span class="team-chip">Group A#2</span></div>
+              </div>
+              <div class="game-slot">
+                <div class="team-row"><span class="team-chip highlight">Semi 1 Loser</span><span class="vs">vs</span><span class="team-chip highlight">Semi 2 Loser</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Config inputs — shown only for tournament formats -->
+          <div class="config-section">
+            <h4>⚙️ Configure before applying</h4>
+            <div class="config-row">
+              <span class="config-label">Start time</span>
+              <input class="config-input" value="09:00" type="time">
+            </div>
+            <div class="config-row">
+              <span class="config-label">Game duration</span>
+              <input class="config-input" value="15 min">
+            </div>
+            <div class="config-row">
+              <span class="config-label">Break after</span>
+              <input class="config-input" value="5 min">
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer actions -->
+        <div class="preview-footer">
+          <button class="btn btn-primary">Apply to Gameday →</button>
+          <button class="btn btn-outline">Clone & Edit</button>
+          <span class="spacer"></span>
+          <button class="btn btn-danger-outline">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="annotation" style="margin-top:14px;">
+  <strong>Notes:</strong>
+  Tournament formats (built-in, from <code>tournamentTemplates.ts</code>) show a configure panel for start time / game duration — replaces the old TournamentGeneratorModal.
+  Saved templates (from the backend API) show a preview and go straight to Apply.
+  "Save current as template" in the titlebar opens an inline name-prompt without leaving the modal.
+</div>
+
+<p style="font-size:14px;margin-top:14px;color:#495057;">Does this layout work? Next: the "Apply" flow and saving a new template.</p>

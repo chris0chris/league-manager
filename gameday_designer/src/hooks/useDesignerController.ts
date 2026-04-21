@@ -21,7 +21,7 @@ import {
   TOURNAMENT_GENERATION_STATE_DELAY,
   DEFAULT_TOURNAMENT_GROUP_NAME,
 } from '../utils/tournamentConstants';
-import type { GlobalTeam, GlobalTeamGroup, HighlightedElement, Notification, NotificationType, FlowState } from '../types/flowchart';
+import type { GlobalTeam, HighlightedElement, Notification, NotificationType, FlowState } from '../types/flowchart';
 import { isFieldNode, isGameNode, isStageNode } from '../types/flowchart';
 import { calculateGameTimes } from '../utils/timeCalculation';
 import type { TournamentGenerationConfig, RoundRobinConfig } from '../types/tournament';
@@ -191,58 +191,69 @@ export function useDesignerController(
     async (config: TournamentGenerationConfig & { 
       generateTeams: boolean; 
       autoAssignTeams: boolean;
-      selectedTeamIds?: string[];
+      selectedTeams?: GlobalTeam[];
       customTemplate?: GenericTemplate;
     }) => {
       try {
         const fs = flowStateRef.current;
-        const currentTeams = fs?.globalTeams || [];
-        let teamsToUse = currentTeams;
+        if (!fs) return;
+        
+        // Use provided selectedTeams or current teams from flow state
+        let teamsToUse = config.selectedTeams && config.selectedTeams.length > 0 
+          ? config.selectedTeams 
+          : (fs.globalTeams || []);
         
         // Handle custom template
         if (config.customTemplate) {
-            const latestFs = flowStateRef.current;
-            if (!latestFs) return;
-            // The list endpoint omits `slots`; fetch the full detail so applyGenericTemplate
-            // has the complete slot data.
             const fullTemplate = await gamedayApi.getTemplateDetail(config.customTemplate.id as number) as GenericTemplate;
 
-            // Pre-generate teams and groups BEFORE calling applyGenericTemplate so that
-            // getTeamId() inside applyGenericTemplate can resolve slot indices to real IDs.
-            // (If we generate teams after, every home/awayTeamId remains null.)
-            const preState = latestFs.exportState();
-            if (config.generateTeams && preState.globalTeams.length === 0) {
-                const teamCount = fullTemplate.num_teams;
-                if (preState.globalTeamGroups.length === 0) {
-                    const groupConfig = fullTemplate.group_config ?? [];
-                    const numGroups = groupConfig.length || fullTemplate.num_groups || 1;
-                    preState.globalTeamGroups = groupConfig.length > 0
-                        ? groupConfig.map((g, i) => ({ id: `g${i + 1}`, name: g.name, order: i }))
-                        : Array.from({ length: numGroups }, (_, i) => ({
-                            id: `g${i + 1}`,
-                            name: `Gruppe ${String.fromCharCode(65 + i)}`,
-                            order: i,
-                          }));
-                }
-                const groupCount = preState.globalTeamGroups.length || 1;
-                const teamData = generateTeamsForTournament(teamCount);
-                const teamsPerGroupCount = Math.ceil(teamCount / groupCount);
-                preState.globalTeams = teamData.map((data, index) => ({
+            const preState = fs.exportState();
+            const requiredCount = fullTemplate.num_teams || 0;
+            const neededCount = Math.max(0, requiredCount - teamsToUse.length);
+
+            // 1. Ensure groups exist (scaffold from template if missing)
+            if (preState.globalTeamGroups.length === 0) {
+                const groupConfig = fullTemplate.group_config ?? [];
+                const numGroups = groupConfig.length || fullTemplate.num_groups || 1;
+                preState.globalTeamGroups = groupConfig.length > 0
+                    ? groupConfig.map((g, i) => ({ id: `g${i + 1}`, name: g.name, order: i }))
+                    : Array.from({ length: numGroups }, (_, i) => ({
+                        id: `g${i + 1}`,
+                        name: `Gruppe ${String.fromCharCode(65 + i)}`,
+                        order: i,
+                      }));
+            }
+
+            const groupCount = preState.globalTeamGroups.length || 1;
+            const allTeamsGathered = [...teamsToUse];
+
+            // 2. Generate missing teams if requested
+            if (config.generateTeams && neededCount > 0) {
+                const teamData = generateTeamsForTournament(neededCount, teamsToUse.length);
+                const generatedTeams: GlobalTeam[] = teamData.map((data, index) => ({
                     id: uuidv4(),
                     label: data.label,
                     color: data.color,
-                    groupId: preState.globalTeamGroups[
-                        Math.min(Math.floor(index / teamsPerGroupCount), groupCount - 1)
-                    ]?.id ?? null,
-                    order: index,
+                    groupId: null, // Assigned in redistribution below
+                    order: teamsToUse.length + index,
                 }));
+                allTeamsGathered.push(...generatedTeams);
             }
+
+            // 3. Ensure ALL teams have a groupId (redistribute if they are currently ungrouped)
+            const teamsPerGroupCount = Math.ceil(allTeamsGathered.length / groupCount);
+            preState.globalTeams = allTeamsGathered.map((team, index) => ({
+                ...team,
+                groupId: team.groupId || preState.globalTeamGroups[
+                    Math.min(Math.floor(index / teamsPerGroupCount), groupCount - 1)
+                ]?.id || null,
+            }));
+            
+            teamsToUse = preState.globalTeams;
 
             const imported = applyGenericTemplate(fullTemplate, preState);
 
-            // Calculate game start times from the user-configured startTime/gameDuration/breakDuration.
-            // applyGenericTemplate does not call calculateGameTimes (slot.start_time has no DB column),
-            // so without this step all games would render '--:--', unlike the built-in template path.
+            // Calculate game start times
             const importedFields = imported.nodes.filter(isFieldNode);
             const importedStages = imported.nodes.filter(isStageNode).map(stage =>
                 stage.data.order === 0
@@ -261,8 +272,8 @@ export function useDesignerController(
                 isGameNode(n) ? (timedGames.find(g => g.id === n.id) ?? n) : n
             );
 
-            latestFs.importState({
-                metadata: latestFs.metadata || {} as GamedayMetadata,
+            fs.importState({
+                metadata: fs.metadata || {} as GamedayMetadata,
                 nodes: timedNodes,
                 edges: imported.edges,
                 fields: imported.nodes.filter(n => n.type === 'field').map(f => ({
@@ -280,47 +291,59 @@ export function useDesignerController(
             return;
         }
 
-        const generatedGroups: GlobalTeamGroup[] = [];
+        const teamCount = config.template.teamCount.exact || config.template.teamCount.min;
+        const neededCount = Math.max(0, teamCount - teamsToUse.length);
+        const allGroups = [...fs.globalTeamGroups];
+
         if (config.generateTeams) {
-          const teamCount = config.template.teamCount.exact || config.template.teamCount.min;
+          // 1. Determine target group count for scaffolding
           const firstStage = config.template.stages?.[0];
-          let groupCount = 1;
+          let targetGroupCount = 1;
           if (firstStage && firstStage.fieldAssignment === 'split') {
-            groupCount = firstStage.splitCount || config.fieldCount;
+            targetGroupCount = firstStage.splitCount || config.fieldCount;
             if (firstStage.splitCount === undefined && firstStage.progressionMode === 'round_robin') {
               const teamsPerGroup = (firstStage.config as RoundRobinConfig).teamCount;
               if (teamsPerGroup > 0) {
-                groupCount = Math.floor(teamCount / teamsPerGroup);
+                targetGroupCount = Math.floor(teamCount / teamsPerGroup);
               }
             }
           }
 
-          const groupIds: string[] = [];
-          for (let i = 0; i < groupCount; i++) {
-            const groupName = groupCount > 1 ? `Gruppe ${String.fromCharCode(65 + i)}` : DEFAULT_TOURNAMENT_GROUP_NAME;
-            const newGroup = fs?.addGlobalTeamGroup(groupName);
-            if (newGroup) {
-              groupIds.push(newGroup.id);
-              generatedGroups.push(newGroup);
+          // 2. Scaffold groups if they don't exist yet
+          if (allGroups.length < targetGroupCount) {
+            for (let i = allGroups.length; i < targetGroupCount; i++) {
+              const groupName = targetGroupCount > 1 ? `Gruppe ${String.fromCharCode(65 + i)}` : DEFAULT_TOURNAMENT_GROUP_NAME;
+              allGroups.push({
+                id: uuidv4(),
+                name: groupName,
+                order: i
+              });
             }
           }
 
-          const teamData = generateTeamsForTournament(teamCount);
-          const teamsPerGroupCount = Math.ceil(teamCount / groupCount);
-          
-          const newTeams: GlobalTeam[] = teamData.map((data, index) => {
-            const groupIndex = Math.min(Math.floor(index / teamsPerGroupCount), groupIds.length - 1);
-            const team = fs?.addGlobalTeam(data.label, groupIds[groupIndex]);
-            fs?.updateGlobalTeam(team.id, { color: data.color });
-            return { ...team, color: data.color };
-          });
-
-          teamsToUse = newTeams;
-        } else {
-          if (config.selectedTeamIds && config.selectedTeamIds.length > 0) {
-            teamsToUse = currentTeams.filter(t => config.selectedTeamIds!.includes(t.id));
+          // 3. Generate missing teams if requested
+          if (neededCount > 0) {
+            const teamData = generateTeamsForTournament(neededCount, teamsToUse.length);
+            const generatedTeams: GlobalTeam[] = teamData.map((data, index) => ({
+              id: uuidv4(),
+              label: data.label,
+              color: data.color,
+              groupId: null, // Assigned in redistribution below
+              order: teamsToUse.length + index,
+            }));
+            teamsToUse = [...teamsToUse, ...generatedTeams];
           }
         }
+
+        // 4. Ensure ALL teams have a groupId (redistribute if they are currently ungrouped)
+        const currentGroupCount = allGroups.length || 1;
+        const teamsPerGroupCount = Math.ceil(teamsToUse.length / currentGroupCount);
+        teamsToUse = teamsToUse.map((team, index) => ({
+            ...team,
+            groupId: team.groupId || allGroups[
+                Math.min(Math.floor(index / teamsPerGroupCount), currentGroupCount - 1)
+            ]?.id || null,
+        }));
 
         // Prepare structure
         const structure = generateTournament(teamsToUse, config);
@@ -345,10 +368,8 @@ export function useDesignerController(
         };
         
         // Atomic update of the entire structure using importState
-        // We use the latest values from ref to ensure we don't overwrite teams/groups added during this function
-        const latestFs = flowStateRef.current;
-        fs?.importState({
-          metadata: latestFs?.metadata || {} as GamedayMetadata,
+        fs.importState({
+          metadata: fs.metadata || {} as GamedayMetadata,
           nodes: [...structureWithRefs.fields, ...structureWithRefs.stages, ...structureWithRefs.games],
           edges: [], // Edges will be added by assignTeamsToTournament if needed
           fields: structureWithRefs.fields.map(f => ({ 
@@ -357,11 +378,11 @@ export function useDesignerController(
             order: f.data.order, 
             color: f.data.color 
           })),
-          globalTeams: config.generateTeams ? teamsToUse : (latestFs?.globalTeams || []),
-          globalTeamGroups: config.generateTeams ? generatedGroups : (latestFs?.globalTeamGroups || []),
+          globalTeams: teamsToUse,
+          globalTeamGroups: allGroups,
         });
 
-        fs?.setSelection({ nodeIds: [], edgeIds: [] });
+        fs.setSelection({ nodeIds: [], edgeIds: [] });
 
         if (config.autoAssignTeams && teamsToUse.length > 0) {
           setTimeout(() => {
@@ -463,7 +484,7 @@ export function useDesignerController(
     dismissNotification, addNotification, onMetadataHighlight
   ]);
 
-  return useMemo(() => ({
+  const memoizedState = useMemo(() => ({
     metadata: flowState?.metadata,
     nodes: flowState?.nodes || [],
     edges: flowState?.edges || [],
@@ -474,8 +495,6 @@ export function useDesignerController(
     notifications,
     updateMetadata: flowState?.updateMetadata,
     ui: uiInternal,
-    // eslint-disable-next-line react-hooks/refs
-    handlers: handlersInternal,
     canUndo: flowState?.canUndo,
     canRedo: flowState?.canRedo,
     undo: flowState?.undo,
@@ -483,10 +502,15 @@ export function useDesignerController(
     stats: flowState?.stats,
     onMetadataHighlight,
   }), [
-    flowState?.metadata, flowState?.nodes, flowState?.edges, flowState?.fields, 
-    flowState?.globalTeams, flowState?.globalTeamGroups, flowState?.canUndo, 
+    flowState?.metadata, flowState?.nodes, flowState?.edges, flowState?.fields,
+    flowState?.globalTeams, flowState?.globalTeamGroups, flowState?.canUndo,
     flowState?.canRedo, flowState?.undo, flowState?.redo, flowState?.stats,
     flowState?.updateMetadata,
-    validation, notifications, uiInternal, handlersInternal, onMetadataHighlight
+    validation, notifications, uiInternal, onMetadataHighlight
   ]);
+
+  return useMemo(() => ({
+    ...memoizedState,
+    handlers: handlersInternal,
+  }), [memoizedState, handlersInternal]);
 }

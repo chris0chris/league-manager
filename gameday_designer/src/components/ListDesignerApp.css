@@ -175,3 +175,28 @@ body.designer-active {
 .delete-button-grow:hover {
   color: #dc3545 !important;
 }
+/**
+ * Template Library Modal
+ */
+@media (min-width: 992px) {
+  .template-library-modal.modal-dialog {
+    max-width: 900px;
+  }
+}
+
+.template-library-modal .modal-body {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+/**
+ * Save Template Modal Refinements
+ */
+.template-save-backdrop.modal-backdrop.show {
+  opacity: 0.3 !important;
+}
+
+.template-save-modal .modal-content {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border: none !important;
+}

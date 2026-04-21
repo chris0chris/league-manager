@@ -1,0 +1,416 @@
+<h2>3 Approaches for Template Library</h2>
+<p class="subtitle">Click an approach to select it</p>
+
+<style>
+  .approach-card {
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    margin-bottom: 28px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .approach-card:hover { border-color: #0d6efd; box-shadow: 0 0 0 3px rgba(13,110,253,0.15); }
+  .approach-card.selected { border-color: #0d6efd; box-shadow: 0 0 0 4px rgba(13,110,253,0.25); }
+  .approach-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .approach-label {
+    width: 28px; height: 28px;
+    background: #0d6efd; color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 14px; flex-shrink: 0;
+  }
+  .approach-title { font-weight: 600; font-size: 15px; }
+  .approach-desc { color: #6c757d; font-size: 13px; margin-left: auto; max-width: 400px; text-align: right; }
+  .badge-rec { background: #198754; color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+
+  /* Mockup shell */
+  .mockup-shell {
+    background: #f1f3f5;
+    padding: 16px;
+  }
+  .modal-window {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    overflow: hidden;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  .modal-titlebar {
+    background: #343a40;
+    color: white;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .modal-close {
+    background: #dc3545; color: white; border: none;
+    border-radius: 50%; width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; cursor: pointer;
+  }
+  .modal-toolbar {
+    padding: 10px 14px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: #f8f9fa;
+  }
+  .search-box {
+    background: white; border: 1px solid #ced4da; border-radius: 4px;
+    padding: 5px 10px; font-size: 13px; color: #6c757d;
+    flex: 1; max-width: 220px;
+  }
+  .filter-btn {
+    background: white; border: 1px solid #ced4da; border-radius: 4px;
+    padding: 5px 10px; font-size: 12px; color: #495057; cursor: pointer;
+  }
+
+  /* Two-panel layout */
+  .two-panel { display: flex; min-height: 320px; }
+  .panel-left {
+    width: 220px; flex-shrink: 0;
+    border-right: 1px solid #dee2e6;
+    overflow-y: auto;
+    background: #fafafa;
+  }
+  .panel-right { flex: 1; padding: 18px; }
+  .group-label {
+    padding: 8px 12px 4px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    color: #6c757d; letter-spacing: 0.5px;
+  }
+  .template-item {
+    padding: 8px 14px;
+    font-size: 13px; cursor: pointer;
+    border-left: 3px solid transparent;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .template-item:hover { background: #e9ecef; }
+  .template-item.active {
+    background: #e7f1ff;
+    border-left-color: #0d6efd;
+    color: #0d6efd;
+    font-weight: 500;
+  }
+  .template-item .icon { font-size: 14px; }
+
+  /* Preview panel */
+  .preview-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .preview-meta { font-size: 12px; color: #6c757d; margin-bottom: 14px; }
+  .stage-flow {
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .stage-pill {
+    background: #e7f1ff; color: #0d6efd; border-radius: 20px;
+    padding: 4px 12px; font-size: 12px; font-weight: 500;
+  }
+  .stage-arrow { color: #adb5bd; font-size: 14px; }
+  .preview-actions {
+    display: flex; gap: 8px; margin-top: 16px;
+    padding-top: 14px; border-top: 1px solid #dee2e6;
+  }
+  .btn { padding: 6px 14px; border-radius: 4px; font-size: 13px; cursor: pointer; border: none; font-weight: 500; }
+  .btn-primary { background: #0d6efd; color: white; }
+  .btn-secondary { background: white; color: #495057; border: 1px solid #ced4da; }
+  .btn-danger { background: white; color: #dc3545; border: 1px solid #dc3545; }
+
+  /* Diagram */
+  .structure-diagram {
+    background: #f8f9fa; border: 1px solid #dee2e6;
+    border-radius: 6px; padding: 12px;
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .field-col { flex: 1; min-width: 80px; }
+  .field-header {
+    background: #6c757d; color: white; border-radius: 4px 4px 0 0;
+    text-align: center; font-size: 11px; padding: 4px;
+  }
+  .game-slot {
+    border: 1px solid #dee2e6; margin-top: 4px;
+    border-radius: 4px; padding: 5px 6px;
+    font-size: 11px; background: white;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .team-tag {
+    background: #e9ecef; border-radius: 3px;
+    padding: 2px 5px; font-size: 10px; color: #495057;
+  }
+
+  /* Wizard */
+  .stepper {
+    display: flex; align-items: center; gap: 0;
+    padding: 14px 20px; border-bottom: 1px solid #dee2e6;
+    background: #f8f9fa;
+  }
+  .step {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: #6c757d;
+  }
+  .step.active { color: #0d6efd; font-weight: 600; }
+  .step.done { color: #198754; }
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #dee2e6; color: #6c757d;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .step.active .step-num { background: #0d6efd; color: white; }
+  .step.done .step-num { background: #198754; color: white; }
+  .step-sep { width: 30px; height: 2px; background: #dee2e6; margin: 0 4px; }
+  .step-sep.done { background: #198754; }
+
+  .wizard-body { padding: 20px 24px; min-height: 220px; }
+  .choice-grid { display: flex; gap: 14px; margin-top: 14px; }
+  .choice-tile {
+    flex: 1; border: 2px solid #dee2e6; border-radius: 8px;
+    padding: 18px 14px; text-align: center; cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .choice-tile:hover { border-color: #0d6efd; }
+  .choice-tile .tile-icon { font-size: 28px; margin-bottom: 8px; }
+  .choice-tile h4 { font-size: 14px; margin: 0 0 4px; }
+  .choice-tile p { font-size: 12px; color: #6c757d; margin: 0; }
+  .wizard-footer {
+    padding: 12px 24px; border-top: 1px solid #dee2e6;
+    display: flex; justify-content: flex-end; background: #f8f9fa;
+  }
+
+  /* Dropdown approach */
+  .app-header-mock {
+    background: #212529; color: white;
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 12px;
+    border-radius: 6px 6px 0 0;
+    font-size: 13px;
+  }
+  .app-header-mock .brand { font-weight: 700; font-size: 14px; margin-right: 12px; }
+  .app-header-mock .divider { color: #6c757d; }
+  .app-header-mock .spacer { flex: 1; }
+  .toolbar-mock {
+    background: #f8f9fa; border-bottom: 1px solid #dee2e6;
+    padding: 8px 12px; display: flex; gap: 6px; align-items: center;
+  }
+  .toolbar-btn {
+    background: white; border: 1px solid #ced4da; border-radius: 4px;
+    padding: 5px 10px; font-size: 12px; cursor: pointer; color: #212529;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .toolbar-btn.split-l { border-radius: 4px 0 0 4px; }
+  .toolbar-btn.split-r { border-radius: 0 4px 4px 0; border-left: none; padding: 5px 6px; }
+  .toolbar-sep { width: 1px; height: 20px; background: #dee2e6; margin: 0 4px; }
+  .dropdown-menu {
+    background: white; border: 1px solid #dee2e6; border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    min-width: 220px; overflow: hidden; margin-top: 6px;
+    margin-left: 4px;
+  }
+  .dropdown-section-label {
+    padding: 6px 12px 3px; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; color: #adb5bd; letter-spacing: 0.4px;
+  }
+  .dropdown-item {
+    padding: 8px 14px; font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; color: #212529;
+  }
+  .dropdown-item:hover { background: #f8f9fa; }
+  .dropdown-item.recent { color: #6c757d; font-size: 12px; }
+  .dropdown-divider { height: 1px; background: #dee2e6; margin: 4px 0; }
+  .canvas-mock {
+    background: #f1f3f5; padding: 24px;
+    min-height: 160px;
+    display: flex; align-items: center; justify-content: center;
+    color: #adb5bd; font-size: 13px;
+  }
+
+  .pros-cons-row { display: flex; gap: 12px; padding: 12px 16px; border-top: 1px solid #dee2e6; background: #fafafa; }
+  .pros-box, .cons-box { flex: 1; font-size: 12px; }
+  .pros-box h5 { color: #198754; margin: 0 0 4px; font-size: 12px; }
+  .cons-box h5 { color: #dc3545; margin: 0 0 4px; font-size: 12px; }
+  .pros-box li, .cons-box li { margin-bottom: 2px; }
+</style>
+
+<!-- APPROACH A -->
+<div class="approach-card" data-choice="a" onclick="toggleSelect(this)">
+  <div class="approach-header">
+    <div class="approach-label">A</div>
+    <div class="approach-title">Two-Panel Modal <span class="badge-rec">Recommended</span></div>
+    <div class="approach-desc">Unified library: browse, preview, apply — all in one place</div>
+  </div>
+  <div class="mockup-shell">
+    <div class="modal-window">
+      <div class="modal-titlebar">
+        <span>📚 Template Library</span>
+        <button class="modal-close">✕</button>
+      </div>
+      <div class="modal-toolbar">
+        <div class="search-box">🔍 Search templates...</div>
+        <div class="filter-btn">All types ▾</div>
+        <div class="filter-btn">My association ▾</div>
+      </div>
+      <div class="two-panel">
+        <div class="panel-left">
+          <div class="group-label">Tournament Formats</div>
+          <div class="template-item active"><span class="icon">🏆</span> 6-Team Cup</div>
+          <div class="template-item"><span class="icon">🏆</span> 8-Team Playoff</div>
+          <div class="template-item"><span class="icon">🏆</span> Round Robin</div>
+          <div class="group-label">My Templates</div>
+          <div class="template-item"><span class="icon">📄</span> Club Standard</div>
+          <div class="template-item"><span class="icon">📄</span> 3v3 Format</div>
+          <div class="group-label">Association</div>
+          <div class="template-item"><span class="icon">🌐</span> Regional Cup</div>
+        </div>
+        <div class="panel-right">
+          <div class="preview-title">6-Team Cup Format</div>
+          <div class="preview-meta">Built-in · 6 teams · 2 fields · ~90 min total</div>
+          <div class="stage-flow">
+            <div class="stage-pill">Group Stage</div>
+            <div class="stage-arrow">→</div>
+            <div class="stage-pill">Semifinals</div>
+            <div class="stage-arrow">→</div>
+            <div class="stage-pill">Final</div>
+          </div>
+          <div class="structure-diagram">
+            <div class="field-col">
+              <div class="field-header">Field 1</div>
+              <div class="game-slot"><span class="team-tag">A1</span><span class="team-tag">B2</span></div>
+              <div class="game-slot"><span class="team-tag">A2</span><span class="team-tag">B1</span></div>
+              <div class="game-slot"><span class="team-tag">Semi 1</span><span class="team-tag">Semi 2</span></div>
+            </div>
+            <div class="field-col">
+              <div class="field-header">Field 2</div>
+              <div class="game-slot"><span class="team-tag">A3</span><span class="team-tag">B3</span></div>
+              <div class="game-slot"><span class="team-tag">A1</span><span class="team-tag">A3</span></div>
+              <div class="game-slot"><span class="team-tag">Final</span><span class="team-tag">3rd Place</span></div>
+            </div>
+          </div>
+          <div class="preview-actions">
+            <button class="btn btn-primary">Apply to Gameday →</button>
+            <button class="btn btn-secondary">Clone & Edit</button>
+            <button class="btn btn-secondary">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pros-cons-row">
+    <div class="pros-box"><h5>✓ Pros</h5><ul><li>Single entry point for all schedule structures</li><li>Preview before applying</li><li>Full CRUD in one place</li></ul></div>
+    <div class="cons-box"><h5>✗ Cons</h5><ul><li>Tournament format config needs a sub-step/sheet</li><li>More complex to build</li></ul></div>
+  </div>
+</div>
+
+<!-- APPROACH B -->
+<div class="approach-card" data-choice="b" onclick="toggleSelect(this)">
+  <div class="approach-header">
+    <div class="approach-label">B</div>
+    <div class="approach-title">Wizard Stepper Modal</div>
+    <div class="approach-desc">Guided step-by-step: choose type → browse → configure → apply</div>
+  </div>
+  <div class="mockup-shell">
+    <div class="modal-window">
+      <div class="modal-titlebar">
+        <span>📚 Templates</span>
+        <button class="modal-close">✕</button>
+      </div>
+      <div class="stepper">
+        <div class="step active"><div class="step-num">1</div> Choose type</div>
+        <div class="step-sep"></div>
+        <div class="step"><div class="step-num">2</div> Browse</div>
+        <div class="step-sep"></div>
+        <div class="step"><div class="step-num">3</div> Configure</div>
+        <div class="step-sep"></div>
+        <div class="step"><div class="step-num">4</div> Apply</div>
+      </div>
+      <div class="wizard-body">
+        <p style="font-size:14px;font-weight:600;margin:0 0 4px;">What do you want to do?</p>
+        <p style="font-size:13px;color:#6c757d;margin:0 0 14px;">Choose a starting point for your schedule</p>
+        <div class="choice-grid">
+          <div class="choice-tile">
+            <div class="tile-icon">🏆</div>
+            <h4>Tournament Format</h4>
+            <p>Generate a schedule from a built-in competition structure</p>
+          </div>
+          <div class="choice-tile">
+            <div class="tile-icon">📁</div>
+            <h4>Load Saved Template</h4>
+            <p>Apply a previously saved custom template</p>
+          </div>
+          <div class="choice-tile">
+            <div class="tile-icon">💾</div>
+            <h4>Save Current</h4>
+            <p>Save this gameday's schedule as a reusable template</p>
+          </div>
+        </div>
+      </div>
+      <div class="wizard-footer">
+        <button class="btn btn-primary">Next →</button>
+      </div>
+    </div>
+  </div>
+  <div class="pros-cons-row">
+    <div class="pros-box"><h5>✓ Pros</h5><ul><li>Very clear for first-time users</li><li>Natural progressive disclosure</li></ul></div>
+    <div class="cons-box"><h5>✗ Cons</h5><ul><li>Extra clicks for experienced users</li><li>Can't browse & compare templates easily</li></ul></div>
+  </div>
+</div>
+
+<!-- APPROACH C -->
+<div class="approach-card" data-choice="c" onclick="toggleSelect(this)">
+  <div class="approach-header">
+    <div class="approach-label">C</div>
+    <div class="approach-title">Toolbar Dropdown + Manage Modal</div>
+    <div class="approach-desc">Quick dropdown for common actions; separate modal for full management</div>
+  </div>
+  <div class="mockup-shell">
+    <div class="modal-window">
+      <div class="app-header-mock">
+        <span class="brand">⚽ LeagueSphere</span>
+        <span class="divider">|</span>
+        <span>Summer Cup 2026</span>
+        <span class="spacer"></span>
+        <span style="font-size:11px;color:#adb5bd;">Language · User</span>
+      </div>
+      <div class="toolbar-mock">
+        <div class="toolbar-btn">📥 Import</div>
+        <div class="toolbar-btn split-l">📤 Export</div>
+        <div class="toolbar-btn split-r">▾</div>
+        <div class="toolbar-sep"></div>
+        <div class="toolbar-btn split-l" style="background:#e7f1ff;border-color:#0d6efd;color:#0d6efd;font-weight:600;">📚 Templates</div>
+        <div class="toolbar-btn split-r" style="background:#e7f1ff;border-color:#0d6efd;color:#0d6efd;">▾</div>
+        <div class="toolbar-sep"></div>
+        <div class="toolbar-btn">↩</div>
+        <div class="toolbar-btn">↪</div>
+      </div>
+      <div style="display:flex;">
+        <div class="canvas-mock" style="flex:1;">Gameday Canvas (schedule visible behind)</div>
+        <div class="dropdown-menu">
+          <div class="dropdown-section-label">Recent</div>
+          <div class="dropdown-item recent">📄 Club Standard</div>
+          <div class="dropdown-item recent">🏆 6-Team Cup</div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-section-label">Actions</div>
+          <div class="dropdown-item">🏆 Generate Tournament...</div>
+          <div class="dropdown-item">💾 Save as Template...</div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item">📁 Manage Templates →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pros-cons-row">
+    <div class="pros-box"><h5>✓ Pros</h5><ul><li>Fastest access for power users</li><li>Recents reduce repeated navigation</li><li>Canvas stays visible</li></ul></div>
+    <div class="cons-box"><h5>✗ Cons</h5><ul><li>Two surfaces to build (dropdown + modal)</li><li>Full template CRUD still needs a separate modal</li></ul></div>
+  </div>
+</div>

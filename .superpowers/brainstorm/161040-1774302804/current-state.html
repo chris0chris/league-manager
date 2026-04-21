@@ -1,0 +1,54 @@
+<h2>Current State: Template Management in Gameday Designer</h2>
+<p class="subtitle">Understanding what's cramped and where, before designing something better</p>
+
+<div class="section">
+  <h3>Current Toolbar (FlowToolbar)</h3>
+  <div class="mockup">
+    <div class="mockup-header">AppHeader — top of page</div>
+    <div class="mockup-body" style="display:flex;align-items:center;gap:12px;padding:10px;">
+      <div class="mock-button" style="background:#0d6efd;color:white;padding:6px 14px;border-radius:4px;font-size:13px;">⚡ Generate Tournament</div>
+      <div style="flex:1"></div>
+      <span style="font-size:12px;color:#888;">— FlowToolbar below —</span>
+      <div style="display:flex;gap:4px;">
+        <div class="mock-button" style="font-size:12px;">📥 Import</div>
+        <div style="display:flex;">
+          <div class="mock-button" style="font-size:12px;border-radius:4px 0 0 4px;">📤 Export</div>
+          <div class="mock-button" style="font-size:12px;border-radius:0 4px 4px 0;padding:4px 6px;">▾</div>
+        </div>
+        <div class="mock-button" style="font-size:12px;">↩ Undo</div>
+        <div class="mock-button" style="font-size:12px;">↪ Redo</div>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:13px;color:#666;margin-top:8px;">
+    <strong>Export dropdown contains:</strong> "Export Schedule" + "Export Template" — template save is hidden here.<br>
+    <strong>Generate Tournament</strong> opens a modal that also lets users pick a tournament format (a kind of template).<br>
+    <strong>No UI</strong> for browsing, loading, or managing saved server-side templates.
+  </p>
+</div>
+
+<div class="section">
+  <h3>The Problem</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:12px;">
+      <div class="label">Cramped</div>
+      <p style="font-size:13px;margin:6px 0 0;">Template actions (save/load) buried in export dropdown and tournament generator modal — no clear home.</p>
+    </div>
+    <div style="background:#f8d7da;border:1px solid #dc3545;border-radius:6px;padding:12px;">
+      <div class="label">Missing</div>
+      <p style="font-size:13px;margin:6px 0 0;">The backend has full template CRUD (list, create, delete, clone, preview, validate) but <em>no UI exists</em> to use it.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>What needs a better home?</h3>
+  <ul style="font-size:13px;line-height:1.9;">
+    <li>📁 <strong>Browse templates</strong> — list all saved templates for the association</li>
+    <li>💾 <strong>Save as template</strong> — save current schedule as a reusable template</li>
+    <li>▶️ <strong>Apply template</strong> — load a template onto current gameday</li>
+    <li>🏆 <strong>Generate tournament</strong> — pick a tournament format and auto-build a schedule</li>
+    <li>📤 <strong>Export / Import</strong> — JSON file import/export</li>
+    <li>🔧 <strong>Manage templates</strong> — rename, delete, clone, preview templates</li>
+  </ul>
+</div>

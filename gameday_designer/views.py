@@ -229,7 +229,7 @@ class ScheduleTemplateViewSet(viewsets.ModelViewSet):
         except ApplicationError as e:
             logging.exception("Error applying schedule template")
             return Response(
-                {"error": str(e)},
+                {"error": "Failed to apply template"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -555,17 +555,32 @@ class TeamBulkCreationView(APIView):
 class LeagueTeamsView(APIView):
     """
     GET /api/designer/gamedays/<gameday_id>/league-teams/
-    Returns all teams in the gameday's league+season via SeasonLeagueTeam.
+    Returns teams in the gameday's league+season via SeasonLeagueTeam.
+    Falls back to all teams if no SeasonLeagueTeam is configured.
     """
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request, gameday_id):
-        from gamedays.models import SeasonLeagueTeam
+        from gamedays.models import SeasonLeagueTeam, Team
 
         gameday = get_object_or_404(Gameday, pk=gameday_id)
         slt = SeasonLeagueTeam.objects.filter(
             season=gameday.season, league=gameday.league
         ).first()
-        teams = slt.teams.all() if slt else []
-        return Response([{"id": t.pk, "name": t.name} for t in teams])
+
+        if slt:
+            teams = slt.teams.select_related("association").all()
+        else:
+            teams = Team.objects.exclude(location="dummy").select_related("association").order_by("name")
+
+        return Response([
+            {
+                "id": t.pk,
+                "name": t.name,
+                "association_id": t.association_id,
+                "association_abbr": t.association.abbr if t.association else None,
+                "association_name": t.association.name if t.association else None,
+            }
+            for t in teams
+        ])

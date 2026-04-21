@@ -204,6 +204,25 @@ export const TEAM_COLORS = [
 // ============================================================================
 
 /**
+ * Get team color by index from predefined color palette
+ *
+ * @param index - Team index (0-based)
+ * @returns Hex color code
+ */
+export function getTeamColor(index: number): string {
+  // Local fallback palette to ensure teams are never grey even if TEAM_COLORS is missing
+  const fallbackPalette = [
+    '#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'
+  ];
+  
+  const palette = (typeof TEAM_COLORS !== 'undefined' && TEAM_COLORS && TEAM_COLORS.length > 0) 
+    ? TEAM_COLORS 
+    : fallbackPalette;
+    
+  return palette[index % palette.length];
+}
+
+/**
  * Default start time for first game (10:00)
  */
 export const DEFAULT_START_TIME = '10:00';

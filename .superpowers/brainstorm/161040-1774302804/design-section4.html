@@ -1,0 +1,194 @@
+<h2>Design Section 4 of 4: Complete Left Panel & Filter Mapping</h2>
+<p class="subtitle">Final left panel structure with all 4 groups, and how filter pills map to them</p>
+
+<style>
+  .split { display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; align-items: start; }
+
+  .panel-left {
+    background: #fafafa; border: 1px solid #dee2e6; border-radius: 8px;
+    overflow: hidden;
+  }
+  .panel-top {
+    background: #212529; color: white; padding: 8px 12px;
+    font-size: 12px; font-weight: 600;
+  }
+  .search-row {
+    padding: 8px 10px; border-bottom: 1px solid #dee2e6; background: white;
+  }
+  .search-box {
+    background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;
+    padding: 5px 10px; font-size: 12px; color: #6c757d; width: 100%; box-sizing: border-box;
+  }
+  .group-header {
+    padding: 9px 12px 4px;
+    font-size: 10px; font-weight: 800; text-transform: uppercase;
+    color: #6c757d; letter-spacing: 0.6px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .group-count { background: #dee2e6; color: #6c757d; border-radius: 10px; padding: 1px 7px; font-size: 10px; }
+  .tpl-item {
+    padding: 7px 14px 7px 12px; font-size: 13px; cursor: pointer;
+    border-left: 3px solid transparent;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tpl-item:hover { background: #f0f0f0; }
+  .tpl-item.active { background: #e7f1ff; border-left-color: #0d6efd; color: #0d6efd; font-weight: 600; }
+  .tpl-meta { font-size: 10px; color: #adb5bd; display: block; font-weight: 400; }
+  .panel-divider { height: 1px; background: #dee2e6; margin: 5px 0; }
+
+  .mapping-table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  .mapping-table th {
+    text-align: left; padding: 8px 12px; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.4px; color: #6c757d; border-bottom: 2px solid #dee2e6;
+    background: #f8f9fa;
+  }
+  .mapping-table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  .mapping-table tr:last-child td { border-bottom: none; }
+
+  .scope-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 5px; padding: 3px 9px; font-size: 12px; font-weight: 600;
+  }
+  .badge-builtin { background: #e9ecef; color: #495057; }
+  .badge-personal { background: #e7f1ff; color: #0d6efd; }
+  .badge-assoc { background: #d1e7dd; color: #198754; }
+  .badge-community { background: #ede9ff; color: #6f42c1; }
+
+  .filter-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .pill {
+    border-radius: 20px; padding: 5px 13px; font-size: 12px; font-weight: 500; cursor: pointer;
+    border: 1px solid;
+  }
+  .pill-all { background: #0d6efd; color: white; border-color: #0d6efd; }
+  .pill-builtin { background: #f8f9fa; color: #495057; border-color: #ced4da; }
+  .pill-personal { background: #e7f1ff; color: #0d6efd; border-color: #bbd6ff; }
+  .pill-assoc { background: #d1e7dd; color: #198754; border-color: #b2dfcc; }
+  .pill-community { background: #ede9ff; color: #6f42c1; border-color: #c9b8f5; }
+
+  .annotation {
+    background: #f0f4ff; border-left: 3px solid #0d6efd;
+    padding: 10px 14px; font-size: 12px; border-radius: 0 5px 5px 0;
+    color: #495057; line-height: 1.7; margin-top: 14px;
+  }
+</style>
+
+<div class="split">
+
+  <!-- Left panel mockup -->
+  <div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Left panel — all 4 groups</div>
+    <div class="panel-left">
+      <div class="panel-top">📚 Template Library</div>
+      <div class="search-row">
+        <div class="search-box">🔍 Search...</div>
+      </div>
+
+      <div class="group-header">🏆 Tournament Formats <span class="group-count">4</span></div>
+      <div class="tpl-item active">
+        <span>🏆</span>
+        <div>6-Team Cup <span class="tpl-meta">Built-in</span></div>
+      </div>
+      <div class="tpl-item">
+        <span>🏆</span>
+        <div>8-Team Playoff <span class="tpl-meta">Built-in</span></div>
+      </div>
+      <div class="tpl-item">
+        <span>🏆</span>
+        <div>Round Robin <span class="tpl-meta">Built-in</span></div>
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="group-header">🔒 My Templates <span class="group-count">2</span></div>
+      <div class="tpl-item">
+        <span>📄</span>
+        <div>Club Standard <span class="tpl-meta">Personal · 12 Jan 2026</span></div>
+      </div>
+      <div class="tpl-item">
+        <span>📄</span>
+        <div>3v3 Format <span class="tpl-meta">Personal · 5 Feb 2026</span></div>
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="group-header">🏛️ Association <span class="group-count">1</span></div>
+      <div class="tpl-item">
+        <span>🏛️</span>
+        <div>Regional Cup <span class="tpl-meta">Shared by admin</span></div>
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="group-header">🌐 Community <span class="group-count">3</span></div>
+      <div class="tpl-item">
+        <span>🌐</span>
+        <div>Street Football Cup <span class="tpl-meta">by @marco · ★ 42</span></div>
+      </div>
+      <div class="tpl-item">
+        <span>🌐</span>
+        <div>Beach 5v5 <span class="tpl-meta">by @leagueHQ · ★ 18</span></div>
+      </div>
+      <div class="tpl-item">
+        <span>🌐</span>
+        <div>Corporate League <span class="tpl-meta">by @orgAdmin · ★ 7</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mapping table + filter pills -->
+  <div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Scope → group mapping</div>
+    <table class="mapping-table">
+      <thead>
+        <tr>
+          <th>Group</th>
+          <th>Source</th>
+          <th>Who can see</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🏆 Tournament Formats</td>
+          <td><span class="scope-badge badge-builtin">Built-in</span><br><span style="font-size:11px;color:#6c757d;">tournamentTemplates.ts</span></td>
+          <td style="font-size:12px;color:#495057;">Everyone (read-only)</td>
+        </tr>
+        <tr>
+          <td>🔒 My Templates</td>
+          <td><span class="scope-badge badge-personal">Personal</span><br><span style="font-size:11px;color:#6c757d;">Backend API</span></td>
+          <td style="font-size:12px;color:#495057;">Only you</td>
+        </tr>
+        <tr>
+          <td>🏛️ Association</td>
+          <td><span class="scope-badge badge-assoc">Association</span><br><span style="font-size:11px;color:#6c757d;">Backend API</span></td>
+          <td style="font-size:12px;color:#495057;">All members of your association</td>
+        </tr>
+        <tr>
+          <td>🌐 Community</td>
+          <td><span class="scope-badge badge-community">Global</span><br><span style="font-size:11px;color:#6c757d;">Backend API</span></td>
+          <td style="font-size:12px;color:#495057;">All LeagueSphere users</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="font-size:13px;font-weight:700;margin:18px 0 8px;">Filter pills in search bar</div>
+    <div class="filter-pills">
+      <div class="pill pill-all">All</div>
+      <div class="pill pill-builtin">🏆 Tournament formats</div>
+      <div class="pill pill-personal">🔒 My templates</div>
+      <div class="pill pill-assoc">🏛️ Association</div>
+      <div class="pill pill-community">🌐 Community</div>
+    </div>
+
+    <div style="font-size:13px;font-weight:700;margin:18px 0 8px;">Backend: sharing field on ScheduleTemplate</div>
+    <div style="background:#1e1e1e;color:#d4d4d4;border-radius:6px;padding:12px;font-size:12px;font-family:monospace;line-height:1.7;">
+      sharing: <span style="color:#ce9178;">"personal"</span> | <span style="color:#ce9178;">"association"</span> | <span style="color:#ce9178;">"global"</span>
+      <br><br>
+      <span style="color:#6a9955;">// Already on the model (added recently)</span><br>
+      <span style="color:#6a9955;">// API filters by sharing + association membership</span>
+    </div>
+  </div>
+</div>
+
+<div class="annotation">
+  <strong>Note on Community templates:</strong> Since they're globally visible, the preview panel should show the author and optionally a star/rating. Actions available: Clone (to My Templates), Apply — but not Delete (unless you're the author).
+</div>

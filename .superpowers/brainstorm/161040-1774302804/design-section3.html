@@ -1,0 +1,187 @@
+<h2>Design Section 3 of 4: Apply & Save Flows</h2>
+<p class="subtitle">What happens after clicking "Apply to Gameday" or "Save current as template"</p>
+
+<style>
+  .flow-section { margin-bottom: 32px; }
+  .flow-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #dee2e6; }
+  .flow-title span { font-size: 12px; font-weight: 400; color: #6c757d; margin-left: 8px; }
+
+  .step-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 8px; }
+  .step-num { width: 24px; height: 24px; border-radius: 50%; background: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .step-arrow { color: #adb5bd; font-size: 18px; margin: 3px 0 0 10px; }
+
+  .modal-shell {
+    background: white; border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.14);
+    overflow: hidden; max-width: 520px;
+  }
+  .modal-header {
+    background: #212529; color: white;
+    padding: 10px 16px; font-size: 14px; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-body { padding: 18px 20px; }
+  .modal-footer {
+    padding: 12px 20px; border-top: 1px solid #dee2e6;
+    background: #f8f9fa; display: flex; gap: 8px; justify-content: flex-end;
+  }
+  .btn { padding: 7px 16px; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+  .btn-primary { background: #0d6efd; color: white; }
+  .btn-outline { background: white; color: #495057; border: 1px solid #ced4da; }
+  .btn-danger { background: #dc3545; color: white; }
+  .btn-success { background: #198754; color: white; }
+
+  .form-label { font-size: 12px; font-weight: 600; color: #495057; margin-bottom: 4px; display: block; }
+  .form-input {
+    width: 100%; box-sizing: border-box;
+    border: 1px solid #ced4da; border-radius: 5px;
+    padding: 8px 12px; font-size: 13px; margin-bottom: 12px; color: #212529;
+  }
+  .form-input:focus { border-color: #0d6efd; outline: none; }
+  .form-textarea {
+    width: 100%; box-sizing: border-box;
+    border: 1px solid #ced4da; border-radius: 5px;
+    padding: 8px 12px; font-size: 13px; min-height: 60px; resize: vertical;
+    color: #6c757d; margin-bottom: 12px;
+  }
+
+  .team-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .team-chip {
+    background: #e9ecef; border: 1px solid #dee2e6; border-radius: 5px;
+    padding: 5px 10px; font-size: 12px; cursor: pointer; color: #495057;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .team-chip.selected { background: #e7f1ff; border-color: #0d6efd; color: #0d6efd; font-weight: 600; }
+  .team-chip .remove { color: #adb5bd; font-size: 10px; }
+
+  .warning-box {
+    background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px;
+    padding: 10px 13px; font-size: 13px; margin-bottom: 14px;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .info-box {
+    background: #e7f1ff; border: 1px solid #bbd6ff; border-radius: 6px;
+    padding: 10px 13px; font-size: 13px; margin-bottom: 14px;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+
+  .progress-steps {
+    display: flex; gap: 0; margin-bottom: 16px;
+  }
+  .pstep {
+    flex: 1; text-align: center; font-size: 11px; padding: 6px 4px;
+    background: #f8f9fa; border: 1px solid #dee2e6; color: #6c757d;
+  }
+  .pstep:first-child { border-radius: 4px 0 0 4px; }
+  .pstep:last-child { border-radius: 0 4px 4px 0; }
+  .pstep + .pstep { border-left: none; }
+  .pstep.active { background: #0d6efd; color: white; border-color: #0d6efd; font-weight: 600; }
+  .pstep.done { background: #d1e7dd; color: #198754; border-color: #b2dfcc; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .annotation {
+    background: #f0f4ff; border-left: 3px solid #0d6efd;
+    padding: 10px 14px; font-size: 12px; border-radius: 0 5px 5px 0;
+    margin-top: 10px; color: #495057; line-height: 1.7;
+  }
+  .annotation strong { color: #0d6efd; }
+</style>
+
+<!-- FLOW 1: Apply a Tournament Format -->
+<div class="flow-section">
+  <div class="flow-title">Flow 1: Apply a Tournament Format <span>(e.g. "6-Team Cup" — has configuration)</span></div>
+  <div class="split">
+
+    <!-- Step 1: Configure (already in the preview panel) -->
+    <div>
+      <div class="step-row"><div class="step-num">1</div><strong style="font-size:13px;">Configure (in preview panel)</strong></div>
+      <p style="font-size:12px;color:#6c757d;margin:4px 0 10px 36px;">User sets start time, game duration, break time — already shown in the preview panel on the right side of the library.</p>
+      <div class="modal-shell" style="max-width:100%;">
+        <div class="modal-header">⚙️ Configure: 6-Team Cup</div>
+        <div class="modal-body" style="padding:14px;">
+          <div class="progress-steps">
+            <div class="pstep done">Configure</div>
+            <div class="pstep active">Teams</div>
+            <div class="pstep">Apply</div>
+          </div>
+          <label class="form-label">Select teams (6 required)</label>
+          <div class="team-grid">
+            <div class="team-chip selected">FC Alpha <span class="remove">✕</span></div>
+            <div class="team-chip selected">Barca B <span class="remove">✕</span></div>
+            <div class="team-chip selected">Red Stars <span class="remove">✕</span></div>
+            <div class="team-chip selected">City FC <span class="remove">✕</span></div>
+            <div class="team-chip">+ Add team</div>
+          </div>
+          <div style="margin-top:10px;font-size:12px;color:#6c757d;">4 of 6 selected · Need 2 more  <span style="color:#198754;">✓ Auto-fill remaining</span></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline">← Back</button>
+          <button class="btn btn-primary">Apply to Gameday →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Confirm apply -->
+    <div>
+      <div class="step-row"><div class="step-num">2</div><strong style="font-size:13px;">Confirm & Apply</strong></div>
+      <p style="font-size:12px;color:#6c757d;margin:4px 0 10px 36px;">Clicking Apply shows a brief confirmation if the gameday already has schedule content.</p>
+      <div class="modal-shell" style="max-width:100%;">
+        <div class="modal-header">Apply Template</div>
+        <div class="modal-body">
+          <div class="warning-box">
+            ⚠️ <span>This will <strong>replace</strong> the current schedule. This action can be undone.</span>
+          </div>
+          <div style="font-size:13px;line-height:1.7;">
+            <strong>6-Team Cup Format</strong> will be applied to <strong>Summer Cup 2026</strong>.<br>
+            <span style="color:#6c757d;">· 6 teams · 2 fields · Start 09:00 · 15 min games</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline">Cancel</button>
+          <button class="btn btn-primary">Confirm Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOW 2: Apply a Saved Template -->
+<div class="flow-section">
+  <div class="flow-title">Flow 2: Apply a Saved Template <span>(from backend API — no extra config needed)</span></div>
+  <div class="modal-shell">
+    <div class="modal-header">Apply Template</div>
+    <div class="modal-body">
+      <div class="info-box">
+        ℹ️ <span>Applying <strong>Club Standard</strong> to <strong>Summer Cup 2026</strong>. The current schedule will be replaced (undoable).</span>
+      </div>
+      <div style="font-size:13px;color:#6c757d;line-height:1.7;">
+        · 8 teams · 3 fields · Saved 12 Jan 2026 by you
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline">Cancel</button>
+      <button class="btn btn-primary">Apply →</button>
+    </div>
+  </div>
+  <div class="annotation">Saved templates skip the team/config step — they store the full schedule structure. Just confirm and apply.</div>
+</div>
+
+<!-- FLOW 3: Save current schedule as template -->
+<div class="flow-section">
+  <div class="flow-title">Flow 3: Save Current Schedule as Template <span>(from titlebar button)</span></div>
+  <div class="modal-shell">
+    <div class="modal-header">💾 Save as Template</div>
+    <div class="modal-body">
+      <label class="form-label">Template name *</label>
+      <input class="form-input" type="text" value="My Summer Cup Format" placeholder="e.g. Club Standard 2026">
+      <label class="form-label">Description (optional)</label>
+      <textarea class="form-textarea" placeholder="Describe this template..."></textarea>
+      <div style="font-size:12px;color:#6c757d;">Will be saved to <strong>My Templates</strong> and visible only to you.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline">Cancel</button>
+      <button class="btn btn-success">Save Template</button>
+    </div>
+  </div>
+</div>
