@@ -137,13 +137,13 @@
         <tbody>
         {% for row in info.table %}
         <tr class="{{ row.bg_class }}"
-            x-show="fuzzyMatch(search, `{{ row.team__name }}`)">
+            x-show="fuzzyMatch(search, `{{ row.team__description }}`)">
             {% if user.is_staff %}
             <td>{{ row.team_id }}</td>
             {% endif %}
 
             <td>{{ row.rank }}</td>
-            <td x-html="highlightMultiple(`{{ row.team__name }}`)"></td>
+            <td x-html="highlightMultiple(`{{ row.team__description }}`)"></td>
             <td>{{ row.win_quotient|floatformat:3 }}</td>
             <td>{{ row.pf }}</td>
             <td>{{ row.pa }}</td>

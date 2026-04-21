@@ -47,7 +47,7 @@ from .forms import (
 from .models import Gameday, Gameinfo
 from .service.builders import TableContextBuilder
 from .service.gameday_form_service import GamedayFormService
-from .service.gameday_service import GamedayService, GamedayGameService
+from .service.gameday_service import GamedayService, GamedayGameService, EmptySchedule
 from .service.gameday_settings import ID
 from .service.league_statistics_service import LeagueStatisticsService
 from .wizard import (
@@ -224,7 +224,8 @@ class GamedayDetailView(DetailView):
                 **render_configs
             )
         else:
-            del schedule[ID]
+            if not isinstance(schedule, EmptySchedule):
+                del schedule[ID]
 
         context["info"] = {
             "schedule": schedule.to_html(**render_configs),

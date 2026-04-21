@@ -4,6 +4,30 @@ import pandas as pd
 
 from gamedays.service.gameday_settings import (
     FINISHED,
+    TEAM_DESCRIPTION,
+    PF,
+    PA,
+    WINS,
+    DRAWS,
+    LOSSES,
+    GAMES_PLAYED,
+    WIN_POINTS,
+    MAX_WIN_POINTS,
+    STANDING,
+    STATUS,
+    ID,
+    POINTS,
+    FIELD,
+    WIN_QUOTIENT,
+    FH,
+    SH,
+    OPPONENT_LEAGUE_ID,
+    LEAGUE_ID,
+    TEAM_ID,
+    NAME_ASCENDING,
+    RANK,
+    LEAGUE__NAME,
+    FINALRUNDE,
 )
 from league_table.service.datatypes import LeagueConfig, LeagueConfigRuleset
 from league_table.service.ranking.tiebreakers import TieBreaker, TIEBREAK_REGISTRY
@@ -16,24 +40,24 @@ class TeamStatsEngine:
     def build(self, games_df: pd.DataFrame) -> pd.DataFrame:
         df = self._compute_team_stats(games_df)
 
-        grouped = df.groupby("team_id").agg(
+        grouped = df.groupby(TEAM_ID).agg(
             {
-                "team__name": "first",
-                "pf": "sum",
-                "pa": "sum",
-                "wins": "sum",
-                "draws": "sum",
-                "losses": "sum",
-                "games_played": "sum",
-                "win_points": "sum",
-                "max_win_points": "sum",
-                "standing": "first",
+                TEAM_DESCRIPTION: "first",
+                PF: "sum",
+                PA: "sum",
+                WINS: "sum",
+                DRAWS: "sum",
+                LOSSES: "sum",
+                GAMES_PLAYED: "sum",
+                WIN_POINTS: "sum",
+                MAX_WIN_POINTS: "sum",
+                STANDING: "first",
             }
         )
 
-        grouped["diff"] = grouped["pf"] - grouped["pa"]
-        grouped["win_quotient"] = (
-            grouped["win_points"] / grouped["max_win_points"]
+        grouped["diff"] = grouped[PF] - grouped[PA]
+        grouped[WIN_QUOTIENT] = (
+            grouped[WIN_POINTS] / grouped[MAX_WIN_POINTS]
         ).fillna(0.0).round(self.ruleset.league_quotient_precision)
 
         return grouped.reset_index()
@@ -43,21 +67,21 @@ class TeamStatsEngine:
 
         lp = self.ruleset.league_points
 
-        finished_mask = df["status"] == FINISHED
-        win_mask = (df["pf"] > df["pa"]) & finished_mask
-        draw_mask = (df["pf"] == df["pa"]) & finished_mask
-        loss_mask = (df["pf"] < df["pa"]) & finished_mask
+        finished_mask = df[STATUS] == FINISHED
+        win_mask = (df[PF] > df[PA]) & finished_mask
+        draw_mask = (df[PF] == df[PA]) & finished_mask
+        loss_mask = (df[PF] < df[PA]) & finished_mask
 
-        df["wins"] = win_mask.astype(int)
-        df["draws"] = draw_mask.astype(int)
-        df["losses"] = loss_mask.astype(int)
-        df["games_played"] = finished_mask.astype(int)
-        df["win_points"] = (
+        df[WINS] = win_mask.astype(int)
+        df[DRAWS] = draw_mask.astype(int)
+        df[LOSSES] = loss_mask.astype(int)
+        df[GAMES_PLAYED] = finished_mask.astype(int)
+        df[WIN_POINTS] = (
             win_mask * lp.points_win_same_league
             + draw_mask * lp.points_draw_same_league
             + loss_mask * lp.points_loss_same_league
         )
-        df["max_win_points"] = finished_mask * lp.max_points_same_league
+        df[MAX_WIN_POINTS] = finished_mask * lp.max_points_same_league
 
         return df
 
@@ -69,7 +93,7 @@ class FinalRankingEngine:
     def compute_final_table(self, games: pd.DataFrame) -> pd.DataFrame:
         """Compute final standings based on actual playoff results."""
         # ensure all games finished
-        if not games[games["status"] != "beendet"].empty:
+        if not games[games[STATUS] != FINISHED].empty:
             return pd.DataFrame()
 
         final_standing = []
@@ -77,26 +101,26 @@ class FinalRankingEngine:
         # define the expected placement games
         placements = ["P1", "P3", "P5", "P7", "P9", "P10"]
         for place in placements:
-            local_games = games[games["standing"] == place]
+            local_games = games[games[STANDING] == place]
             if local_games.empty:
                 continue
 
             tie_breaker = TieBreakerEngine(self.league_config_ruleset)
             mini_table_sorted = tie_breaker.rank_by_games(local_games)
 
-            final_standing.extend(mini_table_sorted["team_id"].tolist())
+            final_standing.extend(mini_table_sorted[TEAM_ID].tolist())
 
         # if some teams are not in playoffs, add them at the end
-        all_teams = games["team_id"].unique().tolist()
+        all_teams = games[TEAM_ID].unique().tolist()
         missing = [t for t in all_teams if t not in final_standing]
         final_standing += missing
 
         # aggregate basic stats for presentation
         table = TeamStatsEngine(self.league_config_ruleset).build(games)
-        table = table.set_index("team_id").reindex(final_standing).reset_index()
-        table["rank"] = range(1, len(table) + 1)
-        table = table.rename(columns={"win_quotient": "win_quotient"})
-        table["standing"] = "Finalrunde"
+        table = table.set_index(TEAM_ID).reindex(final_standing).reset_index()
+        table[RANK] = range(1, len(table) + 1)
+        table = table.rename(columns={WIN_QUOTIENT: WIN_QUOTIENT})
+        table[STANDING] = FINALRUNDE
 
         return table
 
@@ -109,29 +133,29 @@ class LeagueRankingEngine:
         df = df.copy()
 
         lp = self.league_config.ruleset.league_points
-        mask_finished = df["status"] == FINISHED
+        mask_finished = df[STATUS] == FINISHED
 
-        same_league = df["league_id"] == df["opponent_league_id"]
+        same_league = df[LEAGUE_ID] == df[OPPONENT_LEAGUE_ID]
 
-        df["win_points"] = (
-            (df["pf"] > df["pa"])
+        df[WIN_POINTS] = (
+            (df[PF] > df[PA])
             * mask_finished
             * same_league.map(
                 {True: lp.points_win_same_league, False: lp.points_win_other_league}
             )
-            + (df["pf"] == df["pa"])
+            + (df[PF] == df[PA])
             * mask_finished
             * same_league.map(
                 {True: lp.points_draw_same_league, False: lp.points_draw_other_league}
             )
-            + (df["pf"] < df["pa"])
+            + (df[PF] < df[PA])
             * mask_finished
             * same_league.map(
                 {True: lp.points_loss_same_league, False: lp.points_loss_other_league}
             )
         )
 
-        df["max_win_points"] = same_league.map(
+        df[MAX_WIN_POINTS] = same_league.map(
             {
                 True: lp.max_points_same_league,
                 False: lp.max_points_other_league,
@@ -147,14 +171,14 @@ class LeagueRankingEngine:
             return df
 
         for adj in adjustments:
-            team_id = adj["id"]
-            points_delta = int(adj["points"])
-            field = adj["field"]
+            team_id = adj[ID]
+            points_delta = int(adj[POINTS])
+            field = adj[FIELD]
 
             if field not in df.columns:
                 raise ValueError(f"Invalid adjustment field '{field}'")
 
-            df.loc[df["team_id"] == team_id, field] += points_delta
+            df.loc[df[TEAM_ID] == team_id, field] += points_delta
 
         return df
 
@@ -165,37 +189,36 @@ class LeagueRankingEngine:
 
         df_games = games_with_results.rename(
             columns={
-                "team__description": "team__name",
-                "gameinfo__standing": "standing",
-                "gameinfo__status": "status",
+                "gameinfo__standing": STANDING,
+                "gameinfo__status": STATUS,
             }
         )
 
         if self.league_config.group_by_leagues:
-            df_games["standing"] = df_games["league__name"]
+            df_games[STANDING] = df_games[LEAGUE__NAME]
 
         team_stats = TeamStatsEngine(self.league_config.ruleset).build(df_games)
-        del team_stats["win_points"]
-        del team_stats["max_win_points"]
+        del team_stats[WIN_POINTS]
+        del team_stats[MAX_WIN_POINTS]
 
         league_stats = self.compute_league_specific_stats(df_games)
 
-        league_agg = league_stats.groupby("team_id", as_index=False).agg(
+        league_agg = league_stats.groupby(TEAM_ID, as_index=False).agg(
             {
-                "win_points": "sum",
-                "max_win_points": "sum",
+                WIN_POINTS: "sum",
+                MAX_WIN_POINTS: "sum",
             }
         )
 
         table = team_stats.merge(
             league_agg,
-            on="team_id",
+            on=TEAM_ID,
             how="left",
         )
 
         table = self.apply_team_point_adjustments(table)
 
-        table["win_quotient"] = (table["win_points"] / table["max_win_points"]).fillna(0.0).round(
+        table[WIN_QUOTIENT] = (table[WIN_POINTS] / table[MAX_WIN_POINTS]).fillna(0.0).round(
             self.league_config.ruleset.league_quotient_precision
         )
 
@@ -203,28 +226,28 @@ class LeagueRankingEngine:
 
     def _compute_league_points(self, row):
         league_points = self.league_config.ruleset.league_points
-        if row["pf"] > row["pa"]:
+        if row[PF] > row[PA]:
             return (
                 league_points.points_win_same_league
-                if row["league_id"] == row["opponent_league_id"]
+                if row[LEAGUE_ID] == row[OPPONENT_LEAGUE_ID]
                 else league_points.points_win_other_league
             )
-        elif row["pf"] == row["pa"]:
+        elif row[PF] == row[PA]:
             return (
                 league_points.points_draw_same_league
-                if row["league_id"] == row["opponent_league_id"]
+                if row[LEAGUE_ID] == row[OPPONENT_LEAGUE_ID]
                 else league_points.points_draw_other_league
             )
         else:
             return (
                 league_points.points_loss_same_league
-                if row["league_id"] == row["opponent_league_id"]
+                if row[LEAGUE_ID] == row[OPPONENT_LEAGUE_ID]
                 else league_points.points_loss_other_league
             )
 
     def _compute_max_points(self, df):
         league_points = self.league_config.ruleset.league_points
-        return (df["league_id"] == df["opponent_league_id"]).map(
+        return (df[LEAGUE_ID] == df[OPPONENT_LEAGUE_ID]).map(
             {
                 True: league_points.max_points_same_league,
                 False: league_points.max_points_other_league,
@@ -255,17 +278,17 @@ class TieBreakerEngine:
         ]
 
     def rank(self, standings_df: pd.DataFrame, games_df: pd.DataFrame) -> pd.DataFrame:
-        games_df = games_df.fillna({"fh": 0, "sh": 0, "pa": 0})
+        games_df = games_df.fillna({FH: 0, SH: 0, PA: 0})
 
         # Compute tiebreakers inside each standing group
         ranked_groups = []
-        for standing, group_df in standings_df.groupby("standing"):
+        for standing, group_df in standings_df.groupby(STANDING):
             ranked_groups.append(self._rank_group(group_df.copy(), games_df))
 
         result = pd.concat(ranked_groups, ignore_index=True)
 
         # Sort again by standing + rank to ensure global order
-        result = result.sort_values(by=["standing", "rank"], ignore_index=True)
+        result = result.sort_values(by=[STANDING, RANK], ignore_index=True)
 
         return result
 
@@ -279,7 +302,7 @@ class TieBreakerEngine:
     def _rank_group(self, df: pd.DataFrame, games_df: pd.DataFrame) -> pd.DataFrame:
         updated = []
 
-        for points, tied_df in df.groupby("win_quotient", dropna=False):
+        for points, tied_df in df.groupby(WIN_QUOTIENT, dropna=False):
             tied_df = tied_df.copy()
             for tb in self.tie_breakers:
                 if tb.key not in tied_df.columns:
@@ -287,7 +310,7 @@ class TieBreakerEngine:
 
             # If only one team → no tie → no tiebreak needed
             if len(tied_df) == 1:
-                tied_df["rank"] = None  # temp, set later
+                tied_df[RANK] = None  # temp, set later
                 updated.append(tied_df)
                 continue
 
@@ -306,14 +329,14 @@ class TieBreakerEngine:
         merged = merged.sort_values(by=sort_keys, ascending=asc_list, ignore_index=True)
 
         # Assign final ranks inside this standing group
-        merged["rank"] = self._assign_ranks_in_group(merged)
+        merged[RANK] = self._assign_ranks_in_group(merged)
 
         return merged
 
     def _apply_tiebreakers(
         self, df: pd.DataFrame, games_df: pd.DataFrame
     ) -> pd.DataFrame:
-        tied_ids = df["team_id"].tolist()
+        tied_ids = df[TEAM_ID].tolist()
 
         for tb in self.tie_breakers:
             # Compute only the tiebreakers that are actually in use
@@ -332,7 +355,7 @@ class TieBreakerEngine:
         tiebreak_cols = [tb.key for tb in self.tie_breakers]
 
         # If last tiebreaker is name_ascending, it does NOT define unique ranking
-        if tiebreak_cols and tiebreak_cols[-1] == "name_ascending":
+        if tiebreak_cols and tiebreak_cols[-1] == NAME_ASCENDING:
             # Collapse: remove name_ascending from tuple
             collapse_cols = tiebreak_cols[:-1]
         else:

@@ -5,11 +5,11 @@ from datetime import datetime
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
-from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -22,10 +22,6 @@ from gamedays.api.serializers import (
     SeasonSerializer,
     LeagueSerializer,
 )
-from gamedays.serializers.game_results import (
-    GameResultsUpdateSerializer,
-    GameInfoSerializer,
-)
 from gamedays.models import (
     Gameday,
     Gameinfo,
@@ -35,13 +31,17 @@ from gamedays.models import (
     Gameresult,
     GamedayDesignerState,
 )
+from gamedays.serializers.game_results import (
+    GameResultsUpdateSerializer,
+    GameInfoSerializer,
+)
 from gamedays.service.gameday_service import (
     GamedayService,
     TABLE_HEADERS,
     HtmlAndJsonRendering,
 )
 from gamedays.service.gameday_settings import (
-    TEAM_NAME,
+    TEAM_DESCRIPTION,
     PF,
     PA,
     DIFF,
@@ -223,13 +223,13 @@ class GamedayScheduleView(APIView):
         elif get == "qualify":
             qualify_table = gs.get_qualify_table()
             if not isinstance(qualify_table, HtmlAndJsonRendering):
-                qualify_table = qualify_table[[STANDING, TEAM_NAME, WIN_POINTS, PF, PA, DIFF]]
+                qualify_table = qualify_table[[STANDING, TEAM_DESCRIPTION, WIN_POINTS, PF, PA, DIFF]]
                 qualify_table = qualify_table.rename(columns=TABLE_HEADERS)
             response = qualify_table.to_json(orient="split")
         elif get == "final":
             final_table = gs.get_final_table()
             if not isinstance(final_table, HtmlAndJsonRendering):
-                final_table = final_table[[TEAM_NAME, WIN_POINTS, PF, PA, DIFF]]
+                final_table = final_table[[TEAM_DESCRIPTION, WIN_POINTS, PF, PA, DIFF]]
                 final_table = final_table.rename(columns=TABLE_HEADERS)
             response = final_table.to_json(orient="split")
         return Response(json.loads(response, object_pairs_hook=OrderedDict))

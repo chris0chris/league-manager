@@ -26,7 +26,7 @@ from gamedays.service.gameday_settings import (
     STATUS,
     ID_HOME,
     OFFICIALS,
-    TEAM_NAME,
+    TEAM_DESCRIPTION,
     PF,
     PA,
     DIFF,
@@ -49,7 +49,7 @@ EMPTY_DATA = "[]"
 TABLE_HEADERS = {
     DFFL: "DFFL-Punkte",
     STANDING: "Gruppe",
-    TEAM_NAME: "Team",
+    TEAM_DESCRIPTION: "Team",
     WIN_POINTS: "Punkte",
     PF: "PF",
     PA: "PA",
