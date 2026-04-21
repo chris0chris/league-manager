@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Button, Badge, Alert } from 'react-bootstrap';
 import { GlobalTeam } from '../../../types/flowchart';
+import { designerApi } from '../../../api/designerApi';
 
 interface TeamPickerStepProps {
   requiredTeams: number;
@@ -8,17 +9,29 @@ interface TeamPickerStepProps {
   onConfirm: (selectedTeams: GlobalTeam[]) => void;
   onBack: () => void;
   onAutoGenerateTeams?: (count: number) => Promise<GlobalTeam[]>;
+  backButtonLabel?: string;
+  preselectedTeams?: GlobalTeam[];
 }
 
 const TeamPickerStep: React.FC<TeamPickerStepProps> = ({
   requiredTeams, availableTeams, onConfirm, onBack,
-  onAutoGenerateTeams,
+  onAutoGenerateTeams, backButtonLabel = 'Back to Library', preselectedTeams = [],
 }) => {
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>(() => {
+    const preselectedNames = new Set(preselectedTeams.map(t => t.label.toLowerCase()));
+    return availableTeams
+      .filter(t => preselectedNames.has(t.label.toLowerCase()))
+      .map(t => t.id);
+  });
   const [creating, setCreating] = useState(false);
   const [localTeams, setLocalTeams] = useState<GlobalTeam[]>([]);
   const [associationFilter, setAssociationFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [mockTeams, setMockTeams] = useState<boolean>(false);
+
+  useEffect(() => {
+    designerApi.getConfig().then(config => setMockTeams(config.mock_teams)).catch(() => setMockTeams(false));
+  }, []);
 
   const allTeams = [...availableTeams, ...localTeams];
 
@@ -155,7 +168,7 @@ const TeamPickerStep: React.FC<TeamPickerStepProps> = ({
           </div>
         )}
 
-        {onAutoGenerateTeams && selectedIds.length < requiredTeams && (
+        {onAutoGenerateTeams && selectedIds.length < requiredTeams && mockTeams && (
           <Button
             size="sm"
             variant="outline-primary"
@@ -173,7 +186,11 @@ const TeamPickerStep: React.FC<TeamPickerStepProps> = ({
       </Modal.Body>
       <Modal.Footer className="bg-light">
         <Button variant="outline-secondary" onClick={onBack}>
-          <i className="bi bi-arrow-left me-2"></i>Back to Library
+          {backButtonLabel === 'Cancel' ? (
+            <>{backButtonLabel}</>
+          ) : (
+            <><i className="bi bi-arrow-left me-2"></i>{backButtonLabel}</>
+          )}
         </Button>
         <Button
           variant="primary"

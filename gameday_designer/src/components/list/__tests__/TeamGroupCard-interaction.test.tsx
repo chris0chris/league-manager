@@ -29,7 +29,7 @@ describe('TeamGroupCard Interaction Fix (#680)', () => {
   const mockOnUpdateTeam = vi.fn();
   const mockOnReorderTeam = vi.fn();
   const mockOnUpdateGroup = vi.fn();
-  const mockOnAddTeam = vi.fn();
+  const mockOnShowTeamSelection = vi.fn();
 
   const defaultProps = {
     group: mockGroup,
@@ -41,7 +41,8 @@ describe('TeamGroupCard Interaction Fix (#680)', () => {
     onUpdateTeam: mockOnUpdateTeam,
     onDeleteTeam: vi.fn(),
     onReorderTeam: mockOnReorderTeam,
-    onAddTeam: mockOnAddTeam,
+    onAddTeam: vi.fn(),
+    onShowTeamSelection: mockOnShowTeamSelection,
     getTeamUsage: vi.fn(() => []),
     index: 0,
     totalGroups: 2,
@@ -93,7 +94,7 @@ describe('TeamGroupCard Interaction Fix (#680)', () => {
     const addBtns = screen.getAllByTitle(/add (a new|your first) team/i);
     await user.click(addBtns[1]); // Click the one in the body
 
-    expect(mockOnAddTeam).toHaveBeenCalledWith('group-1');
+    expect(mockOnShowTeamSelection).toHaveBeenCalledWith('group-1', 'group');
   });
 
   it('cancels team label edit on Escape', async () => {

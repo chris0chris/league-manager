@@ -4,6 +4,7 @@ from .base import *
 import os
 
 DEBUG = False
+MOCK_TEAMS = True
 
 # Demo-specific secret key (not for production)
 if not os.environ.get("SECRET_KEY"):

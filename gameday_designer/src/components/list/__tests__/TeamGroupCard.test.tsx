@@ -70,14 +70,22 @@ describe('TeamGroupCard', () => {
     totalGroups: 2,
   });
 
-  it('calls onShowTeamSelection with group mode when link button is clicked', () => {
+  it('calls onShowTeamSelection with group mode when add team button is clicked', () => {
     const onShowTeamSelection = vi.fn();
     render(<TeamGroupCard {...getDefaultProps()} onShowTeamSelection={onShowTeamSelection} />);
 
-    const linkBtn = screen.getByTitle('Connect an existing team from the database pool');
-    fireEvent.click(linkBtn);
+    const addBtn = screen.getByTitle(/add.*team.*group/i);
+    fireEvent.click(addBtn);
 
     expect(onShowTeamSelection).toHaveBeenCalledWith('group-1', 'group');
+  });
+
+  it('does not render link team button', () => {
+    const onShowTeamSelection = vi.fn();
+    render(<TeamGroupCard {...getDefaultProps()} onShowTeamSelection={onShowTeamSelection} />);
+
+    const linkBtn = screen.queryByTitle('Connect an existing team from the database pool');
+    expect(linkBtn).not.toBeInTheDocument();
   });
 
   it('shows a pencil edit button next to the group name when not readOnly', () => {

@@ -7,6 +7,7 @@ if not SECRET_KEY:
     SECRET_KEY = "django-insecure-local-dev-key-set-SECRET_KEY-env-var-in-production"
 
 DEBUG = True
+MOCK_TEAMS = True
 DEBUG_DATE = datetime.date.today()
 # DEBUG_DATE = datetime.date(2026, 3, 21)
 
