@@ -18,4 +18,15 @@ describe('SaveTemplateSheet', () => {
     fireEvent.click(screen.getByRole('button', { name: /save template/i }));
     expect(onSave).toHaveBeenCalledWith({ name: 'My Format', description: '', sharing: 'ASSOCIATION' });
   });
+
+  it('applies the correct CSS classes for backdrop and modal', () => {
+    render(<SaveTemplateSheet show onHide={vi.fn()} onSave={vi.fn()} />);
+    // React Bootstrap Modal usually puts the modal container in the body
+    const modal = document.querySelector('.modal');
+    expect(modal).toHaveClass('template-save-modal');
+
+    // Backdrop is also in the body
+    const backdrop = document.querySelector('.modal-backdrop');
+    expect(backdrop).toHaveClass('template-save-backdrop');
+  });
 });

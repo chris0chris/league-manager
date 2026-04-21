@@ -15,12 +15,19 @@ export { default as StageSection } from './list/StageSection';
 export { default as TeamTable } from './list/TeamTable';
 export { default as GameTable } from './list/GameTable';
 
-// Shared component types
+// Re-export legacy types
+export type { GameSlotCardProps } from './GameSlotCard';
+export type { FieldColumnProps } from './FieldColumn';
+export type { DesignerCanvasProps } from './DesignerCanvas';
+export type { TeamSelectorProps } from './TeamSelector';
+export type { GameSlotEditorProps } from './GameSlotEditor';
+
+// Re-export new component types
 export type { FlowToolbarProps } from './FlowToolbar';
 export type { FlowPropertiesPanelProps } from './FlowPropertiesPanel';
 export type { FieldSidebarProps } from './FieldSidebar';
 
-// List component types
+// Re-export list component types
 export type { ListCanvasProps } from './ListCanvas';
 export type { FieldSectionProps } from './list/FieldSection';
 export type { StageSectionProps } from './list/StageSection';

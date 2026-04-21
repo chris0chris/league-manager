@@ -348,7 +348,7 @@ describe('useDesignerController', () => {
       expect(consoleSpy).toHaveBeenCalledWith('Failed to generate tournament:', expect.any(Error));
     });
 
-    it('filters teams by selectedTeamIds', async () => {
+    it('filters teams by selectedTeams', async () => {
       const { result } = renderHook(() => {
         const flowState = useFlowState({
           globalTeams: [
@@ -364,7 +364,7 @@ describe('useDesignerController', () => {
       await act(async () => {
         await result.current.handlers.handleGenerateTournament({
           ...mockConfig,
-          selectedTeamIds: ['t1']
+          selectedTeams: [{ id: 't1', label: 'T1', groupId: null, order: 0 }]
         });
       });
       
@@ -375,6 +375,61 @@ describe('useDesignerController', () => {
       // t2 should NOT be in the call
       const callArgs = vi.mocked(tournamentGenerator.generateTournament).mock.calls[0][0];
       expect(callArgs).toHaveLength(1);
+    });
+
+    it('handles selectedTeams correctly including adding missing teams and calculating neededCount', async () => {
+      const mockSelectedTeams = [
+        { id: 'st1', label: 'Selected 1', groupId: 'g1', color: '#ff0000', order: 0 },
+        { id: 'st2', label: 'Selected 2', groupId: 'g1', color: '#00ff00', order: 1 },
+      ];
+
+      const { result } = renderHook(() => {
+        const fs = useFlowState();
+        return { fs, controller: useDesignerController(undefined, fs) };
+      });
+
+      const importStateSpy = vi.spyOn(result.current.fs, 'importState');
+
+      vi.mocked(tournamentGenerator.generateTournament).mockReturnValue(mockStructure);
+      
+      // We want to verify neededCount. If teamCount is 4 and we have 2 selected teams, neededCount should be 2.
+      const configWithSelected = {
+        ...mockConfig,
+        template: {
+          ...mockConfig.template,
+          teamCount: { exact: 4 }
+        },
+        generateTeams: true,
+        selectedTeams: mockSelectedTeams
+      };
+
+      // Mock generateTeamsForTournament to return 2 teams (since 4 - 2 = 2)
+      vi.mocked(teamAssignment.generateTeamsForTournament).mockReturnValue([
+        { label: 'Gen 1', color: '#0000ff' },
+        { label: 'Gen 2', color: '#ffff00' },
+      ]);
+
+      await act(async () => {
+        await result.current.controller.handlers.handleGenerateTournament(configWithSelected);
+      });
+
+      // 1. Verify that neededCount is calculated correctly (Required - Selected)
+      // Since generateTeamsForTournament is called with neededCount and startOffset
+      expect(teamAssignment.generateTeamsForTournament).toHaveBeenCalledWith(2, 2);
+
+      // 2. Verify that the total number of teams (selected + generated) are included in the importState call
+      expect(importStateSpy).toHaveBeenCalledWith(expect.objectContaining({
+        globalTeams: expect.arrayContaining([
+          expect.objectContaining({ id: 'st1' }),
+          expect.objectContaining({ id: 'st2' }),
+          expect.objectContaining({ label: 'Gen 1' }),
+          expect.objectContaining({ label: 'Gen 2' }),
+        ])
+      }));
+      
+      // Total teams should be 4
+      const importCall = importStateSpy.mock.calls[0][0];
+      expect(importCall.globalTeams).toHaveLength(4);
     });
   });
 

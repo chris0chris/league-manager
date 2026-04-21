@@ -20,6 +20,9 @@ import type {
 export interface TeamRecord {
   id: number;
   name: string;
+  association_id?: number | null;
+  association_abbr?: string | null;
+  association_name?: string | null;
 }
 
 /**

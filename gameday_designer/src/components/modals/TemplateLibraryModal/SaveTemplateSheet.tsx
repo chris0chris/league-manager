@@ -8,9 +8,9 @@ interface SaveTemplateSheetProps {
 }
 
 const SCOPE_OPTIONS = [
-  { value: 'PRIVATE' as const, icon: '🔒', label: 'Personal', desc: 'Only visible to you' },
-  { value: 'ASSOCIATION' as const, icon: '🏛️', label: 'Association', desc: 'Shared with your association' },
-  { value: 'GLOBAL' as const, icon: '🌐', label: 'Global', desc: 'Visible to all users' },
+  { value: 'PRIVATE' as const, icon: <i className="bi bi-lock me-1"></i>, label: 'Personal', desc: 'Only visible to you' },
+  { value: 'ASSOCIATION' as const, icon: <i className="bi bi-bank me-1"></i>, label: 'Association', desc: 'Shared with your association' },
+  { value: 'GLOBAL' as const, icon: <i className="bi bi-globe me-1"></i>, label: 'Global', desc: 'Visible to all users' },
 ];
 
 const SaveTemplateSheet: React.FC<SaveTemplateSheetProps> = ({ show, onHide, onSave }) => {
@@ -27,9 +27,15 @@ const SaveTemplateSheet: React.FC<SaveTemplateSheetProps> = ({ show, onHide, onS
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal
+      show={show}
+      onHide={onHide}
+      centered
+      backdropClassName="template-save-backdrop"
+      className="template-save-modal"
+    >
       <Modal.Header closeButton>
-        <Modal.Title>💾 Save as Template</Modal.Title>
+        <Modal.Title><i className="bi bi-download me-2"></i>Save as Template</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form noValidate>

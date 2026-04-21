@@ -24,7 +24,7 @@ describe('TemplateLibraryModal', () => {
   });
 
   it('shows "Save current as template" button in titlebar', () => {
-    render(<TemplateLibraryModal show onHide={vi.fn()} gamedayId={1} currentUserId={1} flowTeams={[]} />);
+    render(<TemplateLibraryModal show onHide={vi.fn()} gamedayId={1} currentUserId={1} />);
     expect(screen.getByRole('button', { name: /save current/i })).toBeInTheDocument();
   });
 });

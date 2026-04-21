@@ -5,10 +5,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getTeamColor, generateTeamsForTournament, assignTeamsToTournamentGames } from '../teamAssignment';
+import { generateTeamsForTournament, assignTeamsToTournamentGames } from '../teamAssignment';
 import type { GlobalTeam, GameNode, StageNode } from '../../types/flowchart';
 import type { TournamentStructure } from '../tournamentGenerator';
-import { TEAM_COLORS } from '../tournamentConstants';
+import { TEAM_COLORS, getTeamColor } from '../tournamentConstants';
 
 /**
  * Helper to create a mock global team

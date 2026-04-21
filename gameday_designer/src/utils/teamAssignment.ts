@@ -11,7 +11,7 @@ import type { GlobalTeam, GameNode, StageNode } from '../types/flowchart';
 import type { TournamentStructure } from './tournamentGenerator';
 import type { EdgeSpec } from './bracketEdgeGenerator';
 import { createPlacementEdges } from './bracketEdgeGenerator';
-import { TEAM_COLORS } from './tournamentConstants';
+import { getTeamColor } from './tournamentConstants';
 import { getRoundRobinPairings } from './roundRobinLogic';
 
 /**
@@ -36,22 +36,6 @@ export type TeamAssignmentOperation =
       type: 'add_edges';
       edges: EdgeSpec[];
     };
-
-/**
- * Get team color by index from predefined color palette
- *
- * @param index - Team index (0-based)
- * @returns Hex color code
- *
- * @example
- * ```typescript
- * const color = getTeamColor(0); // returns '#3498db' (Blue)
- * const color = getTeamColor(12); // wraps around to first color
- * ```
- */
-export function getTeamColor(index: number): string {
-  return TEAM_COLORS[index % TEAM_COLORS.length];
-}
 
 /**
  * Generate team data for tournament

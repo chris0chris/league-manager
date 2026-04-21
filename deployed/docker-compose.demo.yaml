@@ -80,6 +80,11 @@ services:
       - io.portainer.accesscontrol.teams=leaguesphere
       # Watchtower scope
       - com.centurylinklabs.watchtower.scope=dev
+      # Ofelia demo reset
+      - ofelia.enabled=true
+      - ofelia.job-exec.demo-reset.schedule=0 0 0 * * *
+      - ofelia.job-exec.demo-reset.command=/bin/bash -c "rm -f /app/.demo_last_reset && /app/entrypoint.demo.sh"
+      - ofelia.job-exec.demo-reset.no-overlap=true
     env_file: ls.env.demo
     environment:
       DJANGO_SETTINGS_MODULE: league_manager.settings.demo

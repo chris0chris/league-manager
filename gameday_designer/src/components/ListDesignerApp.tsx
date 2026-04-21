@@ -502,12 +502,12 @@ const ListDesignerApp: React.FC = () => {
             startTime: config.startTime,
             gameDuration: config.gameDuration,
             breakDuration: config.breakDuration,
-            generateTeams: config.generateTeams ?? false,
-            autoAssignTeams: config.generateTeams ?? false,
-            selectedTeamIds: config.selectedTeamIds,
+            generateTeams: config.generateTeams,
+            autoAssignTeams: config.generateTeams,
+            selectedTeams: config.selectedTeams,
           });
         }}
-        onGenerateFromSavedTemplate={(templateId, config) => {
+        onGenerateFromSavedTemplate={(templateId, config, selectedTeams) => {
           handleGenerateTournament({
             template: null as unknown as TournamentTemplate,
             fieldCount: 2,
@@ -517,6 +517,7 @@ const ListDesignerApp: React.FC = () => {
             generateTeams: true,
             autoAssignTeams: false,
             customTemplate: { id: templateId } as GenericTemplate,
+            selectedTeams,
           });
         }}
         onNotify={addNotification}
