@@ -1,7 +1,16 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import TeamPickerStep from '../TeamPickerStep';
 import React from 'react';
+import { designerApi } from '../../../../api/designerApi';
+
+// Mock designerApi
+vi.mock('../../../../api/designerApi', () => ({
+  designerApi: {
+    getConfig: vi.fn(),
+    getLeagueTeams: vi.fn(),
+  },
+}));
 
 const mockTeams = [
   { id: '1', label: 'Team A', groupId: null, order: 0 },
@@ -10,6 +19,11 @@ const mockTeams = [
 ];
 
 describe('TeamPickerStep', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(designerApi.getConfig).mockResolvedValue({ mock_teams: true });
+  });
+
   it('shows required team count', () => {
     render(<TeamPickerStep requiredTeams={6} availableTeams={mockTeams} onConfirm={vi.fn()} onBack={vi.fn()} />);
     // There are two "6"s: one in <strong> and one in <Badge>
@@ -73,7 +87,7 @@ describe('TeamPickerStep', () => {
     fireEvent.click(screen.getByText('Team C'));
 
     // Now the button should show "auto-generate 1 missing teams"
-    const genButton = screen.getByText(/auto-generate 1 missing teams/i);
+    const genButton = await screen.findByText(/auto-generate 1 missing teams/i);
     fireEvent.click(genButton);
 
     await waitFor(() => {

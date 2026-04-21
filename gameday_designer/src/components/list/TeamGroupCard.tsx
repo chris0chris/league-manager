@@ -65,7 +65,6 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
   onDeleteTeam,
   onReorderTeam,
   onShowTeamSelection,
-      onAddTeam,
       getTeamUsage,
   
   index,
@@ -227,22 +226,12 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
                 className="btn btn-sm btn-outline-primary btn-adaptive"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onAddTeam(group.id);
+                  onShowTeamSelection(group.id, 'group');
                 }}
                 title={t('ui:tooltip.addTeamToGroup')}
               >
                 <i className={`bi ${ICONS.ADD} me-2`}></i>
                 <span className="btn-label-adaptive">{t('ui:button.addTeam')}</span>
-              </button>
-              <button
-                className="btn btn-sm btn-outline-info"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onShowTeamSelection(group.id, 'group');
-                }}
-                title={t('ui:tooltip.connectTeam')}
-              >
-                <i className={`bi ${ICONS.LINK}`}></i>
               </button>
               <button
                 className="btn btn-sm btn-outline-secondary"
@@ -291,7 +280,7 @@ const TeamGroupCard: React.FC<TeamGroupCardProps> = ({
               {!readOnly && (
                 <button
                   className="btn btn-outline-primary btn-adaptive px-4"
-                  onClick={() => onAddTeam(group.id)}
+                  onClick={() => onShowTeamSelection(group.id, 'group')}
                   title={t('ui:tooltip.addFirstTeamToGroup')}
                 >
                   <i className={`bi ${ICONS.ADD} me-2`}></i>

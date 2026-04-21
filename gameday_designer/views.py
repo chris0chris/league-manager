@@ -584,3 +584,13 @@ class LeagueTeamsView(APIView):
             }
             for t in teams
         ])
+
+
+class ConfigView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from django.conf import settings
+        return Response({
+            "mock_teams": getattr(settings, "MOCK_TEAMS", False),
+        })

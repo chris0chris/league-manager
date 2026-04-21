@@ -127,42 +127,94 @@ def test_auto_generate_teams_has_color_iterator(live_server, page: Page):
 
     _login(page, live_server.url)
     page.goto(f"{live_server.url}{DESIGNER_BASE_URL}/")
-    
+
     # Wait for dashboard to be ready
     expect(page.get_by_role("button", name="Create Gameday").first).to_be_visible(timeout=15000)
     page.get_by_role("button", name="Create Gameday").first.click()
-    
+
     # Wait for editor to load
     expect(page.get_by_test_id("gameday-metadata-accordion")).to_be_visible(timeout=15000)
-    
+
     # Open Template Library
     page.get_by_test_id("open-template-library-button").click()
     expect(page.get_by_text("Template Library")).to_be_visible(timeout=5000)
-    
+
     # Select first template
     page.locator('[data-testid^="builtin-template-"]').first.click()
     page.get_by_test_id("apply-template-button").click()
-    
+
     # Click Auto-generate
     expect(page.get_by_text("Select Teams")).to_be_visible(timeout=5000)
     page.get_by_role("button", name=re.compile(r"Auto-generate")).click()
-    
+
     # Apply
     apply_btn = page.get_by_role("button", name=re.compile(r"Apply to Gameday"))
     expect(apply_btn).to_be_enabled(timeout=10000)
     apply_btn.click()
-    
+
     # Wait for apply
     expect(page.get_by_text("Select Teams")).not_to_be_visible(timeout=5000)
     page.wait_for_timeout(2000)
-    
+
     # Check colors of the first two teams
     color_inputs = page.locator('div[id^="team-"]').locator('input[type="color"]')
     assert color_inputs.count() >= 2
-    
+
     color_1 = color_inputs.nth(0).input_value()
     color_2 = color_inputs.nth(1).input_value()
-    
+
     assert color_1.lower() != "#6c757d", f"Team 1 has default grey: {color_1}"
     assert color_2.lower() != "#6c757d", f"Team 2 has default grey: {color_2}"
     assert color_1 != color_2, f"Generated teams should have different colors. Got {color_1} and {color_2}"
+
+@pytest.mark.django_db(transaction=True)
+def test_add_team_to_pool_via_team_picker_dialog(live_server, page: Page):
+    """
+    Validate that the 'Add Team' button in team pool opens TeamPickerStep
+    dialog and allows selecting teams from the league.
+    """
+    # Setup Data
+    league = LeagueFactory(name="E2E Pool League")
+    season = SeasonFactory(name="2026")
+    teams = [
+        TeamFactory(name=f"Pool Team {c}") for c in "AB"
+    ]
+    SeasonLeagueTeamFactory(season=season, league=league, teams=teams)
+
+    # Login and Navigate
+    _login(page, live_server.url)
+    page.goto(f"{live_server.url}{DESIGNER_BASE_URL}/")
+
+    # Create Gameday
+    page.get_by_role("button", name="Create Gameday").first.click()
+
+    # Set league and season
+    expect(page.get_by_test_id("gameday-metadata-accordion")).to_be_visible(timeout=15000)
+    page.get_by_test_id("gameday-metadata-toggle").click()
+    page.fill("#gamedayName", "Team Pool Test")
+    expect(page.locator("#gamedaySeason option", has_text="2026")).to_be_attached(timeout=10000)
+    page.select_option("#gamedaySeason", label="2026")
+    page.select_option("#gamedayLeague", label="E2E Pool League")
+
+    # Click "Add Group" to create a team group
+    page.get_by_role("button", name=re.compile(r"Add Group")).first.click()
+    expect(page.get_by_text("Group 1")).to_be_visible(timeout=5000)
+
+    # Click "Add Team" button in the group
+    add_team_buttons = page.get_by_role("button", name=re.compile(r"Add Team"))
+    add_team_buttons.first.click()
+
+    # Verify TeamPickerStep dialog opens
+    expect(page.get_by_text("Select Teams")).to_be_visible(timeout=5000)
+
+    # Select first team
+    page.get_by_text(teams[0].name).click()
+
+    # Apply
+    apply_btn = page.get_by_role("button", name=re.compile(r"Apply to Gameday"))
+    expect(apply_btn).to_be_enabled(timeout=10000)
+    apply_btn.click()
+
+    # Verify team added to pool
+    expect(page.get_by_text("Select Teams")).not_to_be_visible(timeout=5000)
+    expect(page.get_by_text(teams[0].name)).to_be_visible(timeout=5000)

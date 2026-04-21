@@ -269,6 +269,11 @@ class DesignerApi {
     );
     return response.data;
   }
+
+  async getConfig(): Promise<{ mock_teams: boolean }> {
+    const response = await this.client.get<{ mock_teams: boolean }>('/config/');
+    return response.data;
+  }
 }
 
 /**
