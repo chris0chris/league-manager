@@ -176,7 +176,62 @@ case "$VERSION_ARG" in
         if [ -d "../league_manager" ]; then
             cd ..
         fi
-        bump-my-version bump "$VERSION_ARG" && git push $REMOTE && git push $REMOTE --tags
+
+        # Read current version
+        CURRENT_VERSION=$(grep "__version__" league_manager/__init__.py | cut -d'"' -f2)
+        echo "Current version: $CURRENT_VERSION"
+
+        # Extract base version (remove any +demo.X or -rc.X suffix)
+        BASE_VERSION="${CURRENT_VERSION%%+*}"
+        BASE_VERSION="${BASE_VERSION%%-*}"
+
+        echo "Base version: $BASE_VERSION"
+
+        # Parse version components
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
+
+        # Bump version based on argument
+        case "$VERSION_ARG" in
+            major)
+                NEW_MAJOR=$((MAJOR + 1))
+                NEW_VERSION="${NEW_MAJOR}.0.0"
+                ;;
+            minor)
+                NEW_MINOR=$((MINOR + 1))
+                NEW_VERSION="${MAJOR}.${NEW_MINOR}.0"
+                ;;
+            patch)
+                NEW_PATCH=$((PATCH + 1))
+                NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
+                ;;
+        esac
+
+        echo "Creating version: $NEW_VERSION"
+
+        # Update version files directly
+        sed -i "s/__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" league_manager/__init__.py
+        sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" liveticker/package.json
+        sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" passcheck/package.json
+        sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" scorecard/package.json
+        sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" gameday_designer/package.json
+        sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" pyproject.toml
+        sed -i "s/current_version = \".*\"/current_version = \"$NEW_VERSION\"/" pyproject.toml
+
+        # Regenerate uv.lock to match updated pyproject.toml
+        echo "Regenerating uv.lock..."
+        uv lock
+
+        # Commit and tag
+        git add league_manager/__init__.py liveticker/package.json passcheck/package.json scorecard/package.json gameday_designer/package.json pyproject.toml uv.lock
+        git commit -m "Bump version: $CURRENT_VERSION → $NEW_VERSION"
+        git tag -a "v$NEW_VERSION" -m "Bump version: $CURRENT_VERSION → $NEW_VERSION"
+
+        # Push commits and tags
+        git push $REMOTE && git push $REMOTE --tags
+
+        # Show new version
+        FINAL_VERSION=$(grep "__version__" league_manager/__init__.py | cut -d'"' -f2)
+        echo "✅ Production release deployed: $FINAL_VERSION"
         ;;
     stage)
         # Staging deployment - create/increment RC version
