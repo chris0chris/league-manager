@@ -322,7 +322,7 @@ class DBSetup:
             "Gewinner Spiel 5",
             "Verlierer Spiel 5",
         ]:
-            TeamFactory(name=name)
+            TeamFactory(name=name, description=name)
 
     def g4_final4_1_status_empty(self) -> "Gameday":
         from gamedays.management.schedule_manager import ScheduleCreator, Schedule, GroupSchedule
