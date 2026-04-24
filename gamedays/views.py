@@ -247,7 +247,7 @@ class GamedayDetailView(DetailView):
             "url_pattern_league_filter": UrlService.build_absolute_url(
                 LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE, {"season": gameday.season, "league": gameday.league}
             ),
-            "url_pattern_liveticker": f"{UrlService.build_absolute_url(LIVETICKER_HOME)}?league={gameday.league.name}&gameday={gameday.pk}",
+            "url_pattern_liveticker": f"{UrlService.build_absolute_url(LIVETICKER_HOME)}?league={gameday.league.slug}&gameday={gameday.pk}",
         }
 
         return context

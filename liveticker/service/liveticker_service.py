@@ -19,7 +19,7 @@ class LivetickerService:
         if not league:
             league = League.objects.all()
         else:
-            league = League.objects.filter(name__in=league)
+            league = League.objects.filter(slug__in=league)
         if not gameday_ids:
             today_gamedays = Gameday.objects.filter(
                 date=datetime.today(), league__in=league
