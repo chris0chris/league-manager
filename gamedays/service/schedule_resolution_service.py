@@ -1,12 +1,11 @@
-from gamedays.models import Team, Gameinfo, Gameresult, Gameday
+import logging
+
 from gameday_designer.models import (
-    ScheduleTemplate,
     TemplateUpdateRule,
-    TemplateApplication,
 )
+from gamedays.models import Team, Gameinfo, Gameresult, Gameday
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.service.placeholder_service import GamedayPlaceholderService
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +65,7 @@ class GamedayScheduleResolutionService:
                     standing=team_rule.standing,
                     points=team_rule.points,
                 )
-                team = Team.objects.get(name=team_name)
+                team = Team.objects.get(description=team_name)
 
                 if team_rule.role == "home":
                     self._update_gameresult(target_gi, team, True)
