@@ -19,10 +19,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_view
 from django.contrib.sitemaps.views import sitemap
-from django.urls import path, include
-from django.views.generic import TemplateView
 from django.http import JsonResponse
+from django.urls import path, include
 from django.views import View
+from django.views.generic import TemplateView, RedirectView
 
 from league_manager.constants import LEAGUE_MANAGER_MAINTENANCE, CLEAR_CACHE
 
@@ -42,7 +42,7 @@ class HealthCheckView(View):
         return JsonResponse({"status": "healthy"})
 
 
-from league_manager.views import homeview, ClearCacheView, robots_txt_view, database_error_view
+from league_manager.views import ClearCacheView, robots_txt_view, database_error_view
 from league_manager.sitemaps import (
     StaticViewSitemap,
     LeaguetableSitemap,
@@ -91,7 +91,7 @@ urlpatterns = [
     path("gamedays/", include("gamedays.urls")),
     path("passcheck/", include("passcheck.urls")),
     path("dal/", include("league_manager.dal.urls")),
-    path("", homeview),
+    path("", RedirectView.as_view(url="gamedays/", permanent=True)),
     path(
         "login/",
         auth_view.LoginView.as_view(template_name="registration/login.html"),
