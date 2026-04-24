@@ -1,0 +1,33 @@
+{% if url_pattern and selected_season and leagues %}
+<div class="dropdown">
+    <button
+        class="btn btn-primary dropdown-toggle"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+    >
+        Liga: {% if selected_league %}{{ selected_league }}{% else %}Nicht ausgewählt{% endif %}
+    </button>
+
+    <ul class="dropdown-menu">
+        {% for current_league in leagues %}
+            <li>
+                <a
+                    class="dropdown-item {% if current_league == selected_league %}active{% endif %}"
+                    href="{% url url_pattern season=selected_season league=current_league %}"
+                >
+                    {{ current_league }}
+                    {% if current_league == selected_league %}
+                        ✓
+                    {% endif %}
+                </a>
+            </li>
+        {% endfor %}
+        <li>
+            <a class="dropdown-item" href="{% url 'league-gameday-list-and-year' season=selected_season %}">
+                Alle anzeigen
+            </a>
+        </li>
+    </ul>
+</div>
+{% endif %}

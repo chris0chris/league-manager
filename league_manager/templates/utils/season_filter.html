@@ -1,4 +1,4 @@
-{% if url_pattern and current_season and current_league and seasons %}
+{% if url_pattern and selected_season and seasons %}
 <div class="dropdown">
     <button
         class="btn btn-primary dropdown-toggle"
@@ -6,18 +6,25 @@
         data-bs-toggle="dropdown"
         aria-expanded="false"
     >
-        Saison: {{ current_season }}
+        Saison: {{ selected_season }}
     </button>
 
     <ul class="dropdown-menu">
-        {% for season in seasons %}
+        {% for current_season in seasons %}
             <li>
+                {% if current_league %}
                 <a
-                    class="dropdown-item {% if current_season == season %}active{% endif %}"
-                    href="{% url url_pattern season=season league=current_league %}"
+                    class="dropdown-item {% if selected_season == current_season %}active{% endif %}"
+                    href="{% url url_pattern season=current_season league=current_league %}"
                 >
-                    {{ season }}
-                    {% if current_season == season %}
+                {% else %}
+                <a
+                    class="dropdown-item {% if selected_season == current_season %}active{% endif %}"
+                    href="{% url url_pattern season=current_season %}"
+                >
+                {% endif %}
+                    {{ current_season }}
+                    {% if selected_season == current_season %}
                         ✓
                     {% endif %}
                 </a>

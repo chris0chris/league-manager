@@ -63,13 +63,14 @@ class GamedayListView(View):
     model = Gameday
     template_name = "gamedays/gameday_list.html"
 
-    def get(self, request, **kwargs):
+    def get(self, request, *args, **kwargs):
         year = kwargs.get("season", datetime.today().year)
+        show_all_games = request.GET.get("showAllGames") == "true"
         league = kwargs.get("league")
         gamedays = Gameday.objects.filter(date__year=year).order_by("date")
-        leagues = gamedays.values_list("league__name", flat=True).distinct().order_by("-league__name")
+        leagues = gamedays.values_list("league__name", flat=True).distinct().order_by("league__name")
         filtered_gamedays_by_today = gamedays.filter(date__gt=datetime.today()).order_by("date")
-        if filtered_gamedays_by_today.count() > 0:
+        if filtered_gamedays_by_today.count() > 0 and not show_all_games:
             gamedays = filtered_gamedays_by_today
         gamedays_filtered_by_league = (
             gamedays.filter(league__name=league) if league else gamedays
@@ -79,15 +80,15 @@ class GamedayListView(View):
             self.template_name,
             {
                 "gamedays": gamedays_filtered_by_league,
-                "years": Gameday.objects.annotate(year=ExtractYear("date"))
+                "seasons": Gameday.objects.annotate(year=ExtractYear("date"))
                 .values_list("year", flat=True)
                 .distinct()
                 .order_by("-year"),
-                "season": year,
+                "selected_season": year,
                 "leagues": leagues,
-                "current_league": league,
+                "selected_league": league,
                 "season_year_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR,
-                "season_year_league_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
+                "league_year_url_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
                 "season_year_league_statistic_pattern": LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
             },
         )

@@ -1,25 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
-<ul class="nav nav-pills mb-1">
-    {% for year in years %}
-    <li class="nav-item">
-        <a class="nav-link {% if year == season %}active{% endif %}"
-           href="{% url season_year_pattern season=year%}">{{ year }}</a>
-    </li>
-    {% endfor %}
-</ul>
-<ul class="nav nav-pills mb-3">
-    {% for league in leagues %}
-    <li class="nav-item">
-        <a class="nav-link {% if league == current_league %}active{% endif %}"
-           href="{% url season_year_league_pattern season=season league=league %}">{{ league }}</a>
-    </li>
-    {% endfor %}
-</ul>
-{% if current_league %}
+
+<div class="d-flex gap-2 mb-3">
+{% include 'utils/season_filter.html' with url_pattern=season_year_pattern  %}
+{% include 'utils/league_filter.html' with  url_pattern=league_year_url_pattern %}
+    {% if request.GET.showAllGames == "true" %}
+        <a class="btn btn-info btn-sm ms-auto"
+           {% if selected_league %}
+               href="{% url league_year_url_pattern season=selected_season league=selected_league %}"
+           {% else %}
+               href="{% url season_year_pattern season=selected_season %}"
+           {% endif %}
+           title="Spiele ab heute anzeigen">
+            <i class="bi bi-calendar"></i> Spiele ab heute anzeigen
+        </a>
+    {% else %}
+        <a class="btn btn-outline-info btn-sm ms-auto"
+           {% if selected_league %}
+               href="{% url league_year_url_pattern season=selected_season league=selected_league %}?showAllGames=true"
+           {% else %}
+               href="{% url season_year_pattern season=selected_season %}?showAllGames=true"
+           {% endif %}
+           title="Alle Spiele anzeigen">
+            <i class="bi bi-list"></i> Alle Spiele anzeigen
+        </a>
+    {% endif %}
+</div>
+
+{% if selected_league %}
 <article class="media content-section">
     <div class="media-body">
-        <h2><a class="article-title" href="{% url season_year_league_statistic_pattern season=season league=current_league %}"><i class="bi bi-table"></i> {{ current_league }} Statistiken</a></h2>
+        <h2><a class="article-title" href="{% url season_year_league_statistic_pattern season=selected_season league=selected_league %}"><i class="bi bi-table"></i> {{ selected_league }} Statistiken</a></h2>
     </div>
 </article>
 <h2>Spieltage</h2>
