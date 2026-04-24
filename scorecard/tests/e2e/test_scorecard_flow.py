@@ -5,7 +5,7 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 import pytest
 from playwright.sync_api import Page, expect
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from gamedays.models import Gameday, Gameinfo, Gameresult
+from gamedays.models import Gameday, Gameinfo
 from django.contrib.auth.models import User
 
 
@@ -107,8 +107,8 @@ def test_schedule_update_resolves_finalrunde_teams(live_server, page: Page):
     _navigate_to_games_list(page, gameday)
 
     # ---- 4. Phase 1: verify Vorrunde shows real team names --------------
-    expect(page.get_by_text("A1 vs A2")).to_be_visible(timeout=5000)
-    expect(page.get_by_text("A3 vs A4")).to_be_visible(timeout=5000)
+    expect(page.get_by_text("AAAAAAA1 vs AAAAAAA2")).to_be_visible(timeout=5000)
+    expect(page.get_by_text("AAAAAAA3 vs AAAAAAA4")).to_be_visible(timeout=5000)
 
     # ---- 5. Phase 1: verify Finalrunde shows placeholder team names -----
     # Spiel 4 row: "Gewinner Spiel 1 vs Gewinner Spiel 2" (winners bracket, unresolved)
@@ -128,9 +128,9 @@ def test_schedule_update_resolves_finalrunde_teams(live_server, page: Page):
 
     # ---- 8. Phase 2: verify Finalrunde now shows resolved team names ----
     # Spiel 3 (losers bracket): A2 (loser Spiel 1) vs A4 (loser Spiel 2)
-    expect(page.get_by_text("A2 vs A4")).to_be_visible(timeout=5000)
-    # Spiel 4 (winners bracket): A1 (winner Spiel 1) vs A3 (winner Spiel 2)
-    expect(page.get_by_text("A1 vs A3")).to_be_visible(timeout=5000)
+    expect(page.get_by_text("AAAAAAA2 vs AAAAAAA4")).to_be_visible(timeout=5000)
+    # Spiel 4 (winners bracket): AAAAAAA1 (winner Spiel 1) vs AAAAAAA3 (winner Spiel 2)
+    expect(page.get_by_text("AAAAAAA1 vs AAAAAAA3")).to_be_visible(timeout=5000)
 
     # Placeholder matchup text must be gone from Finalrunde rows
     # Positive assertions above act as sync point — page is fully loaded once these pass,
