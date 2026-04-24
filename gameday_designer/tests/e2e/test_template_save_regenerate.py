@@ -92,6 +92,15 @@ def test_save_custom_template_and_regenerate(live_server, page: Page):
     page.wait_for_timeout(500)
     # Add a team to the officials group - use the "Add your first team" button (empty group)
     page.locator('#group-group-officials').get_by_title("Add your first team to this group").click()
+    
+    # TeamPickerStep dialog appears; auto-generate a team for the officials group
+    expect(page.get_by_text("Select Teams")).to_be_visible(timeout=5000)
+    page.get_by_role("button", name=_re.compile(r"Auto-generate")).click()
+    apply_btn = page.get_by_role("button", name=_re.compile(r"Apply to Gameday"))
+    expect(apply_btn).to_be_enabled(timeout=10000)
+    apply_btn.click()
+    expect(page.get_by_text("Select Teams")).not_to_be_visible(timeout=5000)
+    
     page.wait_for_timeout(500)
 
     # Snapshot team count AFTER adding the officials team — this is the state that
@@ -131,8 +140,8 @@ def test_save_custom_template_and_regenerate(live_server, page: Page):
     # Expect success notification
     expect(page.get_by_text("Template saved successfully")).to_be_visible(timeout=10000)
 
-    # Close the Template Library modal via the ✕ button
-    page.get_by_role("button", name="✕").click()
+    # Close the Template Library modal via the Close button
+    page.get_by_test_id("close-template-library-button").click()
     expect(page.get_by_text("Template Library")).not_to_be_visible(timeout=5000)
 
     # ---- Phase 4: Clear the schedule -----------------------------------------

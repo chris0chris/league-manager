@@ -28,6 +28,8 @@ export interface GlobalTeam {
   order: number;
   /** Optional color for visual coding */
   color?: string;
+  /** Optional association abbreviation for filtering */
+  associationAbbr?: string | null;
 }
 
 /**

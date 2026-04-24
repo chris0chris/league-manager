@@ -1,36 +1,59 @@
 #!/bin/zsh
 set -e
 
-# 1. Setup container and database
-echo "📦 Initializing test container and database..."
+# Check for --demo flag
+DEMO_MODE=false
+for arg in "$@"; do
+    [[ "$arg" == "--demo" ]] && DEMO_MODE=true
+done
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
-# Only pass --fresh to spinup if it was requested; other flags are not relevant to DB setup
-SPINUP_ARGS=()
-for arg in "$@"; do
-    [[ "$arg" == "--fresh" ]] && SPINUP_ARGS+=(--fresh)
-done
-./spinup_test_db.sh "${SPINUP_ARGS[@]}"
-cd ..
 
-# 2. Get the actual IP of servyy-test
-echo "🔍 Discovering container IP..."
-# Extracting the first IPv4 address from the eth0 interface
-CONTAINER_IP=$(lxc list servyy-test --format json | jq -r '.[0].state.network.eth0.addresses[] | select(.family=="inet") | .address' | head -n 1)
-
-if [ -z "$CONTAINER_IP" ]; then
-    echo "❌ Error: Could not determine IP for servyy-test"
-    exit 1
+if [ "$DEMO_MODE" = true ]; then
+    echo "🎮 Starting in DEMO mode (SQLite database)..."
+    # Demo mode uses SQLite - no container needed
+    cd ..
+else
+    # 1. Setup container and database
+    echo "📦 Initializing test container and database..."
+    # Only pass --fresh to spinup if it was requested; other flags are not relevant to DB setup
+    SPINUP_ARGS=()
+    for arg in "$@"; do
+        [[ "$arg" == "--fresh" ]] && SPINUP_ARGS+=(--fresh)
+    done
+    ./spinup_test_db.sh "${SPINUP_ARGS[@]}"
+    cd ..
 fi
-echo "✅ Found IP: $CONTAINER_IP"
 
-# 3. Export environment variables
-export league_manager=dev
-export SECRET_KEY='django-insecure-default-key-for-dev'
-export MYSQL_HOST="$CONTAINER_IP"
-export MYSQL_DB_NAME=test_db
-export MYSQL_USER=user
-export MYSQL_PWD=user
+# 2. Setup environment variables
+if [ "$DEMO_MODE" = true ]; then
+    echo "📝 Setting up demo environment variables..."
+    export DJANGO_SETTINGS_MODULE=league_manager.settings.demo
+    export SECRET_KEY='django-insecure-demo-key-for-local-testing'
+    export DEMO_MODE=True
+    export DEMO_RESET_HOUR=0
+    export DEMO_RESET_MINUTE=0
+    export EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+else
+    echo "🔍 Discovering container IP..."
+    # Extracting the first IPv4 address from the eth0 interface
+    CONTAINER_IP=$(lxc list servyy-test --format json | jq -r '.[0].state.network.eth0.addresses[] | select(.family=="inet") | .address' | head -n 1)
+
+    if [ -z "$CONTAINER_IP" ]; then
+        echo "❌ Error: Could not determine IP for servyy-test"
+        exit 1
+    fi
+    echo "✅ Found IP: $CONTAINER_IP"
+
+    # 3. Export environment variables for test mode
+    export league_manager=dev
+    export SECRET_KEY='django-insecure-default-key-for-dev'
+    export MYSQL_HOST="$CONTAINER_IP"
+    export MYSQL_DB_NAME=test_db
+    export MYSQL_USER=user
+    export MYSQL_PWD=user
+fi
 
 # 3.5 Sync Python dependencies
 echo "🐍 Syncing Python dependencies..."
@@ -109,19 +132,41 @@ python manage.py collectstatic --noinput
 echo "🔄 Running database migrations..."
 python manage.py migrate --no-input
 
-# 4.1 Import test data if --fresh was passed
-for arg in "$@"; do
-    if [[ "$arg" == "--fresh" ]]; then
-        echo "📥 Importing test data from dump..."
-        ssh servyy-test.lxd "docker exec -i mysql mariadb -uuser -puser test_db" < "$SCRIPT_DIR/test_db_dump.sql"
-        break
-    fi
-done
+# 4.1 Seed demo data or import test dump
+if [ "$DEMO_MODE" = true ]; then
+    echo "🌱 Seeding demo database with synthetic data..."
+    python manage.py seed_demo_data
+else
+    # Import test data if --fresh was passed
+    for arg in "$@"; do
+        if [[ "$arg" == "--fresh" ]]; then
+            echo "📥 Importing test data from dump..."
+            ssh servyy-test.lxd "docker exec -i mysql mariadb -uuser -puser test_db" < "$SCRIPT_DIR/test_db_dump.sql"
+            break
+        fi
+    done
 
-# 5. Create default user (admin/admin)
-echo "👤 Creating default admin user..."
-echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | python manage.py shell
+    # 5. Create default user (admin/admin) for test mode
+    echo "👤 Creating default admin user..."
+    echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | python manage.py shell
+fi
 
 # 7. Start dev server
-echo "🌐 Starting development server at http://localhost:8000 (DB at $MYSQL_HOST)"
+if [ "$DEMO_MODE" = true ]; then
+    echo ""
+    echo "🎮 DEMO MODE STARTED"
+    echo "🌐 Server: http://localhost:8000"
+    echo "💾 Database: SQLite (local)"
+    echo ""
+    echo "Demo Accounts:"
+    echo "  admin@demo.local / DemoAdmin123!"
+    echo "  referee@demo.local / DemoRef123!"
+    echo "  manager@demo.local / DemoMgr123!"
+    echo "  user@demo.local / DemoUser123!"
+    echo ""
+    echo "More info: http://localhost:8000/demo-info/"
+    echo ""
+else
+    echo "🌐 Starting development server at http://localhost:8000 (DB at $MYSQL_HOST)"
+fi
 python manage.py runserver 0.0.0.0:8000 --insecure

@@ -43,7 +43,7 @@ class HealthCheckView(View):
         return JsonResponse({"status": "healthy"})
 
 
-from league_manager.views import ClearCacheView, robots_txt_view, database_error_view
+from league_manager.views import ClearCacheView, robots_txt_view, database_error_view, DemoInfoView
 from league_manager.sitemaps import (
     StaticViewSitemap,
     LeaguetableSitemap,
@@ -92,6 +92,7 @@ urlpatterns = [
     path("gamedays/", include("gamedays.urls")),
     path("passcheck/", include("passcheck.urls")),
     path("dal/", include("league_manager.dal.urls")),
+    path("demo-info/", DemoInfoView.as_view(), name="demo_info"),
     path("", RedirectView.as_view(pattern_name=LEAGUE_GAMEDAY_LIST, permanent=True)),
     path(
         "login/",

@@ -16,7 +16,7 @@ import LoadingOverlay from './ui/LoadingOverlay';
 import TemplateLibraryModal from './modals/TemplateLibraryModal';
 import { useGamedayContext } from '../context/GamedayContext';
 import { GameNode } from '../types/designer';
-import { isGameNode } from '../types/flowchart';
+import { isGameNode, GlobalTeam } from '../types/flowchart';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { gamedayApi } from '../api/gamedayApi';
 import { getAllTemplates } from '../utils/tournamentTemplates';
@@ -274,14 +274,23 @@ const ListDesignerApp: React.FC = () => {
     setShowTeamSelectionModal(true);
   }, []);
 
-  const handleTeamSelected = useCallback((team: { id: number; text: string }) => {
-    if (teamSelectionContext) {
+  const handleTeamSelected = useCallback((selectedTeams: GlobalTeam[]) => {
+    if (teamSelectionContext && selectedTeams.length > 0) {
       if (teamSelectionContext.side === 'group') {
-        handleConnectTeam(team, teamSelectionContext.slotId);
-      } else if (teamSelectionContext.side === 'replace') {
-        handleReplaceGlobalTeam(teamSelectionContext.slotId, team);
+        selectedTeams.forEach(team => {
+          const teamId = typeof team.id === 'string' ? parseInt(team.id) : team.id;
+          const teamObj = { id: teamId, text: team.label };
+          handleConnectTeam(teamObj, teamSelectionContext.slotId);
+        });
       } else {
-        handleAssignTeam(teamSelectionContext.slotId, teamSelectionContext.side as 'home' | 'away', String(team.id));
+        const team = selectedTeams[0];
+        const teamId = typeof team.id === 'string' ? parseInt(team.id) : team.id;
+        const teamObj = { id: teamId, text: team.label };
+        if (teamSelectionContext.side === 'replace') {
+          handleReplaceGlobalTeam(teamSelectionContext.slotId, teamObj);
+        } else {
+          handleAssignTeam(teamSelectionContext.slotId, teamSelectionContext.side as 'home' | 'away', String(teamId));
+        }
       }
     }
     setShowTeamSelectionModal(false);
@@ -485,6 +494,9 @@ const ListDesignerApp: React.FC = () => {
         groupId={teamSelectionContext?.slotId ?? ''}
         onSelect={handleTeamSelected}
         title={teamSelectionContext?.side === 'official' ? t('ui:title.selectOfficial') : t('ui:title.selectTeam')}
+        gamedayId={id ? parseInt(id) : 0}
+        mode={teamSelectionContext?.side === 'group' ? 'group' : 'single'}
+        preselectedTeams={teamSelectionContext?.side === 'group' ? flowState.globalTeams.filter(t => t.groupId === teamSelectionContext.slotId) : []}
       />
 
       <TemplateLibraryModal
@@ -502,12 +514,12 @@ const ListDesignerApp: React.FC = () => {
             startTime: config.startTime,
             gameDuration: config.gameDuration,
             breakDuration: config.breakDuration,
-            generateTeams: config.generateTeams ?? false,
-            autoAssignTeams: config.generateTeams ?? false,
-            selectedTeamIds: config.selectedTeamIds,
+            generateTeams: config.generateTeams,
+            autoAssignTeams: config.generateTeams,
+            selectedTeams: config.selectedTeams,
           });
         }}
-        onGenerateFromSavedTemplate={(templateId, config) => {
+        onGenerateFromSavedTemplate={(templateId, config, selectedTeams) => {
           handleGenerateTournament({
             template: null as unknown as TournamentTemplate,
             fieldCount: 2,
@@ -517,6 +529,7 @@ const ListDesignerApp: React.FC = () => {
             generateTeams: true,
             autoAssignTeams: false,
             customTemplate: { id: templateId } as GenericTemplate,
+            selectedTeams,
           });
         }}
         onNotify={addNotification}

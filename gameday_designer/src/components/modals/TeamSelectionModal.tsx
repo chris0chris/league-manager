@@ -1,116 +1,94 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Modal, Button, Form, ListGroup, InputGroup, Spinner } from 'react-bootstrap';
-import { useTypedTranslation } from '../../i18n/useTypedTranslation';
-import { gamedayApi } from '../../api/gamedayApi';
-import { ICONS } from '../../utils/iconConstants';
+import React, { useState, useEffect } from 'react';
+import { Modal, Spinner } from 'react-bootstrap';
+import { designerApi } from '../../api/designerApi';
+import TeamPickerStep from './TemplateLibraryModal/TeamPickerStep';
+import type { GlobalTeam } from '../../types/flowchart';
+import { getTeamColor } from '../../utils/tournamentConstants';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface TeamSelectionModalProps {
   show: boolean;
   onHide: () => void;
-  onSelect: (team: { id: number; text: string }) => void;
+  onSelect: (teams: GlobalTeam[]) => void;
   groupId: string;
-  title?: string;
+  gamedayId?: number;
+  mode?: 'single' | 'group';
+  preselectedTeams?: GlobalTeam[];
 }
 
 const TeamSelectionModal: React.FC<TeamSelectionModalProps> = ({
   show,
   onHide,
   onSelect,
-  title,
+  gamedayId = 0,
+  preselectedTeams = [],
 }) => {
-  const { t } = useTypedTranslation(['modal', 'ui']);
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<{ id: number; text: string }[]>([]);
+  const [availableTeams, setAvailableTeams] = useState<GlobalTeam[]>([]);
   const [loading, setLoading] = useState(false);
-  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!show) {
-      setQuery('');
-      setResults([]);
-    }
-  }, [show]);
+    if (!show) return;
 
-  const handleSearch = async (searchQuery: string) => {
-    setQuery(searchQuery);
-    
-    if (searchTimeout.current) {
-      clearTimeout(searchTimeout.current);
-    }
-
-    if (!searchQuery.trim()) {
-      setResults([]);
-      return;
-    }
-
-    setLoading(true);
-    searchTimeout.current = setTimeout(async () => {
+    const loadTeams = async () => {
+      setLoading(true);
       try {
-        const teams = await gamedayApi.searchTeams(searchQuery);
-        setResults(teams);
+        const teams = await designerApi.getLeagueTeams(gamedayId);
+        const globalTeams = teams.map((t, i) => ({
+          id: String(t.id),
+          label: t.name,
+          groupId: null,
+          order: i,
+          color: getTeamColor(i),
+          associationAbbr: t.association_abbr ?? null
+        }));
+        setAvailableTeams(globalTeams);
       } catch (error) {
-        console.error('Failed to search teams:', error);
+        console.error('Failed to load teams:', error);
       } finally {
         setLoading(false);
       }
-    }, 300);
+    };
+
+    loadTeams();
+  }, [show, gamedayId]);
+
+  const handleConfirm = (selectedTeams: GlobalTeam[]) => {
+    onSelect(selectedTeams);
+    onHide();
+  };
+
+  const handleAutoGenerateTeams = async (count: number): Promise<GlobalTeam[]> => {
+    const generated: GlobalTeam[] = [];
+    for (let i = 0; i < count; i++) {
+      const team: GlobalTeam = {
+        id: `team-${uuidv4()}`,
+        label: `Generated Team ${i + 1}`,
+        groupId: null,
+        order: availableTeams.length + i,
+        color: getTeamColor((availableTeams.length + i) % 10),
+      };
+      generated.push(team);
+    }
+    return generated;
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>{title || t('modal:teamSelection.title', 'Connect Existing Team')}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Form.Group className="mb-3">
-          <InputGroup>
-            <Form.Control
-              type="text"
-              placeholder={t('modal:teamSelection.placeholder', 'Search by team name...')}
-              value={query}
-              onChange={(e) => handleSearch(e.target.value)}
-              autoFocus
-            />
-            <InputGroup.Text>
-              {loading ? <Spinner animation="border" size="sm" /> : <i className={`bi ${ICONS.SEARCH}`} />}
-            </InputGroup.Text>
-          </InputGroup>
-        </Form.Group>
-
-        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-          {results.length > 0 ? (
-            <ListGroup variant="flush">
-              {results.map((team) => (
-                <ListGroup.Item
-                  key={team.id}
-                  action
-                  onClick={() => {
-                    onSelect(team);
-                    onHide();
-                  }}
-                  className="d-flex justify-content-between align-items-center"
-                >
-                  <span>{team.text}</span>
-                  <small className="text-muted">ID: {team.id}</small>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
-          ) : query && !loading ? (
-            <div className="text-center py-3 text-muted">
-              {t('modal:teamSelection.noResults', 'No teams found matching your search.')}
-            </div>
-          ) : (
-            <div className="text-center py-3 text-muted small">
-              {t('modal:teamSelection.hint', 'Enter at least 2 characters to search.')}
-            </div>
-          )}
+    <Modal show={show} onHide={onHide} centered size="lg" backdrop="static">
+      {loading ? (
+        <div className="text-center p-5">
+          <Spinner animation="border" />
         </div>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
-          {t('ui:button.cancel')}
-        </Button>
-      </Modal.Footer>
+      ) : (
+        <TeamPickerStep
+          requiredTeams={1}
+          availableTeams={availableTeams}
+          onConfirm={handleConfirm}
+          onBack={onHide}
+          onAutoGenerateTeams={handleAutoGenerateTeams}
+          backButtonLabel="Cancel"
+          preselectedTeams={preselectedTeams}
+        />
+      )}
     </Modal>
   );
 };

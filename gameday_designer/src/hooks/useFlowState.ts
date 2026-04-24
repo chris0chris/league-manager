@@ -298,7 +298,13 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
     setFields(state.fields || []);
     const migratedTeams = (state.globalTeams || []).map((team: GlobalTeam & { reference?: string }) => {
       if ('reference' in team && !('groupId' in team)) {
-        return { id: team.id, label: team.label || 'Team', groupId: null, order: team.order };
+        return { 
+          id: team.id, 
+          label: team.label || 'Team', 
+          groupId: null, 
+          order: team.order,
+          color: team.color 
+        };
       }
       return team;
     });

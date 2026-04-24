@@ -234,7 +234,7 @@ const GamedayDashboard: React.FC = () => {
   }, [gamedays, addNotification, t, navigate]);
 
   useEffect(() => {
-    loadGamedays();
+    Promise.resolve().then(() => loadGamedays());
     const currentTimeouts = timeoutRefs.current;
     return () => {
       // CRITICAL: When navigating away, we must immediately execute any pending deletions
@@ -258,7 +258,7 @@ const GamedayDashboard: React.FC = () => {
       const state = location.state as { pendingDeleteId?: number } | null;
       if (state?.pendingDeleteId) {
         const gameday = gamedays.find(g => g.id === state.pendingDeleteId);
-        handleDelete(state.pendingDeleteId, gameday?.status);
+        Promise.resolve().then(() => handleDelete(state.pendingDeleteId, gameday?.status));
         // Clear location state so it doesn't trigger again on refresh
         navigate(location.pathname, { replace: true, state: {} });
         hasTriggeredInitialDelete.current = true;

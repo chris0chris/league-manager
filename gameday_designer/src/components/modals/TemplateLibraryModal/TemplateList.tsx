@@ -27,10 +27,10 @@ const SCOPE_LABELS: Record<string, string> = {
   global: 'Community',
 };
 
-const SCOPE_ICONS: Record<string, string> = {
-  personal: '🔒',
-  association: '🏛️',
-  global: '🌐',
+const SCOPE_ICONS: Record<string, React.ReactNode> = {
+  personal: <i className="bi bi-lock me-1"></i>,
+  association: <i className="bi bi-bank me-1"></i>,
+  global: <i className="bi bi-globe me-1"></i>,
 };
 
 const TemplateList: React.FC<TemplateListProps> = ({ selectedId, onSelect, searchQuery, filterScope }) => {
@@ -59,7 +59,9 @@ const TemplateList: React.FC<TemplateListProps> = ({ selectedId, onSelect, searc
     }
   }, [searchQuery]);
 
-  useEffect(() => { fetchTemplates(); }, [fetchTemplates]);
+  useEffect(() => { 
+    Promise.resolve().then(() => fetchTemplates()); 
+  }, [fetchTemplates]);
 
   const builtins = getAllTemplates().filter(t =>
     !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -75,7 +77,7 @@ const TemplateList: React.FC<TemplateListProps> = ({ selectedId, onSelect, searc
       {showBuiltins && builtins.length > 0 && (
         <>
           <div className="px-3 pt-2 pb-1 text-uppercase text-secondary" style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.5px' }}>
-            🏆 <span>Tournament Formats</span> <span className="badge bg-secondary ms-1">{builtins.length}</span>
+            <i className="bi bi-trophy me-2"></i> <span>Tournament Formats</span> <span className="badge bg-secondary ms-1">{builtins.length}</span>
           </div>
           <ListGroup variant="flush">
             {builtins.map(t => {
@@ -89,7 +91,7 @@ const TemplateList: React.FC<TemplateListProps> = ({ selectedId, onSelect, searc
                   className="border-0 py-2 px-3"
                   data-testid={`builtin-template-${t.id}`}
                 >
-                  🏆 <span>{t.name}</span>
+                  <i className="bi bi-trophy me-2"></i> <span>{t.name}</span>
                   <div className="text-muted" style={{ fontSize: 11 }}>Built-in</div>
                 </ListGroup.Item>
               );

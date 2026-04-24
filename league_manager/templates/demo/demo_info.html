@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Demo Information - LeagueSphere{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="alert alert-info mb-4">
+                <h2 class="alert-heading">Game Demo Environment</h2>
+                <p>
+                    Welcome to the LeagueSphere demo! This is a fully functional demo environment
+                    with realistic synthetic data that resets daily at midnight (UTC). Feel free to explore
+                    all features using the demo accounts below.
+                </p>
+            </div>
+
+            <h3 class="mb-4">Demo Accounts</h3>
+            <p>Use any of these accounts to log in and explore the system:</p>
+
+            <div class="row">
+                {% for cred in demo_credentials %}
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <strong>{{ cred.role }}</strong>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">{{ cred.description }}</p>
+                            <div class="credentials-box" style="background-color: #f5f5f5; padding: 12px; border-radius: 4px;">
+                                <p class="mb-1"><strong>Username:</strong><br>
+                                <code>{{ cred.username }}</code></p>
+                                <p class="mb-0"><strong>Password:</strong><br>
+                                <code>{{ cred.password }}</code></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-4 p-3" style="background-color: #fff3cd; border-left: 4px solid #ffc107;">
+                <h5>Daily Reset</h5>
+                <p class="mb-0">
+                    The demo database automatically resets to a clean state every day at <strong>midnight UTC</strong>.
+                    Any data you create will be lost after the reset. All accounts and demo data are restored fresh.
+                </p>
+            </div>
+
+            <div class="mt-4 p-3" style="background-color: #e7f3ff; border-left: 4px solid #2196F3;">
+                <h5>Privacy & Security</h5>
+                <p class="mb-0">
+                    All data in this demo environment is completely synthetic and contains no real personal information.
+                    The demo is isolated from production systems and suitable for testing and evaluation.
+                </p>
+            </div>
+
+            <div class="text-center mt-5">
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Get Started</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

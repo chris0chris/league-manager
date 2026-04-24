@@ -2,6 +2,7 @@
 from .base import *
 
 DEBUG = False
+MOCK_TEAMS = False
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "leaguesphere.app",

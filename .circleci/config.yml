@@ -454,19 +454,49 @@ jobs:
           extra_tag: $CIRCLE_TAG
       - run:
           name: Update staging deploy to SUCCESS
-          command: circleci run release update "leaguesphere-stage" --status=SUCCESS 
-          when: on_success 
+          command: circleci run release update "leaguesphere-stage" --status=SUCCESS
+          when: on_success
       - run:
           name: Update planned staging deploy to FAILED
-          command: circleci run release update "leaguesphere-stage" --status=FAILED 
+          command: circleci run release update "leaguesphere-stage" --status=FAILED
           when: on_fail
 
-  run_migrations_staging:
+  deploy_demo:
     docker:
       - image: cimg/base:stable
     steps:
-      - run_migrations_cmd:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.24
+      - run:
+          name: Set sanitized Docker tag
+          command: |
+            echo "export DOCKER_TAG=$(echo "$CIRCLE_TAG" | sed 's/+/-/g')" >> $BASH_ENV
+      - run:
+          name: Plan demo deploy
+          command: |
+            circleci run release plan "leaguesphere-demo" \
+              --environment-name="demo" \
+              --component-name="leaguesphere" \
+              --target-version="${CIRCLE_TAG}"
+      - push_docker_image:
           image_name: backend
+          registry_image_name: leaguesphere/backend
+          tag: demo
+          extra_tag: $DOCKER_TAG
+      - push_docker_image:
+          image_name: frontend
+          registry_image_name: leaguesphere/frontend
+          tag: demo
+          extra_tag: $DOCKER_TAG
+      - run:
+          name: Update demo deploy to SUCCESS
+          command: circleci run release update "leaguesphere-demo" --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update planned demo deploy to FAILED
+          command: circleci run release update "leaguesphere-demo" --status=FAILED
+          when: on_fail
 
   deploy_production:
     docker:
@@ -592,13 +622,24 @@ workflows:
             - test_compose_network
           filters:
             tags:
-              only: /.*/
+              only: /^v?[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$/
             branches:
               ignore: /.*/
+
+      - deploy_demo:
+          context: demo
+          requires:
+            - test_compose_network
+          filters:
+            tags:
+              only: /.*\+demo\.[0-9]+$/
+            branches:
+              ignore: /.*/
+
       - hold_production:
           type: approval
           requires:
-            - deploy_staging
+            - test_compose_network
           filters:
             tags:
               only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
@@ -612,6 +653,16 @@ workflows:
           filters:
             tags:
               only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
+      - deploy_demo:
+          name: deploy_demo_production
+          context: demo
+          requires:
+            - hold_production
+          filters:
+            tags:
+              only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
+            branches:
+              ignore: /.*/
       - run_migrations_production:
           context: production
           requires:

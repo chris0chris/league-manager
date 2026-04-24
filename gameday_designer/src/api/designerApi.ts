@@ -20,6 +20,9 @@ import type {
 export interface TeamRecord {
   id: number;
   name: string;
+  association_id?: number | null;
+  association_abbr?: string | null;
+  association_name?: string | null;
 }
 
 /**
@@ -264,6 +267,11 @@ class DesignerApi {
     const response = await this.client.get<TeamRecord[]>(
       `/gamedays/${gamedayId}/league-teams/`
     );
+    return response.data;
+  }
+
+  async getConfig(): Promise<{ mock_teams: boolean }> {
+    const response = await this.client.get<{ mock_teams: boolean }>('/config/');
     return response.data;
   }
 }
