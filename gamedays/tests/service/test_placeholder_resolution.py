@@ -1,8 +1,9 @@
 from django.test import TestCase
+
+from gameday_designer.models import ScheduleTemplate, TemplateSlot, TemplateApplication
 from gamedays.models import Gameday, Gameinfo, Gameresult
 from gamedays.service.model_wrapper import GamedayModelWrapper
 from gamedays.tests.setup_factories.db_setup import DBSetup
-from gameday_designer.models import ScheduleTemplate, TemplateSlot, TemplateApplication
 
 
 class TestPlaceholderResolution(TestCase):
@@ -60,8 +61,8 @@ class TestPlaceholderResolution(TestCase):
         home_result = game_results[game_results["isHome"] == True].iloc[0]
         away_result = game_results[game_results["isHome"] == False].iloc[0]
 
-        assert home_result["team__name"] == "Winner Game 1"
-        assert away_result["team__name"] == "Winner Game 2"
+        assert home_result["team__description"] == "Winner Game 1"
+        assert away_result["team__description"] == "Winner Game 2"
 
     def test_get_game_placeholder_group_team(self):
         # Ensure we have a game on field 1

@@ -63,7 +63,7 @@ class ScheduleUpdate:
             self.data = {}
 
     def _update_gameresult(self, gi, teamName, is_home):
-        team = Team.objects.get(name=teamName)
+        team = Team.objects.get(description=teamName)
         gameresult = Gameresult.objects.get(gameinfo=gi, isHome=is_home)
         gameresult.team = team
         gameresult.isHome = is_home
@@ -162,7 +162,7 @@ class ScheduleUpdate:
                                 game.officials.standing,
                                 game.officials.points,
                             )
-                        officials = Team.objects.get(name=officialsTeamName)
+                        officials = Team.objects.get(description=officialsTeamName)
                         if gi.officials != officials:
                             gi.officials = officials
                             gi.save()

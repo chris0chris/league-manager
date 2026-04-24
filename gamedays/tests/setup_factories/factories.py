@@ -34,7 +34,7 @@ class SeasonFactory(DjangoModelFactory):
         model = Season
         django_get_or_create = ("name",)
 
-    name = "some_season"
+    name = datetime.today().year
 
 
 class TeamFactory(DjangoModelFactory):

@@ -6,7 +6,7 @@ from pandas import DataFrame
 from gamedays.models import Gameinfo, Gameresult, TeamLog
 from gamedays.service.gameday_settings import (
     STANDING,
-    TEAM_NAME,
+    TEAM_DESCRIPTION,
     POINTS,
     POINTS_HOME,
     POINTS_AWAY,
@@ -87,7 +87,7 @@ class GamedayModelWrapper:
 
         gameresult = pd.DataFrame(
             Gameresult.objects.filter(gameinfo_id__in=self._gameinfo['id']).order_by('-' + IS_HOME).values(
-                *([f.name for f in Gameresult._meta.local_fields] + [TEAM_NAME, TEAM_ID])))
+                *([f.name for f in Gameresult._meta.local_fields] + [TEAM_DESCRIPTION, TEAM_ID])))
         if gameresult.empty:
             self._games_with_result: DataFrame = pd.DataFrame()
             return
@@ -112,12 +112,12 @@ class GamedayModelWrapper:
     def _resolve_placeholders(self):
         if (
             self._games_with_result.empty
-            or TEAM_NAME not in self._games_with_result.columns
+            or TEAM_DESCRIPTION not in self._games_with_result.columns
         ):
             return
 
         # Only proceed if there are missing team names
-        if self._games_with_result[TEAM_NAME].isna().any():
+        if self._games_with_result[TEAM_DESCRIPTION].isna().any():
 
             placeholder_service = GamedayPlaceholderService(
                 self._gameinfo["gameday"].iloc[0]
@@ -127,19 +127,19 @@ class GamedayModelWrapper:
 
             # Resolve each missing row
             for index, row in self._games_with_result[
-                self._games_with_result[TEAM_NAME].isna()
+                self._games_with_result[TEAM_DESCRIPTION].isna()
             ].iterrows():
                 placeholder = placeholder_service.get_placeholder(
                     row[GAMEINFO_ID], is_home=row[IS_HOME]
                 )
-                self._games_with_result.at[index, TEAM_NAME] = placeholder
+                self._games_with_result.at[index, TEAM_DESCRIPTION] = placeholder
 
     def get_staff_passcheck_details(self, gameday_id):
         column_mapping = {
             "created_at": "Zeitpunkt",
             "official_name": "Schiedsrichter",
             "user__username": "Account",
-            "team__name": "Team",
+            "team__description": "Team",
             "note": "Notiz",
         }
 
@@ -228,13 +228,13 @@ class GamedayModelWrapper:
             )
             .exclude(team=None)
             .exclude(player=None)
-            .values(TEAM_NAME, "event", "player", "value")
+            .values(TEAM_DESCRIPTION, "event", "player", "value")
         )
 
         if events.empty:
             return pd.DataFrame(columns=output_columns)
 
-        events["player"] = events.apply(lambda x: f"{x.team__name} #{x.player}", axis=1)
+        events["player"] = events.apply(lambda x: f"{x.team__description} #{x.player}", axis=1)
 
         table = (
             pd.crosstab(
@@ -303,13 +303,13 @@ class GamedayModelWrapper:
             )
             .exclude(team=None)
             .exclude(player=None)
-            .values(TEAM_NAME, "event", "player")
+            .values(TEAM_DESCRIPTION, "event", "player")
         )
 
         if events.empty:
             return pd.DataFrame(columns=output_columns)
 
-        events["player"] = events.apply(lambda x: f"{x.team__name} #{x.player}", axis=1)
+        events["player"] = events.apply(lambda x: f"{x.team__description} #{x.player}", axis=1)
         events = (
             events.groupby("player", as_index=False)
             .event.count()
@@ -325,7 +325,7 @@ class GamedayModelWrapper:
 
     def _get_standing_list(self, standings):
         final_standing = self._games_with_result.groupby(
-            [STANDING, TEAM_NAME], as_index=False
+            [STANDING, TEAM_DESCRIPTION], as_index=False
         )
         final_standing = final_standing.agg(
             {POINTS: "sum", PF: "sum", PA: "sum", DIFF: "sum"}
@@ -341,11 +341,11 @@ class GamedayModelWrapper:
             ]
             if current_standing_table.shape[0] == 2:
                 final_team_list = (
-                    final_team_list + current_standing_table[TEAM_NAME].to_list()
+                    final_team_list + current_standing_table[TEAM_DESCRIPTION].to_list()
                 )
             else:
                 current_standing_table = current_standing_table.groupby(
-                    [TEAM_NAME], as_index=False
+                    [TEAM_DESCRIPTION], as_index=False
                 )
                 current_standing_table = current_standing_table.agg(
                     {POINTS: "sum", PF: "sum", PA: "sum", DIFF: "sum"}
@@ -354,7 +354,7 @@ class GamedayModelWrapper:
                     by=[POINTS, DIFF, PF, PA], ascending=False
                 )
                 final_team_list = (
-                    final_team_list + current_standing_table[TEAM_NAME].to_list()
+                    final_team_list + current_standing_table[TEAM_DESCRIPTION].to_list()
                 )
 
         return final_team_list
@@ -363,10 +363,10 @@ class GamedayModelWrapper:
         home_teams = self._games_with_result.groupby(GAMEINFO_ID).nth(0).reset_index()
         away_teams = self._games_with_result.groupby(GAMEINFO_ID).nth(1).reset_index()
         home_teams = home_teams.rename(
-            columns={TEAM_NAME: HOME, PF: POINTS_HOME, ID_Y: ID_HOME}
+            columns={TEAM_DESCRIPTION: HOME, PF: POINTS_HOME, ID_Y: ID_HOME}
         )
         away_teams = away_teams.rename(
-            columns={TEAM_NAME: AWAY, PF: POINTS_AWAY, ID_Y: ID_AWAY}
+            columns={TEAM_DESCRIPTION: AWAY, PF: POINTS_AWAY, ID_Y: ID_AWAY}
         )
         away_teams = away_teams[[ID_AWAY, POINTS_AWAY, AWAY]]
         qualify_round = pd.concat([home_teams, away_teams], axis=1).sort_values(
@@ -386,7 +386,7 @@ class GamedayModelWrapper:
 
     def _get_table(self):
         qualify_round = self._games_with_result[self._games_with_result[STAGE].isin([QUALIIFY_ROUND, MAIN_ROUND])]
-        qualify_round = qualify_round.groupby([STANDING, TEAM_NAME], as_index=False)
+        qualify_round = qualify_round.groupby([STANDING, TEAM_DESCRIPTION], as_index=False)
         qualify_round = qualify_round.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum', TEAM_ID: 'first'})
         qualify_round = qualify_round.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
         qualify_round = qualify_round.sort_values(by=STANDING)
@@ -395,11 +395,11 @@ class GamedayModelWrapper:
     def get_qualify_team_by(self, place, standing):
         qualify_round = self._get_table()
         nth_standing = qualify_round.groupby(STANDING).nth(place - 1)
-        return nth_standing[nth_standing[STANDING] == standing][TEAM_NAME].iloc[0]
+        return nth_standing[nth_standing[STANDING] == standing][TEAM_DESCRIPTION].iloc[0]
 
     def get_team_by_points(self, place, standing, points):
         teams = self._get_teams_by(standing, points)
-        return teams.iloc[place - 1][TEAM_NAME]
+        return teams.iloc[place - 1][TEAM_DESCRIPTION]
 
     def get_team_by(self, place, standing, points=None):
         if points is None:
@@ -441,26 +441,26 @@ class GamedayModelWrapper:
             .nth(place - 1)
             .sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
         )
-        return qualify_standing_by_place.iloc[index][TEAM_NAME]
+        return qualify_standing_by_place.iloc[index][TEAM_DESCRIPTION]
 
     def get_team_aggregate_by(self, aggregate_standings, aggregate_place, place):
         return (
             self._games_with_result[
                 self._games_with_result[STANDING].isin(aggregate_standings)
             ]
-            .groupby([STANDING, TEAM_NAME], as_index=False)
+            .groupby([STANDING, TEAM_DESCRIPTION], as_index=False)
             .agg({POINTS: "sum", PF: "sum", PA: "sum", DIFF: "sum"})
             .sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
             .sort_values(by=STANDING)
             .groupby(STANDING)
             .nth(aggregate_place - 1)
             .sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
-            .iloc[place - 1][TEAM_NAME]
+            .iloc[place - 1][TEAM_DESCRIPTION]
         )
 
     def get_teams_by(self, standing, points):
         teams = self._get_teams_by(standing, points)
-        return list(teams[TEAM_NAME])
+        return list(teams[TEAM_DESCRIPTION])
 
     def _get_teams_by(self, standing, points):
         results_with_standing = self._games_with_result[

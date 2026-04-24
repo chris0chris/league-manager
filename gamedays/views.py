@@ -47,7 +47,8 @@ from .forms import (
 from .models import Gameday, Gameinfo
 from .service.builders import TableContextBuilder
 from .service.gameday_form_service import GamedayFormService
-from .service.gameday_service import GamedayService, GamedayGameService
+from .service.gameday_service import GamedayService, GamedayGameService, EmptySchedule
+from .service.gameday_settings import ID
 from .service.league_statistics_service import LeagueStatisticsService
 from .wizard import (
     FIELD_GROUP_STEP,
@@ -62,10 +63,15 @@ class GamedayListView(View):
     model = Gameday
     template_name = "gamedays/gameday_list.html"
 
-    def get(self, request, **kwargs):
+    def get(self, request, *args, **kwargs):
         year = kwargs.get("season", datetime.today().year)
+        show_all_games = request.GET.get("showAllGames") == "true"
         league = kwargs.get("league")
-        gamedays = Gameday.objects.filter(date__year=year).order_by("-date")
+        gamedays = Gameday.objects.filter(date__year=year).order_by("date")
+        leagues = gamedays.values_list("league__name", flat=True).distinct().order_by("league__name")
+        filtered_gamedays_by_today = gamedays.filter(date__gt=datetime.today()).order_by("date")
+        if filtered_gamedays_by_today.count() > 0 and not show_all_games:
+            gamedays = filtered_gamedays_by_today
         gamedays_filtered_by_league = (
             gamedays.filter(league__name=league) if league else gamedays
         )
@@ -74,17 +80,15 @@ class GamedayListView(View):
             self.template_name,
             {
                 "gamedays": gamedays_filtered_by_league,
-                "years": Gameday.objects.annotate(year=ExtractYear("date"))
+                "seasons": Gameday.objects.annotate(year=ExtractYear("date"))
                 .values_list("year", flat=True)
                 .distinct()
                 .order_by("-year"),
-                "season": year,
-                "leagues": gamedays.values_list("league__name", flat=True)
-                .distinct()
-                .order_by("-league__name"),
-                "current_league": league,
+                "selected_season": year,
+                "leagues": leagues,
+                "selected_league": league,
                 "season_year_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR,
-                "season_year_league_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
+                "league_year_url_pattern": LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
                 "season_year_league_statistic_pattern": LEAGUE_GAMEDAY_LEAGUE_STATISTICS,
             },
         )
@@ -217,13 +221,17 @@ class GamedayDetailView(DetailView):
 
         passcheck_info_table = ""
 
+        schedule = gs.get_schedule()
         if self.request.user.is_staff:
             passcheck_info_table = gs.get_staff_passcheck_details().to_html(
                 **render_configs
             )
+        else:
+            if not isinstance(schedule, EmptySchedule):
+                del schedule[ID]
 
         context["info"] = {
-            "schedule": gs.get_schedule().to_html(**render_configs),
+            "schedule": schedule.to_html(**render_configs),
             "qualify_table": qualify_table,
             "final_table": final_table,
             "officials": officials,
@@ -236,7 +244,10 @@ class GamedayDetailView(DetailView):
             "passcheck_info_table": passcheck_info_table,
             "url_pattern_official": url_pattern_official,
             "url_pattern_official_signup": url_pattern_official_signup,
-            "url_pattern_liveticker": f"{UrlService.build_absolute_url(LIVETICKER_HOME)}?league={gameday.league.name}&gameday={gameday.pk}",
+            "url_pattern_league_filter": UrlService.build_absolute_url(
+                LEAGUE_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE, {"season": gameday.season, "league": gameday.league}
+            ),
+            "url_pattern_liveticker": f"{UrlService.build_absolute_url(LIVETICKER_HOME)}?league={gameday.league.slug}&gameday={gameday.pk}",
         }
 
         return context

@@ -1,8 +1,8 @@
-from django.db.models import Sum, OuterRef, Subquery, IntegerField
+from django.db.models import Sum
 
 from gamedays.service.team_repository_service import TeamRepositoryService
 from officials.api.serializers import OfficialGameCountSerializer
-from officials.models import Official, OfficialLicenseHistory
+from officials.models import Official
 from officials.service.game_official_entries import (
     InternalGameOfficialEntry,
     ExternalGameOfficialEntry,
@@ -21,7 +21,8 @@ class OfficialService:
         team_repository_service = TeamRepositoryService(team_id)
         all_team_officials = (
             Official.objects.filter(
-                officiallicensehistory__created_at__year=season,
+                officiallicensehistory__created_at__gte=f"{season - 1}-10-01",
+                officiallicensehistory__created_at__lte=f"{season}-12-31",
                 team=team_repository_service.team,
             )
             .order_by("last_name", "first_name")

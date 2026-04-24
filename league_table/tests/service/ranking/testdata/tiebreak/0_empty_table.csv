@@ -1,4 +1,4 @@
-team_id,team__name,pf,pa,diff,win,standing,win_quotient
+team_id,team__description,pf,pa,diff,win,standing,win_quotient
 2,Team B,0,0,0,0,Group 1,0.000
 1,Team A,0,0,0,0,Group 1,0.000
 4,Team D,0,0,0,0,Group 1,0.000

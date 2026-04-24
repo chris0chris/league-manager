@@ -6,6 +6,7 @@ from django.test import TestCase, RequestFactory
 from django.urls import reverse
 from django_webtest import WebTest
 
+from gamedays.constants import LEAGUE_GAMEDAY_LIST
 from gamedays.models import Team
 from league_manager.constants import (
     CLEAR_CACHE,
@@ -60,11 +61,10 @@ class TestHomeView(TestCase):
     def test_homeview_renders_correct_template(self):
         response = self.client.get("/")  # or the URL name for homeview
 
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 301)
 
-        # Check that 'homeview.html' was used
-        template_names = [t.name for t in response.templates if t.name is not None]
-        assert "homeview.html" in template_names
+        expected_url = reverse(LEAGUE_GAMEDAY_LIST)
+        self.assertEqual(response.url, expected_url)
 
 
 class TestClearCacheView(TestCase):

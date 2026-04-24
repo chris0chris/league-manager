@@ -11,7 +11,7 @@
       "pf": 110,
       "rank": 1,
       "standing": "Finalrunde",
-      "team__name": "C3",
+      "team__description": "CCCCCCC3",
       "win_points": 5.0,
       "win_quotient": 1.0,
       "wins": 5
@@ -27,7 +27,7 @@
       "pf": 100,
       "rank": 2,
       "standing": "Finalrunde",
-      "team__name": "C2",
+      "team__description": "CCCCCCC2",
       "win_points": 3.0,
       "win_quotient": 0.6,
       "wins": 3
@@ -43,7 +43,7 @@
       "pf": 80,
       "rank": 3,
       "standing": "Finalrunde",
-      "team__name": "B4",
+      "team__description": "BBBBBBB4",
       "win_points": 4.0,
       "win_quotient": 0.8,
       "wins": 4
@@ -59,7 +59,7 @@
       "pf": 40,
       "rank": 4,
       "standing": "Finalrunde",
-      "team__name": "A4",
+      "team__description": "AAAAAAA4",
       "win_points": 3.0,
       "win_quotient": 0.6,
       "wins": 3
@@ -75,7 +75,7 @@
       "pf": 70,
       "rank": 5,
       "standing": "Finalrunde",
-      "team__name": "B3",
+      "team__description": "BBBBBBB3",
       "win_points": 3.0,
       "win_quotient": 0.6,
       "wins": 3
@@ -91,7 +91,7 @@
       "pf": 30,
       "rank": 6,
       "standing": "Finalrunde",
-      "team__name": "A3",
+      "team__description": "AAAAAAA3",
       "win_points": 2.0,
       "win_quotient": 0.4,
       "wins": 2
@@ -107,7 +107,7 @@
       "pf": 72,
       "rank": 7,
       "standing": "Finalrunde",
-      "team__name": "C1",
+      "team__description": "CCCCCCC1",
       "win_points": 2.0,
       "win_quotient": 0.5,
       "wins": 2
@@ -123,7 +123,7 @@
       "pf": 60,
       "rank": 8,
       "standing": "Finalrunde",
-      "team__name": "B2",
+      "team__description": "BBBBBBB2",
       "win_points": 2.0,
       "win_quotient": 0.4,
       "wins": 2
@@ -139,7 +139,7 @@
       "pf": 20,
       "rank": 9,
       "standing": "Finalrunde",
-      "team__name": "A2",
+      "team__description": "AAAAAAA2",
       "win_points": 1.0,
       "win_quotient": 0.2,
       "wins": 1
@@ -155,7 +155,7 @@
       "pf": 40,
       "rank": 10,
       "standing": "Finalrunde",
-      "team__name": "B1",
+      "team__description": "BBBBBBB1",
       "win_points": 1.0,
       "win_quotient": 0.25,
       "wins": 1
@@ -171,7 +171,7 @@
       "pf": 8,
       "rank": 11,
       "standing": "Finalrunde",
-      "team__name": "A1",
+      "team__description": "AAAAAAA1",
       "win_points": 0.0,
       "win_quotient": 0.0,
       "wins": 0
@@ -184,17 +184,14 @@
         "type": "integer"
       },
       {
-        "extDtype": "string",
-        "name": "team__name",
+        "name": "team__description",
         "type": "string"
       },
       {
-        "extDtype": "Int64",
         "name": "pf",
         "type": "integer"
       },
       {
-        "extDtype": "Int64",
         "name": "pa",
         "type": "integer"
       },
@@ -215,7 +212,6 @@
         "type": "integer"
       },
       {
-        "extDtype": "Float64",
         "name": "win_points",
         "type": "number"
       },
@@ -228,12 +224,10 @@
         "type": "string"
       },
       {
-        "extDtype": "Int64",
         "name": "diff",
         "type": "integer"
       },
       {
-        "extDtype": "Float64",
         "name": "win_quotient",
         "type": "number"
       },
@@ -242,7 +236,6 @@
         "type": "integer"
       }
     ],
-    "pandas_version": "1.4.0",
     "primaryKey": [
       "index"
     ]

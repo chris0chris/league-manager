@@ -1,5 +1,6 @@
-import os
 import datetime
+import os
+
 # Must be set before any Django imports
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
@@ -7,7 +8,7 @@ import pytest
 import requests
 from playwright.sync_api import Page, expect
 from django.contrib.auth.models import User
-from gamedays.models import Gameday, Gameinfo, Team, Season, League, Gameresult
+from gamedays.models import Gameday, Gameinfo, Team, Season, League
 from gameday_designer.models import (
     ScheduleTemplate, 
     TemplateSlot, 
@@ -93,7 +94,7 @@ def test_designer_progression_resolves_teams_in_scorecard(live_server, page: Pag
         admin = User.objects.create_superuser(username="admin", password="password123", email="admin@test.com")
     else:
         admin = User.objects.get(username="admin")
-    
+
     gameday = Gameday.objects.create(
         name="Designer Scorecard E2E",
         season=season,
@@ -156,11 +157,11 @@ def test_designer_progression_resolves_teams_in_scorecard(live_server, page: Pag
     # ---- 4. Complete Group A game via API (hits production signal path) -
     gi_a = Gameinfo.objects.get(gameday=gameday, standing="Gruppe A")
     _finalize_game_via_api(live_server.url, token, gi_a, home_score=12, away_score=0)
-    
+
     # Reload page to see partial resolution (UI would normally do this on navigation)
     page.goto(f"{live_server.url}/scorecard/")
     _navigate_to_games_list(page, gameday)
-    
+
     # SF1 should still be unresolved because Vorrunde stage isn't finished (Gruppe B pending)
     expect(page.get_by_text("Winner Gruppe A vs Runner-up Gruppe B")).to_be_visible()
 
@@ -171,7 +172,7 @@ def test_designer_progression_resolves_teams_in_scorecard(live_server, page: Pag
     # ---- 6. Final Verification: SF1 Resolved in Scorecard UI ------------
     page.goto(f"{live_server.url}/scorecard/")
     _navigate_to_games_list(page, gameday)
-    
+
     # SF1: Team A1 (1st Gruppe A) vs Team B1 (2nd Gruppe B)
-    expect(page.get_by_text("Team A1 vs Team B1")).to_be_visible()
+    expect(page.get_by_text("Desc Team A1 vs Desc Team B1")).to_be_visible()
     expect(page.get_by_text("Winner Gruppe A vs Runner-up Gruppe B")).not_to_be_visible()

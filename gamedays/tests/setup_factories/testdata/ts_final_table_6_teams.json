@@ -11,7 +11,7 @@
       "pf": 12,
       "rank": 1,
       "standing": "Finalrunde",
-      "team__name": "B1",
+      "team__description": "BBBBBBB1",
       "win_points": 4.0,
       "win_quotient": 1.0,
       "wins": 4
@@ -27,7 +27,7 @@
       "pf": 11,
       "rank": 2,
       "standing": "Finalrunde",
-      "team__name": "A1",
+      "team__description": "AAAAAAA1",
       "win_points": 3.0,
       "win_quotient": 0.75,
       "wins": 3
@@ -43,7 +43,7 @@
       "pf": 9,
       "rank": 3,
       "standing": "Finalrunde",
-      "team__name": "A2",
+      "team__description": "AAAAAAA2",
       "win_points": 2.0,
       "win_quotient": 0.5,
       "wins": 2
@@ -59,7 +59,7 @@
       "pf": 8,
       "rank": 4,
       "standing": "Finalrunde",
-      "team__name": "B2",
+      "team__description": "BBBBBBB2",
       "win_points": 1.0,
       "win_quotient": 0.25,
       "wins": 1
@@ -75,7 +75,7 @@
       "pf": 5,
       "rank": 5,
       "standing": "Finalrunde",
-      "team__name": "B3",
+      "team__description": "BBBBBBB3",
       "win_points": 1.0,
       "win_quotient": 0.333,
       "wins": 1
@@ -91,7 +91,7 @@
       "pf": 4,
       "rank": 6,
       "standing": "Finalrunde",
-      "team__name": "A3",
+      "team__description": "AAAAAAA3",
       "win_points": 0.0,
       "win_quotient": 0.0,
       "wins": 0
@@ -104,17 +104,14 @@
         "type": "integer"
       },
       {
-        "extDtype": "string",
-        "name": "team__name",
+        "name": "team__description",
         "type": "string"
       },
       {
-        "extDtype": "Int64",
         "name": "pf",
         "type": "integer"
       },
       {
-        "extDtype": "Int64",
         "name": "pa",
         "type": "integer"
       },
@@ -135,7 +132,6 @@
         "type": "integer"
       },
       {
-        "extDtype": "Float64",
         "name": "win_points",
         "type": "number"
       },
@@ -148,12 +144,10 @@
         "type": "string"
       },
       {
-        "extDtype": "Int64",
         "name": "diff",
         "type": "integer"
       },
       {
-        "extDtype": "Float64",
         "name": "win_quotient",
         "type": "number"
       },
@@ -162,7 +156,6 @@
         "type": "integer"
       }
     ],
-    "pandas_version": "1.4.0",
     "primaryKey": [
       "index"
     ]

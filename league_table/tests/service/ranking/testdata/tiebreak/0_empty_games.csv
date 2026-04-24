@@ -1,1 +1,1 @@
-gameinfo,team_id,team__name,fh,sh,pa,isHome,standing,pf,league_id,opponent_team_id,opponent_league_id,status
+gameinfo,team_id,team__description,fh,sh,pa,isHome,standing,pf,league_id,opponent_team_id,opponent_league_id,status
