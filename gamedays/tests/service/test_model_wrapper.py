@@ -126,22 +126,22 @@ class TestGamedayModelWrapper(TestCase):
     def test_get_qualify_team_by(self):
         gameday = DBSetup().g62_qualify_finished()
         gmw = GamedayModelWrapper(gameday.pk)
-        assert gmw.get_qualify_team_by(place=1, standing="Gruppe 1") == "A1"
-        assert gmw.get_qualify_team_by(place=3, standing="Gruppe 2") == "B3"
+        assert gmw.get_qualify_team_by(place=1, standing="Gruppe 1") == "AAAAAAA1"
+        assert gmw.get_qualify_team_by(place=3, standing="Gruppe 2") == "BBBBBBB3"
 
     def test_get_team_by_points(self):
         gameday = DBSetup().g62_finalround(sf="beendet")
         gmw = GamedayModelWrapper(gameday.pk)
-        assert gmw.get_team_by_points(place=1, standing="HF", points=0) == "B2"
-        assert gmw.get_team_by_points(place=1, standing="HF", points=2) == "A1"
-        assert gmw.get_team_by_points(place=2, standing="HF", points=0) == "A2"
-        assert gmw.get_team_by_points(place=2, standing="HF", points=2) == "B1"
+        assert gmw.get_team_by_points(place=1, standing="HF", points=0) == "BBBBBBB2"
+        assert gmw.get_team_by_points(place=1, standing="HF", points=2) == "AAAAAAA1"
+        assert gmw.get_team_by_points(place=2, standing="HF", points=0) == "AAAAAAA2"
+        assert gmw.get_team_by_points(place=2, standing="HF", points=2) == "BBBBBBB1"
 
     def test_get_team_by(self):
         gameday = DBSetup().g62_finalround(sf="beendet")
         gmw = GamedayModelWrapper(gameday.pk)
-        assert gmw.get_team_by(place=1, standing="HF", points=2) == "A1"
-        assert gmw.get_team_by(place=1, standing="Gruppe 1") == "A1"
+        assert gmw.get_team_by(place=1, standing="HF", points=2) == "AAAAAAA1"
+        assert gmw.get_team_by(place=1, standing="Gruppe 1") == "AAAAAAA1"
 
     def test_is_finished(self):
         gameday = DBSetup().g62_qualify_finished()
@@ -186,8 +186,8 @@ class TestGamedayModelWrapper(TestCase):
         for game in all_prelim_games:
             update_gameresults(game)
         gmw = GamedayModelWrapper(gameday.pk)
-        assert gmw.get_team_by_qualify_for(place=2, index=0) == "B2"
-        assert gmw.get_team_by_qualify_for(place=2, index=1) == "A2"
+        assert gmw.get_team_by_qualify_for(place=2, index=0) == "BBBBBBB2"
+        assert gmw.get_team_by_qualify_for(place=2, index=1) == "AAAAAAA2"
 
     def test_team_aggregation(self):
         gameday = DBSetup().g72_qualify_finished()
@@ -199,13 +199,13 @@ class TestGamedayModelWrapper(TestCase):
             gmw.get_team_aggregate_by(
                 aggregate_standings=["Gruppe 1", "Gruppe 2"], aggregate_place=2, place=1
             )
-            == "A3"
+            == "AAAAAAA3"
         )
         assert (
             gmw.get_team_aggregate_by(
                 aggregate_standings=["Gruppe 1", "Gruppe 2"], aggregate_place=2, place=2
             )
-            == "B2"
+            == "BBBBBBB2"
         )
 
     def test_get_mulitple_teams_by_standing_and_points(self):
@@ -215,7 +215,7 @@ class TestGamedayModelWrapper(TestCase):
         for game in all_games:
             update_gameresults(game)
         gmw = GamedayModelWrapper(gameday.pk)
-        assert gmw.get_teams_by(standing="HF", points=2) == ["B2", "B1"]
+        assert gmw.get_teams_by(standing="HF", points=2) == ["BBBBBBB2", "BBBBBBB1"]
 
 
 def update_gameresults(game):

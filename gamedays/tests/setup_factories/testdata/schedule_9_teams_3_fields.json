@@ -1,14 +1,14 @@
 {
   "data": [
     {
-      "away": "A2",
+      "away": "AAAAAAA2",
       "field": 1,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 1,
-      "home": "A1",
+      "home": "AAAAAAA1",
       "id": 1,
       "id_away": "2",
       "id_home": "1",
@@ -25,14 +25,14 @@
       "status": "beendet"
     },
     {
-      "away": "B2",
+      "away": "BBBBBBB2",
       "field": 2,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 8,
-      "home": "B1",
+      "home": "BBBBBBB1",
       "id": 8,
       "id_away": "16",
       "id_home": "15",
@@ -49,14 +49,14 @@
       "status": "beendet"
     },
     {
-      "away": "C2",
+      "away": "CCCCCCC2",
       "field": 3,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 14,
-      "home": "C1",
+      "home": "CCCCCCC1",
       "id": 14,
       "id_away": "28",
       "id_home": "27",
@@ -73,14 +73,14 @@
       "status": "beendet"
     },
     {
-      "away": "A3",
+      "away": "AAAAAAA3",
       "field": 1,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 2,
-      "home": "A2",
+      "home": "AAAAAAA2",
       "id": 2,
       "id_away": "4",
       "id_home": "3",
@@ -97,14 +97,14 @@
       "status": "beendet"
     },
     {
-      "away": "B3",
+      "away": "BBBBBBB3",
       "field": 2,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 9,
-      "home": "B2",
+      "home": "BBBBBBB2",
       "id": 9,
       "id_away": "18",
       "id_home": "17",
@@ -121,14 +121,14 @@
       "status": "beendet"
     },
     {
-      "away": "C3",
+      "away": "CCCCCCC3",
       "field": 3,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 15,
-      "home": "C2",
+      "home": "CCCCCCC2",
       "id": 15,
       "id_away": "30",
       "id_home": "29",
@@ -145,14 +145,14 @@
       "status": "beendet"
     },
     {
-      "away": "A1",
+      "away": "AAAAAAA1",
       "field": 1,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 3,
-      "home": "A3",
+      "home": "AAAAAAA3",
       "id": 3,
       "id_away": "6",
       "id_home": "5",
@@ -169,14 +169,14 @@
       "status": "beendet"
     },
     {
-      "away": "B1",
+      "away": "BBBBBBB1",
       "field": 2,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 10,
-      "home": "B3",
+      "home": "BBBBBBB3",
       "id": 10,
       "id_away": "20",
       "id_home": "19",
@@ -193,14 +193,14 @@
       "status": "beendet"
     },
     {
-      "away": "C1",
+      "away": "CCCCCCC1",
       "field": 3,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 16,
-      "home": "C3",
+      "home": "CCCCCCC3",
       "id": 16,
       "id_away": "32",
       "id_home": "31",
@@ -217,14 +217,14 @@
       "status": "beendet"
     },
     {
-      "away": "C2",
+      "away": "CCCCCCC2",
       "field": 1,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 4,
-      "home": "B2",
+      "home": "BBBBBBB2",
       "id": 4,
       "id_away": "8",
       "id_home": "7",
@@ -241,14 +241,14 @@
       "status": "beendet"
     },
     {
-      "away": "A3",
+      "away": "AAAAAAA3",
       "field": 2,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 11,
-      "home": "A2",
+      "home": "AAAAAAA2",
       "id": 11,
       "id_away": "22",
       "id_home": "21",
@@ -265,14 +265,14 @@
       "status": "beendet"
     },
     {
-      "away": "B1",
+      "away": "BBBBBBB1",
       "field": 3,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 17,
-      "home": "A1",
+      "home": "AAAAAAA1",
       "id": 17,
       "id_away": "34",
       "id_home": "33",
@@ -289,14 +289,14 @@
       "status": "beendet"
     },
     {
-      "away": "C3",
+      "away": "CCCCCCC3",
       "field": 1,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 5,
-      "home": "C2",
+      "home": "CCCCCCC2",
       "id": 5,
       "id_away": "10",
       "id_home": "9",
@@ -313,14 +313,14 @@
       "status": "beendet"
     },
     {
-      "away": "B3",
+      "away": "BBBBBBB3",
       "field": 2,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 12,
-      "home": "A3",
+      "home": "AAAAAAA3",
       "id": 12,
       "id_away": "24",
       "id_home": "23",
@@ -337,14 +337,14 @@
       "status": "beendet"
     },
     {
-      "away": "C1",
+      "away": "CCCCCCC1",
       "field": 3,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 18,
-      "home": "B1",
+      "home": "BBBBBBB1",
       "id": 18,
       "id_away": "36",
       "id_home": "35",
@@ -361,14 +361,14 @@
       "status": "beendet"
     },
     {
-      "away": "B2",
+      "away": "BBBBBBB2",
       "field": 1,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 6,
-      "home": "A2",
+      "home": "AAAAAAA2",
       "id": 6,
       "id_away": "12",
       "id_home": "11",
@@ -385,14 +385,14 @@
       "status": "beendet"
     },
     {
-      "away": "A1",
+      "away": "AAAAAAA1",
       "field": 3,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 19,
-      "home": "C1",
+      "home": "CCCCCCC1",
       "id": 19,
       "id_away": "38",
       "id_home": "37",
@@ -409,14 +409,14 @@
       "status": "beendet"
     },
     {
-      "away": "C3",
+      "away": "CCCCCCC3",
       "field": 1,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 7,
-      "home": "B3",
+      "home": "BBBBBBB3",
       "id": 7,
       "id_away": "14",
       "id_home": "13",
@@ -433,14 +433,14 @@
       "status": "beendet"
     },
     {
-      "away": "C2",
+      "away": "CCCCCCC2",
       "field": 2,
       "gameFinished": null,
       "gameHalftime": null,
       "gameStarted": null,
       "gameday": 1,
       "gameinfo": 13,
-      "home": "A3",
+      "home": "AAAAAAA3",
       "id": 13,
       "id_away": "26",
       "id_home": "25",
@@ -520,42 +520,34 @@
         "type": "string"
       },
       {
-        "extDtype": "Int64",
         "name": "gameinfo",
         "type": "integer"
       },
       {
-        "extDtype": "string",
         "name": "id_home",
-        "type": "any"
+        "type": "string"
       },
       {
-        "extDtype": "string",
         "name": "home",
-        "type": "any"
+        "type": "string"
       },
       {
-        "extDtype": "Int64",
         "name": "points_home",
         "type": "integer"
       },
       {
-        "extDtype": "Int64",
         "name": "points_away",
         "type": "integer"
       },
       {
-        "extDtype": "string",
         "name": "away",
-        "type": "any"
+        "type": "string"
       },
       {
-        "extDtype": "string",
         "name": "id_away",
-        "type": "any"
+        "type": "string"
       }
     ],
-    "pandas_version": "1.4.0",
     "primaryKey": [
       "index"
     ]

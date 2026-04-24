@@ -24,6 +24,7 @@ from django.urls import path, include
 from django.views import View
 from django.views.generic import TemplateView, RedirectView
 
+from gamedays.constants import LEAGUE_GAMEDAY_LIST
 from league_manager.constants import LEAGUE_MANAGER_MAINTENANCE, CLEAR_CACHE
 
 
@@ -91,7 +92,7 @@ urlpatterns = [
     path("gamedays/", include("gamedays.urls")),
     path("passcheck/", include("passcheck.urls")),
     path("dal/", include("league_manager.dal.urls")),
-    path("", RedirectView.as_view(url="gamedays/", permanent=True)),
+    path("", RedirectView.as_view(pattern_name=LEAGUE_GAMEDAY_LIST, permanent=True)),
     path(
         "login/",
         auth_view.LoginView.as_view(template_name="registration/login.html"),

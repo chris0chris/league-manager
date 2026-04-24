@@ -10,14 +10,14 @@
       "index": 0,
       "losses": 0,
       "max_win_points": 0.0,
-      "name_ascending": "a1",
+      "name_ascending": "aaaaaaa1",
       "overall_point_diff": 9,
       "overall_points_scored": 12,
       "pa": 3,
       "pf": 12,
       "rank": 1,
       "standing": "Gruppe 1",
-      "team__name": "A1",
+      "team__description": "AAAAAAA1",
       "win_points": 0.0,
       "win_quotient": 0.0,
       "wins": 0
@@ -32,14 +32,14 @@
       "index": 1,
       "losses": 0,
       "max_win_points": 0.0,
-      "name_ascending": "a2",
+      "name_ascending": "aaaaaaa2",
       "overall_point_diff": 4,
       "overall_points_scored": 8,
       "pa": 4,
       "pf": 8,
       "rank": 2,
       "standing": "Gruppe 1",
-      "team__name": "A2",
+      "team__description": "AAAAAAA2",
       "win_points": 0.0,
       "win_quotient": 0.0,
       "wins": 0
@@ -54,14 +54,14 @@
       "index": 2,
       "losses": 0,
       "max_win_points": 0.0,
-      "name_ascending": "a3",
+      "name_ascending": "aaaaaaa3",
       "overall_point_diff": -1,
       "overall_points_scored": 4,
       "pa": 5,
       "pf": 4,
       "rank": 3,
       "standing": "Gruppe 1",
-      "team__name": "A3",
+      "team__description": "AAAAAAA3",
       "win_points": 0.0,
       "win_quotient": 0.0,
       "wins": 0
@@ -76,14 +76,14 @@
       "index": 3,
       "losses": 0,
       "max_win_points": 0.0,
-      "name_ascending": "a4",
+      "name_ascending": "aaaaaaa4",
       "overall_point_diff": -5,
       "overall_points_scored": 1,
       "pa": 6,
       "pf": 1,
       "rank": 4,
       "standing": "Gruppe 1",
-      "team__name": "A4",
+      "team__description": "AAAAAAA4",
       "win_points": 0.0,
       "win_quotient": 0.0,
       "wins": 0
@@ -98,14 +98,14 @@
       "index": 4,
       "losses": 0,
       "max_win_points": 0.0,
-      "name_ascending": "a5",
+      "name_ascending": "aaaaaaa5",
       "overall_point_diff": -7,
       "overall_points_scored": 0,
       "pa": 7,
       "pf": 0,
       "rank": 5,
       "standing": "Gruppe 1",
-      "team__name": "A5",
+      "team__description": "AAAAAAA5",
       "win_points": 0.0,
       "win_quotient": 0.0,
       "wins": 0
@@ -118,17 +118,14 @@
         "type": "integer"
       },
       {
-        "extDtype": "string",
-        "name": "team__name",
+        "name": "team__description",
         "type": "string"
       },
       {
-        "extDtype": "Int64",
         "name": "pf",
         "type": "integer"
       },
       {
-        "extDtype": "Int64",
         "name": "pa",
         "type": "integer"
       },
@@ -149,7 +146,6 @@
         "type": "integer"
       },
       {
-        "extDtype": "Float64",
         "name": "win_points",
         "type": "number"
       },
@@ -158,17 +154,14 @@
         "type": "number"
       },
       {
-        "extDtype": "string",
         "name": "standing",
         "type": "string"
       },
       {
-        "extDtype": "Int64",
         "name": "diff",
         "type": "integer"
       },
       {
-        "extDtype": "Float64",
         "name": "win_quotient",
         "type": "number"
       },
@@ -185,17 +178,14 @@
         "type": "integer"
       },
       {
-        "extDtype": "Int64",
         "name": "overall_point_diff",
         "type": "integer"
       },
       {
-        "extDtype": "Int64",
         "name": "overall_points_scored",
         "type": "integer"
       },
       {
-        "extDtype": "string",
         "name": "name_ascending",
         "type": "string"
       },
@@ -204,7 +194,6 @@
         "type": "integer"
       }
     ],
-    "pandas_version": "1.4.0",
     "primaryKey": [
       "index"
     ]

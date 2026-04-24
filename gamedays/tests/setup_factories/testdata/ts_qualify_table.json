@@ -17,7 +17,7 @@
       "pf": 6,
       "rank": 1,
       "standing": "Gruppe 1",
-      "team__name": "A1",
+      "team__description": "AAAAAAA1",
       "win_points": 2.0,
       "win_quotient": 1.0,
       "wins": 2
@@ -39,7 +39,7 @@
       "pf": 4,
       "rank": 2,
       "standing": "Gruppe 1",
-      "team__name": "A2",
+      "team__description": "AAAAAAA2",
       "win_points": 1.0,
       "win_quotient": 0.5,
       "wins": 1
@@ -61,7 +61,7 @@
       "pf": 2,
       "rank": 3,
       "standing": "Gruppe 1",
-      "team__name": "A3",
+      "team__description": "AAAAAAA3",
       "win_points": 0.0,
       "win_quotient": 0.0,
       "wins": 0
@@ -83,7 +83,7 @@
       "pf": 6,
       "rank": 1,
       "standing": "Gruppe 2",
-      "team__name": "B1",
+      "team__description": "BBBBBBB1",
       "win_points": 2.0,
       "win_quotient": 1.0,
       "wins": 2
@@ -105,7 +105,7 @@
       "pf": 4,
       "rank": 2,
       "standing": "Gruppe 2",
-      "team__name": "B2",
+      "team__description": "BBBBBBB2",
       "win_points": 1.0,
       "win_quotient": 0.5,
       "wins": 1
@@ -127,7 +127,7 @@
       "pf": 2,
       "rank": 3,
       "standing": "Gruppe 2",
-      "team__name": "B3",
+      "team__description": "BBBBBBB3",
       "win_points": 0.0,
       "win_quotient": 0.0,
       "wins": 0
@@ -140,17 +140,14 @@
         "type": "integer"
       },
       {
-        "extDtype": "string",
-        "name": "team__name",
+        "name": "team__description",
         "type": "string"
       },
       {
-        "extDtype": "Int64",
         "name": "pf",
         "type": "integer"
       },
       {
-        "extDtype": "Int64",
         "name": "pa",
         "type": "integer"
       },
@@ -171,7 +168,6 @@
         "type": "integer"
       },
       {
-        "extDtype": "Float64",
         "name": "win_points",
         "type": "number"
       },
@@ -180,17 +176,14 @@
         "type": "number"
       },
       {
-        "extDtype": "string",
         "name": "standing",
         "type": "string"
       },
       {
-        "extDtype": "Int64",
         "name": "diff",
         "type": "integer"
       },
       {
-        "extDtype": "Float64",
         "name": "win_quotient",
         "type": "number"
       },
@@ -223,7 +216,6 @@
         "type": "integer"
       }
     ],
-    "pandas_version": "1.4.0",
     "primaryKey": [
       "index"
     ]

@@ -1,4 +1,4 @@
-gameinfo,team_id,team__name,fh,sh,pa,isHome,standing,pf,league_id,opponent_team_id,opponent_league_id,status
+gameinfo,team_id,team__description,fh,sh,pa,isHome,standing,pf,league_id,opponent_team_id,opponent_league_id,status
 1001,1,Team A,14,14,20,TRUE,Group 1,28,5,2,5,beendet
 1001,2,Team B,12,8,28,FALSE,Group 1,20,5,1,5,beendet
 1002,1,Team A,12,14,12,TRUE,Group 1,26,5,2,5,beendet
