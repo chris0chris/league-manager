@@ -1,5 +1,6 @@
-import os
 import datetime
+import os
+
 # Must be set before any Django imports
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
@@ -7,7 +8,7 @@ import pytest
 import requests
 from playwright.sync_api import Page, expect
 from django.contrib.auth.models import User
-from gamedays.models import Gameday, Gameinfo, Team, Season, League, Gameresult
+from gamedays.models import Gameday, Gameinfo, Team, Season, League
 from gameday_designer.models import (
     ScheduleTemplate, 
     TemplateSlot, 
@@ -173,5 +174,5 @@ def test_designer_progression_resolves_teams_in_scorecard(live_server, page: Pag
     _navigate_to_games_list(page, gameday)
     
     # SF1: Team A1 (1st Gruppe A) vs Team B1 (2nd Gruppe B)
-    expect(page.get_by_text("Team A1 vs Team B1")).to_be_visible()
+    expect(page.get_by_text("Desc Team A1 vs Desc Team B1")).to_be_visible()
     expect(page.get_by_text("Winner Gruppe A vs Runner-up Gruppe B")).not_to_be_visible()
