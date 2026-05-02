@@ -14,7 +14,7 @@ dependencies = [
     "pandas==3.0.2",
     "django-pandas==0.6.7",
     "djangorestframework==3.17.1",
-    "django-autocomplete-light==3.12.1",
+    "django-autocomplete-light==4.0.0",
     "django-formtools==2.5.1",
     "Markdown==3.10.2",
     "django-cors-headers==4.9.0",

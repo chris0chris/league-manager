@@ -292,12 +292,15 @@ wheels = [
 
 [[package]]
 name = "django-autocomplete-light"
-version = "3.12.1"
+version = "4.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bc/49/fd4705cd96f313d858f9a8c5fce1c33f1f61adb6b25acc92a924acf0a305/django_autocomplete_light-3.12.1.tar.gz", hash = "sha256:50f7b83681feec6491c38e6114d7a4fe80f9e99a8cc6c8458a3e7bb137ad6b1d", size = 296420, upload-time = "2025-02-26T08:21:16.332Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/40/2a/7dfb8b219d7c8ed3e82481a801829e5d74203a854a11a3db105e91659d06/django_autocomplete_light-4.0.0.tar.gz", hash = "sha256:2d4438320eefe1248ad0543e1d1673449f571afcc5c603fb487e5ed2fe4849cf", size = 102423, upload-time = "2026-04-23T07:11:51.727Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/93/c2/feb897d6215d6aa8d8b96081f2be976624ff22717950d058ad16dea94072/django_autocomplete_light-4.0.0-py3-none-any.whl", hash = "sha256:60ecf1bbc00f8a633c3967443ab745d9945b73cd6b4f7f64f236280c956b7ba4", size = 117892, upload-time = "2026-04-23T07:11:49.78Z" },
+]
 
 [[package]]
 name = "django-cors-headers"
@@ -580,7 +583,7 @@ requires-dist = [
     { name = "bump2version", marker = "extra == 'test'", specifier = "==1.0.1" },
     { name = "crispy-bootstrap5", specifier = "==2026.3" },
     { name = "django", specifier = "==6.0.4" },
-    { name = "django-autocomplete-light", specifier = "==3.12.1" },
+    { name = "django-autocomplete-light", specifier = "==4.0.0" },
     { name = "django-cors-headers", specifier = "==4.9.0" },
     { name = "django-crispy-forms", specifier = "==2.6" },
     { name = "django-debug-toolbar", marker = "extra == 'test'", specifier = "==6.3.0" },
