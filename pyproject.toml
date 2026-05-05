@@ -42,7 +42,7 @@ test = [
     "types-factory_boy==0.4.1",
 ]
 prod = [
-    "gunicorn>=22.0.0",
+    "gunicorn>=26.0.0",
 ]
 
 [tool.setuptools.packages.find]
