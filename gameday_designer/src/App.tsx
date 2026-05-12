@@ -16,9 +16,6 @@ import GamedayDashboard from './components/dashboard/GamedayDashboard';
 import MainLayout from './components/layout/MainLayout';
 import { GamedayProvider } from './context/GamedayContext';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-
 /**
  * Main App component for Gameday Designer.
  */

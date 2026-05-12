@@ -157,6 +157,10 @@ gameday_designer/static/gameday_designer/js/*.js
 gameday_designer/static/gameday_designer/js/*.css
 gameday_designer/static/gameday_designer/js/*.woff
 gameday_designer/static/gameday_designer/js/*.woff2
+league_manager/static/journey_dashboard/
+
+# Superpowers tooling artifacts
+.superpowers/
 
 league_manager/league_manager/
 

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'journey_dashboard/index.css' %}">
+    <style>
+        /* Lock body height to viewport and use flex layout */
+        html {
+            height: 100vh;
+        }
+        body {
+            height: 100vh;
+            overflow: hidden !important;
+            display: flex;
+            flex-direction: column;
+            padding-top: 4rem !important;
+        }
+
+        /* Make main container fill remaining space exactly */
+        main.container {
+            flex: 1;
+            max-width: 100%;
+            padding: 0;
+            margin-top: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 0; /* Force flex child to respect parent container */
+        }
+
+        /* Make content area fill available space */
+        main.container > div {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Dashboard container fills the content area */
+        #journey-dashboard {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Ensure footer stays at the very bottom without margin-top */
+        .footer {
+            position: sticky;
+            bottom: 0;
+            z-index: 1000;
+            flex-shrink: 0;
+            margin-top: 0 !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="journey-dashboard" data-user-id="{{ request.user.id }}"></div>
+{% endblock %}
+
+{% block extra_js %}
+    <script type="module" src="{% static 'journey_dashboard/index.js' %}"></script>
+{% endblock %}

@@ -1,16 +1,14 @@
 {
   "name": "gameday_designer",
-  "version": "3.15.0",
+  "version": "3.16.0",
   "private": true,
   "type": "module",
   "dependencies": {
-    "@types/node": "25.6.2",
+    "@types/node": "25.7.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "axios": "1.16.0",
-    "bootstrap": "5.3.8",
-    "bootstrap-icons": "1.13.1",
-    "i18next": "26.0.10",
+    "i18next": "26.1.0",
     "i18next-browser-languagedetector": "8.2.1",
     "i18next-resources-to-backend": "1.2.1",
     "react": "19.2.6",
@@ -60,8 +58,8 @@
     "@testing-library/user-event": "14.6.1",
     "@types/react-router-dom": "5.3.3",
     "@vitejs/plugin-react": "6.0.1",
-    "@vitest/coverage-v8": "4.1.5",
-    "@vitest/ui": "4.1.5",
+    "@vitest/coverage-v8": "4.1.6",
+    "@vitest/ui": "4.1.6",
     "esbuild": "^0.28.0",
     "eslint": "10.3.0",
     "eslint-formatter-junit": "9.0.1",
@@ -69,9 +67,9 @@
     "i18next-resources-for-ts": "2.1.0",
     "jsdom": "29.1.1",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.59.2",
-    "vite": "8.0.11",
-    "vitest": "4.1.5"
+    "typescript-eslint": "8.59.3",
+    "vite": "8.0.12",
+    "vitest": "4.1.6"
   },
   "overrides": {
     "postcss": "8.5.14",
@@ -86,6 +84,6 @@
     "eslint-plugin-react-hooks": {
       "eslint": "^10.0.0"
     },
-    "vite": "8.0.11"
+    "vite": "8.0.12"
   }
 }

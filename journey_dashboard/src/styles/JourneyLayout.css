@@ -1,0 +1,22 @@
+.journey-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: #f8f9fa;
+}
+
+.journey-layout .journey-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 24px 24px;
+  background-color: #f8f9fa;
+}
+
+/* Ensure full container height on mount */
+#journey-dashboard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}

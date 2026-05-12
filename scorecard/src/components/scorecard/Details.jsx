@@ -11,6 +11,7 @@ import Halftime from './Halftime';
 import {FINALIZE_URL} from '../common/urls';
 import ModalDeleteEntry from './ModalDeleteEntry';
 import {FaTrash} from 'react-icons/fa';
+import { trackEvent } from '../../trackEvent';
 
 const Details = (props) => {
   const gameLog = props.gameLog;
@@ -38,11 +39,21 @@ const Details = (props) => {
       setTeamInPossession(teamName);
       props.halftime(gameLog.gameId, {});
       props.updateTeamInPossession(gameLog.gameId, teamName);
+      trackEvent('second_half_started', {
+        game_id: gameLog.gameId,
+        home_score: gameLog.home.score,
+        away_score: gameLog.away.score,
+      });
     } else {
       setIsFinal(true);
     }
   };
   const updateTeam = (teamName) => {
+    trackEvent('team_switched', {
+      game_id: gameLog.gameId,
+      team_name: teamName,
+      half: half,
+    });
     setTeamInPossession(teamName);
   };
   const createLogEntry = (event, isAgainstOpponent=false) => {

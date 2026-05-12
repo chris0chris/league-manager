@@ -14,6 +14,7 @@ import {searchForOfficials} from '../../actions/officials';
 import RadioButton from '../layout/RadioButton';
 import InputDropdown from '../layout/InputDropdown';
 import {OFFICIALS_SEARCH_FOR_OFFICIALS} from '../../actions/types';
+import { trackEvent } from '../../trackEvent';
 
 export const Officials = (props) => {
   const selectedGame = props.selectedGame;
@@ -160,6 +161,13 @@ export const Officials = (props) => {
     officials.push({name: downJudge.text, position: Official.DOWN_JUDGE, official: downJudge.id});
     officials.push({name: fieldJudge.text, position: Official.FIELD_JUDGE, official: fieldJudge.id});
     officials.push({name: sideJudge.text, position: Official.SIDE_JUDGE, official: sideJudge.id});
+    trackEvent('game_started', {
+      game_id: selectedGame.id,
+      home_team: selectedGame.home,
+      away_team: selectedGame.away,
+      first_possession: fhPossession,
+      coin_toss_result: ct,
+    });
     props.saveGameSetup(selectedGame.id, gameSetup);
     props.saveOfficials(selectedGame.id, officials);
     props.updateTeamInPossession(selectedGame.id, fhPossession);

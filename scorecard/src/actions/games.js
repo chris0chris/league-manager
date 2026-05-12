@@ -9,6 +9,7 @@ import {GAME_CREATE_LOG_ENTRY_FAIL,
   SET_SELECTED_GAME,
   UPDATE_TEAM_IN_FAIL,
   UPDATE_TEAM_IN_POSSESSION} from './types';
+import { trackEvent } from '../trackEvent';
 
 export const getGames = (gamedayId, team) => {
   return apiGet(
@@ -30,11 +31,21 @@ export const getGameLog = (gameId) => {
 
 export const createLogEntry = (event) => {
   // console.log(event);
+  trackEvent('game_event_recorded', {
+    game_id: event.gameId,
+    team: event.team,
+    event_type: event.event?.[0]?.name || 'unknown',
+    half: event.half,
+  });
   return apiPost(`/api/gamelog/${event.gameId}`,
       event, GET_GAME_LOG, GAME_CREATE_LOG_ENTRY_FAIL);
 };
 
 export const updateTeamInPossession = (gameId, teamName) => {
+  trackEvent('possession_recorded', {
+    game_id: gameId,
+    team_name: teamName,
+  });
   return apiPut(`/api/game/${gameId}/possession`,
       {team: teamName}, UPDATE_TEAM_IN_POSSESSION, UPDATE_TEAM_IN_FAIL);
 };
@@ -45,6 +56,9 @@ export const deleteLogEntry = (gameId, entryToDelete) => {
 };
 
 export const halftime = (gameId, event) => {
+  trackEvent('halftime_recorded', {
+    game_id: gameId,
+  });
   return apiPut(
       `/api/game/${gameId}/halftime`,
       event,
@@ -53,6 +67,11 @@ export const halftime = (gameId, event) => {
 };
 
 export const gameFinalize = (gameId, data) => {
+  trackEvent('game_completed', {
+    game_id: gameId,
+    home_captain: data.homeCaptain,
+    away_captain: data.awayCaptain,
+  });
   return apiPut(
       `/api/game/${gameId}/finalize`,
       data,

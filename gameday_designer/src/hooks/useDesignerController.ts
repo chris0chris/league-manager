@@ -29,6 +29,7 @@ import type { UseFlowStateReturn, GamedayMetadata } from '../types/designer';
 import { v4 as uuidv4 } from 'uuid';
 import { gamedayApi } from '../api/gamedayApi';
 import { genericizeFlowState, applyGenericTemplate, GenericTemplate } from '../utils/templateMapper';
+import { trackEvent } from '../trackEvent';
 
 export function useDesignerController(
   gamedayId: string | undefined,
@@ -125,7 +126,7 @@ export function useDesignerController(
   );
 
   const handleImport = useCallback(
-    (json: unknown) => {
+    (json: unknown, importSource: 'file' | 'clipboard' = 'file') => {
       const errors = validateScheduleJson(json);
       if (errors.length > 0) {
         addNotification(`Invalid JSON format: ${errors.join(', ')}`, 'danger', 'Import Error');
@@ -140,8 +141,14 @@ export function useDesignerController(
 
       flowStateRef.current?.importState(result.state);
       addNotification('Schedule imported successfully', 'success', 'Import Success');
+
+      // Track import event
+      trackEvent('import_executed', {
+        gameday_id: gamedayId,
+        import_source: importSource,
+      });
     },
-    [addNotification]
+    [addNotification, gamedayId]
   );
 
   const handleExport = useCallback(() => {
@@ -156,22 +163,35 @@ export function useDesignerController(
     }
     downloadFlowchartAsJson(state);
     addNotification('Schedule exported successfully', 'success', 'Export Success');
-  }, [addNotification]);
+
+    // Track export event
+    trackEvent('export_executed', {
+      gameday_id: gamedayId,
+      export_format: 'json',
+    });
+  }, [addNotification, gamedayId]);
 
   const handleSaveTemplate = useCallback(async (name: string, description: string, sharing: 'PRIVATE' | 'ASSOCIATION' | 'GLOBAL') => {
     const currentState = flowStateRef.current?.exportState();
     if (!currentState) return;
-    
+
     const genericTemplate = genericizeFlowState(currentState, name, description, sharing);
-    
+
     try {
       await gamedayApi.saveTemplate(genericTemplate);
       addNotification('Template saved successfully', 'success', 'Template Saved');
+
+      // Track template save event
+      trackEvent('template_saved', {
+        template_name: name,
+        sharing_scope: sharing,
+        gameday_id: gamedayId,
+      });
     } catch (error: unknown) {
       console.error('Failed to save template', error);
       throw error;
     }
-  }, [addNotification]);
+  }, [addNotification, gamedayId]);
 
   const assignTeamsToTournament = useCallback(
     (structure: TournamentStructure, teams: GlobalTeam[], clearExisting: boolean = false) => {
@@ -392,12 +412,28 @@ export function useDesignerController(
         
         setShowTournamentModal(false);
         addNotification('Tournament generated successfully', 'success', 'Generation Success');
+
+        // Track template applied event
+        trackEvent('template_applied', {
+          template_id: config.customTemplate?.id || config.template?.id,
+          template_type: config.customTemplate ? 'saved' : 'builtin',
+          gameday_id: gamedayId,
+          team_count: teamsToUse?.length,
+          field_count: config.fieldCount,
+        });
+
+        // Track gameday created/updated event (tournament generation)
+        trackEvent('gameday_created_with_template', {
+          gameday_id: gamedayId,
+          template_id: config.customTemplate?.id || config.template?.id,
+          template_type: config.customTemplate ? 'saved' : 'builtin',
+        });
       } catch (error) {
         console.error('Failed to generate tournament:', error);
         addNotification('Failed to generate tournament. See console for details.', 'danger', 'Generation Error');
       }
     },
-    [addNotification, assignTeamsToTournament]
+    [addNotification, assignTeamsToTournament, gamedayId]
   );
 
   const handleSwapTeams = useCallback(
@@ -433,6 +469,32 @@ export function useDesignerController(
     notifications,
   }), [highlightedElement, expandedFieldIds, expandedStageIds, showTournamentModal, canExport, flowState?.nodes?.length, flowState?.globalTeams?.length, flowState?.fields?.length, flowState?.saveTrigger, isLoading, notifications]);
 
+  const handleUpdateNode = useCallback((id: string, data: Record<string, unknown>) => {
+    if (!gamedayId) return;
+
+    const currentNode = flowStateRef.current?.nodes.find(n => n.id === id);
+
+    // Update the node
+    flowStateRef.current?.updateNode(id, data);
+
+    // Determine edit type based on node type
+    let editType = 'node_updated';
+    if (currentNode?.type === 'game') {
+      editType = 'game_modified';
+    } else if (currentNode?.type === 'stage') {
+      editType = 'stage_modified';
+    } else if (currentNode?.type === 'field') {
+      editType = 'field_modified';
+    }
+
+    // Track the edit event
+    trackEvent('gameday_edited', {
+      gameday_id: gamedayId,
+      edit_type: editType,
+      element_id: id,
+    });
+  }, [gamedayId]);
+
   const handlersInternal = useMemo(() => ({
     loadData,
     saveData,
@@ -445,7 +507,7 @@ export function useDesignerController(
     handleSaveTemplate,
     handleClearAll: () => flowStateRef.current?.clearAll(),
     handleUpdateMetadata: (data: Partial<GamedayMetadata>) => flowStateRef.current?.updateMetadata(data),
-    handleUpdateNode: (id: string, data: Record<string, unknown>) => flowStateRef.current?.updateNode(id, data),
+    handleUpdateNode,
     handleUpdateGlobalTeam: (id: string, data: Record<string, unknown>) => flowStateRef.current?.updateGlobalTeam(id, data),
     handleDeleteGlobalTeam: (id: string) => flowStateRef.current?.deleteGlobalTeam(id),
     handleReplaceGlobalTeam: (oldId: string, newTeamData: { id: number; text: string }) => flowStateRef.current?.replaceGlobalTeam(oldId, newTeamData),
@@ -463,8 +525,27 @@ export function useDesignerController(
     handleGenerateTournament,
     showTournamentModal,
     setShowTournamentModal: (show: boolean) => setShowTournamentModal(show),
-    handleAddGlobalTeam: (groupId: string) => flowStateRef.current?.addGlobalTeam(undefined, groupId),
-    handleAddOfficialsGroup: () => flowStateRef.current?.addOfficialsGroup(),
+    handleAddGlobalTeam: (groupId: string) => {
+      flowStateRef.current?.addGlobalTeam(undefined, groupId);
+      // Track global team added event
+      const teamName = flowStateRef.current?.globalTeams?.[flowStateRef.current.globalTeams.length - 1]?.label || 'New Team';
+      trackEvent('global_team_added', {
+        gameday_id: gamedayId,
+        team_name: teamName,
+      });
+    },
+    handleAddOfficialsGroup: () => {
+      flowStateRef.current?.addOfficialsGroup();
+      // Track officials group added event
+      const officialGroups = flowStateRef.current?.nodes?.filter(n => n.type === 'officials') || [];
+      const groupName = officialGroups.length > 0
+        ? `Officials Group ${officialGroups.length}`
+        : 'Officials Group 1';
+      trackEvent('officials_group_added', {
+        gameday_id: gamedayId,
+        group_name: groupName,
+      });
+    },
     handleAddGlobalTeamGroup: () => flowStateRef.current?.addGlobalTeamGroup(),
     handleAddFieldContainer: () => flowStateRef.current?.addFieldNode({}, true),
     handleAddStage: (fieldId: string) => flowStateRef.current?.addStageNode(fieldId),
@@ -478,10 +559,10 @@ export function useDesignerController(
     handleAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) =>
       flowStateRef.current?.addStageToGameEdge(sourceStageId, sourceRank, targetGameId, targetSlot, sourceGroup),
   }), [
-    loadData, saveData, expandField, expandStage, handleHighlightElement, 
+    loadData, saveData, expandField, expandStage, handleHighlightElement,
     handleDynamicReferenceClick, handleImport, handleExport, handleSaveTemplate,
-    handleSwapTeams, handleGenerateTournament, showTournamentModal, 
-    dismissNotification, addNotification, onMetadataHighlight
+    handleSwapTeams, handleGenerateTournament, showTournamentModal,
+    dismissNotification, addNotification, onMetadataHighlight, handleUpdateNode, gamedayId
   ]);
 
   const memoizedState = useMemo(() => ({

@@ -10,6 +10,7 @@ import { ScheduleTemplate } from '../../types/api';
 import { TournamentTemplate } from '../../utils/tournamentTemplates';
 import { NotificationType } from '../../types/designer';
 import { getTeamColor } from '../../utils/tournamentConstants';
+import { trackEvent } from '../../trackEvent';
 
 type FilterScope = 'all' | 'personal' | 'association' | 'global';
 type Step = 'library' | 'team-picker';
@@ -64,6 +65,15 @@ const TemplateLibraryModal: React.FC<TemplateLibraryModalProps> = ({
     onHide();
   }, [onHide]);
 
+  // Track template library opened
+  useEffect(() => {
+    if (show) {
+      trackEvent('template_library_opened', {
+        gameday_id: gamedayId,
+      });
+    }
+  }, [show, gamedayId]);
+
   // Fetch league teams when entering team-picker step
   useEffect(() => {
     if (step !== 'team-picker') return;
@@ -100,6 +110,11 @@ const TemplateLibraryModal: React.FC<TemplateLibraryModalProps> = ({
     try {
       if (selected.type === 'builtin') {
         const builtin = selected.template as TournamentTemplate;
+        trackEvent('template_used', {
+          gameday_id: gamedayId,
+          template_name: builtin.name,
+          template_id: builtin.id,
+        });
         onGenerateFromBuiltin?.({
           templateId: builtin.id,
           fieldCount: applyConfig?.numFields ?? builtin.fieldOptions[0] ?? 2,
@@ -113,13 +128,18 @@ const TemplateLibraryModal: React.FC<TemplateLibraryModalProps> = ({
         return;
       }
       const template = selected.template as ScheduleTemplate;
+      trackEvent('template_used', {
+        gameday_id: gamedayId,
+        template_name: template.name,
+        template_id: String(template.id),
+      });
       onGenerateFromSavedTemplate?.(template.id, applyConfig, selectedTeams);
       handleHide();
     } catch (e) {
       console.error('Failed to apply template', e);
       onNotify?.('Failed to apply template', 'error');
     }
-  }, [selected, applyConfig, handleHide, onGenerateFromBuiltin, onGenerateFromSavedTemplate, onNotify]);
+  }, [selected, applyConfig, gamedayId, handleHide, onGenerateFromBuiltin, onGenerateFromSavedTemplate, onNotify]);
 
   const handleAutoGenerateTeams = useCallback(async (count: number): Promise<GlobalTeam[]> => {
     try {

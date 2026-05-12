@@ -4,6 +4,7 @@ import Modal from "react-bootstrap/Modal";
 import { Player } from "../common/types";
 import Validator from "../utils/validation";
 import { Alert } from "react-bootstrap";
+import { trackEvent } from "../trackEvent";
 
 interface Props {
   modalVisible: boolean;
@@ -55,6 +56,15 @@ function PlayerModal({
     setShowSuccessMessage(true);
     player.isSelected = !player.isSelected;
     player.jersey_number = Number(jerseyNumber);
+
+    // Track player eligibility event
+    trackEvent('player_eligibility_checked', {
+      player_id: player.id,
+      player_name: `${player.first_name} ${player.last_name}`,
+      status: player.isSelected ? 'approved' : 'removed',
+      jersey_number: Number(jerseyNumber),
+    });
+
     setTimeout(() => {
       // only move on to next player if player is checked
       if (player.isSelected === true) {

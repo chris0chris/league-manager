@@ -95,7 +95,7 @@ commands:
 jobs:
   python:
     docker:
-      - image: cimg/python:3.14.3
+      - image: cimg/python:3.14.5
       - image: cimg/mysql:9.7
         command: [ --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --default-storage-engine=InnoDB ]
         environment:
@@ -210,9 +210,32 @@ jobs:
           name: "JavaScript Build"
           command: npm --prefix gameday_designer/ run build
 
+  journey_dashboard_js:
+    executor:
+      name: node/default
+      tag: "24.0"
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - node/install-packages:
+          app-dir: journey_dashboard/
+      - run:
+          name: "JavaScript Test Suite"
+          command: npm --prefix journey_dashboard/ run test:run
+      - run:
+          name: "JavaScript Linter"
+          command: |
+            mkdir -p /tmp/eslint
+            npm --prefix journey_dashboard/ run eslint:junit
+      - store_test_results:
+          path: /tmp/eslint
+      - run:
+          name: "JavaScript Build"
+          command: npm --prefix journey_dashboard/ run build
+
   e2e:
     docker:
-      - image: cimg/python:3.14.3-node
+      - image: cimg/python:3.14.5-node
       - image: cimg/mysql:9.7
         command: [ --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --default-storage-engine=InnoDB ]
         environment:
@@ -568,7 +591,11 @@ workflows:
           filters:
             tags:
               only: /.*/
-      
+      - journey_dashboard_js:
+          filters:
+            tags:
+              only: /.*/
+
       - build_backend:
           requires:
             - python
@@ -582,6 +609,7 @@ workflows:
             - liveticker_js
             - passcheck_js
             - gameday_designer_js
+            - journey_dashboard_js
           filters:
             tags:
               only: /.*/

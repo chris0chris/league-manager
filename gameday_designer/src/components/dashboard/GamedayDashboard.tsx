@@ -3,6 +3,7 @@ import { Container, Row, Col, Button, Form, Spinner, Card } from 'react-bootstra
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTypedTranslation } from '../../i18n/useTypedTranslation';
 import { gamedayApi } from '../../api/gamedayApi';
+import { trackEvent } from '../../trackEvent';
 import type { GamedayListEntry } from '../../types';
 import type { Notification, NotificationType } from '../../types/designer';
 import GamedayCard from './GamedayCard';
@@ -150,6 +151,13 @@ const GamedayDashboard: React.FC = () => {
         season: seasons[0].id,
         league: leagues[0].id,
       });
+
+      // Track gameday created event
+      trackEvent('gameday_created', {
+        gameday_id: newGameday.id,
+        gameday_name: newGameday.name,
+      });
+
       navigate(`/designer/${newGameday.id}`);
     } catch (error) {
       console.error('Failed to create gameday', error);

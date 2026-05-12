@@ -22,7 +22,20 @@ import { gamedayApi } from '../api/gamedayApi';
 import { getAllTemplates } from '../utils/tournamentTemplates';
 import type { GenericTemplate } from '../utils/templateMapper';
 import type { TournamentTemplate } from '../types/tournament';
+import { trackEvent } from '../trackEvent';
 import './ListDesignerApp.css';
+
+const getSessionId = (): string => {
+  let sessionId = sessionStorage.getItem('gameday_session_id');
+  if (!sessionId) {
+    const randomBytes = new Uint8Array(8);
+    crypto.getRandomValues(randomBytes);
+    const randomString = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
+    sessionId = `session_${Date.now()}_${randomString}`;
+    sessionStorage.setItem('gameday_session_id', sessionId);
+  }
+  return sessionId;
+};
 
 const ListDesignerApp: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -238,6 +251,16 @@ const ListDesignerApp: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // Track designer opened event
+  useEffect(() => {
+    if (id) {
+      trackEvent('gameday_designer_opened', {
+        gameday_id: id,
+        session_id: getSessionId(),
+      });
+    }
+  }, [id]);
+
   const handleOpenResultModal = useCallback((gameId: string) => {
     const gameNode = flowState.nodes.find((n) => n.id === gameId && isGameNode(n)) as GameNode | undefined;
     if (gameNode) {
@@ -263,11 +286,19 @@ const ListDesignerApp: React.FC = () => {
       setShowResultModal(false);
       setSelectedGameForResult(null);
       addNotification(t('ui:notification.gameResultSaved'), 'success', t('ui:notification.title.success'));
+
+      // Track game result saved event
+      trackEvent('game_result_saved', {
+        gameday_id: id,
+        game_id: selectedGameForResult.id,
+        halftime_score: `${data.halftime_score.home}-${data.halftime_score.away}`,
+        final_score: `${data.final_score.home}-${data.final_score.away}`,
+      });
     } catch (error) {
       console.error('Failed to save result', error);
       addNotification(t('ui:notification.saveResultFailed'), 'danger', t('ui:notification.title.error'));
     }
-  }, [selectedGameForResult, handleUpdateNode, addNotification, t]);
+  }, [selectedGameForResult, handleUpdateNode, addNotification, t, id]);
 
   const handleShowTeamSelection = useCallback((slotId: string, side: 'home' | 'away' | 'official' | 'group' | 'replace') => {
     setTeamSelectionModalContext({ slotId, side });
@@ -322,13 +353,25 @@ const ListDesignerApp: React.FC = () => {
   const handleConfirmPublish = useCallback(async () => {
     setShowPublishModal(false); // close immediately before awaiting API
     try {
+      // Count games and stages from current flowState
+      const gameCount = flowState.nodes.filter(n => n.type === 'game').length;
+      const stageCount = flowState.nodes.filter(n => n.type === 'stage').length;
+
       await gamedayApi.publish(parseInt(id!));
       addNotification(t('ui:notification.publishSuccess'), 'success', t('ui:notification.title.success'));
+
+      // Track gameday published event
+      trackEvent('gameday_published', {
+        gameday_id: id,
+        game_count: gameCount,
+        stage_count: stageCount,
+      });
+
       loadData();
     } catch {
       addNotification(t('ui:notification.publishFailed'), 'danger', t('ui:notification.title.error'));
     }
-  }, [id, addNotification, t, loadData]);
+  }, [id, addNotification, t, loadData, flowState.nodes]);
 
   const handleConfirmDelete = useCallback(async () => {
     setShowDeleteModal(false);

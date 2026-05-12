@@ -8,6 +8,7 @@ import {DETAILS_URL, ROOT_URL} from '../common/urls';
 import {gameFinalize} from '../../actions/games';
 import GameLog from './GameLog';
 import FloatingInput from '../layout/FloatingInput';
+import { trackEvent } from '../../trackEvent';
 
 const Finalize = (props) => {
   const [isHomeConfirmed, setIsHomeConfirmed] = useState(false);
@@ -86,6 +87,11 @@ const Finalize = (props) => {
             type='button'
             onClick={() => {
               if (homeCaptain != '') {
+                trackEvent('captain_confirmed', {
+                  game_id: gameLog.gameId,
+                  team: gameLog.home.name,
+                  captain_name: homeCaptain,
+                });
                 setIsHomeConfirmed(!isHomeConfirmed);
               }
             }}
@@ -118,6 +124,11 @@ const Finalize = (props) => {
             type='button'
             onClick={() => {
               if (awayCaptain != '') {
+                trackEvent('captain_confirmed', {
+                  game_id: gameLog.gameId,
+                  team: gameLog.away.name,
+                  captain_name: awayCaptain,
+                });
                 setIsAwayConfirmed(!isAwayConfirmed);
               }
             }}

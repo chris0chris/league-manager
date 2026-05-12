@@ -1,50 +1,34 @@
-import react from "eslint-plugin-react";
+import eslint from "@eslint/js";
 import globals from "globals";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import js from "@eslint/js";
-import { FlatCompat } from "@eslint/eslintrc";
+import reactHooks from "eslint-plugin-react-hooks";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
-});
-
-export default [...compat.extends("plugin:react/recommended"), {
-    settings: {
-    react: {
-     version: "detect",
-    },
-  },
-    plugins: {
-        react,
-    },
-
-    languageOptions: {
-        globals: {
-            ...globals.browser,
-            ...globals.jest,
-        },
-
-        ecmaVersion: 12,
-        sourceType: "module",
-
-        parserOptions: {
-            ecmaFeatures: {
-                jsx: true,
+export default [
+    eslint.configs.recommended,
+    {
+        languageOptions: {
+            globals: {
+                ...globals.browser,
+                ...globals.jest,
+                process: 'readonly',
+            },
+            ecmaVersion: 12,
+            sourceType: "module",
+            parserOptions: {
+                ecmaFeatures: {
+                    jsx: true,
+                },
             },
         },
+        plugins: {
+            "react-hooks": reactHooks,
+        },
+        rules: {
+            ...reactHooks.configs.recommended.rules,
+            "linebreak-style": 0,
+            "max-len": ["error", {
+                code: 120,
+                ignoreComments: true,
+            }],
+        },
     },
-
-    rules: {
-        "linebreak-style": 0,
-
-        "max-len": ["error", {
-            code: 120,
-            ignoreComments: true,
-        }],
-    },
-}];
+];

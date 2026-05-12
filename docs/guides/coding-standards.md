@@ -18,8 +18,42 @@ LeagueSphere maintains high-quality standards across its polyglot codebase (Pyth
 - **Framework**: Vite-based applications.
 - **State Management**: Prefer React Context for new state or Redux if established in a legacy component.
 - **Styling**: Standard Vanilla CSS is preferred for all new components to maintain platform-native feel and flexibility.
-- **Typing**: No `any`. Use interfaces and types for all props, states, and API responses.
+- **Typing**: No `any`. Use interfaces and types for all props, states, and API responses. If necessary to work around type constraints, use proper type syntax like `ReturnType<typeof someFunction>` instead of `as any`.
 - **Tests**: Use `vitest` for all frontend unit and integration tests.
+- **Linting**: All TypeScript/JavaScript code MUST pass ESLint checks before committing. See "Linting Standards" below.
+
+## 🔍 Linting Standards
+
+### ESLint (TypeScript/JavaScript)
+All frontend code MUST pass ESLint before committing. Run before pushing:
+```bash
+npm run eslint
+```
+
+**Critical Rules Enforced:**
+- **`@typescript-eslint/no-explicit-any`**: Never use `as any` type assertions. Replace with proper types:
+  - ❌ BAD: `mockApi.mockResolvedValue({} as any)`
+  - ✅ GOOD: `mockApi.mockResolvedValue({} as ReturnType<typeof api>)`
+  - ✅ GOOD: Type the object explicitly: `mockApi.mockResolvedValue<ApiResponse>({...})`
+
+- **`@typescript-eslint/no-unused-vars`**: Remove unused imports and variables.
+
+- **Deprecation Warnings**: Replace deprecated methods:
+  - ❌ BAD: `.substr(2, 9)` (deprecated)
+  - ✅ GOOD: `.slice(2, 11)` (current standard)
+
+**Random Number Generation:**
+- ❌ BAD: `Math.random()` for security-sensitive values (sessions, tokens, IDs)
+- ✅ GOOD: `crypto.getRandomValues()` for cryptographically secure randomness
+
+### Running Linting
+```bash
+# Check for lint errors
+npm run eslint
+
+# Format code (if available)
+npm run prettier
+```
 
 ## 💅 Styling and UI
 - Use consistent spacing (multiples of 4px/8px).

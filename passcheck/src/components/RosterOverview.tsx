@@ -17,6 +17,7 @@ import useMessage from "../hooks/useMessage";
 import { ApiError } from "../utils/api";
 import Validator from "../utils/validation";
 import RosterTable from "./RosterTable";
+import { trackEvent } from "../trackEvent";
 
 function RosterOverview() {
   const { setMessage } = useMessage();
@@ -118,16 +119,25 @@ function RosterOverview() {
 
   const onSubmitRoster = () => {
     handleClose();
+    const selectedPlayers = getAllSelectedPlayers();
     submitRoster({
       teamId: teamId!,
       gamedayId: gamedayId!,
       data: {
         official_name: officialName,
         note: note,
-        roster: getAllSelectedPlayers(),
+        roster: selectedPlayers,
       },
     })
       .then(() => {
+        // Track roster submission
+        trackEvent('roster_submitted', {
+          gameday_id: gamedayId,
+          team_id: teamId,
+          team_name: team.name,
+          verified_count: selectedPlayers.length,
+          official_name: officialName,
+        });
         setMessage({
           text: "Erfolgreich gespeichert.",
           color: MessageColor.Success,
@@ -165,6 +175,12 @@ function RosterOverview() {
     setApprovalUrlLoaded(true);
     getApprovalUrl(teamId!)
       .then((redirectedUrl) => {
+        // Track equipment approval access
+        trackEvent('equipment_approval_opened', {
+          gameday_id: gamedayId,
+          team_id: teamId,
+          team_name: team.name,
+        });
         window.open(redirectedUrl, "_blank");
         setApprovalUrlLoaded(false);
         setMessage({ text: "" });
@@ -234,6 +250,12 @@ function RosterOverview() {
             variant="success"
             type="button"
             onClick={() => {
+              // Track passcheck start
+              trackEvent('passcheck_started', {
+                gameday_id: gamedayId,
+                team_id: teamId,
+                team_name: team.name,
+              });
               setShowPlayerModal(true);
               setShowStartButton(false);
             }}

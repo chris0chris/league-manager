@@ -1,0 +1,5 @@
+{
+  "invalidScheduleFormat": "Invalid schedule format: {{errors}}",
+  "invalidJson": "Invalid JSON file. Please select a valid schedule JSON file.",
+  "fileReadError": "Error reading file. Please try again."
+}

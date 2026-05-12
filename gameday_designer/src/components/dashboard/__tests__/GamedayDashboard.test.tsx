@@ -23,6 +23,11 @@ vi.mock('../../../api/gamedayApi', () => ({
   },
 }));
 
+// Mock trackEvent
+vi.mock('../../../trackEvent', () => ({
+  trackEvent: vi.fn(),
+}));
+
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-router-dom')>();
@@ -173,16 +178,40 @@ describe('GamedayDashboard', () => {
 
   it('allows deletion of draft gamedays', async () => {
     await renderDashboard();
-    
+
     // Gameday 2 is DRAFT
     const deleteBtn = screen.getAllByTitle(/delete gameday/i)[1];
-    
+
     fireEvent.click(deleteBtn);
-    
+
     // Should show "Deleted" undo toast
     await waitFor(() => {
       // Flexible matcher for "Gameday \"Gameday 2\" deleted"
       expect(screen.getByText((content) => content.includes('deleted') && content.includes('Gameday 2'))).toBeInTheDocument();
     });
+  });
+
+  it('tracks gameday_created when new gameday is created', async () => {
+    const { trackEvent } = await import('../../../trackEvent');
+    const newGameday = { id: 99, name: 'New Gameday' };
+
+    (gamedayApi.createGameday as ReturnType<typeof vi.fn>).mockResolvedValue(newGameday);
+    (gamedayApi.listSeasons as ReturnType<typeof vi.fn>).mockResolvedValue([{ id: 1 }]);
+    (gamedayApi.listLeagues as ReturnType<typeof vi.fn>).mockResolvedValue([{ id: 1 }]);
+
+    await renderDashboard();
+
+    const createButton = screen.getByRole('button', { name: /Create Gameday/i });
+    fireEvent.click(createButton);
+
+    await waitFor(() => {
+      expect(trackEvent).toHaveBeenCalledWith('gameday_created', {
+        gameday_id: 99,
+        gameday_name: expect.any(String),
+      });
+    });
+
+    // Should navigate to the new gameday
+    expect(mockNavigate).toHaveBeenCalledWith('/designer/99');
   });
 });
