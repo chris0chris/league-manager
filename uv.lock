@@ -292,14 +292,14 @@ wheels = [
 
 [[package]]
 name = "django-autocomplete-light"
-version = "4.0.1"
+version = "5.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c4/b9/5b335b792519441785597ba511a467cf5359299a5f0fa050f01bfc033fb3/django_autocomplete_light-4.0.1.tar.gz", hash = "sha256:cdf7c7ae8596d4f1b2bb85e04cc25ef8438c70ad5eb9e7592b5afac2d3ec266c", size = 117611, upload-time = "2026-05-27T12:22:00.335Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5d/ca/1288c2c7597484340c6ba5e3911c84b552511310633954d7aa496610e45a/django_autocomplete_light-5.0.0.tar.gz", hash = "sha256:115ee3541ee4a7ddd1b92396ea75d0f38d0b91899b0dc17259310975c728b32e", size = 117640, upload-time = "2026-06-18T01:43:28.909Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/78/32/0aeb15dd3092dd2db9e7e991d35adcd41a567b76c7f29081c35ca66a72bb/django_autocomplete_light-4.0.1-py3-none-any.whl", hash = "sha256:870a8a850c036ee6aeffe73d72d2289d33e5d5115a04674de39189aeccd627c8", size = 134027, upload-time = "2026-05-27T12:21:58.053Z" },
+    { url = "https://files.pythonhosted.org/packages/e1/bd/9e9cc8746bf51031a477dd21ee3a08449ab9d94739a242622dc381ebe763/django_autocomplete_light-5.0.0-py3-none-any.whl", hash = "sha256:6fa30efa43e87ff17266e638de04accb11543186e332b09ae43cbccb10e804bb", size = 134025, upload-time = "2026-06-18T01:43:27.178Z" },
 ]
 
 [[package]]
@@ -603,7 +603,7 @@ requires-dist = [
     { name = "bump2version", marker = "extra == 'test'", specifier = "==1.0.1" },
     { name = "crispy-bootstrap5", specifier = "==2026.3" },
     { name = "django", specifier = "==6.0.6" },
-    { name = "django-autocomplete-light", specifier = "==4.0.1" },
+    { name = "django-autocomplete-light", specifier = "==5.0.0" },
     { name = "django-cors-headers", specifier = "==4.9.0" },
     { name = "django-crispy-forms", specifier = "==2.6" },
     { name = "django-debug-toolbar", marker = "extra == 'test'", specifier = "==6.3.0" },
