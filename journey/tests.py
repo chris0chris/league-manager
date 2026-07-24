@@ -596,6 +596,11 @@ class GameProgressViewTests(TestCase):
         self.assertIn("journey_dashboard", view.template_name)
         self.assertNotIn("gameday_designer/progress", view.template_name)
 
+    def test_anonymous_user_can_access_progress_page(self):
+        """Page must be reachable without authentication (public status page)."""
+        response = self.client.get(reverse("game-progress-page"))
+        self.assertEqual(response.status_code, 200)
+
 
 class GamedayProgressSerializerTests(TestCase):
     """Tests for GamedayProgressSerializer status computation."""

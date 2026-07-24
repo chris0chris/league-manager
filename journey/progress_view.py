@@ -1,11 +1,12 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 
 
-class GameProgressPageView(LoginRequiredMixin, TemplateView):
+class GameProgressPageView(TemplateView):
     """
     Serves the game progress dashboard React application.
-    Requires user authentication to view.
+
+    Publicly accessible (no login required) but intentionally not linked
+    from any menu for non-staff users; see gameday_designer/menu.py.
     """
 
     template_name = "journey_dashboard/index.html"
