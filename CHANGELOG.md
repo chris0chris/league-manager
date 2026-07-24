@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.12.1](https://github.com/dachrisch/leaguesphere/compare/v4.12.0...v4.12.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency eslint to v10.8.0 ([#1644](https://github.com/dachrisch/leaguesphere/issues/1644)) ([9da9497](https://github.com/dachrisch/leaguesphere/commit/9da94976838cfc5c4175aa1feee82b4deeb0be60))
+* **deps:** update dependency postcss to v8.5.23 ([#1642](https://github.com/dachrisch/leaguesphere/issues/1642)) ([79f5caa](https://github.com/dachrisch/leaguesphere/commit/79f5caa616423c3b14560c9c3730ae50588f47dc))
+
 ## [4.11.11](https://github.com/dachrisch/leaguesphere/compare/v4.11.10...v4.11.11) (2026-07-23)
 
 
