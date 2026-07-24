@@ -55,6 +55,7 @@ class TeamFactory(DjangoModelFactory):
 class SeasonLeagueTeamFactory(DjangoModelFactory):
     class Meta:
         model = SeasonLeagueTeam
+        skip_postgeneration_save = True
 
     season = factory.SubFactory(SeasonFactory)
     league = factory.SubFactory(LeagueFactory)
