@@ -634,16 +634,45 @@ jobs:
       - image: cimg/base:stable
     steps:
       - run:
-          name: Auto-approve hold_production outside weekends
+          name: Auto-approve hold_production when no active games
           command: |
-            dow=$(date -u +%u) # 1=Mon .. 7=Sun (UTC)
-            if [ "$dow" -ge 6 ]; then
-              echo "Weekend (day $dow, UTC) - leaving hold_production for manual approval"
+            sudo apt-get update -qq && sudo apt-get install -qq -y jq
+
+            # Fetch game progress data (unrestricted public API)
+            response=$(curl -sf "https://www.leaguesphere.app/api/game-progress/?page_size=100")
+            if [ -z "$response" ]; then
+              echo "Failed to fetch game progress API - leaving hold_production for manual approval"
               exit 0
             fi
-            echo "Weekday (day $dow, UTC) - auto-approving hold_production"
 
-            sudo apt-get update -qq && sudo apt-get install -qq -y jq
+            # Check for active games (status indicates in-progress; excludes finished and planned)
+            # "Geplant" games are checked separately in the upcoming 4-hour window below.
+            active_count=$(echo "$response" | jq \
+              '[.results[].games[] | select(.status != "beendet" and .status != "Geplant")] | length')
+            if [ "$active_count" -gt 0 ]; then
+              echo "Active games detected ($active_count) - leaving hold_production for manual approval"
+              exit 0
+            fi
+
+            # Check for upcoming games within the next 4 hours (game times are CET/CEST)
+            now_epoch=$(TZ=Europe/Berlin date +%s)
+            window_epoch=$(TZ=Europe/Berlin date -d '+4 hours' +%s)
+
+            upcoming_count=0
+            while IFS= read -r dt; do
+              game_epoch=$(TZ=Europe/Berlin date -d "$dt" +%s 2>/dev/null) || continue
+              if [ "$game_epoch" -ge "$now_epoch" ] && [ "$game_epoch" -le "$window_epoch" ]; then
+                upcoming_count=$((upcoming_count + 1))
+              fi
+            done < <(echo "$response" | jq -r \
+              '.results[] | .date as $d | .games[] | select(.scheduled != null) | $d + " " + .scheduled')
+
+            if [ "$upcoming_count" -gt 0 ]; then
+              echo "Games scheduled within next 4 hours ($upcoming_count) - leaving hold_production for manual approval"
+              exit 0
+            fi
+
+            echo "No active or upcoming games - auto-approving hold_production"
 
             approval_request_id=""
             for i in $(seq 1 30); do
@@ -794,8 +823,9 @@ workflows:
               only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
             branches:
               ignore: /.*/
-      # Auto-approves hold_production via the CircleCI API on weekdays, so
-      # production deploys only require a manual click on weekends.
+      # Auto-approves hold_production via the CircleCI API when no active or
+      # upcoming games are detected, so production deploys are blocked during
+      # live game windows and auto-approved otherwise.
       - auto_approve_hold_production:
           context: production
           requires:
