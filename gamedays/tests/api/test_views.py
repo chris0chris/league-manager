@@ -12,6 +12,7 @@ from rest_framework.reverse import reverse
 from gamedays.api.serializers import GamedaySerializer, GameinfoSerializer
 from gamedays.constants import API_GAMEDAY_WHISTLEGAMES, API_GAMEDAY_LIST, API_GAME_OFFICIALS
 from gamedays.models import Team, Gameday, Gameinfo
+from gamedays.service.auto_assign_officials_service import AutoAssignOfficialsError
 from gamedays.service.gameday_service import EmptySchedule, EmptyQualifyTable
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from league_table.tests.setup_factories.db_setup_leaguetable import LEAGUE_TABLE_TEST_RULESET
@@ -366,6 +367,28 @@ class TestStandaloneViewPermissions(WebTest):
         # The response may be 200 (success) or 400 (no designer state / validation error)
         # depending on the gameday setup — the point is it is NOT 401/403.
         assert response.status_code in (200, 400)
+
+    def test_auto_assign_officials_error_does_not_leak_exception_detail(self):
+        """CodeQL py/stack-trace-exposure (alert #69): the raw exception text
+        must never reach the HTTP response, only the server-side log."""
+        author, gameday = self._create_gameday_with_author("aa_author5")
+        staff_user = DBSetup().create_new_user("aa_staff3", is_staff=True)
+        sensitive_detail = "internal detail: /srv/leaguesphere/secret_config.py line 42"
+
+        with patch(
+            "gamedays.api.views.AutoAssignOfficialsService.assign",
+            side_effect=AutoAssignOfficialsError(sensitive_detail),
+        ):
+            with self.assertLogs("gamedays.api.views", level="WARNING") as logs:
+                response = self.app.post(
+                    reverse("api-gameday-auto-assign-officials", kwargs={"pk": gameday.pk}),
+                    headers=DBSetup().get_token_header(user=staff_user),
+                    expect_errors=True,
+                )
+
+        assert response.status_code == 400
+        assert sensitive_detail not in response.text
+        assert any(sensitive_detail in message for message in logs.output)
 
     # ── GameOfficialCreateOrUpdateView (PUT /api/game/{id}/officials) ──
 

@@ -1,5 +1,6 @@
 import json
 import hashlib
+import logging
 from collections import OrderedDict
 from datetime import datetime
 
@@ -59,6 +60,8 @@ from gamedays.service.gameday_settings import (
     STANDING,
     WIN_POINTS,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _check_gameday_mutation_permission(request, gameday) -> bool:
@@ -531,7 +534,11 @@ class AutoAssignOfficialsView(APIView):
                 {"assigned_count": len(assignments), "assignments": assignments}
             )
         except AutoAssignOfficialsError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.warning("Auto-assign officials failed for gameday %s: %s", pk, e)
+            return Response(
+                {"error": "Unable to auto-assign officials for this gameday."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class GameResultsUpdateView(APIView):
