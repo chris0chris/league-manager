@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.3](https://github.com/dachrisch/leaguesphere/compare/v4.13.2...v4.13.3) (2026-07-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency web-vitals to v6.0.1 ([#1658](https://github.com/dachrisch/leaguesphere/issues/1658)) ([5a16138](https://github.com/dachrisch/leaguesphere/commit/5a16138c3da74b8076781658623d19592da9ff60))
+
 ## [4.13.2](https://github.com/dachrisch/leaguesphere/compare/v4.13.1...v4.13.2) (2026-07-27)
 
 
