@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.1](https://github.com/dachrisch/leaguesphere/compare/v4.13.0...v4.13.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* **ci:** constrain active game check to today's gamedays only ([#1655](https://github.com/dachrisch/leaguesphere/issues/1655)) ([dbb0ccd](https://github.com/dachrisch/leaguesphere/commit/dbb0ccd177ed1ebe5ae272719eef8f645e91d8a0))
+
 ## [4.13.0](https://github.com/dachrisch/leaguesphere/compare/v4.12.4...v4.13.0) (2026-07-27)
 
 
