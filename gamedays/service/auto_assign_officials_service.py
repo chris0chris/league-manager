@@ -55,6 +55,15 @@ class AutoAssignOfficialsService:
                     if gr.team_id:
                         busy_teams.add(gr.team_id)
 
+            # How many distinct *real* fields are in play at this exact
+            # timeslot. If it's just one, games sharing this timeslot can't
+            # truly be concurrent (a field only hosts one game at a time),
+            # so a team playing in another game here is safe to referee.
+            # Scoped per-timeslot (not gameday-wide) so an unrelated later
+            # game on a second field doesn't block an earlier single-field
+            # slot.
+            num_fields_at_time = len({gi.field for gi in games_at_time})
+
             groups: dict[str, list[Gameinfo]] = defaultdict(list)
             for gi in games_at_time:
                 groups[gi.standing].append(gi)
@@ -75,7 +84,27 @@ class AutoAssignOfficialsService:
                     for t in donor_pool
                     if t not in busy_teams and t not in slot_assigned
                 ]
+
                 if not eligible:
+                    if num_fields_at_time > 1:
+                        continue
+                    for gi in gis:
+                        game_busy = {
+                            gr.team_id
+                            for gr in gi.gameresult_set.all()
+                            if gr.team_id
+                        }
+                        per_game_eligible = [
+                            t for t in donor_pool if t not in game_busy
+                        ]
+                        if not per_game_eligible:
+                            continue
+                        per_game_eligible.sort(key=lambda t: referee_count[t])
+                        chosen = per_game_eligible.pop(0)
+                        gi.officials_id = chosen
+                        gi.save(update_fields=["officials"])
+                        referee_count[chosen] += 1
+                        assignments[gi.pk] = chosen
                     continue
 
                 for gi in gis:
@@ -106,7 +135,8 @@ class AutoAssignOfficialsService:
             return {}
 
         state_data = state.state_data or {}
-        game_nodes = [n for n in state_data.get("nodes", []) if n.get("type") == "game"]
+        nodes = state_data.get("nodes", [])
+        game_nodes = [n for n in nodes if n.get("type") == "game"]
         if not game_nodes:
             return {}
 
@@ -114,7 +144,13 @@ class AutoAssignOfficialsService:
             t["id"] for t in state_data.get("globalTeams", []) if t.get("id")
         }
 
-        num_fields = self._get_num_fields()
+        # Prefer the number of field nodes actually present on the current
+        # canvas over the gameday's template format string, which goes
+        # stale as soon as a user adds/removes a field in the designer
+        # without recreating the gameday (e.g. a "6_2" template reduced to
+        # a single field still reports 2 fields via format alone).
+        field_node_count = sum(1 for n in nodes if n.get("type") == "field")
+        num_fields = field_node_count if field_node_count else self._get_num_fields()
 
         all_teams_in_standing: dict[str, set[str]] = defaultdict(set)
         for node in game_nodes:

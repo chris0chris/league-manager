@@ -222,6 +222,142 @@ class TestAutoAssignOfficialsService(TestCase):
 
         assert a1 == a2, "Assignments differ between runs"
 
+    def test_single_real_field_same_time_same_standing_still_assigns(self):
+        """Regression: unlike the designer-state path, _assign_from_gameinfos
+        had no single-field fallback at all. 4 teams, 2 games both on the
+        same real field (field=1) at the same scheduled time and standing --
+        the whole team pool is exhausted, but since it's one physical field
+        the games are actually sequential, so referees should still be
+        assignable. The gameday's stale format ("6_2") must not matter --
+        only the real `field` values on the Gameinfo rows do."""
+        gameday = Gameday.objects.create(
+            name="4 Teams 1 Real Field",
+            season=Season.objects.create(name="2026"),
+            league=League.objects.create(name="Test"),
+            date="2026-07-16",
+            start="10:00",
+            author=self.user,
+            status="DRAFT",
+            format="6_2",
+        )
+        teams = [
+            Team.objects.create(name=f"Team {i}", description=f"T{i}") for i in range(4)
+        ]
+        for home, away in [(teams[0], teams[1]), (teams[2], teams[3])]:
+            gi = Gameinfo.objects.create(
+                gameday=gameday,
+                scheduled="10:00",
+                field=1,
+                stage="Vorrunde",
+                standing="Gruppe 1",
+                status="Geplant",
+                officials=home,
+            )
+            Gameresult.objects.create(gameinfo=gi, team=home, isHome=True)
+            Gameresult.objects.create(gameinfo=gi, team=away, isHome=False)
+
+        service = AutoAssignOfficialsService(gameday.pk)
+        assignments = service.assign()
+
+        assert (
+            len(assignments) == 2
+        ), f"Expected 2 assignments, got {len(assignments)}: {assignments}"
+        self._assert_no_self_referee(gameday)
+
+    def test_two_real_fields_same_time_same_standing_skips_when_impossible(self):
+        """Opposite direction of the above: 2 games on 2 DIFFERENT real
+        fields at the exact same scheduled time -- truly concurrent, so no
+        team is free to referee either game. Must not cross-assign a team
+        that is simultaneously playing on the other field."""
+        gameday = Gameday.objects.create(
+            name="4 Teams 2 Real Fields",
+            season=Season.objects.create(name="2026"),
+            league=League.objects.create(name="Test"),
+            date="2026-07-16",
+            start="10:00",
+            author=self.user,
+            status="DRAFT",
+            format="4_1",
+        )
+        teams = [
+            Team.objects.create(name=f"Team {i}", description=f"T{i}") for i in range(4)
+        ]
+        for field, home, away in [(1, teams[0], teams[1]), (2, teams[2], teams[3])]:
+            gi = Gameinfo.objects.create(
+                gameday=gameday,
+                scheduled="10:00",
+                field=field,
+                stage="Vorrunde",
+                standing="Gruppe 1",
+                status="Geplant",
+                officials=home,
+            )
+            Gameresult.objects.create(gameinfo=gi, team=home, isHome=True)
+            Gameresult.objects.create(gameinfo=gi, team=away, isHome=False)
+
+        service = AutoAssignOfficialsService(gameday.pk)
+        assignments = service.assign()
+
+        assert assignments == {}, (
+            f"Expected 0 assignments (2 concurrent real fields), "
+            f"got {len(assignments)}: {assignments}"
+        )
+
+    def test_field_count_evaluated_per_timeslot_not_gameday_wide(self):
+        """A gameday can legitimately use 2 different fields at different
+        times (e.g. round-robin overflow). The single-field fallback must
+        be gated on how many real fields are in play AT THAT TIMESLOT, not
+        on how many fields the gameday uses anywhere -- otherwise an
+        unrelated later game on field 2 would wrongly block assignment for
+        an earlier, single-field time slot."""
+        gameday = Gameday.objects.create(
+            name="Mixed Field Usage",
+            season=Season.objects.create(name="2026"),
+            league=League.objects.create(name="Test"),
+            date="2026-07-16",
+            start="10:00",
+            author=self.user,
+            status="DRAFT",
+            format="4_1",
+        )
+        teams = [
+            Team.objects.create(name=f"Team {i}", description=f"T{i}") for i in range(4)
+        ]
+        # 10:00 -- both games on field 1 (single real field at this time).
+        for home, away in [(teams[0], teams[1]), (teams[2], teams[3])]:
+            gi = Gameinfo.objects.create(
+                gameday=gameday,
+                scheduled="10:00",
+                field=1,
+                stage="Vorrunde",
+                standing="Gruppe 1",
+                status="Geplant",
+                officials=home,
+            )
+            Gameresult.objects.create(gameinfo=gi, team=home, isHome=True)
+            Gameresult.objects.create(gameinfo=gi, team=away, isHome=False)
+        # 11:10 -- unrelated later game on field 2. Makes the gameday touch
+        # 2 distinct fields overall, but not at the 10:00 timeslot.
+        gi = Gameinfo.objects.create(
+            gameday=gameday,
+            scheduled="11:10",
+            field=2,
+            stage="Vorrunde",
+            standing="Gruppe 1",
+            status="Geplant",
+            officials=teams[0],
+        )
+        Gameresult.objects.create(gameinfo=gi, team=teams[0], isHome=True)
+        Gameresult.objects.create(gameinfo=gi, team=teams[2], isHome=False)
+
+        service = AutoAssignOfficialsService(gameday.pk)
+        assignments = service.assign()
+
+        assert (
+            len(assignments) == 3
+        ), f"Expected all 3 games assigned, got {len(assignments)}: {assignments}"
+        self._assert_no_self_referee(gameday)
+
 
 class TestAutoAssignOfficialsServiceDesignerState(TestCase):
     """
@@ -282,6 +418,9 @@ class TestAutoAssignOfficialsServiceDesignerState(TestCase):
             "parentId": parent_id,
             "data": data,
         }
+
+    def _field_node(self, node_id):
+        return {"id": node_id, "type": "field", "data": {}}
 
     def test_idle_team_in_pool_is_assigned_as_referee(self):
         """Reproduces the reported bug: 3 registered teams, 1 game between
@@ -453,3 +592,85 @@ class TestAutoAssignOfficialsServiceDesignerState(TestCase):
         assert assignments["game-1"] in {"team-c", "team-d"}
         # Game 2 has an explicit later time, so Game 1's teams are free too
         assert assignments["game-2"] in {"team-a", "team-b"}
+
+    def test_stale_format_claiming_two_fields_does_not_block_single_real_field(self):
+        """Reproduces the reported bug (gameday 897 on stage): the gameday
+        was created from a 2-field template (format="6_2") but the user has
+        since reduced the designer canvas down to a single field node. 4
+        registered teams, 2 games in the same standing/stage exhaust the
+        whole pool -- the stale format string must not stop the
+        single-field fallback from finding referees for a canvas that
+        currently only has 1 real field."""
+        gameday = Gameday.objects.create(
+            name="Stale Two-Field Format",
+            season=self.season,
+            league=self.league,
+            date="2026-07-16",
+            start="10:00",
+            author=self.user,
+            status="DRAFT",
+            format="6_2",
+        )
+        GamedayDesignerState.objects.create(
+            gameday=gameday,
+            state_data={
+                "nodes": [
+                    self._field_node("field-1"),
+                    self._game_node("game-1", "Game 1", "team-a", "team-b"),
+                    self._game_node("game-2", "Game 1", "team-c", "team-d"),
+                ],
+                "globalTeams": [
+                    {"id": t, "label": t, "groupId": "group-1", "order": 0}
+                    for t in ("team-a", "team-b", "team-c", "team-d")
+                ],
+                "globalTeamGroups": [{"id": "group-1", "name": "Group 1", "order": 0}],
+            },
+        )
+
+        service = AutoAssignOfficialsService(gameday.pk)
+        assignments = service.assign()
+
+        assert (
+            len(assignments) == 2
+        ), f"Expected 2 assignments, got {len(assignments)}: {assignments}"
+        assert set(assignments.values()) <= {"team-a", "team-b", "team-c", "team-d"}
+
+    def test_two_real_field_nodes_override_misleading_single_field_format(self):
+        """Opposite direction: format says "4_1" (1 field) but the designer
+        canvas actually has 2 field nodes. Must not unsafely widen
+        assignment to a team that could be concurrently busy on the other
+        real field just because the stale format claims there's only one."""
+        gameday = Gameday.objects.create(
+            name="Misleading Single-Field Format",
+            season=self.season,
+            league=self.league,
+            date="2026-07-16",
+            start="10:00",
+            author=self.user,
+            status="DRAFT",
+            format="4_1",
+        )
+        GamedayDesignerState.objects.create(
+            gameday=gameday,
+            state_data={
+                "nodes": [
+                    self._field_node("field-1"),
+                    self._field_node("field-2"),
+                    self._game_node("game-1", "Game 1", "team-a", "team-b"),
+                    self._game_node("game-2", "Game 1", "team-c", "team-d"),
+                ],
+                "globalTeams": [
+                    {"id": t, "label": t, "groupId": "group-1", "order": 0}
+                    for t in ("team-a", "team-b", "team-c", "team-d")
+                ],
+                "globalTeamGroups": [{"id": "group-1", "name": "Group 1", "order": 0}],
+            },
+        )
+
+        service = AutoAssignOfficialsService(gameday.pk)
+        assignments = service.assign()
+
+        assert assignments == {}, (
+            f"Expected 0 assignments (2 real field nodes => can't assume "
+            f"sequential), got {len(assignments)}: {assignments}"
+        )
