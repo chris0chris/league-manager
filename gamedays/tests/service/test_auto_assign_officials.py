@@ -144,6 +144,49 @@ class TestAutoAssignOfficialsService(TestCase):
         self._assert_no_time_conflict(gameday)
         self._assert_balanced_referee_counts(gameday)
 
+    def test_single_group_four_teams_one_field(self):
+        """4 teams on 1 field, single standing -- each game at a different
+        time, so eligible teams should always exist."""
+        gameday = Gameday.objects.create(
+            name="4 Teams 1 Field",
+            season=Season.objects.create(name="2026"),
+            league=League.objects.create(name="Test"),
+            date="2026-07-16",
+            start="10:00",
+            author=self.user,
+            status="DRAFT",
+            format="4_1",
+        )
+        teams = [Team.objects.create(name=f"Team {i}", description=f"T{i}") for i in range(4)]
+        games_data = [
+            ("10:00", 0, 1),
+            ("11:10", 2, 3),
+            ("12:20", 0, 2),
+            ("13:30", 1, 3),
+            ("14:40", 0, 3),
+            ("15:50", 1, 2),
+        ]
+        for time, h, a in games_data:
+            gi = Gameinfo.objects.create(
+                gameday=gameday,
+                scheduled=time,
+                field=1,
+                stage="Vorrunde",
+                standing="Gruppe 1",
+                status="Geplant",
+                officials=teams[h],
+            )
+            Gameresult.objects.create(gameinfo=gi, team=teams[h], isHome=True)
+            Gameresult.objects.create(gameinfo=gi, team=teams[a], isHome=False)
+
+        service = AutoAssignOfficialsService(gameday.pk)
+        assignments = service.assign()
+
+        assert len(assignments) == 6
+        self._assert_no_self_referee(gameday)
+        self._assert_no_time_conflict(gameday)
+        self._assert_balanced_referee_counts(gameday)
+
     def test_non_draft_status_rejected(self):
         gameday = DBSetup().create_empty_gameday()
         gameday.status = "PUBLISHED"
@@ -284,6 +327,83 @@ class TestAutoAssignOfficialsServiceDesignerState(TestCase):
 
         service = AutoAssignOfficialsService(gameday.pk)
         assert service.assign() == {}
+
+    def test_four_teams_one_field_designer_state(self):
+        """4 teams on 1 field in designer state (no manual times). All games
+        share the same stage-based time key, which previously caused all teams
+        to appear busy and 0 assignments."""
+        gameday = self._create_draft_gameday()
+        GamedayDesignerState.objects.create(
+            gameday=gameday,
+            state_data={
+                "nodes": [
+                    self._game_node("game-1", "Game 1", "team-a", "team-b"),
+                    self._game_node("game-2", "Game 2", "team-c", "team-d"),
+                    self._game_node("game-3", "Game 3", "team-a", "team-c"),
+                    self._game_node("game-4", "Game 4", "team-b", "team-d"),
+                    self._game_node("game-5", "Game 5", "team-a", "team-d"),
+                    self._game_node("game-6", "Game 6", "team-b", "team-c"),
+                ],
+                "globalTeams": [
+                    {"id": t, "label": t, "groupId": "group-1", "order": 0}
+                    for t in ("team-a", "team-b", "team-c", "team-d")
+                ],
+                "globalTeamGroups": [{"id": "group-1", "name": "Group 1", "order": 0}],
+            },
+        )
+
+        service = AutoAssignOfficialsService(gameday.pk)
+        assignments = service.assign()
+
+        assert len(assignments) == 6, f"Expected 6 assignments, got {len(assignments)}: {assignments}"
+
+        state = GamedayDesignerState.objects.get(gameday=gameday)
+        ref_counts: dict[str, int] = {}
+        for node in state.state_data["nodes"]:
+            official = node["data"].get("official", {})
+            if official and official.get("name"):
+                ref_counts[official["name"]] = ref_counts.get(official["name"], 0) + 1
+
+        assert len(ref_counts) > 0, "No referees were assigned"
+        values = list(ref_counts.values())
+        assert max(values) - min(values) <= 1, f"Referee counts imbalanced: {ref_counts}"
+
+    def test_four_teams_two_fields_designer_state_skips_when_impossible(self):
+        """4 teams on 2 fields in designer state — games are concurrent
+        across fields, all teams are busy simultaneously, so no assignment
+        is possible (and the fallback for a single field must NOT trigger)."""
+        gameday = Gameday.objects.create(
+            name="4 Teams 2 Fields",
+            season=self.season,
+            league=self.league,
+            date="2026-07-16",
+            start="10:00",
+            author=self.user,
+            status="DRAFT",
+            format="4_2",
+        )
+        GamedayDesignerState.objects.create(
+            gameday=gameday,
+            state_data={
+                "nodes": [
+                    self._game_node("game-1", "Game 1", "team-a", "team-b"),
+                    self._game_node("game-2", "Game 2", "team-c", "team-d"),
+                ],
+                "globalTeams": [
+                    {"id": t, "label": t, "groupId": "group-1", "order": 0}
+                    for t in ("team-a", "team-b", "team-c", "team-d")
+                ],
+                "globalTeamGroups": [{"id": "group-1", "name": "Group 1", "order": 0}],
+            },
+        )
+
+        service = AutoAssignOfficialsService(gameday.pk)
+        assignments = service.assign()
+
+        assert assignments == {}, (
+            f"Expected 0 assignments (all teams busy concurrently), "
+            f"got {len(assignments)}: {assignments}"
+        )
 
     def test_no_designer_state_returns_empty(self):
         gameday = self._create_draft_gameday()

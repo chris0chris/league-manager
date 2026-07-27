@@ -91,6 +91,14 @@ class AutoAssignOfficialsService:
 
         return assignments
 
+    def _get_num_fields(self) -> int:
+        try:
+            gameday = Gameday.objects.get(pk=self.gameday_id)
+            parts = gameday.format.split("_")
+            return int(parts[1]) if len(parts) == 2 else 1
+        except (Gameday.DoesNotExist, ValueError, IndexError):
+            return 1
+
     def _assign_from_designer_state(self) -> dict[str, str]:
         try:
             state = GamedayDesignerState.objects.get(gameday_id=self.gameday_id)
@@ -105,6 +113,8 @@ class AutoAssignOfficialsService:
         all_team_ids: set[str] = {
             t["id"] for t in state_data.get("globalTeams", []) if t.get("id")
         }
+
+        num_fields = self._get_num_fields()
 
         all_teams_in_standing: dict[str, set[str]] = defaultdict(set)
         for node in game_nodes:
@@ -166,7 +176,28 @@ class AutoAssignOfficialsService:
                     for t in donor_pool
                     if t not in busy_teams and t not in slot_assigned
                 ]
+
                 if not eligible:
+                    if num_fields > 1:
+                        continue
+                    for node in group_nodes:
+                        data = node.get("data", {})
+                        game_busy: set[str] = set()
+                        for tkey in ("homeTeamId", "awayTeamId"):
+                            if data.get(tkey):
+                                game_busy.add(data[tkey])
+                        per_game_eligible = [
+                            t
+                            for t in donor_pool
+                            if t not in game_busy
+                        ]
+                        if not per_game_eligible:
+                            continue
+                        per_game_eligible.sort(key=lambda t: referee_count[t])
+                        chosen = per_game_eligible.pop(0)
+                        node["data"]["official"] = {"type": "static", "name": chosen}
+                        referee_count[chosen] += 1
+                        assignments[node["id"]] = chosen
                     continue
 
                 for node in group_nodes:
