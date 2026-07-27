@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.5](https://github.com/dachrisch/leaguesphere/compare/v4.13.4...v4.13.5) (2026-07-27)
+
+
+### Bug Fixes
+
+* auto-assign 0 referees for 4 teams on 1 field in designer state ([#1662](https://github.com/dachrisch/leaguesphere/issues/1662)) ([7f07cfb](https://github.com/dachrisch/leaguesphere/commit/7f07cfb424bdff82b9999f572a97f8507ae9c5c0))
+
 ## [4.13.4](https://github.com/dachrisch/leaguesphere/compare/v4.13.3...v4.13.4) (2026-07-27)
 
 
