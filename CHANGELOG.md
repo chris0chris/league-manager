@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.13.0](https://github.com/dachrisch/leaguesphere/compare/v4.12.4...v4.13.0) (2026-07-27)
+
+
+### Features
+
+* **ci:** replace weekday auto-approve with game-aware auto-approve ([#1651](https://github.com/dachrisch/leaguesphere/issues/1651)) ([9ca5575](https://github.com/dachrisch/leaguesphere/commit/9ca5575e35a101d7715bcd32175ea8486a0415a6))
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([#1653](https://github.com/dachrisch/leaguesphere/issues/1653)) ([96975e6](https://github.com/dachrisch/leaguesphere/commit/96975e61db56b34ea6942d65cd6590fe9d932056))
+
 ## [4.12.4](https://github.com/dachrisch/leaguesphere/compare/v4.12.3...v4.12.4) (2026-07-26)
 
 
