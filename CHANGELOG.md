@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.6](https://github.com/dachrisch/leaguesphere/compare/v4.13.5...v4.13.6) (2026-07-27)
+
+
+### Bug Fixes
+
+* auto-assign officials against real field count, not stale format ([#1664](https://github.com/dachrisch/leaguesphere/issues/1664)) ([afed708](https://github.com/dachrisch/leaguesphere/commit/afed70802846ac381229e1970975f4248e0b9581))
+
 ## [4.13.5](https://github.com/dachrisch/leaguesphere/compare/v4.13.4...v4.13.5) (2026-07-27)
 
 
