@@ -150,7 +150,8 @@ describe('ListCanvas - Inline Add Field Button Pattern', () => {
       expect(icon).toBeInTheDocument();
       // Check for the one in the body (large)
       const bodyIcon = container.querySelector('.card-body .bi-map');
-      expect(bodyIcon).toHaveStyle({ fontSize: '4rem' });
+      // jsdom 30+ converts length values to pixels in getComputedStyle
+      expect(bodyIcon).toHaveStyle({ fontSize: '64px' });
     });
   });
 

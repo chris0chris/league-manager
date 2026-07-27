@@ -113,7 +113,7 @@ jobs:
   scorecard_js:
     executor:
       name: node/default
-      tag: "24.0"
+      tag: "24.17"
     working_directory: ~/repo
     steps:
       - checkout
@@ -136,7 +136,7 @@ jobs:
   liveticker_js:
     executor:
       name: node/default
-      tag: "24.0"
+      tag: "24.17"
     working_directory: ~/repo
     steps:
       - checkout
@@ -159,7 +159,7 @@ jobs:
   passcheck_js:
     executor:
       name: node/default
-      tag: "24.0"
+      tag: "24.17"
     working_directory: ~/repo
     steps:
       - checkout
@@ -182,7 +182,7 @@ jobs:
   gameday_designer_js:
     executor:
       name: node/default
-      tag: "24.0"
+      tag: "24.17"
     working_directory: ~/repo
     steps:
       - checkout
@@ -201,7 +201,7 @@ jobs:
   journey_dashboard_js:
     executor:
       name: node/default
-      tag: "24.0"
+      tag: "24.17"
     working_directory: ~/repo
     steps:
       - checkout
