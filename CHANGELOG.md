@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.7](https://github.com/dachrisch/leaguesphere/compare/v4.13.6...v4.13.7) (2026-07-27)
+
+
+### Bug Fixes
+
+* **gamedays:** stop leaking exception detail from auto-assign officials endpoint ([#1666](https://github.com/dachrisch/leaguesphere/issues/1666)) ([ad888a4](https://github.com/dachrisch/leaguesphere/commit/ad888a4bf6fff2b1beafc8e6f144acfa92a2e986))
+
 ## [4.13.6](https://github.com/dachrisch/leaguesphere/compare/v4.13.5...v4.13.6) (2026-07-27)
 
 
