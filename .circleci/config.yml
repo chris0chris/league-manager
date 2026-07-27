@@ -645,10 +645,13 @@ jobs:
               exit 0
             fi
 
-            # Check for active games (status indicates in-progress; excludes finished and planned)
-            # "Geplant" games are checked separately in the upcoming 4-hour window below.
+            # Check for active games (status indicates in-progress on today's gamedays).
+            # Past gamedays with stale statuses (e.g. a game stuck in "2. Halbzeit")
+            # should not block deploys. "Geplant" games checked separately below.
+            today_date=$(TZ=Europe/Berlin date +%Y-%m-%d)
             active_count=$(echo "$response" | jq \
-              '[.results[].games[] | select(.status != "beendet" and .status != "Geplant")] | length')
+              --arg today "$today_date" \
+              '[.results[] | select(.date == $today) | .games[] | select(.status != "beendet" and .status != "Geplant")] | length')
             if [ "$active_count" -gt 0 ]; then
               echo "Active games detected ($active_count) - leaving hold_production for manual approval"
               exit 0
