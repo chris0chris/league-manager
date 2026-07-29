@@ -8,7 +8,7 @@ version = "4.6.0"
 requires-python = ">=3.12"
 dependencies = [
     "Django==6.0.7",
-    "django-crispy-forms==2.6",
+    "django-crispy-forms==2.7",
     "crispy-bootstrap5==2026.3",
     "numpy==2.5.1",
     "pandas==3.0.3",
