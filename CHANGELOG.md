@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.13](https://github.com/dachrisch/leaguesphere/compare/v4.13.12...v4.13.13) (2026-07-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-router-dom to v7.18.2 ([#1682](https://github.com/dachrisch/leaguesphere/issues/1682)) ([1cf9ae4](https://github.com/dachrisch/leaguesphere/commit/1cf9ae486adcd5b1668e305dd3b5423fceba3826))
+
 ## [4.13.12](https://github.com/dachrisch/leaguesphere/compare/v4.13.11...v4.13.12) (2026-07-28)
 
 
