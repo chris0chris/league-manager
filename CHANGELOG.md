@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.16](https://github.com/dachrisch/leaguesphere/compare/v4.13.15...v4.13.16) (2026-07-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency jsdom to v30.0.1 ([#1686](https://github.com/dachrisch/leaguesphere/issues/1686)) ([921ff3b](https://github.com/dachrisch/leaguesphere/commit/921ff3b6e8ba7b3320f7f3ef8214b1a2dff983f2))
+
 ## [4.13.15](https://github.com/dachrisch/leaguesphere/compare/v4.13.14...v4.13.15) (2026-07-29)
 
 
