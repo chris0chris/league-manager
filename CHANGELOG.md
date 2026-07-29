@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.14](https://github.com/dachrisch/leaguesphere/compare/v4.13.13...v4.13.14) (2026-07-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency i18next-resources-to-backend to v1.2.2 ([#1681](https://github.com/dachrisch/leaguesphere/issues/1681)) ([42a1b04](https://github.com/dachrisch/leaguesphere/commit/42a1b04bf256305424e6439de812ac81fc09e2f4))
+
 ## [4.13.13](https://github.com/dachrisch/leaguesphere/compare/v4.13.12...v4.13.13) (2026-07-29)
 
 
