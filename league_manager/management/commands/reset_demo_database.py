@@ -136,7 +136,8 @@ class Command(BaseCommand):
         # Collect all model instances from apps that should be backed up
         included_apps = {'auth', 'gamedays', 'league_manager', 'gameday_designer',
                         'league_table', 'officials', 'knox', 'sites'}
-        excluded_models = {'admin.logentry', 'sessions.session', 'contenttypes.contenttype'}
+        excluded_models = {'admin.logentry', 'sessions.session', 'contenttypes.contenttype',
+                          'auth.permission', 'auth.group'}
 
         objects_to_dump = []
         for model in apps.get_models():
