@@ -9,7 +9,7 @@ import { useFlowState } from '../../hooks/useFlowState';
 import { renderHook } from '@testing-library/react';
 import { formatTeamReference, parseTeamReference, getTeamReferenceDisplayName } from '../../utils/teamReference';
 import { validateForExport, exportToStructuredTemplate } from '../../utils/flowchartExport';
-import { FlowState, GamedayMetadata, FlowNode, GameNode } from '../../types/flowchart';
+import { FlowState, GamedayMetadata, FlowNode } from '../../types/flowchart';
 import { GamedayListEntry } from '../../types';
 
 // Mock gamedayApi
@@ -175,39 +175,6 @@ describe('Coverage Expansion - ListDesignerApp & useFlowState', () => {
       expect(result.current.metadata.name).toBe('Changed');
     });
 
-    it('covers deleteField cascading', () => {
-      const { result } = renderHook(() => useFlowState());
-      let fieldId = '';
-      act(() => {
-        const field = result.current.addField('F1');
-        fieldId = field.id;
-        result.current.addGameNode({ fieldId: field.id });
-      });
-
-      expect(result.current.fields).toHaveLength(1);
-      expect((result.current.nodes[0] as GameNode).data.fieldId).toBe(fieldId);
-
-      act(() => {
-        result.current.deleteField(fieldId);
-      });
-
-      expect(result.current.fields).toHaveLength(0);
-      expect((result.current.nodes[0] as GameNode).data.fieldId).toBeNull();
-    });
-
-    it('covers addBulkFields with clearExisting', () => {
-        const { result } = renderHook(() => useFlowState());
-        act(() => {
-            result.current.addField('F1');
-        });
-        expect(result.current.fields).toHaveLength(1);
-
-        act(() => {
-            result.current.addBulkFields([{ id: 'f2', name: 'F2', order: 0 }], true);
-        });
-        expect(result.current.fields).toHaveLength(1);
-        expect(result.current.fields[0].id).toBe('f2');
-    });
   });
 
   describe('utils coverage', () => {

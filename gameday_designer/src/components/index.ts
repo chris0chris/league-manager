@@ -5,7 +5,6 @@
 // Shared components (used by list-based UI)
 export { default as FlowToolbar } from './FlowToolbar';
 export { default as FlowPropertiesPanel } from './FlowPropertiesPanel';
-export { default as FieldSidebar } from './FieldSidebar';
 
 // List-based components
 export { default as ListCanvas } from './ListCanvas';
@@ -20,7 +19,6 @@ export { default as GameTable } from './list/GameTable';
 // Re-export new component types
 export type { FlowToolbarProps } from './FlowToolbar';
 export type { FlowPropertiesPanelProps } from './FlowPropertiesPanel';
-export type { FieldSidebarProps } from './FieldSidebar';
 
 // Re-export list component types
 export type { ListCanvasProps } from './ListCanvas';

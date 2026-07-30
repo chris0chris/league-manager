@@ -726,8 +726,6 @@ describe('useFlowState - Edge Cases', () => {
 
         result.current.addGlobalTeamGroup('Group A');
         result.current.addGlobalTeam('Team 1');
-
-        result.current.addField('Legacy Field');
       });
 
       expect(result.current.nodes.length).toBeGreaterThan(0);
