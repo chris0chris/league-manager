@@ -699,25 +699,19 @@ jobs:
               --header "Circle-Token: ${CIRCLE_API_APPROVE_TOKEN}" \
               "https://circleci.com/api/v2/workflow/${CIRCLE_WORKFLOW_ID}/approve/${approval_request_id}"
 
-  # Stand-in for the 3 checks required by branch protection on the
-  # release-please branch: that branch only ever contains a version bump +
-  # changelog (never code), and its content was already exercised by CI on
-  # the master-merge push that triggered release-please. See the
-  # `release_please_checks` workflow below.
-  noop:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - run:
-          name: Skip (release-please branch already verified pre-merge)
-          command: echo "Skipping - covered by required checks on the prior master-merge CI run"
-
 workflows:
   version: 2
   build_test_deploy:
+    # Skip the master-push run: merges are PR-only (ruleset requires a PR)
+    # and required status checks must be up to date with master before
+    # merging, so whatever lands on master was just CI'd against that exact
+    # base a moment earlier - a second full run on the merge commit itself
+    # adds nothing. Still runs on every other branch (including the
+    # release-please branch, so its required checks post normally) and on
+    # tags (via each job's own `tags` filter, for deploys).
     when:
       not:
-        equal: [ << pipeline.git.branch >>, "release-please--branches--master" ]
+        equal: [ << pipeline.git.branch >>, "master" ]
     jobs:
       - python:
           filters:
@@ -881,17 +875,3 @@ workflows:
               only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
             branches:
               ignore: /.*/
-
-  # Satisfies the 3 branch-protection-required checks on the release-please
-  # branch without repeating the real build_test_deploy workflow. See the
-  # `noop` job comment above for why this is safe.
-  release_please_checks:
-    when:
-      equal: [ << pipeline.git.branch >>, "release-please--branches--master" ]
-    jobs:
-      - noop:
-          name: e2e
-      - noop:
-          name: check_migrations
-      - noop:
-          name: test_compose_network
