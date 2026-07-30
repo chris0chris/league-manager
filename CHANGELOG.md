@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.13.18](https://github.com/dachrisch/leaguesphere/compare/v4.13.17...v4.13.18) (2026-07-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @vitejs/plugin-react to v6.0.5 ([#1692](https://github.com/dachrisch/leaguesphere/issues/1692)) ([4bb5fe8](https://github.com/dachrisch/leaguesphere/commit/4bb5fe89526a1433b4080758707ff328b1089d3c))
+* **deps:** update dependency @vitejs/plugin-react to v6.0.5 ([#1693](https://github.com/dachrisch/leaguesphere/issues/1693)) ([8af729c](https://github.com/dachrisch/leaguesphere/commit/8af729c7ecd2440bebb032307034630c8651aec4))
+* **deps:** update dependency axios to v1.19.0 ([#1695](https://github.com/dachrisch/leaguesphere/issues/1695)) ([dada1e5](https://github.com/dachrisch/leaguesphere/commit/dada1e57dd7b7ea26af8115562d3fafb74bcbab6))
+* **matchreport:** use gameday's year as reference for official license ([#1667](https://github.com/dachrisch/leaguesphere/issues/1667)) ([dd938d2](https://github.com/dachrisch/leaguesphere/commit/dd938d210f433c7f36841d4c4ac48109a68fea4a))
+
 ## [4.13.17](https://github.com/dachrisch/leaguesphere/compare/v4.13.16...v4.13.17) (2026-07-29)
 
 
