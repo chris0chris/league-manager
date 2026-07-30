@@ -53,7 +53,9 @@ class MoodleRememberToken(models.Model):
         return self.expires_at <= timezone.now()
 
     def __str__(self):
-        return f"MoodleRememberToken({self.selector[:8]}… -> official {self.official_id})"
+        return (
+            f"MoodleRememberToken({self.selector[:8]}… -> official {self.official_id})"
+        )
 
 
 class OfficialGamedaySignup(models.Model):
@@ -96,13 +98,25 @@ class EmptyOfficialLicenseHistory:
         return datetime.date(1, 1, 1)
 
 
+class OfficialLicenseHistoryQuerySet(QuerySet):
+    def in_year(self, year):
+        return self.filter(created_at__year=year)
+
+    def order_by_rank(self, *fields):
+        # License names sort alphabetically in rank order (F1 is the
+        # highest license, F4 the lowest) - ascending order surfaces the
+        # highest-ranked license first. Any fields passed in take priority
+        # (e.g. to sort by year before breaking ties on rank).
+        return self.order_by(*fields, "license__name")
+
+
 class OfficialLicenseHistory(models.Model):
     official: Official = models.ForeignKey(Official, on_delete=models.CASCADE)
     license = models.ForeignKey(OfficialLicense, on_delete=models.CASCADE)
     created_at = models.DateField(default=date.today)
     result = models.PositiveSmallIntegerField(null=False, default=0)
 
-    objects: QuerySet = models.Manager()
+    objects: QuerySet = OfficialLicenseHistoryQuerySet.as_manager()
 
     def valid_until(self):
         # noinspection PyUnresolvedReferences

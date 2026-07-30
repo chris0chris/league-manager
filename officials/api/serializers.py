@@ -124,8 +124,8 @@ class OfficialSerializer(ModelSerializer):
     def _get_license_history(self, obj):
         newest_license: OfficialLicenseHistory = (
             obj.officiallicensehistory_set.exclude(license=LicenseStrategy.NO_LICENSE)
-            .order_by("created_at__year", "-license__name")
-            .last()
+            .order_by_rank("-created_at__year")
+            .first()
         )
         if newest_license is None:
             return EmptyOfficialLicenseHistory()
