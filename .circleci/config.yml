@@ -707,30 +707,44 @@ workflows:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
       - e2e:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
       - scorecard_js:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
       - liveticker_js:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
       - passcheck_js:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
       - gameday_designer_js:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
       - journey_dashboard_js:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
 
       - build_backend:
           requires:
@@ -739,6 +753,8 @@ workflows:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
       - build_frontend:
           requires:
             - scorecard_js
@@ -749,6 +765,8 @@ workflows:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
 
       - test_backend_image:
           requires:
@@ -756,12 +774,16 @@ workflows:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
       - test_frontend_image:
           requires:
             - build_frontend
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
       - check_migrations:
           context: staging
           requires:
@@ -769,6 +791,8 @@ workflows:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
       - test_compose_network:
           requires:
             - build_backend
@@ -779,6 +803,8 @@ workflows:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: release-please--branches--master
 
       - ensure_draft_release:
           filters:
