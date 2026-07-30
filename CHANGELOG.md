@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.21](https://github.com/dachrisch/leaguesphere/compare/v4.13.20...v4.13.21) (2026-07-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency markdown to v3.10.3 ([#1704](https://github.com/dachrisch/leaguesphere/issues/1704)) ([a346599](https://github.com/dachrisch/leaguesphere/commit/a346599cc49a2eab5a1924b0ff099938c6357d97))
+
 ## [4.13.20](https://github.com/dachrisch/leaguesphere/compare/v4.13.19...v4.13.20) (2026-07-30)
 
 
