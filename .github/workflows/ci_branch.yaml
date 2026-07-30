@@ -1,6 +1,14 @@
 # GitHub Actions companion workflow for master branch.
 # Mirrors CircleCI's build_test_deploy workflow on master pushes (build + test only, no deploy).
 # CircleCI remains the primary CI; this provides a safety-net second opinion on master.
+#
+# Jobs matching CircleCI's master behavior:
+#   - Python unit tests (part_build_test.yaml) ↔ CircleCI: python
+#   - Frontend unit tests (all 5 apps)        ↔ CircleCI: scorecard_js, liveticker_js, passcheck_js, gameday_designer_js, journey_dashboard_js
+#   - Docker build + test + compose           ↔ CircleCI: build_backend, build_frontend, test_backend_image, test_frontend_image, check_migrations, test_compose_network
+#
+# Not yet mirrored (no reusable part workflow exists):
+#   - e2e Playwright tests                    ↔ CircleCI: e2e (scorecard + gameday_designer)
 name: 🏗️🧪🍂 Build & Test branches
 # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions
 on:
@@ -15,12 +23,14 @@ permissions:
   security-events: write
 
 jobs:
+  # Python unit tests ↔ CircleCI: python
   build-test-django:
     uses: ./.github/workflows/part_build_test.yaml
     secrets: inherit
 
+  # Frontend unit tests (all 5 apps) ↔ CircleCI: scorecard_js, liveticker_js, passcheck_js, gameday_designer_js, journey_dashboard_js
   build-test-frontend:
     uses: ./.github/workflows/part_node_test_matrix.yaml
     secrets: inherit
     with:
-      projects: '["scorecard", "liveticker", "gameday_designer", "passcheck"]'
+      projects: '["scorecard", "liveticker", "passcheck", "gameday_designer", "journey_dashboard"]'
