@@ -1,4 +1,4 @@
-import { FlowState, GlobalTeam, FlowNode, isGameNode, isStageNode, createGameNodeInStage, createGameToGameEdge, createStageToGameEdge, FlowEdge, GlobalTeamGroup, StageCategory, StageToGameEdgeData } from '../types/flowchart';
+import { FlowState, GlobalTeam, FlowNode, isGameNode, isStageNode, isFieldNode, createGameNodeInStage, createGameToGameEdge, createStageToGameEdge, FlowEdge, GlobalTeamGroup, StageCategory, StageToGameEdgeData } from '../types/flowchart';
 import { isWinnerReference, isLoserReference, isGroupTeamReference, isRankReference, isGroupRankReference, TeamReference } from '../types/designer';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -121,7 +121,11 @@ export function genericizeFlowState(state: FlowState, name: string, description:
   };
 
   const gameNodes = state.nodes.filter(isGameNode);
-  const fieldsList = [...state.fields].sort((a, b) => a.order - b.order);
+  // Field container nodes are the source of truth for field count/order, not the
+  // separate `fields` metadata array: that array is only kept in sync by the
+  // tournament-generator and import flows, while the "Add Field" designer button
+  // and automatic hierarchy creation only ever push a node onto `state.nodes`.
+  const fieldsList = state.nodes.filter(isFieldNode).sort((a, b) => a.data.order - b.data.order);
 
   const slots: GenericTemplateSlot[] = gameNodes.map(node => {
     // Derive stage name, type, and category from the parent stage node.
@@ -198,7 +202,7 @@ export function genericizeFlowState(state: FlowState, name: string, description:
     name,
     description,
     num_teams: state.globalTeams.length,
-    num_fields: state.fields.length,
+    num_fields: fieldsList.length,
     num_groups: state.globalTeamGroups.length,
     game_duration: state.metadata?.game_duration || 70,
     sharing,

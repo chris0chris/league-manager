@@ -1,6 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { genericizeFlowState, applyGenericTemplate } from '../templateMapper';
-import { FlowState, GlobalTeam, GlobalTeamGroup, FlowNode, isGameNode } from '../../types/flowchart';
+import {
+  FlowState,
+  GlobalTeam,
+  GlobalTeamGroup,
+  FlowNode,
+  isGameNode,
+  createFieldNode,
+  createStageNode,
+  createGameNodeInStage,
+} from '../../types/flowchart';
 
 describe('templateMapper', () => {
   it('should correctly genericize teams into group and team indices', () => {
@@ -113,5 +122,41 @@ describe('templateMapper', () => {
     expect(officialTeam?.groupId).toBe(groups[1].id); // g2 = External Officials
     expect(gameNode.data.startTime).toBe('09:30');
     expect(gameNode.data.manualTime).toBe(true);
+  });
+
+  it('derives num_fields and per-slot field index from the field container nodes, not the legacy fields metadata array', () => {
+    // Reproduces production bug: gamedays built via the "Add Field" designer button
+    // (nodesManager.addFieldNode) never populate the separate `fields` metadata array,
+    // so it stays empty even though real field container nodes exist in `nodes`.
+    const groups: GlobalTeamGroup[] = [{ id: 'g1', name: 'Group A', order: 0 }];
+    const teams: GlobalTeam[] = [
+      { id: 't1', label: 'Team 1', groupId: 'g1', order: 0 },
+      { id: 't2', label: 'Team 2', groupId: 'g1', order: 1 },
+      { id: 't3', label: 'Team 3', groupId: 'g1', order: 2 },
+      { id: 't4', label: 'Team 4', groupId: 'g1', order: 3 },
+    ];
+
+    const field1 = createFieldNode('field-1', { name: 'Feld 1', order: 0 });
+    const field2 = createFieldNode('field-2', { name: 'Feld 2', order: 1 });
+    const stage1 = createStageNode('stage-1', field1.id, { name: 'Preliminary', order: 0 });
+    const stage2 = createStageNode('stage-2', field2.id, { name: 'Preliminary', order: 0 });
+    const game1 = createGameNodeInStage('game-1', stage1.id, {
+      standing: 'A1', homeTeamId: 't1', awayTeamId: 't2', official: null, breakAfter: 0,
+    });
+    const game2 = createGameNodeInStage('game-2', stage2.id, {
+      standing: 'B1', homeTeamId: 't3', awayTeamId: 't4', official: null, breakAfter: 0,
+    });
+
+    const nodes: FlowNode[] = [field1, field2, stage1, stage2, game1, game2];
+
+    // `fields` is empty, mirroring the real desynced production data for gameday 895.
+    const flowState = { nodes, edges: [], fields: [], globalTeams: teams, globalTeamGroups: groups } as unknown as FlowState;
+
+    const template = genericizeFlowState(flowState, 'Multi-Field Test');
+
+    expect(template.num_fields).toBe(2);
+    const fieldByStanding = new Map(template.slots.map(s => [s.standing, s.field]));
+    expect(fieldByStanding.get('A1')).toBe(1);
+    expect(fieldByStanding.get('B1')).toBe(2);
   });
 });
