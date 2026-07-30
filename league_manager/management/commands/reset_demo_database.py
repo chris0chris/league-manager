@@ -224,23 +224,16 @@ class Command(BaseCommand):
     def _restore_snapshot_json(self, snapshot_path):
         """Restore from Django dumpdata JSON file."""
         from django.core.management import call_command
-        from django.core.serializers import deserialize
 
         # Clear existing data first
         self.stdout.write("Clearing existing data...")
         call_command('flush', '--no-input', verbosity=0)
 
-        # Load from snapshot using Django's deserialization
+        # Load from snapshot using Django's loaddata, which handles
+        # auth_permission/contenttypes correctly (skips already-existing
+        # permission entries instead of duplicating them).
         self.stdout.write("Loading snapshot data...")
-        with open(snapshot_path, 'r') as f:
-            content = f.read()
-            # Skip if empty or just whitespace/empty array
-            if not content.strip() or content.strip() == '[]':
-                self.stdout.write("Snapshot contains no data")
-                return
-            # Deserialize JSON and save objects
-            for obj in deserialize('json', content):
-                obj.save()
+        call_command('loaddata', snapshot_path, verbosity=0)
 
     def _recreate_database(self, db_name):
         """Drop and recreate database."""
