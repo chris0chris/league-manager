@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.13.20](https://github.com/dachrisch/leaguesphere/compare/v4.13.19...v4.13.20) (2026-07-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency django-crispy-forms to v2.7 ([#1698](https://github.com/dachrisch/leaguesphere/issues/1698)) ([a49ee47](https://github.com/dachrisch/leaguesphere/commit/a49ee470b42e3bd0564c8df2b84402bb9de38e3c))
+
+
+### Miscellaneous Chores
+
+* release 4.13.20 ([#1700](https://github.com/dachrisch/leaguesphere/issues/1700)) ([63f5598](https://github.com/dachrisch/leaguesphere/commit/63f559898216ae8f1a555df0725e4b0a71e11921))
+
 ## [4.13.19](https://github.com/dachrisch/leaguesphere/compare/v4.13.18...v4.13.19) (2026-07-30)
 
 
