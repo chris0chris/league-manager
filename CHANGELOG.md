@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.13.27](https://github.com/dachrisch/leaguesphere/compare/v4.13.26...v4.13.27) (2026-07-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @types/react-dom to v19.2.4 ([#1723](https://github.com/dachrisch/leaguesphere/issues/1723)) ([2feffcf](https://github.com/dachrisch/leaguesphere/commit/2feffcf3527b474d4e89ed429a720d765a19faa3))
+* exclude auth.permission and auth.group from demo snapshot serialization ([d9a3af2](https://github.com/dachrisch/leaguesphere/commit/d9a3af263559b84c42e085c3d32773d852d3c2bb))
+
 ## [4.13.26](https://github.com/dachrisch/leaguesphere/compare/v4.13.25...v4.13.26) (2026-07-30)
 
 
