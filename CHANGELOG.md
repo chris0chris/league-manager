@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.26](https://github.com/dachrisch/leaguesphere/compare/v4.13.25...v4.13.26) (2026-07-30)
+
+
+### Bug Fixes
+
+* use loaddata for JSON snapshot restore to avoid auth_permission constraint errors ([d057df9](https://github.com/dachrisch/leaguesphere/commit/d057df920c51c7adeaae86342df414b7a0c73e4d))
+
 ## [4.13.25](https://github.com/dachrisch/leaguesphere/compare/v4.13.24...v4.13.25) (2026-07-30)
 
 
