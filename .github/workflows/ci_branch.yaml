@@ -1,10 +1,13 @@
-# NOTE: GitHub Actions are being deactivated in favor of CircleCI due to pricing changes.
-# Reference: https://github.com/resources/insights/2026-pricing-changes-for-github-actions
+# GitHub Actions companion workflow for master branch.
+# Mirrors CircleCI's build_test_deploy workflow on master pushes (build + test only, no deploy).
+# CircleCI remains the primary CI; this provides a safety-net second opinion on master.
 name: 🏗️🧪🍂 Build & Test branches
 # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions
 on:
   workflow_dispatch:
-#  push:
+  push:
+    branches:
+      - master
 
 permissions:
   contents: write
