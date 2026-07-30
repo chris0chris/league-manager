@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.25](https://github.com/dachrisch/leaguesphere/compare/v4.13.24...v4.13.25) (2026-07-30)
+
+
+### Miscellaneous Chores
+
+* release 4.13.25 ([63f37bc](https://github.com/dachrisch/leaguesphere/commit/63f37bcef7ddb1b70644b35018d063a1fec7d193))
+
 ## [4.13.24](https://github.com/dachrisch/leaguesphere/compare/v4.13.23...v4.13.24) (2026-07-30)
 
 
