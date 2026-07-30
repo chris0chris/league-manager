@@ -11,10 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
+      max-parallel: 1
       fail-fast: false
       matrix:
-        python-version: [ '3.12', '3.13', '3.14' ]
+        python-version: [ '3.14' ]
     services:
       mysql:
         image: mysql:9.7
