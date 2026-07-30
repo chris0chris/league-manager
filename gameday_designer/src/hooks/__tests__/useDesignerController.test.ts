@@ -74,7 +74,6 @@ describe('useDesignerController', () => {
         result.current.flowState.addGameNodeInStage(stageNode!.id, { standing: 'A1' });
       });
 
-      expect(result.current.flowState.fields).toEqual([]);
       expect(result.current.controller.ui.canExport).toBe(true);
     });
 

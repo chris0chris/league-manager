@@ -149,7 +149,6 @@ describe('useFlowState - Edge Cases', () => {
       const oldFormatState: FlowState = {
         nodes: [],
         edges: [],
-        fields: [],
         globalTeams: [
           {
             id: 'team-1',
@@ -196,7 +195,6 @@ describe('useFlowState - Edge Cases', () => {
       const newFormatState: FlowState = {
         nodes: [],
         edges: [],
-        fields: [],
         globalTeams: [
           {
             id: 'team-1',
@@ -241,7 +239,6 @@ describe('useFlowState - Edge Cases', () => {
       const stateWithoutTeams: FlowState = {
         nodes: [],
         edges: [],
-        fields: [],
         globalTeams: undefined as unknown as GlobalTeam[], // Missing globalTeams
         globalTeamGroups: undefined as unknown as GlobalTeamGroup[], // Missing groups
       };
@@ -660,7 +657,6 @@ describe('useFlowState - Edge Cases', () => {
       const state = result.current.exportState();
 
       expect(state.nodes.length).toBeGreaterThan(0);
-      expect(state.fields).toBeInstanceOf(Array);
       expect(state.globalTeams).toHaveLength(1);
       expect(state.globalTeamGroups).toHaveLength(1);
     });
@@ -741,7 +737,6 @@ describe('useFlowState - Edge Cases', () => {
       expect(result.current.edges.length).toBe(0);
       expect(result.current.globalTeams.length).toBe(0);
       expect(result.current.globalTeamGroups.length).toBe(0);
-      expect(result.current.fields.length).toBe(0);
     });
   });
 });

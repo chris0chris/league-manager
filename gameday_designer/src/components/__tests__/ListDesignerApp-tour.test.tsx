@@ -58,7 +58,6 @@ const ReplayTrigger = () => {
 const defaultFlowState = {
   nodes: [],
   edges: [],
-  fields: [],
   globalTeams: [],
   globalTeamGroups: [],
   metadata: null,
@@ -66,7 +65,7 @@ const defaultFlowState = {
   canUndo: false,
   canRedo: false,
   stats: { fieldCount: 0, gameCount: 0, teamCount: 0 },
-  exportState: vi.fn().mockReturnValue({ nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [] }),
+  exportState: vi.fn().mockReturnValue({ nodes: [], edges: [], globalTeams: [], globalTeamGroups: [] }),
   importState: vi.fn(),
 };
 
@@ -97,7 +96,6 @@ const defaultMockReturn = {
   flowState: {
     nodes: [],
     edges: [],
-    fields: [],
     globalTeams: [],
     globalTeamGroups: [],
     exportState: vi.fn().mockReturnValue({ nodes: [], edges: [] }),

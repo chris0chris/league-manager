@@ -8,15 +8,14 @@
 import type {
   FlowState,
   FlowNode,
-  FlowField,
   GameNodeData,
-  FieldNodeData,
   StageNodeData,
 } from '../types/flowchart';
 import {
   isGameNode,
   isFieldNode,
   isStageNode,
+  getFieldNodes,
 } from '../types/flowchart';
 import type { ScheduleJson, GameJson, TeamReference } from '../types/designer';
 import { formatTeamReference } from './teamReference';
@@ -214,55 +213,30 @@ interface FieldInfo {
   id: string;
   name: string;
   order: number;
-  isContainer: boolean;
 }
 
 /**
- * Get all fields (both container and legacy) for grouping.
+ * Get all field container nodes for grouping.
  */
-function getAllFields(
-  nodes: FlowNode[],
-  legacyFields: FlowField[]
-): FieldInfo[] {
-  const fields: FieldInfo[] = [];
-
-  // Add container fields from node hierarchy
-  const fieldNodes = nodes.filter(isFieldNode);
-  for (const node of fieldNodes) {
-    const data = node.data as FieldNodeData;
-    fields.push({
-      id: node.id,
-      name: data.name,
-      order: data.order,
-      isContainer: true,
-    });
-  }
-
-  // Add legacy fields
-  for (const field of legacyFields) {
-    // Skip if already added from container
-    if (!fields.some((f) => f.id === field.id)) {
-      fields.push({
-        id: field.id,
-        name: field.name,
-        order: field.order,
-        isContainer: false,
-      });
-    }
-  }
-
-  return fields.sort((a, b) => a.order - b.order);
+function getAllFields(nodes: FlowNode[]): FieldInfo[] {
+  return getFieldNodes(nodes).map((node) => ({
+    id: node.id,
+    name: node.data.name,
+    order: node.data.order,
+  }));
 }
 
 /**
  * Group game nodes by their assigned field.
- * Supports both container hierarchy and legacy fieldId.
+ *
+ * Primarily uses container hierarchy (game -> stage -> field). Falls back to
+ * a game's own `data.fieldId` string for any pre-existing data that predates
+ * the container-hierarchy model, synthesizing a field entry named after the
+ * raw id if no container field node matches it — so such a game still gets
+ * exported, just without a friendly display name.
  */
-function groupGamesByField(
-  nodes: FlowNode[],
-  fields: FlowField[]
-): Map<string, { fieldInfo: FieldInfo; games: FlowNode[] }> {
-  const allFields = getAllFields(nodes, fields);
+function groupGamesByField(nodes: FlowNode[]): Map<string, { fieldInfo: FieldInfo; games: FlowNode[] }> {
+  const allFields = getAllFields(nodes);
   const gamesByField = new Map<string, { fieldInfo: FieldInfo; games: FlowNode[] }>();
 
   // Initialize with all fields (even empty ones)
@@ -280,12 +254,17 @@ function groupGamesByField(
       continue;
     }
 
-    // Fall back to legacy fieldId
+    // Fall back to legacy fieldId, synthesizing a field entry if needed
     const legacyFieldId = (node.data as GameNodeData).fieldId;
-    if (legacyFieldId && gamesByField.has(legacyFieldId)) {
-      gamesByField.get(legacyFieldId)!.games.push(node);
+    if (!legacyFieldId) continue;
+
+    if (!gamesByField.has(legacyFieldId)) {
+      gamesByField.set(legacyFieldId, {
+        fieldInfo: { id: legacyFieldId, name: legacyFieldId, order: allFields.length + gamesByField.size },
+        games: [],
+      });
     }
-    // Note: Games without field assignment are skipped
+    gamesByField.get(legacyFieldId)!.games.push(node);
   }
 
   return gamesByField;
@@ -298,7 +277,7 @@ function groupGamesByField(
  * @returns Export result with data or errors
  */
 export function exportToScheduleJson(state: FlowState): ExportResult {
-  const { nodes, fields, globalTeams } = state;
+  const { nodes, globalTeams } = state;
   const errors: string[] = [];
 
   // Check for games without field assignment
@@ -340,7 +319,7 @@ export function exportToScheduleJson(state: FlowState): ExportResult {
   }
 
   // Group games by field
-  const gamesByField = groupGamesByField(nodes, fields);
+  const gamesByField = groupGamesByField(nodes);
 
   // Build schedule JSON
   const schedules: ScheduleJson[] = [];
@@ -387,7 +366,7 @@ export function downloadFlowchartAsJson(
   const url = URL.createObjectURL(blob);
 
   const gameCount = state.nodes.filter(isGameNode).length;
-  const fieldCount = state.fields.length;
+  const fieldCount = getFieldNodes(state.nodes).length;
   const defaultFilename = `schedule_${gameCount}_games_${fieldCount}_fields.json`;
 
   const link = document.createElement('a');
@@ -408,17 +387,18 @@ export function downloadFlowchartAsJson(
  * @returns Array of validation error messages
  */
 export function validateForExport(state: FlowState): string[] {
-  const { nodes, fields } = state;
+  const { nodes } = state;
   const errors: string[] = [];
 
-  // Check for at least one field (container nodes or legacy fields)
-  const containerFieldNodes = nodes.filter(isFieldNode);
-  if (fields.length === 0 && containerFieldNodes.length === 0) {
+  // Check for at least one field (container nodes or a legacy fieldId on some game)
+  const containerFieldNodes = getFieldNodes(nodes);
+  const gameNodes = nodes.filter(isGameNode);
+  const hasLegacyFieldId = gameNodes.some((n) => (n.data as GameNodeData).fieldId);
+  if (containerFieldNodes.length === 0 && !hasLegacyFieldId) {
     errors.push('At least one field is required');
   }
 
   // Check for at least one game
-  const gameNodes = nodes.filter(isGameNode);
   if (gameNodes.length === 0) {
     errors.push('At least one game is required');
   }

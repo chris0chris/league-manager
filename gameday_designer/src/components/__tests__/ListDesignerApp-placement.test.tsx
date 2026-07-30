@@ -103,7 +103,6 @@ describe('ListDesignerApp - Placement Edge Creation', () => {
     },
     nodes: [],
     edges: [],
-    fields: [],
     globalTeams: [],
     globalTeamGroups: [],
     selectedNode: null,

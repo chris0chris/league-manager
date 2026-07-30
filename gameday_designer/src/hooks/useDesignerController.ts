@@ -295,12 +295,6 @@ export function useDesignerController(
                 metadata: fs.metadata || {} as GamedayMetadata,
                 nodes: timedNodes,
                 edges: imported.edges,
-                fields: imported.nodes.filter(n => n.type === 'field').map(f => ({
-                    id: f.id,
-                    name: f.data.name,
-                    order: f.data.order,
-                    color: f.data.color
-                })),
                 globalTeams: imported.globalTeams,
                 globalTeamGroups: imported.globalTeamGroups
             });
@@ -391,12 +385,6 @@ export function useDesignerController(
           metadata: fs.metadata || {} as GamedayMetadata,
           nodes: [...structureWithRefs.fields, ...structureWithRefs.stages, ...structureWithRefs.games],
           edges: [], // Edges will be added by assignTeamsToTournament if needed
-          fields: structureWithRefs.fields.map(f => ({ 
-            id: f.id, 
-            name: f.data.name, 
-            order: f.data.order, 
-            color: f.data.color 
-          })),
           globalTeams: teamsToUse,
           globalTeamGroups: allGroups,
         });
@@ -462,11 +450,11 @@ export function useDesignerController(
     expandedStageIds,
     showTournamentModal,
     canExport,
-    hasData: (flowState?.nodes?.length ?? 0) > 0 || (flowState?.globalTeams?.length ?? 0) > 0 || (flowState?.fields?.length ?? 0) > 0,
+    hasData: (flowState?.nodes?.length ?? 0) > 0 || (flowState?.globalTeams?.length ?? 0) > 0,
     saveTrigger: flowState?.saveTrigger,
     isLoading,
     notifications,
-  }), [highlightedElement, expandedFieldIds, expandedStageIds, showTournamentModal, canExport, flowState?.nodes?.length, flowState?.globalTeams?.length, flowState?.fields?.length, flowState?.saveTrigger, isLoading, notifications]);
+  }), [highlightedElement, expandedFieldIds, expandedStageIds, showTournamentModal, canExport, flowState?.nodes?.length, flowState?.globalTeams?.length, flowState?.saveTrigger, isLoading, notifications]);
 
   const handleUpdateNode = useCallback((id: string, data: Record<string, unknown>) => {
     if (!gamedayId) return;
@@ -568,7 +556,6 @@ export function useDesignerController(
     metadata: flowState?.metadata,
     nodes: flowState?.nodes || [],
     edges: flowState?.edges || [],
-    fields: flowState?.fields || [],
     globalTeams: flowState?.globalTeams || [],
     globalTeamGroups: flowState?.globalTeamGroups || [],
     validation,
@@ -582,7 +569,7 @@ export function useDesignerController(
     stats: flowState?.stats,
     onMetadataHighlight,
   }), [
-    flowState?.metadata, flowState?.nodes, flowState?.edges, flowState?.fields,
+    flowState?.metadata, flowState?.nodes, flowState?.edges,
     flowState?.globalTeams, flowState?.globalTeamGroups, flowState?.canUndo,
     flowState?.canRedo, flowState?.undo, flowState?.redo, flowState?.stats,
     flowState?.updateMetadata,

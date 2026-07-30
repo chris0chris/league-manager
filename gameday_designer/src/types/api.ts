@@ -4,12 +4,11 @@
  * These types match the Django backend API models and responses.
  */
 
-import type { 
-  FlowNode, 
-  FlowEdge, 
-  FlowField, 
-  GlobalTeam, 
-  GlobalTeamGroup 
+import type {
+  FlowNode,
+  FlowEdge,
+  GlobalTeam,
+  GlobalTeamGroup
 } from './flowchart';
 
 /**
@@ -194,7 +193,6 @@ export interface Gameday extends GamedayMetadata {
   designer_data?: {
     nodes?: FlowNode[];
     edges?: FlowEdge[];
-    fields?: FlowField[];
     globalTeams?: GlobalTeam[];
     globalTeamGroups?: GlobalTeamGroup[];
   };

@@ -24,7 +24,7 @@ const INITIAL_GAMEDAYS: Gameday[] = [
     season_display: 'Season 2026',
     league: 1,
     league_display: 'DFFL',
-    designer_data: { fields: [] }
+    designer_data: {}
   },
   {
     id: 2,
@@ -39,7 +39,7 @@ const INITIAL_GAMEDAYS: Gameday[] = [
     season_display: 'Season 2026',
     league: 1,
     league_display: 'DFFL',
-    designer_data: { fields: [] }
+    designer_data: {}
   }
 ];
 
@@ -118,7 +118,7 @@ class MockGamedayService {
       season: data.season || 1,
       league: data.league || 1,
       status: 'DRAFT',
-      designer_data: data.designer_data || { fields: [] }
+      designer_data: data.designer_data || {}
     };
 
     this.gamedays.push(newGameday);

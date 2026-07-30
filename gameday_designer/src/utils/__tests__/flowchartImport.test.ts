@@ -7,7 +7,7 @@ import {
   importFromScheduleJson,
   validateScheduleJson,
 } from '../flowchartImport';
-import { isGameNode, isGameToGameEdge } from '../../types/flowchart';
+import { isGameNode, isGameToGameEdge, isFieldNode, isStageNode } from '../../types/flowchart';
 
 describe('Flowchart Import Utility', () => {
   describe('importFromScheduleJson', () => {
@@ -33,11 +33,12 @@ describe('Flowchart Import Utility', () => {
       expect(result.state).toBeDefined();
       expect(result.warnings).toHaveLength(0);
 
-      const { nodes, fields, globalTeams } = result.state!;
+      const { nodes, globalTeams } = result.state!;
 
-      // Should have 1 field
-      expect(fields).toHaveLength(1);
-      expect(fields[0].name).toBe('Feld 1');
+      // Should have 1 field container node
+      const fieldNodes = nodes.filter(isFieldNode);
+      expect(fieldNodes).toHaveLength(1);
+      expect(fieldNodes[0].data.name).toBe('Feld 1');
 
       // Should have 2 global teams + 1 game node
       expect(globalTeams).toHaveLength(2);
@@ -209,9 +210,46 @@ describe('Flowchart Import Utility', () => {
       const result = importFromScheduleJson(json);
 
       expect(result.success).toBe(true);
-      expect(result.state!.fields).toHaveLength(2);
-      expect(result.state!.fields[0].name).toBe('Feld 1');
-      expect(result.state!.fields[1].name).toBe('Feld 2');
+      const fieldNodes = result.state!.nodes.filter(isFieldNode);
+      expect(fieldNodes).toHaveLength(2);
+      expect(fieldNodes[0].data.name).toBe('Feld 1');
+      expect(fieldNodes[1].data.name).toBe('Feld 2');
+    });
+
+    it('builds a field -> stage -> game container hierarchy instead of flat fieldId references', () => {
+      const json = [
+        {
+          field: 'Feld 1',
+          games: [
+            { stage: 'Vorrunde', standing: 'Spiel 1', home: '0_0', away: '0_1', official: '' },
+            { stage: 'Vorrunde', standing: 'Spiel 2', home: '0_2', away: '0_3', official: '' },
+            { stage: 'Finale', standing: 'Spiel 3', home: '0_0', away: '0_2', official: '' },
+          ],
+        },
+      ];
+
+      const result = importFromScheduleJson(json);
+      expect(result.success).toBe(true);
+
+      const { nodes } = result.state!;
+      const fieldNode = nodes.find(isFieldNode);
+      expect(fieldNode).toBeDefined();
+
+      const stageNodes = nodes.filter(isStageNode);
+      // Two unique stage names in the source JSON -> two stage nodes, both nested under the field
+      expect(stageNodes).toHaveLength(2);
+      expect(stageNodes.every((s) => s.parentId === fieldNode!.id)).toBe(true);
+
+      const vorrunde = stageNodes.find((s) => s.data.name === 'Vorrunde');
+      const finale = stageNodes.find((s) => s.data.name === 'Finale');
+      expect(vorrunde).toBeDefined();
+      expect(finale).toBeDefined();
+
+      const gameNodes = nodes.filter(isGameNode);
+      expect(gameNodes).toHaveLength(3);
+      // Both Vorrunde games share the same stage node; Finale's game is under the other
+      expect(gameNodes.filter((g) => g.parentId === vorrunde!.id)).toHaveLength(2);
+      expect(gameNodes.filter((g) => g.parentId === finale!.id)).toHaveLength(1);
     });
 
     it('reuses team nodes for repeated references', () => {

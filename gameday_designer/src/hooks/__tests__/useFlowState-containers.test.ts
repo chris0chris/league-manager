@@ -552,17 +552,14 @@ describe('useFlowState - Container Operations', () => {
     it('clearAll resets everything including teams', () => {
       const { result } = renderHook(() => useFlowState());
       act(() => {
-        result.current.importState({ fields: [{ id: 'f1', name: 'F', order: 0 }] } as FlowState);
         result.current.addGlobalTeamGroup('G');
       });
-      expect(result.current.fields).toHaveLength(1);
       expect(result.current.globalTeamGroups).toHaveLength(1);
 
       act(() => {
         result.current.clearAll();
       });
 
-      expect(result.current.fields).toHaveLength(0);
       expect(result.current.globalTeamGroups).toHaveLength(0);
     });
 
