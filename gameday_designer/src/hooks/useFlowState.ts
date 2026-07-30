@@ -16,7 +16,6 @@ import type {
   GamedayMetadata,
 } from '../types/flowchart';
 import {
-  createFlowField,
   createGameNode,
   isGameNode,
   isFieldNode,
@@ -239,32 +238,6 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
     setSelection({ nodeIds: nodeId ? [nodeId] : [], edgeIds: [] });
   }, []);
 
-  const addField = useCallback((name: string): FlowField => {
-    const id = `field-${uuidv4()}`;
-    const newField = createFlowField(id, name, fields.length);
-    setFields((flds) => [...flds, newField]);
-    handleStateChange();
-    return newField;
-  }, [fields, handleStateChange]);
-
-  const updateField = useCallback((fieldId: string, name: string) => {
-    setFields((flds) => flds.map((f) => (f.id === fieldId ? { ...f, name } : f)));
-    handleStateChange();
-  }, [handleStateChange]);
-
-  const deleteField = useCallback((fieldId: string) => {
-    setFields((flds) => flds.filter((f) => f.id !== fieldId));
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (isGameNode(node) && node.data.fieldId === fieldId) {
-          return { ...node, data: { ...node.data, fieldId: null } };
-        }
-        return node;
-      })
-    );
-    handleStateChange();
-  }, [handleStateChange]);
-
   const clearAll = useCallback(() => {
     setNodes([]);
     setEdges([]);
@@ -438,14 +411,6 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
     onStateChange?.();
   }, [onStateChange]);
 
-  const addBulkFields = useCallback((newFields: FlowField[], clearExisting: boolean = false) => {
-    setFields((prev) => {
-      const base = clearExisting ? [] : prev;
-      return [...base, ...newFields];
-    });
-    onStateChange?.();
-  }, [onStateChange]);
-
   const addBulkGamesToGameEdgesCb = useCallback((newEdges: GameToGameEdge[], clearExisting?: boolean) => {
     addBulkGameToGameEdges(newEdges, clearExisting);
   }, [addBulkGameToGameEdges]);
@@ -488,9 +453,6 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
     addOfficialsGroup,
     addGameNode, // Overrides nodesManager.addGameNode (v1 behavior)
     deleteNode, // Overrides managers
-    addField,
-    updateField,
-    deleteField,
     selectNode,
     updateMetadata,
     setSelection,
@@ -512,7 +474,6 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
     matchNames,
     groupNames,
     addBulkGames,
-    addBulkFields,
     moveNodeToStage: () => {}, // Placeholder
     // Explicitly export these from managers
     addFieldNode: nodesManager.addFieldNode,
@@ -530,10 +491,10 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
     metadata, nodes, edges, fields, globalTeams, globalTeamGroups, saveTrigger,
     undo, redo, canUndo, canRedo, stats, selection, onNodesChange, onEdgesChange,
     nodesManager, edgesManagerProps, teamPoolManager, addBulkGamesToGameEdgesCb,
-    addStageToGameEdgeCb, removeEdgeFromSlotCb, addOfficialsGroup, addGameNode, deleteNode, 
-    addField, updateField, deleteField, selectNode, updateMetadata, 
-    setSelection, clearAll, clearSchedule, importState, exportState, 
-    getTargetStage, ensureContainerHierarchy, getGameField, getGameStage, 
-    getFieldStages, getStageGames, matchNames, groupNames, addBulkGames, addBulkFields
+    addStageToGameEdgeCb, removeEdgeFromSlotCb, addOfficialsGroup, addGameNode, deleteNode,
+    selectNode, updateMetadata,
+    setSelection, clearAll, clearSchedule, importState, exportState,
+    getTargetStage, ensureContainerHierarchy, getGameField, getGameStage,
+    getFieldStages, getStageGames, matchNames, groupNames, addBulkGames
   ]);
 }

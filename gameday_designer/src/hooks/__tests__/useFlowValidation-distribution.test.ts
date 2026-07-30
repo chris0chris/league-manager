@@ -53,7 +53,7 @@ describe('useFlowValidation - Game Distribution', () => {
       // So Team 2 and 3 are missing one game.
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], globalTeams, globalTeamGroups, validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], globalTeams, globalTeamGroups, validMetadata));
 
     const warning = result.current.warnings.find(w => w.type === 'uneven_game_distribution');
     expect(warning).toBeDefined();
@@ -103,7 +103,7 @@ describe('useFlowValidation - Game Distribution', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], globalTeams, globalTeamGroups, validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], globalTeams, globalTeamGroups, validMetadata));
 
     const warning = result.current.warnings.find(w => w.type === 'uneven_game_distribution');
     expect(warning).toBeUndefined();
@@ -124,7 +124,7 @@ describe('useFlowValidation - Game Distribution', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], ungroupedTeams, [], validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], ungroupedTeams, [], validMetadata));
 
     const warning = result.current.warnings.find(w => w.type === 'uneven_game_distribution');
     expect(warning).toBeUndefined();
@@ -145,7 +145,7 @@ describe('useFlowValidation - Game Distribution', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], singleTeamGroup, groups, validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], singleTeamGroup, groups, validMetadata));
 
     const warning = result.current.warnings.find(w => w.type === 'uneven_game_distribution');
     expect(warning).toBeUndefined();
@@ -166,7 +166,7 @@ describe('useFlowValidation - Game Distribution', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], teams, [], validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], teams, [], validMetadata));
 
     const warning = result.current.warnings.find(w => w.type === 'uneven_game_distribution');
     expect(warning).toBeDefined();

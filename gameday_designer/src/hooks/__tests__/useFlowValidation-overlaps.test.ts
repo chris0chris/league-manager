@@ -1,15 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
-import type { FlowNode, FlowField } from '../../types/flowchart';
+import type { FlowNode } from '../../types/flowchart';
 
 const validMetadata = { id: 1, name: 'Test', date: '2026-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
 
 describe('useFlowValidation - Time Overlaps', () => {
-  const fields: FlowField[] = [
-    { id: 'field1', name: 'Field 1', order: 0 },
-  ];
-
   it('should detect overlaps on the same field', () => {
     const nodes: FlowNode[] = [
       {
@@ -59,7 +55,7 @@ describe('useFlowValidation - Time Overlaps', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], fields, [], [], validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], validMetadata));
 
     expect(result.current.isValid).toBe(false);
     expect(result.current.errors).toHaveLength(1);
@@ -123,7 +119,7 @@ describe('useFlowValidation - Time Overlaps', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], fields, [], [], validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], validMetadata));
 
     expect(result.current.isValid).toBe(true);
     expect(result.current.errors).toHaveLength(0);
@@ -179,7 +175,7 @@ describe('useFlowValidation - Time Overlaps', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], fields, [], [], validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], validMetadata));
 
     expect(result.current.isValid).toBe(false);
     expect(result.current.errors).toHaveLength(1);

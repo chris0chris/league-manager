@@ -38,7 +38,7 @@ describe('useFlowValidation i18n', () => {
         },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], validMetadata));
 
     expect(result.current.isValid).toBe(false);
     expect(result.current.errors).toHaveLength(1);

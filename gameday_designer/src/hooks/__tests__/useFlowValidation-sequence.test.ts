@@ -30,7 +30,7 @@ describe('useFlowValidation - Stage Sequence', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], validMetadata));
 
     const warning = result.current.warnings.find(w => w.type === 'stage_time_conflict' && w.id.includes('stage_sequence_time'));
     expect(warning).toBeDefined();
@@ -67,7 +67,7 @@ describe('useFlowValidation - Stage Sequence', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], validMetadata));
 
     const warning = result.current.warnings.find(w => w.id.includes('stage_sequence_type'));
     expect(warning).toBeDefined();
@@ -91,7 +91,7 @@ describe('useFlowValidation - Stage Sequence', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], validMetadata));
 
     const error = result.current.errors.find(e => e.type === 'stage_outside_field' && e.id === 'stage1_outside_field');
     expect(error).toBeDefined();
@@ -115,7 +115,7 @@ describe('useFlowValidation - Stage Sequence', () => {
       },
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], [], validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], validMetadata));
 
     const error = result.current.errors.find(e => e.type === 'stage_outside_field' && e.id === 'stage1_outside_field');
     expect(error).toBeDefined();

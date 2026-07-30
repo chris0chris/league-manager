@@ -102,29 +102,6 @@ describe('useFlowState advanced', () => {
     expect(result.current.getStageGames(sId)).toHaveLength(1);
   });
 
-  it('manages fields separately from nodes', () => {
-    const { result } = renderHook(() => useFlowState());
-    
-    let fieldId = '';
-    act(() => {
-      const f = result.current.addField('New Field');
-      fieldId = f.id;
-    });
-
-    expect(result.current.fields).toHaveLength(1);
-    expect(result.current.fields[0].name).toBe('New Field');
-
-    act(() => {
-      result.current.updateField(fieldId, 'Updated');
-    });
-    expect(result.current.fields[0].name).toBe('Updated');
-
-    act(() => {
-      result.current.deleteField(fieldId);
-    });
-    expect(result.current.fields).toHaveLength(0);
-  });
-
       it('addBulkGames adds nodes to the state', () => {
         const { result } = renderHook(() => useFlowState());
         

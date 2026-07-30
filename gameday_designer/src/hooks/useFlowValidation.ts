@@ -21,7 +21,6 @@ import type {
   FlowValidationWarning,
   GameNodeData,
   TeamNodeData,
-  FlowField,
   GlobalTeam,
   GlobalTeamGroup,
   GamedayMetadata,
@@ -34,6 +33,7 @@ import {
   isTeamToGameEdge,
   isGameToGameEdge,
   isStageToGameEdge,
+  getFieldNodes,
 } from '../types/flowchart';
 import { formatTeamReference } from '../utils/teamReference';
 import { parseTime } from '../utils/timeCalculation';
@@ -567,12 +567,12 @@ function checkStagesOutsideFields(nodes: FlowNode[]): FlowValidationError[] {
  * Detects if games on the same field have overlapping time slots.
  */
 function checkTimeOverlaps(
-  nodes: FlowNode[],
-  fields: FlowField[]
+  nodes: FlowNode[]
 ): FlowValidationError[] {
   const errors: FlowValidationError[] = [];
   const gameNodes = nodes.filter(isGameNode);
   const stageNodes = nodes.filter(isStageNode);
+  const fieldNodes = getFieldNodes(nodes);
 
   // Helper to find the field ID for a game
   const getFieldId = (game: GameNodeData, parentId?: string): string | null => {
@@ -659,20 +659,8 @@ function checkTimeOverlaps(
       }
 
       if (isOverlap) {
-        let fieldName = fields.find(f => f.id === fieldId)?.name;
-        
-        // If not found in fields array, look in nodes (v2 model)
-        if (!fieldName) {
-          const fieldNode = nodes.find(n => n.id === fieldId && isFieldNode(n)) as FieldNode | undefined;
-          if (fieldNode) {
-            fieldName = fieldNode.data.name;
-          }
-        }
+        const fieldName = fieldNodes.find(f => f.id === fieldId)?.data.name ?? 'Unknown Field';
 
-        if (!fieldName) {
-          fieldName = 'Unknown Field';
-        }
-        
         errors.push({
           id: `overlap_${current.id}_${next.id}`,
           type: 'field_overlap',
@@ -1169,7 +1157,7 @@ function checkTeamsWithoutGames(
  */
 function checkUnusedFields(nodes: FlowNode[]): FlowValidationWarning[] {
   const warnings: FlowValidationWarning[] = [];
-  const fieldNodes = nodes.filter(isFieldNode);
+  const fieldNodes = getFieldNodes(nodes);
   const gameNodes = nodes.filter(isGameNode);
   const stageNodes = nodes.filter(isStageNode);
 
@@ -1361,7 +1349,6 @@ function checkMetadataWarnings(metadata?: GamedayMetadata): FlowValidationWarnin
 export function validateFlowchart(
   nodes: FlowNode[],
   edges: FlowEdge[],
-  fields: FlowField[] = [],
   globalTeams: GlobalTeam[] = [],
   globalTeamGroups: GlobalTeamGroup[] = [],
   metadata?: GamedayMetadata
@@ -1374,7 +1361,7 @@ export function validateFlowchart(
     ...checkStagesOutsideFields(nodes),
     ...checkGamesOutsideContainers(nodes),
     ...checkTeamsOutsideContainers(nodes),
-    ...checkTimeOverlaps(nodes, fields),
+    ...checkTimeOverlaps(nodes),
     ...checkTeamCapacity(nodes, globalTeams),
     ...checkProgressionIntegrity(nodes, edges),
     ...checkCyclicStageReferences(nodes, edges),
@@ -1409,7 +1396,6 @@ export function validateFlowchart(
  *
  * @param nodes - The nodes to validate
  * @param edges - The edges to validate
- * @param fields - All fields in the tournament
  * @param globalTeams - Global team pool
  * @param globalTeamGroups - Team groups
  * @param metadata - Gameday metadata
@@ -1418,13 +1404,12 @@ export function validateFlowchart(
 export function useFlowValidation(
   nodes: FlowNode[],
   edges: FlowEdge[],
-  fields: FlowField[] = [],
   globalTeams: GlobalTeam[] = [],
   globalTeamGroups: GlobalTeamGroup[] = [],
   metadata?: GamedayMetadata
 ): FlowValidationResult {
   return useMemo(
-    () => validateFlowchart(nodes, edges, fields, globalTeams, globalTeamGroups, metadata),
-    [nodes, edges, fields, globalTeams, globalTeamGroups, metadata]
+    () => validateFlowchart(nodes, edges, globalTeams, globalTeamGroups, metadata),
+    [nodes, edges, globalTeams, globalTeamGroups, metadata]
   );
 }

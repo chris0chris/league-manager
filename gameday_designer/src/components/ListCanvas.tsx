@@ -11,8 +11,8 @@ import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import FieldSection from './list/FieldSection';
 import { GameResultsTable } from './GameResultsTable';
 import MetadataTeamPoolRow from './MetadataTeamPoolRow';
-import type { FlowNode, FlowEdge, FieldNode, StageNode, GlobalTeam, GlobalTeamGroup, GamedayMetadata, FlowValidationResult, HighlightedElement } from '../types/flowchart';
-import { isFieldNode, isStageNode } from '../types/flowchart';
+import type { FlowNode, FlowEdge, StageNode, GlobalTeam, GlobalTeamGroup, GamedayMetadata, FlowValidationResult, HighlightedElement } from '../types/flowchart';
+import { isStageNode, getFieldNodes } from '../types/flowchart';
 import { ICONS } from '../utils/iconConstants';
 import './ListCanvas.css';
 
@@ -130,12 +130,7 @@ const ListCanvas: React.FC<ListCanvasProps> = (props) => {
 
   const { t } = useTypedTranslation(['ui']);
 
-  const fields = useMemo(() => 
-    nodes
-      .filter((node): node is FieldNode => isFieldNode(node))
-      .sort((a, b) => a.data.order - b.data.order),
-    [nodes]
-  );
+  const fields = useMemo(() => getFieldNodes(nodes), [nodes]);
 
   const getFieldStagesMap = useMemo(() => {
     const map = new Map<string, StageNode[]>();

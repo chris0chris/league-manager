@@ -26,7 +26,7 @@ describe('useFlowValidation - Metadata', () => {
       league: 0,
     };
 
-    const result = validateFlowchart([], [], [], [], [], invalidMetadata);
+    const result = validateFlowchart([], [], [], [], invalidMetadata);
     
     const errorTypes = result.errors.map(e => e.id);
     expect(errorTypes).toContain('metadata_name_missing');
@@ -43,7 +43,7 @@ describe('useFlowValidation - Metadata', () => {
       address: '',
     };
 
-    const result = validateFlowchart([], [], [], [], [], metadataWithoutVenue);
+    const result = validateFlowchart([], [], [], [], metadataWithoutVenue);
     
     const warningIds = result.warnings.map(w => w.id);
     expect(warningIds).toContain('metadata_venue_missing');
@@ -55,7 +55,7 @@ describe('useFlowValidation - Metadata', () => {
       date: '2020-01-01',
     };
 
-    const result = validateFlowchart([], [], [], [], [], pastMetadata);
+    const result = validateFlowchart([], [], [], [], pastMetadata);
     
     const warningIds = result.warnings.map(w => w.id);
     expect(warningIds).toContain('metadata_date_in_past');
@@ -73,14 +73,14 @@ describe('useFlowValidation - Metadata', () => {
       date: todayStr,
     };
 
-    const result = validateFlowchart([], [], [], [], [], todayMetadata);
+    const result = validateFlowchart([], [], [], [], todayMetadata);
     
     const warningIds = result.warnings.map(w => w.id);
     expect(warningIds).not.toContain('metadata_date_in_past');
   });
 
   it('should be valid with complete metadata and future date', () => {
-    const result = validateFlowchart([], [], [], [], [], validMetadata);
+    const result = validateFlowchart([], [], [], [], validMetadata);
     
     // Filtering out standard 'no games'/'no teams' warnings for this test
     const relevantErrors = result.errors.filter(e => e.id.startsWith('metadata_'));

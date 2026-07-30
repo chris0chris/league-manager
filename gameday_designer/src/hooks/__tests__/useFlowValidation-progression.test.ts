@@ -56,7 +56,7 @@ describe('useFlowValidation - Progression Integrity', () => {
       } as GameToGameEdge,
     ];
 
-    const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], [], validMetadata));
+    const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], validMetadata));
 
     const error = result.current.errors.find(e => e.type === 'progression_order');
     expect(error).toBeDefined();

@@ -599,6 +599,15 @@ export function isFieldNode(node: FlowNode): node is FieldNode {
 }
 
 /**
+ * Get all field container nodes from a node list, in display order.
+ * This is the single source of truth for "what fields exist" —
+ * field container nodes, not any separate metadata list.
+ */
+export function getFieldNodes(nodes: FlowNode[]): FieldNode[] {
+  return nodes.filter(isFieldNode).sort((a, b) => a.data.order - b.data.order);
+}
+
+/**
  * Type guard to check if a node is a StageNode.
  */
 export function isStageNode(node: FlowNode): node is StageNode {

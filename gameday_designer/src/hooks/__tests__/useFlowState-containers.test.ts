@@ -17,11 +17,10 @@ import {
   isStageNode,
   isGameNode,
 } from '../../types/flowchart';
-import type { 
-  FlowState, 
-  FieldNode, 
-  GameNode, 
-  FlowField, 
+import type {
+  FlowState,
+  FieldNode,
+  GameNode,
   GamedayMetadata,
   FlowNode
 } from '../../types/flowchart';
@@ -530,26 +529,6 @@ describe('useFlowState - Container Operations', () => {
   });
 
   describe('Other state operations', () => {
-    it('handles deleteField and cleans up game field assignments', () => {
-      const { result } = renderHook(() => useFlowState());
-      let field: FlowField;
-      act(() => {
-        field = result.current.addField('Field 1');
-        result.current.addGameNode({ fieldId: field.id });
-      });
-
-      expect(result.current.fields).toHaveLength(1);
-      
-      act(() => {
-        result.current.deleteField(field.id);
-      });
-
-      expect(result.current.fields).toHaveLength(0);
-      const gameNode = result.current.nodes.find(isGameNode);
-      // @ts-expect-error - testing dynamic data access
-      expect(gameNode?.data.fieldId).toBeNull();
-    });
-
     it('handles importState with migrated teams', () => {
       const { result } = renderHook(() => useFlowState());
       const mockState: Partial<FlowState> = {
@@ -573,7 +552,7 @@ describe('useFlowState - Container Operations', () => {
     it('clearAll resets everything including teams', () => {
       const { result } = renderHook(() => useFlowState());
       act(() => {
-        result.current.addField('F');
+        result.current.importState({ fields: [{ id: 'f1', name: 'F', order: 0 }] } as FlowState);
         result.current.addGlobalTeamGroup('G');
       });
       expect(result.current.fields).toHaveLength(1);
@@ -602,21 +581,6 @@ describe('useFlowState - Container Operations', () => {
 
       expect(result.current.nodes).toHaveLength(0);
       expect(result.current.globalTeamGroups).toHaveLength(1);
-    });
-
-    it('addBulkFields handles clearExisting flag', () => {
-      const { result } = renderHook(() => useFlowState());
-      act(() => {
-        result.current.addField('Old Field');
-      });
-      expect(result.current.fields).toHaveLength(1);
-
-      act(() => {
-        result.current.addBulkFields([{ id: 'new', name: 'New', order: 0 }], true);
-      });
-
-      expect(result.current.fields).toHaveLength(1);
-      expect(result.current.fields[0].name).toBe('New');
     });
 
     it('updateMetadata updates metadata state', () => {

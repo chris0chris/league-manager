@@ -56,6 +56,28 @@ describe('useDesignerController', () => {
       expect(result.current.ui.canExport).toBe(false);
     });
 
+    it('canExport is true for a hand-built schedule, even though the legacy fields metadata array is never populated by the real "Add Field" flow', () => {
+      const { result } = renderHook(() => {
+        const flowState = useFlowState();
+        const controller = useDesignerController(undefined, flowState);
+        return { flowState, controller };
+      });
+
+      // Mirrors the real designer UI: handleAddFieldContainer calls addFieldNode({}, true),
+      // which pushes a field + stage container node onto `nodes` but never touches `fields`.
+      act(() => {
+        result.current.controller.handlers.handleAddFieldContainer();
+      });
+
+      const stageNode = result.current.flowState.nodes.find((n) => n.type === 'stage');
+      act(() => {
+        result.current.flowState.addGameNodeInStage(stageNode!.id, { standing: 'A1' });
+      });
+
+      expect(result.current.flowState.fields).toEqual([]);
+      expect(result.current.controller.ui.canExport).toBe(true);
+    });
+
     it('manages tournament modal visibility', () => {
       const { result } = renderHook(() => {
         const flowState = useFlowState();

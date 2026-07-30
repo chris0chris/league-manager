@@ -22,7 +22,7 @@ import {
   DEFAULT_TOURNAMENT_GROUP_NAME,
 } from '../utils/tournamentConstants';
 import type { GlobalTeam, HighlightedElement, Notification, NotificationType, FlowState } from '../types/flowchart';
-import { isFieldNode, isGameNode, isStageNode } from '../types/flowchart';
+import { isFieldNode, isGameNode, isStageNode, getFieldNodes } from '../types/flowchart';
 import { calculateGameTimes } from '../utils/timeCalculation';
 import type { TournamentGenerationConfig, RoundRobinConfig } from '../types/tournament';
 import type { UseFlowStateReturn, GamedayMetadata } from '../types/designer';
@@ -73,11 +73,10 @@ export function useDesignerController(
 
   // Validate the current flowchart
   const validation = useFlowValidation(
-    flowState?.nodes || [], 
-    flowState?.edges || [], 
-    flowState?.fields || [], 
-    flowState?.globalTeams || [], 
-    flowState?.globalTeamGroups || [], 
+    flowState?.nodes || [],
+    flowState?.edges || [],
+    flowState?.globalTeams || [],
+    flowState?.globalTeamGroups || [],
     flowState?.metadata || {} as GamedayMetadata
   );
 
@@ -454,8 +453,8 @@ export function useDesignerController(
   );
 
   const canExport = useMemo(() => {
-    return (flowState?.nodes || []).some((n) => n.type === 'game') && (flowState?.fields || []).length > 0;
-  }, [flowState?.nodes, flowState?.fields]);
+    return (flowState?.nodes || []).some((n) => n.type === 'game') && getFieldNodes(flowState?.nodes || []).length > 0;
+  }, [flowState?.nodes]);
 
   const uiInternal = useMemo(() => ({
     highlightedElement,
