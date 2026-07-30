@@ -16,7 +16,7 @@ dependencies = [
     "djangorestframework==3.17.1",
     "django-autocomplete-light==5.0.0",
     "django-formtools==2.7",
-    "Markdown==3.10.2",
+    "Markdown==3.10.3",
     "django-cors-headers==4.9.0",
     "Pillow==12.3.0",
     "django-rest-knox==5.1.0",
