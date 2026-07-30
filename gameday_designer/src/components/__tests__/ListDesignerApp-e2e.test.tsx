@@ -55,9 +55,6 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
         { id: 'game-1', type: 'game', parentId: 'stage-1', data: { standing: 'Game 1', order: 0 }, position: { x: 0, y: 0 } }
       ],
       edges: [],
-      fields: [
-        { id: 'field-1', name: 'Field 1', order: 0 }
-      ],
       globalTeams: [],
       globalTeamGroups: []
     }

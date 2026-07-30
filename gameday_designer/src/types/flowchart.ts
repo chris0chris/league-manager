@@ -380,24 +380,6 @@ export interface StageToGameEdge extends Edge {
 export type FlowEdge = GameToGameEdge | StageToGameEdge;
 
 // ============================================================================
-// Field Types (Simplified from slot-based approach)
-// ============================================================================
-
-/**
- * Represents a playing field (simplified - no gameSlots).
- */
-export interface FlowField {
-  /** Unique identifier for the field */
-  id: string;
-  /** Display name (e.g., "Feld 1", "Main Field") */
-  name: string;
-  /** Display order for sorting fields */
-  order: number;
-  /** Optional color for visual coding */
-  color?: string;
-}
-
-// ============================================================================
 // Gameday Metadata
 // ============================================================================
 
@@ -434,8 +416,6 @@ export interface FlowState {
   nodes: FlowNode[];
   /** All edges connecting nodes */
   edges: FlowEdge[];
-  /** Available playing fields */
-  fields: FlowField[];
   /** Global team pool (v2) - teams that can be assigned to any game */
   globalTeams: GlobalTeam[];
   /** Global team groups - for organizing teams into sections */
@@ -855,21 +835,6 @@ export function createStageToGameEdge(
 }
 
 /**
- * Creates a new field with default values.
- */
-export function createFlowField(
-  id: string,
-  name: string,
-  order: number
-): FlowField {
-  return {
-    id,
-    name,
-    order,
-  };
-}
-
-/**
  * Creates an empty flow state.
  */
 export function createEmptyFlowState(): FlowState {
@@ -888,7 +853,6 @@ export function createEmptyFlowState(): FlowState {
     },
     nodes: [],
     edges: [],
-    fields: [],
     globalTeams: [],
     globalTeamGroups: [],
   };

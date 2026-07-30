@@ -13,7 +13,7 @@ import i18n from '../../i18n/testConfig';
 import { useDesignerController } from '../../hooks/useDesignerController';
 import { useFlowState } from '../../hooks/useFlowState';
 import { gamedayApi } from '../../api/gamedayApi';
-import type { GamedayMetadata, FlowNode, FlowEdge, FieldNode, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
+import type { GamedayMetadata, FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
 
 vi.mock('../../hooks/useDesignerController');
 vi.mock('../../hooks/useFlowState');
@@ -35,7 +35,6 @@ describe('Final Coverage Polish', () => {
   const defaultFlowState = {
     nodes: [] as FlowNode[],
     edges: [] as FlowEdge[],
-    fields: [] as FieldNode[],
     globalTeams: [] as GlobalTeam[],
     globalTeamGroups: [] as GlobalTeamGroup[],
     selectedNode: null,
@@ -44,7 +43,7 @@ describe('Final Coverage Polish', () => {
     canUndo: false,
     canRedo: false,
     stats: { fieldCount: 0, gameCount: 0, teamCount: 0 },
-    exportState: vi.fn().mockReturnValue({ nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [] }),
+    exportState: vi.fn().mockReturnValue({ nodes: [], edges: [], globalTeams: [], globalTeamGroups: [] }),
     importState: vi.fn(),
     updateMetadata: vi.fn(),
     addGameNode: vi.fn(),
@@ -135,7 +134,6 @@ describe('Final Coverage Polish', () => {
         metadata: { ...defaultMetadata, status: 'PUBLISHED' },
         nodes: [mockField, mockStage, mockGame],
         edges: [],
-        fields: [mockField],
         selectedNode: mockGame,
         globalTeams: [],
         globalTeamGroups: [],
@@ -203,7 +201,6 @@ describe('Final Coverage Polish', () => {
         metadata: { ...defaultMetadata, status: 'PUBLISHED' },
         nodes: [mockField, mockStage, mockGame],
         edges: [],
-        fields: [mockField],
         selectedNode: mockGame,
         globalTeams: [],
         globalTeamGroups: [],

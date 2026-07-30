@@ -47,7 +47,6 @@ describe('Coverage Expansion - ListDesignerApp & useFlowState', () => {
     designer_data: {
       nodes: [],
       edges: [],
-      fields: [],
       globalTeams: [],
       globalTeamGroups: [],
     }
@@ -196,7 +195,6 @@ describe('Coverage Expansion - ListDesignerApp & useFlowState', () => {
         const emptyState: FlowState = {
             nodes: [],
             edges: [],
-            fields: [],
             globalTeams: [],
             globalTeamGroups: []
         };
@@ -207,7 +205,6 @@ describe('Coverage Expansion - ListDesignerApp & useFlowState', () => {
     const stateWithIncompleteGame: FlowState = {
         ...emptyState,
         metadata: mockGameday as unknown as GamedayMetadata,
-        fields: [{ id: 'f1', name: 'F1', order: 0 }],
         nodes: [{ id: 'g1', type: 'game', data: { standing: '' }, position: { x: 0, y: 0 } } as unknown as FlowNode]
     };
     const errors2 = validateForExport(stateWithIncompleteGame);
@@ -223,7 +220,6 @@ it('covers exportToStructuredTemplate fallbacks', () => {
             { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1' }, position: { x: 0, y: 0 } } as unknown as FlowNode
         ],
         edges: [],
-        fields: [],
         globalTeams: [],
         globalTeamGroups: []
     };

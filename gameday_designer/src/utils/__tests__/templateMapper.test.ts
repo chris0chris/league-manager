@@ -43,7 +43,6 @@ describe('templateMapper', () => {
     const flowState: Partial<FlowState> = {
       nodes,
       edges: [],
-      fields: [],
       globalTeams: teams,
       globalTeamGroups: groups,
     };
@@ -71,7 +70,7 @@ describe('templateMapper', () => {
         data: { stage: 'Preliminary', stageType: 'STANDARD', standing: 'A1', homeTeamId: 't1', awayTeamId: 't2', official: null, breakAfter: 0, startTime: '10:30', manualTime: true }
       } as FlowNode,
     ];
-    const flowState = { nodes, edges: [], fields: [], globalTeams: teams, globalTeamGroups: groups } as unknown as FlowState;
+    const flowState = { nodes, edges: [], globalTeams: teams, globalTeamGroups: groups } as unknown as FlowState;
 
     const template = genericizeFlowState(flowState, 'Times Test');
 
@@ -105,7 +104,7 @@ describe('templateMapper', () => {
     };
 
     const currentState: FlowState = {
-      nodes: [], edges: [], fields: [], globalTeams: teams, globalTeamGroups: groups,
+      nodes: [], edges: [], globalTeams: teams, globalTeamGroups: groups,
       metadata: null,
     } as unknown as FlowState;
 
@@ -149,8 +148,7 @@ describe('templateMapper', () => {
 
     const nodes: FlowNode[] = [field1, field2, stage1, stage2, game1, game2];
 
-    // `fields` is empty, mirroring the real desynced production data for gameday 895.
-    const flowState = { nodes, edges: [], fields: [], globalTeams: teams, globalTeamGroups: groups } as unknown as FlowState;
+    const flowState = { nodes, edges: [], globalTeams: teams, globalTeamGroups: groups } as unknown as FlowState;
 
     const template = genericizeFlowState(flowState, 'Multi-Field Test');
 

@@ -8,7 +8,6 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 import { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
-import { FieldNode } from '../../types/designer';
 
 // Mock the controller hook
 vi.mock('../../hooks/useDesignerController', () => ({
@@ -60,7 +59,6 @@ vi.mock('../../trackEvent', () => ({
 const defaultFlowState = {
   nodes: [] as FlowNode[],
   edges: [] as FlowEdge[],
-  fields: [] as FieldNode[],
   globalTeams: [{ id: '1', label: 'Test Team', groupId: null, order: 0, color: '#000' }] as GlobalTeam[],
   globalTeamGroups: [] as GlobalTeamGroup[],
   metadata: null,
@@ -68,7 +66,7 @@ const defaultFlowState = {
   canUndo: false,
   canRedo: false,
   stats: { fieldCount: 0, gameCount: 0, teamCount: 0 },
-  exportState: vi.fn().mockReturnValue({ nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [] }),
+  exportState: vi.fn().mockReturnValue({ nodes: [], edges: [], globalTeams: [], globalTeamGroups: [] }),
   importState: vi.fn(),
   updateMetadata: vi.fn(),
   addGlobalTeam: vi.fn(),
@@ -163,7 +161,6 @@ describe('ListDesignerApp', () => {
     flowState: {
       nodes: [] as FlowNode[],
       edges: [] as FlowEdge[],
-      fields: [] as FieldNode[],
       globalTeams: [] as GlobalTeam[],
       globalTeamGroups: [] as GlobalTeamGroup[],
       exportState: vi.fn().mockReturnValue({ nodes: [], edges: [] }),

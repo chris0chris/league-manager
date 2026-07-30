@@ -26,7 +26,6 @@ describe('Patch Coverage - useUndoRedo', () => {
     metadata: { name: '', date: '', start: '', format: '', author: 1, address: '', season: 1, league: 1, status: 'DRAFT' },
     nodes: [],
     edges: [],
-    fields: [],
     globalTeams: [],
     globalTeamGroups: [],
   };

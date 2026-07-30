@@ -10,7 +10,6 @@ import {
   isGameToGameEdge,
   createGameNode,
   createGameToGameEdge,
-  createFlowField,
   createEmptyFlowState,
   createEmptyFlowValidationResult,
   type GameNodeData,
@@ -185,26 +184,6 @@ describe('Flowchart Types', () => {
       });
     });
 
-    describe('createFlowField', () => {
-      it('creates a field with given parameters', () => {
-        const field = createFlowField('field-1', 'Feld 1', 0);
-
-        expect(field).toEqual({
-          id: 'field-1',
-          name: 'Feld 1',
-          order: 0,
-        });
-      });
-
-      it('creates multiple fields with different orders', () => {
-        const field1 = createFlowField('field-1', 'Main Field', 0);
-        const field2 = createFlowField('field-2', 'Side Field', 1);
-
-        expect(field1.order).toBe(0);
-        expect(field2.order).toBe(1);
-      });
-    });
-
     describe('createEmptyFlowState', () => {
       it('creates an empty flow state', () => {
         const state = createEmptyFlowState();
@@ -224,7 +203,6 @@ describe('Flowchart Types', () => {
           },
           nodes: [],
           edges: [],
-          fields: [],
           globalTeams: [],
           globalTeamGroups: [],
         });

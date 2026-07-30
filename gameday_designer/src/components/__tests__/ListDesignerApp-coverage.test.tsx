@@ -13,7 +13,7 @@ import i18n from '../../i18n/testConfig';
 import { useDesignerController } from '../../hooks/useDesignerController';
 import { useFlowState } from '../../hooks/useFlowState';
 import { gamedayApi } from '../../api/gamedayApi';
-import type { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup, FieldNode } from '../../types/flowchart';
+import type { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
 
 // Mock the hooks
 vi.mock('../../hooks/useDesignerController');
@@ -55,7 +55,6 @@ describe('ListDesignerApp Coverage', () => {
   const mockFlowState = {
     nodes: [] as FlowNode[],
     edges: [] as FlowEdge[],
-    fields: [] as FieldNode[],
     globalTeams: [] as GlobalTeam[],
     globalTeamGroups: [] as GlobalTeamGroup[],
     selectedNode: null,
@@ -68,7 +67,6 @@ describe('ListDesignerApp Coverage', () => {
       metadata: { id: 1, name: 'Test Gameday', date: '2026-05-01', start: '10:00', format: '6_2', author: 1, address: 'Test Field', season: 1, league: 1, status: 'DRAFT' },
       nodes: [],
       edges: [],
-      fields: [],
       globalTeams: [],
       globalTeamGroups: [],
     }),
@@ -148,7 +146,6 @@ describe('ListDesignerApp Coverage', () => {
     metadata: { id: 1, name: "Test Gameday", date: "2026-05-01", start: "10:00", format: "6_2", author: 1, address: "Test Field", season: 1, league: 1, status: 'DRAFT' },
     nodes: [] as FlowNode[],
     edges: [] as FlowEdge[],
-    fields: [] as FieldNode[],
     globalTeams: [
         { id: 'team-1', label: 'Team A', color: '#3498db', groupId: 'group-1', order: 0 },
         { id: 'team-2', label: 'Team B', color: '#e74c3c', groupId: 'group-1', order: 1 }
@@ -180,7 +177,6 @@ describe('ListDesignerApp Coverage', () => {
       metadata: { id: 1, name: "Test Gameday" },
       nodes: [],
       edges: [],
-      fields: [],
       globalTeams: [],
       globalTeamGroups: []
     }),
@@ -370,7 +366,6 @@ describe('ListDesignerApp Coverage', () => {
         ...defaultMockReturn,
         metadata: { ...defaultMockReturn.metadata, status: 'PUBLISHED' },
         nodes: [mockField, mockStage, mockGame],
-        fields: [mockField],
         selectedNode: mockGame,
         globalTeams: mockTeams,
         ui: {
@@ -405,7 +400,7 @@ describe('ListDesignerApp Coverage', () => {
     // State recorded during the initial load (initialLoadRef sets lastSavedStateRef to this).
     const stateA = {
       metadata: { id: 1, name: 'Test Gameday', date: '2026-05-01', start: '10:00', format: '6_2', author: 1, address: 'Test Field', season: 1, league: 1, status: 'DRAFT' },
-      nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [],
+      nodes: [], edges: [], globalTeams: [], globalTeamGroups: [],
     };
     // State returned after a "change" — differs from stateA so the auto-save diff check passes.
     const stateB = { ...stateA, metadata: { ...stateA.metadata, name: 'Changed' } };
@@ -583,8 +578,8 @@ describe('ListDesignerApp Coverage', () => {
 
   describe('BEH-005: auto-save debounce', () => {
     it('fires saveData at 1500ms, not 2000ms', async () => {
-      const stateA = { version: 1, nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [] };
-      const stateB = { version: 2, nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [] };
+      const stateA = { version: 1, nodes: [], edges: [], globalTeams: [], globalTeamGroups: [] };
+      const stateB = { version: 2, nodes: [], edges: [], globalTeams: [], globalTeamGroups: [] };
 
       const flowStateA = { ...mockFlowState, exportState: vi.fn().mockReturnValue(stateA) };
       const flowStateB = { ...mockFlowState, exportState: vi.fn().mockReturnValue(stateB) };

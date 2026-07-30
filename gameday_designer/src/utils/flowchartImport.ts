@@ -10,13 +10,13 @@ import type {
   FlowState,
   FlowNode,
   FlowEdge,
-  FlowField,
   GameInputHandle,
   GlobalTeam,
 } from '../types/flowchart';
 import {
-  createGameNode,
-  createFlowField,
+  createFieldNode,
+  createStageNode,
+  createGameNodeInStage,
   createGameToGameEdge,
 } from '../types/flowchart';
 import type { ScheduleJson } from '../types/designer';
@@ -43,6 +43,10 @@ export interface ImportResult {
 /**
  * Import schedule JSON into a flow state.
  *
+ * Builds the v2 container hierarchy (field -> stage -> game), matching
+ * what the designer canvas and hand-built schedules already use, instead
+ * of the older flat model (game.data.fieldId + a separate fields array).
+ *
  * @param json - The schedule JSON to import
  * @returns Import result with state or errors
  */
@@ -61,7 +65,6 @@ export function importFromScheduleJson(json: unknown): ImportResult {
 
   const nodes: FlowNode[] = [];
   const edges: FlowEdge[] = [];
-  const fields: FlowField[] = [];
   const globalTeams: GlobalTeam[] = [];
 
   // Track global teams and games for assignments
@@ -69,7 +72,7 @@ export function importFromScheduleJson(json: unknown): ImportResult {
   const gameNodeMap = new Map<string, string>(); // standing -> game id
   let teamOrder = 0;
 
-  // First pass: Create fields and game nodes, collect unique team labels
+  // First pass: Create field/stage/game container nodes, collect unique team labels
   for (let fieldIdx = 0; fieldIdx < json.length; fieldIdx++) {
     const fieldSchedule = json[fieldIdx] as ScheduleJson;
 
@@ -79,16 +82,18 @@ export function importFromScheduleJson(json: unknown): ImportResult {
       continue;
     }
 
-    // Create field
+    // Create field container node
     const fieldId = `field-${uuidv4()}`;
     const fieldName = String(fieldSchedule.field ?? `Field ${fieldIdx + 1}`);
-    fields.push(createFlowField(fieldId, fieldName, fieldIdx));
+    nodes.push(createFieldNode(fieldId, { name: fieldName, order: fieldIdx }));
 
-    // Create game nodes
     if (!Array.isArray(fieldSchedule.games)) {
       warnings.push(`Field "${fieldName}": No games found`);
       continue;
     }
+
+    // One stage container node per unique stage name within this field
+    const stageIdByName = new Map<string, string>();
 
     for (let gameIdx = 0; gameIdx < fieldSchedule.games.length; gameIdx++) {
       const game = fieldSchedule.games[gameIdx];
@@ -98,17 +103,24 @@ export function importFromScheduleJson(json: unknown): ImportResult {
         continue;
       }
 
+      const stageName = game.stage || 'Preliminary';
+      let stageId = stageIdByName.get(stageName);
+      if (!stageId) {
+        stageId = `stage-${uuidv4()}`;
+        nodes.push(createStageNode(stageId, fieldId, { name: stageName, order: stageIdByName.size }));
+        stageIdByName.set(stageName, stageId);
+      }
+
       const gameId = `game-${uuidv4()}`;
       const standing = game.standing || `Game ${gameIdx + 1}`;
 
       // Track for assignments
       gameNodeMap.set(standing, gameId);
 
-      // Create game node (teams will be assigned in second pass)
-      const gameNode = createGameNode(gameId, { x: 0, y: 0 }, {
-        stage: game.stage || 'Preliminary',
+      // Create game node inside its stage (teams will be assigned in second pass)
+      const gameNode = createGameNodeInStage(gameId, stageId, {
+        stage: stageName,
         standing,
-        fieldId,
         official: game.official ? parseTeamReference(game.official) : null,
         breakAfter: game.break_after ?? 0,
         homeTeamId: null,
@@ -210,7 +222,6 @@ export function importFromScheduleJson(json: unknown): ImportResult {
     state: {
       nodes,
       edges,
-      fields,
       globalTeams,
       globalTeamGroups: [],
     },

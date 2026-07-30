@@ -124,9 +124,7 @@ describe('GamedayApi', () => {
         address: 'Main Field',
         season: 1,
         league: 1,
-        designer_data: {
-            fields: []
-        }
+        designer_data: {}
       };
 
       mockAxiosInstance.get.mockResolvedValue({ data: mockGameday });

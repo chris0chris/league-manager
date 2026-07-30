@@ -8,7 +8,7 @@ import { GamedayProvider } from '../../context/GamedayContext';
 import i18n from '../../i18n/testConfig';
 import { useDesignerController } from '../../hooks/useDesignerController';
 import { useFlowState } from '../../hooks/useFlowState';
-import type { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup, FieldNode } from '../../types/flowchart';
+import type { FlowNode, FlowEdge, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
 
 // Mock the hooks
 vi.mock('../../hooks/useDesignerController');
@@ -59,7 +59,6 @@ vi.mock('../../api/gamedayApi', () => ({
 const defaultFlowState = {
   nodes: [] as FlowNode[],
   edges: [] as FlowEdge[],
-  fields: [] as FieldNode[],
   globalTeams: [] as GlobalTeam[],
   globalTeamGroups: [] as GlobalTeamGroup[],
   selectedNode: null,
@@ -68,7 +67,7 @@ const defaultFlowState = {
   canUndo: false,
   canRedo: false,
   stats: { fieldCount: 0, gameCount: 0, teamCount: 0 },
-  exportState: vi.fn().mockReturnValue({ nodes: [], edges: [], fields: [], globalTeams: [], globalTeamGroups: [] }),
+  exportState: vi.fn().mockReturnValue({ nodes: [], edges: [], globalTeams: [], globalTeamGroups: [] }),
   importState: vi.fn(),
   updateMetadata: vi.fn(),
   addGameNode: vi.fn(),
@@ -147,7 +146,6 @@ describe('ListDesignerApp - Integration Tests', () => {
     metadata: { id: 1, name: "Test Gameday", date: "2026-05-01", start: "10:00", format: "6_2", author: 1, address: "Test Field", season: 1, league: 1, status: 'DRAFT' },
     nodes: [] as FlowNode[],
     edges: [] as FlowEdge[],
-    fields: [] as FieldNode[],
     globalTeams: [] as GlobalTeam[],
     globalTeamGroups: [] as GlobalTeamGroup[],
     selectedNode: null,
@@ -176,7 +174,6 @@ describe('ListDesignerApp - Integration Tests', () => {
       metadata: {},
       nodes: [],
       edges: [],
-      fields: [],
       globalTeams: [],
       globalTeamGroups: []
     }),
