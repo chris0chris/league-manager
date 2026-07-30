@@ -10,11 +10,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 1
-      fail-fast: false
-      matrix:
-        python-version: [ '3.14' ]
     services:
       mysql:
         image: mysql:9.7
@@ -34,10 +29,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-      - name: 🐍⚙️ Set up Python ${{ matrix.python-version }}
+      - name: 🐍⚙️ Set up Python 3.14
         uses: actions/setup-python@v7
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.14'
       - name: 📦⬇️ Install Dependencies
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -53,7 +48,7 @@ jobs:
         uses: mikepenz/action-junit-report@v6
         if: success() || failure() # always run even if the previous step fails
         with:
-          summary: Test report python ${{ matrix.python-version }}
+          summary: Test report python 3.14
           require_tests: true
           report_paths: '**/junit.xml'
       - name: 📊 Upload Coverage to Codecov
