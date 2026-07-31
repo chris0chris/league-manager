@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.30](https://github.com/dachrisch/leaguesphere/compare/v4.13.29...v4.13.30) (2026-07-31)
+
+
+### Bug Fixes
+
+* **gameday-designer:** allow selecting any team for External Officials ([#1732](https://github.com/dachrisch/leaguesphere/issues/1732)) ([7c5c156](https://github.com/dachrisch/leaguesphere/commit/7c5c156f08e76802410a285be91fa10d0cac76a6))
+
 ## [4.13.29](https://github.com/dachrisch/leaguesphere/compare/v4.13.28...v4.13.29) (2026-07-31)
 
 
