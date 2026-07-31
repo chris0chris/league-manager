@@ -194,6 +194,16 @@ export function importFromScheduleJson(json: unknown): ImportResult {
               slot as GameInputHandle
             );
             edges.push(edge);
+
+            // Mirror the edge onto the game node's own data. GameTable and
+            // exportToScheduleJson read data.homeTeamDynamic/awayTeamDynamic
+            // directly and never re-derive it from edges (that only happens
+            // via the useEdgesState mutators the interactive canvas uses).
+            if (slot === 'home') {
+              gameNode.data.homeTeamDynamic = parsed;
+            } else {
+              gameNode.data.awayTeamDynamic = parsed;
+            }
           } else {
             warnings.push(
               `Game "${game.standing}": Referenced match "${parsed.matchName}" not found`
