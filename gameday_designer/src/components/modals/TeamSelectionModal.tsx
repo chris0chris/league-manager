@@ -14,6 +14,8 @@ export interface TeamSelectionModalProps {
   gamedayId?: number;
   mode?: 'single' | 'group';
   preselectedTeams?: GlobalTeam[];
+  /** Bypass the gameday's own league restriction, e.g. for external officials. */
+  allTeams?: boolean;
 }
 
 const TeamSelectionModal: React.FC<TeamSelectionModalProps> = ({
@@ -23,6 +25,7 @@ const TeamSelectionModal: React.FC<TeamSelectionModalProps> = ({
   gamedayId = 0,
   mode = 'single',
   preselectedTeams = [],
+  allTeams = false,
 }) => {
   const [availableTeams, setAvailableTeams] = useState<GlobalTeam[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,7 +36,7 @@ const TeamSelectionModal: React.FC<TeamSelectionModalProps> = ({
     const loadTeams = async () => {
       setLoading(true);
       try {
-        const teams = await designerApi.getLeagueTeams(gamedayId);
+        const teams = await designerApi.getLeagueTeams(gamedayId, { allTeams });
         const globalTeams = teams.map((t, i) => ({
           id: String(t.id),
           label: t.name,
@@ -51,7 +54,7 @@ const TeamSelectionModal: React.FC<TeamSelectionModalProps> = ({
     };
 
     loadTeams();
-  }, [show, gamedayId]);
+  }, [show, gamedayId, allTeams]);
 
   const handleConfirm = (selectedTeams: GlobalTeam[]) => {
     onSelect(selectedTeams);

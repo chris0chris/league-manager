@@ -667,6 +667,7 @@ const ListDesignerApp: React.FC = () => {
         gamedayId={id ? parseInt(id) : 0}
         mode={teamSelectionContext?.side === 'group' ? 'group' : 'single'}
         preselectedTeams={teamSelectionContext?.side === 'group' ? flowState.globalTeams.filter(t => t.groupId === teamSelectionContext.slotId) : []}
+        allTeams={teamSelectionContext?.slotId === 'group-officials'}
       />
 
       <TemplateLibraryModal

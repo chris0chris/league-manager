@@ -20,9 +20,13 @@ vi.mock('../../hooks/useFlowState', () => ({
 
 // Mock TeamSelectionModal to expose a trigger button for tests
 vi.mock('../modals/TeamSelectionModal', () => ({
-  default: ({ show, onSelect }: { show: boolean; onSelect: (teams: GlobalTeam[]) => void }) =>
+  default: ({ show, onSelect, allTeams }: { show: boolean; onSelect: (teams: GlobalTeam[]) => void; allTeams?: boolean }) =>
     show ? (
-      <button data-testid="mock-team-select" onClick={() => onSelect([{ id: '99', label: 'Replaced Team', groupId: null, order: 0, color: '#000' }])}>
+      <button
+        data-testid="mock-team-select"
+        data-all-teams={String(!!allTeams)}
+        onClick={() => onSelect([{ id: '99', label: 'Replaced Team', groupId: null, order: 0, color: '#000' }])}
+      >
         Select Team
       </button>
     ) : null,
@@ -257,6 +261,40 @@ describe('ListDesignerApp', () => {
 
       expect(mockHandlers.handleReplaceGlobalTeam).toHaveBeenCalledWith('team-1', { id: 99, text: 'Replaced Team' });
       expect(mockHandlers.handleAssignTeam).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('External officials team picker', () => {
+    it('requests all teams (not just the league) when adding to the External Officials group', async () => {
+      const officialsGroup: GlobalTeamGroup = { id: 'group-officials', name: 'External Officials', order: -1 };
+      (useFlowState as Mock).mockReturnValue({
+        ...defaultFlowState,
+        globalTeams: [],
+        globalTeamGroups: [officialsGroup],
+      });
+      renderApp();
+
+      const addTeamBtn = await screen.findByTestId('add-team-button');
+      await act(async () => { addTeamBtn.click(); });
+
+      const selectBtn = await screen.findByTestId('mock-team-select');
+      expect(selectBtn).toHaveAttribute('data-all-teams', 'true');
+    });
+
+    it('keeps the league restriction for a regular team group', async () => {
+      const regularGroup: GlobalTeamGroup = { id: 'group-1', name: 'Gruppe A', order: 0 };
+      (useFlowState as Mock).mockReturnValue({
+        ...defaultFlowState,
+        globalTeams: [],
+        globalTeamGroups: [regularGroup],
+      });
+      renderApp();
+
+      const addTeamBtn = await screen.findByTestId('add-team-button');
+      await act(async () => { addTeamBtn.click(); });
+
+      const selectBtn = await screen.findByTestId('mock-team-select');
+      expect(selectBtn).toHaveAttribute('data-all-teams', 'false');
     });
   });
 

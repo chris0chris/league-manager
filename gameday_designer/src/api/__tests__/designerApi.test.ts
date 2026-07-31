@@ -513,4 +513,40 @@ describe('DesignerApi', () => {
       expect(result.gamedays).toHaveLength(2);
     });
   });
+
+  describe('getLeagueTeams', () => {
+    it('should fetch teams scoped to the gameday league by default', async () => {
+      mockAxiosInstance.get.mockResolvedValue({ data: [{ id: 1, name: 'Team A' }] });
+
+      const result = await designerApi.getLeagueTeams(42);
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith(
+        '/gamedays/42/league-teams/',
+        { params: undefined }
+      );
+      expect(result).toEqual([{ id: 1, name: 'Team A' }]);
+    });
+
+    it('should request scope=all when allTeams is true', async () => {
+      mockAxiosInstance.get.mockResolvedValue({ data: [] });
+
+      await designerApi.getLeagueTeams(42, { allTeams: true });
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith(
+        '/gamedays/42/league-teams/',
+        { params: { scope: 'all' } }
+      );
+    });
+
+    it('should not request scope=all when allTeams is false', async () => {
+      mockAxiosInstance.get.mockResolvedValue({ data: [] });
+
+      await designerApi.getLeagueTeams(42, { allTeams: false });
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith(
+        '/gamedays/42/league-teams/',
+        { params: undefined }
+      );
+    });
+  });
 });

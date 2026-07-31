@@ -271,9 +271,17 @@ class DesignerApi {
     return response.data;
   }
 
-  async getLeagueTeams(gamedayId: number): Promise<TeamRecord[]> {
+  /**
+   * List teams selectable for a gameday.
+   *
+   * @param options.allTeams - Bypass the gameday's own league restriction and
+   * return every team. Used for external officials, who are typically not
+   * part of the gameday's own league.
+   */
+  async getLeagueTeams(gamedayId: number, options?: { allTeams?: boolean }): Promise<TeamRecord[]> {
     const response = await this.client.get<TeamRecord[]>(
-      `/gamedays/${gamedayId}/league-teams/`
+      `/gamedays/${gamedayId}/league-teams/`,
+      { params: options?.allTeams ? { scope: 'all' } : undefined }
     );
     return response.data;
   }

@@ -209,6 +209,25 @@ class TestLeagueTeamsView:
         assert response.status_code == status.HTTP_200_OK
         assert response.data == []
 
+    def test_scope_all_bypasses_league_restriction(
+        self, api_client, staff_user, gameday, teams
+    ):
+        """?scope=all returns every team, not just the ones in the gameday's own league -
+        used for picking external officials from outside the gameday's league."""
+        slt = SeasonLeagueTeam.objects.create(
+            season=gameday.season, league=gameday.league
+        )
+        slt.teams.set(teams[:3])
+        api_client.force_authenticate(user=staff_user)
+
+        scoped_response = api_client.get(self.url(gameday.pk))
+        all_response = api_client.get(self.url(gameday.pk), {"scope": "all"})
+
+        assert len(scoped_response.data) == 3
+        assert len(all_response.data) == len(teams)
+        returned_ids = {item["id"] for item in all_response.data}
+        assert returned_ids == {t.pk for t in teams}
+
     def test_returns_404_for_unknown_gameday(self, api_client, staff_user):
         """Returns 404 when gameday does not exist."""
         api_client.force_authenticate(user=staff_user)

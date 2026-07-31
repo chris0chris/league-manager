@@ -597,6 +597,10 @@ class LeagueTeamsView(APIView):
     GET /api/designer/gamedays/<gameday_id>/league-teams/
     Returns teams in the gameday's league+season via SeasonLeagueTeam.
     Falls back to all teams if no SeasonLeagueTeam is configured.
+
+    Pass ?scope=all to skip the league restriction and return all teams
+    regardless of SeasonLeagueTeam - used when picking teams that aren't
+    part of the gameday's own league, e.g. external officials.
     """
 
     permission_classes = [IsAuthenticated]
@@ -605,9 +609,14 @@ class LeagueTeamsView(APIView):
         from gamedays.models import SeasonLeagueTeam, Team
 
         gameday = get_object_or_404(Gameday, pk=gameday_id)
-        slt = SeasonLeagueTeam.objects.filter(
-            season=gameday.season, league=gameday.league
-        ).first()
+        scope_all = request.query_params.get("scope") == "all"
+        slt = (
+            None
+            if scope_all
+            else SeasonLeagueTeam.objects.filter(
+                season=gameday.season, league=gameday.league
+            ).first()
+        )
 
         if slt:
             teams = slt.teams.select_related("association").all()
