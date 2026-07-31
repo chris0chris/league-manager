@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.29](https://github.com/dachrisch/leaguesphere/compare/v4.13.28...v4.13.29) (2026-07-31)
+
+
+### Bug Fixes
+
+* **gameday-designer:** preserve winner/loser refs when re-importing a schedule ([#1727](https://github.com/dachrisch/leaguesphere/issues/1727)) ([5d20b65](https://github.com/dachrisch/leaguesphere/commit/5d20b65f06e2653dcf4251fe5d356089463f4483))
+
 ## [4.13.28](https://github.com/dachrisch/leaguesphere/compare/v4.13.27...v4.13.28) (2026-07-31)
 
 
