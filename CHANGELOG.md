@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.31](https://github.com/dachrisch/leaguesphere/compare/v4.13.30...v4.13.31) (2026-08-01)
+
+
+### Bug Fixes
+
+* **gameday-designer:** drop dangling dynamic team references from applied templates ([#1734](https://github.com/dachrisch/leaguesphere/issues/1734)) ([bc4e3ac](https://github.com/dachrisch/leaguesphere/commit/bc4e3acf656da6b148f69d5cf1810b2b1f2f3b7b))
+
 ## [4.13.30](https://github.com/dachrisch/leaguesphere/compare/v4.13.29...v4.13.30) (2026-07-31)
 
 
