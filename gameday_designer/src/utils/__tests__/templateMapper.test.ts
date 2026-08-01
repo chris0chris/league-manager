@@ -157,4 +157,67 @@ describe('templateMapper', () => {
     expect(fieldByStanding.get('A1')).toBe(1);
     expect(fieldByStanding.get('B1')).toBe(2);
   });
+
+  describe('unresolvable winner/loser references', () => {
+    const groups: GlobalTeamGroup[] = [{ id: 'g1', name: 'Group A', order: 0 }];
+    const teams: GlobalTeam[] = [
+      { id: 't1', label: 'Team 1', groupId: 'g1', order: 0 },
+      { id: 't2', label: 'Team 2', groupId: 'g1', order: 1 },
+    ];
+
+    const baseSlot = {
+      field: 1, slot_order: 1, stage: 'Preliminary', stage_type: 'STANDARD' as const,
+      stage_category: 'preliminary' as const, break_after: 0,
+      home_group: 0, home_team: 0, home_reference: '',
+      away_group: 0, away_team: 1, away_reference: '',
+      official_group: null, official_team: null, official_reference: '',
+      start_time: '', manual_time: false,
+    };
+
+    it('wires an edge and keeps the dynamic reference when the source standing exists', () => {
+      const template = {
+        name: 'Test', description: '', num_teams: 2, num_fields: 1, num_groups: 1,
+        game_duration: 15, sharing: 'PRIVATE' as const,
+        slots: [
+          { ...baseSlot, slot_order: 1, standing: 'AF 1' },
+          { ...baseSlot, slot_order: 2, standing: 'VF 1', home_reference: 'Winner AF 1', home_group: null, home_team: null },
+        ],
+      };
+      const currentState: FlowState = {
+        nodes: [], edges: [], globalTeams: teams, globalTeamGroups: groups, metadata: null,
+      } as unknown as FlowState;
+
+      const result = applyGenericTemplate(template, currentState);
+
+      const vf1 = result.nodes.filter(isGameNode).find(n => n.data.standing === 'VF 1')!;
+      expect(vf1.data.homeTeamDynamic).toEqual({ type: 'winner', matchName: 'AF 1' });
+      expect(result.edges).toHaveLength(1);
+      expect(result.edges[0].targetHandle).toBe('home');
+    });
+
+    it('clears the dynamic reference instead of leaving a dangling matchName when the source standing does not exist', () => {
+      // Reproduces production bug (gameday 898, stage): a template slot's
+      // home_reference pointed at a standing ("Game 1") that doesn't match any
+      // slot's own `standing` in the same template. No edge could be wired,
+      // but homeTeamDynamic was set unconditionally regardless - so the
+      // canvas showed the slot as unassigned while export still emitted
+      // "Gewinner Game 1" for a match that doesn't exist anywhere.
+      const template = {
+        name: 'Test', description: '', num_teams: 2, num_fields: 1, num_groups: 1,
+        game_duration: 15, sharing: 'PRIVATE' as const,
+        slots: [
+          { ...baseSlot, slot_order: 1, standing: 'VF 1', home_reference: 'Winner Game 1', home_group: null, home_team: null },
+        ],
+      };
+      const currentState: FlowState = {
+        nodes: [], edges: [], globalTeams: teams, globalTeamGroups: groups, metadata: null,
+      } as unknown as FlowState;
+
+      const result = applyGenericTemplate(template, currentState);
+
+      const vf1 = result.nodes.filter(isGameNode).find(n => n.data.standing === 'VF 1')!;
+      expect(vf1.data.homeTeamDynamic).toBeNull();
+      expect(result.edges.filter(e => e.targetHandle === 'home')).toHaveLength(0);
+    });
+  });
 });

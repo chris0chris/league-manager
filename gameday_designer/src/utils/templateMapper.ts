@@ -394,6 +394,8 @@ export function applyGenericTemplate(template: GenericTemplate, currentState: Fl
         : targetGame.data.awayTeamDynamic;
       if (!dynamicRef) continue;
 
+      let resolved = false;
+
       if (isWinnerReference(dynamicRef) || isLoserReference(dynamicRef)) {
         const sourceGame = allGameNodes.find(g => g.data.standing === dynamicRef.matchName);
         if (sourceGame) {
@@ -404,6 +406,7 @@ export function applyGenericTemplate(template: GenericTemplate, currentState: Fl
             targetGame.id,
             slot
           ));
+          resolved = true;
         }
       } else if (isRankReference(dynamicRef) || isGroupRankReference(dynamicRef)) {
         const sourceStage = newNodes.find(n => isStageNode(n) && n.id === dynamicRef.stageId);
@@ -416,6 +419,21 @@ export function applyGenericTemplate(template: GenericTemplate, currentState: Fl
             slot,
             isGroupRankReference(dynamicRef) ? dynamicRef.groupName : undefined
           ));
+          resolved = true;
+        }
+      }
+
+      // A dynamic reference that can't be resolved to a real source game/stage
+      // (e.g. a template slot's home_reference/away_reference pointing at a
+      // standing that doesn't match any slot in the same template) must not be
+      // left as data with no backing edge - GameTable and exportToScheduleJson
+      // read this field directly and would otherwise show/export a phantom
+      // "Winner of X" for a match that doesn't exist.
+      if (!resolved) {
+        if (slot === 'home') {
+          targetGame.data.homeTeamDynamic = null;
+        } else {
+          targetGame.data.awayTeamDynamic = null;
         }
       }
     }
