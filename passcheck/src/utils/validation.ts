@@ -1,7 +1,7 @@
 import { Player, Roster, TeamValidator } from "../common/types";
 import { Message, MessageColor } from "../context/MessageContext";
 
-abstract class BaseValidator {
+export abstract class BaseValidator {
   check(roster: Roster, player: Player | null = null): boolean {
     if (!this.isValid(roster, player)) {
       return false;
@@ -77,7 +77,7 @@ class JerseyNumberBetweenValidator extends BaseValidator {
     this.minimumNumber = minimumNumber;
     this.maximumNumber = maximumNumber;
   }
-  isValid(roster: Roster, player: Player | null): boolean {
+  isValid(_roster: Roster, player: Player | null): boolean {
     if (!player) {
       return false;
     }

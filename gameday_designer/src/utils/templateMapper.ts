@@ -51,12 +51,13 @@ export function genericizeFlowState(state: FlowState, name: string, description:
   );
 
   const resolveTeam = (teamId: string | null, dynamicRef: unknown) => {
-    if (dynamicRef) {
-      if (isWinnerReference(dynamicRef)) return { reference: `Winner ${dynamicRef.matchName}` };
-      if (isLoserReference(dynamicRef)) return { reference: `Loser ${dynamicRef.matchName}` };
-      if (isGroupTeamReference(dynamicRef)) return { group: dynamicRef.group, team: dynamicRef.team };
-      if (isGroupRankReference(dynamicRef)) return { reference: `Rank ${dynamicRef.place} ${dynamicRef.groupName} from ${dynamicRef.stageName}` };
-      if (isRankReference(dynamicRef)) return { reference: `Rank ${dynamicRef.place} from ${dynamicRef.stageName}` };
+    if (dynamicRef && typeof dynamicRef === 'object') {
+      const ref = dynamicRef as TeamReference;
+      if (isWinnerReference(ref)) return { reference: `Winner ${ref.matchName}` };
+      if (isLoserReference(ref)) return { reference: `Loser ${ref.matchName}` };
+      if (isGroupTeamReference(ref)) return { group: ref.group, team: ref.team };
+      if (isGroupRankReference(ref)) return { reference: `Rank ${ref.place} ${ref.groupName} from ${ref.stageName}` };
+      if (isRankReference(ref)) return { reference: `Rank ${ref.place} from ${ref.stageName}` };
     }
 
     if (teamId) {
@@ -73,7 +74,7 @@ export function genericizeFlowState(state: FlowState, name: string, description:
   };
 
   // Resolve team assignment from an edge when dynamicRef/teamId are both absent
-  const resolveTeamFromEdge = (gameId: string, targetHandle: 'home' | 'away'): { reference?: string } => {
+  const resolveTeamFromEdge = (gameId: string, targetHandle: 'home' | 'away'): { group?: number; team?: number; reference?: string } => {
     const edge = state.edges.find(e =>
       e.target === gameId && e.targetHandle === targetHandle
     );
@@ -141,8 +142,8 @@ export function genericizeFlowState(state: FlowState, name: string, description:
       }
     }
 
-    let home = resolveTeam(node.data.homeTeamId, node.data.homeTeamDynamic);
-    let away = resolveTeam(node.data.awayTeamId, node.data.awayTeamDynamic);
+    let home: { group?: number; team?: number; reference?: string } = resolveTeam(node.data.homeTeamId, node.data.homeTeamDynamic);
+    let away: { group?: number; team?: number; reference?: string } = resolveTeam(node.data.awayTeamId, node.data.awayTeamDynamic);
 
     // Fall back to edge-based resolution for TBD progression slots
     if (!hasValue(home)) home = resolveTeamFromEdge(node.id, 'home');
@@ -459,18 +460,14 @@ function parseReference(ref: string, nodes: FlowNode[]) {
         return { type: 'loser' as const, matchName: ref.replace('Loser ', '') };
     }
     
-    // Rank formats:
-    // Rank {place} from {stageName}
-    // Rank {place} {groupName} from {stageName}
     const rankMatch = ref.match(/^Rank (\d+)(?: (.*?))? from (.*)$/);
     if (rankMatch) {
         const place = parseInt(rankMatch[1], 10);
         const groupName = rankMatch[2];
         const stageName = rankMatch[3];
         
-        // Find stage node by name
         const stageNode = nodes.find(n => isStageNode(n) && n.data.name === stageName);
-        if (stageNode) {
+        if (stageNode && isStageNode(stageNode)) {
             if (groupName) {
                 return {
                     type: 'groupRank' as const,

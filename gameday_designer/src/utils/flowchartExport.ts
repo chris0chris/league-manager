@@ -85,8 +85,8 @@ export function exportToStructuredTemplate(state: FlowState): StructuredTemplate
         standing: game.data.standing,
         home: deriveTeamReference(game, 'home', globalTeams),
         away: deriveTeamReference(game, 'away', globalTeams),
-        official: game.data.official,
-        breakAfter: game.data.breakAfter,
+        official: game.data.official ?? undefined,
+        breakAfter: game.data.breakAfter || undefined,
       })),
     };
   });

@@ -14,6 +14,7 @@ describe('Tournament Generation with Empty Initial Pool (#697)', () => {
       {
         name: 'Group Stage',
         category: 'preliminary',
+        stageType: 'STANDARD',
         progressionMode: 'round_robin',
         config: { mode: 'round_robin', teamCount: 3, doubleRound: false },
         fieldAssignment: 'split',
@@ -22,6 +23,7 @@ describe('Tournament Generation with Empty Initial Pool (#697)', () => {
       {
         name: 'Playoffs',
         category: 'final',
+        stageType: 'STANDARD',
         progressionMode: 'placement',
         config: { mode: 'placement', positions: 4, format: 'single_elimination' },
         fieldAssignment: 0,

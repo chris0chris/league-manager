@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { Card, Button } from 'react-bootstrap';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import FieldSection from './list/FieldSection';
-import { GameResultsTable } from './GameResultsTable';
+import { GameResultsTable, ScoreEdit } from './GameResultsTable';
 import MetadataTeamPoolRow from './MetadataTeamPoolRow';
 import type { FlowNode, FlowEdge, StageNode, GlobalTeam, GlobalTeamGroup, GamedayMetadata, FlowValidationResult, HighlightedElement } from '../types/flowchart';
 import { isStageNode, getFieldNodes } from '../types/flowchart';
@@ -32,13 +32,12 @@ export interface ListCanvasProps {
   onAddGlobalTeam: (groupId: string) => void;
   onUpdateGlobalTeam: (teamId: string, data: Partial<Omit<GlobalTeam, 'id'>>) => void;
   onDeleteGlobalTeam: (teamId: string) => void;
-  onReplaceGlobalTeam: (teamId: string, newTeam: { id: number; text: string }) => void;
   onReorderGlobalTeam: (teamId: string, direction: 'up' | 'down') => void;
   onAddGlobalTeamGroup: () => void;
   onUpdateGlobalTeamGroup: (groupId: string, data: Partial<Omit<GlobalTeamGroup, 'id'>>) => void;
   onDeleteGlobalTeamGroup: (groupId: string) => void;
   onReorderGlobalTeamGroup: (groupId: string, direction: 'up' | 'down') => void;
-  onShowTeamSelection: (id: string, mode?: 'group' | 'replace' | 'official') => void;
+  onShowTeamSelection: (id: string, mode: 'group' | 'replace' | 'official' | 'home' | 'away') => void;
   getTeamUsage: (teamId: string) => { gameId: string; slot: 'home' | 'away' }[];
   onAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
   onSwapTeams: (gameId: string) => void;
@@ -59,7 +58,7 @@ export interface ListCanvasProps {
   onAddOfficials?: () => void;
   resultsMode?: boolean;
   gameResults?: import('../types/designer').GameResultsDisplay[];
-  onSaveBulkResults?: (results: Record<string, unknown>) => Promise<void>;
+  onSaveBulkResults?: (results: Record<string, ScoreEdit>) => Promise<void>;
   readOnly?: boolean;
   // Metadata + Team Pool Row props
   metadata: GamedayMetadata;
@@ -89,7 +88,6 @@ const ListCanvas: React.FC<ListCanvasProps> = (props) => {
     onAddGlobalTeam,
     onUpdateGlobalTeam,
     onDeleteGlobalTeam,
-    onReplaceGlobalTeam,
     onReorderGlobalTeam,
     onAddGlobalTeamGroup,
     onUpdateGlobalTeamGroup,
@@ -187,7 +185,6 @@ const ListCanvas: React.FC<ListCanvasProps> = (props) => {
           onAddGlobalTeam={onAddGlobalTeam}
           onUpdateGlobalTeam={onUpdateGlobalTeam}
           onDeleteGlobalTeam={onDeleteGlobalTeam}
-          onReplaceGlobalTeam={onReplaceGlobalTeam}
           onReorderGlobalTeam={onReorderGlobalTeam}
           onAddGlobalTeamGroup={onAddGlobalTeamGroup}
           onUpdateGlobalTeamGroup={onUpdateGlobalTeamGroup}

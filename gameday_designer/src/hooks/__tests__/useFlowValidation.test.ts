@@ -17,7 +17,8 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
-import type { FlowNode, FlowEdge, GameToGameEdge, TeamToGameEdge } from '../../types/flowchart';
+import type { FlowNode, FlowEdge, GameToGameEdge, TeamToGameEdge, GlobalTeam, GamedayMetadata } from '../../types/flowchart';
+import type { TeamReference } from '../../types/designer';
 
 const validMetadata = { id: 1, name: 'Test', date: '2099-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
 
@@ -36,14 +37,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -51,12 +52,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: 'team1',
             awayTeamId: 'team2',
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -73,14 +79,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -88,12 +94,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: 'team1',
             awayTeamId: 'team2',
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -102,12 +113,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamId: null,
+            awayTeamId: null,
             standing: 'Game 2',
             homeTeamDynamic: { type: 'winner', matchName: 'Game 1' },
             awayTeamDynamic: { type: 'loser', matchName: 'Game 1' },
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -116,22 +132,22 @@ describe('useFlowValidation', () => {
       const edges: FlowEdge[] = [
         {
           id: 'edge1',
-          type: 'game-to-game',
+          type: 'gameToGame',
           source: 'game1',
           target: 'game2',
           sourceHandle: 'winner',
           targetHandle: 'home',
           data: { outputType: 'winner' },
-        } as GameToGameEdge,
+        } as unknown as GameToGameEdge,
         {
           id: 'edge2',
-          type: 'game-to-game',
+          type: 'gameToGame',
           source: 'game1',
           target: 'game2',
           sourceHandle: 'loser',
           targetHandle: 'away',
           data: { outputType: 'loser' },
-        } as GameToGameEdge,
+        } as unknown as GameToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], validMetadata));
@@ -147,14 +163,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -162,12 +178,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: null,
             awayTeamId: 'team2',
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -186,14 +207,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -201,12 +222,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: 'team1',
             awayTeamId: null,
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -225,14 +251,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -240,12 +266,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: null,
             awayTeamId: null,
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -264,14 +295,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -279,12 +310,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: 'team1',
             awayTeamId: 'team2',
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -293,12 +329,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 2',
             homeTeamId: null,
             awayTeamId: null,
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -307,22 +348,22 @@ describe('useFlowValidation', () => {
       const edges: FlowEdge[] = [
         {
           id: 'edge1',
-          type: 'game-to-game',
+          type: 'gameToGame',
           source: 'game1',
           target: 'game2',
           sourceHandle: 'winner',
           targetHandle: 'home',
           data: { outputType: 'winner' },
-        } as GameToGameEdge,
+        } as unknown as GameToGameEdge,
         {
           id: 'edge2',
-          type: 'game-to-game',
+          type: 'gameToGame',
           source: 'game1',
           target: 'game2',
           sourceHandle: 'loser',
           targetHandle: 'away',
           data: { outputType: 'loser' },
-        } as GameToGameEdge,
+        } as unknown as GameToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], validMetadata));
@@ -338,14 +379,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -353,13 +394,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
             standing: 'Game 1',
             homeTeamId: null,
             homeTeamDynamic: { type: 'winner', matchName: 'Game 2' },
             awayTeamId: null,
+            awayTeamDynamic: null,
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -368,13 +413,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
             standing: 'Game 2',
             homeTeamId: null,
             homeTeamDynamic: { type: 'winner', matchName: 'Game 1' },
             awayTeamId: null,
+            awayTeamDynamic: null,
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -389,7 +438,7 @@ describe('useFlowValidation', () => {
           sourceHandle: 'winner',
           targetHandle: 'home',
           data: { sourcePort: 'winner', targetPort: 'home' },
-        } as GameToGameEdge,
+        } as unknown as GameToGameEdge,
         {
           id: 'edge2',
           type: 'gameToGame',
@@ -398,7 +447,7 @@ describe('useFlowValidation', () => {
           sourceHandle: 'winner',
           targetHandle: 'home',
           data: { sourcePort: 'winner', targetPort: 'home' },
-        } as GameToGameEdge,
+        } as unknown as GameToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], validMetadata));
@@ -419,24 +468,24 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0 },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0 },
           position: { x: 0, y: 0 },
         },
-        { id: 'g1', type: 'game', parentId: 'stage1', data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' }, position: { x: 0, y: 0 } },
-        { id: 'g2', type: 'game', parentId: 'stage1', data: { standing: 'G2', homeTeamId: 't3', awayTeamId: 't4' }, position: { x: 0, y: 0 } },
-        { id: 'g3', type: 'game', parentId: 'stage1', data: { standing: 'G3' }, position: { x: 0, y: 0 } },
+        { id: 'g1', type: 'game', parentId: 'stage1', data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G1', homeTeamId: 't1', awayTeamId: 't2', fieldId: null, official: null }, position: { x: 0, y: 0 } },
+        { id: 'g2', type: 'game', parentId: 'stage1', data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G2', homeTeamId: 't3', awayTeamId: 't4', fieldId: null, official: null }, position: { x: 0, y: 0 } },
+        { id: 'g3', type: 'game', parentId: 'stage1', data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G3', homeTeamId: null, awayTeamId: null, fieldId: null, official: null }, position: { x: 0, y: 0 } },
       ];
 
       const edges: FlowEdge[] = [
-        { id: 'e1', type: 'gameToGame', source: 'g1', target: 'g3', sourceHandle: 'winner', targetHandle: 'home', data: { sourcePort: 'winner', targetPort: 'home' } } as GameToGameEdge,
-        { id: 'e2', type: 'gameToGame', source: 'g2', target: 'g3', sourceHandle: 'winner', targetHandle: 'away', data: { sourcePort: 'winner', targetPort: 'away' } } as GameToGameEdge,
+        { id: 'e1', type: 'gameToGame', source: 'g1', target: 'g3', sourceHandle: 'winner', targetHandle: 'home', data: { sourcePort: 'winner', targetPort: 'home' } } as unknown as GameToGameEdge,
+        { id: 'e2', type: 'gameToGame', source: 'g2', target: 'g3', sourceHandle: 'winner', targetHandle: 'away', data: { sourcePort: 'winner', targetPort: 'away' } } as unknown as GameToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], validMetadata));
@@ -452,14 +501,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0 },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
@@ -468,18 +517,18 @@ describe('useFlowValidation', () => {
           parentId: 'stage1',
           data: { label: 'Team A', reference: { type: 'static', name: 'Team A' } },
           position: { x: 0, y: 0 },
-        },
+        } as unknown as FlowNode,
         {
           id: 'game1',
           type: 'game',
           parentId: 'stage1',
-          data: { standing: 'Game 1', official: { type: 'static', name: 'Team A' } },
+          data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'Game 1', homeTeamId: null, awayTeamId: null, fieldId: null, official: { type: 'static', name: 'Team A' } },
           position: { x: 0, y: 0 },
         },
       ];
 
       const edges: FlowEdge[] = [
-        { id: 'e1', type: 'teamToGame', source: 'team1', target: 'game1', targetHandle: 'home', data: { targetPort: 'home' } } as TeamToGameEdge,
+        { id: 'e1', type: 'teamToGame', source: 'team1', target: 'game1', targetHandle: 'home', data: { targetPort: 'home' } } as unknown as TeamToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], validMetadata));
@@ -492,14 +541,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0 },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
@@ -508,18 +557,18 @@ describe('useFlowValidation', () => {
           parentId: 'stage1',
           data: { label: 'Team B', reference: { type: 'static', name: 'Team B' } },
           position: { x: 0, y: 0 },
-        },
+        } as unknown as FlowNode,
         {
           id: 'game1',
           type: 'game',
           parentId: 'stage1',
-          data: { standing: 'Game 1', official: { type: 'static', name: 'Team B' } },
+          data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'Game 1', homeTeamId: null, awayTeamId: null, fieldId: null, official: { type: 'static', name: 'Team B' } },
           position: { x: 0, y: 0 },
         },
       ];
 
       const edges: FlowEdge[] = [
-        { id: 'e1', type: 'teamToGame', source: 'team1', target: 'game1', targetHandle: 'away', data: { targetPort: 'away' } } as TeamToGameEdge,
+        { id: 'e1', type: 'teamToGame', source: 'team1', target: 'game1', targetHandle: 'away', data: { targetPort: 'away' } } as unknown as TeamToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], validMetadata));
@@ -531,14 +580,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -546,12 +595,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: 'team-a',
             awayTeamId: 'team-b',
             fieldId: 'field1',
-            official: 'team-a',
-            startTime: null,
+            official: 'team-a' as unknown as TeamReference,
           },
           position: { x: 0, y: 0 },
         },
@@ -577,14 +631,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -592,12 +646,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: 'team-a',
             awayTeamId: 'team-b',
             fieldId: 'field1',
-            official: 'team-b',
-            startTime: null,
+            official: 'team-b' as unknown as TeamReference,
           },
           position: { x: 0, y: 0 },
         },
@@ -625,14 +684,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -640,12 +699,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Group A',
             homeTeamId: 'team1',
             awayTeamId: 'team2',
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -654,12 +718,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Group A',
             homeTeamId: 'team3',
             awayTeamId: 'team4',
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -679,14 +748,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -694,12 +763,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: 'team1',
             awayTeamId: 'team2',
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -708,12 +782,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 2',
             homeTeamId: 'team3',
             awayTeamId: 'team4',
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -732,14 +811,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -751,7 +830,7 @@ describe('useFlowValidation', () => {
             reference: { type: 'static', teamId: 'team-a' },
           },
           position: { x: 0, y: 0 },
-        },
+        } as unknown as FlowNode,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], validMetadata));
@@ -767,14 +846,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
         {
@@ -786,18 +865,23 @@ describe('useFlowValidation', () => {
             reference: { type: 'static', teamId: 'team-a' },
           },
           position: { x: 0, y: 0 },
-        },
+        } as unknown as FlowNode,
         {
           id: 'game1',
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: null,
             awayTeamId: 'team2',
             fieldId: 'field1',
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -806,11 +890,11 @@ describe('useFlowValidation', () => {
       const edges: FlowEdge[] = [
         {
           id: 'edge1',
-          type: 'team-to-game',
+          type: 'teamToGame',
           source: 'team1',
           target: 'game1',
           targetHandle: 'home',
-        } as TeamToGameEdge,
+        } as unknown as TeamToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], validMetadata));
@@ -826,20 +910,25 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'game1',
           type: 'game',
-          parentId: null,
+          parentId: undefined,
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: 'team1',
             awayTeamId: 'team2',
             fieldId: null,
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -858,8 +947,8 @@ describe('useFlowValidation', () => {
         {
           id: 'stage1',
           type: 'stage',
-          parentId: null,
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          parentId: undefined,
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
       ];
@@ -877,7 +966,7 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
@@ -885,12 +974,17 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'field1', // Invalid: game parent must be stage
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: 'team1',
             awayTeamId: 'team2',
             fieldId: null,
             official: null,
-            startTime: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -915,11 +1009,11 @@ describe('useFlowValidation', () => {
             reference: { type: 'static', teamId: 'team-a' },
           },
           position: { x: 0, y: 0 },
-        },
+        } as unknown as FlowNode,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], validMetadata));
-
+      
       expect(result.current.isValid).toBe(false);
       const containerError = result.current.errors.find(e => e.id === 'team1_outside_container');
       expect(containerError).toBeDefined();
@@ -931,7 +1025,7 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
@@ -943,7 +1037,7 @@ describe('useFlowValidation', () => {
             reference: { type: 'static', teamId: 'team-a' },
           },
           position: { x: 0, y: 0 },
-        },
+        } as unknown as FlowNode,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, [], [], [], validMetadata));
@@ -960,7 +1054,7 @@ describe('useFlowValidation', () => {
           id: 'stage1',
           type: 'stage',
           parentId: 'nonexistent',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0, progressionMode: 'manual' },
           position: { x: 0, y: 0 },
         },
       ];
@@ -980,18 +1074,25 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'game1',
           type: 'game',
-          parentId: null,
+          parentId: undefined,
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             homeTeamId: 'team1',
             awayTeamId: 'team2',
             fieldId: 'field1',
+            official: null,
             startTime: '10:00',
             duration: 50,
           },
@@ -1000,12 +1101,19 @@ describe('useFlowValidation', () => {
         {
           id: 'game2',
           type: 'game',
-          parentId: null,
+          parentId: undefined,
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 2',
             homeTeamId: 'team3',
             awayTeamId: 'team4',
             fieldId: 'field1',
+            official: null,
             startTime: '10:30',
             duration: 50,
           },
@@ -1026,14 +1134,14 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0 },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
@@ -1041,10 +1149,18 @@ describe('useFlowValidation', () => {
           type: 'game',
           parentId: 'stage1',
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'Game 1',
             startTime: 'invalid',
             homeTeamId: 't1',
             awayTeamId: 't2',
+            fieldId: null,
+            official: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -1059,28 +1175,28 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Real Field Name', order: 0 },
+          data: { type: 'field', name: 'Real Field Name', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0 },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'game1',
           type: 'game',
           parentId: 'stage1',
-          data: { standing: 'G1', startTime: '10:00', duration: 60, homeTeamId: 't1', awayTeamId: 't2' },
+          data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G1', fieldId: null, official: null, startTime: '10:00', duration: 60, homeTeamId: 't1', awayTeamId: 't2' },
           position: { x: 0, y: 0 },
         },
         {
           id: 'game2',
           type: 'game',
           parentId: 'stage1',
-          data: { standing: 'G2', startTime: '10:30', duration: 60, homeTeamId: 't3', awayTeamId: 't4' },
+          data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G2', fieldId: null, official: null, startTime: '10:30', duration: 60, homeTeamId: 't3', awayTeamId: 't4' },
           position: { x: 0, y: 0 },
         },
       ];
@@ -1099,21 +1215,21 @@ describe('useFlowValidation', () => {
           id: 'stage1',
           type: 'stage',
           parentId: 'nonexistent-field',
-          data: { name: 'Stage 1', order: 0 },
+          data: { type: 'stage', name: 'Stage 1', category: 'preliminary', stageType: 'STANDARD', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'game1',
           type: 'game',
           parentId: 'stage1',
-          data: { standing: 'G1', startTime: '10:00', duration: 60, homeTeamId: 't1', awayTeamId: 't2' },
+          data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G1', fieldId: null, official: null, startTime: '10:00', duration: 60, homeTeamId: 't1', awayTeamId: 't2' },
           position: { x: 0, y: 0 },
         },
         {
           id: 'game2',
           type: 'game',
           parentId: 'stage1',
-          data: { standing: 'G2', startTime: '10:30', duration: 60, homeTeamId: 't3', awayTeamId: 't4' },
+          data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G2', fieldId: null, official: null, startTime: '10:30', duration: 60, homeTeamId: 't3', awayTeamId: 't4' },
           position: { x: 0, y: 0 },
         },
       ];
@@ -1130,11 +1246,20 @@ describe('useFlowValidation', () => {
         {
           id: 'game1',
           type: 'game',
-          parentId: null,
+          parentId: undefined,
           data: {
+            type: 'game',
+            stage: 'Preliminary',
+            stageType: 'STANDARD',
+            breakAfter: 0,
+            homeTeamDynamic: null,
+            awayTeamDynamic: null,
             standing: 'G1',
+            homeTeamId: null,
+            awayTeamId: null,
             startTime: '10:00',
             fieldId: null, // No field
+            official: null,
           },
           position: { x: 0, y: 0 },
         },
@@ -1147,8 +1272,8 @@ describe('useFlowValidation', () => {
 
   describe('Self-Play Validation', () => {
     const nodes: FlowNode[] = [
-      { id: 'f1', type: 'field', data: { name: 'F1', order: 0 }, position: { x: 0, y: 0 } },
-      { id: 's1', type: 'stage', parentId: 'f1', data: { name: 'S1', order: 0 }, position: { x: 0, y: 0 } },
+      { id: 'f1', type: 'field', data: { type: 'field', name: 'F1', order: 0 }, position: { x: 0, y: 0 } },
+      { id: 's1', type: 'stage', parentId: 'f1', data: { type: 'stage', name: 'S1', category: 'preliminary', stageType: 'STANDARD', order: 0 }, position: { x: 0, y: 0 } },
     ];
 
     it('should detect when same static team ID is assigned to both slots', () => {
@@ -1158,7 +1283,7 @@ describe('useFlowValidation', () => {
           id: 'g1',
           type: 'game',
           parentId: 's1',
-          data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't1' },
+          data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G1', homeTeamId: 't1', awayTeamId: 't1', fieldId: null, official: null },
           position: { x: 0, y: 0 },
         },
       ];
@@ -1172,13 +1297,13 @@ describe('useFlowValidation', () => {
     it('should detect when same dynamic source is assigned to both slots', () => {
       const gameNodes: FlowNode[] = [
         ...nodes,
-        { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' }, position: { x: 0, y: 0 } },
-        { id: 'g2', type: 'game', parentId: 's1', data: { standing: 'G2' }, position: { x: 0, y: 0 } },
+        { id: 'g1', type: 'game', parentId: 's1', data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G1', homeTeamId: 't1', awayTeamId: 't2', fieldId: null, official: null }, position: { x: 0, y: 0 } },
+        { id: 'g2', type: 'game', parentId: 's1', data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G2', homeTeamId: null, awayTeamId: null, fieldId: null, official: null }, position: { x: 0, y: 0 } },
       ];
 
       const edges: FlowEdge[] = [
-        { id: 'e1', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'winner', targetHandle: 'home' } as GameToGameEdge,
-        { id: 'e2', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'winner', targetHandle: 'away' } as GameToGameEdge,
+        { id: 'e1', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'winner', targetHandle: 'home' } as unknown as GameToGameEdge,
+        { id: 'e2', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'winner', targetHandle: 'away' } as unknown as GameToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(gameNodes, edges, [], [], validMetadata));
@@ -1190,13 +1315,13 @@ describe('useFlowValidation', () => {
     it('should allow winner vs loser of same game', () => {
       const gameNodes: FlowNode[] = [
         ...nodes,
-        { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' }, position: { x: 0, y: 0 } },
-        { id: 'g2', type: 'game', parentId: 's1', data: { standing: 'G2' }, position: { x: 0, y: 0 } },
+        { id: 'g1', type: 'game', parentId: 's1', data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G1', homeTeamId: 't1', awayTeamId: 't2', fieldId: null, official: null }, position: { x: 0, y: 0 } },
+        { id: 'g2', type: 'game', parentId: 's1', data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G2', homeTeamId: null, awayTeamId: null, fieldId: null, official: null }, position: { x: 0, y: 0 } },
       ];
 
       const edges: FlowEdge[] = [
-        { id: 'e1', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'winner', targetHandle: 'home' } as GameToGameEdge,
-        { id: 'e2', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'loser', targetHandle: 'away' } as GameToGameEdge,
+        { id: 'e1', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'winner', targetHandle: 'home' } as unknown as GameToGameEdge,
+        { id: 'e2', type: 'gameToGame', source: 'g1', target: 'g2', sourceHandle: 'loser', targetHandle: 'away' } as unknown as GameToGameEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(gameNodes, edges, [], [], validMetadata));
@@ -1208,9 +1333,9 @@ describe('useFlowValidation', () => {
   describe('Cyclic Stage Reference Validation', () => {
     it('should detect when a game references its own parent Ranking Stage', () => {
       const nodes: FlowNode[] = [
-        { id: 'f1', type: 'field', data: { name: 'F1', order: 0 }, position: { x: 0, y: 0 } },
-        { id: 's1', type: 'stage', parentId: 'f1', data: { name: 'S1', order: 0, stageType: 'RANKING' }, position: { x: 0, y: 0 } },
-        { id: 'g1', type: 'game', parentId: 's1', data: { standing: 'G1' }, position: { x: 0, y: 0 } },
+        { id: 'f1', type: 'field', data: { type: 'field', name: 'F1', order: 0 }, position: { x: 0, y: 0 } },
+        { id: 's1', type: 'stage', parentId: 'f1', data: { type: 'stage', name: 'S1', category: 'preliminary', stageType: 'RANKING', order: 0 }, position: { x: 0, y: 0 } },
+        { id: 'g1', type: 'game', parentId: 's1', data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', breakAfter: 0, homeTeamDynamic: null, awayTeamDynamic: null, standing: 'G1', homeTeamId: null, awayTeamId: null, fieldId: null, official: null }, position: { x: 0, y: 0 } },
       ];
 
       const edges: FlowEdge[] = [
@@ -1221,7 +1346,7 @@ describe('useFlowValidation', () => {
           target: 'g1',
           targetHandle: 'home',
           data: { sourceRank: 1, targetPort: 'home' },
-        } as FlowEdge,
+        } as unknown as FlowEdge,
       ];
 
       const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], validMetadata));
@@ -1237,7 +1362,7 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
       ];
@@ -1260,7 +1385,7 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
       ];
@@ -1269,13 +1394,13 @@ describe('useFlowValidation', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { type: 'field', name: 'Field 1', order: 0 },
           position: { x: 0, y: 0 },
         },
         {
           id: 'field2',
           type: 'field',
-          data: { name: 'Field 2', order: 1 },
+          data: { type: 'field', name: 'Field 2', order: 1 },
           position: { x: 0, y: 0 },
         },
       ];

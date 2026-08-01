@@ -22,7 +22,7 @@ const MessageContext = createContext<{
 }>({
   message: {text: ''},
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  setMessage: (value: Message) => {},
+  setMessage: (_value: Message) => {},
 });
 
 export default MessageContext;

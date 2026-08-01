@@ -30,9 +30,9 @@ describe('edgeAnalysis', () => {
     id,
     type: 'field',
     data: {
+      type: 'field',
       name,
       order,
-      description: '',
     },
     position: { x: 0, y: 0 },
   });
@@ -46,10 +46,11 @@ describe('edgeAnalysis', () => {
     id,
     type: 'stage',
     data: {
+      type: 'stage',
       name,
       order,
-      stageType: 'group',
-      description: '',
+      category: 'preliminary',
+      stageType: 'STANDARD',
     },
     position: { x: 0, y: 0 },
     parentId,
@@ -63,7 +64,11 @@ describe('edgeAnalysis', () => {
     id,
     type: 'game',
     data: {
+      type: 'game',
+      stage: 'Test Stage',
+      stageType: 'STANDARD',
       standing,
+      fieldId: null,
       homeTeamId: null,
       awayTeamId: null,
       homeTeamDynamic: null,
@@ -88,7 +93,7 @@ describe('edgeAnalysis', () => {
     sourceHandle,
     targetHandle,
     type: 'gameToGame',
-  });
+  } as FlowEdge);
 
   describe('findSourceGameForReference', () => {
     it('returns null when no edges exist', () => {

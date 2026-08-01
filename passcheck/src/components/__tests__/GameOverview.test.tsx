@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import GameOverview from '../GameOverview';
@@ -21,7 +20,7 @@ vi.mock('../../hooks/useMessage', () => ({
 }));
 
 const mockNavigate = vi.fn();
-const mockParams = { gamedayId: undefined };
+const mockParams: { gamedayId: string | undefined } = { gamedayId: undefined };
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');

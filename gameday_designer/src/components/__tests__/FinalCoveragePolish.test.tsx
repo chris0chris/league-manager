@@ -2,7 +2,6 @@
  * Final coverage polish tests - Triggering CI
  */
 
-import React from 'react';
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
@@ -103,6 +102,14 @@ describe('Final Coverage Polish', () => {
       <GamedayMetadataAccordion 
         metadata={defaultMetadata as unknown as GamedayMetadata} 
         onUpdate={onUpdate}
+        onClearAll={vi.fn()}
+        onDelete={vi.fn()}
+        onPublish={vi.fn()}
+        onUnlock={vi.fn()}
+        onHighlight={vi.fn()}
+        validation={{ isValid: true, errors: [], warnings: [] }}
+        readOnly={false}
+        hasData={true}
       />
     );
 

@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react';
 import { formatTeamReference, parseTeamReference, getTeamReferenceDisplayName } from '../../utils/teamReference';
 import { validateForExport, exportToStructuredTemplate } from '../../utils/flowchartExport';
 import { FlowState, GamedayMetadata, FlowNode } from '../../types/flowchart';
-import { GamedayListEntry } from '../../types';
+import { Gameday } from '../../types';
 
 // Mock gamedayApi
 vi.mock('../../api/gamedayApi', () => ({
@@ -33,7 +33,7 @@ vi.mock('../../api/gamedayApi', () => ({
 }));
 
 describe('Coverage Expansion - ListDesignerApp & useFlowState', () => {
-  const mockGameday: GamedayListEntry = {
+  const mockGameday: Gameday = {
     id: 1,
     name: 'Coverage Test',
     date: '2026-06-01',
@@ -225,7 +225,7 @@ it('covers exportToStructuredTemplate fallbacks', () => {
     };
         const template = exportToStructuredTemplate(state);
         expect(template.metadata.name).toBe('Tournament Template');
-        expect(template.stages[0].games[0].home.name).toBe('TBD');
+        expect((template.stages[0].games[0].home as { name: string }).name).toBe('TBD');
     });
   });
 });

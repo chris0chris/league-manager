@@ -16,10 +16,10 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('creates a new GameToGameEdge from source to target game', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
-      let game2Id: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
 
       // Setup: Create field, stage, and two games
       act(() => {
@@ -36,7 +36,7 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
       });
 
       // Act: Create edge from Game 1 (winner) to Game 2 (home slot)
-      let edgeId: string;
+      let edgeId!: string;
       act(() => {
         edgeId = result.current.addGameToGameEdge(game1Id, 'winner', game2Id, 'home');
       });
@@ -55,11 +55,11 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('clears static team assignment when edge is created', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
-      let game2Id: string;
-      let teamId: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
+      let teamId!: string;
 
       // Setup: Create field, stage, two games, and a team
       act(() => {
@@ -100,10 +100,10 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('sets homeTeamDynamic field when targeting home slot', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
-      let game2Id: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
 
       act(() => {
         fieldId = result.current.addFieldNode().id;
@@ -136,10 +136,10 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('sets awayTeamDynamic field when targeting away slot', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
-      let game2Id: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
 
       act(() => {
         fieldId = result.current.addFieldNode().id;
@@ -172,11 +172,11 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('creates multiple edges from same source game', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
-      let game2Id: string;
-      let game3Id: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
+      let game3Id!: string;
 
       act(() => {
         fieldId = result.current.addFieldNode().id;
@@ -214,10 +214,10 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('returns unique edge ID', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
-      let game2Id: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
 
       act(() => {
         fieldId = result.current.addFieldNode().id;
@@ -232,8 +232,8 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
         game2Id = result.current.addGameNodeInStage(stageId, { standing: 'Game 2' }).id;
       });
 
-      let edgeId1: string;
-      let edgeId2: string;
+      let edgeId1!: string;
+      let edgeId2!: string;
 
       act(() => {
         edgeId1 = result.current.addGameToGameEdge(game1Id, 'winner', game2Id, 'home');
@@ -253,10 +253,10 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('removes edge targeting specific game slot', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
-      let game2Id: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
 
       act(() => {
         fieldId = result.current.addFieldNode().id;
@@ -290,10 +290,10 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('clears homeTeamDynamic when removing edge from home slot', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
-      let game2Id: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
 
       act(() => {
         fieldId = result.current.addFieldNode().id;
@@ -330,10 +330,10 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('clears awayTeamDynamic when removing edge from away slot', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
-      let game2Id: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
 
       act(() => {
         fieldId = result.current.addFieldNode().id;
@@ -370,10 +370,10 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('only removes edge for specified slot, not other slot', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
-      let game2Id: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
 
       act(() => {
         fieldId = result.current.addFieldNode().id;
@@ -414,9 +414,9 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('does nothing if no edge exists for specified slot', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
 
       act(() => {
         fieldId = result.current.addFieldNode().id;
@@ -444,11 +444,11 @@ describe('useFlowState - Game-to-Game Edge Management', () => {
     it('replacing dynamic edge with static team clears edge first', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
-      let game1Id: string;
-      let game2Id: string;
-      let teamId: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
+      let teamId!: string;
 
       act(() => {
         fieldId = result.current.addFieldNode().id;

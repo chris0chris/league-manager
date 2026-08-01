@@ -11,7 +11,7 @@ import type {
   FieldNode,
   StageNode,
   FlowNode,
-  StageType,
+  StageCategory,
 } from '../flowchart';
 import {
   isFieldNodeData,
@@ -66,17 +66,18 @@ describe('Container Types - Field and Stage', () => {
       expect(data.order).toBe(0);
     });
 
-    it('supports all stage types', () => {
-      const stageTypes: StageType[] = ['preliminary', 'final', 'placement', 'custom'];
+    it('supports all stage categories', () => {
+      const stageCategories: StageCategory[] = ['preliminary', 'final', 'placement', 'custom'];
 
-      stageTypes.forEach((stageType) => {
+      stageCategories.forEach((category) => {
         const data: StageNodeData = {
           type: 'stage',
-          name: stageType,
-          stageType,
+          name: category,
+          category,
+          stageType: 'STANDARD',
           order: 0,
         };
-        expect(data.stageType).toBe(stageType);
+        expect(data.category).toBe(category);
       });
     });
   });
@@ -97,6 +98,7 @@ describe('Container Types - Field and Stage', () => {
           type: 'stage',
           name: 'Preliminary',
           category: 'preliminary',
+          stageType: 'STANDARD',
           order: 0,
         };
         expect(isFieldNodeData(data)).toBe(false);
@@ -121,6 +123,7 @@ describe('Container Types - Field and Stage', () => {
           type: 'stage',
           name: 'Final',
           category: 'final',
+          stageType: 'STANDARD',
           order: 1,
         };
         expect(isStageNodeData(data)).toBe(true);
@@ -171,6 +174,7 @@ describe('Container Types - Field and Stage', () => {
             type: 'stage',
             name: 'Preliminary',
             category: 'preliminary',
+            stageType: 'STANDARD',
             order: 0,
           },
           style: { width: 300, height: 150 },
@@ -190,6 +194,7 @@ describe('Container Types - Field and Stage', () => {
             type: 'stage',
             name: 'Final',
             category: 'final',
+            stageType: 'STANDARD',
             order: 0,
           },
           style: { width: 300, height: 150 },
@@ -239,6 +244,7 @@ describe('Container Types - Field and Stage', () => {
             type: 'stage',
             name: 'Preliminary',
             category: 'preliminary',
+            stageType: 'STANDARD',
             order: 0,
           },
           style: { width: 300, height: 150 },
@@ -274,7 +280,7 @@ describe('Container Types - Field and Stage', () => {
             label: 'A',
           },
         };
-        expect(isContainerNode(node as FlowNode)).toBe(false);
+        expect(isContainerNode(node as unknown as FlowNode)).toBe(false);
       });
     });
   });
@@ -453,13 +459,14 @@ describe('Container Types - Field and Stage', () => {
         parentId: 'field-1',
         position: { x: 20, y: 60 },
         data: {
-          type: 'stage',
-          name: 'Preliminary',
-          category: 'preliminary',
-          order: 0,
-        },
-        style: { width: 300, height: 150 },
-        extent: 'parent',
+            type: 'stage',
+            name: 'Preliminary',
+            category: 'preliminary',
+            stageType: 'STANDARD',
+            order: 0,
+          },
+          style: { width: 300, height: 150 },
+          extent: 'parent',
         expandParent: true,
         draggable: false,
         selectable: true,

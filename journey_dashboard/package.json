@@ -30,6 +30,7 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run --coverage",
     "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
     "eslint": "eslint ./src",
     "eslint:junit": "eslint ./src --format junit -o /tmp/eslint/js-lint-results-journey_dashboard.xml",
     "eslint:json": "eslint ./src --format json -o js-lint-results-journey_dashboard.json",

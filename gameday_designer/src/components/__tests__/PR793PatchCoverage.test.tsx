@@ -23,7 +23,7 @@ vi.mock('../../api/designerApi', () => ({
 
 describe('Patch Coverage - useUndoRedo', () => {
   const initialState: FlowState = {
-    metadata: { name: '', date: '', start: '', format: '', author: 1, address: '', season: 1, league: 1, status: 'DRAFT' },
+    metadata: { id: 0, name: '', date: '', start: '', format: '', author: 1, address: '', season: 1, league: 1, status: 'DRAFT' },
     nodes: [],
     edges: [],
     globalTeams: [],
@@ -36,7 +36,7 @@ describe('Patch Coverage - useUndoRedo', () => {
     // Push 51 states to exceed 50 limit
     act(() => {
       for (let i = 1; i <= 51; i++) {
-        result.current.pushState({ ...initialState, metadata: { ...initialState.metadata, name: `State ${i}` } });
+        result.current.pushState({ ...initialState, metadata: { ...initialState.metadata!, name: `State ${i}` } } as FlowState);
       }
     });
     
@@ -59,7 +59,7 @@ describe('Patch Coverage - useUndoRedo', () => {
 
   it('covers undo and redo', () => {
     const { result } = renderHook(() => useUndoRedo(initialState));
-    const nextState = { ...initialState, metadata: { ...initialState.metadata, name: 'Next' } };
+    const nextState: FlowState = { ...initialState, metadata: { ...initialState.metadata!, name: 'Next' } };
     
     act(() => {
       result.current.pushState(nextState);
@@ -68,13 +68,13 @@ describe('Patch Coverage - useUndoRedo', () => {
     
     act(() => {
       const state = result.current.undo();
-      expect(state?.metadata.name).toBe('');
+      expect(state?.metadata?.name).toBe('');
     });
     expect(result.current.canRedo).toBe(true);
     
     act(() => {
       const state = result.current.redo();
-      expect(state?.metadata.name).toBe('Next');
+      expect(state?.metadata?.name).toBe('Next');
     });
   });
 
@@ -85,7 +85,7 @@ describe('Patch Coverage - useUndoRedo', () => {
     // We just need to hit the shift() line.
     act(() => {
       for (let i = 1; i <= 51; i++) {
-        result.current.pushState({ ...initialState, metadata: { ...initialState.metadata, name: `S${i}` } });
+        result.current.pushState({ ...initialState, metadata: { ...initialState.metadata!, name: `S${i}` } } as FlowState);
       }
     });
     
@@ -99,7 +99,7 @@ describe('Patch Coverage - useUndoRedo', () => {
     expect(result.current.undo()).toBeNull();
     
     act(() => {
-      result.current.pushState({ ...initialState, metadata: { ...initialState.metadata, name: 'S1' } });
+      result.current.pushState({ ...initialState, metadata: { ...initialState.metadata!, name: 'S1' } } as FlowState);
     });
     
     // redo on top of stack
@@ -111,9 +111,9 @@ describe('Patch Coverage - useUndoRedo', () => {
     });
     // Next pushState should be ignored
     act(() => {
-      result.current.pushState({ ...initialState, metadata: { ...initialState.metadata, name: 'Ignored' } });
+      result.current.pushState({ ...initialState, metadata: { ...initialState.metadata!, name: 'Ignored' } } as FlowState);
     });
-    expect(result.current.state.metadata.name).toBe('');
+    expect(result.current.state.metadata?.name).toBe('');
   });
 });
 
@@ -187,10 +187,18 @@ describe('Patch Coverage - GameTable handlers', () => {
       type: 'game',
       parentId: 's1',
       data: {
+        type: 'game',
+        stage: 'Preliminary',
+        stageType: 'STANDARD',
         standing: 'Game 1',
         startTime: '10:00',
         homeTeamId: 't1',
         awayTeamId: 't2',
+        fieldId: null,
+        official: null,
+        breakAfter: 0,
+        homeTeamDynamic: null,
+        awayTeamDynamic: null,
       },
       position: { x: 0, y: 0 },
     }

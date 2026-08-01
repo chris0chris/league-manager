@@ -41,13 +41,12 @@ export interface MetadataTeamPoolRowProps {
   onAddGlobalTeam: (groupId: string) => void;
   onUpdateGlobalTeam: (teamId: string, data: Partial<Omit<GlobalTeam, 'id'>>) => void;
   onDeleteGlobalTeam: (teamId: string) => void;
-  onReplaceGlobalTeam: (teamId: string, newTeam: { id: number; text: string }) => void;
   onReorderGlobalTeam: (teamId: string, direction: 'up' | 'down') => void;
   onAddGlobalTeamGroup: () => void;
   onUpdateGlobalTeamGroup: (groupId: string, data: Partial<Omit<GlobalTeamGroup, 'id'>>) => void;
   onDeleteGlobalTeamGroup: (groupId: string) => void;
   onReorderGlobalTeamGroup: (groupId: string, direction: 'up' | 'down') => void;
-  onShowTeamSelection: (id: string, mode?: 'group' | 'replace' | 'official') => void;
+  onShowTeamSelection: (id: string, mode: 'group' | 'replace' | 'official' | 'home' | 'away') => void;
   getTeamUsage: (teamId: string) => { gameId: string; slot: 'home' | 'away' }[];
   onAddOfficials?: () => void;
 }
@@ -75,7 +74,6 @@ const MetadataTeamPoolRow: React.FC<MetadataTeamPoolRowProps> = ({
   onAddGlobalTeam,
   onUpdateGlobalTeam,
   onDeleteGlobalTeam,
-  onReplaceGlobalTeam,
   onReorderGlobalTeam,
   onAddGlobalTeamGroup,
   onUpdateGlobalTeamGroup,
@@ -177,7 +175,6 @@ const MetadataTeamPoolRow: React.FC<MetadataTeamPoolRowProps> = ({
                 onAddTeam={onAddGlobalTeam}
                 onUpdate={onUpdateGlobalTeam}
                 onDelete={onDeleteGlobalTeam}
-                onReplace={onReplaceGlobalTeam}
                 onReorder={onReorderGlobalTeam}
                 onShowTeamSelection={onShowTeamSelection}
                 getTeamUsage={getTeamUsage}

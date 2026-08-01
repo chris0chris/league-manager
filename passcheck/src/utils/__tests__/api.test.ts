@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import axios, { AxiosError } from 'axios';
 import { apiGet, apiPut } from '../api';
@@ -7,9 +8,13 @@ vi.mock('axios');
 describe('api utilities', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
     localStorage.clear();
-    delete (window as Window & typeof globalThis & { location: unknown }).location;
-    (window as Window & typeof globalThis & { location: { href: string } }).location = { href: '' };
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { href: '' },
+      writable: true,
+    });
     vi.spyOn(window, 'alert').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -107,8 +112,7 @@ describe('api utilities', () => {
     });
 
     it('handles 401 error in production mode', async () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('MODE', 'production');
 
       const error = {
         response: { status: 401 },
@@ -119,12 +123,10 @@ describe('api utilities', () => {
       await apiGet('/test-url');
 
       expect(window.location.href).toBe('/scorecard/');
-      process.env.NODE_ENV = originalEnv;
     });
 
     it('shows alert in development mode for 401 error', async () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('MODE', 'development');
       localStorage.setItem('token', 'dev-token');
 
       const error = {
@@ -139,8 +141,6 @@ describe('api utilities', () => {
       expect(window.alert).toHaveBeenCalledWith(
         "localStorage.setItem('token', 'dev-token')"
       );
-
-      process.env.NODE_ENV = originalEnv;
     });
 
     it('throws ApiError for non-401 errors', async () => {

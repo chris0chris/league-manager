@@ -2,11 +2,10 @@
  * Tests for PublishConfirmationModal component
  */
 
-import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import PublishConfirmationModal from '../PublishConfirmationModal';
-import type { FlowValidationResult, FlowValidationError } from '../../../types/flowchart';
+import type { FlowValidationResult, FlowValidationError, FlowValidationErrorType, FlowValidationWarningType } from '../../../types/flowchart';
 import '../../../i18n/testConfig';
 
 describe('PublishConfirmationModal', () => {
@@ -51,7 +50,7 @@ describe('PublishConfirmationModal', () => {
       isValid: false,
       errors: [{ 
         id: 'e1', 
-        type: 'missing_teams', 
+        type: 'incomplete_game_inputs' as FlowValidationErrorType, 
         message: 'Custom Error Message', 
         affectedNodes: ['n1']
       }],
@@ -79,7 +78,7 @@ describe('PublishConfirmationModal', () => {
       errors: [],
       warnings: [{ 
         id: 'w1', 
-        type: 'field_overlap', 
+        type: 'no_teams' as FlowValidationWarningType, 
         message: 'Potential Issues Found',
         affectedNodes: ['node-1']
       }]
@@ -110,7 +109,7 @@ describe('PublishConfirmationModal', () => {
       isValid: false,
       errors: [{ 
         id: 'e1', 
-        type: 'field_overlap', 
+        type: 'field_overlap' as FlowValidationErrorType, 
         message: 'Overlap',
         affectedNodes: ['game-1']
       }],
@@ -137,7 +136,7 @@ describe('PublishConfirmationModal', () => {
   it('uses item.message when messageKey is missing', () => {
     const validation: FlowValidationResult = {
       isValid: false,
-      errors: [{ id: 'e1', type: 'unknown', message: 'Raw Error Message' }],
+      errors: [{ id: 'e1', type: 'incomplete_game_inputs' as FlowValidationErrorType, message: 'Raw Error Message', affectedNodes: [] }],
       warnings: []
     };
     render(
@@ -151,10 +150,11 @@ describe('PublishConfirmationModal', () => {
       isValid: false,
       errors: [{ 
         id: 'e1', 
-        type: 'overlap', 
-        // @ts-expect-error - testing specific message key
+        type: 'field_overlap' as FlowValidationErrorType, 
         messageKey: 'field_overlap' as unknown as string, 
-        messageParams: { game1: 'G1', game2: 'G2', field: 'F1' } 
+        messageParams: { game1: 'G1', game2: 'G2', field: 'F1' },
+        message: '',
+        affectedNodes: [],
       }],
       warnings: []
     };
@@ -174,10 +174,9 @@ describe('PublishConfirmationModal', () => {
 
     items.forEach(item => {
       mockOnHighlight.mockClear();
-      const validation = {
+      const validation: FlowValidationResult = {
         isValid: false,
-        // @ts-expect-error - testing various error types
-        errors: [{ ...item, message: `Error ${item.id}` } as unknown as FlowValidationError],
+        errors: [{ ...item, message: `Error ${item.id}`, type: item.type as FlowValidationErrorType, affectedNodes: item.affectedNodes } as unknown as FlowValidationError],
         warnings: []
       };
       

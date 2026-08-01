@@ -20,8 +20,8 @@ import type {
   StageNodeData,
   StageType,
   StageCategory,
-  TournamentStructure,
 } from '../types/flowchart';
+import type { TournamentStructure } from '../utils/tournamentGenerator';
 import {
   createFieldNode,
   createStageNode,
@@ -240,16 +240,15 @@ export function useNodesState(
   const updateNode = useCallback(
     (nodeId: string, data: Partial<TeamNodeData | GameNodeData | FieldNodeData | StageNodeData>) => {
       setNodes((prevNodes) => {
-        const updatedNodes = prevNodes.map((node) => {
+        const updatedNodes = prevNodes.map((node): FlowNode => {
           if (node.id === nodeId) {
-            return { ...node, data: { ...node.data, ...data } };
+            return { ...node, data: { ...node.data, ...data } } as FlowNode;
           }
           return node;
         });
 
         const updatedNode = updatedNodes.find((n) => n.id === nodeId);
 
-        // Time recalculation logic
         if (updatedNode && isStageNode(updatedNode) && 'startTime' in data) {
           const stage = updatedNode;
           const games = updatedNodes
@@ -258,10 +257,10 @@ export function useNodesState(
 
           if (games.length > 0) {
             const timeUpdates = recalculateStageGameTimes(stage, games);
-            return updatedNodes.map((node) => {
+            return updatedNodes.map((node): FlowNode => {
               const update = timeUpdates.find((u) => u.gameId === node.id);
               if (update && isGameNode(node) && !node.data.manualTime) {
-                return { ...node, data: { ...node.data, startTime: update.startTime } };
+                return { ...node, data: { ...node.data, startTime: update.startTime } } as FlowNode;
               }
               return node;
             });
@@ -279,10 +278,10 @@ export function useNodesState(
 
               if (games.length > 0) {
                 const timeUpdates = recalculateStageGameTimes(stage, games);
-                return updatedNodes.map((node) => {
+                return updatedNodes.map((node): FlowNode => {
                   const update = timeUpdates.find((u) => u.gameId === node.id);
                   if (update && isGameNode(node) && !node.data.manualTime) {
-                    return { ...node, data: { ...node.data, startTime: update.startTime } };
+                    return { ...node, data: { ...node.data, startTime: update.startTime } } as FlowNode;
                   }
                   return node;
                 });

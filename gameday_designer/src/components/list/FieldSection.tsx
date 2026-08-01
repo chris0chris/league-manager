@@ -28,7 +28,7 @@ export interface FieldSectionProps {
   globalTeams: GlobalTeam[];
   globalTeamGroups: GlobalTeamGroup[];
   highlightedElement?: HighlightedElement | null;
-  onUpdate: (nodeId: string, data: Partial<FieldNode['data']>) => void;
+  onUpdate: (nodeId: string, data: Record<string, unknown>) => void;
   onDelete: (nodeId: string) => void;
   onAddStage: (fieldId: string) => void;
   onSelectNode: (nodeId: string | null) => void;

@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -161,7 +160,7 @@ describe('GamedayDashboard tour', () => {
   });
 
   it('does not store a resume id when creating a gameday after the tour is already seen', async () => {
-    vi.mocked(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+    vi.mocked(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: async () => [{ id: 1, event_name: 'gd_tour_manual_build_completed', metadata: {}, created_at: '2026-07-19T00:00:00Z' }],
     });
@@ -201,7 +200,7 @@ describe('GamedayDashboard tour', () => {
     });
 
     it('force-shows the create-step tour on replay even after it was already seen', async () => {
-      vi.mocked(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(seenFetchResponse);
+      vi.mocked(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(seenFetchResponse);
 
       await renderDashboard();
       await waitFor(() => expect(capturedTourProps.run).toBe(false));
@@ -213,7 +212,7 @@ describe('GamedayDashboard tour', () => {
 
     it('tracks gd_tour_manual_build_started with replay: true', async () => {
       const { trackEvent } = await import('../../../trackEvent');
-      vi.mocked(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(seenFetchResponse);
+      vi.mocked(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(seenFetchResponse);
 
       await renderDashboard();
       await waitFor(() => expect(capturedTourProps.run).toBe(false));

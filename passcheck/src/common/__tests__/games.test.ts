@@ -64,7 +64,7 @@ describe('games utilities', () => {
       const mockVerification = {
         teamId: 'team1',
         gamedayId: 'gameday1',
-        data: { players: [] },
+        data: { official_name: '', note: null, roster: [] },
       };
       vi.mocked(api.apiPut).mockResolvedValue(undefined);
 
@@ -72,7 +72,7 @@ describe('games utilities', () => {
 
       expect(api.apiPut).toHaveBeenCalledWith(
         '/api/passcheck/roster/team1/gameday/gameday1',
-        { players: [] }
+        { official_name: '', note: null, roster: [] }
       );
     });
   });

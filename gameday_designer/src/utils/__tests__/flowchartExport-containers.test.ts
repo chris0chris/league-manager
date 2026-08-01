@@ -15,6 +15,7 @@ import {
   type GlobalTeam,
   type GlobalTeamGroup,
 } from '../../types/flowchart';
+import type { ScheduleJson } from '../../types/designer';
 
 describe('Flowchart Export - Container Hierarchy', () => {
   describe('exportToScheduleJson with container hierarchy', () => {
@@ -41,12 +42,13 @@ describe('Flowchart Export - Container Hierarchy', () => {
       };
 
       const result = exportToScheduleJson(state);
+      const data = result.data as ScheduleJson[] | undefined;
 
       expect(result.success).toBe(true);
-      expect(result.data).toHaveLength(1);
-      expect(result.data![0].field).toBe('Main Field');
-      expect(result.data![0].games).toHaveLength(1);
-      expect(result.data![0].games[0].stage).toBe('Preliminary');
+      expect(data).toHaveLength(1);
+      expect(data![0].field).toBe('Main Field');
+      expect(data![0].games).toHaveLength(1);
+      expect(data![0].games[0].stage).toBe('Preliminary');
     });
 
     it('derives stage name from parent stage node', () => {
@@ -72,9 +74,10 @@ describe('Flowchart Export - Container Hierarchy', () => {
       };
 
       const result = exportToScheduleJson(state);
+      const data = result.data as ScheduleJson[] | undefined;
 
       expect(result.success).toBe(true);
-      expect(result.data![0].games[0].stage).toBe('Final');
+      expect(data![0].games[0].stage).toBe('Final');
     });
 
     it('groups games by their container field', () => {
@@ -110,12 +113,13 @@ describe('Flowchart Export - Container Hierarchy', () => {
       };
 
       const result = exportToScheduleJson(state);
+      const data = result.data as ScheduleJson[] | undefined;
 
       expect(result.success).toBe(true);
-      expect(result.data).toHaveLength(2);
+      expect(data).toHaveLength(2);
 
-      const feld1Schedule = result.data!.find((s) => s.field === 'Feld 1');
-      const feld2Schedule = result.data!.find((s) => s.field === 'Feld 2');
+      const feld1Schedule = data!.find((s) => s.field === 'Feld 1');
+      const feld2Schedule = data!.find((s) => s.field === 'Feld 2');
 
       expect(feld1Schedule).toBeDefined();
       expect(feld1Schedule!.games).toHaveLength(1);
@@ -156,14 +160,15 @@ describe('Flowchart Export - Container Hierarchy', () => {
       };
 
       const result = exportToScheduleJson(state);
+      const data = result.data as ScheduleJson[] | undefined;
 
       expect(result.success).toBe(true);
-      expect(result.data).toHaveLength(1);
-      expect(result.data![0].field).toBe('Main Field');
-      expect(result.data![0].games).toHaveLength(2);
+      expect(data).toHaveLength(1);
+      expect(data![0].field).toBe('Main Field');
+      expect(data![0].games).toHaveLength(2);
 
-      const vrGame = result.data![0].games.find((g) => g.standing === 'VR1');
-      const frGame = result.data![0].games.find((g) => g.standing === 'Finale');
+      const vrGame = data![0].games.find((g: { standing: string }) => g.standing === 'VR1');
+      const frGame = data![0].games.find((g: { standing: string }) => g.standing === 'Finale');
 
       expect(vrGame).toBeDefined();
       expect(vrGame!.stage).toBe('Preliminary');
@@ -187,6 +192,7 @@ describe('Flowchart Export - Container Hierarchy', () => {
         data: {
           type: 'game' as const,
           stage: 'Preliminary',
+          stageType: 'STANDARD' as const,
           standing: 'VR1',
           fieldId: 'legacy-field-1',
           official: null,
@@ -208,10 +214,11 @@ describe('Flowchart Export - Container Hierarchy', () => {
       };
 
       const result = exportToScheduleJson(state);
+      const data = result.data as ScheduleJson[] | undefined;
 
       expect(result.success).toBe(true);
-      expect(result.data).toHaveLength(1);
-      expect(result.data![0].field).toBe('legacy-field-1');
+      expect(data).toHaveLength(1);
+      expect(data![0].field).toBe('legacy-field-1');
     });
   });
 
@@ -260,6 +267,7 @@ describe('Flowchart Export - Container Hierarchy', () => {
         data: {
           type: 'game' as const,
           stage: 'Preliminary',
+          stageType: 'STANDARD' as const,
           standing: 'HF1',
           fieldId: null,
           official: null,

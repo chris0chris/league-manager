@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
-import type { FlowNode } from '../../types/flowchart';
+import type { FlowNode, FieldNodeData, StageNodeData, GameNodeData } from '../../types/flowchart';
 
 const validMetadata = { id: 1, name: 'Test', date: '2026-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
 
@@ -11,21 +11,21 @@ describe('useFlowValidation - Stage Sequence', () => {
       {
         id: 'field1',
         type: 'field',
-        data: { name: 'Field 1', order: 0 },
+        data: { name: 'Field 1', order: 0 } as FieldNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage1',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 1', order: 0, startTime: '10:00', category: 'preliminary' },
+        data: { name: 'Stage 1', order: 0, startTime: '10:00', category: 'preliminary' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage2',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 2', order: 1, startTime: '09:00', category: 'preliminary' },
+        data: { name: 'Stage 2', order: 1, startTime: '09:00', category: 'preliminary' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -48,21 +48,21 @@ describe('useFlowValidation - Stage Sequence', () => {
       {
         id: 'field1',
         type: 'field',
-        data: { name: 'Field 1', order: 0 },
+        data: { name: 'Field 1', order: 0 } as FieldNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage1',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Playoffs', order: 0, category: 'final' },
+        data: { name: 'Playoffs', order: 0, category: 'final' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage2',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Pool Play', order: 1, category: 'preliminary' },
+        data: { name: 'Pool Play', order: 1, category: 'preliminary' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -86,7 +86,7 @@ describe('useFlowValidation - Stage Sequence', () => {
         id: 'stage1',
         type: 'stage',
         parentId: undefined, // Missing parent
-        data: { name: 'Stage 1', order: 0, category: 'preliminary' },
+        data: { name: 'Stage 1', order: 0, category: 'preliminary' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -103,14 +103,14 @@ describe('useFlowValidation - Stage Sequence', () => {
       {
         id: 'game1',
         type: 'game',
-        data: { standing: 'G1' },
+        data: { standing: 'G1' } as GameNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage1',
         type: 'stage',
         parentId: 'game1', // Invalid parent type
-        data: { name: 'Stage 1', order: 0, category: 'preliminary' },
+        data: { name: 'Stage 1', order: 0, category: 'preliminary' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
     ];

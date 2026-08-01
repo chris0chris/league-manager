@@ -13,6 +13,7 @@ import type {
   FlowNode,
   FlowEdge,
   GameNode,
+  StageNode,
   GameInputHandle,
   GameOutputHandle,
 } from '../types/flowchart';
@@ -26,7 +27,7 @@ import {
 import type { TeamReference } from '../types/designer';
 
 export function useEdgesState(
-  edges: FlowEdge[],
+  _edges: FlowEdge[],
   setEdges: React.Dispatch<React.SetStateAction<FlowEdge[]>>,
   setNodes: React.Dispatch<React.SetStateAction<FlowNode[]>>
 ) {

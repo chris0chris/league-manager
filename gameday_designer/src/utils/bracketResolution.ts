@@ -1,5 +1,6 @@
 import type { FlowNode, GameNode, GlobalTeam } from '../types/flowchart';
 import { isGameNode } from '../types/flowchart';
+import type { TeamReference } from '../types/designer';
 
 /**
  * Resolves winner/loser references in game nodes based on current scores.
@@ -13,8 +14,8 @@ export function resolveBracketReferences(nodes: FlowNode[], teams: GlobalTeam[])
   const teamMap = new Map<string, string>();
   teams.forEach(t => teamMap.set(t.id, t.label));
 
-  const resolveTeam = (ref: { type: string; matchName: string } | null, currentNodes: FlowNode[]): string | null => {
-    if (!ref || !ref.matchName) return null;
+  const resolveTeam = (ref: TeamReference | null, currentNodes: FlowNode[]): string | null => {
+    if (!ref || (ref.type !== 'winner' && ref.type !== 'loser') || !ref.matchName) return null;
 
     // Find the referenced game
     const sourceNode = currentNodes.find(n => 

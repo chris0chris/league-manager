@@ -9,7 +9,7 @@ import {
   isFieldNode,
   isStageNode,
 } from '../../types/flowchart';
-import type { FlowNode, GameNode } from '../../types/flowchart';
+import type { FlowNode, GameNode, FieldNode, StageNode, FieldNodeData, StageNodeData, GameNodeData } from '../../types/flowchart';
 
 describe('useNodesState', () => {
   const setupHook = (initialNodes: FlowNode[] = []) => {
@@ -43,7 +43,7 @@ describe('useNodesState', () => {
       const nodes = getNodes();
       expect(nodes).toHaveLength(1);
       expect(isFieldNode(nodes[0])).toBe(true);
-      expect(nodes[0].data.name).toBe('Feld 1');
+      expect((nodes[0] as FieldNode).data.name).toBe('Feld 1');
     });
 
     it('creates field with stage by default', () => {
@@ -116,7 +116,7 @@ describe('useNodesState', () => {
       });
 
       const nodes = getNodes();
-      expect(nodes[0].data.name).toBe('Updated Field');
+      expect((nodes[0] as FieldNode).data.name).toBe('Updated Field');
     });
   });
 
@@ -202,7 +202,7 @@ describe('useNodesState', () => {
         ids = result.current.ensureContainerHierarchy(fieldId);
       });
 
-      expect(ids?.fieldId).toBe(fieldId);
+      expect(ids!.fieldId).toBe(fieldId);
       expect(getNodes()).toHaveLength(2); // Field + new Stage
     });
 
@@ -214,7 +214,7 @@ describe('useNodesState', () => {
       
       let ids: { fieldId: string; stageId: string } | null = null;
       act(() => { ids = result.current.ensureContainerHierarchy(null); });
-      expect(ids?.fieldId).toBe(fieldId);
+      expect(ids!.fieldId).toBe(fieldId);
       expect(getNodes()).toHaveLength(2);
     });
 
@@ -236,8 +236,8 @@ describe('useNodesState', () => {
         ids = result.current.ensureContainerHierarchy(stageId);
       });
 
-      expect(ids?.fieldId).toBe(fieldId);
-      expect(ids?.stageId).toBe(stageId);
+      expect(ids!.fieldId).toBe(fieldId);
+      expect(ids!.stageId).toBe(stageId);
       expect(getNodes()).toHaveLength(2);
     });
 
@@ -255,8 +255,8 @@ describe('useNodesState', () => {
       act(() => {
         ids = result.current.ensureContainerHierarchy('invalid-id');
       });
-      expect(ids?.fieldId).toBe(fieldId);
-      expect(ids?.stageId).toBe(stageId);
+      expect(ids!.fieldId).toBe(fieldId);
+      expect(ids!.stageId).toBe(stageId);
     });
   });
 
@@ -272,12 +272,10 @@ describe('useNodesState', () => {
     it('adds multiple nodes at once', () => {
       const { result, getNodes } = setupHook();
       const structure = {
-        // @ts-expect-error - testing bulk add with partial objects
-        fields: [{ id: 'f1', type: 'field', data: { name: 'F1' } } as unknown as FieldNode],
-        // @ts-expect-error - testing bulk add with partial objects
-        stages: [{ id: 's1', type: 'stage', data: { name: 'S1' } } as unknown as StageNode],
-        // @ts-expect-error - testing bulk add with partial objects
-        games: [{ id: 'g1', type: 'game', data: { standing: 'G1' } } as unknown as GameNode],
+        fields: [{ id: 'f1', type: 'field', data: { name: 'F1' } as unknown as FieldNodeData, position: { x: 0, y: 0 } } as unknown as FieldNode],
+        stages: [{ id: 's1', type: 'stage', data: { name: 'S1' } as unknown as StageNodeData, position: { x: 0, y: 0 } } as unknown as StageNode],
+        games: [{ id: 'g1', type: 'game', data: { standing: 'G1' } as unknown as GameNodeData, position: { x: 0, y: 0 } } as unknown as GameNode],
+        edges: [],
       };
       act(() => { result.current.addBulkTournament(structure); });
       expect(getNodes()).toHaveLength(3);

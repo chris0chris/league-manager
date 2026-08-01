@@ -17,8 +17,9 @@ function createMockTeam(id: string, label: string, groupId: string | null = null
   return {
     id,
     label,
-    color: null,
+    color: undefined,
     groupId,
+    order: 0,
   };
 }
 
@@ -40,8 +41,10 @@ function createMockStage(
       type: 'stage',
       name,
       order,
+      category: progressionMode === 'placement' ? 'final' : 'preliminary',
+      stageType: 'STANDARD',
       progressionMode,
-      progressionConfig: progressionMode === 'placement' ? { mode: 'placement', positions: 4, format: 'single_elimination' } : null,
+      progressionConfig: progressionMode === 'placement' ? { mode: 'placement', positions: 4, format: 'single_elimination' } as const : undefined,
     },
     parentId,
   };
@@ -56,14 +59,17 @@ function createMockGame(id: string, standing: string, parentId: string): GameNod
     type: 'game',
     position: { x: 0, y: 0 },
     data: {
+      type: 'game',
+      stage: 'Group Stage',
+      stageType: 'STANDARD',
       standing,
+      fieldId: null,
+      official: null,
+      breakAfter: 0,
       homeTeamId: null,
       awayTeamId: null,
-      startTime: null,
-      manualStartTime: false,
-      breakAfter: null,
-      homeScore: null,
-      awayScore: null,
+      homeTeamDynamic: null,
+      awayTeamDynamic: null,
     },
     parentId,
   };
@@ -168,6 +174,7 @@ describe('teamAssignment', () => {
         ];
 
         const structure: TournamentStructure = {
+          fields: [],
           stages: [stage],
           games,
           edges: [],
@@ -229,6 +236,7 @@ describe('teamAssignment', () => {
         ];
 
         const structure: TournamentStructure = {
+          fields: [],
           stages: [stage1, stage2],
           games,
           edges: [],
@@ -263,6 +271,7 @@ describe('teamAssignment', () => {
         ];
 
         const structure: TournamentStructure = {
+          fields: [],
           stages: [stage],
           games,
           edges: [],
@@ -286,6 +295,7 @@ describe('teamAssignment', () => {
         const games: GameNode[] = [createMockGame('final', 'Final', 'stage1')];
 
         const structure: TournamentStructure = {
+          fields: [],
           stages: [stage],
           games,
           edges: [],
@@ -316,8 +326,11 @@ describe('teamAssignment', () => {
           type: 'stage',
           position: { x: 0, y: 0 },
           data: {
+            type: 'stage',
             name: 'Playoffs',
             order: 1,
+            category: 'final',
+            stageType: 'STANDARD',
             progressionMode: 'placement',
             progressionConfig: {
               mode: 'placement',
@@ -335,6 +348,7 @@ describe('teamAssignment', () => {
         ];
 
         const structure: TournamentStructure = {
+          fields: [],
           stages: [playoffStage, groupStage], // Note: unsorted
           games,
           edges: [],
@@ -367,6 +381,7 @@ describe('teamAssignment', () => {
         ];
 
         const structure: TournamentStructure = {
+          fields: [],
           stages: [groupStage, playoffStage],
           games,
           edges: [],
@@ -388,6 +403,7 @@ describe('teamAssignment', () => {
       it('should handle empty structure', () => {
         const teams: GlobalTeam[] = [createMockTeam('t1', 'Team 1')];
         const structure: TournamentStructure = {
+          fields: [],
           stages: [],
           games: [],
           edges: [],
@@ -402,6 +418,7 @@ describe('teamAssignment', () => {
         const stage = createMockStage('stage1', 'Group Stage', 0, 'round_robin');
         const games: GameNode[] = [createMockGame('g1', 'G1', 'stage1')];
         const structure: TournamentStructure = {
+          fields: [],
           stages: [stage],
           games,
           edges: [],
@@ -415,6 +432,7 @@ describe('teamAssignment', () => {
         const teams: GlobalTeam[] = [createMockTeam('t1', 'Team 1')];
         const stage = createMockStage('stage1', 'Group Stage', 0, 'round_robin');
         const structure: TournamentStructure = {
+          fields: [],
           stages: [stage],
           games: [], // No games
           edges: [],
@@ -429,6 +447,7 @@ describe('teamAssignment', () => {
         const stage = createMockStage('stage1', 'Group Stage', 0, 'round_robin');
         const games: GameNode[] = [createMockGame('g1', 'G1', 'stage1')];
         const structure: TournamentStructure = {
+          fields: [],
           stages: [stage],
           games,
           edges: [],
@@ -446,6 +465,7 @@ describe('teamAssignment', () => {
         const stage = createMockStage('stage1', 'Group Stage', 0, 'round_robin');
         const games: GameNode[] = [createMockGame('g1', 'G1', 'stage1')];
         const structure: TournamentStructure = {
+          fields: [],
           stages: [stage],
           games,
           edges: [],
@@ -460,6 +480,7 @@ describe('teamAssignment', () => {
         const stage = createMockStage('stage1', 'Group Stage', 0, 'round_robin');
         const games: GameNode[] = [createMockGame('g1', 'G1', 'stage1')];
         const structure: TournamentStructure = {
+          fields: [],
           stages: [stage],
           games,
           edges: [],
@@ -487,6 +508,7 @@ describe('teamAssignment', () => {
           createMockGame('third', '3rd Place', 'stage1'),
         ];
         const structure: TournamentStructure = {
+          fields: [],
           stages: [stage],
           games,
           edges: [],

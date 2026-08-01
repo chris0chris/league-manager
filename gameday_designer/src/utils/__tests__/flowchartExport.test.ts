@@ -16,6 +16,7 @@ import {
   type GlobalTeam,
   type GlobalTeamGroup,
 } from '../../types/flowchart';
+import type { ScheduleJson } from '../../types/designer';
 
 describe('Flowchart Export Utility', () => {
   describe('exportToScheduleJson', () => {
@@ -42,10 +43,11 @@ describe('Flowchart Export Utility', () => {
       };
 
       const result = exportToScheduleJson(state);
+      const d = result.data as ScheduleJson[];
 
       expect(result.success).toBe(true);
-      expect(result.data).toHaveLength(1);
-      expect(result.data![0]).toEqual({
+      expect(d).toHaveLength(1);
+      expect(d[0]).toEqual({
         field: 'Feld 1',
         games: [
           {
@@ -93,14 +95,15 @@ describe('Flowchart Export Utility', () => {
       };
 
       const result = exportToScheduleJson(state);
+      const d = result.data as ScheduleJson[];
 
       expect(result.success).toBe(true);
-      expect(result.data).toHaveLength(1);
+      expect(d).toHaveLength(1);
 
-      const games = result.data![0].games;
+      const games = d[0].games;
       expect(games).toHaveLength(3);
 
-      const finalGame = games.find((g) => g.standing === 'P1');
+      const finalGame = games.find((g: { standing: string }) => g.standing === 'P1');
       expect(finalGame).toBeDefined();
       expect(finalGame!.home).toBe('Gewinner HF1');
       expect(finalGame!.away).toBe('Gewinner HF2');
@@ -140,10 +143,11 @@ describe('Flowchart Export Utility', () => {
       };
 
       const result = exportToScheduleJson(state);
+      const d = result.data as ScheduleJson[];
 
       expect(result.success).toBe(true);
 
-      const p3Game = result.data![0].games.find((g) => g.standing === 'P3');
+      const p3Game = d[0].games.find((g: { standing: string }) => g.standing === 'P3');
       expect(p3Game).toBeDefined();
       expect(p3Game!.home).toBe('Verlierer HF1');
       expect(p3Game!.away).toBe('Verlierer HF2');
@@ -170,9 +174,10 @@ describe('Flowchart Export Utility', () => {
       };
 
       const result = exportToScheduleJson(state);
+      const d = result.data as ScheduleJson[];
 
       expect(result.success).toBe(true);
-      expect(result.data![0].games[0].break_after).toBe(10);
+      expect(d[0].games[0].break_after).toBe(10);
     });
 
     it('does not include break_after when zero', () => {
@@ -196,9 +201,10 @@ describe('Flowchart Export Utility', () => {
       };
 
       const result = exportToScheduleJson(state);
+      const d = result.data as ScheduleJson[];
 
       expect(result.success).toBe(true);
-      expect(result.data![0].games[0].break_after).toBeUndefined();
+      expect(d[0].games[0].break_after).toBeUndefined();
     });
 
     it('fails when game has no field assigned', () => {
@@ -216,6 +222,7 @@ describe('Flowchart Export Utility', () => {
         data: {
           type: 'game' as const,
           stage: 'Preliminary',
+          stageType: 'STANDARD' as const,
           standing: 'Spiel 1',
           fieldId: null,
           official: null,
@@ -295,13 +302,14 @@ describe('Flowchart Export Utility', () => {
       };
 
       const result = exportToScheduleJson(state);
+      const d = result.data as ScheduleJson[];
 
       expect(result.success).toBe(true);
-      expect(result.data).toHaveLength(2);
-      expect(result.data![0].field).toBe('Feld 1');
-      expect(result.data![0].games).toHaveLength(1);
-      expect(result.data![1].field).toBe('Feld 2');
-      expect(result.data![1].games).toHaveLength(1);
+      expect(d).toHaveLength(2);
+      expect(d[0].field).toBe('Feld 1');
+      expect(d[0].games).toHaveLength(1);
+      expect(d[1].field).toBe('Feld 2');
+      expect(d[1].games).toHaveLength(1);
     });
   });
 
@@ -338,6 +346,7 @@ describe('Flowchart Export Utility', () => {
         data: {
           type: 'game' as const,
           stage: 'Preliminary',
+          stageType: 'STANDARD' as const,
           standing: 'Spiel 1',
           fieldId: null,
           official: null,

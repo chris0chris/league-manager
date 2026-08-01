@@ -16,7 +16,6 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
 describe('i18n/config', () => {
   let originalHtmlLang: string;
-  let originalLocalStorage: Storage;
 
   beforeEach(() => {
     // Save original HTML lang attribute
@@ -24,9 +23,7 @@ describe('i18n/config', () => {
 
     // Mock localStorage
     const store: Record<string, string> = {};
-    originalLocalStorage = global.localStorage;
-
-    global.localStorage = {
+    vi.stubGlobal('localStorage', {
       getItem: vi.fn((key: string) => store[key] || null),
       setItem: vi.fn((key: string, value: string) => {
         store[key] = value;
@@ -39,7 +36,7 @@ describe('i18n/config', () => {
       }),
       key: vi.fn((index: number) => Object.keys(store)[index] || null),
       length: Object.keys(store).length,
-    } as Storage;
+    } as Storage);
   });
 
   afterEach(() => {
@@ -47,7 +44,7 @@ describe('i18n/config', () => {
     document.documentElement.setAttribute('lang', originalHtmlLang);
 
     // Restore original localStorage
-    global.localStorage = originalLocalStorage;
+    vi.unstubAllGlobals();
 
     // Clear module cache to ensure fresh import for each test
     vi.resetModules();

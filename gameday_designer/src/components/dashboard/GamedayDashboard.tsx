@@ -84,7 +84,7 @@ const GamedayDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const timeoutRefs = useRef<Record<number, NodeJS.Timeout>>({});
+  const timeoutRefs = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
   const gamedaysRef = useRef<GamedayListEntry[]>([]);
   const hasTriggeredInitialDelete = useRef(false);
   const { setReplayTourA } = useGamedayContext();
@@ -325,7 +325,7 @@ const GamedayDashboard: React.FC = () => {
       const state = location.state as { pendingDeleteId?: number } | null;
       if (state?.pendingDeleteId) {
         const gameday = gamedays.find(g => g.id === state.pendingDeleteId);
-        Promise.resolve().then(() => handleDelete(state.pendingDeleteId, gameday?.status));
+        Promise.resolve().then(() => handleDelete(state.pendingDeleteId!, gameday?.status));
         // Clear location state so it doesn't trigger again on refresh
         navigate(location.pathname, { replace: true, state: {} });
         hasTriggeredInitialDelete.current = true;

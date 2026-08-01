@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
-import type { FlowNode, GlobalTeam, GlobalTeamGroup } from '../../types/flowchart';
+import type { FlowNode, GlobalTeam, GlobalTeamGroup, FieldNodeData, StageNodeData, GameNodeData } from '../../types/flowchart';
 
 const validMetadata = { id: 1, name: 'Test', date: '2026-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
 
@@ -21,14 +21,14 @@ describe('useFlowValidation - Game Distribution', () => {
       {
         id: 'field1',
         type: 'field',
-        data: { name: 'Field 1', order: 0 },
+        data: { name: 'Field 1', order: 0 } as FieldNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage1',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 1', order: 0, category: 'preliminary' },
+        data: { name: 'Stage 1', order: 0, category: 'preliminary' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
       // Team 1 vs Team 2
@@ -36,7 +36,7 @@ describe('useFlowValidation - Game Distribution', () => {
         id: 'game1',
         type: 'game',
         parentId: 'stage1',
-        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' },
+        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' } as GameNodeData,
         position: { x: 0, y: 0 },
       },
       // Team 1 vs Team 3
@@ -44,7 +44,7 @@ describe('useFlowValidation - Game Distribution', () => {
         id: 'game2',
         type: 'game',
         parentId: 'stage1',
-        data: { standing: 'G2', homeTeamId: 't1', awayTeamId: 't3' },
+        data: { standing: 'G2', homeTeamId: 't1', awayTeamId: 't3' } as GameNodeData,
         position: { x: 0, y: 0 },
       },
       // Team 1 has 2 games, Team 2 has 1 game, Team 3 has 1 game.
@@ -70,35 +70,35 @@ describe('useFlowValidation - Game Distribution', () => {
       {
         id: 'field1',
         type: 'field',
-        data: { name: 'Field 1', order: 0 },
+        data: { name: 'Field 1', order: 0 } as FieldNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage1',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 1', order: 0, category: 'preliminary' },
+        data: { name: 'Stage 1', order: 0, category: 'preliminary' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'game1',
         type: 'game',
         parentId: 'stage1',
-        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' },
+        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' } as GameNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'game2',
         type: 'game',
         parentId: 'stage1',
-        data: { standing: 'G2', homeTeamId: 't2', awayTeamId: 't3' },
+        data: { standing: 'G2', homeTeamId: 't2', awayTeamId: 't3' } as GameNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'game3',
         type: 'game',
         parentId: 'stage1',
-        data: { standing: 'G3', homeTeamId: 't3', awayTeamId: 't1' },
+        data: { standing: 'G3', homeTeamId: 't3', awayTeamId: 't1' } as GameNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -119,7 +119,7 @@ describe('useFlowValidation - Game Distribution', () => {
       {
         id: 'game1',
         type: 'game',
-        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' },
+        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: 't2' } as GameNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -140,7 +140,7 @@ describe('useFlowValidation - Game Distribution', () => {
       {
         id: 'game1',
         type: 'game',
-        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: null },
+        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: null } as GameNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -161,7 +161,7 @@ describe('useFlowValidation - Game Distribution', () => {
       {
         id: 'game1',
         type: 'game',
-        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: null },
+        data: { standing: 'G1', homeTeamId: 't1', awayTeamId: null } as GameNodeData,
         position: { x: 0, y: 0 },
       },
     ];

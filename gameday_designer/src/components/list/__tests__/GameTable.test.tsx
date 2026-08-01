@@ -9,7 +9,8 @@ import '@testing-library/jest-dom';
 import GameTable from '../GameTable';
 import { GamedayProvider } from '../../../context/GamedayContext';
 import i18n from '../../../i18n/testConfig';
-import type { GameNode, StageNode, FieldNode, GlobalTeam, GlobalTeamGroup, FlowEdge } from '../../../types/flowchart';
+import type { GameNode, StageNode, FieldNode, GlobalTeam, GlobalTeamGroup, FlowEdge, HighlightedElement } from '../../../types/flowchart';
+import type { NotificationType } from '../../../types/designer';
 import { createFieldNode, createStageNode, createGameNodeInStage } from '../../../types/flowchart';
 import * as timeUtils from '../../../utils/timeCalculation';
 
@@ -30,18 +31,18 @@ describe('GameTable', () => {
   let team1: GlobalTeam;
   let teamGroup1: GlobalTeamGroup;
 
-  let mockOnUpdate: ReturnType<typeof vi.fn>;
-  let mockOnDelete: ReturnType<typeof vi.fn>;
-  let mockOnSelectNode: ReturnType<typeof vi.fn>;
-  let mockOnHighlightElement: ReturnType<typeof vi.fn>;
-  let mockOnOpenResultModal: ReturnType<typeof vi.fn>;
-  let mockOnAssignTeam: ReturnType<typeof vi.fn>;
-  let mockOnAddGameToGameEdge: ReturnType<typeof vi.fn>;
-  let mockOnAddStageToGameEdge: ReturnType<typeof vi.fn>;
-  let mockOnRemoveEdgeFromSlot: ReturnType<typeof vi.fn>;
-  let mockOnDynamicReferenceClick: ReturnType<typeof vi.fn>;
-  let mockOnNotify: ReturnType<typeof vi.fn>;
-  let mockOnSwapTeams: ReturnType<typeof vi.fn>;
+  let mockOnUpdate: (nodeId: string, data: Record<string, unknown>) => void;
+  let mockOnDelete: (nodeId: string) => void;
+  let mockOnSelectNode: (nodeId: string | null) => void;
+  let mockOnHighlightElement: (id: string, type: HighlightedElement['type']) => void;
+  let mockOnOpenResultModal: (gameId: string) => void;
+  let mockOnAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
+  let mockOnAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
+  let mockOnAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) => void;
+  let mockOnRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
+  let mockOnDynamicReferenceClick: (sourceGameId: string) => void;
+  let mockOnNotify: (message: string, type: NotificationType, title?: string) => void;
+  let mockOnSwapTeams: (gameId: string) => void;
 
   beforeEach(async () => {
     await i18n.changeLanguage('en');
@@ -64,18 +65,18 @@ describe('GameTable', () => {
     teamGroup1 = { id: 'group-1', name: 'Group A', order: 0 };
     team1 = { id: 'team-1', label: 'Team A', groupId: 'group-1', order: 0 };
 
-    mockOnUpdate = vi.fn();
-    mockOnDelete = vi.fn();
-    mockOnSelectNode = vi.fn();
-    mockOnHighlightElement = vi.fn();
-    mockOnOpenResultModal = vi.fn();
-    mockOnAssignTeam = vi.fn();
-    mockOnAddGameToGameEdge = vi.fn();
-    mockOnAddStageToGameEdge = vi.fn();
-    mockOnRemoveEdgeFromSlot = vi.fn();
-    mockOnDynamicReferenceClick = vi.fn();
-    mockOnNotify = vi.fn();
-    mockOnSwapTeams = vi.fn();
+    mockOnUpdate = vi.fn() as (nodeId: string, data: Record<string, unknown>) => void;
+    mockOnDelete = vi.fn() as (nodeId: string) => void;
+    mockOnSelectNode = vi.fn() as (nodeId: string | null) => void;
+    mockOnHighlightElement = vi.fn() as (id: string, type: HighlightedElement['type']) => void;
+    mockOnOpenResultModal = vi.fn() as (gameId: string) => void;
+    mockOnAssignTeam = vi.fn() as (gameId: string, teamId: string, slot: 'home' | 'away') => void;
+    mockOnAddGameToGameEdge = vi.fn() as (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
+    mockOnAddStageToGameEdge = vi.fn() as (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) => void;
+    mockOnRemoveEdgeFromSlot = vi.fn() as (targetGameId: string, targetSlot: 'home' | 'away') => void;
+    mockOnDynamicReferenceClick = vi.fn() as (sourceGameId: string) => void;
+    mockOnNotify = vi.fn() as (message: string, type: NotificationType, title?: string) => void;
+    mockOnSwapTeams = vi.fn() as (gameId: string) => void;
   });
 
   const renderTable = (props = {}) => {
@@ -261,7 +262,7 @@ describe('GameTable', () => {
         data: { 
           ...game2.data, 
           stage: 'Stage 2',
-          homeTeamDynamic: { type: 'rank', place: 1, stageId: 'stage-ranking', stageName: 'Placement' } 
+          homeTeamDynamic: { type: 'rank' as const, place: 1, stageId: 'stage-ranking', stageName: 'Placement' } 
         }
       };
       

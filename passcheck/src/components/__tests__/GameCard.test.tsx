@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import GameCard from '../GameCard';
 import { Game } from '../../common/types';

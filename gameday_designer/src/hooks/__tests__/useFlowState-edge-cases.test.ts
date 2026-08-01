@@ -21,14 +21,14 @@ import {
   GlobalTeam,
   GlobalTeamGroup,
 } from '../../types/flowchart';
-import type { FlowState } from '../../types/flowchart';
+import type { FlowState, GameNodeData, FieldNodeData } from '../../types/flowchart';
 
 describe('useFlowState - Edge Cases', () => {
   describe('ensureContainerHierarchy - Edge Cases', () => {
     it('should create stage in selected field when field has no stages', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
+      let fieldId!: string;
 
       // Create a field
       act(() => {
@@ -41,7 +41,7 @@ describe('useFlowState - Edge Cases', () => {
       });
 
       // Ensure container hierarchy should create a stage in the selected field
-      let stageId: string;
+      let stageId!: string;
       act(() => {
         const hierarchy = result.current.ensureContainerHierarchy();
         stageId = hierarchy.stageId;
@@ -57,8 +57,8 @@ describe('useFlowState - Edge Cases', () => {
     it('should return existing stage when field already has stages', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let existingStageId: string;
+      let fieldId!: string;
+      let existingStageId!: string;
 
       // Create field
       act(() => {
@@ -81,7 +81,7 @@ describe('useFlowState - Edge Cases', () => {
       const initialNodeCount = result.current.nodes.length;
 
       // Ensure container hierarchy should return the existing stage
-      let hierarchy: { fieldId: string; stageId: string };
+      let hierarchy!: { fieldId: string; stageId: string };
       act(() => {
         hierarchy = result.current.ensureContainerHierarchy();
       });
@@ -95,7 +95,7 @@ describe('useFlowState - Edge Cases', () => {
     it('should create stage in first field when no selection but field exists', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
+      let fieldId!: string;
 
       // Create a field without stages
       act(() => {
@@ -108,7 +108,7 @@ describe('useFlowState - Edge Cases', () => {
       });
 
       // Ensure container hierarchy should create a stage in the first field
-      let hierarchy: { fieldId: string; stageId: string };
+      let hierarchy!: { fieldId: string; stageId: string };
       act(() => {
         hierarchy = result.current.ensureContainerHierarchy();
       });
@@ -125,7 +125,7 @@ describe('useFlowState - Edge Cases', () => {
       // Start with no nodes
       expect(result.current.nodes).toHaveLength(0);
 
-      let hierarchy: { fieldId: string; stageId: string };
+      let hierarchy!: { fieldId: string; stageId: string };
       act(() => {
         hierarchy = result.current.ensureContainerHierarchy();
       });
@@ -137,7 +137,7 @@ describe('useFlowState - Edge Cases', () => {
       expect(field).toBeDefined();
       expect(stage).toBeDefined();
       expect(stage?.parentId).toBe(hierarchy.fieldId);
-      expect(field?.data.name).toBe('Feld 1');
+      expect((field?.data as FieldNodeData).name).toBe('Feld 1');
     });
   });
 
@@ -257,10 +257,10 @@ describe('useFlowState - Edge Cases', () => {
     it('should unassign teams from games when deleting group', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let groupId: string;
-      let team1Id: string;
-      let team2Id: string;
-      let gameId: string;
+      let groupId!: string;
+      let team1Id!: string;
+      let team2Id!: string;
+      let gameId!: string;
 
       // Create group with teams
       act(() => {
@@ -274,8 +274,8 @@ describe('useFlowState - Edge Cases', () => {
       });
 
       // Create game and assign teams from the group
-      let fieldId: string;
-      let stageId: string;
+      let fieldId!: string;
+      let stageId!: string;
       act(() => {
         const field = result.current.addFieldNode();
         fieldId = field.id;
@@ -296,8 +296,8 @@ describe('useFlowState - Edge Cases', () => {
 
       // Verify teams are assigned
       const gameBefore = result.current.nodes.find((n) => n.id === gameId && isGameNode(n));
-      expect(gameBefore?.data.homeTeamId).toBe(team1Id);
-      expect(gameBefore?.data.awayTeamId).toBe(team2Id);
+      expect((gameBefore?.data as GameNodeData).homeTeamId).toBe(team1Id);
+      expect((gameBefore?.data as GameNodeData).awayTeamId).toBe(team2Id);
 
       // Delete the group (should cascade delete teams and unassign from games)
       act(() => {
@@ -310,14 +310,14 @@ describe('useFlowState - Edge Cases', () => {
 
       // Verify game no longer has team assignments
       const gameAfter = result.current.nodes.find((n) => n.id === gameId && isGameNode(n));
-      expect(gameAfter?.data.homeTeamId).toBeNull();
-      expect(gameAfter?.data.awayTeamId).toBeNull();
+      expect((gameAfter?.data as GameNodeData).homeTeamId).toBeNull();
+      expect((gameAfter?.data as GameNodeData).awayTeamId).toBeNull();
     });
 
     it('should handle deleting group with no teams', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let groupId: string;
+      let groupId!: string;
 
       // Create empty group
       act(() => {
@@ -336,13 +336,13 @@ describe('useFlowState - Edge Cases', () => {
     it('should unassign teams only from affected games', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let group1Id: string;
-      let group2Id: string;
-      let team1Id: string;
-      let team2Id: string;
-      let team3Id: string;
-      let game1Id: string;
-      let game2Id: string;
+      let group1Id!: string;
+      let group2Id!: string;
+      let team1Id!: string;
+      let team2Id!: string;
+      let team3Id!: string;
+      let game1Id!: string;
+      let game2Id!: string;
 
       // Create two groups with teams
       act(() => {
@@ -363,8 +363,8 @@ describe('useFlowState - Edge Cases', () => {
       });
 
       // Create games
-      let fieldId: string;
-      let stageId: string;
+      let fieldId!: string;
+      let stageId!: string;
       act(() => {
         const field = result.current.addFieldNode();
         fieldId = field.id;
@@ -395,13 +395,13 @@ describe('useFlowState - Edge Cases', () => {
 
       // Game 1 should have no teams
       const game1After = result.current.nodes.find((n) => n.id === game1Id && isGameNode(n));
-      expect(game1After?.data.homeTeamId).toBeNull();
-      expect(game1After?.data.awayTeamId).toBeNull();
+      expect((game1After?.data as GameNodeData).homeTeamId).toBeNull();
+      expect((game1After?.data as GameNodeData).awayTeamId).toBeNull();
 
       // Game 2 should still have team 3
       const game2After = result.current.nodes.find((n) => n.id === game2Id && isGameNode(n));
-      expect(game2After?.data.homeTeamId).toBe(team3Id);
-      expect(game2After?.data.awayTeamId).toBeNull();
+      expect((game2After?.data as GameNodeData).homeTeamId).toBe(team3Id);
+      expect((game2After?.data as GameNodeData).awayTeamId).toBeNull();
 
       // Group 2 and team 3 should still exist
       expect(result.current.globalTeamGroups).toHaveLength(1);
@@ -413,7 +413,7 @@ describe('useFlowState - Edge Cases', () => {
     it('should return empty array when team is not used', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let teamId: string;
+      let teamId!: string;
 
       act(() => {
         teamId = result.current.addGlobalTeam('Unused Team').id;
@@ -426,13 +426,13 @@ describe('useFlowState - Edge Cases', () => {
     it('should return usage for team assigned to multiple games', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let teamId: string;
-      let game1Id: string;
-      let game2Id: string;
-      let game3Id: string;
+      let teamId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
+      let game3Id!: string;
 
-      let fieldId: string;
-      let stageId: string;
+      let fieldId!: string;
+      let stageId!: string;
       act(() => {
         teamId = result.current.addGlobalTeam('Popular Team').id;
         const field = result.current.addFieldNode();
@@ -466,11 +466,11 @@ describe('useFlowState - Edge Cases', () => {
     it('should return usage for team in both home and away slots of same game', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let teamId: string;
-      let gameId: string;
+      let teamId!: string;
+      let gameId!: string;
 
-      let fieldId: string;
-      let stageId: string;
+      let fieldId!: string;
+      let stageId!: string;
       act(() => {
         teamId = result.current.addGlobalTeam('Dual Team').id;
         const field = result.current.addFieldNode();
@@ -502,12 +502,12 @@ describe('useFlowState - Edge Cases', () => {
     it('should handle deleting team assigned to multiple games', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let teamId: string;
-      let game1Id: string;
-      let game2Id: string;
+      let teamId!: string;
+      let game1Id!: string;
+      let game2Id!: string;
 
-      let fieldId: string;
-      let stageId: string;
+      let fieldId!: string;
+      let stageId!: string;
       act(() => {
         teamId = result.current.addGlobalTeam('Team to Delete').id;
         const field = result.current.addFieldNode();
@@ -543,14 +543,14 @@ describe('useFlowState - Edge Cases', () => {
       const game1 = result.current.nodes.find((n) => n.id === game1Id && isGameNode(n));
       const game2 = result.current.nodes.find((n) => n.id === game2Id && isGameNode(n));
 
-      expect(game1?.data.homeTeamId).toBeNull();
-      expect(game2?.data.awayTeamId).toBeNull();
+      expect((game1?.data as GameNodeData).homeTeamId).toBeNull();
+      expect((game2?.data as GameNodeData).awayTeamId).toBeNull();
     });
 
     it('should handle deleting team not assigned to any games', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let teamId: string;
+      let teamId!: string;
 
       act(() => {
         teamId = result.current.addGlobalTeam('Unassigned Team').id;
@@ -569,7 +569,7 @@ describe('useFlowState - Edge Cases', () => {
       const { result } = renderHook(() => useFlowState());
 
       // Create a standalone game node (shouldn't happen in normal usage but test defensively)
-      let gameId: string;
+      let gameId!: string;
       act(() => {
         gameId = result.current.addGameNode().id;
       });
@@ -581,7 +581,7 @@ describe('useFlowState - Edge Cases', () => {
     it('should return null for getGameStage when game has no parent', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let gameId: string;
+      let gameId!: string;
       act(() => {
         gameId = result.current.addGameNode().id;
       });
@@ -594,9 +594,9 @@ describe('useFlowState - Edge Cases', () => {
       const { result } = renderHook(() => useFlowState());
 
       // Create field, stage, and game
-      let fieldId: string;
-      let stageId: string;
-      let gameId: string;
+      let fieldId!: string;
+      let stageId!: string;
+      let gameId!: string;
 
       act(() => {
         fieldId = result.current.addFieldNode().id;
@@ -633,8 +633,8 @@ describe('useFlowState - Edge Cases', () => {
     it('should export complete state including all container nodes', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
+      let fieldId!: string;
+      let stageId!: string;
       act(() => {
         // Create complex state
         const field1 = result.current.addFieldNode({ name: 'Field 1' });
@@ -664,11 +664,11 @@ describe('useFlowState - Edge Cases', () => {
     it('should export state with edges', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let game1Id: string;
-      let game2Id: string;
+      let game1Id!: string;
+      let game2Id!: string;
 
-      let fieldId: string;
-      let stageId: string;
+      let fieldId!: string;
+      let stageId!: string;
       act(() => {
         const field = result.current.addFieldNode();
         fieldId = field.id;
@@ -703,8 +703,8 @@ describe('useFlowState - Edge Cases', () => {
     it('should clear all state including teams and groups', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let fieldId: string;
-      let stageId: string;
+      let fieldId!: string;
+      let stageId!: string;
       act(() => {
         // Create comprehensive state
         const field = result.current.addFieldNode();

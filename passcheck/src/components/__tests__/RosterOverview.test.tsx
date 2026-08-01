@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import RosterOverview from '../RosterOverview';
@@ -73,7 +72,7 @@ describe('RosterOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(games.getRosterList).mockResolvedValue(mockTeamData);
-    vi.mocked(games.submitRoster).mockResolvedValue({});
+    vi.mocked(games.submitRoster).mockResolvedValue(undefined);
     vi.mocked(games.getApprovalUrl).mockResolvedValue('https://approval.url');
   });
 

@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import TeamPickerStep from '../TeamPickerStep';
-import React from 'react';
+
 import { designerApi } from '../../../../api/designerApi';
 
 // Mock designerApi
@@ -21,7 +21,7 @@ const mockTeams = [
 describe('TeamPickerStep', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(designerApi.getConfig).mockResolvedValue({ mock_teams: true, is_staff: true });
+    vi.mocked(designerApi.getConfig).mockResolvedValue({ mock_teams: true, is_staff: true, username: 'testuser', avatar_url: null });
   });
 
   it('shows required team count', () => {
@@ -104,7 +104,7 @@ describe('TeamPickerStep', () => {
   });
 
   it('hides auto-generate button when is_staff is false', async () => {
-    vi.mocked(designerApi.getConfig).mockResolvedValue({ mock_teams: true, is_staff: false });
+    vi.mocked(designerApi.getConfig).mockResolvedValue({ mock_teams: true, is_staff: false, username: 'testuser', avatar_url: null });
     const onAutoGenerate = vi.fn();
     render(<TeamPickerStep requiredTeams={4} availableTeams={mockTeams} onConfirm={vi.fn()} onBack={vi.fn()} onAutoGenerateTeams={onAutoGenerate} />);
 

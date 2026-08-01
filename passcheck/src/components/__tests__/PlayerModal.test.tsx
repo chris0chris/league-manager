@@ -1,7 +1,7 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import PlayerModal from '../PlayerModal';
-import { Player } from '../../common/types';
+import { Player, Roster } from '../../common/types';
+import type { BaseValidator } from '../../utils/validation';
 
 import { vi } from 'vitest';
 
@@ -12,13 +12,19 @@ const mockValidateAndUpdate = vi.fn();
 vi.mock('../../utils/validation', () => {
   return vi.fn().mockImplementation(() => ({
     validateAndGetErrors: mockValidateAndGetErrors,
-    validateAndUpdate: mockValidateAndUpdate
+    validateAndUpdate: mockValidateAndUpdate,
+    validators: [],
+    roster: [],
+    addValidator: vi.fn()
   }));
 });
 
 interface MockValidator {
   validateAndGetErrors: typeof mockValidateAndGetErrors;
   validateAndUpdate: typeof mockValidateAndUpdate;
+  validators: BaseValidator[];
+  roster: Roster;
+  addValidator: (validator: BaseValidator) => void;
 }
 
 interface PlayerModalProps {
@@ -49,7 +55,10 @@ describe('PlayerModal', () => {
 
     mockValidator = {
       validateAndGetErrors: mockValidateAndGetErrors,
-      validateAndUpdate: mockValidateAndUpdate
+      validateAndUpdate: mockValidateAndUpdate,
+      validators: [],
+      roster: [],
+      addValidator: vi.fn()
     };
 
     defaultProps = {
@@ -152,7 +161,7 @@ describe('PlayerModal', () => {
 
     render(<PlayerModal {...defaultProps} />);
 
-    const jerseyInput = screen.getByPlaceholderText('Trikotnummer');
+    const jerseyInput = screen.getByPlaceholderText('Trikotnummer') as HTMLInputElement;
     fireEvent.change(jerseyInput, { target: { value: '100' } });
 
     // Check that error handling code was triggered

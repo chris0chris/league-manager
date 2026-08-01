@@ -28,7 +28,7 @@ function PlayerModal({
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   let timeoutTillNextPlayer = 500;
-  if (process.env.NODE_ENV === "development") {
+  if (import.meta.env.MODE === "development") {
     timeoutTillNextPlayer = 200;
   }
   useEffect(() => {

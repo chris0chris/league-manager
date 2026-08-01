@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
-import type { FlowNode, FlowEdge, GameToGameEdge } from '../../types/flowchart';
+import type { FlowNode, FlowEdge, GameToGameEdge, FieldNodeData, StageNodeData, GameNodeData } from '../../types/flowchart';
 
 const validMetadata = { id: 1, name: 'Test', date: '2026-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
 
@@ -11,35 +11,35 @@ describe('useFlowValidation - Progression Integrity', () => {
       {
         id: 'field1',
         type: 'field',
-        data: { name: 'Field 1', order: 0 },
+        data: { name: 'Field 1', order: 0 } as FieldNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage1', // Vorrunde
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 1', order: 0, category: 'preliminary' },
+        data: { name: 'Stage 1', order: 0, category: 'preliminary' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage2', // Finalrunde
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 2', order: 1, category: 'final' },
+        data: { name: 'Stage 2', order: 1, category: 'final' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'game1', // In Finalrunde
         type: 'game',
         parentId: 'stage2',
-        data: { standing: 'Final', homeTeamId: 't1', awayTeamId: 't2' },
+        data: { standing: 'Final', homeTeamId: 't1', awayTeamId: 't2' } as GameNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'game2', // In Vorrunde
         type: 'game',
         parentId: 'stage1',
-        data: { standing: 'Prelim', homeTeamId: null, awayTeamId: 't3' },
+        data: { standing: 'Prelim', homeTeamId: null, awayTeamId: 't3' } as GameNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -53,7 +53,7 @@ describe('useFlowValidation - Progression Integrity', () => {
         sourceHandle: 'winner',
         targetHandle: 'home',
         data: { sourcePort: 'winner', targetPort: 'home' },
-      } as GameToGameEdge,
+      } as unknown as GameToGameEdge,
     ];
 
     const { result } = renderHook(() => useFlowValidation(nodes, edges, [], [], validMetadata));

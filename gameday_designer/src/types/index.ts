@@ -55,4 +55,6 @@ export type {
   ResourceUrl,
   GamedayListEntry,
   Gameday,
+  Season,
+  League,
 } from './api';

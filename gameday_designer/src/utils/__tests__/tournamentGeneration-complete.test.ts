@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest';
 import { generateTournament } from '../tournamentGenerator';
 import { assignTeamsToTournamentGames } from '../teamAssignment';
 import { TEMPLATE_F6_2_2 } from '../tournamentTemplates';
-import type { GlobalTeam } from '../../types/flowchart';
+import type { GlobalTeam, FlowEdge } from '../../types/flowchart';
 
 describe('Tournament Generation - 6 Teams Integration', () => {
   const teams: GlobalTeam[] = [
@@ -62,11 +62,15 @@ describe('Tournament Generation - 6 Teams Integration', () => {
         op.edges.forEach(edgeSpec => {
           finalEdges.push({
             id: `edge-${edgeSpec.sourceGameId}-${edgeSpec.targetGameId}`,
-            source: edgeSpec.sourceGameId,
+            source: edgeSpec.sourceGameId!,
             target: edgeSpec.targetGameId,
-            sourceHandle: edgeSpec.outputType,
-            targetHandle: edgeSpec.targetSlot
-          });
+            sourceHandle: edgeSpec.outputType as 'winner' | 'loser',
+            targetHandle: edgeSpec.targetSlot,
+            data: {
+              sourcePort: edgeSpec.outputType as 'winner' | 'loser',
+              targetPort: edgeSpec.targetSlot,
+            },
+          } as FlowEdge);
         });
       }
     });

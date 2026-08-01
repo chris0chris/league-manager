@@ -8,7 +8,6 @@
  * - Inline editing and reordering
  */
 
-import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -33,15 +32,14 @@ describe('TeamGroupCard', () => {
     { id: 'group-2', name: 'Group B', order: 1 },
   ];
 
-  // Mock functions
-  let mockOnUpdateGroup: ReturnType<typeof vi.fn>;
-  let mockOnDeleteGroup: ReturnType<typeof vi.fn>;
-  let mockOnReorderGroup: ReturnType<typeof vi.fn>;
-  let mockOnUpdateTeam: ReturnType<typeof vi.fn>;
-  let mockOnDeleteTeam: ReturnType<typeof vi.fn>;
-  let mockOnReorderTeam: ReturnType<typeof vi.fn>;
-  let mockOnAddTeam: ReturnType<typeof vi.fn>;
-  let mockGetTeamUsage: ReturnType<typeof vi.fn>;
+  let mockOnUpdateGroup: (groupId: string, data: Partial<Omit<GlobalTeamGroup, 'id'>>) => void;
+  let mockOnDeleteGroup: (groupId: string) => void;
+  let mockOnReorderGroup: (groupId: string, direction: 'up' | 'down') => void;
+  let mockOnUpdateTeam: (teamId: string, data: Partial<Omit<GlobalTeam, 'id'>>) => void;
+  let mockOnDeleteTeam: (teamId: string) => void;
+  let mockOnReorderTeam: (teamId: string, direction: 'up' | 'down') => void;
+  let mockOnAddTeam: (groupId: string) => void;
+  let mockGetTeamUsage: (teamId: string) => { gameId: string; slot: 'home' | 'away' }[];
 
   beforeEach(() => {
     mockOnUpdateGroup = vi.fn();
@@ -65,6 +63,7 @@ describe('TeamGroupCard', () => {
     onDeleteTeam: mockOnDeleteTeam,
     onReorderTeam: mockOnReorderTeam,
     onAddTeam: mockOnAddTeam,
+    onShowTeamSelection: vi.fn(),
     getTeamUsage: mockGetTeamUsage,
     index: 0,
     totalGroups: 2,

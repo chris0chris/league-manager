@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import JourneyLayout from './components/JourneyLayout';
 import GameProgressPage from './components/game-progress/GameProgressPage';
 import { AdoptionMetrics } from './components/AdoptionMetrics';

@@ -294,4 +294,4 @@ class GamedayApi {
 /**
  * Singleton instance of the Gameday API client.
  */
-export const gamedayApi = new GamedayApi(typeof process !== 'undefined' && process.env.NODE_ENV === 'test');
+export const gamedayApi = new GamedayApi(typeof import.meta !== 'undefined' && import.meta.env.MODE === 'test');

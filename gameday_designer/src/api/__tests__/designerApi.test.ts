@@ -61,6 +61,7 @@ describe('DesignerApi', () => {
             num_fields: 2,
             num_groups: 2,
             game_duration: 15,
+            sharing: 'PRIVATE',
             association: null,
             created_by: null,
             updated_by: null,
@@ -74,6 +75,7 @@ describe('DesignerApi', () => {
             num_fields: 3,
             num_groups: 3,
             game_duration: 12,
+            sharing: 'PRIVATE',
             association: null,
             created_by: null,
             updated_by: null,
@@ -107,6 +109,7 @@ describe('DesignerApi', () => {
             num_fields: 2,
             num_groups: 2,
             game_duration: 15,
+            sharing: 'PRIVATE',
             association: 5,
             created_by: null,
             updated_by: null,
@@ -139,6 +142,7 @@ describe('DesignerApi', () => {
             num_fields: 2,
             num_groups: 2,
             game_duration: 15,
+            sharing: 'PRIVATE',
             association: null,
             created_by: null,
             updated_by: null,
@@ -167,6 +171,7 @@ describe('DesignerApi', () => {
         num_fields: 2,
         num_groups: 2,
         game_duration: 15,
+        sharing: 'PRIVATE',
         association: null,
         created_by: null,
         updated_by: null,
@@ -211,6 +216,7 @@ describe('DesignerApi', () => {
       const mockResponse: ScheduleTemplate = {
         id: 3,
         ...newTemplate,
+        sharing: 'PRIVATE',
         association: null,
         created_by: 1,
         updated_by: 1,
@@ -259,6 +265,7 @@ describe('DesignerApi', () => {
       const mockResponse: ScheduleTemplate = {
         id: 1,
         ...updatedData,
+        sharing: 'PRIVATE',
         association: null,
         created_by: 1,
         updated_by: 2,
@@ -290,6 +297,7 @@ describe('DesignerApi', () => {
         num_fields: 2,
         num_groups: 2,
         game_duration: 15,
+        sharing: 'PRIVATE',
         association: null,
         created_by: 1,
         updated_by: 2,
@@ -335,7 +343,7 @@ describe('DesignerApi', () => {
   describe('validateTemplate', () => {
     it('should validate a template and return validation result', async () => {
       const mockValidation: ValidationResult = {
-        is_valid: true,
+        isValid: true,
         errors: [],
         warnings: [],
       };
@@ -347,19 +355,19 @@ describe('DesignerApi', () => {
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/templates/1/validate/'
       );
-      expect(result.is_valid).toBe(true);
+      expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
     it('should return validation errors', async () => {
       const mockValidation: ValidationResult = {
-        is_valid: false,
+        isValid: false,
         errors: [
           {
-            code: 'invalid_reference',
+            id: 'err-1',
+            type: 'invalid_reference',
             message: 'Invalid team reference',
-            severity: 'error',
-            slot_id: 1,
+            affectedSlots: [],
           },
         ],
         warnings: [],
@@ -369,9 +377,9 @@ describe('DesignerApi', () => {
 
       const result = await designerApi.validateTemplate(1);
 
-      expect(result.is_valid).toBe(false);
+      expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].code).toBe('invalid_reference');
+      expect(result.errors[0].type).toBe('invalid_reference');
     });
   });
 
@@ -439,6 +447,7 @@ describe('DesignerApi', () => {
         num_fields: 2,
         num_groups: 2,
         game_duration: 15,
+        sharing: 'PRIVATE',
         association: null,
         created_by: 1,
         updated_by: 1,

@@ -21,12 +21,12 @@ describe('api/getGamedayEvents', () => {
 
   beforeEach(() => {
     // Mock localStorage
-    originalLocalStorage = global.localStorage;
+    originalLocalStorage = window.localStorage;
     store = {
       authToken: 'test-token-123',
     };
 
-    global.localStorage = {
+    window.localStorage = {
       getItem: vi.fn((key: string) => store[key] || null),
       setItem: vi.fn((key: string, value: string) => {
         store[key] = value;
@@ -42,14 +42,14 @@ describe('api/getGamedayEvents', () => {
     } as Storage;
 
     // Mock fetch
-    originalFetch = global.fetch;
+    originalFetch = window.fetch;
     mockFetch = vi.fn();
-    global.fetch = mockFetch as unknown as typeof fetch;
+    window.fetch = mockFetch as unknown as typeof fetch;
   });
 
   afterEach(() => {
-    global.localStorage = originalLocalStorage;
-    global.fetch = originalFetch;
+    window.localStorage = originalLocalStorage;
+    window.fetch = originalFetch;
     vi.clearAllMocks();
   });
 

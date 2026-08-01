@@ -15,6 +15,7 @@ import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useFlowState } from '../useFlowState';
 import { isGameNode, isStageNode, isFieldNode } from '../../types/flowchart';
+import type { GameNodeData, StageNodeData, FieldNodeData } from '../../types/flowchart';
 
 describe('useFlowState - Time Calculation and Updates', () => {
   describe('updateNode - Game Duration Changes', () => {
@@ -77,9 +78,9 @@ describe('useFlowState - Time Calculation and Updates', () => {
         (n) => n.id === game3Id && isGameNode(n)
       );
 
-      expect(game1Before?.data.startTime).toBe('10:00');
-      expect(game2Before?.data.startTime).toBe('11:20');
-      expect(game3Before?.data.startTime).toBe('12:40');
+      expect((game1Before?.data as GameNodeData).startTime).toBe('10:00');
+      expect((game2Before?.data as GameNodeData).startTime).toBe('11:20');
+      expect((game3Before?.data as GameNodeData).startTime).toBe('12:40');
 
       // Change game 1 duration to 30 minutes
       act(() => {
@@ -97,10 +98,10 @@ describe('useFlowState - Time Calculation and Updates', () => {
         (n) => n.id === game3Id && isGameNode(n)
       );
 
-      expect(game1After?.data.startTime).toBe('10:00'); // unchanged
-      expect(game1After?.data.duration).toBe(30);
-      expect(game2After?.data.startTime).toBe('10:40'); // 10:00 + 30 + 10
-      expect(game3After?.data.startTime).toBe('12:00'); // 10:40 + 70 + 10
+      expect((game1After?.data as GameNodeData).startTime).toBe('10:00'); // unchanged
+      expect((game1After?.data as GameNodeData).duration).toBe(30);
+      expect((game2After?.data as GameNodeData).startTime).toBe('10:40'); // 10:00 + 30 + 10
+      expect((game3After?.data as GameNodeData).startTime).toBe('12:00'); // 10:40 + 70 + 10
     });
 
     it('should recalculate subsequent game times when break changes', () => {
@@ -152,7 +153,7 @@ describe('useFlowState - Time Calculation and Updates', () => {
         (n) => n.id === game2Id && isGameNode(n)
       );
 
-      expect(game2After?.data.startTime).toBe('15:30'); // 14:00 + 70 + 20
+      expect((game2After?.data as GameNodeData).startTime).toBe('15:30'); // 14:00 + 70 + 20
     });
 
     it('should preserve manual time overrides during recalculation', () => {
@@ -206,8 +207,8 @@ describe('useFlowState - Time Calculation and Updates', () => {
       const game2Manual = result.current.nodes.find(
         (n) => n.id === game2Id && isGameNode(n)
       );
-      expect(game2Manual?.data.manualTime).toBe(true);
-      expect(game2Manual?.data.startTime).toBe('11:30');
+      expect((game2Manual?.data as GameNodeData).manualTime).toBe(true);
+      expect((game2Manual?.data as GameNodeData).startTime).toBe('11:30');
 
       // Change game 1 duration - should NOT affect game 2 (manual override)
       act(() => {
@@ -219,8 +220,8 @@ describe('useFlowState - Time Calculation and Updates', () => {
       );
 
       // Game 2 should keep manual time
-      expect(game2After?.data.startTime).toBe('11:30'); // unchanged
-      expect(game2After?.data.manualTime).toBe(true);
+      expect((game2After?.data as GameNodeData).startTime).toBe('11:30'); // unchanged
+      expect((game2After?.data as GameNodeData).manualTime).toBe(true);
     });
 
     it('should not recalculate times if stage has no start time', () => {
@@ -246,7 +247,7 @@ describe('useFlowState - Time Calculation and Updates', () => {
       const stageBefore = result.current.nodes.find(
         (n) => n.id === stageId && isStageNode(n)
       );
-      expect(stageBefore?.data.startTime).toBeUndefined();
+      expect((stageBefore?.data as StageNodeData).startTime).toBeUndefined();
 
       // Add games
       act(() => {
@@ -270,8 +271,8 @@ describe('useFlowState - Time Calculation and Updates', () => {
         (n) => n.id === game2Id && isGameNode(n)
       );
 
-      expect(game1Before?.data.startTime).toBeUndefined();
-      expect(game2Before?.data.startTime).toBeUndefined();
+      expect((game1Before?.data as GameNodeData).startTime).toBeUndefined();
+      expect((game2Before?.data as GameNodeData).startTime).toBeUndefined();
 
       // Change game 1 duration
       act(() => {
@@ -282,7 +283,7 @@ describe('useFlowState - Time Calculation and Updates', () => {
       const game2After = result.current.nodes.find(
         (n) => n.id === game2Id && isGameNode(n)
       );
-      expect(game2After?.data.startTime).toBeUndefined();
+      expect((game2After?.data as GameNodeData).startTime).toBeUndefined();
     });
   });
 
@@ -313,7 +314,7 @@ describe('useFlowState - Time Calculation and Updates', () => {
       const stage = result.current.nodes.find(
         (n) => n.id === stageId && isStageNode(n)
       );
-      expect(stage?.data.startTime).toBe('10:00');
+      expect((stage?.data as StageNodeData).startTime).toBe('10:00');
     });
 
     it('should preserve games without startTime when stage has no startTime', () => {
@@ -347,7 +348,7 @@ describe('useFlowState - Time Calculation and Updates', () => {
       const game = result.current.nodes.find(
         (n) => n.id === gameId && isGameNode(n)
       );
-      expect(game?.data.startTime).toBeUndefined();
+      expect((game?.data as GameNodeData).startTime).toBeUndefined();
     });
   });
 
@@ -459,14 +460,14 @@ describe('useFlowState - Time Calculation and Updates', () => {
         (n) => n.id === fieldId && isFieldNode(n)
       );
       expect(field).toBeDefined();
-      expect(field?.data.name).toBe('Test Field');
+      expect((field?.data as FieldNodeData).name).toBe('Test Field');
 
       // Verify stage was created in the field
       const stage = result.current.nodes.find(
         (n) => isStageNode(n) && n.parentId === fieldId
       );
       expect(stage).toBeDefined();
-      expect(stage?.data.name).toBe('Preliminary'); // First stage defaults to 'Preliminary'
+      expect((stage?.data as StageNodeData).name).toBe('Preliminary'); // First stage defaults to 'Preliminary'
     });
 
     it('should create field without stage when includeStage is false', () => {

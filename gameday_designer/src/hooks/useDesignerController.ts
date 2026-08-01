@@ -21,11 +21,14 @@ import {
   TOURNAMENT_GENERATION_STATE_DELAY,
   DEFAULT_TOURNAMENT_GROUP_NAME,
 } from '../utils/tournamentConstants';
-import type { GlobalTeam, HighlightedElement, Notification, NotificationType, FlowState } from '../types/flowchart';
+import type { GlobalTeam, GlobalTeamGroup, HighlightedElement, FlowState } from '../types/flowchart';
+import type { Notification, NotificationType } from '../types/designer';
 import { isFieldNode, isGameNode, isStageNode, getFieldNodes } from '../types/flowchart';
 import { calculateGameTimes } from '../utils/timeCalculation';
-import type { TournamentGenerationConfig, RoundRobinConfig } from '../types/tournament';
-import type { UseFlowStateReturn, GamedayMetadata } from '../types/designer';
+import type { TournamentGenerationConfig } from '../types/tournament';
+import type { RoundRobinConfig } from '../types/flowchart';
+import type { GamedayMetadata } from '../types/flowchart';
+import type { UseFlowStateReturn } from './useFlowState';
 import { v4 as uuidv4 } from 'uuid';
 import { gamedayApi } from '../api/gamedayApi';
 import { genericizeFlowState, applyGenericTemplate, GenericTemplate } from '../utils/templateMapper';
@@ -199,7 +202,7 @@ export function useDesignerController(
         if (op.type === 'assign_team') {
           flowStateRef.current?.assignTeamToGame(op.gameId, op.teamId, op.slot);
         } else if (op.type === 'add_edges') {
-          flowStateRef.current?.addBulkGameToGameEdges(op.edges, clearExisting);
+          flowStateRef.current?.addBulkGameToGameEdges(op.edges as Array<{ sourceGameId: string; outputType: 'winner' | 'loser'; targetGameId: string; targetSlot: 'home' | 'away' }>, clearExisting);
         }
       });
     },
@@ -400,9 +403,12 @@ export function useDesignerController(
         setShowTournamentModal(false);
         addNotification('Tournament generated successfully', 'success', 'Generation Success');
 
+        // Derive template id for analytics
+        const resolvedTemplateId = config.template?.id;
+
         // Track template applied event
         trackEvent('template_applied', {
-          template_id: config.customTemplate?.id || config.template?.id,
+          template_id: resolvedTemplateId,
           template_type: config.customTemplate ? 'saved' : 'builtin',
           gameday_id: gamedayId,
           team_count: teamsToUse?.length,
@@ -412,7 +418,7 @@ export function useDesignerController(
         // Track gameday created/updated event (tournament generation)
         trackEvent('gameday_created_with_template', {
           gameday_id: gamedayId,
-          template_id: config.customTemplate?.id || config.template?.id,
+          template_id: resolvedTemplateId,
           template_type: config.customTemplate ? 'saved' : 'builtin',
         });
       } catch (error) {
@@ -454,7 +460,9 @@ export function useDesignerController(
     saveTrigger: flowState?.saveTrigger,
     isLoading,
     notifications,
-  }), [highlightedElement, expandedFieldIds, expandedStageIds, showTournamentModal, canExport, flowState?.nodes?.length, flowState?.globalTeams?.length, flowState?.saveTrigger, isLoading, notifications]);
+    selectedNodeId: flowState?.selection?.nodeIds?.[0] ?? null,
+    highlightedSourceGameId: highlightedElement?.type === 'game' ? highlightedElement.id : null,
+  }), [highlightedElement, expandedFieldIds, expandedStageIds, showTournamentModal, canExport, flowState?.nodes?.length, flowState?.globalTeams?.length, flowState?.saveTrigger, isLoading, notifications, flowState?.selection]);
 
   const handleUpdateNode = useCallback((id: string, data: Record<string, unknown>) => {
     if (!gamedayId) return;
@@ -498,10 +506,10 @@ export function useDesignerController(
     handleUpdateGlobalTeam: (id: string, data: Record<string, unknown>) => flowStateRef.current?.updateGlobalTeam(id, data),
     handleDeleteGlobalTeam: (id: string) => flowStateRef.current?.deleteGlobalTeam(id),
     handleReplaceGlobalTeam: (oldId: string, newTeamData: { id: number; text: string }) => flowStateRef.current?.replaceGlobalTeam(oldId, newTeamData),
-    handleReorderGlobalTeam: (id: string, index: number) => flowStateRef.current?.reorderGlobalTeam(id, index),
-    handleUpdateGlobalTeamGroup: (id: string, name: string) => flowStateRef.current?.updateGlobalTeamGroup(id, name),
+    handleReorderGlobalTeam: (id: string, direction: 'up' | 'down') => flowStateRef.current?.reorderGlobalTeam(id, direction),
+    handleUpdateGlobalTeamGroup: (id: string, data: Partial<Omit<GlobalTeamGroup, 'id'>>) => flowStateRef.current?.updateGlobalTeamGroup(id, data),
     handleDeleteGlobalTeamGroup: (id: string) => flowStateRef.current?.deleteGlobalTeamGroup(id),
-    handleReorderGlobalTeamGroup: (id: string, index: number) => flowStateRef.current?.reorderGlobalTeamGroup(id, index),
+    handleReorderGlobalTeamGroup: (id: string, direction: 'up' | 'down') => flowStateRef.current?.reorderGlobalTeamGroup(id, direction),
     handleAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => flowStateRef.current?.assignTeamToGame(gameId, teamId, slot),
     handleConnectTeam: (team: { id: number; text: string }, groupId: string) => {
       flowStateRef.current?.addGlobalTeam(team.text, groupId, team.id);
@@ -524,7 +532,7 @@ export function useDesignerController(
     handleAddOfficialsGroup: () => {
       flowStateRef.current?.addOfficialsGroup();
       // Track officials group added event
-      const officialGroups = flowStateRef.current?.nodes?.filter(n => n.type === 'officials') || [];
+      const officialGroups = flowStateRef.current?.globalTeamGroups?.filter(g => g.id === 'group-officials') || [];
       const groupName = officialGroups.length > 0
         ? `Officials Group ${officialGroups.length}`
         : 'Officials Group 1';
@@ -540,7 +548,7 @@ export function useDesignerController(
     addNotification,
     onMetadataHighlight,
     handleRemoveEdgeFromSlot: (gameId: string, slot: 'home' | 'away') => flowStateRef.current?.removeEdgeFromSlot(gameId, slot),
-    handleUpdateGameSlot: (gameId: string, slot: 'home' | 'away', type: string, refId: string) => flowStateRef.current?.addGameNodeInStage(gameId, slot, type, refId),
+    handleUpdateGameSlot: (stageId: string) => flowStateRef.current?.addGameNodeInStage(stageId),
     handleAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') =>
       flowStateRef.current?.addGameToGameEdge(sourceGameId, outputType, targetGameId, targetSlot),
     handleAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) =>

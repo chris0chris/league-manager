@@ -10,6 +10,34 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import FieldSection from '../FieldSection';
 import type { FieldNode, StageNode, GameNode } from '../../../types/flowchart';
+import type { FieldSectionProps } from '../FieldSection';
+
+const createDefaultFieldSectionProps = (overrides: Partial<FieldSectionProps> = {}): FieldSectionProps => ({
+  field: {} as FieldNode,
+  stages: [],
+  allNodes: [],
+  edges: [],
+  globalTeams: [],
+  globalTeamGroups: [],
+  onUpdate: vi.fn(),
+  onDelete: vi.fn(),
+  onAddStage: vi.fn(),
+  onSelectNode: vi.fn(),
+  selectedNodeId: null,
+  onHighlightElement: vi.fn(),
+  onAssignTeam: vi.fn(),
+  onSwapTeams: vi.fn(),
+  onAddGame: vi.fn(),
+  onAddGameToGameEdge: vi.fn(),
+  onAddStageToGameEdge: vi.fn(),
+  onRemoveEdgeFromSlot: vi.fn(),
+  onOpenResultModal: vi.fn(),
+  isExpanded: true,
+  expandedStageIds: new Set<string>(),
+  highlightedSourceGameId: null,
+  onDynamicReferenceClick: vi.fn(),
+  ...overrides,
+});
 
 describe('FieldSection', () => {
   // Sample field node
@@ -34,6 +62,7 @@ describe('FieldSection', () => {
       type: 'stage',
       name: 'Preliminary',
       category: 'preliminary',
+      stageType: 'STANDARD',
       order: 0,
     },
   };
@@ -47,42 +76,25 @@ describe('FieldSection', () => {
     data: {
       type: 'game',
       stage: 'Preliminary',
+      stageType: 'STANDARD',
       standing: 'Game 1',
       fieldId: null,
       official: null,
       breakAfter: 0,
+      homeTeamId: null,
+      awayTeamId: null,
+      homeTeamDynamic: null,
+      awayTeamDynamic: null,
     },
   };
 
   it('renders field with name and metadata', () => {
-    const mockOnUpdate = vi.fn();
-    const mockOnDelete = vi.fn();
-    const mockOnAddStage = vi.fn();
-
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[sampleStage]}
-        allNodes={[sampleField, sampleStage, sampleGame]}
-        edges={[]}
-        globalTeams={[]}
-        globalTeamGroups={[]}
-        onUpdate={mockOnUpdate}
-        onDelete={mockOnDelete}
-        onAddStage={mockOnAddStage}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-        onAssignTeam={vi.fn()}
-        onAddGame={vi.fn()}
-        highlightedSourceGameId={null}
-        onDynamicReferenceClick={vi.fn()}
-        onAddGameToGameEdge={vi.fn()}
-        onRemoveGameToGameEdge={vi.fn()}
-        onNotify={vi.fn()}
-        isExpanded={true}
-        expandedStageIds={new Set()}
-        readOnly={false}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [sampleStage],
+        allNodes: [sampleField, sampleStage, sampleGame],
+      })} />
     );
 
     // Field name should be visible
@@ -95,28 +107,11 @@ describe('FieldSection', () => {
 
   it('shows stages when expanded', () => {
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[sampleStage]}
-        allNodes={[sampleField, sampleStage, sampleGame]}
-        edges={[]}
-        globalTeams={[]}
-        globalTeamGroups={[]}
-        onUpdate={vi.fn()}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-        onAssignTeam={vi.fn()}
-        onAddGame={vi.fn()}
-        highlightedSourceGameId={null}
-        onDynamicReferenceClick={vi.fn()}
-        onAddGameToGameEdge={vi.fn()}
-        onRemoveGameToGameEdge={vi.fn()}
-        onNotify={vi.fn()}
-        isExpanded={true}
-        expandedStageIds={new Set()}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [sampleStage],
+        allNodes: [sampleField, sampleStage, sampleGame],
+      })} />
     );
 
     // Should be expanded - stage name visible
@@ -128,26 +123,11 @@ describe('FieldSection', () => {
 
   it('Add Stage button is in the header', () => {
     const { container } = render(
-      <FieldSection
-        field={sampleField}
-        stages={[]}
-        allNodes={[sampleField]}
-        edges={[]}
-        onUpdate={vi.fn()}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-        onAssignTeam={vi.fn()}
-        onAddGame={vi.fn()}
-        highlightedSourceGameId={null}
-        onDynamicReferenceClick={vi.fn()}
-        onAddGameToGameEdge={vi.fn()}
-        onRemoveGameToGameEdge={vi.fn()}
-        onNotify={vi.fn()}
-        isExpanded={true}
-        expandedStageIds={new Set()}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [],
+        allNodes: [sampleField],
+      })} />
     );
 
     const header = container.querySelector('.field-section__header');
@@ -161,26 +141,12 @@ describe('FieldSection', () => {
     const mockOnAddStage = vi.fn();
 
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[]}
-        allNodes={[sampleField]}
-        edges={[]}
-        onUpdate={vi.fn()}
-        onDelete={vi.fn()}
-        onAddStage={mockOnAddStage}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-        onAssignTeam={vi.fn()}
-        onAddGame={vi.fn()}
-        highlightedSourceGameId={null}
-        onDynamicReferenceClick={vi.fn()}
-        onAddGameToGameEdge={vi.fn()}
-        onRemoveGameToGameEdge={vi.fn()}
-        onNotify={vi.fn()}
-        isExpanded={true}
-        expandedStageIds={new Set()}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [],
+        allNodes: [sampleField],
+        onAddStage: mockOnAddStage,
+      })} />
     );
 
     // Get the header add stage button
@@ -192,26 +158,11 @@ describe('FieldSection', () => {
 
   it('No Add Stage button appears at bottom when stages exist', () => {
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[sampleStage]}
-        allNodes={[sampleField, sampleStage]}
-        edges={[]}
-        onUpdate={vi.fn()}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-        onAssignTeam={vi.fn()}
-        onAddGame={vi.fn()}
-        highlightedSourceGameId={null}
-        onDynamicReferenceClick={vi.fn()}
-        onAddGameToGameEdge={vi.fn()}
-        onRemoveGameToGameEdge={vi.fn()}
-        onNotify={vi.fn()}
-        isExpanded={true}
-        expandedStageIds={new Set()}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [sampleStage],
+        allNodes: [sampleField, sampleStage],
+      })} />
     );
 
     // Only the header button should exist
@@ -226,26 +177,12 @@ describe('FieldSection', () => {
     const mockOnDelete = vi.fn();
 
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[]}
-        allNodes={[sampleField]}
-        edges={[]}
-        onUpdate={vi.fn()}
-        onDelete={mockOnDelete}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-        onAssignTeam={vi.fn()}
-        onAddGame={vi.fn()}
-        highlightedSourceGameId={null}
-        onDynamicReferenceClick={vi.fn()}
-        onAddGameToGameEdge={vi.fn()}
-        onRemoveGameToGameEdge={vi.fn()}
-        onNotify={vi.fn()}
-        isExpanded={true}
-        expandedStageIds={new Set()}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [],
+        allNodes: [sampleField],
+        onDelete: mockOnDelete,
+      })} />
     );
 
     const deleteButton = screen.getByTitle(/Permanently remove this field/i);
@@ -270,26 +207,11 @@ describe('FieldSection', () => {
     };
 
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[stage2, stage1]} // Intentionally out of order
-        allNodes={[sampleField, stage1, stage2]}
-        edges={[]}
-        onUpdate={vi.fn()}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-        onAssignTeam={vi.fn()}
-        onAddGame={vi.fn()}
-        highlightedSourceGameId={null}
-        onDynamicReferenceClick={vi.fn()}
-        onAddGameToGameEdge={vi.fn()}
-        onRemoveGameToGameEdge={vi.fn()}
-        onNotify={vi.fn()}
-        isExpanded={true}
-        expandedStageIds={new Set()}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [stage2, stage1],
+        allNodes: [sampleField, stage1, stage2],
+      })} />
     );
 
     // Check stage names appear and in correct order
@@ -301,17 +223,12 @@ describe('FieldSection', () => {
 
   it('highlights field when selected', () => {
     const { container } = render(
-      <FieldSection
-        field={sampleField}
-        stages={[]}
-        allNodes={[sampleField]}
-        edges={[]}
-        onUpdate={vi.fn()}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId="field-1"
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [],
+        allNodes: [sampleField],
+        selectedNodeId: 'field-1',
+      })} />
     );
 
     const fieldCard = container.querySelector('.field-section');
@@ -320,17 +237,11 @@ describe('FieldSection', () => {
 
   it('shows empty state when field has no stages', () => {
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[]}
-        allNodes={[sampleField]}
-        edges={[]}
-        onUpdate={vi.fn()}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [],
+        allNodes: [sampleField],
+      })} />
     );
 
     expect(screen.getByText(/no stages/i)).toBeInTheDocument();
@@ -340,17 +251,12 @@ describe('FieldSection', () => {
     const mockOnUpdate = vi.fn();
 
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[]}
-        allNodes={[sampleField]}
-        edges={[]}
-        onUpdate={mockOnUpdate}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [],
+        allNodes: [sampleField],
+        onUpdate: mockOnUpdate,
+      })} />
     );
 
     // Click the edit button
@@ -368,17 +274,11 @@ describe('FieldSection', () => {
 
   it('allows canceling field name edit with Escape', () => {
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[]}
-        allNodes={[sampleField]}
-        edges={[]}
-        onUpdate={vi.fn()}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [],
+        allNodes: [sampleField],
+      })} />
     );
 
     fireEvent.click(screen.getByTitle(/Click to edit the name of this playing field/i));
@@ -393,17 +293,12 @@ describe('FieldSection', () => {
   it('saves field name edit with Enter', () => {
     const mockOnUpdate = vi.fn();
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[]}
-        allNodes={[sampleField]}
-        edges={[]}
-        onUpdate={mockOnUpdate}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [],
+        allNodes: [sampleField],
+        onUpdate: mockOnUpdate,
+      })} />
     );
 
     fireEvent.click(screen.getByTitle(/Click to edit the name of this playing field/i));
@@ -417,17 +312,12 @@ describe('FieldSection', () => {
   it('calls onUpdate when color is changed', () => {
     const mockOnUpdate = vi.fn();
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[]}
-        allNodes={[sampleField]}
-        edges={[]}
-        onUpdate={mockOnUpdate}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [],
+        allNodes: [sampleField],
+        onUpdate: mockOnUpdate,
+      })} />
     );
 
     const colorInput = screen.getByTitle(/Change the accent color for this field/i);
@@ -438,19 +328,12 @@ describe('FieldSection', () => {
 
   it('toggles expansion when header is clicked', () => {
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[sampleStage]}
-        allNodes={[sampleField, sampleStage]}
-        edges={[]}
-        onUpdate={vi.fn()}
-        onDelete={vi.fn()}
-        onAddStage={vi.fn()}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-        isExpanded={false}
-        expandedStageIds={new Set()}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [sampleStage],
+        allNodes: [sampleField, sampleStage],
+        isExpanded: false,
+      })} />
     );
 
     const header = screen.getByText('Feld 1').closest('.field-section__header');
@@ -469,17 +352,12 @@ describe('FieldSection', () => {
   it('shows big Add Stage button in empty state', () => {
     const mockOnAddStage = vi.fn();
     render(
-      <FieldSection
-        field={sampleField}
-        stages={[]}
-        allNodes={[sampleField]}
-        edges={[]}
-        onUpdate={vi.fn()}
-        onDelete={vi.fn()}
-        onAddStage={mockOnAddStage}
-        onSelectNode={vi.fn()}
-        selectedNodeId={null}
-      />
+      <FieldSection {...createDefaultFieldSectionProps({
+        field: sampleField,
+        stages: [],
+        allNodes: [sampleField],
+        onAddStage: mockOnAddStage,
+      })} />
     );
 
     const bigAddButton = screen.getByText(/No stages yet/i).parentElement?.querySelector('button');

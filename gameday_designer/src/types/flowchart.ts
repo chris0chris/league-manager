@@ -125,6 +125,9 @@ export interface GameNodeData {
   /** Dynamic away team reference from GameToGameEdge (overrides awayTeamId) */
   awayTeamDynamic: TeamReference | null;
 
+  /** Optional group name the game belongs to (e.g. round-robin group letter) */
+  group?: string;
+
   /** Resolved home team label from backend (read-only) */
   resolvedHomeTeam?: string;
   /** Resolved away team label from backend (read-only) */
@@ -254,8 +257,8 @@ export interface StageNodeData {
   progressionConfig?: ProgressionConfig;
   /** Optional mapping for progression from source games */
   progressionMapping?: Record<string, {
-    home: { sourceIndex: number; type: 'winner' | 'loser' };
-    away: { sourceIndex: number; type: 'winner' | 'loser' };
+    home: { sourceIndex: number; type: 'winner' | 'loser' | 'rank'; sourceStageId?: string; sourceStageIndex?: number };
+    away: { sourceIndex: number; type: 'winner' | 'loser' | 'rank'; sourceStageId?: string; sourceStageIndex?: number };
   }>;
 }
 
@@ -266,7 +269,7 @@ export interface StageNodeData {
 /**
  * Union type for all node data types.
  */
-export type FlowNodeData = GameNodeData | FieldNodeData | StageNodeData;
+export type FlowNodeData = GameNodeData | FieldNodeData | StageNodeData | TeamNodeData;
 
 /**
  * Team node type for React Flow.
@@ -294,7 +297,7 @@ export type StageNode = Node<StageNodeData, 'stage'>;
 /**
  * Union type for all node types used in the designer.
  */
-export type FlowNode = GameNode | FieldNode | StageNode;
+export type FlowNode = GameNode | FieldNode | StageNode | TeamNode;
 
 // ============================================================================
 // Edge Types
@@ -311,7 +314,7 @@ export type TeamOutputHandle = 'output';
  * Handle IDs for stage node connections (Ranking Stages).
  * Format: rank-1, rank-2, etc.
  */
-export type RankOutputHandle = `rank-${number}`;
+export type RankOutputHandle = `rank-${number}` | `rank-${string}-${number}`;
 
 /**
  * Data for an edge connecting a team to a game input.
@@ -347,7 +350,7 @@ export interface StageToGameEdgeData {
  * Edge connecting a team node to a game node.
  * @deprecated Teams are now assigned directly to games via GlobalTeam pool (v2)
  */
-export interface TeamToGameEdge extends Edge {
+export interface TeamToGameEdge extends Edge<TeamToGameEdgeData> {
   type: 'teamToGame';
   sourceHandle: TeamOutputHandle;
   targetHandle: GameInputHandle;
@@ -357,7 +360,7 @@ export interface TeamToGameEdge extends Edge {
 /**
  * Edge connecting a game output to another game input.
  */
-export interface GameToGameEdge extends Edge {
+export interface GameToGameEdge extends Edge<GameToGameEdgeData> {
   type: 'gameToGame';
   sourceHandle: GameOutputHandle;
   targetHandle: GameInputHandle;
@@ -367,7 +370,7 @@ export interface GameToGameEdge extends Edge {
 /**
  * Edge connecting a stage node (Ranking Stage) to a game node.
  */
-export interface StageToGameEdge extends Edge {
+export interface StageToGameEdge extends Edge<StageToGameEdgeData> {
   type: 'stageToGame';
   sourceHandle: RankOutputHandle;
   targetHandle: GameInputHandle;
@@ -377,7 +380,7 @@ export interface StageToGameEdge extends Edge {
 /**
  * Union type for all edge types used in the designer.
  */
-export type FlowEdge = GameToGameEdge | StageToGameEdge;
+export type FlowEdge = TeamToGameEdge | GameToGameEdge | StageToGameEdge;
 
 // ============================================================================
 // Gameday Metadata
@@ -400,6 +403,9 @@ export interface GamedayMetadata {
   league: number;
   league_display?: string;
   status: string;
+  has_results?: boolean;
+  resource_urls?: import('./api').ResourceUrl[];
+  game_duration?: number;
 }
 
 // ============================================================================
@@ -475,7 +481,12 @@ export type FlowValidationWarningType =
   | 'unassigned_field'
   | 'stage_time_conflict'
   | 'stage_sequence_type'
-  | 'uneven_game_distribution';
+  | 'uneven_game_distribution'
+  | 'no_teams'
+  | 'no_games'
+  | 'team_without_games'
+  | 'unused_field'
+  | 'broken_progression';
 
 /**
  * Validation error for the flowchart.
@@ -530,13 +541,6 @@ export interface FlowValidationResult {
 // ============================================================================
 
 /**
- * Type guard to check if node data is TeamNodeData.
- */
-export function isTeamNodeData(data: FlowNodeData): data is TeamNodeData {
-  return data.type === 'team';
-}
-
-/**
  * Type guard to check if node data is GameNodeData.
  */
 export function isGameNodeData(data: FlowNodeData): data is GameNodeData {
@@ -558,13 +562,6 @@ export function isStageNodeData(data: FlowNodeData): data is StageNodeData {
 }
 
 /**
- * Type guard to check if a node is a TeamNode.
- */
-export function isTeamNode(node: FlowNode): node is TeamNode {
-  return node.type === 'team';
-}
-
-/**
  * Type guard to check if a node is a GameNode.
  */
 export function isGameNode(node: FlowNode): node is GameNode {
@@ -576,6 +573,20 @@ export function isGameNode(node: FlowNode): node is GameNode {
  */
 export function isFieldNode(node: FlowNode): node is FieldNode {
   return node.type === 'field';
+}
+
+/**
+ * Type guard to check if a node is a TeamNode.
+ */
+export function isTeamNode(node: FlowNode): node is TeamNode {
+  return node.type === 'team';
+}
+
+/**
+ * Type guard to check if an edge is a TeamToGameEdge.
+ */
+export function isTeamToGameEdge(edge: FlowEdge): edge is TeamToGameEdge {
+  return edge.type === 'teamToGame';
 }
 
 /**
@@ -599,13 +610,6 @@ export function isStageNode(node: FlowNode): node is StageNode {
  */
 export function isContainerNode(node: FlowNode): node is FieldNode | StageNode {
   return node.type === 'field' || node.type === 'stage';
-}
-
-/**
- * Type guard to check if an edge is a TeamToGameEdge.
- */
-export function isTeamToGameEdge(edge: FlowEdge): edge is TeamToGameEdge {
-  return edge.type === 'teamToGame';
 }
 
 /**

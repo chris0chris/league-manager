@@ -21,7 +21,7 @@ export const apiPut = (url: string, body: any) => {
   return axios
     .put(url, body, header)
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    .then((res) => {})
+    .then(() => {})
     .catch((err) => {
       console.error(err);
       throwApiError(err);
@@ -39,7 +39,7 @@ export const apiGet = (url: string): any => {
     .catch((error: AxiosError) => {
       console.error("api ERROR", error);
       if (error.response && error.response.status === 401) {
-        if (process.env.NODE_ENV === "production") {
+        if (import.meta.env.MODE === "production") {
           window.location.href = SCORECARD_URL;
         } else {
           alert(

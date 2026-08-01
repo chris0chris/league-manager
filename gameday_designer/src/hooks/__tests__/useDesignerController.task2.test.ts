@@ -53,7 +53,8 @@ describe('useDesignerController Task 2', () => {
     vi.mocked(tournamentGenerator.generateTournament).mockReturnValue({
       fields: [],
       stages: [],
-      games: []
+      games: [],
+      edges: []
     });
 
     const { result } = renderHook(() => {

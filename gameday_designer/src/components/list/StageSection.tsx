@@ -28,7 +28,7 @@ export interface StageSectionProps {
   globalTeams: GlobalTeam[];
   globalTeamGroups: GlobalTeamGroup[];
   highlightedElement?: HighlightedElement | null;
-  onUpdate: (nodeId: string, data: Partial<StageNode['data']>) => void;
+  onUpdate: (nodeId: string, data: Record<string, unknown>) => void;
   onDelete: (nodeId: string) => void;
   onSelectNode: (nodeId: string | null) => void;
   onHighlightElement: (id: string, type: import('../../types/flowchart').HighlightedElement['type']) => void;

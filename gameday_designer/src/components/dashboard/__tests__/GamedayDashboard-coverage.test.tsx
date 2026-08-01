@@ -2,7 +2,6 @@
  * Additional coverage tests for GamedayDashboard
  */
 
-import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -47,7 +46,6 @@ describe('GamedayDashboard Coverage', () => {
       season: 1,
       league: 1,
       status: 'DRAFT',
-      designer_data: {},
       has_designer_state: true,
     },
   ];

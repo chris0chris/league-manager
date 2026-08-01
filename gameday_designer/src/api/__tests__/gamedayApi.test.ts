@@ -124,6 +124,7 @@ describe('GamedayApi', () => {
         address: 'Main Field',
         season: 1,
         league: 1,
+        status: 'DRAFT',
         designer_data: {}
       };
 
@@ -152,6 +153,7 @@ describe('GamedayApi', () => {
         format: '6_2',
         author: 1,
         address: '',
+        status: 'DRAFT',
       };
 
       mockAxiosInstance.post.mockResolvedValue({ data: mockResponse });
@@ -179,6 +181,7 @@ describe('GamedayApi', () => {
         address: 'Main Field',
         season: 1,
         league: 1,
+        status: 'DRAFT',
       };
 
       mockAxiosInstance.put.mockResolvedValue({ data: mockResponse });
@@ -204,6 +207,7 @@ describe('GamedayApi', () => {
         address: 'Main Field',
         season: 1,
         league: 1,
+        status: 'DRAFT',
       };
 
       mockAxiosInstance.patch.mockResolvedValue({ data: mockResponse });

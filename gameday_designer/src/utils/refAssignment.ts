@@ -28,7 +28,7 @@ import type { TeamReference } from '../types/designer';
  */
 export function assignRefereesToGames(
   games: GameNode[],
-  stages: StageNode[],
+  _stages: StageNode[],
   teams: GlobalTeam[]
 ): GameNode[] {
   // Track how many times each team has been assigned as a referee

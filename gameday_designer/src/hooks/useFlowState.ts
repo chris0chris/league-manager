@@ -13,6 +13,8 @@ import type {
   GlobalTeam,
   GlobalTeamGroup,
   GamedayMetadata,
+  GameInputHandle,
+  GameOutputHandle,
 } from '../types/flowchart';
 import {
   createGameNode,
@@ -150,7 +152,7 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
     currentIndexRef.current--;
     const prevState = historyRef.current[currentIndexRef.current];
 
-    setMetadata(prevState.metadata);
+    setMetadata(prevState.metadata!);
     setNodes(prevState.nodes);
     setEdges(prevState.edges);
     setGlobalTeams(prevState.globalTeams);
@@ -173,7 +175,7 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
     currentIndexRef.current++;
     const nextState = historyRef.current[currentIndexRef.current];
 
-    setMetadata(nextState.metadata);
+    setMetadata(nextState.metadata!);
     setNodes(nextState.nodes);
     setEdges(nextState.edges);
     setGlobalTeams(nextState.globalTeams);
@@ -254,23 +256,26 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
   }, [handleStateChange]);
 
   const importState = useCallback((state: FlowState) => {
-    if (state.metadata) {
+    const meta = state.metadata;
+    if (meta) {
       setMetadata(prev => ({
-        ...state.metadata,
-        date: state.metadata.date || '',
-        status: state.metadata.status || prev.status || 'DRAFT'
+        ...meta,
+        date: meta.date || '',
+        status: meta.status || prev.status || 'DRAFT'
       }));
     }
     setNodes(state.nodes || []);
     setEdges(state.edges || []);
     const migratedTeams = (state.globalTeams || []).map((team: GlobalTeam & { reference?: string }) => {
-      if ('reference' in team && !('groupId' in team)) {
+      const hasRef = 'reference' in team;
+      const noGroup = !('groupId' in team);
+      if (hasRef && noGroup) {
         return { 
-          id: team.id, 
-          label: team.label || 'Team', 
+          id: (team as GlobalTeam).id, 
+          label: (team as GlobalTeam).label || 'Team', 
           groupId: null, 
-          order: team.order,
-          color: team.color 
+          order: (team as GlobalTeam).order ?? 0,
+          color: (team as GlobalTeam).color ?? '#cccccc' 
         };
       }
       return team;
@@ -404,7 +409,7 @@ function useFlowStateInternal(initialState?: Partial<FlowState>, onStateChange?:
     onStateChange?.();
   }, [onStateChange]);
 
-  const addBulkGamesToGameEdgesCb = useCallback((newEdges: GameToGameEdge[], clearExisting?: boolean) => {
+  const addBulkGamesToGameEdgesCb = useCallback((newEdges: Array<{ sourceGameId: string; outputType: GameOutputHandle; targetGameId: string; targetSlot: GameInputHandle }>, clearExisting?: boolean) => {
     addBulkGameToGameEdges(newEdges, clearExisting);
   }, [addBulkGameToGameEdges]);
 

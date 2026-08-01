@@ -5,7 +5,6 @@ import { useDesignerController } from '../hooks/useDesignerController';
 import { useFlowState } from '../hooks/useFlowState';
 import ListCanvas from './ListCanvas';
 import { GameResultsTable, ScoreEdit } from './GameResultsTable';
-import { FlowToolbarProps } from './FlowToolbar';
 import PublishConfirmationModal from './modals/PublishConfirmationModal';
 import DeleteGamedayConfirmModal from './modals/DeleteGamedayConfirmModal';
 import GameResultModal from './modals/GameResultModal';
@@ -14,7 +13,7 @@ import NotificationToast from './ui/NotificationToast';
 import LoadingOverlay from './ui/LoadingOverlay';
 import TemplateLibraryModal from './modals/TemplateLibraryModal';
 import { useGamedayContext } from '../context/GamedayContext';
-import { GameNode } from '../types/designer';
+import type { GameNode } from '../types/flowchart';
 import { isGameNode, GlobalTeam } from '../types/flowchart';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { gamedayApi } from '../api/gamedayApi';
@@ -227,7 +226,7 @@ const ListDesignerApp: React.FC = () => {
   const lastToolbarPropsRef = useRef<string>('');
 
   useEffect(() => {
-    const newProps: FlowToolbarProps = {
+    const newProps = {
       onImport: handleImport,
       onExport: handleExport,
       gamedayStatus: metadata?.status,
@@ -265,7 +264,7 @@ const ListDesignerApp: React.FC = () => {
   const initialLoadRef = useRef(true);
   const isSavingRef = useRef(false);
   const saveQueuedRef = useRef(false);
-  const pendingSaveRef = useRef<{ timer: NodeJS.Timeout | null }>({ timer: null });
+  const pendingSaveRef = useRef<{ timer: ReturnType<typeof setTimeout> | null }>({ timer: null });
 
   const latestStateRef = useRef<typeof flowState | null>(null);
   useEffect(() => {
@@ -431,7 +430,7 @@ const ListDesignerApp: React.FC = () => {
         if (teamSelectionContext.side === 'replace') {
           handleReplaceGlobalTeam(teamSelectionContext.slotId, teamObj);
         } else {
-          handleAssignTeam(teamSelectionContext.slotId, teamSelectionContext.side as 'home' | 'away', String(teamId));
+          handleAssignTeam(teamSelectionContext.slotId, String(teamId), teamSelectionContext.side as 'home' | 'away');
         }
       }
     }
@@ -578,7 +577,6 @@ const ListDesignerApp: React.FC = () => {
               onAddGlobalTeam={handleAddGlobalTeam}
               onUpdateGlobalTeam={handleUpdateGlobalTeam}
               onDeleteGlobalTeam={handleDeleteGlobalTeam}
-              onReplaceGlobalTeam={handleReplaceGlobalTeam}
               onReorderGlobalTeam={handleReorderGlobalTeam}
               onAddGlobalTeamGroup={handleAddGlobalTeamGroup}
               onUpdateGlobalTeamGroup={handleUpdateGlobalTeamGroup}

@@ -12,6 +12,7 @@ import type {
   FlowEdge,
   GameInputHandle,
   GlobalTeam,
+  GameNodeData,
 } from '../types/flowchart';
 import {
   createFieldNode,
@@ -214,10 +215,11 @@ export function importFromScheduleJson(json: unknown): ImportResult {
           const teamId = teamLabelMap.get(parsed.name);
           if (teamId) {
             // Update game node with team assignment
+            const gameData = gameNode.data as GameNodeData;
             if (slot === 'home') {
-              gameNode.data.homeTeamId = teamId;
+              gameData.homeTeamId = teamId;
             } else {
-              gameNode.data.awayTeamId = teamId;
+              gameData.awayTeamId = teamId;
             }
           }
         }

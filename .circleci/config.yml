@@ -169,6 +169,9 @@ jobs:
           name: "JavaScript Test Suite"
           command: npm --prefix passcheck/ run test:run
       - run:
+          name: "TypeScript Typecheck"
+          command: npm --prefix passcheck/ run typecheck
+      - run:
           name: "JavaScript Linter"
           command: |
             mkdir -p /tmp/eslint
@@ -192,6 +195,9 @@ jobs:
           name: "JavaScript Test Suite"
           command: npm --prefix gameday_designer/ run test:run
       - run:
+          name: "TypeScript Typecheck"
+          command: npm --prefix gameday_designer/ run typecheck
+      - run:
           name: "JavaScript Linter"
           command: npm --prefix gameday_designer/ run eslint
       - run:
@@ -210,6 +216,9 @@ jobs:
       - run:
           name: "JavaScript Test Suite"
           command: npm --prefix journey_dashboard/ run test:run
+      - run:
+          name: "TypeScript Typecheck"
+          command: npm --prefix journey_dashboard/ run typecheck
       - run:
           name: "JavaScript Linter"
           command: |

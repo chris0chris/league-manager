@@ -24,9 +24,9 @@ describe('i18n/config', () => {
 
     // Mock localStorage
     const store: Record<string, string> = {};
-    originalLocalStorage = global.localStorage;
+    originalLocalStorage = window.localStorage;
 
-    global.localStorage = {
+    window.localStorage = {
       getItem: vi.fn((key: string) => store[key] || null),
       setItem: vi.fn((key: string, value: string) => {
         store[key] = value;
@@ -47,7 +47,7 @@ describe('i18n/config', () => {
     document.documentElement.setAttribute('lang', originalHtmlLang);
 
     // Restore original localStorage
-    global.localStorage = originalLocalStorage;
+    window.localStorage = originalLocalStorage;
 
     // Clear module cache to ensure fresh import for each test
     vi.resetModules();

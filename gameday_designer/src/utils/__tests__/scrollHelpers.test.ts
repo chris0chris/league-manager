@@ -27,9 +27,9 @@ describe('scrollHelpers', () => {
     id,
     type: 'field',
     data: {
+      type: 'field',
       name,
       order,
-      description: '',
     },
     position: { x: 0, y: 0 },
   });
@@ -43,10 +43,11 @@ describe('scrollHelpers', () => {
     id,
     type: 'stage',
     data: {
+      type: 'stage',
       name,
       order,
       category: 'preliminary',
-      description: '',
+      stageType: 'STANDARD',
     },
     position: { x: 0, y: 0 },
     parentId,
@@ -60,7 +61,11 @@ describe('scrollHelpers', () => {
     id,
     type: 'game',
     data: {
+      type: 'game',
+      stage: 'Test Stage',
+      stageType: 'STANDARD',
       standing,
+      fieldId: null,
       homeTeamId: null,
       awayTeamId: null,
       homeTeamDynamic: null,
@@ -77,7 +82,7 @@ describe('scrollHelpers', () => {
 
   beforeEach(() => {
     scrollIntoViewMock = vi.fn();
-    Element.prototype.scrollIntoView = scrollIntoViewMock;
+    Element.prototype.scrollIntoView = scrollIntoViewMock as unknown as typeof Element.prototype.scrollIntoView;
     vi.useFakeTimers();
   });
 

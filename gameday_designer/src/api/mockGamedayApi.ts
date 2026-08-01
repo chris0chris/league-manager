@@ -24,6 +24,7 @@ const INITIAL_GAMEDAYS: Gameday[] = [
     season_display: 'Season 2026',
     league: 1,
     league_display: 'DFFL',
+    status: 'DRAFT',
     designer_data: {}
   },
   {
@@ -39,6 +40,7 @@ const INITIAL_GAMEDAYS: Gameday[] = [
     season_display: 'Season 2026',
     league: 1,
     league_display: 'DFFL',
+    status: 'DRAFT',
     designer_data: {}
   }
 ];

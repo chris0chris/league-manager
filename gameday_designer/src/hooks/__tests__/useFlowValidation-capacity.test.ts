@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
-import type { FlowNode, GlobalTeam } from '../../types/flowchart';
+import type { FlowNode, GlobalTeam, FieldNodeData, StageNodeData, GameNodeData } from '../../types/flowchart';
+import type { TeamReference } from '../../types/designer';
 
 const validMetadata = { id: 1, name: 'Test', date: '2026-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
 
@@ -17,27 +18,27 @@ describe('useFlowValidation - Team Capacity', () => {
       {
         id: 'field1',
         type: 'field',
-        data: { name: 'Field 1', order: 0 },
+        data: { name: 'Field 1', order: 0 } as FieldNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'field2',
         type: 'field',
-        data: { name: 'Field 2', order: 1 },
+        data: { name: 'Field 2', order: 1 } as FieldNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage1',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+        data: { name: 'Stage 1', order: 0, progressionMode: 'manual' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage2',
         type: 'stage',
         parentId: 'field2',
-        data: { name: 'Stage 2', order: 0, progressionMode: 'manual' },
+        data: { name: 'Stage 2', order: 0, progressionMode: 'manual' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
       {
@@ -52,7 +53,7 @@ describe('useFlowValidation - Team Capacity', () => {
           homeTeamId: 't1',
           awayTeamId: 't2',
           official: null,
-        },
+        } as GameNodeData,
         position: { x: 0, y: 0 },
       },
       {
@@ -67,7 +68,7 @@ describe('useFlowValidation - Team Capacity', () => {
           homeTeamId: 't1', // Team 1 is playing here too!
           awayTeamId: 't3',
           official: null,
-        },
+        } as GameNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -91,27 +92,27 @@ describe('useFlowValidation - Team Capacity', () => {
       {
         id: 'field1',
         type: 'field',
-        data: { name: 'Field 1', order: 0 },
+        data: { name: 'Field 1', order: 0 } as FieldNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'field2',
         type: 'field',
-        data: { name: 'Field 2', order: 1 },
+        data: { name: 'Field 2', order: 1 } as FieldNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage1',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+        data: { name: 'Stage 1', order: 0, progressionMode: 'manual' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage2',
         type: 'stage',
         parentId: 'field2',
-        data: { name: 'Stage 2', order: 0, progressionMode: 'manual' },
+        data: { name: 'Stage 2', order: 0, progressionMode: 'manual' } as StageNodeData,
         position: { x: 0, y: 0 },
       },
       {
@@ -126,7 +127,7 @@ describe('useFlowValidation - Team Capacity', () => {
           homeTeamId: 't1',
           awayTeamId: 't2',
           official: null,
-        },
+        } as GameNodeData,
         position: { x: 0, y: 0 },
       },
       {
@@ -140,8 +141,8 @@ describe('useFlowValidation - Team Capacity', () => {
           breakAfter: 0,
           homeTeamId: 't3',
           awayTeamId: 't2',
-          official: 't1', // Team 1 is officiating here while playing in Game 1
-        },
+          official: 't1' as unknown as TeamReference, // Team 1 is officiating here while playing in Game 1
+        } as GameNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -163,14 +164,14 @@ describe('useFlowValidation - Team Capacity', () => {
       {
         id: 'field1',
         type: 'field',
-        data: { name: 'Field 1', order: 0 },
+        data: { name: 'Field 1', order: 0 } as FieldNodeData,
         position: { x: 0, y: 0 },
       },
       {
         id: 'stage1',
         type: 'stage',
         parentId: 'field1',
-        data: { name: 'Stage 1', order: 0 },
+        data: { name: 'Stage 1', order: 0 } as StageNodeData,
         position: { x: 0, y: 0 },
       },
       {
@@ -182,7 +183,7 @@ describe('useFlowValidation - Team Capacity', () => {
           startTime: 'invalid',
           homeTeamId: 'team1',
           awayTeamId: 'team2',
-        },
+        } as GameNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -199,8 +200,8 @@ describe('useFlowValidation - Team Capacity', () => {
         data: {
           standing: 'G1',
           homeTeamId: 't1',
-          official: 't1',
-        },
+          official: 't1' as unknown as TeamReference,
+        } as GameNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -222,7 +223,7 @@ describe('useFlowValidation - Team Capacity', () => {
           standing: 'G1',
           homeTeamId: 'My Static Team',
           official: { type: 'static', name: 'My Static Team' },
-        },
+        } as GameNodeData,
         position: { x: 0, y: 0 },
       },
     ];
@@ -242,8 +243,8 @@ describe('useFlowValidation - Team Capacity', () => {
         data: {
           standing: 'G1',
           awayTeamId: 't1',
-          official: 't1',
-        },
+          official: 't1' as unknown as TeamReference,
+        } as GameNodeData,
         position: { x: 0, y: 0 },
       },
     ];

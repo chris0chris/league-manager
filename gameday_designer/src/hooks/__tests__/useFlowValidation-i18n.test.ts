@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useFlowValidation } from '../useFlowValidation';
-import type { FlowNode } from '../../types/flowchart';
+import type { FlowNode, FieldNodeData, StageNodeData, GameNodeData } from '../../types/flowchart';
 
 const validMetadata = { id: 1, name: 'Test', date: '2026-01-01', start: '10:00', status: 'DRAFT', format: '6_2', author: 1, address: 'Field', season: 1, league: 1 };
 
@@ -12,14 +12,14 @@ describe('useFlowValidation i18n', () => {
         {
           id: 'field1',
           type: 'field',
-          data: { name: 'Field 1', order: 0 },
+          data: { name: 'Field 1', order: 0 } as FieldNodeData,
           position: { x: 0, y: 0 },
         },
         {
           id: 'stage1',
           type: 'stage',
           parentId: 'field1',
-          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' },
+          data: { name: 'Stage 1', order: 0, progressionMode: 'manual' } as StageNodeData,
           position: { x: 0, y: 0 },
         },
         {
@@ -32,8 +32,8 @@ describe('useFlowValidation i18n', () => {
             awayTeamId: null,
             fieldId: 'field1',
             official: null,
-            startTime: null,
-          },
+            startTime: undefined,
+          } as GameNodeData,
           position: { x: 0, y: 0 },
         },
     ];

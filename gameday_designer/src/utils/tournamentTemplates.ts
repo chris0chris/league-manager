@@ -5,7 +5,8 @@
  * Each template defines the complete structure: fields, stages, and progression modes.
  */
 
-import { TournamentTemplate } from '../types/tournament';
+import type { TournamentTemplate } from '../types/tournament';
+export type { TournamentTemplate };
 import { DEFAULT_START_TIME, DEFAULT_GAME_DURATION } from './tournamentConstants';
 
 /**
@@ -25,6 +26,7 @@ export const TEMPLATE_F6_2_2: TournamentTemplate = {
     {
       name: 'Group Stage',
       category: 'preliminary',
+      stageType: 'STANDARD',
       progressionMode: 'round_robin',
       config: { mode: 'round_robin', teamCount: 3, doubleRound: false },
       fieldAssignment: 'split', // Group A → Field 1, Group B → Field 2
@@ -33,6 +35,7 @@ export const TEMPLATE_F6_2_2: TournamentTemplate = {
     {
       name: 'Playoffs',
       category: 'final',
+      stageType: 'STANDARD',
       progressionMode: 'placement',
       config: { mode: 'placement', positions: 4, format: 'single_elimination' },
       fieldAssignment: 0, // All playoff games on Field 1
@@ -76,6 +79,7 @@ export const TEMPLATE_F8_2_3: TournamentTemplate = {
     {
       name: 'Group Stage',
       category: 'preliminary',
+      stageType: 'STANDARD',
       progressionMode: 'round_robin',
       config: { mode: 'round_robin', teamCount: 4, doubleRound: false },
       fieldAssignment: 'split',
@@ -84,6 +88,7 @@ export const TEMPLATE_F8_2_3: TournamentTemplate = {
     {
       name: 'Playoffs',
       category: 'final',
+      stageType: 'STANDARD',
       progressionMode: 'placement',
       config: { mode: 'placement', positions: 8, format: 'single_elimination' },
       fieldAssignment: 0,
@@ -109,6 +114,7 @@ export const TEMPLATE_F8_2_3: TournamentTemplate = {
     {
       name: '3rd/5th Place',
       category: 'placement',
+      stageType: 'STANDARD',
       progressionMode: 'placement',
       config: { mode: 'placement', positions: 4, format: 'single_elimination' },
       fieldAssignment: 0,

@@ -2,7 +2,6 @@
  * Additional coverage tests for GamedayCard
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import GamedayCard from '../GamedayCard';
@@ -52,7 +51,7 @@ describe('GamedayCard Coverage', () => {
       />
     );
     // The card itself has role="button"
-    const card = screen.getByText('Test Gameday').closest('.card');
+    const card = screen.getByText('Test Gameday').closest('.card') as HTMLElement | null;
     
     fireEvent.mouseEnter(card!);
     expect(card!.style.transform).toBe('translateY(-5px)');

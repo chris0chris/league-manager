@@ -150,6 +150,7 @@ export function useGameProgress(
     recent: [],
     upcoming: [],
     totalLiveGames: 0,
+    totalPlayedGamesToday: 0,
     todayGamedayCount: 0,
   });
 

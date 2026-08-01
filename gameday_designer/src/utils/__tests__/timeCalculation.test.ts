@@ -30,6 +30,7 @@ function createMockGameNode(
     data: {
       type: 'game',
       stage: 'Test Stage',
+      stageType: 'STANDARD',
       standing,
       fieldId: null,
       official: null,

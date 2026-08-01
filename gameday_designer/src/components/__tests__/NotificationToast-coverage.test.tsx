@@ -2,7 +2,6 @@
  * Additional coverage tests for NotificationToast
  */
 
-import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import NotificationToast from "../ui/NotificationToast";

@@ -175,7 +175,7 @@ export function getStageEndTime(
  * Uses linear minute counter to prevent wrap-around bugs during calculation.
  */
 export function calculateGameTimes(
-  fields: FieldNode[],
+  _fields: FieldNode[],
   stages: StageNode[],
   games: GameNode[],
   gameDuration: number,

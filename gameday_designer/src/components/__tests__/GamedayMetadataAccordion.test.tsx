@@ -287,7 +287,8 @@ describe('GamedayMetadataAccordion', () => {
     await waitFor(() => expect(vi.mocked(gamedayApi.patchGameday)).toHaveBeenCalled());
     fireEvent.blur(screen.getByTestId('resource-url-description'));
     await waitFor(() => {
-      const lastCall = vi.mocked(gamedayApi.patchGameday).mock.calls.at(-1);
+      const calls = vi.mocked(gamedayApi.patchGameday).mock.calls;
+      const lastCall = calls[calls.length - 1];
       expect(lastCall?.[1]).toEqual({
         resource_urls: [{ id: 42, url: 'https://twitch.tv/live', description: 'Livestream' }],
       });

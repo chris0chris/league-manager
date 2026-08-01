@@ -6,6 +6,7 @@ import ListDesignerApp from '../ListDesignerApp';
 import AppHeader from '../layout/AppHeader';
 import { GamedayProvider } from '../../context/GamedayContext';
 import { gamedayApi } from '../../api/gamedayApi';
+import type { Gameday } from '../../types/api';
 
 // Mock react-router-dom
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -37,7 +38,7 @@ vi.mock('../../api/gamedayApi', () => ({
 }));
 
 describe('ListDesignerApp - E2E CRUD Flow', () => {
-  const mockGameday = {
+  const mockGameday: Gameday = {
     id: 1,
     name: 'E2E Test Gameday',
     date: '2026-06-01',
@@ -50,9 +51,9 @@ describe('ListDesignerApp - E2E CRUD Flow', () => {
     status: 'DRAFT',
     designer_data: {
       nodes: [
-        { id: 'field-1', type: 'field', data: { name: 'Field 1', order: 0 }, position: { x: 0, y: 0 } },
-        { id: 'stage-1', type: 'stage', parentId: 'field-1', data: { name: 'Preliminary Round', category: 'preliminary', order: 0 }, position: { x: 0, y: 0 } },
-        { id: 'game-1', type: 'game', parentId: 'stage-1', data: { standing: 'Game 1', order: 0 }, position: { x: 0, y: 0 } }
+        { id: 'field-1', type: 'field', data: { type: 'field', name: 'Field 1', order: 0 }, position: { x: 0, y: 0 } },
+        { id: 'stage-1', type: 'stage', parentId: 'field-1', data: { type: 'stage', name: 'Preliminary Round', category: 'preliminary', stageType: 'STANDARD', order: 0 }, position: { x: 0, y: 0 } },
+        { id: 'game-1', type: 'game', parentId: 'stage-1', data: { type: 'game', stage: 'Preliminary', stageType: 'STANDARD', standing: 'Game 1', fieldId: null, official: null, breakAfter: 0, homeTeamId: null, awayTeamId: null, homeTeamDynamic: null, awayTeamDynamic: null }, position: { x: 0, y: 0 } }
       ],
       edges: [],
       globalTeams: [],

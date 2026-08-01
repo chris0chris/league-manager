@@ -50,8 +50,8 @@ const TeamPickerStep: React.FC<TeamPickerStepProps> = ({
   const associations = Array.from(
     new Map(
       availableTeams
-        .filter(t => t.associationAbbr)
-        .map(t => [t.associationAbbr, t.associationAbbr])
+        .filter((t): t is typeof t & { associationAbbr: string } => !!t.associationAbbr)
+        .map(t => [t.associationAbbr, t.associationAbbr] as [string, string])
     ).values()
   ).sort();
 

@@ -12,9 +12,8 @@ const createPlayer = (
   first_name: `Player${id}`,
   last_name: `Last${id}`,
   jersey_number,
+  pass_number: id,
   isSelected,
-  is_sub_in_other_league: false,
-  gender: 'M',
 });
 
 describe('Validator', () => {

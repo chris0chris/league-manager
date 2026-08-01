@@ -91,7 +91,7 @@ const TemplateLibraryModal: React.FC<TemplateLibraryModalProps> = ({
           associationAbbr: t.association_abbr ?? null
         }))
       ))
-      .catch(() => onNotify?.('Failed to load league teams', 'error'));
+      .catch(() => onNotify?.('Failed to load league teams', 'danger'));
   }, [step, gamedayId, onNotify]);
 
   const handleSelect = useCallback((item: SelectedTemplate) => {
@@ -102,7 +102,7 @@ const TemplateLibraryModal: React.FC<TemplateLibraryModalProps> = ({
     setSelected(item);
   }, []);
 
-  const handleApply = useCallback((item: SelectedTemplate, config?: TournamentConfig) => {
+  const handleApply = useCallback((_item: SelectedTemplate, config?: TournamentConfig) => {
     if (isLocked) return;
     setApplyConfig(config);
     setStep('team-picker');
@@ -141,7 +141,7 @@ const TemplateLibraryModal: React.FC<TemplateLibraryModalProps> = ({
       handleHide();
     } catch (e) {
       console.error('Failed to apply template', e);
-      onNotify?.('Failed to apply template', 'error');
+      onNotify?.('Failed to apply template', 'danger');
     }
   }, [selected, applyConfig, gamedayId, handleHide, onGenerateFromBuiltin, onGenerateFromSavedTemplate, onNotify]);
 
@@ -156,7 +156,7 @@ const TemplateLibraryModal: React.FC<TemplateLibraryModalProps> = ({
         color: getTeamColor(leagueTeams.length + i)
       }));
     } catch (e) {
-      onNotify?.(`Failed to generate teams`, 'error');
+      onNotify?.(`Failed to generate teams`, 'danger');
       throw e;
     }
   }, [leagueTeams.length, onNotify]);
@@ -212,7 +212,7 @@ const TemplateLibraryModal: React.FC<TemplateLibraryModalProps> = ({
     try {
       await onSaveTemplate?.(data.name, data.description, data.sharing);
     } catch {
-      onNotify?.('Failed to save template', 'error');
+      onNotify?.('Failed to save template', 'danger');
       return;
     }
     setShowSave(false);

@@ -12,4 +12,6 @@ const resources = {
   validation
 } as const;
 
+export type Namespace = keyof typeof resources;
+
 export default resources;

@@ -11,6 +11,7 @@ export interface TeamSelectionModalProps {
   onHide: () => void;
   onSelect: (teams: GlobalTeam[]) => void;
   groupId: string;
+  title?: string;
   gamedayId?: number;
   mode?: 'single' | 'group';
   preselectedTeams?: GlobalTeam[];

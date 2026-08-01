@@ -20,7 +20,7 @@ import type { GlobalTeam } from '../../types/flowchart';
 
 // Mock the time calculation module
 vi.mock('../timeCalculation', () => ({
-  calculateGameTimes: vi.fn((fields, stages, games) => games),
+  calculateGameTimes: vi.fn((_fields, _stages, games) => games),
 }));
 
 // Mock the game generators module
@@ -52,17 +52,22 @@ describe('tournamentGenerator', () => {
       {
         name: 'Group Stage',
         category: 'preliminary',
+        stageType: 'STANDARD',
         progressionMode: 'round_robin',
         config: {
-          gamesPerTeam: 2,
+          mode: 'round_robin',
+          teamCount: 2,
+          doubleRound: false,
         },
         fieldAssignment: 'split',
       },
       {
         name: 'Finals',
         category: 'final',
+        stageType: 'STANDARD',
         progressionMode: 'placement',
         config: {
+          mode: 'placement',
           positions: 4,
           format: 'single_elimination',
         },
@@ -164,8 +169,9 @@ describe('tournamentGenerator', () => {
           {
             name: 'Test Stage',
             category: 'preliminary',
+            stageType: 'STANDARD',
             progressionMode: 'round_robin',
-            config: { gamesPerTeam: 2 },
+            config: { mode: 'round_robin', teamCount: 2, doubleRound: false },
             fieldAssignment: 'all',
           },
         ],
@@ -205,8 +211,9 @@ describe('tournamentGenerator', () => {
           {
             name: 'Finals',
             category: 'final',
+            stageType: 'STANDARD',
             progressionMode: 'placement',
-            config: { positions: 2, format: 'single_elimination' },
+            config: { mode: 'placement', positions: 2, format: 'single_elimination' },
             fieldAssignment: 0,
           },
         ],
@@ -247,15 +254,17 @@ describe('tournamentGenerator', () => {
           {
             name: 'Stage 1',
             category: 'preliminary',
+            stageType: 'STANDARD',
             progressionMode: 'round_robin',
-            config: { gamesPerTeam: 2 },
+            config: { mode: 'round_robin', teamCount: 2, doubleRound: false },
             fieldAssignment: 'all',
           },
           {
             name: 'Stage 2',
             category: 'final',
+            stageType: 'STANDARD',
             progressionMode: 'placement',
-            config: { positions: 2, format: 'single_elimination' },
+            config: { mode: 'placement', positions: 2, format: 'single_elimination' },
             fieldAssignment: 0,
           },
         ],
@@ -556,8 +565,9 @@ describe('tournamentGenerator', () => {
           {
             name: 'Test Stage',
             category: 'preliminary',
+            stageType: 'STANDARD',
             progressionMode: 'round_robin',
-            config: { gamesPerTeam: 2 },
+            config: { mode: 'round_robin', teamCount: 2, doubleRound: false },
             fieldAssignment: 5, // Out of range for 2 fields, should wrap to 5 % 2 = 1
           },
         ],

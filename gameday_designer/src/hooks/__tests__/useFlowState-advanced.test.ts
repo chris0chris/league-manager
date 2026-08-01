@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useFlowState } from '../useFlowState';
-import type { FlowState, GameNode } from '../../types/flowchart';
+import type { FlowState, GameNode, GameNodeData } from '../../types/flowchart';
 
 describe('useFlowState advanced', () => {
   it('migrates legacy teams during importState', () => {
@@ -49,14 +49,14 @@ describe('useFlowState advanced', () => {
 
     // Verify initial state
     const g2Init = result.current.nodes.find(n => n.id === g2Id);
-    expect(g2Init?.data.homeTeamDynamic).not.toBeNull();
+    expect((g2Init?.data as GameNodeData).homeTeamDynamic).not.toBeNull();
 
     act(() => {
       result.current.deleteNode(g1Id);
     });
 
     const g2After = result.current.nodes.find(n => n.id === g2Id);
-    expect(g2After?.data.homeTeamDynamic).toBeNull();
+    expect((g2After?.data as GameNodeData).homeTeamDynamic).toBeNull();
   });
 
   it('cascades deletion from field to stages and games', () => {
@@ -106,7 +106,6 @@ describe('useFlowState advanced', () => {
         const { result } = renderHook(() => useFlowState());
         
         act(() => {
-          // @ts-expect-error - testing bulk add with partial objects
           result.current.addBulkGames([{ id: 'g1', type: 'game', data: {} } as unknown as GameNode]);
         });
   

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import { Accordion, Form, Row, Col, Button, Overlay, Popover, useAccordionButton, AccordionContext } from 'react-bootstrap';
-import { GamedayMetadata, FlowValidationResult, ValidationError, ValidationWarning, HighlightedElement } from '../types/flowchart';
+import { GamedayMetadata, FlowValidationResult, FlowValidationError, FlowValidationWarning, HighlightedElement } from '../types/flowchart';
 import { useTypedTranslation } from '../i18n/useTypedTranslation';
 import { ICONS } from '../utils/iconConstants';
 import { gamedayApi } from '../api/gamedayApi';
@@ -11,14 +11,14 @@ import './GamedayMetadataAccordion.css';
  * Custom Accordion Header to prevent invalid HTML nesting (button inside button).
  * Uses useAccordionButton to trigger the toggle manually.
  */
-const CustomAccordionHeader: React.FC<{
+  const CustomAccordionHeader: React.FC<{
   eventKey: string;
   metadata: GamedayMetadata;
   statusColor: string;
   onPublish?: () => void;
   readOnly: boolean;
   validation: FlowValidationResult;
-  t: (key: string, params?: unknown) => string;
+  t: import('i18next').TFunction;
   formatDate: (d: string) => string;
   getStatusBadge: (s?: string) => React.ReactNode;
   onHighlight: (id: string, type: HighlightedElement['type']) => void;
@@ -26,8 +26,8 @@ const CustomAccordionHeader: React.FC<{
   handleMouseLeave: () => void;
   validationBadgeRef: React.RefObject<HTMLDivElement>;
   showValidationPopover: boolean;
-  getHighlightType: (type: string) => HighlightedElement['type'];
-  getMessage: (item: ValidationError | ValidationWarning) => string;
+  getHighlightType: (item: FlowValidationError | FlowValidationWarning) => HighlightedElement['type'];
+  getMessage: (item: FlowValidationError | FlowValidationWarning) => string;
   isHighlighted: boolean;
 }> = ({ 
   eventKey, metadata, statusColor, onPublish, readOnly, validation, t, formatDate, getStatusBadge, onHighlight,
@@ -260,7 +260,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
 
   const [showValidationPopover, setShowValidationPopover] = useState(false);
   const validationBadgeRef = useRef<HTMLDivElement>(null);
-  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
@@ -370,21 +370,21 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
     );
   };
 
-  const getMessage = (item: ValidationError | ValidationWarning) => {
+  const getMessage = (item: FlowValidationError | FlowValidationWarning) => {
     if (item.messageKey) {
       return t(`validation:${item.messageKey}` as const, item.messageParams);
     }
     return item.message;
   };
 
-  const getHighlightType = (item: ValidationError | ValidationWarning): HighlightedElement['type'] => {
+  const getHighlightType = (item: FlowValidationError | FlowValidationWarning): HighlightedElement['type'] => {
     const node0 = item.affectedNodes[0] || '';
     if (node0 === 'metadata' || node0.startsWith('metadata-')) return 'metadata' as HighlightedElement['type'];
     if (node0 === 'team-pool') return 'team';
     if (node0 === 'fields-card') return 'field';
     
     const errorType = item.type;
-    if (errorType === 'field_overlap' || errorType === 'team_overlap' || errorType === 'no_games' || errorType === 'broken_progression' || errorType === 'uneven_game_distribution') return 'game';
+    if (errorType === 'field_overlap' || errorType === 'team_overlap' || errorType === 'uneven_game_distribution') return 'game';
     if (errorType.includes('stage')) return 'stage';
     if (errorType.includes('field')) return 'field';
     if (errorType.includes('team')) return 'team';
@@ -407,7 +407,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
     <div className={`gameday-metadata-accordion ${isHighlighted ? 'is-highlighted' : ''}`} id="gameday-metadata" data-testid="gameday-metadata-accordion">
       <Accordion 
         activeKey={activeKey} 
-        onSelect={(k) => setActiveKey(k ?? undefined)}
+        onSelect={(k) => setActiveKey(k !== null ? (Array.isArray(k) ? k[0] : k) : undefined)}
       >
         <Accordion.Item eventKey="0">
           <CustomAccordionHeader 
@@ -423,7 +423,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
             onHighlight={onHighlight}
             handleMouseEnter={handleMouseEnter}
             handleMouseLeave={handleMouseLeave}
-            validationBadgeRef={validationBadgeRef}
+            validationBadgeRef={validationBadgeRef as React.RefObject<HTMLDivElement>}
             showValidationPopover={showValidationPopover}
             getHighlightType={getHighlightType}
             getMessage={getMessage}
@@ -601,7 +601,7 @@ const GamedayMetadataAccordion: React.FC<GamedayMetadataAccordionProps> = ({
                       disabled={!!metadata.has_results}
                       className="px-3"
                     >
-                      <i className={`bi ${ICONS.UNLOCK} me-2`}></i>
+                       <i className="bi bi-unlock me-2"></i>
                       {t('ui:button.unlockSchedule')}
                     </Button>
                   </span>

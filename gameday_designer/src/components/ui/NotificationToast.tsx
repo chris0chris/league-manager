@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Toast, ToastContainer, ProgressBar } from 'react-bootstrap';
-import { Notification } from '../types/designer';
+import { Notification } from '../../types/designer';
 
 interface NotificationToastProps {
   notifications: Notification[];

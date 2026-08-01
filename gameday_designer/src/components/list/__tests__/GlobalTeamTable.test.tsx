@@ -9,7 +9,6 @@
  * - Group management (add, delete, reorder)
  */
 
-import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -32,27 +31,28 @@ describe('GlobalTeamTable', () => {
 
   const mockNodes: FlowNode[] = [];
 
-  // Mock functions
-  let mockOnAddGroup: ReturnType<typeof vi.fn>;
-  let mockOnUpdateGroup: ReturnType<typeof vi.fn>;
-  let mockOnDeleteGroup: ReturnType<typeof vi.fn>;
-  let mockOnReorderGroup: ReturnType<typeof vi.fn>;
-  let mockOnAddTeam: ReturnType<typeof vi.fn>;
-  let mockOnUpdate: ReturnType<typeof vi.fn>;
-  let mockOnDelete: ReturnType<typeof vi.fn>;
-  let mockOnReorder: ReturnType<typeof vi.fn>;
-  let mockGetTeamUsage: ReturnType<typeof vi.fn>;
+  let mockOnAddGroup: () => void;
+  let mockOnUpdateGroup: (groupId: string, data: Partial<Omit<GlobalTeamGroup, 'id'>>) => void;
+  let mockOnDeleteGroup: (groupId: string) => void;
+  let mockOnReorderGroup: (groupId: string, direction: 'up' | 'down') => void;
+  let mockOnAddTeam: (groupId: string) => void;
+  let mockOnUpdate: (teamId: string, data: Partial<Omit<GlobalTeam, 'id'>>) => void;
+  let mockOnDelete: (teamId: string) => void;
+  let mockOnReorder: (teamId: string, direction: 'up' | 'down') => void;
+  let mockOnShowTeamSelection: (id: string, mode: 'group' | 'replace' | 'home' | 'away') => void;
+  let mockGetTeamUsage: (teamId: string) => { gameId: string; slot: 'home' | 'away' }[];
 
   beforeEach(() => {
-    mockOnAddGroup = vi.fn();
-    mockOnUpdateGroup = vi.fn();
-    mockOnDeleteGroup = vi.fn();
-    mockOnReorderGroup = vi.fn();
-    mockOnAddTeam = vi.fn();
-    mockOnUpdate = vi.fn();
-    mockOnDelete = vi.fn();
-    mockOnReorder = vi.fn();
-    mockGetTeamUsage = vi.fn(() => []);
+    mockOnAddGroup = vi.fn() as unknown as () => void;
+    mockOnUpdateGroup = vi.fn() as unknown as (groupId: string, data: Partial<Omit<GlobalTeamGroup, 'id'>>) => void;
+    mockOnDeleteGroup = vi.fn() as unknown as (groupId: string) => void;
+    mockOnReorderGroup = vi.fn() as unknown as (groupId: string, direction: 'up' | 'down') => void;
+    mockOnAddTeam = vi.fn() as unknown as (groupId: string) => void;
+    mockOnUpdate = vi.fn() as unknown as (teamId: string, data: Partial<Omit<GlobalTeam, 'id'>>) => void;
+    mockOnDelete = vi.fn() as unknown as (teamId: string) => void;
+    mockOnReorder = vi.fn() as unknown as (teamId: string, direction: 'up' | 'down') => void;
+    mockOnShowTeamSelection = vi.fn() as unknown as (id: string, mode: 'group' | 'replace' | 'home' | 'away') => void;
+    mockGetTeamUsage = vi.fn(() => []) as unknown as (teamId: string) => { gameId: string; slot: 'home' | 'away' }[];
   });
 
   const renderTable = (props = {}) => {
@@ -68,6 +68,7 @@ describe('GlobalTeamTable', () => {
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
         onReorder={mockOnReorder}
+        onShowTeamSelection={mockOnShowTeamSelection}
         getTeamUsage={mockGetTeamUsage}
         allNodes={mockNodes}
         {...props}
@@ -126,9 +127,9 @@ describe('GlobalTeamTable', () => {
   });
 
   it('displays team usage count', () => {
-    mockGetTeamUsage.mockReturnValue([{ gameId: 'g1', slot: 'home' }]);
+    vi.mocked(mockGetTeamUsage).mockReturnValue([{ gameId: 'g1', slot: 'home' }]);
     renderTable();
-    const team1Row = screen.getByText('Team 1').closest('div.d-flex');
+    const team1Row = screen.getByText('Team 1').closest('div.d-flex') as HTMLElement | null;
     expect(within(team1Row!).getByText('1')).toBeInTheDocument();
   });
 
@@ -136,7 +137,7 @@ describe('GlobalTeamTable', () => {
     const user = userEvent.setup();
     renderTable();
 
-    const team2Row = screen.getByText('Team 2').closest('div.d-flex');
+    const team2Row = screen.getByText('Team 2').closest('div.d-flex') as HTMLElement | null;
     const upButton = within(team2Row!).getByTitle(/Move this team one position up/i);
     await user.click(upButton);
 
@@ -148,7 +149,7 @@ describe('GlobalTeamTable', () => {
     const mockOnDelete = vi.fn();
     renderTable({ teams: mockTeams, groups: mockGroups, onDelete: mockOnDelete });
 
-    const team1Row = screen.getByText('Team 1').closest('div.d-flex');
+    const team1Row = screen.getByText('Team 1').closest('div.d-flex') as HTMLElement | null;
     const deleteButton = within(team1Row!).getByTitle(/Permanently remove this team from the pool/i);
     await user.click(deleteButton);
 
@@ -160,7 +161,7 @@ describe('GlobalTeamTable', () => {
     const mockOnDeleteGroup = vi.fn();
     renderTable({ teams: mockTeams, groups: mockGroups, onDeleteGroup: mockOnDeleteGroup });
 
-    const groupAHeader = screen.getByText('Group A').closest('.card-header');
+    const groupAHeader = screen.getByText('Group A').closest('.card-header') as HTMLElement | null;
     const deleteButton = within(groupAHeader!).getByTitle(/Permanently remove this team group and all its teams/i);
     await user.click(deleteButton);
 
@@ -172,7 +173,7 @@ describe('GlobalTeamTable', () => {
     const mockOnReorderGroup = vi.fn();
     renderTable({ teams: mockTeams, groups: mockGroups, onReorderGroup: mockOnReorderGroup });
 
-    const groupBHeader = screen.getByText('Group B').closest('.card-header');
+    const groupBHeader = screen.getByText('Group B').closest('.card-header') as HTMLElement | null;
     const upButton = within(groupBHeader!).getByTitle(/Move this team group one position up/i);
     await user.click(upButton);
 
@@ -181,7 +182,7 @@ describe('GlobalTeamTable', () => {
 
   it('disables reorder buttons appropriately', () => {
     renderTable();
-    const groupAHeader = screen.getByText('Group A').closest('.card-header');
+    const groupAHeader = screen.getByText('Group A').closest('.card-header') as HTMLElement | null;
     const groupAUpButton = within(groupAHeader!).getByTitle(/Move this team group one position up/i);
     expect(groupAUpButton).toBeDisabled();
   });
@@ -196,7 +197,7 @@ describe('GlobalTeamTable', () => {
       const user = userEvent.setup();
       renderTable();
 
-      const team1Row = screen.getByText('Team 1').closest('div.d-flex');
+      const team1Row = screen.getByText('Team 1').closest('div.d-flex') as HTMLElement | null;
       const dropdownToggle = within(team1Row!).getByTitle(/Move this team to a different group/i);
       await user.click(dropdownToggle);
 

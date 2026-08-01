@@ -190,6 +190,7 @@ export interface GamedayListEntry extends GamedayMetadata {
  * Full Gameday structure including tournament designer data.
  */
 export interface Gameday extends GamedayMetadata {
+  has_designer_state?: boolean;
   designer_data?: {
     nodes?: FlowNode[];
     edges?: FlowEdge[];

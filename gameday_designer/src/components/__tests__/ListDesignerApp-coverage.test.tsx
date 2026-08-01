@@ -150,7 +150,7 @@ describe('ListDesignerApp Coverage', () => {
         { id: 'team-1', label: 'Team A', color: '#3498db', groupId: 'group-1', order: 0 },
         { id: 'team-2', label: 'Team B', color: '#e74c3c', groupId: 'group-1', order: 1 }
     ] as GlobalTeam[],
-    globalTeamGroups: [{ id: 'group-1', label: 'Group 1', order: 0 }] as GlobalTeamGroup[],
+    globalTeamGroups: [{ id: 'group-1', name: 'Group 1', order: 0 }] as GlobalTeamGroup[],
     selectedNode: null,
     validation: { isValid: true, errors: [], warnings: [] },
     notifications: [],

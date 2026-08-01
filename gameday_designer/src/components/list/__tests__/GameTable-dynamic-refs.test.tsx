@@ -13,7 +13,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import GameTable from '../GameTable';
-import type { GameNode, StageNode, FieldNode, GlobalTeam } from '../../../types/flowchart';
+import type { GameNode, StageNode, FieldNode, GlobalTeam, HighlightedElement } from '../../../types/flowchart';
 import { createFieldNode, createStageNode, createGameNodeInStage, createGameToGameEdge } from '../../../types/flowchart';
 
 describe('GameTable - Dynamic Reference Dropdown', () => {
@@ -26,13 +26,17 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
   let team1: GlobalTeam;
   let team2: GlobalTeam;
 
-  let mockOnUpdate: ReturnType<typeof vi.fn>;
-  let mockOnDelete: ReturnType<typeof vi.fn>;
-  let mockOnSelectNode: ReturnType<typeof vi.fn>;
-  let mockOnAssignTeam: ReturnType<typeof vi.fn>;
-  let mockOnDynamicReferenceClick: ReturnType<typeof vi.fn>;
-  let mockOnAddGameToGameEdge: ReturnType<typeof vi.fn>;
-  let mockOnRemoveGameToGameEdge: ReturnType<typeof vi.fn>;
+  let mockOnUpdate: (nodeId: string, data: Record<string, unknown>) => void;
+  let mockOnDelete: (nodeId: string) => void;
+  let mockOnSelectNode: (nodeId: string | null) => void;
+  let mockOnHighlightElement: (id: string, type: HighlightedElement['type']) => void;
+  let mockOnSwapTeams: (gameId: string) => void;
+  let mockOnOpenResultModal: (gameId: string) => void;
+  let mockOnAssignTeam: (gameId: string, teamId: string, slot: 'home' | 'away') => void;
+  let mockOnDynamicReferenceClick: (sourceGameId: string) => void;
+  let mockOnAddGameToGameEdge: (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
+  let mockOnAddStageToGameEdge: (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) => void;
+  let mockOnRemoveEdgeFromSlot: (targetGameId: string, targetSlot: 'home' | 'away') => void;
 
   beforeEach(() => {
     // Create field with two stages (stage 1 has lower order)
@@ -50,13 +54,17 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
     team2 = { id: 'team-2', label: 'Team B', groupId: null, order: 1 };
 
     // Mock handlers
-    mockOnUpdate = vi.fn();
-    mockOnDelete = vi.fn();
-    mockOnSelectNode = vi.fn();
-    mockOnAssignTeam = vi.fn();
-    mockOnDynamicReferenceClick = vi.fn();
-    mockOnAddGameToGameEdge = vi.fn();
-    mockOnRemoveGameToGameEdge = vi.fn();
+    mockOnUpdate = vi.fn() as (nodeId: string, data: Record<string, unknown>) => void;
+    mockOnDelete = vi.fn() as (nodeId: string) => void;
+    mockOnSelectNode = vi.fn() as (nodeId: string | null) => void;
+    mockOnHighlightElement = vi.fn() as (id: string, type: HighlightedElement['type']) => void;
+    mockOnSwapTeams = vi.fn() as (gameId: string) => void;
+    mockOnOpenResultModal = vi.fn() as (gameId: string) => void;
+    mockOnAssignTeam = vi.fn() as (gameId: string, teamId: string, slot: 'home' | 'away') => void;
+    mockOnDynamicReferenceClick = vi.fn() as (sourceGameId: string) => void;
+    mockOnAddGameToGameEdge = vi.fn() as (sourceGameId: string, outputType: 'winner' | 'loser', targetGameId: string, targetSlot: 'home' | 'away') => void;
+    mockOnAddStageToGameEdge = vi.fn() as (sourceStageId: string, sourceRank: number, targetGameId: string, targetSlot: 'home' | 'away', sourceGroup?: string) => void;
+    mockOnRemoveEdgeFromSlot = vi.fn() as (targetGameId: string, targetSlot: 'home' | 'away') => void;
   });
 
   describe('Team slot rendering', () => {
@@ -72,11 +80,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -99,11 +111,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -126,11 +142,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -163,11 +183,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -203,11 +227,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -230,11 +258,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -256,11 +288,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -291,11 +327,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -304,7 +344,7 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
       expect(screen.getByText(/Winner of Game 1/i)).toBeInTheDocument();
     });
 
-    it('calls onRemoveGameToGameEdge when clicking X button', () => {
+    it('calls onRemoveEdgeFromSlot when clicking X button', () => {
       // Create edge: Game 1 winner -> Game 3 home
       const edge = createGameToGameEdge('edge-1', 'game-1', 'winner', 'game-3', 'home');
       const game3WithDynamic = {
@@ -326,11 +366,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -360,11 +404,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -389,11 +437,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -417,11 +469,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 
@@ -445,11 +501,15 @@ describe('GameTable - Dynamic Reference Dropdown', () => {
           onDelete={mockOnDelete}
           onSelectNode={mockOnSelectNode}
           selectedNodeId={null}
+          onHighlightElement={mockOnHighlightElement}
+          onSwapTeams={mockOnSwapTeams}
+          onOpenResultModal={mockOnOpenResultModal}
           onAssignTeam={mockOnAssignTeam}
           highlightedSourceGameId={null}
           onDynamicReferenceClick={mockOnDynamicReferenceClick}
           onAddGameToGameEdge={mockOnAddGameToGameEdge}
-          onRemoveGameToGameEdge={mockOnRemoveGameToGameEdge}
+          onAddStageToGameEdge={mockOnAddStageToGameEdge}
+          onRemoveEdgeFromSlot={mockOnRemoveEdgeFromSlot}
         />
       );
 

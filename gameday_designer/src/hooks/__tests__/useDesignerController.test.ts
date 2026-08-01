@@ -10,6 +10,8 @@ import * as teamAssignment from '../../utils/teamAssignment';
 import { DEFAULT_TOURNAMENT_GROUP_NAME } from '../../utils/tournamentConstants';
 import type { TournamentGenerationConfig } from '../../types/tournament';
 import type { TournamentStructure } from '../../utils/tournamentGenerator';
+import type { FlowState, GameNodeData, GlobalTeam } from '../../types/flowchart';
+import type { TeamReference } from '../../types/designer';
 
 // Mock utilities
 vi.mock('../../utils/flowchartExport', () => ({
@@ -138,9 +140,8 @@ describe('useDesignerController', () => {
         return useDesignerController(undefined, flowState);
       });
       
-      let promise: Promise<void>;
       await act(async () => {
-        promise = result.current.handlers.handleDynamicReferenceClick('game-1');
+        result.current.handlers.handleDynamicReferenceClick('game-1');
       });
       
       expect(result.current.ui.highlightedElement).toEqual({ id: 'game-1', type: 'game' });
@@ -151,7 +152,6 @@ describe('useDesignerController', () => {
       });
       
       expect(result.current.ui.highlightedElement).toBeNull();
-      await promise!;
       vi.useRealTimers();
     });
   });
@@ -221,8 +221,9 @@ describe('useDesignerController', () => {
       vi.mocked(flowchartImport.validateScheduleJson).mockReturnValue([]);
       vi.mocked(flowchartImport.importFromScheduleJson).mockReturnValue({ 
         success: true, 
-        // @ts-expect-error - partial state for testing
-        state: mockState as unknown as FlowState 
+        state: mockState as unknown as FlowState,
+        warnings: [],
+        errors: [],
       });
       const { result } = renderHook(() => {
         const flowState = useFlowState();
@@ -239,7 +240,8 @@ describe('useDesignerController', () => {
     it('handles failed import processing', () => {
       vi.mocked(flowchartImport.importFromScheduleJson).mockReturnValueOnce({ 
         success: false, 
-        errors: ['Import Error'] 
+        errors: ['Import Error'],
+        warnings: [],
       });
       const { result } = renderHook(() => {
         const flowState = useFlowState();
@@ -422,7 +424,7 @@ describe('useDesignerController', () => {
         },
         generateTeams: true,
         selectedTeams: mockSelectedTeams
-      };
+      } as unknown as TournamentGenerationConfig & { generateTeams: boolean; autoAssignTeams: boolean; selectedTeams?: GlobalTeam[]; };
 
       // Mock generateTeamsForTournament to return 2 teams (since 4 - 2 = 2)
       vi.mocked(teamAssignment.generateTeamsForTournament).mockReturnValue([
@@ -510,9 +512,9 @@ describe('useDesignerController', () => {
         const game = result.current.flowState.addGameNode({
           homeTeamId: 'team-1',
           awayTeamId: 'team-2',
-          homeTeamDynamic: 'Winner 1',
-          awayTeamDynamic: 'Loser 1'
-        });
+          homeTeamDynamic: 'Winner 1' as unknown as TeamReference,
+          awayTeamDynamic: 'Loser 1' as unknown as TeamReference
+        } as Partial<GameNodeData>);
         gameId = game.id;
       });
 
@@ -548,7 +550,7 @@ describe('useDesignerController', () => {
         result.current.handlers.handleSelectNode('1');
         result.current.handlers.handleUpdateGlobalTeam('1', {});
         result.current.handlers.handleDeleteGlobalTeam('1');
-        result.current.handlers.handleReorderGlobalTeam('1', 0);
+        result.current.handlers.handleReorderGlobalTeam('1', 'up');
         result.current.handlers.handleAssignTeam('g1', 't1', 'home');
         result.current.handlers.handleExport();
       });

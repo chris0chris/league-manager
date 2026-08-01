@@ -44,7 +44,7 @@ export function generateRoundRobinGames(
 
   const pairings = getRoundRobinPairings(teamCount, doubleRound);
 
-  pairings.forEach((pairing, index) => {
+  pairings.forEach((_pairing, index) => {
     const gameId = uuidv4();
     const game = createGameNodeInStage(
       gameId,

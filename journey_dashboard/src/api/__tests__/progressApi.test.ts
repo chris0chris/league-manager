@@ -31,13 +31,13 @@ describe('progressApi.list', () => {
   let mockFetch: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    originalFetch = global.fetch;
+    originalFetch = window.fetch;
     mockFetch = vi.fn();
-    global.fetch = mockFetch as unknown as typeof fetch;
+    window.fetch = mockFetch as unknown as typeof fetch;
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    window.fetch = originalFetch;
     vi.clearAllMocks();
   });
 

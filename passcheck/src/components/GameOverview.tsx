@@ -10,8 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 function GameOverview() {
   const [games, setGames] = useState<GameList>([]);
   const [gamedays, setGamedays] = useState<Gameday[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [officials, setOfficials] = useState<string>("");
+  const [, setOfficials] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [showAllGamedays, setShowAllGamedays] = useState<boolean>(false);
   const { setMessage } = useMessage();

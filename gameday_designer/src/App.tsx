@@ -24,7 +24,7 @@ const App: React.FC = () => {
   const currentUserId = parseInt(mountEl?.dataset.userId ?? '0', 10);
 
   return (
-    <BrowserRouter basename={import.meta.env.DEV ? '/' : '/gamedays/gameday/design'} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <BrowserRouter basename={import.meta.env.DEV ? '/' : '/gamedays/gameday/design'}>
       <GamedayProvider currentUserId={currentUserId}>
         <Routes>
           <Route path="/" element={<MainLayout />}>

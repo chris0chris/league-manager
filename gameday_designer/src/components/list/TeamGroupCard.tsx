@@ -37,7 +37,7 @@ export interface TeamGroupCardProps {
   /** Callback to reorder team */
   onReorderTeam: (teamId: string, direction: 'up' | 'down') => void;
   /** Callback to show team selection modal */
-  onShowTeamSelection: (id: string, mode?: 'group' | 'replace') => void;
+  onShowTeamSelection: (id: string, mode: 'group' | 'replace') => void;
   /** Callback to add a team to this group */
   onAddTeam: (groupId: string) => void;
   /** Function to get which games use a team */

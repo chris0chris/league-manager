@@ -21,10 +21,17 @@ describe('bracketEdgeGenerator', () => {
     type: 'game',
     position: { x: 0, y: 0 },
     data: {
+      type: 'game',
+      stage: 'Placement',
+      stageType: 'STANDARD',
       standing,
+      fieldId: null,
+      official: null,
+      breakAfter: 0,
       homeTeamId: null,
       awayTeamId: null,
-      officialTeamId: null,
+      homeTeamDynamic: null,
+      awayTeamDynamic: null,
       startTime: '10:00',
       duration: 70,
     },
@@ -295,8 +302,8 @@ describe('bracketEdgeGenerator', () => {
       
       const mapping = {
         'Final': {
-          home: { type: 'winner', sourceIndex: 0 },
-          away: { type: 'winner', sourceIndex: 1 }
+          home: { type: 'winner' as const, sourceIndex: 0 },
+          away: { type: 'winner' as const, sourceIndex: 1 }
         }
       };
 
@@ -321,8 +328,8 @@ describe('bracketEdgeGenerator', () => {
       const sourceGames = [createMockGame('g1', 'G1')]; // Need at least one source game to trigger mapping logic
       const mapping = {
         'SF1': {
-          home: { type: 'rank', sourceStageId: 'stage1', sourceIndex: 0 },
-          away: { type: 'rank', sourceStageId: 'stage1', sourceIndex: 1 }
+          home: { type: 'rank' as const, sourceStageId: 'stage1', sourceIndex: 0 },
+          away: { type: 'rank' as const, sourceStageId: 'stage1', sourceIndex: 1 }
         }
       };
 
@@ -348,8 +355,8 @@ describe('bracketEdgeGenerator', () => {
       const sourceGames = [createMockGame('g1', 'G1')];
       const mapping = {
         'NonExistent': {
-          home: { type: 'winner', sourceIndex: 0 },
-          away: { type: 'winner', sourceIndex: 0 }
+          home: { type: 'winner' as const, sourceIndex: 0 },
+          away: { type: 'winner' as const, sourceIndex: 0 }
         }
       };
       const config = { mode: 'placement' as const, positions: 2, format: 'single_elimination' as const };

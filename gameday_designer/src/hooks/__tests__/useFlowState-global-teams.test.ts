@@ -10,14 +10,15 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useFlowState } from '../useFlowState';
+import type { GameNodeData } from '../../types/flowchart';
 
 describe('useFlowState - Global Team Pool', () => {
   describe('addGlobalTeam', () => {
     it('creates a team with specified groupId', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let groupId: string;
-      let teamId: string;
+      let groupId!: string;
+      let teamId!: string;
 
       act(() => {
         const group = result.current.addGlobalTeamGroup('Group A');
@@ -127,9 +128,9 @@ describe('useFlowState - Global Team Pool', () => {
     it('unassigns deleted teams from games', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let groupId: string;
-      let teamId: string;
-      let gameId: string;
+      let groupId!: string;
+      let teamId!: string;
+      let gameId!: string;
 
       act(() => {
         groupId = result.current.addGlobalTeamGroup('Group A').id;
@@ -144,7 +145,7 @@ describe('useFlowState - Global Team Pool', () => {
 
       // Verify assignment
       const game = result.current.nodes.find(n => n.id === gameId && n.type === 'game');
-      expect(game?.data.homeTeamId).toBe(teamId);
+      expect((game?.data as GameNodeData).homeTeamId).toBe(teamId);
 
       // Delete the group
       act(() => {
@@ -153,7 +154,7 @@ describe('useFlowState - Global Team Pool', () => {
 
       // Verify team is unassigned from game
       const updatedGame = result.current.nodes.find(n => n.id === gameId && n.type === 'game');
-      expect(updatedGame?.data.homeTeamId).toBeNull();
+      expect((updatedGame?.data as GameNodeData).homeTeamId).toBeNull();
     });
   });
 
@@ -161,9 +162,9 @@ describe('useFlowState - Global Team Pool', () => {
     it('allows moving teams between groups', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let group1Id: string;
-      let group2Id: string;
-      let teamId: string;
+      let group1Id!: string;
+      let group2Id!: string;
+      let teamId!: string;
 
       act(() => {
         group1Id = result.current.addGlobalTeamGroup('Group A').id;
@@ -188,8 +189,8 @@ describe('useFlowState - Global Team Pool', () => {
     it('requires teams to have a groupId (no ungrouped teams allowed)', () => {
       const { result } = renderHook(() => useFlowState());
 
-      let groupId: string;
-      let teamId: string;
+      let groupId!: string;
+      let teamId!: string;
 
       act(() => {
         groupId = result.current.addGlobalTeamGroup('Group A').id;

@@ -2,7 +2,6 @@
  * Tests for GamedayDashboard Component
  */
 
-import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -52,7 +51,6 @@ describe('GamedayDashboard', () => {
       season: 1,
       league: 1,
       status: 'PUBLISHED',
-      designer_data: {},
       has_designer_state: true,
     },
     {
@@ -66,7 +64,6 @@ describe('GamedayDashboard', () => {
       season: 1,
       league: 1,
       status: 'DRAFT',
-      designer_data: {},
       has_designer_state: true,
     },
   ];

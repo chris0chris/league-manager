@@ -43,7 +43,8 @@ describe('GameProgressPage', () => {
       ...baseState,
       gamedays: [{ id: 1 }] as unknown as GameProgressState['gamedays'],
       live: [{ id: 1, name: 'Upcoming Today' }] as unknown as GameProgressState['live'],
-    } as GameProgressState);
+      refetch: vi.fn(),
+    });
 
     render(<GameProgressPage />);
     expect(screen.getByText('Today')).toBeDefined();
@@ -55,7 +56,8 @@ describe('GameProgressPage', () => {
       gamedays: [{ id: 1 }] as unknown as GameProgressState['gamedays'],
       live: [{ id: 1, name: 'Live Gameday' }] as unknown as GameProgressState['live'],
       totalLiveGames: 3,
-    } as GameProgressState);
+      refetch: vi.fn(),
+    });
 
     render(<GameProgressPage />);
     expect(screen.getByText('Live (3 Games)')).toBeDefined();
@@ -67,7 +69,8 @@ describe('GameProgressPage', () => {
       gamedays: [{ id: 1 }] as unknown as GameProgressState['gamedays'],
       live: [{ id: 1, name: 'Finished Today' }] as unknown as GameProgressState['live'],
       totalPlayedGamesToday: 10,
-    } as GameProgressState);
+      refetch: vi.fn(),
+    });
 
     render(<GameProgressPage />);
     expect(screen.getByText('Results (1 Gamedays)')).toBeDefined();

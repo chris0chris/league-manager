@@ -24,6 +24,7 @@ describe('Flowchart Types', () => {
         const data: GameNodeData = {
           type: 'game',
           stage: 'Final',
+          stageType: 'STANDARD',
           standing: 'P1',
           fieldId: 'field-1',
           official: { type: 'static', name: 'Officials' },
@@ -46,6 +47,7 @@ describe('Flowchart Types', () => {
           data: {
             type: 'game',
             stage: 'Preliminary',
+            stageType: 'STANDARD',
             standing: 'HF1',
             fieldId: null,
             official: null,
@@ -236,6 +238,7 @@ describe('Flowchart Types', () => {
       const data: GameNodeData = {
         type: 'game',
         stage: 'Preliminary',
+        stageType: 'STANDARD',
         standing: 'HF1',
         fieldId: null,
         official: null,

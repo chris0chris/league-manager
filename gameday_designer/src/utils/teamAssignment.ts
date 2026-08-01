@@ -7,7 +7,7 @@
  * @module teamAssignment
  */
 
-import type { GlobalTeam, GameNode, StageNode } from '../types/flowchart';
+import type { GlobalTeam, GameNode, StageNode, RoundRobinConfig } from '../types/flowchart';
 import type { TournamentStructure } from './tournamentGenerator';
 import type { EdgeSpec } from './bracketEdgeGenerator';
 import { createPlacementEdges } from './bracketEdgeGenerator';

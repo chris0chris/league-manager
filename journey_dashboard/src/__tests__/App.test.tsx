@@ -7,7 +7,7 @@
  * - Component hierarchy: App → JourneyLayout → content
  */
 
-import React from 'react';
+import '@testing-library/jest-dom/vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
