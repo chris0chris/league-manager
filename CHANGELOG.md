@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.13.34](https://github.com/dachrisch/leaguesphere/compare/v4.13.33...v4.13.34) (2026-08-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency replace-in-file to v9 ([#1739](https://github.com/dachrisch/leaguesphere/issues/1739)) ([1e7220c](https://github.com/dachrisch/leaguesphere/commit/1e7220cc598159a9e5c6a07db8aaa8a0b3710dcc))
+* **journey:** exclude draft gamedays from progress dashboard ([#1742](https://github.com/dachrisch/leaguesphere/issues/1742)) ([eec7e7f](https://github.com/dachrisch/leaguesphere/commit/eec7e7fe85452ecd6798fe2055ab8417a676dfb1))
+
 ## [4.13.33](https://github.com/dachrisch/leaguesphere/compare/v4.13.32...v4.13.33) (2026-08-02)
 
 
