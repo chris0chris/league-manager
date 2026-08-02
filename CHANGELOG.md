@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.33](https://github.com/dachrisch/leaguesphere/compare/v4.13.32...v4.13.33) (2026-08-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency globals to v17.9.0 ([#1740](https://github.com/dachrisch/leaguesphere/issues/1740)) ([eb3a186](https://github.com/dachrisch/leaguesphere/commit/eb3a1867392a843596e6a290d4c76584aa1e07e8))
+
 ## [4.13.32](https://github.com/dachrisch/leaguesphere/compare/v4.13.31...v4.13.32) (2026-08-02)
 
 
