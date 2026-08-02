@@ -770,3 +770,26 @@ class GameProgressOrderingTests(APITestCase):
 
         returned_ids = [row['id'] for row in response.data['results']]
         self.assertEqual(returned_ids, [gd_minus2.id, gd_plus2.id])
+
+    def test_draft_gamedays_are_excluded(self):
+        """Draft gamedays must not appear on the progress dashboard."""
+        from datetime import time
+        from gamedays.models import Gameday
+
+        published = self._create_gameday(0)
+        draft = Gameday.objects.create(
+            name='Draft GD',
+            season=self.season,
+            league=self.league,
+            date=self.today,
+            start=time(10, 0),
+            author=self.author,
+            status=Gameday.STATUS_DRAFT,
+        )
+
+        response = self.client.get('/api/game-progress/')
+        self.assertEqual(response.status_code, 200)
+
+        returned_ids = [row['id'] for row in response.data['results']]
+        self.assertIn(published.id, returned_ids)
+        self.assertNotIn(draft.id, returned_ids)

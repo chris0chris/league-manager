@@ -48,6 +48,8 @@ class GameProgressViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = Gameday.objects.filter(
             date__gte=start_date,
             date__lte=end_date,
+        ).exclude(
+            status=Gameday.STATUS_DRAFT,
         ).annotate(
             distance_from_today=Abs(
                 ExpressionWrapper(F('date') - today, output_field=DurationField())
