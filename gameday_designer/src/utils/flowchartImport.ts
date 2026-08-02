@@ -173,6 +173,7 @@ export function importFromScheduleJson(json: unknown): ImportResult {
       // Find the game node
       const gameNode = nodes.find((n) => n.id === gameId);
       if (!gameNode) continue;
+      const gameData = gameNode.data as GameNodeData;
 
       // Process home and away teams
       for (const [refStr, slot] of [
@@ -201,9 +202,9 @@ export function importFromScheduleJson(json: unknown): ImportResult {
             // directly and never re-derive it from edges (that only happens
             // via the useEdgesState mutators the interactive canvas uses).
             if (slot === 'home') {
-              gameNode.data.homeTeamDynamic = parsed;
+              gameData.homeTeamDynamic = parsed;
             } else {
-              gameNode.data.awayTeamDynamic = parsed;
+              gameData.awayTeamDynamic = parsed;
             }
           } else {
             warnings.push(
@@ -215,7 +216,6 @@ export function importFromScheduleJson(json: unknown): ImportResult {
           const teamId = teamLabelMap.get(parsed.name);
           if (teamId) {
             // Update game node with team assignment
-            const gameData = gameNode.data as GameNodeData;
             if (slot === 'home') {
               gameData.homeTeamId = teamId;
             } else {

@@ -37,6 +37,9 @@ jobs:
           npm ci
           npm run test:coverage
 
+      - name: 🔎 Typecheck ${{ matrix.project }}
+        run: npm run typecheck --if-present
+
       - name: 📊 Upload Coverage to Codecov
         env:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}

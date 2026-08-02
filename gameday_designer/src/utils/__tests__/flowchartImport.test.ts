@@ -8,6 +8,7 @@ import {
   validateScheduleJson,
 } from '../flowchartImport';
 import { isGameNode, isGameToGameEdge, isFieldNode, isStageNode } from '../../types/flowchart';
+import type { GameNode } from '../../types/flowchart';
 
 describe('Flowchart Import Utility', () => {
   describe('importFromScheduleJson', () => {
@@ -100,7 +101,7 @@ describe('Flowchart Import Utility', () => {
       // The game node's own data must carry the dynamic reference too, not just the edge -
       // GameTable and exportToScheduleJson both read data.homeTeamDynamic/awayTeamDynamic
       // directly and never re-derive it from edges.
-      const finalGame = nodes.find((n) => isGameNode(n) && n.data.standing === 'P1');
+      const finalGame = nodes.find((n) => isGameNode(n) && n.data.standing === 'P1') as GameNode | undefined;
       expect(finalGame?.data.homeTeamDynamic).toEqual({ type: 'winner', matchName: 'HF1' });
       expect(finalGame?.data.awayTeamDynamic).toEqual({ type: 'winner', matchName: 'HF2' });
     });
@@ -146,7 +147,7 @@ describe('Flowchart Import Utility', () => {
       expect(gameToGameEdges.every((e) => e.sourceHandle === 'loser')).toBe(true);
 
       const { nodes } = result.state!;
-      const p3Game = nodes.find((n) => isGameNode(n) && n.data.standing === 'P3');
+      const p3Game = nodes.find((n) => isGameNode(n) && n.data.standing === 'P3') as GameNode | undefined;
       expect(p3Game?.data.homeTeamDynamic).toEqual({ type: 'loser', matchName: 'HF1' });
       expect(p3Game?.data.awayTeamDynamic).toEqual({ type: 'loser', matchName: 'HF2' });
     });

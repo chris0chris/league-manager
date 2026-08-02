@@ -9,14 +9,14 @@ export interface GenericTemplateSlot {
   stage_type: 'STANDARD' | 'RANKING';
   stage_category: StageCategory;
   standing: string;
-  home_group?: number;
-  home_team?: number;
+  home_group?: number | null;
+  home_team?: number | null;
   home_reference?: string;
-  away_group?: number;
-  away_team?: number;
+  away_group?: number | null;
+  away_team?: number | null;
   away_reference?: string;
-  official_group?: number;
-  official_team?: number;
+  official_group?: number | null;
+  official_team?: number | null;
   official_reference?: string;
   break_after: number;
   start_time?: string;
@@ -243,8 +243,8 @@ export function applyGenericTemplate(template: GenericTemplate, currentState: Fl
   }
 
   // Helper to get actual team ID from group/team index
-  const getTeamId = (groupIdx: number | undefined, teamIdx: number | undefined): string | null => {
-    if (groupIdx === undefined || teamIdx === undefined) return null;
+  const getTeamId = (groupIdx: number | null | undefined, teamIdx: number | null | undefined): string | null => {
+    if (groupIdx == null || teamIdx == null) return null;
     const group = newGroups[groupIdx];
     if (!group) return null;
     const teamsInGroup = newTeams.filter(t => t.groupId === group.id).sort((a, b) => a.order - b.order);
