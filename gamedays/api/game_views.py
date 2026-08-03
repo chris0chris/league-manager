@@ -2,7 +2,7 @@ import json
 from collections import OrderedDict
 from http import HTTPStatus
 
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.generics import UpdateAPIView, RetrieveUpdateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -107,18 +107,43 @@ class GameLogAPIView(APIView):
 
     def delete(self, request: Request, *args, **kwargs):
         game_id = kwargs.get("id")
+        sequence = request.data.get("sequence")
         try:
-            game_service = GameService(game_id)
-            gamelog = game_service.delete_gamelog(request.data.get("sequence"))
-            game_service.update_score(gamelog)
-            return Response(
-                json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict),
-                status=HTTPStatus.OK,
-            )
+            game = Gameinfo.objects.get(pk=game_id)
         except Gameinfo.DoesNotExist:
             raise NotFound(
                 detail=f"Could not delete team logs ... gameId {game_id} not found"
             )
+        if not self._can_delete_log_entry(request.user, game, sequence):
+            raise PermissionDenied(
+                detail="You do not have permission to delete this game log entry."
+            )
+        game_service = GameService(game_id)
+        gamelog = game_service.delete_gamelog(sequence)
+        game_service.update_score(gamelog)
+        return Response(
+            json.loads(gamelog.as_json(), object_pairs_hook=OrderedDict),
+            status=HTTPStatus.OK,
+        )
+
+    @staticmethod
+    def _can_delete_log_entry(user, game: Gameinfo, sequence) -> bool:
+        """Whether the user may delete a log entry.
+
+        Allowed for staff, the gameday author, or the user who recorded the
+        entry (so on-site scorecard officials can still undo their own
+        mistakes while unrelated authenticated users cannot tamper with the
+        log).
+        """
+        if not user.is_authenticated:
+            return False
+        if user.is_staff:
+            return True
+        if game.gameday.author_id == user.pk:
+            return True
+        return TeamLog.objects.filter(
+            gameinfo=game, sequence=sequence, isDeleted=False, author=user
+        ).exists()
 
 
 class GameHalftimeAPIView(APIView):

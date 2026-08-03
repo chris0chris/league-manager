@@ -362,6 +362,59 @@ class TestGameLog(WebTest):
         assert json_response["home"]["score"] == 34
         assert json_response["home"]["firsthalf"]["entries"][1]["isDeleted"]
 
+    def test_delete_team_log_denied_for_anonymous(self):
+        gameinfo = DBSetup().create_teamlog_home_and_away()
+        response = self.app.delete_json(
+            reverse(API_GAMELOG, kwargs={"id": gameinfo.pk}),
+            {"sequence": 2},
+            expect_errors=True,
+        )
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+        assert not TeamLog.objects.filter(
+            gameinfo=gameinfo, sequence=2, isDeleted=True
+        ).exists()
+
+    def test_delete_team_log_denied_for_unrelated_user(self):
+        gameinfo = DBSetup().create_teamlog_home_and_away()
+        unrelated = DBSetup().create_new_user(username="unrelated", is_staff=False)
+        response = self.app.delete_json(
+            reverse(API_GAMELOG, kwargs={"id": gameinfo.pk}),
+            {"sequence": 2},
+            headers=DBSetup().get_token_header(unrelated),
+            expect_errors=True,
+        )
+        assert response.status_code == HTTPStatus.FORBIDDEN
+        assert not TeamLog.objects.filter(
+            gameinfo=gameinfo, sequence=2, isDeleted=True
+        ).exists()
+
+    def test_delete_team_log_allowed_for_entry_author(self):
+        DBSetup().g62_status_empty()
+        logger = DBSetup().create_new_user(username="logger", is_staff=False)
+        first_game = Gameinfo.objects.first()
+        self.app.post_json(
+            reverse(API_GAMELOG, kwargs={"id": first_game.pk}),
+            {
+                "team": "A1",
+                "gameId": first_game.pk,
+                "half": 1,
+                "event": [
+                    {"name": "Touchdown", "player": "19"},
+                    {"name": "1-Extra-Punkt", "player": "7"},
+                ],
+            },
+            headers=DBSetup().get_token_header(logger),
+        )
+        response = self.app.delete_json(
+            reverse(API_GAMELOG, kwargs={"id": first_game.pk}),
+            {"sequence": 1},
+            headers=DBSetup().get_token_header(logger),
+        )
+        assert response.status_code == HTTPStatus.OK
+        assert TeamLog.objects.filter(
+            gameinfo=first_game, sequence=1, isDeleted=True
+        ).exists()
+
 
 class TestGameHalftime(WebTest):
     def test_halftime_submitted(self):
