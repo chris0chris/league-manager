@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.13.35](https://github.com/dachrisch/leaguesphere/compare/v4.13.34...v4.13.35) (2026-08-03)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([#1744](https://github.com/dachrisch/leaguesphere/issues/1744)) ([d61bde4](https://github.com/dachrisch/leaguesphere/commit/d61bde4e24507bb2ce6e050791f82d6795c70e89))
+* require entry-owner authorization to delete gamelog entries ([#1747](https://github.com/dachrisch/leaguesphere/issues/1747)) ([0bf441a](https://github.com/dachrisch/leaguesphere/commit/0bf441aad9d150ae4aa1b0d1d5adc71772e95e3c)), closes [#1746](https://github.com/dachrisch/leaguesphere/issues/1746)
+
 ## [4.13.34](https://github.com/dachrisch/leaguesphere/compare/v4.13.33...v4.13.34) (2026-08-02)
 
 
