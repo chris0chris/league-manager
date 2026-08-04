@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
@@ -33,11 +34,16 @@ class RosterView(View):
         passcheck_service = PasscheckService(user_permission=user_permission)
         from passcheck.urls import PASSCHECK_ROSTER_LIST_FOR_YEAR
 
+        try:
+            roster_context = passcheck_service.get_roster(team_id, year)
+        except ValueError:
+            raise Http404(f"Team {team_id} not found")
+
         context = {
             "season": year,
             "url_pattern": PASSCHECK_ROSTER_LIST_FOR_YEAR,
             "pk": team_id,
-            **passcheck_service.get_roster(team_id, year),
+            **roster_context,
         }
         return render(request, self.template_name, context)
 

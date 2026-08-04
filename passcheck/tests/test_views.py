@@ -39,6 +39,15 @@ class TestRosterView(WebTest):
         )
         assert response.status_code == HTTPStatus.OK
 
+    def test_unknown_team_returns_not_found(self):
+        user = DBSetup().create_new_user("some staff user", is_staff=True)
+        self.app.set_user(user)
+        response: DjangoWebtestResponse = self.app.get(
+            reverse(PASSCHECK_ROSTER_LIST, kwargs={"pk": 513}),
+            expect_errors=True,
+        )
+        assert response.status_code == HTTPStatus.NOT_FOUND
+
 
 class TestPlayerlistDeleteView(WebTest):
     def test_display_team_roster(self):
