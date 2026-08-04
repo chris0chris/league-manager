@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.0](https://github.com/dachrisch/leaguesphere/compare/v4.13.39...v4.14.0) (2026-08-04)
+
+
+### Features
+
+* **journey:** rework user journey analysis into per-session timeline widget ([#1756](https://github.com/dachrisch/leaguesphere/issues/1756)) ([533abbb](https://github.com/dachrisch/leaguesphere/commit/533abbb54d0f078c136c7edc63a4706c0ed3d399))
+
 ## [4.13.39](https://github.com/dachrisch/leaguesphere/compare/v4.13.38...v4.13.39) (2026-08-04)
 
 
