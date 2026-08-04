@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import JourneyLayout from './components/JourneyLayout';
 import GameProgressPage from './components/game-progress/GameProgressPage';
 import { AdoptionMetrics } from './components/AdoptionMetrics';
-import { TopActionsTable } from './components/TopActionsTable';
-import { fetchStats, fetchGlobalAdoption } from './utils/api';
-import { StatsResponse, GlobalAdoptionResponse } from './types';
+import { UserJourneys } from './components/UserJourneys';
+import { fetchGlobalAdoption } from './utils/api';
+import { GlobalAdoptionResponse } from './types';
 import './index.css';
 
 function getCurrentPage(): 'journey' | 'progress' {
@@ -16,9 +16,7 @@ function getCurrentPage(): 'journey' | 'progress' {
 }
 
 function App() {
-  const [stats, setStats] = useState<StatsResponse | null>(null);
   const [adoptionData, setAdoptionData] = useState<GlobalAdoptionResponse | null>(null);
-  const [loading, setLoading] = useState(true);
   const [currentPage] = useState<'journey' | 'progress'>(getCurrentPage());
 
   // Auth is handled by Django's LoginRequiredMixin on the server side.
@@ -36,17 +34,10 @@ function App() {
 
     const loadData = async () => {
       try {
-        setLoading(true);
-        const [statsData, adoption] = await Promise.all([
-          fetchStats(),
-          fetchGlobalAdoption()
-        ]);
-        setStats(statsData);
+        const adoption = await fetchGlobalAdoption();
         setAdoptionData(adoption);
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
-      } finally {
-        setLoading(false);
       }
     };
     loadData();
@@ -67,7 +58,7 @@ function App() {
         </p>
 
         <AdoptionMetrics adoptionData={adoptionData} />
-        <TopActionsTable stats={stats} loading={loading} />
+        <UserJourneys />
       </div>
     </JourneyLayout>
   );

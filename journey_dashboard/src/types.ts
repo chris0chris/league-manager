@@ -39,6 +39,44 @@ export interface StatsResponse {
 }
 
 /**
+ * Per-session user journey analysis (reworked "Top Actions" widget).
+ * A session is one reconstructed Journey with its ordered, categorized events.
+ */
+export interface JourneyEventItem {
+  name: string;
+  category: string;
+  meta: Record<string, unknown>;
+  at: string;
+}
+
+export interface JourneySession {
+  id: number;
+  user: string;
+  started_at: string;
+  ended_at: string | null;
+  ongoing: boolean;
+  duration_s: number;
+  event_count: number;
+  cat_counts: Record<string, number>;
+  events: JourneyEventItem[];
+}
+
+export interface JourneySessionsSummary {
+  n_sessions: number;
+  n_users: number;
+  users: string[];
+  n_events: number;
+  date_min: string | null;
+  date_max: string | null;
+  top_events: [string, number][];
+}
+
+export interface JourneySessionsResponse {
+  sessions: JourneySession[];
+  summary: JourneySessionsSummary;
+}
+
+/**
  * Game creation statistics: designer vs legacy breakdown
  */
 export interface TimePeriodStats {

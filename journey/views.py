@@ -137,6 +137,21 @@ class JourneyViewSet(viewsets.ModelViewSet):
             return Journey.objects.all().order_by('-started_at')
         return Journey.objects.filter(user=self.request.user).order_by('-started_at')
 
+    @action(detail=False, methods=['get'])
+    def sessions(self, request):
+        """Return per-session user journeys (staff-only) for the last N days."""
+        if not request.user.is_staff:
+            return Response({"detail": "Permission denied."}, status=403)
+
+        try:
+            days = int(request.query_params.get('days', 7))
+            days = min(max(days, 1), 365)
+        except (TypeError, ValueError):
+            days = 7
+
+        from .api.session_report import build_session_report
+        return Response(build_session_report(days=days))
+
 
 class JourneyDashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'journey_dashboard/index.html'

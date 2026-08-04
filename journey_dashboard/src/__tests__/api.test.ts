@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { getGamedayEvents } from '../utils/api';
+import { getGamedayEvents, fetchJourneySessions } from '../utils/api';
 
 describe('api/getGamedayEvents', () => {
   let originalFetch: typeof fetch;
@@ -310,5 +310,83 @@ describe('api/getGamedayEvents', () => {
       expect(result[0].created_at).toBe('2024-01-01T10:00:00Z');
       expect(result[1].created_at).toBe('2024-01-02T15:30:00Z');
     });
+  });
+});
+
+describe('api/fetchJourneySessions', () => {
+  let originalFetch: typeof fetch;
+  let mockFetch: ReturnType<typeof vi.fn>;
+  let originalLocalStorage: Storage;
+
+  beforeEach(() => {
+    originalLocalStorage = window.localStorage;
+    window.localStorage = {
+      getItem: vi.fn(() => 'test-token-123'),
+    } as unknown as Storage;
+
+    originalFetch = window.fetch;
+    mockFetch = vi.fn();
+    window.fetch = mockFetch as unknown as typeof fetch;
+  });
+
+  afterEach(() => {
+    window.localStorage = originalLocalStorage;
+    window.fetch = originalFetch;
+    vi.clearAllMocks();
+  });
+
+  it('should request sessions from the journeys endpoint with a days window', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sessions: [], summary: {} }),
+    });
+
+    await fetchJourneySessions(7);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/api/journey/journeys/sessions/?days=7',
+      expect.objectContaining({
+        credentials: 'include',
+        headers: expect.objectContaining({
+          'Authorization': 'Token test-token-123',
+        }),
+      })
+    );
+  });
+
+  it('should default to a 7 day window', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sessions: [], summary: {} }),
+    });
+
+    await fetchJourneySessions();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/api/journey/journeys/sessions/?days=7',
+      expect.any(Object)
+    );
+  });
+
+  it('should return the parsed session report', async () => {
+    const payload = { sessions: [{ id: 1 }], summary: { n_sessions: 1 } };
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => payload,
+    });
+
+    const result = await fetchJourneySessions();
+    expect(result).toEqual(payload);
+  });
+
+  it('should throw on a failed request', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      statusText: 'Forbidden',
+    });
+
+    await expect(fetchJourneySessions()).rejects.toThrow(
+      'Failed to fetch journey sessions: Forbidden'
+    );
   });
 });

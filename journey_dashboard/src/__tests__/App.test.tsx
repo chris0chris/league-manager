@@ -15,7 +15,7 @@ import App from '../App';
 
 // Mock the API calls to prevent actual HTTP requests
 vi.mock('../utils/api', () => ({
-  fetchStats: vi.fn(() => Promise.resolve({ stats: [], total_events: 0, unique_event_types: 0 })),
+  fetchJourneySessions: vi.fn(() => Promise.resolve({ sessions: [], summary: { n_sessions: 0, n_users: 0, users: [], n_events: 0, date_min: null, date_max: null, top_events: [] } })),
   fetchGlobalAdoption: vi.fn(() => Promise.resolve({
     gameday: { opens: 0 },
     passcheck: { opens: 0 },
@@ -28,8 +28,8 @@ vi.mock('../components/AdoptionMetrics', () => ({
   AdoptionMetrics: () => <div data-testid="adoption-metrics">Adoption Metrics</div>,
 }));
 
-vi.mock('../components/TopActionsTable', () => ({
-  TopActionsTable: () => <div data-testid="top-actions-table">Top Actions Table</div>,
+vi.mock('../components/UserJourneys', () => ({
+  UserJourneys: () => <div data-testid="user-journeys">User Journeys</div>,
 }));
 
 describe('App with JourneyLayout', () => {
@@ -60,7 +60,7 @@ describe('App with JourneyLayout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('adoption-metrics')).toBeInTheDocument();
-      expect(screen.getByTestId('top-actions-table')).toBeInTheDocument();
+      expect(screen.getByTestId('user-journeys')).toBeInTheDocument();
     });
   });
 });

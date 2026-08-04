@@ -1,4 +1,4 @@
-import { Journey, JourneyEvent, StatsResponse, GlobalAdoptionResponse, GameCreationStatsResponse } from '../types';
+import { Journey, JourneyEvent, JourneySessionsResponse, GlobalAdoptionResponse, GameCreationStatsResponse } from '../types';
 
 const BASE_URL = '/api/journey';
 
@@ -37,13 +37,13 @@ export async function fetchEvents(journeyId?: number): Promise<JourneyEvent[]> {
   return Array.isArray(data) ? data : (data.results || []);
 }
 
-export async function fetchStats(): Promise<StatsResponse> {
-  const url = `${BASE_URL}/events/stats/`;
-  const res = await fetch(url, { 
+export async function fetchJourneySessions(days = 7): Promise<JourneySessionsResponse> {
+  const url = `${BASE_URL}/journeys/sessions/?days=${days}`;
+  const res = await fetch(url, {
     headers: getAuthHeader(),
     credentials: 'include'
   });
-  if (!res.ok) throw new Error(`Failed to fetch stats: ${res.statusText}`);
+  if (!res.ok) throw new Error(`Failed to fetch journey sessions: ${res.statusText}`);
   return res.json();
 }
 
