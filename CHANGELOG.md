@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.39](https://github.com/dachrisch/leaguesphere/compare/v4.13.38...v4.13.39) (2026-08-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency django to v6.0.8 ([#1754](https://github.com/dachrisch/leaguesphere/issues/1754)) ([9757f3f](https://github.com/dachrisch/leaguesphere/commit/9757f3f7d77a71ba7b5fbd3606b9070e9c03a8e7))
+
 ## [4.13.38](https://github.com/dachrisch/leaguesphere/compare/v4.13.37...v4.13.38) (2026-08-04)
 
 
