@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.38](https://github.com/dachrisch/leaguesphere/compare/v4.13.37...v4.13.38) (2026-08-04)
+
+
+### Bug Fixes
+
+* **passcheck:** return 404 instead of 500 for unknown team roster ([#1752](https://github.com/dachrisch/leaguesphere/issues/1752)) ([8a40593](https://github.com/dachrisch/leaguesphere/commit/8a4059384ec282edf09cac25942bac4ebf91d00c))
+
 ## [4.13.37](https://github.com/dachrisch/leaguesphere/compare/v4.13.36...v4.13.37) (2026-08-04)
 
 
