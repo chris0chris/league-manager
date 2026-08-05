@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.2](https://github.com/dachrisch/leaguesphere/compare/v4.14.1...v4.14.2) (2026-08-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency pytest-django to v4.13.0 ([#1761](https://github.com/dachrisch/leaguesphere/issues/1761)) ([5efb9b1](https://github.com/dachrisch/leaguesphere/commit/5efb9b18f2815ada00f2f613797f1cdb64e6ad0c))
+
 ## [4.14.1](https://github.com/dachrisch/leaguesphere/compare/v4.14.0...v4.14.1) (2026-08-05)
 
 
