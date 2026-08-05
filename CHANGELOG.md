@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.1](https://github.com/dachrisch/leaguesphere/compare/v4.14.0...v4.14.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency djangorestframework to v3.17.2 ([#1758](https://github.com/dachrisch/leaguesphere/issues/1758)) ([5b97f8c](https://github.com/dachrisch/leaguesphere/commit/5b97f8cd571bef4303cc64d38554f569fccdbd3d))
+
 ## [4.14.0](https://github.com/dachrisch/leaguesphere/compare/v4.13.39...v4.14.0) (2026-08-04)
 
 
