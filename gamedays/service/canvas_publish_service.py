@@ -1,4 +1,5 @@
 from gamedays.models import Gameday, Gameinfo, Gameresult, GamedayDesignerState, Team
+from gamedays.service.stage_category import StageCategory
 
 
 OFFICIALS_PLACEHOLDER = "N/A"
@@ -44,6 +45,9 @@ class CanvasPublishService:
 
             field_num = field_node.get("data", {}).get("order", 0) + 1
             stage_name = stage_node.get("data", {}).get("name", "")
+            stage_category = stage_node.get("data", {}).get(
+                "category", StageCategory.PRELIMINARY
+            )
             standing = data.get("standing", "")
             start_time = data.get("startTime") or str(self.gameday.start)
 
@@ -56,6 +60,7 @@ class CanvasPublishService:
                 scheduled=start_time,
                 field=field_num,
                 stage=stage_name,
+                stage_category=stage_category,
                 standing=standing,
                 officials=officials,
                 status=Gameinfo.STATUS_PUBLISHED,
