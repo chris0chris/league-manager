@@ -37,6 +37,8 @@ interface TeamOption {
   isDisabled?: boolean;
   isWinner?: boolean;
   winnerLabel?: string;
+  /** Resolved TeamReference for dynamic options (winner/loser/rank/etc.) */
+  reference?: TeamReference;
 }
 
 // Custom Option component with colored dot for teams and stage headers
@@ -389,44 +391,15 @@ const GameTable: React.FC<GameTableProps> = memo(({
     }
   }, [onRemoveEdgeFromSlot, onAddGameToGameEdge, onAddStageToGameEdge, onAssignTeam]);
 
-  const resolveOfficialReference = useCallback(
-    (value: string): TeamReference | undefined => {
-      if (value.startsWith('winner:') || value.startsWith('loser:')) {
-        const [type, sourceGameId] = value.split(':');
-        const sourceGame = allNodes.find(
-          (n) => isGameNode(n) && n.id === sourceGameId
-        ) as GameNode | undefined;
-        if (sourceGame) {
-          return { type: type as 'winner' | 'loser', matchName: sourceGame.data.standing };
-        }
-        return undefined;
-      }
-      if (value.startsWith('rank:')) {
-        const parts = value.split(':');
-        const stageId = parts[2];
-        const place = parseInt(parts[parts.length - 1], 10);
-        const stageNode = allNodes.find((n) => isStageNode(n) && n.id === stageId) as StageNode | undefined;
-        const stageName = stageNode?.data.name || '';
-        if (parts[1] === 'group') {
-          const groupName = parts.slice(3, -1).join(':');
-          return { type: 'groupRank', place, groupName, stageId, stageName } as TeamReference;
-        }
-        return { type: 'rank', place, stageId, stageName } as TeamReference;
-      }
-      return { type: 'static', name: value };
-    },
-    [allNodes]
-  );
-
   const handleOfficialChange = useCallback(
-    (gameId: string, value: string) => {
-      if (!value) {
+    (gameId: string, option: TeamOption) => {
+      if (!option.value) {
         onUpdate(gameId, { official: undefined });
         return;
       }
-      onUpdate(gameId, { official: resolveOfficialReference(value) });
+      onUpdate(gameId, { official: option.reference ?? { type: 'static', name: option.value } });
     },
-    [onUpdate, resolveOfficialReference]
+    [onUpdate]
   );
 
 
@@ -462,7 +435,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
         options.push({
           value: `rank:${stage.id}:${place}`,
           label: `🏆 ${t('ui:message.placeFrom', { place, stage: stage.data.name })}`,
-          isTeam: false
+          isTeam: false,
+          reference: { type: 'rank', place, stageId: stage.id, stageName: stage.data.name },
         });
       });
 
@@ -475,7 +449,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
           options.push({
             value: `rank:group:${stage.id}:${groupName}:${place}`,
             label: `🎖️ ${t('ui:message.placeInGroup', { place, group: groupName, stage: stage.data.name })}`,
-            isTeam: false
+            isTeam: false,
+            reference: { type: 'groupRank', place, groupName, stageId: stage.id, stageName: stage.data.name },
           });
         });
       });
@@ -598,8 +573,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
       const stageNode = allNodes.find(n => n.id === stageId);
       options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as import('../../types/flowchart').StageNodeData)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
       stageData.games.forEach((sourceGame) => {
-        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ ${t('ui:message.winnerOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
-        options.push({ value: `loser:${sourceGame.id}`, label: `💔 ${t('ui:message.loserOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
+        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ ${t('ui:message.winnerOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false, reference: { type: 'winner', matchName: sourceGame.data.standing } });
+        options.push({ value: `loser:${sourceGame.id}`, label: `💔 ${t('ui:message.loserOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false, reference: { type: 'loser', matchName: sourceGame.data.standing } });
       });
     });
 
@@ -616,7 +591,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
           classNamePrefix="official-select"
           value={options.find(opt => opt.value === currentValue) || null}
           options={options}
-          onChange={(newValue) => newValue && handleOfficialChange(game.id, newValue.value)}
+          onChange={(newValue) => newValue && handleOfficialChange(game.id, newValue)}
           components={{ Option: CustomOption, SingleValue: CustomSingleValue }}
           isOptionDisabled={(option) => option.isDisabled || false}
           menuPortalTarget={document.body}
