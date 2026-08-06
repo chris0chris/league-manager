@@ -96,6 +96,7 @@ class FixCrypticOfficialsTest(TestCase):
         assert "Gewinner VF 2" in output
 
     def test_no_cryptic_teams_found(self):
+        self.gameinfo.delete()
         self.cryptic_team.delete()
         output = self._call()
         assert "No cryptic official teams found" in output
