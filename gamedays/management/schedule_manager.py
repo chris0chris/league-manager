@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Union, List, Optional
 
 from gamedays.models import Team, Gameday, Gameinfo, Gameresult
+from gamedays.service.stage_category import derive_legacy_stage_category
 from league_table.models import LeagueGroup
 
 
@@ -201,6 +202,7 @@ class ScheduleCreator:
         gameinfo.gameday = self.gameday
         gameinfo.scheduled = scheduled
         gameinfo.stage = game.stage
+        gameinfo.stage_category = derive_legacy_stage_category(game.stage)
         gameinfo.field = field
         gameinfo.standing = game.standing
         gameinfo.league_group = game.league_group
