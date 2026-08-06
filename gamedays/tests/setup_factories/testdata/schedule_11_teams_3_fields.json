@@ -21,6 +21,7 @@
       "points_home": 2,
       "scheduled": "10:00:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 1",
       "status": "beendet"
     },
@@ -45,6 +46,7 @@
       "points_home": 10,
       "scheduled": "10:00:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 2",
       "status": "beendet"
     },
@@ -69,6 +71,7 @@
       "points_home": 16,
       "scheduled": "10:00:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 2",
       "status": "beendet"
     },
@@ -93,6 +96,7 @@
       "points_home": 6,
       "scheduled": "11:10:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 1",
       "status": "beendet"
     },
@@ -117,6 +121,7 @@
       "points_home": 4,
       "scheduled": "11:10:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 1",
       "status": "beendet"
     },
@@ -141,6 +146,7 @@
       "points_home": 18,
       "scheduled": "11:10:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 3",
       "status": "beendet"
     },
@@ -165,6 +171,7 @@
       "points_home": 14,
       "scheduled": "12:20:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 2",
       "status": "beendet"
     },
@@ -189,6 +196,7 @@
       "points_home": 12,
       "scheduled": "12:20:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 2",
       "status": "beendet"
     },
@@ -213,6 +221,7 @@
       "points_home": 20,
       "scheduled": "12:20:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 3",
       "status": "beendet"
     },
@@ -237,6 +246,7 @@
       "points_home": 8,
       "scheduled": "13:30:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 1",
       "status": "beendet"
     },
@@ -261,6 +271,7 @@
       "points_home": 16,
       "scheduled": "13:30:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 2",
       "status": "beendet"
     },
@@ -285,6 +296,7 @@
       "points_home": 14,
       "scheduled": "13:30:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 2",
       "status": "beendet"
     },
@@ -309,6 +321,7 @@
       "points_home": 8,
       "scheduled": "14:40:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 1",
       "status": "beendet"
     },
@@ -333,6 +346,7 @@
       "points_home": 6,
       "scheduled": "14:40:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 1",
       "status": "beendet"
     },
@@ -357,6 +371,7 @@
       "points_home": 22,
       "scheduled": "14:40:00",
       "stage": "Vorrunde",
+      "stage_category": "preliminary",
       "standing": "Gruppe 3",
       "status": "beendet"
     },
@@ -381,6 +396,7 @@
       "points_home": 6,
       "scheduled": "15:50:00",
       "stage": "Finalrunde",
+      "stage_category": "final",
       "standing": "PO",
       "status": "beendet"
     },
@@ -405,6 +421,7 @@
       "points_home": 20,
       "scheduled": "15:50:00",
       "stage": "Finalrunde",
+      "stage_category": "final",
       "standing": "PO",
       "status": "beendet"
     },
@@ -429,6 +446,7 @@
       "points_home": 4,
       "scheduled": "15:50:00",
       "stage": "Finalrunde",
+      "stage_category": "final",
       "standing": "P7",
       "status": "beendet"
     },
@@ -453,6 +471,7 @@
       "points_home": 20,
       "scheduled": "17:00:00",
       "stage": "Finalrunde",
+      "stage_category": "final",
       "standing": "HF",
       "status": "beendet"
     },
@@ -477,6 +496,7 @@
       "points_home": 22,
       "scheduled": "17:00:00",
       "stage": "Finalrunde",
+      "stage_category": "final",
       "standing": "HF",
       "status": "beendet"
     },
@@ -501,6 +521,7 @@
       "points_home": 12,
       "scheduled": "17:00:00",
       "stage": "Finalrunde",
+      "stage_category": "final",
       "standing": "P7",
       "status": "beendet"
     },
@@ -525,6 +546,7 @@
       "points_home": 16,
       "scheduled": "18:10:00",
       "stage": "Finalrunde",
+      "stage_category": "final",
       "standing": "P3",
       "status": "beendet"
     },
@@ -549,6 +571,7 @@
       "points_home": 6,
       "scheduled": "18:10:00",
       "stage": "Finalrunde",
+      "stage_category": "final",
       "standing": "P5",
       "status": "beendet"
     },
@@ -573,6 +596,7 @@
       "points_home": 18,
       "scheduled": "18:10:00",
       "stage": "Finalrunde",
+      "stage_category": "final",
       "standing": "P7",
       "status": "beendet"
     },
@@ -597,6 +621,7 @@
       "points_home": 22,
       "scheduled": "19:20:00",
       "stage": "Finalrunde",
+      "stage_category": "final",
       "standing": "P1",
       "status": "beendet"
     },
@@ -621,6 +646,7 @@
       "points_home": 2,
       "scheduled": "19:20:00",
       "stage": "Finalrunde",
+      "stage_category": "final",
       "standing": "P10",
       "status": "beendet"
     }
@@ -673,6 +699,10 @@
       },
       {
         "name": "standing",
+        "type": "string"
+      },
+      {
+        "name": "stage_category",
         "type": "string"
       },
       {

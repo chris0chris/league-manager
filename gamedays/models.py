@@ -4,6 +4,8 @@ from django.db.models import QuerySet, CASCADE
 from django.utils import timezone
 from django.utils.text import slugify
 
+from gamedays.service.stage_category import StageCategory, derive_legacy_stage_category
+
 
 class Season(models.Model):
     name = models.CharField(max_length=200)
@@ -179,6 +181,9 @@ class Gameinfo(models.Model):
     gameFinished = models.TimeField(null=True, blank=True)
     stage = models.CharField(max_length=100)
     standing = models.CharField(max_length=100)
+    stage_category = models.CharField(
+        max_length=20, choices=StageCategory.choices, blank=True, default=""
+    )
     league_group = models.ForeignKey(
         "league_table.LeagueGroup", on_delete=CASCADE, null=True, default=None
     )
@@ -193,6 +198,11 @@ class Gameinfo(models.Model):
             models.Index(fields=["officials"]),
             models.Index(fields=["gameday"]),
         ]
+
+    def save(self, *args, **kwargs):
+        if not self.stage_category:
+            self.stage_category = derive_legacy_stage_category(self.stage)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return (
