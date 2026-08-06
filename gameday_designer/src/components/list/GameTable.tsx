@@ -389,23 +389,44 @@ const GameTable: React.FC<GameTableProps> = memo(({
     }
   }, [onRemoveEdgeFromSlot, onAddGameToGameEdge, onAddStageToGameEdge, onAssignTeam]);
 
+  const resolveOfficialReference = useCallback(
+    (value: string): TeamReference | undefined => {
+      if (value.startsWith('winner:') || value.startsWith('loser:')) {
+        const [type, sourceGameId] = value.split(':');
+        const sourceGame = allNodes.find(
+          (n) => isGameNode(n) && n.id === sourceGameId
+        ) as GameNode | undefined;
+        if (sourceGame) {
+          return { type: type as 'winner' | 'loser', matchName: sourceGame.data.standing };
+        }
+        return undefined;
+      }
+      if (value.startsWith('rank:')) {
+        const parts = value.split(':');
+        const stageId = parts[2];
+        const place = parseInt(parts[parts.length - 1], 10);
+        const stageNode = allNodes.find((n) => isStageNode(n) && n.id === stageId) as StageNode | undefined;
+        const stageName = stageNode?.data.name || '';
+        if (parts[1] === 'group') {
+          const groupName = parts.slice(3, -1).join(':');
+          return { type: 'groupRank', place, groupName, stageId, stageName } as TeamReference;
+        }
+        return { type: 'rank', place, stageId, stageName } as TeamReference;
+      }
+      return { type: 'static', name: value };
+    },
+    [allNodes]
+  );
+
   const handleOfficialChange = useCallback(
     (gameId: string, value: string) => {
       if (!value) {
         onUpdate(gameId, { official: undefined });
         return;
       }
-      
-      // If the value looks like a dynamic reference (winner:..., loser:..., rank:...)
-      // we should ideally parse it back to a TeamReference object.
-      // But for simplicity and backward compatibility, we can wrap it in a static ref
-      // or handle it as a string if we've updated the types.
-      // Given the backend changes, wrapping in a static reference is safe.
-      onUpdate(gameId, { 
-        official: { type: 'static', name: value } as TeamReference 
-      });
+      onUpdate(gameId, { official: resolveOfficialReference(value) });
     },
-    [onUpdate]
+    [onUpdate, resolveOfficialReference]
   );
 
 
@@ -536,6 +557,13 @@ const GameTable: React.FC<GameTableProps> = memo(({
     } else if (official) {
       if (official.type === 'static') {
         currentValue = official.name;
+        // Backward compatibility: older canvases stored a raw
+        // `winner:<gameId>`/`loser:<gameId>` string as a static official.
+        if (currentValue.startsWith('winner:') || currentValue.startsWith('loser:')) {
+          const [type, sourceGameId] = currentValue.split(':');
+          const sourceGame = allNodes.find((n) => isGameNode(n) && n.id === sourceGameId) as GameNode | undefined;
+          if (sourceGame) currentValue = `${type}:${sourceGame.id}`;
+        }
       } else if (official.type === 'winner' || official.type === 'loser') {
         // Officials aren't wired into game-to-game edges like home/away teams,
         // so resolve the source game by matching `standing`, same as bracketResolution.ts
@@ -544,6 +572,10 @@ const GameTable: React.FC<GameTableProps> = memo(({
         if (sourceGame) {
           currentValue = `${official.type}:${sourceGame.id}`;
         }
+      } else if (official.type === 'rank') {
+        currentValue = `rank:${official.stageId}:${official.place}`;
+      } else if (official.type === 'groupRank') {
+        currentValue = `rank:group:${official.stageId}:${official.groupName}:${official.place}`;
       }
     }
 

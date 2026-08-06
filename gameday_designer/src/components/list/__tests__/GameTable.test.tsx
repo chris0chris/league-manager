@@ -219,6 +219,30 @@ describe('GameTable', () => {
       const table = screen.getByRole('table');
       expect(table).toBeInTheDocument();
     });
+
+    it('stores a winner-of-game reference as a typed reference, not a raw string', async () => {
+      const user = userEvent.setup();
+      const { container } = renderTable();
+      // game1 (standing "Quali 1") is upstream of game2 and therefore eligible
+      await user.click(container.querySelector('.official-select__control')!);
+      const option = await screen.findByText(/Winner of Quali 1/i);
+      await user.click(option);
+      expect(mockOnUpdate).toHaveBeenCalledWith('game-2', {
+        official: { type: 'winner', matchName: 'Quali 1' },
+      });
+    });
+
+    it('renders an existing winner-of-game official reference as a readable label', async () => {
+      const gameWithWinnerOfficial = {
+        ...game2,
+        data: {
+          ...game2.data,
+          official: { type: 'winner', matchName: 'Quali 1' },
+        },
+      } as GameNode;
+      renderTable({ games: [gameWithWinnerOfficial] });
+      expect(screen.getByText(/Winner of Quali 1/i)).toBeInTheDocument();
+    });
   });
 
   describe('Dynamic reference interactions', () => {
