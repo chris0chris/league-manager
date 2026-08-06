@@ -147,4 +147,16 @@ class CanvasPublishService:
                     defaults={"description": name, "location": ""},
                 )
                 return team
+            return fallback
+
+        # Dynamic references (winner/loser/standing/rank/groupRank/groupTeam):
+        # format a readable label, e.g. {type: "winner", matchName: "VF 2"}
+        # -> "Gewinner VF 2", mirroring home/away dynamic resolution.
+        name = self._format_dynamic_ref(official_ref)
+        if name:
+            team, _ = Team.objects.get_or_create(
+                name=name,
+                defaults={"description": name, "location": ""},
+            )
+            return team
         return fallback
