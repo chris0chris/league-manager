@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.14.3](https://github.com/dachrisch/leaguesphere/compare/v4.14.2...v4.14.3) (2026-08-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency postcss to v8.5.26 ([#1766](https://github.com/dachrisch/leaguesphere/issues/1766)) ([91a32e3](https://github.com/dachrisch/leaguesphere/commit/91a32e33d871e7e4713c68c9546f220ffb116078))
+* **deps:** update dependency web-vitals to v6.1.0 ([#1763](https://github.com/dachrisch/leaguesphere/issues/1763)) ([b6fd803](https://github.com/dachrisch/leaguesphere/commit/b6fd8034be02457ab90c4bfb8b338e0c1c0408e9))
+* **deps:** update dependency web-vitals to v6.1.0 ([#1764](https://github.com/dachrisch/leaguesphere/issues/1764)) ([c2f0b64](https://github.com/dachrisch/leaguesphere/commit/c2f0b64643086cf2fcfae30dcdf1c17eff96aee4))
+
 ## [4.14.2](https://github.com/dachrisch/leaguesphere/compare/v4.14.1...v4.14.2) (2026-08-05)
 
 
