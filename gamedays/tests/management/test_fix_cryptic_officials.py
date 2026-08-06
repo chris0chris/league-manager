@@ -150,3 +150,24 @@ class FixCrypticOfficialsTest(TestCase):
         output = self._call(execute=True)
         assert "Unresolvable" in output
         assert "not found in canvas" in output
+
+    def test_execute_repoints_to_existing_team_on_name_collision(self):
+        # A team named "Gewinner VF 2" already exists (e.g. resolved as a
+        # home/away team elsewhere in the same gameday) — renaming the
+        # cryptic team to the same name would violate Team.name's unique
+        # constraint, so the command must repoint the referencing Gameinfo
+        # to the existing team instead.
+        existing_team = Team.objects.create(
+            name="Gewinner VF 2",
+            description="Gewinner VF 2",
+            location="",
+        )
+
+        output = self._call(execute=True)
+
+        self.gameinfo.refresh_from_db()
+        assert self.gameinfo.officials_id == existing_team.pk
+
+        self.cryptic_team.refresh_from_db()
+        assert self.cryptic_team.name == "winner:game-aaaa-bbbb-cccc"
+        assert "repointed" in output.lower()
