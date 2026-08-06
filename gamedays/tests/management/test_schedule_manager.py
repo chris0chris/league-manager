@@ -128,6 +128,42 @@ class TestScheduleCreator(TestCase):
         assert Gameresult.objects.filter(gameinfo=gameinfo).count() == 2
         assert Gameresult.objects.all().count() == 12
 
+    def test_schedule_created_sets_preliminary_stage_category_for_hauptrunde(self):
+        gameday = DBSetup().create_empty_gameday()
+        DBSetup().create_playoff_placeholder_teams()
+        group_A = DBSetup().create_teams("A", 4)
+        sc = ScheduleCreator(
+            gameday=Gameday.objects.get(pk=gameday.pk),
+            schedule=Schedule("4_1", [GroupSchedule("Group 1", None, group_A)]),
+        )
+        sc.create()
+        gameinfo_set = Gameinfo.objects.filter(gameday_id=gameday.pk)
+        assert gameinfo_set.count() == 6
+        for gi in gameinfo_set:
+            assert gi.stage == "Hauptrunde"
+            assert gi.stage_category == "preliminary"
+
+    def test_schedule_created_sets_final_stage_category_for_finalrunde(self):
+        gameday = DBSetup().create_empty_gameday()
+        DBSetup().create_playoff_placeholder_teams()
+        group_A = DBSetup().create_teams("A", 3)
+        group_B = DBSetup().create_teams("B", 3)
+        groups = [
+            GroupSchedule(name="Gruppe 1", league_group=None, teams=group_A),
+            GroupSchedule(name="Gruppe 2", league_group=None, teams=group_B),
+        ]
+        sc = ScheduleCreator(
+            gameday=Gameday.objects.get(pk=gameday.pk),
+            schedule=Schedule("6_2", groups),
+        )
+        sc.create()
+        finalrunde_games = Gameinfo.objects.filter(
+            gameday_id=gameday.pk, stage="Finalrunde"
+        )
+        assert finalrunde_games.exists()
+        for gi in finalrunde_games:
+            assert gi.stage_category == "final"
+
     def test_schedule_created_for_4_teams_with_league_group(self):
         gameday = DBSetup().create_empty_gameday()
         DBSetup().create_playoff_placeholder_teams()

@@ -257,6 +257,33 @@ class TestPublishCreatesGameinfos:
         gi = Gameinfo.objects.get(gameday=self.gameday)
         assert gi.officials.name == "Officials FC"   # NOT the "t3" UUID
 
+    @pytest.mark.parametrize(
+        "official_ref,expected_name",
+        [
+            ({"type": "winner", "matchName": "VF 2"}, "Gewinner VF 2"),
+            ({"type": "loser", "matchName": "VF 2"}, "Verlierer VF 2"),
+            ({"type": "rank", "place": 1, "stageName": "Vorrunde", "stageId": ""}, "Rank 1 Vorrunde"),
+            (
+                {"type": "groupRank", "place": 3, "groupName": "Pool B", "stageName": "Quali", "stageId": ""},
+                "Rank 3 in Pool B of Quali",
+            ),
+        ],
+    )
+    def test_publish_dynamic_official_resolved_to_readable_label(self, official_ref, expected_name):
+        """
+        Guards against cryptic official labels ("winner:game-<uuid>"). A ref's
+        official that references the winner/loser/rank of another game must
+        publish with a readable name just like home/away dynamics do.
+        """
+        import copy
+
+        state = copy.deepcopy(MINIMAL_CANVAS_STATE)
+        state["nodes"][-1]["data"]["official"] = official_ref
+        GamedayDesignerState.objects.create(gameday=self.gameday, state_data=state)
+        self._publish()
+        gi = Gameinfo.objects.get(gameday=self.gameday)
+        assert gi.officials.name == expected_name
+
     def test_republish_after_unlock_replaces_gameinfos(self):
         """
         Full unlock → edit → re-publish cycle:

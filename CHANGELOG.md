@@ -1,5 +1,29 @@
 # Changelog
 
+## [4.14.4](https://github.com/dachrisch/leaguesphere/compare/v4.14.3...v4.14.4) (2026-08-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency vite to v8.2.1 ([#1768](https://github.com/dachrisch/leaguesphere/issues/1768)) ([4f78787](https://github.com/dachrisch/leaguesphere/commit/4f787878ae967c05ccb0f251149dae0568946d28))
+* **deps:** update dependency vite to v8.2.1 ([#1769](https://github.com/dachrisch/leaguesphere/issues/1769)) ([86ffcb2](https://github.com/dachrisch/leaguesphere/commit/86ffcb239ab235b708eb9dbbb29810bec9795fd0))
+
+## [4.14.3](https://github.com/dachrisch/leaguesphere/compare/v4.14.2...v4.14.3) (2026-08-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency postcss to v8.5.26 ([#1766](https://github.com/dachrisch/leaguesphere/issues/1766)) ([91a32e3](https://github.com/dachrisch/leaguesphere/commit/91a32e33d871e7e4713c68c9546f220ffb116078))
+* **deps:** update dependency web-vitals to v6.1.0 ([#1763](https://github.com/dachrisch/leaguesphere/issues/1763)) ([b6fd803](https://github.com/dachrisch/leaguesphere/commit/b6fd8034be02457ab90c4bfb8b338e0c1c0408e9))
+* **deps:** update dependency web-vitals to v6.1.0 ([#1764](https://github.com/dachrisch/leaguesphere/issues/1764)) ([c2f0b64](https://github.com/dachrisch/leaguesphere/commit/c2f0b64643086cf2fcfae30dcdf1c17eff96aee4))
+
+## [4.14.2](https://github.com/dachrisch/leaguesphere/compare/v4.14.1...v4.14.2) (2026-08-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency pytest-django to v4.13.0 ([#1761](https://github.com/dachrisch/leaguesphere/issues/1761)) ([5efb9b1](https://github.com/dachrisch/leaguesphere/commit/5efb9b18f2815ada00f2f613797f1cdb64e6ad0c))
+
 ## [4.14.1](https://github.com/dachrisch/leaguesphere/compare/v4.14.0...v4.14.1) (2026-08-05)
 
 

@@ -37,6 +37,8 @@ interface TeamOption {
   isDisabled?: boolean;
   isWinner?: boolean;
   winnerLabel?: string;
+  /** Resolved TeamReference for dynamic options (winner/loser/rank/etc.) */
+  reference?: TeamReference;
 }
 
 // Custom Option component with colored dot for teams and stage headers
@@ -390,20 +392,12 @@ const GameTable: React.FC<GameTableProps> = memo(({
   }, [onRemoveEdgeFromSlot, onAddGameToGameEdge, onAddStageToGameEdge, onAssignTeam]);
 
   const handleOfficialChange = useCallback(
-    (gameId: string, value: string) => {
-      if (!value) {
+    (gameId: string, option: TeamOption) => {
+      if (!option.value) {
         onUpdate(gameId, { official: undefined });
         return;
       }
-      
-      // If the value looks like a dynamic reference (winner:..., loser:..., rank:...)
-      // we should ideally parse it back to a TeamReference object.
-      // But for simplicity and backward compatibility, we can wrap it in a static ref
-      // or handle it as a string if we've updated the types.
-      // Given the backend changes, wrapping in a static reference is safe.
-      onUpdate(gameId, { 
-        official: { type: 'static', name: value } as TeamReference 
-      });
+      onUpdate(gameId, { official: option.reference ?? { type: 'static', name: option.value } });
     },
     [onUpdate]
   );
@@ -441,7 +435,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
         options.push({
           value: `rank:${stage.id}:${place}`,
           label: `🏆 ${t('ui:message.placeFrom', { place, stage: stage.data.name })}`,
-          isTeam: false
+          isTeam: false,
+          reference: { type: 'rank', place, stageId: stage.id, stageName: stage.data.name },
         });
       });
 
@@ -454,7 +449,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
           options.push({
             value: `rank:group:${stage.id}:${groupName}:${place}`,
             label: `🎖️ ${t('ui:message.placeInGroup', { place, group: groupName, stage: stage.data.name })}`,
-            isTeam: false
+            isTeam: false,
+            reference: { type: 'groupRank', place, groupName, stageId: stage.id, stageName: stage.data.name },
           });
         });
       });
@@ -544,6 +540,10 @@ const GameTable: React.FC<GameTableProps> = memo(({
         if (sourceGame) {
           currentValue = `${official.type}:${sourceGame.id}`;
         }
+      } else if (official.type === 'rank') {
+        currentValue = `rank:${official.stageId}:${official.place}`;
+      } else if (official.type === 'groupRank') {
+        currentValue = `rank:group:${official.stageId}:${official.groupName}:${official.place}`;
       }
     }
 
@@ -566,8 +566,8 @@ const GameTable: React.FC<GameTableProps> = memo(({
       const stageNode = allNodes.find(n => n.id === stageId);
       options.push({ value: `stage-header-${stageId}`, label: stageData.name, color: (stageNode?.data as import('../../types/flowchart').StageNodeData)?.color || '#0d6efd', isStageHeader: true, isDisabled: true });
       stageData.games.forEach((sourceGame) => {
-        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ ${t('ui:message.winnerOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
-        options.push({ value: `loser:${sourceGame.id}`, label: `💔 ${t('ui:message.loserOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false });
+        options.push({ value: `winner:${sourceGame.id}`, label: `⚡ ${t('ui:message.winnerOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false, reference: { type: 'winner', matchName: sourceGame.data.standing } });
+        options.push({ value: `loser:${sourceGame.id}`, label: `💔 ${t('ui:message.loserOf', { match: sourceGame.data.standing })} (${stageData.name})`, isTeam: false, reference: { type: 'loser', matchName: sourceGame.data.standing } });
       });
     });
 
@@ -584,7 +584,7 @@ const GameTable: React.FC<GameTableProps> = memo(({
           classNamePrefix="official-select"
           value={options.find(opt => opt.value === currentValue) || null}
           options={options}
-          onChange={(newValue) => newValue && handleOfficialChange(game.id, newValue.value)}
+          onChange={(newValue) => newValue && handleOfficialChange(game.id, newValue)}
           components={{ Option: CustomOption, SingleValue: CustomSingleValue }}
           isOptionDisabled={(option) => option.isDisabled || false}
           menuPortalTarget={document.body}

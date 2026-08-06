@@ -217,6 +217,61 @@ class TestGamedayModelWrapper(TestCase):
         gmw = GamedayModelWrapper(gameday.pk)
         assert gmw.get_teams_by(standing="HF", points=2) == ["BBBBBBB2", "BBBBBBB1"]
 
+    @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
+    def test_get_qualify_table_for_designer_style_stage_name(
+        self, mock_get_league_config_ruleset
+    ):
+        """
+        Regression test for prod incident: gamedays published via the
+        Designer with a stage named e.g. "Liga" (stage_category="preliminary")
+        crashed with KeyError: "['win_points'] not in index" on
+        /api/gameday/<id>/details?get=qualify, because the legacy fallback
+        table used a "points" column while the view expects "win_points".
+        """
+        mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
+        gameday = DBSetup().create_empty_gameday()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
+        DBSetup().create_group(
+            gameday=gameday,
+            name="A",
+            stage="Liga",
+            standing="Tabelle",
+            status="beendet",
+            number_teams=3,
+        )
+        Gameinfo.objects.filter(gameday=gameday, stage="Liga").update(
+            stage_category="preliminary"
+        )
+        gmw = GamedayModelWrapper(gameday.pk)
+        qualify_table = gmw.get_qualify_table()
+        assert len(qualify_table) > 0
+        assert "win_points" in qualify_table.columns
+
+    def test_get_table_uses_win_points_column(self):
+        gameday = DBSetup().g62_qualify_finished()
+        gmw = GamedayModelWrapper(gameday.pk)
+        table = gmw._get_table()
+        assert "win_points" in table.columns
+        assert "points" not in table.columns
+
+    def test_has_finalround_true_for_designer_style_final_category(self):
+        gameday = DBSetup().create_empty_gameday()
+        DBSetup().create_group(
+            gameday=gameday, name="A", stage="Liga", standing="Tabelle", number_teams=3
+        )
+        DBSetup().create_group(
+            gameday=gameday,
+            name="B",
+            stage="Playoffs",
+            standing="Tabelle",
+            number_teams=3,
+        )
+        Gameinfo.objects.filter(gameday=gameday, stage="Playoffs").update(
+            stage_category="final"
+        )
+        gmw = GamedayModelWrapper(gameday.pk)
+        assert gmw.has_finalround()
+
 
 def update_gameresults(game):
     results = Gameresult.objects.filter(gameinfo=game)

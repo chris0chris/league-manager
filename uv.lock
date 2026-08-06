@@ -326,19 +326,6 @@ wheels = [
 ]
 
 [[package]]
-name = "django-health-check"
-version = "4.4.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "django" },
-    { name = "dnspython" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/46/d5/34eac70f0df0d67351692d77f46995ced3d55be09a842802e93d26abceaa/django_health_check-4.4.4.tar.gz", hash = "sha256:4d84f3b0e3015568023f111bc8b3ef5e5094556637e1e0f6202b2eca80c07b9b", size = 21923, upload-time = "2026-07-28T17:33:52.816Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/76/e8/3bc8e4045c026d3496040dceb06265da3d049de1ad4fa082f9414b62ae73/django_health_check-4.4.4-py3-none-any.whl", hash = "sha256:22a4807e06bb60ba98bb35c7c5a625db1a845fc373de3cad6e9d675939dbfe4d", size = 27027, upload-time = "2026-07-28T17:33:51.477Z" },
-]
-
-[[package]]
 name = "django-pandas"
 version = "0.6.7"
 source = { registry = "https://pypi.org/simple" }
@@ -386,15 +373,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/3b/35/c96055e700fdff25da3a7b7756cfd1d4dc54f38b9bc6d6c5e19e3a0fdc20/djangorestframework-3.17.2.tar.gz", hash = "sha256:89ed713b6dc83e1539f214b7d10808ae19bb8511004beba886225da6d5c9dafa", size = 906683, upload-time = "2026-08-05T07:47:22.5Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a2/46/c14108e400b208c394325eb63fbae06c81341b6447fa1a6f9da718b17fe7/djangorestframework-3.17.2-py3-none-any.whl", hash = "sha256:cb0546a7415d5b46c04e0f4fe0a54b2109f4fdd5e83ca773c8c6183a6493d042", size = 899109, upload-time = "2026-08-05T07:47:20.853Z" },
-]
-
-[[package]]
-name = "dnspython"
-version = "2.8.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8c/8b/57666417c0f90f08bcafa776861060426765fdb422eb10212086fb811d26/dnspython-2.8.0.tar.gz", hash = "sha256:181d3c6996452cb1189c4046c61599b84a5a86e099562ffde77d26984ff26d0f", size = 368251, upload-time = "2025-09-07T18:58:00.022Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ba/5a/18ad964b0086c6e62e2e7500f7edc89e3faa45033c71c1893d34eed2b2de/dnspython-2.8.0-py3-none-any.whl", hash = "sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af", size = 331094, upload-time = "2025-09-07T18:57:58.071Z" },
 ]
 
 [[package]]
@@ -529,7 +507,7 @@ wheels = [
 
 [[package]]
 name = "leaguesphere"
-version = "4.14.1"
+version = "4.15.1"
 source = { editable = "." }
 dependencies = [
     { name = "crispy-bootstrap5" },
@@ -538,7 +516,6 @@ dependencies = [
     { name = "django-cors-headers" },
     { name = "django-crispy-forms" },
     { name = "django-formtools" },
-    { name = "django-health-check" },
     { name = "django-pandas" },
     { name = "django-rest-knox" },
     { name = "djangorestframework" },
@@ -581,7 +558,6 @@ requires-dist = [
     { name = "django-crispy-forms", specifier = "==2.7" },
     { name = "django-debug-toolbar", marker = "extra == 'test'", specifier = "==7.0.0" },
     { name = "django-formtools", specifier = "==2.7" },
-    { name = "django-health-check", specifier = "==4.4.4" },
     { name = "django-pandas", specifier = "==0.6.7" },
     { name = "django-rest-knox", specifier = "==5.1.0" },
     { name = "django-webtest", marker = "extra == 'test'", specifier = "==1.9.14" },
@@ -595,7 +571,7 @@ requires-dist = [
     { name = "pillow", specifier = "==12.3.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = "==9.1.1" },
     { name = "pytest-cov", marker = "extra == 'test'", specifier = "==7.1.0" },
-    { name = "pytest-django", marker = "extra == 'test'", specifier = "==4.12.0" },
+    { name = "pytest-django", marker = "extra == 'test'", specifier = "==4.13.0" },
     { name = "pytest-playwright", marker = "extra == 'test'", specifier = ">=0.7.2" },
     { name = "pytest-xdist", marker = "extra == 'test'", specifier = "==3.8.0" },
     { name = "python-dotenv", specifier = "==1.2.2" },
@@ -933,14 +909,14 @@ wheels = [
 
 [[package]]
 name = "pytest-django"
-version = "4.12.0"
+version = "4.13.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pytest" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/13/2b/db9a193df89e5660137f5428063bcc2ced7ad790003b26974adf5c5ceb3b/pytest_django-4.12.0.tar.gz", hash = "sha256:df94ec819a83c8979c8f6de13d9cdfbe76e8c21d39473cfe2b40c9fc9be3c758", size = 91156, upload-time = "2026-02-14T18:40:49.235Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1c/ae/5ed1ab2d12090bd794392d798c14d092f0470f6446eaa6d2af4183f4aa2b/pytest_django-4.13.0.tar.gz", hash = "sha256:2316e3f63e3bc799deb4212830e39b2ef1dcc3b2d8688060f1d0217db6a56ebe", size = 94200, upload-time = "2026-08-05T21:36:23.035Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/83/a5/41d091f697c09609e7ef1d5d61925494e0454ebf51de7de05f0f0a728f1d/pytest_django-4.12.0-py3-none-any.whl", hash = "sha256:3ff300c49f8350ba2953b90297d23bf5f589db69545f56f1ec5f8cff5da83e85", size = 26123, upload-time = "2026-02-14T18:40:47.381Z" },
+    { url = "https://files.pythonhosted.org/packages/27/88/52db7a840fdbd74934f8df11b7450c9919ac00f61c02e88827f3d58180f7/pytest_django-4.13.0-py3-none-any.whl", hash = "sha256:09374c12d947ca0f99e33726bcb720a6d0124f67058e1130586372bd109493e3", size = 27066, upload-time = "2026-08-05T21:36:21.763Z" },
 ]
 
 [[package]]

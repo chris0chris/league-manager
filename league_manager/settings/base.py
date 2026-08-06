@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     "gameday_designer",
     "matchreport",
     "journey",
-    "health_check",
 ]
 
 MIDDLEWARE = [
