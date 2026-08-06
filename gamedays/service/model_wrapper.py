@@ -9,6 +9,7 @@ from gamedays.service.gameday_settings import (
     STANDING,
     TEAM_DESCRIPTION,
     POINTS,
+    WIN_POINTS,
     POINTS_HOME,
     POINTS_AWAY,
     PA,
@@ -19,12 +20,12 @@ from gamedays.service.gameday_settings import (
     FIELD,
     OFFICIALS_NAME,
     STAGE,
+    STAGE_CATEGORY,
     HOME,
     AWAY,
     ID_AWAY,
     ID_HOME,
     ID_Y,
-    QUALIIFY_ROUND,
     STATUS,
     SH,
     FH,
@@ -32,9 +33,9 @@ from gamedays.service.gameday_settings import (
     GAME_FINISHED,
     IN_POSSESSION,
     IS_HOME,
-    MAIN_ROUND,
     TEAM_ID,
 )
+from gamedays.service.stage_category import StageCategory
 from gamedays.service.placeholder_service import GamedayPlaceholderService
 from league_table.models import LeagueSeasonConfig, LeagueRuleset
 from league_table.service.datatypes import LeagueConfigRuleset, LeagueConfig
@@ -173,7 +174,11 @@ class GamedayModelWrapper:
         return passchecks.rename(columns=column_mapping)
 
     def has_finalround(self):
-        return QUALIIFY_ROUND in self._gameinfo[STAGE].values
+        return (
+            self._gameinfo[STAGE_CATEGORY]
+            .isin([StageCategory.FINAL, StageCategory.PLACEMENT])
+            .any()
+        )
 
     def get_schedule(self):
         schedule = self._get_schedule()
@@ -194,7 +199,9 @@ class GamedayModelWrapper:
         # qualify_round["win_quotient"] = qualify_round["points"]
         games_with_result = self._games_with_result
         games_with_result["gameinfo__status"] = games_with_result[STATUS]
-        games_with_result = games_with_result[(games_with_result[STAGE].isin([QUALIIFY_ROUND, MAIN_ROUND]))]
+        games_with_result = games_with_result[
+            games_with_result[STAGE_CATEGORY] == StageCategory.PRELIMINARY
+        ]
         if games_with_result.empty:
             return qualify_round
         table = engine.rank_by_games(games_with_result)
@@ -487,10 +494,27 @@ class GamedayModelWrapper:
         return schedule
 
     def _get_table(self):
-        qualify_round = self._games_with_result[self._games_with_result[STAGE].isin([QUALIIFY_ROUND, MAIN_ROUND])]
+        qualify_round = self._games_with_result[
+            self._games_with_result[STAGE_CATEGORY] == StageCategory.PRELIMINARY
+        ]
         qualify_round = qualify_round.groupby([STANDING, TEAM_DESCRIPTION], as_index=False)
-        qualify_round = qualify_round.agg({POINTS: 'sum', PF: 'sum', PA: 'sum', DIFF: 'sum', TEAM_ID: 'first'})
-        qualify_round = qualify_round.sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
+        # Named aggregation: rename the summed "points" column to "win_points"
+        # in the output. The source DataFrame only has a "points" column
+        # (built in __init__), so the old-style dict form {WIN_POINTS: 'sum'}
+        # would raise a KeyError here since "win_points" isn't a source
+        # column — pandas' dict-style agg requires keys to already exist in
+        # the frame being aggregated. Named aggregation lets us rename on the
+        # way out instead.
+        qualify_round = qualify_round.agg(
+            **{
+                WIN_POINTS: (POINTS, 'sum'),
+                PF: (PF, 'sum'),
+                PA: (PA, 'sum'),
+                DIFF: (DIFF, 'sum'),
+                TEAM_ID: (TEAM_ID, 'first'),
+            }
+        )
+        qualify_round = qualify_round.sort_values(by=[WIN_POINTS, DIFF, PF, PA], ascending=False)
         qualify_round = qualify_round.sort_values(by=STANDING)
         return qualify_round
 
@@ -541,7 +565,7 @@ class GamedayModelWrapper:
             self._get_table()
             .groupby(STANDING)
             .nth(place - 1)
-            .sort_values(by=[POINTS, DIFF, PF, PA], ascending=False)
+            .sort_values(by=[WIN_POINTS, DIFF, PF, PA], ascending=False)
         )
         return qualify_standing_by_place.iloc[index][TEAM_DESCRIPTION]
 
