@@ -19,7 +19,7 @@
     "react-router-dom": "7.18.2",
     "react-select": "5.10.2",
     "uuid": "14.0.1",
-    "web-vitals": "6.0.1"
+    "web-vitals": "6.1.0"
   },
   "scripts": {
     "start": "vite",
