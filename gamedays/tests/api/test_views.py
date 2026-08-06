@@ -140,6 +140,34 @@ class TestGamedaySchedule(WebTest):
         assert response.status_code == HTTPStatus.OK
         assert response.json == []
 
+    @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
+    def test_gameday_details_qualify_table_for_designer_stage_name_returns_200(
+        self, mock_get_league_config_ruleset
+    ):
+        """
+        Regression test for the prod incident where /api/gameday/<id>/details?get=qualify
+        500'd with KeyError: "['win_points'] not in index" for any gameday
+        whose stage name wasn't literally "Vorrunde" or "Hauptrunde" (e.g.
+        Designer-published gamedays named "Liga").
+        """
+        mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET
+        gameday = DBSetup().create_empty_gameday()
+        LeagueSeasonConfigFactory(league=gameday.league, season=gameday.season)
+        DBSetup().create_group(
+            gameday=gameday,
+            name="A",
+            stage="Liga",
+            standing="Tabelle",
+            status="beendet",
+            number_teams=3,
+        )
+
+        response = self.app.get(
+            reverse("api-gameday-schedule", kwargs={"pk": gameday.pk}) + "?get=qualify"
+        )
+
+        assert response.status_code == HTTPStatus.OK
+
 
 class TestGamesToWhistleAPIView(WebTest):
     def test_get_games_to_whistle_for_specific_team(self):
