@@ -532,13 +532,6 @@ const GameTable: React.FC<GameTableProps> = memo(({
     } else if (official) {
       if (official.type === 'static') {
         currentValue = official.name;
-        // Backward compatibility: older canvases stored a raw
-        // `winner:<gameId>`/`loser:<gameId>` string as a static official.
-        if (currentValue.startsWith('winner:') || currentValue.startsWith('loser:')) {
-          const [type, sourceGameId] = currentValue.split(':');
-          const sourceGame = allNodes.find((n) => isGameNode(n) && n.id === sourceGameId) as GameNode | undefined;
-          if (sourceGame) currentValue = `${type}:${sourceGame.id}`;
-        }
       } else if (official.type === 'winner' || official.type === 'loser') {
         // Officials aren't wired into game-to-game edges like home/away teams,
         // so resolve the source game by matching `standing`, same as bracketResolution.ts
