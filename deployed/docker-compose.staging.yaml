@@ -11,6 +11,8 @@ services:
       - "./mysql-data:/var/lib/mysql"
       - "./mysql-init:/docker-entrypoint-initdb.d:ro"
     env_file: ls.env.staging
+    ports:
+      - "127.0.0.1:33062:3306"
     networks:
       - backend
     healthcheck:
