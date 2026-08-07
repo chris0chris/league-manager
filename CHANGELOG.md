@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.15.3](https://github.com/dachrisch/leaguesphere/compare/v4.15.2...v4.15.3) (2026-08-07)
+
+
+### Bug Fixes
+
+* **ci:** sequence create_production_release after promote_to_prerelease ([214828c](https://github.com/dachrisch/leaguesphere/commit/214828c1c7ec4bb21ff873b13bff94dc57e56b40))
+
 ## [4.14.4](https://github.com/dachrisch/leaguesphere/compare/v4.14.3...v4.14.4) (2026-08-06)
 
 
