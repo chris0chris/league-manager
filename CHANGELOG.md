@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.1](https://github.com/dachrisch/leaguesphere/compare/v4.16.0...v4.16.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* give stage mysql a second, non-internal network for port publishing ([#1795](https://github.com/dachrisch/leaguesphere/issues/1795)) ([5bc2fb8](https://github.com/dachrisch/leaguesphere/commit/5bc2fb8cf6d4413e25b81cb9d5b610b8732ea973))
+
 ## [4.16.0](https://github.com/dachrisch/leaguesphere/compare/v4.15.5...v4.16.0) (2026-08-07)
 
 
