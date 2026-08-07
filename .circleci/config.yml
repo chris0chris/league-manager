@@ -879,6 +879,7 @@ workflows:
       - create_production_release:
           requires:
             - deploy_production
+            - promote_to_prerelease
           filters:
             tags:
               only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
