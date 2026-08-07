@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   node: circleci/node@7.2.1
   github-cli: circleci/github-cli@3.0.0
+  codecov: codecov/codecov@6.0.0
 
 commands:
   setup_uv:
@@ -109,6 +110,9 @@ jobs:
             uv run pytest -n 4 --nomigrations --junitxml=test-reports/test-results.xml --cov=. --cov-report=xml --cov-report=html
       - store_test_results:
           path: test-reports
+      - codecov/upload:
+          flags: python
+          files: coverage.xml
 
   scorecard_js:
     executor:
@@ -122,6 +126,9 @@ jobs:
       - run:
           name: "JavaScript Test Suite"
           command: npm --prefix scorecard/ run test:run
+      - codecov/upload:
+          dir: scorecard/coverage
+          flags: scorecard
       - run:
           name: "JavaScript Linter"
           command: |
@@ -145,6 +152,9 @@ jobs:
       - run:
           name: "JavaScript Test Suite"
           command: npm --prefix liveticker/ run test:run
+      - codecov/upload:
+          dir: liveticker/coverage
+          flags: liveticker
       - run:
           name: "JavaScript Linter"
           command: |
@@ -168,6 +178,9 @@ jobs:
       - run:
           name: "JavaScript Test Suite"
           command: npm --prefix passcheck/ run test:run
+      - codecov/upload:
+          dir: passcheck/coverage
+          flags: passcheck
       - run:
           name: "TypeScript Typecheck"
           command: npm --prefix passcheck/ run typecheck
@@ -194,6 +207,9 @@ jobs:
       - run:
           name: "JavaScript Test Suite"
           command: npm --prefix gameday_designer/ run test:run
+      - codecov/upload:
+          dir: gameday_designer/coverage
+          flags: gameday_designer
       - run:
           name: "TypeScript Typecheck"
           command: npm --prefix gameday_designer/ run typecheck
@@ -216,6 +232,9 @@ jobs:
       - run:
           name: "JavaScript Test Suite"
           command: npm --prefix journey_dashboard/ run test:run
+      - codecov/upload:
+          dir: journey_dashboard/coverage
+          flags: journey_dashboard
       - run:
           name: "TypeScript Typecheck"
           command: npm --prefix journey_dashboard/ run typecheck
