@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.16.0](https://github.com/dachrisch/leaguesphere/compare/v4.15.5...v4.16.0) (2026-08-07)
+
+
+### Features
+
+* publish stage mysql on loopback-only 127.0.0.1:33062 ([#1792](https://github.com/dachrisch/leaguesphere/issues/1792)) ([380b2a6](https://github.com/dachrisch/leaguesphere/commit/380b2a6acacdbb871b3fcfac70f33b146360aea9))
+
+
+### Bug Fixes
+
+* **deps:** update dependency eslint to v10.8.1 ([#1790](https://github.com/dachrisch/leaguesphere/issues/1790)) ([6da5f77](https://github.com/dachrisch/leaguesphere/commit/6da5f77ab07085395b8cf65e13e7a598ac7a82b5))
+* **gamedays:** decouple schedule data from display for JSON API ([#1789](https://github.com/dachrisch/leaguesphere/issues/1789)) ([2d7fe71](https://github.com/dachrisch/leaguesphere/commit/2d7fe71ed52a1ced199b43e95b5d97f82c5310ce))
+
 ## [4.15.5](https://github.com/dachrisch/leaguesphere/compare/v4.15.4...v4.15.5) (2026-08-07)
 
 
