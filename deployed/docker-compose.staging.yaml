@@ -15,6 +15,7 @@ services:
       - "127.0.0.1:33062:3306"
     networks:
       - backend
+      - db_access
     healthcheck:
       test: ["CMD", "sh", "-c", "mariadb -h localhost --skip-ssl -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
       interval: 15s
@@ -97,6 +98,8 @@ services:
 networks:
   backend:
     internal: true
+  db_access:
+    internal: false
   egress:
     internal: false
   proxy:
