@@ -13,7 +13,7 @@ dependencies = [
     "numpy==2.5.1",
     "pandas==3.0.5",
     "django-pandas==0.6.7",
-    "djangorestframework==3.17.2",
+    "djangorestframework==3.18.0",
     "django-autocomplete-light==5.0.0",
     "django-formtools==2.7",
     "Markdown==3.10.3",
