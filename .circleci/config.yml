@@ -468,6 +468,41 @@ jobs:
             docker exec $APP_CONTAINER sh -c 'curl -f --max-time 10 https://www.google.com'
             docker-compose -f docker-compose.ci.yaml down -v
 
+  check_release_sequence:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: Refuse to deploy a tag older than the currently released version
+          command: |
+            TAG="${CIRCLE_TAG}"
+            VERSION="${TAG#v}"
+            VERSION="${VERSION%%-rc.*}"
+            REPO="${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+
+            # .release-please-manifest.json on master is the single source of
+            # truth for "what's the latest intended release" - fetch it fresh
+            # (not from this job's own checkout) so a delayed/redelivered
+            # webhook for an old tag can't race a newer one that already shipped.
+            LATEST=$(curl -sf "https://raw.githubusercontent.com/${REPO}/master/.release-please-manifest.json" | grep -o '"[0-9]\+\.[0-9]\+\.[0-9]\+"' | tr -d '"')
+
+            if [ -z "$LATEST" ]; then
+              echo "Could not read the current version from master's release-please manifest - failing closed"
+              exit 1
+            fi
+
+            echo "This build's tag: ${VERSION} (from ${TAG})"
+            echo "Currently released version (master manifest): ${LATEST}"
+
+            OLDEST=$(printf '%s\n%s\n' "$VERSION" "$LATEST" | sort -V | head -1)
+            if [ "$OLDEST" = "$VERSION" ] && [ "$VERSION" != "$LATEST" ]; then
+              echo "${TAG} (${VERSION}) is older than the currently released version (${LATEST})."
+              echo "This looks like a stale/out-of-order CI trigger (e.g. a delayed GitHub webhook redelivery for an old tag) - refusing to deploy so production isn't rolled backwards."
+              exit 1
+            fi
+
+            echo "${TAG} is current. Proceeding."
+
   deploy_staging:
     docker:
       - image: cimg/base:stable
@@ -806,10 +841,18 @@ workflows:
             branches:
               ignore: /.*/
 
+      - check_release_sequence:
+          filters:
+            tags:
+              only: /^v?[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$/
+            branches:
+              ignore: /.*/
+
       - deploy_staging:
           context: staging
           requires:
             - test_compose_network
+            - check_release_sequence
           filters:
             tags:
               only: /^v?[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$/
@@ -840,6 +883,7 @@ workflows:
           type: approval
           requires:
             - test_compose_network
+            - check_release_sequence
           filters:
             tags:
               only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
