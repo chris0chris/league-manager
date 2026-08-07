@@ -39,7 +39,7 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"
           uv sync --extra test
       - name: 🚀🧪 Run Tests
-        run: uv run pytest --cov --junitxml=junit.xml -o junit_family=legacy
+        run: uv run pytest --cov --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
         env:
           MYSQL_HOST: 0.0.0.0
           SECRET_KEY: 123456-TEST
@@ -59,6 +59,8 @@ jobs:
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+          flags: python
       - name: 🧪 Upload test results to Codecov
         # secrets not directly accessible https://stackoverflow.com/questions/72925899/github-actions-detect-if-secret-exists
         env:
