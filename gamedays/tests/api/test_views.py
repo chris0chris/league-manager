@@ -92,6 +92,35 @@ class TestGamedaySchedule(WebTest):
             EmptySchedule().to_json(), object_pairs_hook=OrderedDict
         )
 
+    def test_get_schedule_for_played_gameday_returns_canonical_keys(self):
+        """
+        Regression test for #1781: previously /api/gameday/<id>/details?get=schedule
+        500'd with "DataFrame columns must be unique for orient='index'" for any
+        gameday with played games, because the API serialized the display-renamed
+        schedule (POINTS_HOME and POINTS_AWAY both renamed to "Pkt").
+
+        The JSON payload must expose stable canonical keys, not German display
+        headers, and must not have duplicate keys.
+        """
+        gameday = DBSetup().g62_qualify_finished()
+        response = self.app.get(
+            reverse("api-gameday-schedule", kwargs={"pk": gameday.pk}) + "?get=schedule"
+        )
+        assert response.status_code == HTTPStatus.OK
+        payload = response.json
+        # default orient="index" serializes as {row_index: {...}} for a populated
+        # schedule (the empty case returns "[]").
+        assert payload, "expected a populated schedule for a played gameday"
+        rows = payload.values() if isinstance(payload, dict) else payload
+
+        canonical_keys = ["gameinfo", "home", "points_home", "points_away", "away"]
+        for row in rows:
+            assert isinstance(row, dict)
+            for key in canonical_keys:
+                assert key in row
+            assert "Pkt" not in row
+            assert len(row) == len(set(row)), "JSON object has duplicate keys"
+
     @patch("league_table.service.datatypes.LeagueConfigRuleset.from_ruleset")
     def test_get_qualify_table(self, mock_get_league_config_ruleset):
         mock_get_league_config_ruleset.return_value = LEAGUE_TABLE_TEST_RULESET

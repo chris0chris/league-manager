@@ -370,7 +370,7 @@ class GamedayScheduleView(APIView):
         orient = request.query_params.get("orient")
         orient = "index" if orient is None else orient
         if get == "schedule":
-            response = gs.get_schedule().to_json(orient=orient)
+            response = gs.get_schedule_data().to_json(orient=orient)
         elif get == "qualify":
             qualify_table = gs.get_qualify_table()
             if not isinstance(qualify_table, HtmlAndJsonRendering):

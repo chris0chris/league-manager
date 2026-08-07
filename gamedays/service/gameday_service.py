@@ -177,6 +177,9 @@ class EmptyGamedayService:
     def get_schedule(self, *args, **kwargs):
         return EmptySchedule()
 
+    def get_schedule_data(self, *args, **kwargs):
+        return EmptySchedule()
+
     def get_games_to_whistle(self, *args, **kwargs):
         return EmptySchedule()
 
@@ -210,12 +213,18 @@ class GamedayService:
         self.gmw = GamedayModelWrapper(pk)
         self.gameday_pk = pk
 
-    def get_schedule(self):
+    def get_schedule_data(self):
+        """Canonical schedule DataFrame with stable keys, free of display
+        transformations (no German header rename, no HTML/formatting). This is
+        the payload source for JSON APIs."""
         schedule = self.gmw.get_schedule()
         columns = [ID, SCHEDULED, FIELD, HOME, POINTS_HOME, POINTS_AWAY, AWAY, OFFICIALS_NAME, STANDING, STAGE, STATUS,
             GAMEINFO_ID,
         ]
-        schedule = schedule[columns]
+        return schedule[columns]
+
+    def get_schedule(self):
+        schedule = self.get_schedule_data()
         schedule[OFFICIALS_NAME] = schedule[OFFICIALS_NAME].apply("<i>{}</i>".format)
         schedule[SCHEDULED] = pd.to_datetime(
             schedule[SCHEDULED], format="%H:%M:%S"
