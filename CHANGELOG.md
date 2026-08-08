@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.3](https://github.com/dachrisch/leaguesphere/compare/v4.16.2...v4.16.3) (2026-08-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency esbuild to v0.28.2 ([#1799](https://github.com/dachrisch/leaguesphere/issues/1799)) ([1680469](https://github.com/dachrisch/leaguesphere/commit/1680469e46b5d1ac1aed3ba11b3c6bf3f3fbfbc5))
+
 ## [4.16.2](https://github.com/dachrisch/leaguesphere/compare/v4.16.1...v4.16.2) (2026-08-08)
 
 
