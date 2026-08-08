@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.4](https://github.com/dachrisch/leaguesphere/compare/v4.16.3...v4.16.4) (2026-08-08)
+
+
+### Bug Fixes
+
+* **gamedays:** publish legacy gamedays on create instead of DRAFT ([#1801](https://github.com/dachrisch/leaguesphere/issues/1801)) ([4cb4c6f](https://github.com/dachrisch/leaguesphere/commit/4cb4c6f336adff9d02427c76949daeed41888cf5))
+
 ## [4.16.3](https://github.com/dachrisch/leaguesphere/compare/v4.16.2...v4.16.3) (2026-08-08)
 
 
