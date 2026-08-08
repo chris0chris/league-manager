@@ -4,6 +4,7 @@ from dal import autocomplete
 from django import forms
 from django.contrib.auth.models import User
 from django.forms import modelformset_factory, BaseFormSet, formset_factory, inlineformset_factory
+from django.utils import timezone
 
 from gamedays.models import Season, League, Gameday, Gameinfo, Team, SeasonLeagueTeam, ResourceUrl
 
@@ -223,10 +224,18 @@ class GamedayForm(forms.ModelForm):
             self.fields["season"].initial = last_season.id
 
     def save(self, user=None):
+        is_new = self.instance.pk is None
         gameday = super(GamedayForm, self).save(commit=False)
         gameday.author = self.context.author
         if self.context.init_format:
             gameday.format = "INITIAL_EMPTY"
+        if is_new:
+            # Legacy gamedays have no draft/design phase -- unlike the visual
+            # Designer, this form creates a fully-specified gameday in one
+            # submission, so it should be live immediately rather than
+            # inheriting the model's DRAFT default.
+            gameday.status = Gameday.STATUS_PUBLISHED
+            gameday.published_at = timezone.now()
         gameday.save()
         return gameday
 

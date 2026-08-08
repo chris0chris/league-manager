@@ -15,6 +15,7 @@ from gamedays.tests.setup_factories.factories import (
     TeamFactory,
     GameinfoFactory,
     GameresultFactory,
+    GamedayFactory,
     SeasonFactory,
     LeagueFactory,
     UserFactory,
@@ -88,6 +89,61 @@ class TestGamedayForm(TestCase):
         gameday = form.save()
         assert gameday.author == user
         assert gameday.format == "6_2"
+
+    def test_gameday_form_publishes_new_gameday(self):
+        season = SeasonFactory(name="2026")
+        league = LeagueFactory(name="League C")
+        user = UserFactory(username="LeagueOrgC")
+
+        data = {
+            "name": "New Gameday",
+            "season": season.id,
+            "league": league.id,
+            "date": date.today(),
+            "start": time(10, 0),
+            "address": "Stadium",
+        }
+
+        form = GamedayForm(
+            data=data, context=GamedayFormContext(user, init_format=True)
+        )
+        assert form.is_valid(), form.errors
+        gameday = form.save()
+
+        assert gameday.status == Gameday.STATUS_PUBLISHED
+        assert gameday.published_at is not None
+
+    def test_gameday_form_does_not_republish_existing_gameday(self):
+        season = SeasonFactory(name="2027")
+        league = LeagueFactory(name="League D")
+        user = UserFactory(username="LeagueOrgD")
+        existing = GamedayFactory(
+            season=season,
+            league=league,
+            status=Gameday.STATUS_IN_PROGRESS,
+            published_at=None,
+        )
+
+        data = {
+            "name": "Renamed Gameday",
+            "season": season.id,
+            "league": league.id,
+            "date": date.today(),
+            "start": time(11, 0),
+            "address": "New Address",
+        }
+
+        form = GamedayForm(
+            data=data,
+            instance=existing,
+            context=GamedayFormContext(user, init_format=False),
+        )
+        assert form.is_valid(), form.errors
+        gameday = form.save()
+
+        assert gameday.name == "Renamed Gameday"
+        assert gameday.status == Gameday.STATUS_IN_PROGRESS
+        assert gameday.published_at is None
 
 
 class TestGamedayFormatForm(TestCase):
