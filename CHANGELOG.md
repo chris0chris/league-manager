@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.16.9](https://github.com/dachrisch/leaguesphere/compare/v4.16.8...v4.16.9) (2026-08-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency django-debug-toolbar to v7.1.0 ([#1812](https://github.com/dachrisch/leaguesphere/issues/1812)) ([71de88c](https://github.com/dachrisch/leaguesphere/commit/71de88c436b8f13ab45c12f370abe8a5a6a0f245))
+* **deps:** update dependency pytest-django to v4.14.0 ([#1813](https://github.com/dachrisch/leaguesphere/issues/1813)) ([47042f2](https://github.com/dachrisch/leaguesphere/commit/47042f270d96f66efea0724161cff6d8a6b4ca04))
+
 ## [4.16.8](https://github.com/dachrisch/leaguesphere/compare/v4.16.7...v4.16.8) (2026-08-10)
 
 
