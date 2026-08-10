@@ -55,7 +55,7 @@
     "@babel/plugin-transform-private-property-in-object": "8.0.1",
     "@eslint/js": "10.0.1",
     "@testing-library/dom": "10.4.1",
-    "@testing-library/jest-dom": "7.0.0",
+    "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "14.6.3",
     "@types/react-router-dom": "5.3.3",
