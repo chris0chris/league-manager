@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.16.6](https://github.com/dachrisch/leaguesphere/compare/v4.16.5...v4.16.6) (2026-08-10)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([#1806](https://github.com/dachrisch/leaguesphere/issues/1806)) ([2528ba1](https://github.com/dachrisch/leaguesphere/commit/2528ba142e130fa5f6e221acaf317af56560ba6c))
+* **deps:** update dependency @testing-library/jest-dom to v7.0.1 ([#1805](https://github.com/dachrisch/leaguesphere/issues/1805)) ([33df6f1](https://github.com/dachrisch/leaguesphere/commit/33df6f104dc2a35e3f6e2fc4929a4b5ba3d7526a))
+
 ## [4.16.5](https://github.com/dachrisch/leaguesphere/compare/v4.16.4...v4.16.5) (2026-08-09)
 
 
