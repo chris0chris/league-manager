@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.17.0](https://github.com/dachrisch/leaguesphere/compare/v4.16.12...v4.17.0) (2026-08-11)
+
+
+### Features
+
+* report maintenance_mode on the health-check endpoint ([#1821](https://github.com/dachrisch/leaguesphere/issues/1821)) ([6feb9db](https://github.com/dachrisch/leaguesphere/commit/6feb9db26bb9cc729e2466fefc8ae345579609e9))
+
 ## [4.16.12](https://github.com/dachrisch/leaguesphere/compare/v4.16.11...v4.16.12) (2026-08-11)
 
 
