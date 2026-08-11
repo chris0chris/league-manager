@@ -12,6 +12,10 @@ from league_manager.constants import (
     CLEAR_CACHE,
     LEAGUE_MANAGER_MAINTENANCE,
     MAINTENANCE_CONFIG_CACHE_KEY,
+    MAINTENANCE_SCOPE_FULL,
+    MAINTENANCE_SCOPE_OFF,
+    MAINTENANCE_SCOPE_CUSTOM,
+    MAINTENANCE_SCOPE_WRITES_ONLY,
 )
 from league_manager.models import SiteConfiguration
 from league_manager.views import ClearCacheView, AllTeamListView
@@ -19,42 +23,160 @@ from officials.urls import OFFICIALS_LIST_FOR_ALL_TEAMS
 from passcheck.urls import PASSCHECK_LIST_FOR_ALL_TEAMS
 
 
-class TestMaintenanceView(WebTest):
-    def test_maintenance_page_is_delivered(self):
-        expected_url = reverse(LEAGUE_MANAGER_MAINTENANCE)
+class TestMaintenanceScope(WebTest):
+    def setUp(self):
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+        self.config, _ = SiteConfiguration.objects.get_or_create(id=1)
 
+    def tearDown(self):
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+    def _assert_redirect_to_maintenance(self, url, method="get"):
+        client_method = getattr(self.client, method)
+        response = client_method(url)
+        self.assertEqual(response.status_code, 302)
+        expected = reverse(LEAGUE_MANAGER_MAINTENANCE)
+        self.assertIn(expected, response.url)
+
+    def _assert_redirect_to_elsewhere(self, url):
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        expected_maint = reverse(LEAGUE_MANAGER_MAINTENANCE)
+        self.assertNotIn(expected_maint, response.url)
+
+    def _assert_no_redirect(self, url):
+        response = self.client.get(url)
+        if response.status_code == 302:
+            expected_maint = reverse(LEAGUE_MANAGER_MAINTENANCE)
+            self.assertNotIn(expected_maint, response.url)
+        else:
+            self.assertNotEqual(response.status_code, 302)
+
+    def test_off_scope_allows_all_requests(self):
+        self.config.maintenance_scope = MAINTENANCE_SCOPE_OFF
+        self.config.save()
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+        response = self.client.get("/gamedays/gameday/new/")
+        expected_maint = reverse(LEAGUE_MANAGER_MAINTENANCE)
+        if response.status_code == 302:
+            self.assertNotIn(expected_maint, response.url)
+        else:
+            self.assertNotEqual(response.status_code, 302)
+
+    def test_full_scope_redirects_all_urls(self):
+        self.config.maintenance_scope = MAINTENANCE_SCOPE_FULL
+        self.config.save()
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+        self._assert_redirect_to_maintenance("/gamedays/gameday/new/")
+        self._assert_redirect_to_maintenance("/liveticker/")
+        self._assert_redirect_to_maintenance("/any/random/path/")
+
+    def test_full_scope_exempts_admin_and_maintenance(self):
+        self.config.maintenance_scope = MAINTENANCE_SCOPE_FULL
+        self.config.save()
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+        expected_maint = reverse(LEAGUE_MANAGER_MAINTENANCE)
+
+        admin_response = self.client.get("/admin/")
+        if admin_response.status_code == 302:
+            self.assertNotIn(expected_maint, admin_response.url)
+
+        maint_response = self.client.get("/maintenance/")
+        self.assertEqual(maint_response.status_code, 200)
+
+    def test_writes_only_scope_blocks_write_methods(self):
+        self.config.maintenance_scope = MAINTENANCE_SCOPE_WRITES_ONLY
+        self.config.save()
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+        post_response = self.client.post("/gamedays/gameday/new/")
+        self.assertEqual(post_response.status_code, 302)
+        expected = reverse(LEAGUE_MANAGER_MAINTENANCE)
+        self.assertIn(expected, post_response.url)
+
+    def test_writes_only_scope_allows_get_requests(self):
+        self.config.maintenance_scope = MAINTENANCE_SCOPE_WRITES_ONLY
+        self.config.save()
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+        response = self.client.get("/gamedays/gameday/new/")
+        expected_maint = reverse(LEAGUE_MANAGER_MAINTENANCE)
+        if response.status_code == 302:
+            self.assertNotIn(expected_maint, response.url)
+        else:
+            self.assertNotEqual(response.status_code, 302)
+
+    def test_writes_only_scope_allows_admin_writes(self):
+        self.config.maintenance_scope = MAINTENANCE_SCOPE_WRITES_ONLY
+        self.config.save()
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+        response = self.client.post("/admin/login/")
+        expected_maint = reverse(LEAGUE_MANAGER_MAINTENANCE)
+        if response.status_code == 302:
+            self.assertNotIn(expected_maint, response.url)
+
+    def test_custom_scope_redirects_matching_patterns(self):
+        self.config.maintenance_scope = MAINTENANCE_SCOPE_CUSTOM
+        self.config.maintenance_pages = [
+            "/gamedays/gameday/new/",
+            r"^/passcheck/player/\d+/(update|delete|transfer)/$",
+        ]
+        self.config.save()
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+        response = self.client.get("/gamedays/gameday/new/")
+        self.assertEqual(response.status_code, 302)
+        expected = reverse(LEAGUE_MANAGER_MAINTENANCE)
+        self.assertIn(expected, response.url)
+
+    def test_custom_scope_passes_through_non_matching(self):
+        self.config.maintenance_scope = MAINTENANCE_SCOPE_CUSTOM
+        self.config.maintenance_pages = ["/gamedays/gameday/new/"]
+        self.config.save()
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+        response = self.client.get("/liveticker/")
+        expected_maint = reverse(LEAGUE_MANAGER_MAINTENANCE)
+        if response.status_code == 302:
+            self.assertNotIn(expected_maint, response.url)
+
+    def test_custom_scope_redirects_regex_matches(self):
+        self.config.maintenance_scope = MAINTENANCE_SCOPE_CUSTOM
+        self.config.maintenance_pages = [r"^/gamedays/gameday/\d+/update$"]
+        self.config.save()
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+        response = self.client.get("/gamedays/gameday/42/update")
+        self.assertEqual(response.status_code, 302)
+
+    def test_maintenance_page_is_delivered(self):
+        self.config.maintenance_scope = MAINTENANCE_SCOPE_CUSTOM
         maintenance_pages = [
             "/gamedays/gameday/new/",
             r"^/gamedays/gameday/\d+/update$",
             r"^/passcheck/player/\d+/(update|delete|transfer)/$",
         ]
-
-        config, _ = SiteConfiguration.objects.get_or_create(id=1)
-        config.maintenance_mode = True
-        config.maintenance_pages = maintenance_pages
-        config.save()
+        self.config.maintenance_pages = maintenance_pages
+        self.config.save()
 
         cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
 
+        expected_url = reverse(LEAGUE_MANAGER_MAINTENANCE)
+
         for index, pattern in enumerate(maintenance_pages):
-            # Convert regex to a testable URL
-            # We strip ^ and $ and replace \d+ with a real ID
             target_url = pattern.replace(r"\d+", str(index + 100))
             target_url = target_url.replace(r"(update|delete|transfer)", "update")
             target_url = target_url.lstrip("^").rstrip("$")
-
-            # Ensure it has a leading slash if the regex stripped it
             if not target_url.startswith("/"):
                 target_url = "/" + target_url
 
             response = self.client.get(target_url)
-
             self.assertEqual(response.status_code, 302)
             self.assertIn(expected_url, response.url)
-
-        config.maintenance_mode = False
-        config.save()
-        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
 
 
 class TestHomeView(TestCase):

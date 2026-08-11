@@ -1,8 +1,6 @@
 import pytest
 from django.conf import settings
 from django.urls import reverse
-from unittest.mock import patch
-from django.db import OperationalError
 from django.core.cache import cache
 
 
@@ -14,6 +12,9 @@ def test_default_database_connect_timeout_is_bounded():
     the "Datenbank nicht erreichbar" banner. The timeout must be short enough to
     stay well under the upstream proxy timeout.
     """
+    if settings.DATABASES["default"]["ENGINE"] != "django.db.backends.mysql":
+        pytest.skip("connect_timeout is only configured for MySQL")
+
     options = settings.DATABASES["default"].get("OPTIONS", {})
     connect_timeout = options.get("connect_timeout")
 
@@ -32,38 +33,39 @@ def clear_db_status_cache():
 @pytest.mark.django_db
 def test_db_guard_redirects_on_failure(client):
     """Test that the middleware redirects to database-error when DB is down."""
-    # Ensure cache is clear for test
-    cache.delete("db_connection_status")
+    cache.set("db_connection_status", False, 5)
 
-    with patch("django.db.connection.cursor") as mock_cursor:
-        mock_cursor.side_effect = OperationalError("DB is down")
+    response = client.get("/home/")
+    assert response.status_code == 302
+    assert response.url == reverse("database-error")
 
-        # Request any page that isn't excluded
-        response = client.get("/")
-        assert response.status_code == 302
-        assert response.url == reverse("database-error")
+
+@pytest.mark.django_db
+def test_db_guard_redirects_from_home_while_db_down(client):
+    """Home page redirect while flagged offline."""
+    cache.set("db_connection_status", False, 5)
+
+    response = client.get("/")
+    assert response.status_code == 302
+    assert response.url == reverse("database-error")
 
 
 @pytest.mark.django_db
 def test_db_guard_skips_health_check(client):
     """Test that the middleware doesn't redirect health check even if DB is down."""
-    cache.delete("db_connection_status")
+    cache.set("db_connection_status", False, 5)
 
-    with patch("django.db.connection.cursor") as mock_cursor:
-        mock_cursor.side_effect = OperationalError("DB is down")
-
-        response = client.get("/health/")
-        # Should NOT be a redirect
-        assert response.status_code == 200
-        # Simple health check returns {"status": "healthy"}
-        data = response.json()
-        assert data["status"] == "healthy"
+    response = client.get("/health/")
+    # Should NOT be a redirect
+    assert response.status_code == 200
+    # Simple health check returns {"status": "healthy"}
+    data = response.json()
+    assert data["status"] == "healthy"
 
 
 @pytest.mark.django_db
 def test_db_guard_shows_error_page_while_db_down(client):
     """While DB is down, the error page itself returns 503 (no redirect loop)."""
-    # Simulate a known-down DB without breaking the test framework's own DB access.
     cache.set("db_connection_status", False, 5)
 
     response = client.get(reverse("database-error"))

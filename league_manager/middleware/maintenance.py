@@ -4,8 +4,19 @@ from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from league_manager.constants import LEAGUE_MANAGER_MAINTENANCE, MAINTENANCE_CONFIG_CACHE_KEY
+from league_manager.constants import (
+    LEAGUE_MANAGER_MAINTENANCE,
+    MAINTENANCE_CONFIG_CACHE_KEY,
+    MAINTENANCE_SCOPE_FULL,
+    MAINTENANCE_SCOPE_OFF,
+    MAINTENANCE_SCOPE_CUSTOM,
+    MAINTENANCE_SCOPE_WRITES_ONLY,
+)
 from league_manager.models import SiteConfiguration
+
+ADMIN_PREFIX = "/admin/"
+MAINTENANCE_PREFIX = "/maintenance/"
+WRITE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 
 
 class MaintenanceModeMiddleware:
@@ -19,18 +30,39 @@ class MaintenanceModeMiddleware:
             db_config = SiteConfiguration.objects.first()
             if db_config:
                 config = {
-                    "mode_active": db_config.maintenance_mode,
+                    "scope": db_config.maintenance_scope,
                     "patterns": db_config.maintenance_pages,
                 }
             else:
-                config = {"mode_active": False, "patterns": []}
+                config = {"scope": MAINTENANCE_SCOPE_OFF, "patterns": []}
 
             cache.set(MAINTENANCE_CONFIG_CACHE_KEY, config, 6000000)
 
-        if config["mode_active"]:
+        path = request.path_info
+        if self._is_exempt(path):
+            return self.get_response(request)
+
+        scope = config["scope"]
+
+        if scope == MAINTENANCE_SCOPE_FULL:
+            return HttpResponseRedirect(reverse(LEAGUE_MANAGER_MAINTENANCE))
+
+        if scope == MAINTENANCE_SCOPE_WRITES_ONLY:
+            if request.method in WRITE_METHODS:
+                return HttpResponseRedirect(reverse(LEAGUE_MANAGER_MAINTENANCE))
+
+        if scope == MAINTENANCE_SCOPE_CUSTOM:
             for maintenance_pattern in config["patterns"]:
-                if re.match(maintenance_pattern, request.path_info):
+                if re.match(maintenance_pattern, path):
                     return HttpResponseRedirect(reverse(LEAGUE_MANAGER_MAINTENANCE))
 
-        response = self.get_response(request)
-        return response
+        return self.get_response(request)
+
+    @staticmethod
+    def _is_exempt(path):
+        return (
+            path.startswith(ADMIN_PREFIX)
+            or path.startswith(MAINTENANCE_PREFIX)
+            or path.startswith("/static/")
+            or path.startswith("/media/")
+        )
