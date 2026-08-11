@@ -19,13 +19,19 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_view
 from django.contrib.sitemaps.views import sitemap
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.urls import path, include
 from django.views import View
 from django.views.generic import TemplateView, RedirectView
 
 from gamedays.constants import LEAGUE_GAMEDAY_LIST
-from league_manager.constants import LEAGUE_MANAGER_MAINTENANCE, CLEAR_CACHE
+from league_manager.constants import (
+    LEAGUE_MANAGER_MAINTENANCE,
+    CLEAR_CACHE,
+    MAINTENANCE_CONFIG_CACHE_KEY,
+)
+from league_manager.models import SiteConfiguration
 
 
 class HealthCheckView(View):
@@ -40,7 +46,13 @@ class HealthCheckView(View):
     """
 
     def get(self, request):
-        return JsonResponse({"status": "healthy"})
+        config = cache.get(MAINTENANCE_CONFIG_CACHE_KEY)
+        if config is None:
+            db_config = SiteConfiguration.objects.first()
+            maintenance_mode = db_config.maintenance_mode if db_config else False
+        else:
+            maintenance_mode = config["mode_active"]
+        return JsonResponse({"status": "healthy", "maintenance_mode": maintenance_mode})
 
 
 from league_manager.views import ClearCacheView, robots_txt_view, database_error_view, DemoInfoView
