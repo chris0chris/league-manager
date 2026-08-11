@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.12](https://github.com/dachrisch/leaguesphere/compare/v4.16.11...v4.16.12) (2026-08-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency django-debug-toolbar to v7.1.0 ([#1816](https://github.com/dachrisch/leaguesphere/issues/1816)) ([1e750e2](https://github.com/dachrisch/leaguesphere/commit/1e750e2be61c950ae250d5995c0f0520be2d57d0))
+
 ## [4.16.11](https://github.com/dachrisch/leaguesphere/compare/v4.16.10...v4.16.11) (2026-08-11)
 
 
