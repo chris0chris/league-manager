@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.18.0](https://github.com/dachrisch/leaguesphere/compare/v4.17.0...v4.18.0) (2026-08-11)
+
+
+### Features
+
+* **admin:** simplify maintenance mode to 3-scope dropdown ([#1823](https://github.com/dachrisch/leaguesphere/issues/1823)) ([b3a6620](https://github.com/dachrisch/leaguesphere/commit/b3a662015ce627b8cd96138ce8e95c55a7d07a81))
+
+
+### Bug Fixes
+
+* update health check and middleware for maintenance_scope compatibility ([5a3188e](https://github.com/dachrisch/leaguesphere/commit/5a3188e085caaa4be0f18896b157d4f34f886235))
+
 ## [4.17.0](https://github.com/dachrisch/leaguesphere/compare/v4.16.12...v4.17.0) (2026-08-11)
 
 
