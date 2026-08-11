@@ -65,4 +65,6 @@ class MaintenanceModeMiddleware:
             or path.startswith(MAINTENANCE_PREFIX)
             or path.startswith("/static/")
             or path.startswith("/media/")
+            or path == "/health/"
+            or path == "/database-error/"
         )

@@ -49,10 +49,14 @@ class HealthCheckView(View):
         config = cache.get(MAINTENANCE_CONFIG_CACHE_KEY)
         if config is None:
             db_config = SiteConfiguration.objects.first()
-            maintenance_mode = db_config.maintenance_mode if db_config else False
+            if db_config and hasattr(db_config, "maintenance_scope"):
+                scope = db_config.maintenance_scope
+            else:
+                scope = "off"
         else:
-            maintenance_mode = config["mode_active"]
-        return JsonResponse({"status": "healthy", "maintenance_mode": maintenance_mode})
+            scope = config.get("scope", "off")
+        maintenance_active = scope not in ("off", None)
+        return JsonResponse({"status": "healthy", "maintenance_mode": maintenance_active})
 
 
 from league_manager.views import ClearCacheView, robots_txt_view, database_error_view, DemoInfoView

@@ -3,6 +3,12 @@ from django.conf import settings
 from django.urls import reverse
 from django.core.cache import cache
 
+from league_manager.constants import (
+    MAINTENANCE_CONFIG_CACHE_KEY,
+    MAINTENANCE_SCOPE_OFF,
+)
+from league_manager.models import SiteConfiguration
+
 
 def test_default_database_connect_timeout_is_bounded():
     """The DB connection must fail fast so the guard can render the offline page.
@@ -22,12 +28,24 @@ def test_default_database_connect_timeout_is_bounded():
     assert 0 < connect_timeout <= 5, f"connect_timeout must be short (got {connect_timeout})"
 
 
+def _reset_maintenance_scope_safe():
+    """Ensure maintenance scope is off without requiring DB access."""
+    try:
+        SiteConfiguration.objects.all().delete()
+    except RuntimeError:
+        pass  # No DB access (e.g., settings-only test)
+
+
 @pytest.fixture(autouse=True)
 def clear_db_status_cache():
     """Clear the DB status cache before and after each test to ensure isolation."""
     cache.delete("db_connection_status")
+    cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+    _reset_maintenance_scope_safe()
     yield
     cache.delete("db_connection_status")
+    cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+    _reset_maintenance_scope_safe()
 
 
 @pytest.mark.django_db
