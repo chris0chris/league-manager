@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.18.2](https://github.com/dachrisch/leaguesphere/compare/v4.18.1...v4.18.2) (2026-08-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @testing-library/user-event to v14.6.4 ([#1827](https://github.com/dachrisch/leaguesphere/issues/1827)) ([ade7083](https://github.com/dachrisch/leaguesphere/commit/ade708326f6360cdc3a73b4492efa038501da877))
+
 ## [4.18.1](https://github.com/dachrisch/leaguesphere/compare/v4.18.0...v4.18.1) (2026-08-11)
 
 
