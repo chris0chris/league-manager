@@ -10,7 +10,7 @@ dependencies = [
     "Django==6.0.8",
     "django-crispy-forms==2.7",
     "crispy-bootstrap5==2026.3",
-    "numpy==2.5.1",
+    "numpy==2.5.2",
     "pandas==3.0.5",
     "django-pandas==0.6.7",
     "djangorestframework==3.17.2",
