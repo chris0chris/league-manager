@@ -179,6 +179,33 @@ class TestMaintenanceScope(WebTest):
             self.assertIn(expected_url, response.url)
 
 
+class TestMaintenanceConfigCacheTTL(TestCase):
+    def setUp(self):
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+        self.config, _ = SiteConfiguration.objects.get_or_create(id=1)
+
+    def tearDown(self):
+        cache.delete(MAINTENANCE_CONFIG_CACHE_KEY)
+
+    def test_maintenance_config_cache_expires_within_a_minute(self):
+        """A gunicorn deployment runs multiple worker processes, each with its
+        own private LocMemCache. A stale entry only self-heals once it
+        expires, so the TTL bounds how long an admin's maintenance_scope
+        change can take to reach every worker. It must be short, not the
+        69-day default that made propagation effectively unbounded."""
+        with patch("league_manager.middleware.maintenance.cache.set") as mock_set:
+            self.client.get("/health/")
+
+        maintenance_calls = [
+            call
+            for call in mock_set.call_args_list
+            if call.args[0] == MAINTENANCE_CONFIG_CACHE_KEY
+        ]
+        self.assertEqual(len(maintenance_calls), 1)
+        timeout = maintenance_calls[0].args[2]
+        self.assertLessEqual(timeout, 60)
+
+
 class TestHomeView(TestCase):
     def test_homeview_renders_correct_template(self):
         response = self.client.get("/")  # or the URL name for homeview

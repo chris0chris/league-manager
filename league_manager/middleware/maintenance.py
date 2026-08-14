@@ -7,6 +7,7 @@ from django.urls import reverse
 from league_manager.constants import (
     LEAGUE_MANAGER_MAINTENANCE,
     MAINTENANCE_CONFIG_CACHE_KEY,
+    MAINTENANCE_CONFIG_CACHE_TTL,
     MAINTENANCE_SCOPE_FULL,
     MAINTENANCE_SCOPE_OFF,
     MAINTENANCE_SCOPE_CUSTOM,
@@ -36,7 +37,7 @@ class MaintenanceModeMiddleware:
             else:
                 config = {"scope": MAINTENANCE_SCOPE_OFF, "patterns": []}
 
-            cache.set(MAINTENANCE_CONFIG_CACHE_KEY, config, 6000000)
+            cache.set(MAINTENANCE_CONFIG_CACHE_KEY, config, MAINTENANCE_CONFIG_CACHE_TTL)
 
         path = request.path_info
         if self._is_exempt(path):
