@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.15.3](https://github.com/dachrisch/leaguesphere/compare/v5.15.2...v5.15.3) (2026-11-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @testing-library/user-event to v14.6.11 ([#2402](https://github.com/dachrisch/leaguesphere/issues/2402)) ([443487d](https://github.com/dachrisch/leaguesphere/commit/443487dbeeb6942acb8bbbc65963fd59120ac6b6))
+* **deps:** update dependency numpy to v2.5.5 ([#2403](https://github.com/dachrisch/leaguesphere/issues/2403)) ([7573014](https://github.com/dachrisch/leaguesphere/commit/757301412ac1646afb462081635d151c1b66d299))
+
 ## [5.15.2](https://github.com/dachrisch/leaguesphere/compare/v5.15.1...v5.15.2) (2026-11-15)
 
 
