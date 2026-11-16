@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.15.10](https://github.com/dachrisch/leaguesphere/compare/v5.15.9...v5.15.10) (2026-11-16)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([#2417](https://github.com/dachrisch/leaguesphere/issues/2417)) ([c9ea516](https://github.com/dachrisch/leaguesphere/commit/c9ea51685591b64449d5120863f889aef22e4e8e))
+
 ## [5.15.9](https://github.com/dachrisch/leaguesphere/compare/v5.15.8...v5.15.9) (2026-11-16)
 
 

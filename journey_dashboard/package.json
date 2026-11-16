@@ -1,6 +1,6 @@
 {
   "name": "journey_dashboard",
-  "version": "5.15.9",
+  "version": "5.15.10",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
