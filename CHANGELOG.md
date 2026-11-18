@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.15.11](https://github.com/dachrisch/leaguesphere/compare/v5.15.10...v5.15.11) (2026-11-18)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([#2419](https://github.com/dachrisch/leaguesphere/issues/2419)) ([db82d9d](https://github.com/dachrisch/leaguesphere/commit/db82d9d35835993110ff442445ac1a098937d255))
+* **deps:** update dependency i18next to v27.1.3 ([#2421](https://github.com/dachrisch/leaguesphere/issues/2421)) ([c009986](https://github.com/dachrisch/leaguesphere/commit/c009986f720cb283600e01fe7854b4bce056629b))
+* **deps:** update dependency jquery to v4.1.0 ([#2431](https://github.com/dachrisch/leaguesphere/issues/2431)) ([ac2045a](https://github.com/dachrisch/leaguesphere/commit/ac2045acbbb60d555ffc55c3d5365c9210204424))
+* **deps:** update dependency react-i18next to v18.0.2 ([#2422](https://github.com/dachrisch/leaguesphere/issues/2422)) ([f3a667a](https://github.com/dachrisch/leaguesphere/commit/f3a667a341450e00e7fc0fdf059b71cd562d690c))
+* **deps:** update dependency typescript-eslint to v8.73.0 ([#2423](https://github.com/dachrisch/leaguesphere/issues/2423)) ([519626c](https://github.com/dachrisch/leaguesphere/commit/519626c14a61469eec1d3eca4d286291d9d33d60))
+* **deps:** update js deps ([#2424](https://github.com/dachrisch/leaguesphere/issues/2424)) ([2f004b4](https://github.com/dachrisch/leaguesphere/commit/2f004b4beba316018eb53a310ccedc2173fa7f09))
+
 ## [5.15.10](https://github.com/dachrisch/leaguesphere/compare/v5.15.9...v5.15.10) (2026-11-16)
 
 
