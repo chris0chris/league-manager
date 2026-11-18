@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.17.0](https://github.com/dachrisch/leaguesphere/compare/v5.16.3...v5.17.0) (2026-11-18)
+
+
+### Features
+
+* **deploy:** move staging and demo onto db-nonprod.mariadb ([#2442](https://github.com/dachrisch/leaguesphere/issues/2442)) ([e58942c](https://github.com/dachrisch/leaguesphere/commit/e58942cccfc089cf0d638a38f9c9f430f3fcdb6f))
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-router-dom to v7.18.6 ([#2445](https://github.com/dachrisch/leaguesphere/issues/2445)) ([251e156](https://github.com/dachrisch/leaguesphere/commit/251e156708a1238793843d4bcf8bbabe30f8b959))
+* **scorecard-v2:** give staff a way out of the device lock again ([#2444](https://github.com/dachrisch/leaguesphere/issues/2444)) ([e6c11db](https://github.com/dachrisch/leaguesphere/commit/e6c11db44cae197dd61b2492c7b5cfdda4abf5b1))
+
 ## [5.16.3](https://github.com/dachrisch/leaguesphere/compare/v5.16.2...v5.16.3) (2026-11-18)
 
 
