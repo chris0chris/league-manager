@@ -143,6 +143,45 @@ describe("SeriesSheet", () => {
     expect(onSubmit).toHaveBeenCalledWith([{ name: "Interception" }]);
   });
 
+  it("opens the Spielzeit with the minutes field focused", () => {
+    renderSheet("time");
+
+    expect(screen.getByRole("textbox", { name: "Minuten" })).toHaveFocus();
+  });
+
+  it("jumps to the seconds field after two minute digits", async () => {
+    renderSheet("time");
+    const user = userEvent.setup();
+    const minutes = screen.getByRole("textbox", { name: "Minuten" });
+    const seconds = screen.getByRole("textbox", { name: "Sekunden" });
+
+    await user.type(minutes, "12");
+
+    expect(seconds).toHaveFocus();
+  });
+
+  it("selects the whole field on a click so a correction replaces it", async () => {
+    renderSheet("time");
+    const user = userEvent.setup();
+    const minutes = screen.getByRole("textbox", {
+      name: "Minuten",
+    }) as HTMLInputElement;
+
+    await user.type(minutes, "12");
+    await user.type(screen.getByRole("textbox", { name: "Sekunden" }), "34");
+
+    // Re-editing the minutes: the tap marks the two digits ...
+    await user.click(minutes);
+    expect(minutes).toHaveFocus();
+    expect(minutes.selectionStart).toBe(0);
+    expect(minutes.selectionEnd).toBe(2);
+
+    // ... so a new entry replaces them and the cursor moves on again.
+    await user.keyboard("07");
+    expect(minutes).toHaveValue("07");
+    expect(screen.getByRole("textbox", { name: "Sekunden" })).toHaveFocus();
+  });
+
   it("records the remaining Spielzeit as mm:ss", async () => {
     const { onSubmit } = renderSheet("time");
     const user = userEvent.setup();

@@ -3,6 +3,7 @@ import {
   useId,
   useRef,
   type KeyboardEvent,
+  type MouseEvent,
   type PointerEvent,
   type ReactNode,
 } from "react";
@@ -78,13 +79,34 @@ export default function Sheet({
   const restoreTo = useRef<HTMLElement | null>(null);
   /** Element the pointer went down on; a drag must not close the sheet. */
   const pressedOn = useRef<EventTarget | null>(null);
+  /** Element the pointer came up on; a drag across the scrim is no dismissal. */
+  const releasedOn = useRef<EventTarget | null>(null);
+  /** Scroll offsets of the page behind the sheet, restored on close. */
+  const scrolled = useRef<{ element: Element; top: number }[]>([]);
 
   useEffect(() => {
     const active = document.activeElement;
     restoreTo.current = active instanceof HTMLElement ? active : null;
+    scrolled.current = [];
+    for (
+      let node = active instanceof HTMLElement ? active.parentElement : null;
+      node !== null;
+      node = node.parentElement
+    ) {
+      scrolled.current.push({ element: node, top: node.scrollTop });
+    }
+    const page = document.scrollingElement;
+    if (page != null) {
+      scrolled.current.push({ element: page, top: page.scrollTop });
+    }
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    sheet.current?.focus();
+    // A sheet with its own autofocus (the clock's minutes field) has already
+    // focused a child, so do not steal it. `preventScroll` keeps the phone from
+    // scrolling the board out of view while the keyboard opens.
+    if (!sheet.current?.contains(document.activeElement)) {
+      sheet.current?.focus({ preventScroll: true });
+    }
     return () => {
       document.body.style.overflow = previousOverflow;
       const target = restoreTo.current;
@@ -93,7 +115,12 @@ export default function Sheet({
         target !== document.body &&
         target.isConnected
       ) {
-        target.focus();
+        target.focus({ preventScroll: true });
+      }
+      // The focus above must not leave the page scrolled: put the official
+      // back exactly where they opened the sheet.
+      for (const { element, top } of scrolled.current) {
+        element.scrollTop = top;
       }
     };
   }, []);
@@ -127,15 +154,38 @@ export default function Sheet({
   };
 
   const onScrimPointerDown = (event: PointerEvent<HTMLDivElement>): void => {
+    event.stopPropagation();
     pressedOn.current = event.target;
   };
 
   const onScrimPointerUp = (event: PointerEvent<HTMLDivElement>): void => {
+    event.stopPropagation();
+    releasedOn.current = event.target;
+  };
+
+  /**
+   * Close on the backdrop's **click**, never on pointerup.
+   *
+   * Closing at pointerup removes the scrim before the browser's own click
+   * arrives, so a touch tap outside the sheet would then fire the event log's
+   * Ändern/Rückgängig button that the scrim was covering. The click still
+   * targets the scrim (the sheet only unmounts inside this handler), so the
+   * dismissal can never leak through.
+   */
+  const onScrimClick = (event: MouseEvent<HTMLDivElement>): void => {
+    event.stopPropagation();
     // Both ends on the scrim itself: a press started inside the sheet and
     // released outside (or a drag across it) is not a dismissal.
     const startedHere = pressedOn.current === event.currentTarget;
+    const endedHere = releasedOn.current === event.currentTarget;
     pressedOn.current = null;
-    if (!busy && startedHere && event.target === event.currentTarget) {
+    releasedOn.current = null;
+    if (
+      !busy &&
+      startedHere &&
+      endedHere &&
+      event.target === event.currentTarget
+    ) {
       onClose();
     }
   };
@@ -143,6 +193,7 @@ export default function Sheet({
   return createPortal(
     <div
       className="sheetoverlay"
+      onClick={onScrimClick}
       onPointerDown={onScrimPointerDown}
       onPointerUp={onScrimPointerUp}
     >

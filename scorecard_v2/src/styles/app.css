@@ -3106,6 +3106,22 @@ button.game-row:active {
   min-height: 100%;
 }
 
+/* The finished game's history is part of the page, not a nested scroller.
+   On Tracking the log owns the middle and scrolls itself; here the list is
+   long and the whole result screen scrolls. A scroll container with
+   `overscroll-behavior: contain` would swallow every drag over the rows. */
+.result .logblock {
+  flex: 0 0 auto;
+}
+
+.result .logrows {
+  flex: 0 0 auto;
+  overflow: visible;
+  overscroll-behavior: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
 /* Final score plus both halves — read-only, no possession markers. */
 .finalboard {
   display: flex;
@@ -3244,6 +3260,15 @@ button.game-row:active {
 .captaininput {
   flex: 1 1 170px;
   min-width: 0;
+}
+
+/* The `list` suggestions are a typing aid on a plain text field, not a select:
+   hide the native dropdown chevron Chrome/Safari draw on focus. The UA rule
+   wins without `!important`. */
+.captaininput::-webkit-calendar-picker-indicator {
+  display: none !important;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .captaininput:disabled {
@@ -5487,6 +5512,16 @@ button.syncbadge {
      the shell scrolls rather than clipping them. */
   .app-shell.tracking {
     overflow-y: auto;
+  }
+
+  /* The score and both teams stay in view while the log is thumbed or the
+     clock sheet's keyboard pushes the page: the shell is the scroller here,
+     so the board pins to its top instead of scrolling away. */
+  .tracking .board {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--surface);
   }
 
   /* Head (~40px) plus two one-line entries; the saved strip below the log

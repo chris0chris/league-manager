@@ -167,6 +167,109 @@ describe("Sheet", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
+  it("closes on the backdrop without firing the control underneath", async () => {
+    // The event log's Ändern/Rückgängig buttons sit under the scrim. A tap
+    // outside the sheet closes it and must not also trigger that button.
+    const onClose = vi.fn();
+    const underneath = vi.fn();
+    render(
+      <>
+        <button onClick={underneath} type="button">
+          Ändern
+        </button>
+        <Sheet onClose={onClose} title="Titel">
+          <p>Inhalt</p>
+        </Sheet>
+      </>,
+    );
+    const user = userEvent.setup();
+    const scrim = screen.getByRole("dialog").parentElement as HTMLElement;
+
+    await user.click(scrim);
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(underneath).not.toHaveBeenCalled();
+  });
+
+  it("does not close when the press started inside the sheet", () => {
+    render(
+      <Sheet onClose={vi.fn()} title="Titel">
+        <p>Inhalt</p>
+      </Sheet>,
+    );
+    const scrim = screen.getByRole("dialog").parentElement as HTMLElement;
+
+    fireEvent.pointerDown(screen.getByText("Inhalt"));
+    fireEvent.click(scrim);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("does not close when a drag crosses the scrim", () => {
+    render(
+      <Sheet onClose={vi.fn()} title="Titel">
+        <p>Inhalt</p>
+      </Sheet>,
+    );
+    const scrim = screen.getByRole("dialog").parentElement as HTMLElement;
+
+    fireEvent.pointerDown(scrim);
+    fireEvent.pointerUp(screen.getByText("Inhalt"));
+    fireEvent.click(scrim);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("focuses the dialog without scrolling the page behind it", () => {
+    const focus = vi.spyOn(HTMLElement.prototype, "focus");
+    render(
+      <Sheet onClose={vi.fn()} title="Titel">
+        <p>Inhalt</p>
+      </Sheet>,
+    );
+
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    focus.mockRestore();
+  });
+
+  it("restores the page scroll position when it closes", async () => {
+    const scroller = document.createElement("div");
+    scroller.style.overflow = "auto";
+    document.body.appendChild(scroller);
+    const { unmount } = render(<Opener />, { container: scroller });
+    scroller.scrollTop = 140;
+    await open();
+
+    // The mobile keyboard can push the page while the sheet is open; closing
+    // must leave the official where they were, looking at the score.
+    scroller.scrollTop = 0;
+    unmount();
+
+    expect(scroller.scrollTop).toBe(140);
+    scroller.remove();
+  });
+
+  it("restores the document scroll position when it closes", async () => {
+    // jsdom has no layout and no `document.scrollingElement`; a real browser
+    // scrolls that element while the keyboard opens.
+    const page = document.createElement("div");
+    page.scrollTop = 90;
+    Object.defineProperty(document, "scrollingElement", {
+      configurable: true,
+      get: () => page,
+    });
+    try {
+      const { unmount } = render(<Opener />);
+      await open();
+      page.scrollTop = 0;
+      unmount();
+
+      expect(page.scrollTop).toBe(90);
+    } finally {
+      Reflect.deleteProperty(document, "scrollingElement");
+    }
+  });
+
   it("locks the page scroll while open and releases it on close", async () => {
     const { unmount } = render(<Opener />);
     await open();

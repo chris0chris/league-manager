@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import type { GameLogEventInput, RosterPlayer } from "../../api/types";
 import { FIELD_LENGTH, MIDFIELD, spotText } from "../../app/drive";
@@ -237,6 +237,24 @@ export default function SeriesSheet({
   const [error, setError] = useState<string | null>(null);
   // See TouchdownSheet: two synchronous taps must not both reach onSubmit.
   const saving = useRef(false);
+  const minutesRef = useRef<HTMLInputElement>(null);
+  const secondsRef = useRef<HTMLInputElement>(null);
+
+  // The clock is the entry the official almost always opens this sheet for:
+  // start in the minutes field, with its (usually empty) value selected, and
+  // never let that focus scroll the board away behind the sheet.
+  useEffect(() => {
+    if (!time) {
+      return;
+    }
+    minutesRef.current?.focus({ preventScroll: true });
+    minutesRef.current?.select();
+  }, [time]);
+
+  /** A tap on a clock field replaces its digits instead of inserting beside them. */
+  const selectClock = (event: { currentTarget: HTMLInputElement }): void => {
+    event.currentTarget.select();
+  };
 
   const intercepts = mode === "interception";
   const jerseySide: RosterPlayer["side"] = intercepts
@@ -333,11 +351,20 @@ export default function SeriesSheet({
               inputMode="numeric"
               maxLength={2}
               onChange={(event) => {
-                setMinutes(clockDigits(event.target.value));
+                const digits = clockDigits(event.target.value);
+                setMinutes(digits);
                 setTouched(true);
+                // Two digits are the whole minutes field: hand over to seconds
+                // so the official never has to reach for the second box.
+                if (digits.length === 2) {
+                  secondsRef.current?.focus({ preventScroll: true });
+                }
               }}
+              onClick={selectClock}
+              onFocus={selectClock}
               pattern="[0-9]*"
               placeholder={mode === "time" ? "00" : "0"}
+              ref={minutesRef}
               type="text"
               value={minutes}
             />
@@ -360,8 +387,11 @@ export default function SeriesSheet({
                 setSeconds(clockDigits(event.target.value));
                 setTouched(true);
               }}
+              onClick={selectClock}
+              onFocus={selectClock}
               pattern="[0-9]*"
               placeholder="00"
+              ref={secondsRef}
               type="text"
               value={seconds}
             />

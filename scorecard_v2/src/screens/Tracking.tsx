@@ -2369,6 +2369,7 @@ export default function TrackingScreen({
               logTeamName(log.away),
             ) ?? opponentName
           }
+          setup={setup}
         />
       ) : null}
 
