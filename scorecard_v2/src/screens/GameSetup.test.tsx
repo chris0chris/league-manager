@@ -12,7 +12,14 @@ import type { ReactElement } from "react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 
-import { ApiError, apiGet, apiPost, apiPut, setDeviceId } from "../api/client";
+import {
+  ApiError,
+  apiDelete,
+  apiGet,
+  apiPost,
+  apiPut,
+  setDeviceId,
+} from "../api/client";
 import type {
   CrewPosition,
   Game,
@@ -35,6 +42,7 @@ vi.mock("../api/client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api/client")>();
   return {
     ...actual,
+    apiDelete: vi.fn(),
     apiGet: vi.fn(),
     apiPost: vi.fn(),
     apiPut: vi.fn(),
@@ -46,6 +54,7 @@ vi.mock("../device", () => ({
   getDeviceId: vi.fn(() => "device-1"),
 }));
 
+const apiDeleteMock = apiDelete as unknown as Mock;
 const apiGetMock = apiGet as unknown as Mock;
 const apiPostMock = apiPost as unknown as Mock;
 const apiPutMock = apiPut as unknown as Mock;
@@ -279,6 +288,8 @@ beforeEach(() => {
   apiGetMock.mockReset();
   apiPostMock.mockReset();
   apiPutMock.mockReset();
+  apiDeleteMock.mockReset();
+  apiDeleteMock.mockResolvedValue(undefined);
   setDeviceIdMock.mockReset();
   getDeviceIdMock.mockReset();
   getDeviceIdMock.mockReturnValue("device-1");
@@ -2498,6 +2509,141 @@ describe("a game another device already took", () => {
     expect(
       screen.queryByText(/hat ein anderes Gerät bereits übernommen/),
     ).toBeNull();
+  });
+
+  it("offers staff a take-over that frees the game for the start", async () => {
+    crew = completeCrew();
+    setup = {
+      ctResult: "home",
+      direction: "Nord",
+      fhPossession: "home",
+      locked_elsewhere: true,
+      can_release_lock: true,
+    };
+
+    const { onStarted } = await renderSetup();
+
+    // The warning promises a take-over ("oder dieses Gerät das Spiel
+    // übernimmt"); without the button that promise was a dead end: the start
+    // simply answered 409 and the screen turned read-only.
+    const takeOverButton = await screen.findByRole("button", {
+      name: "Spiel übernehmen",
+    });
+    await userEvent.click(takeOverButton);
+    // The same two-step rule as the tracking strip: the first tap only arms.
+    expect(apiDeleteMock).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: "Übernehmen" }),
+    ).toHaveClass("is-armed");
+    await userEvent.click(screen.getByRole("button", { name: "Übernehmen" }));
+
+    await waitFor(() =>
+      expect(apiDeleteMock).toHaveBeenCalledWith("/api/game/42/device"),
+    );
+    expect(apiPutMock).toHaveBeenCalledWith(
+      SETUP_PATH,
+      { device_id: "device-1" },
+      { deviceId: "device-1" },
+    );
+    // This device holds the game now: the warning no longer applies.
+    expect(
+      screen.queryByText(/hat ein anderes Gerät bereits übernommen/),
+    ).toBeNull();
+
+    await clickStart();
+    await waitFor(() => expect(onStarted).toHaveBeenCalledWith(startedLog()));
+  });
+
+  it("keeps the warning and names the reason when the take-over is refused", async () => {
+    crew = completeCrew();
+    setup = {
+      ctResult: "home",
+      direction: "Nord",
+      fhPossession: "home",
+      locked_elsewhere: true,
+      can_release_lock: true,
+    };
+    apiDeleteMock.mockRejectedValue(
+      new ApiError(
+        403,
+        { detail: "Nur die Turnierleitung kann die Gerätesperre aufheben." },
+        "Nur die Turnierleitung kann die Gerätesperre aufheben.",
+      ),
+    );
+
+    await renderSetup();
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Spiel übernehmen" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Übernehmen" }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      "Nur die Turnierleitung kann die Gerätesperre aufheben.",
+    );
+    expect(
+      screen.getByText(/hat ein anderes Gerät bereits übernommen/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Spiel übernehmen" }),
+    ).toBeInTheDocument();
+  });
+
+  it("offers the take-over after a start met a lock the load did not show", async () => {
+    crew = completeCrew();
+    // The load saw a free game: the other device started it in between.
+    setup = { ctResult: "home", direction: "Nord", fhPossession: "home" };
+    const locked = "Dieses Spiel läuft auf einem anderen Gerät.";
+    setupFailure = new ApiError(
+      409,
+      { detail: locked, device_id: "device-2" },
+      locked,
+    );
+    let setupReads = 0;
+    const served = apiGetMock.getMockImplementation();
+    apiGetMock.mockImplementation(async (path: string, options?: unknown) => {
+      if (path === SETUP_PATH) {
+        setupReads += 1;
+        return setupReads === 1
+          ? setup
+          : { ...setup, locked_elsewhere: true, can_release_lock: true };
+      }
+      return served?.(path, options);
+    });
+
+    await renderSetup();
+    await chooseDefaults();
+
+    await clickStart();
+
+    expect(
+      await screen.findByRole("button", { name: "Spiel übernehmen" }),
+    ).toBeInTheDocument();
+    expect(setupReads).toBeGreaterThan(1);
+  });
+
+  it("offers no take-over to a user who may not release", async () => {
+    crew = completeCrew();
+    setup = {
+      ctResult: "home",
+      direction: "Nord",
+      fhPossession: "home",
+      locked_elsewhere: true,
+      can_release_lock: false,
+    };
+
+    await renderSetup();
+
+    expect(
+      await screen.findByText(/hat ein anderes Gerät bereits übernommen/),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Spiel übernehmen" }),
+    ).toBeNull();
+    expect(
+      screen.getByText("Die Turnierleitung kann die Gerätesperre aufheben."),
+    ).toBeInTheDocument();
   });
 });
 

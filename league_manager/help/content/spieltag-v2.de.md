@@ -216,8 +216,13 @@ stehen, wer ihn erfasst hat: **erfasst von X, gesendet von Y**.
 ## Zweites Gerät
 
 Das Spiel gehört dem Gerät, das es gestartet hat. Ein zweites Gerät öffnet es
-nur lesend und sagt dir auch, warum. Staff kann die Sperre freigeben, wenn ein
-Gerät verloren geht.
+nur lesend und sagt dir auch, warum. Die Turnierleitung kann das Spiel
+übernehmen – in der Vorbereitung und während des Spiels: **Spiel übernehmen**
+antippen, beim zweiten Tipp **Übernehmen** bestätigen. Danach schreibt nur noch
+dieses Gerät.
+
+Wird ein Spiel zurück auf **Geplant** gesetzt, ist die Sperre weg; es darf dann
+jedes Gerät starten.
 
 Nimmt ein anderes Gerät das Spiel, zeigt dein Gerät den offiziellen
 Spielstand. Eigene, noch nicht übertragene Einträge stehen darunter mit

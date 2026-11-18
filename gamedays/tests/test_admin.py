@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.test import TestCase, Client
+from django.contrib.messages.storage.fallback import FallbackStorage
+from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
 
-from gamedays.admin import GameresultAdmin, TeamAdmin
+from gamedays.admin import GameresultAdmin, GameinfoAdmin, TeamAdmin
 from gamedays.models import (
     Tournament,
     TournamentRow,
@@ -13,6 +14,7 @@ from gamedays.models import (
     GamedayDesignerState,
     Gameinfo,
     Gameresult,
+    GameSetup,
     Team,
 )
 from gamedays.tests.setup_factories.factories import (
@@ -20,6 +22,7 @@ from gamedays.tests.setup_factories.factories import (
     SeasonFactory,
     TeamFactory,
     GamedayFactory,
+    GameSetupFactory,
     GameinfoFactory,
     GameresultFactory,
     TournamentFactory,
@@ -349,3 +352,135 @@ class GameinfoAdminResavePropagationActionTests(TestCase):
 
         final_home = Gameresult.objects.get(gameinfo=self.final, isHome=True)
         self.assertEqual(final_home.team.name, "Rank 1 Gruppe 2")  # unchanged
+
+
+class GameSetupAdminTests(TestCase):
+    """The device lock must be findable and releasable from the admin.
+
+    The old bare ``admin.site.register(GameSetup)`` showed a list of numbers
+    ("9317", "9326") and nothing else: a staff member looking for the lock
+    after a lost phone had no way in and had to guess the row. The changelist
+    now names the game, and one action lifts the lock.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff_user = User.objects.create_superuser(
+            username="staffuser4", email="staff4@test.com", password="testpass123"
+        )
+        cls.gameday = GamedayFactory(name="Final 8 - Tag 2")
+        cls.game = GameinfoFactory(
+            gameday=cls.gameday,
+            scheduled="14:00",
+            field=3,
+            stage="Finalrunde",
+            standing="P1",
+            status="2. Halbzeit",
+        )
+        cls.home = TeamFactory(name="Wall")
+        cls.away = TeamFactory(name="Spatz")
+        GameresultFactory(gameinfo=cls.game, team=cls.home, isHome=True)
+        GameresultFactory(gameinfo=cls.game, team=cls.away, isHome=False)
+        cls.setup = GameSetupFactory(gameinfo=cls.game, device_id="6b23f2a3-lost")
+
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username="staffuser4", password="testpass123")
+
+    def test_changelist_names_the_game_and_its_device(self):
+        response = self.client.get("/admin/gamedays/gamesetup/")
+
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn("Final 8 - Tag 2", body)
+        self.assertIn("Finalrunde", body)
+        self.assertIn("6b23f2a3-lost", body)
+
+    def test_search_finds_a_setup_by_a_team_name(self):
+        other = GameinfoFactory(gameday=self.gameday, scheduled="16:00", field=1)
+        GameSetupFactory(gameinfo=other, device_id="unrelated-device")
+
+        response = self.client.get("/admin/gamedays/gamesetup/", {"q": "Spatz"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "6b23f2a3-lost")
+        self.assertNotContains(response, "unrelated-device")
+
+    def test_release_action_clears_the_lock(self):
+        response = self.client.post(
+            "/admin/gamedays/gamesetup/",
+            {
+                "action": "release_lock",
+                "_selected_action": [str(self.setup.pk)],
+                "index": 0,
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.setup.refresh_from_db()
+        self.assertEqual(self.setup.device_id, "")
+        self.assertIn("Gerätesperre", response.content.decode())
+
+    def test_release_action_says_when_there_was_nothing_to_release(self):
+        GameSetup.objects.filter(pk=self.setup.pk).update(device_id="")
+
+        response = self.client.post(
+            "/admin/gamedays/gamesetup/",
+            {
+                "action": "release_lock",
+                "_selected_action": [str(self.setup.pk)],
+                "index": 0,
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("frei", response.content.decode())
+
+
+class GameinfoResetReleasesDeviceLockTests(TestCase):
+    """A game put back to ``Geplant`` is nobody's game.
+
+    A reset kept ``GameSetup.device_id``, so the device that started it once
+    could start it again while every other device was refused with "läuft auf
+    einem anderen Gerät" — on the preparation screen, where no release exists.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff_user = User.objects.create_superuser(
+            username="staffuser5", email="staff5@test.com", password="testpass123"
+        )
+        cls.gameday = GamedayFactory(name="Reset Cup")
+
+    def setUp(self):
+        self.request = RequestFactory().post("/admin/gamedays/gameinfo/1/change/")
+        self.request.user = self.staff_user
+        # ``save_model`` may report the release; the admin's middleware is not
+        # in the request chain of a bare ``RequestFactory`` call.
+        setattr(self.request, "session", {})
+        self.request._messages = FallbackStorage(self.request)
+        self.admin = GameinfoAdmin(Gameinfo, admin.site)
+
+    def game(self, status):
+        game = GameinfoFactory(gameday=self.gameday, status=status)
+        return game, GameSetupFactory(gameinfo=game, device_id="desktop-device")
+
+    def test_setting_a_game_back_to_planned_releases_the_lock(self):
+        game, setup = self.game(status="2. Halbzeit")
+
+        game.status = "Geplant"
+        self.admin.save_model(self.request, game, form=None, change=True)
+
+        setup.refresh_from_db()
+        self.assertEqual(setup.device_id, "")
+
+    def test_saving_a_game_that_still_runs_keeps_the_lock(self):
+        game, setup = self.game(status="2. Halbzeit")
+
+        game.standing = "P1"
+        self.admin.save_model(self.request, game, form=None, change=True)
+
+        setup.refresh_from_db()
+        self.assertEqual(setup.device_id, "desktop-device")

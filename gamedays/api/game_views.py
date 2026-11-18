@@ -36,6 +36,7 @@ from gamedays.models import (
     Gameresult,
     TeamLog,
 )
+from gamedays.service.device_lock import release_device_lock, stored_device
 from gamedays.service.game_service import GameService
 from gamedays.service.gamelog import gameday_ref_now, serialize_events
 from gamedays.service.wrapper.gameinfo_wrapper import IllegalGameTransition
@@ -79,19 +80,6 @@ def _device_conflict(stored: str, incoming: str):
     return None
 
 
-def _stored_device(game_id) -> str:
-    # ``order_by("pk")`` + ``.first()``: historic duplicate setup rows (there
-    # is no unique constraint on gameinfo) must not turn a lock read into a
-    # MultipleObjectsReturned 500.
-    return (
-        GameSetup.objects.filter(gameinfo_id=game_id)
-        .order_by("pk")
-        .values_list("device_id", flat=True)
-        .first()
-        or ""
-    )
-
-
 def _requested_device(request: Request, data) -> str:
     """The device a write claims: the header first, then the body.
 
@@ -110,7 +98,7 @@ def _device_lock_response(request: Request, game_id, data=None):
     that another device holds. A missing device id is still allowed (old app).
     """
     return _device_conflict(
-        _stored_device(game_id),
+        stored_device(game_id),
         _requested_device(request, request.data if data is None else data),
     )
 
@@ -621,8 +609,7 @@ class GameDeviceLockAPIView(APIView):
         game_setup = GameSetup.objects.filter(gameinfo=game).order_by("pk").first()
         if game_setup is None:
             raise NotFound(detail=f"No game setup found for gameId {pk}")
-        game_setup.device_id = ""
-        game_setup.save(update_fields=["device_id"])
+        release_device_lock(pk)
         return Response(status=HTTPStatus.NO_CONTENT)
 
 

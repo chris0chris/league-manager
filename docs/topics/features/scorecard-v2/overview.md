@@ -233,6 +233,26 @@ after a confirmation it releases the lock (`DELETE /api/game/<id>/device`),
 claims the game for this device (`PUT …/setup` with `device_id`) and resumes the
 queue. Without the device header the setup body is unchanged (old app).
 
+Two dead ends the same feature had to close:
+
+- **The preparation screen** warned about the lock ("oder dieses Gerät das
+  Spiel übernimmt") but offered no such control; the start answered `409` and
+  left a read-only screen. The warning now carries the same two-tap
+  **Spiel übernehmen** when `can_release_lock` is true.
+- **A lock discovered by a write** (the open read failed or came from the
+  offline snapshot) showed the strip without the button, because the staff
+  right only travelled with that one read. Entering the `device` pause now asks
+  the setup once for `can_release_lock`, so the take-over appears either way.
+
+A game put **back to `Geplant`** is nobody's game: saving it in the admin
+releases `GameSetup.device_id` (`save_model`, message in the admin), because a
+reset that kept the id left the game startable for the old device only — every
+other device met "läuft auf einem anderen Gerät" on the preparation screen.
+For the same reason `GameSetup` has a real admin page: the changelist names
+game, gameday, stage, standing, status and the holding device, searches by
+team name, and one action (**Gerätesperre freigeben**) clears the lock of the
+selected games.
+
 What the backend had to grow (all additive):
 
 - `GET /api/game/<id>/roster` — jersey + surname per side, `[]` for a bracket

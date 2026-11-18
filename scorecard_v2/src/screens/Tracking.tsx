@@ -7,6 +7,7 @@ import {
   useSyncExternalStore,
 } from "react";
 
+import { apiGet } from "../api/client";
 import { RULES_PATH, type GameRules } from "../api/rules";
 import type {
   Game,
@@ -701,6 +702,12 @@ export default function TrackingScreen({
   const stopReason = pauseReason(status.paused);
   /** Staff may lift another device's lock ("Spiel übernehmen"). */
   const [canRelease, setCanRelease] = useState(false);
+  /**
+   * Whether the open read already answered the lock question. A pause that
+   * only the first *write* discovered (or an open that fell back to the cached
+   * setup) leaves it unset, and the strip would hide the staff take-over.
+   */
+  const lockRightsKnown = useRef(false);
 
 
   /**
@@ -810,6 +817,7 @@ export default function TrackingScreen({
       if (lock === null || !active) {
         return;
       }
+      lockRightsKnown.current = true;
       setCanRelease(lock.canRelease);
       if (lock.lockedElsewhere) {
         getRuntime().sync.pause("device", game.id);
@@ -819,6 +827,34 @@ export default function TrackingScreen({
       active = false;
     };
   }, [game.id]);
+
+  useEffect(() => {
+    // The queue paused on a `409` the open read never saw (a write found the
+    // lock, or the setup came from the cached copy). Ask the server once who
+    // may release it, so staff still get "Spiel übernehmen" instead of the
+    // dead-end hint "Die Turnierleitung kann die Gerätesperre aufheben".
+    if (status.paused !== "device" || lockRightsKnown.current) {
+      return;
+    }
+    lockRightsKnown.current = true;
+    let active = true;
+    void apiGet<GameSetup & LockAnswer>(`/api/game/${game.id}/setup`, {
+      deviceId: getDeviceId(),
+    })
+      .then((answer) => {
+        if (active) {
+          setCanRelease(lockFrom(answer)?.canRelease === true);
+        }
+      })
+      // Offline the strip keeps the hint: the attempt is retried on the next
+      // pause, which is a new effect run.
+      .catch(() => {
+        lockRightsKnown.current = false;
+      });
+    return () => {
+      active = false;
+    };
+  }, [game.id, status.paused]);
 
   useEffect(() => {
     let active = true;

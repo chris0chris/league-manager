@@ -2087,6 +2087,46 @@ describe("Tracking touchdown entry", () => {
     ).toBeInTheDocument();
   });
 
+  it("learns the staff rights when only the write meets the lock", async () => {
+    // The open read never answered (a flaky field connection, or a cached
+    // setup), so the screen cannot know yet whether this user may release the
+    // lock. The strip appeared without the button before — the same read-only
+    // banner, but no way out for staff.
+    let setupReads = 0;
+    apiGetMock.mockImplementation((path: string) => {
+      if (path === "/api/game/42/setup") {
+        setupReads += 1;
+        return setupReads === 1
+          ? Promise.reject(new TypeError("Failed to fetch"))
+          : Promise.resolve({
+              locked_elsewhere: true,
+              can_release_lock: true,
+            });
+      }
+      return Promise.resolve(ROSTER);
+    });
+    apiPostMock.mockRejectedValue(
+      new ApiError(
+        409,
+        { detail: "Dieses Spiel läuft auf einem anderen Gerät.", device_id: "d2" },
+        "Dieses Spiel läuft auf einem anderen Gerät.",
+      ),
+    );
+    renderTracking();
+    const user = userEvent.setup();
+
+    await openSheet(user, /^Touchdown Ravens$/);
+    await pickJersey(user, 23);
+    await user.click(screen.getByRole("button", { name: "Speichern" }));
+
+    expect(
+      await screen.findByRole("button", { name: "Spiel übernehmen" }),
+    ).toBeInTheDocument();
+    expect(apiGetMock).toHaveBeenCalledWith("/api/game/42/setup", {
+      deviceId: expect.any(String),
+    });
+  });
+
   it("disables the composer while a write is in flight", async () => {
     apiGetMock.mockResolvedValue(ROSTER);
     apiPostMock.mockReturnValue(new Promise(() => undefined));

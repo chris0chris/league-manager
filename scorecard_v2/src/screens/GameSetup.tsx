@@ -25,6 +25,7 @@ import DirectionText, {
 import Screen from "../components/Screen";
 import PersonPicker from "../components/PersonPicker";
 import JerseyPicker from "../components/JerseyPicker";
+import { errorMessage } from "../components/sheets/errors";
 import StartConfirmation, {
   startBlockers,
   type StartCrewLine,
@@ -36,8 +37,9 @@ import { getDeviceId } from "../device";
 import { rememberQuarterback } from "../app/quarterback";
 import { cachedGet, cachedGetMeta, snapshotKey } from "../offline/snapshot";
 import { newOpId } from "../session/ids";
-import { lockFrom } from "../session/lock";
+import { lockFrom, takeOver, type LockAnswer } from "../session/lock";
 import { formatGameTime } from "./GameList";
+import { useArmed } from "./useArmed";
 
 interface GameSetupScreenProps {
   game: Game;
@@ -372,6 +374,17 @@ export default function GameSetupScreen({
    * `locked_elsewhere`, never from a stored payload.
    */
   const [lockedElsewhere, setLockedElsewhere] = useState(false);
+  /**
+   * Staff may lift the lock (`DELETE …/device`). The server answers this with
+   * the same read that reports `locked_elsewhere`; without it the warning
+   * would promise a take-over the device cannot perform.
+   */
+  const [canRelease, setCanRelease] = useState(false);
+  const [takingOver, setTakingOver] = useState(false);
+  const [takeOverError, setTakeOverError] = useState<string | null>(null);
+  // Taking a game over locks the other device out: the button asks once more.
+  const { armed, arm, disarm } = useArmed<"takeover">();
+  const confirming = armed === "takeover";
 
   const [toss, setToss] = useState<Side | null>(null);
   const [possession, setPossession] = useState<Side | null>(null);
@@ -442,6 +455,7 @@ export default function GameSetupScreen({
       // as the snapshot, so only a fresh answer may raise the warning.
       const lock = cachedSetup.updatedAt === null ? lockFrom(setup) : null;
       setLockedElsewhere(saved && lock?.lockedElsewhere === true);
+      setCanRelease(lock?.canRelease === true);
       if (saved) {
         setToss(normaliseToss(setup.ctResult, home, away));
         setPossession(normaliseSide(setup.fhPossession, home, away));
@@ -736,6 +750,26 @@ export default function GameSetupScreen({
     return taken;
   };
 
+  /**
+   * Re-read the live lock after a start was refused for it. The read at load
+   * can predate the other device's start, and only a fresh answer carries
+   * `can_release_lock` — without it the warning shows no take-over.
+   */
+  const refreshLock = async (): Promise<void> => {
+    try {
+      const answer = await apiGet<GameSetupPayload & LockAnswer>(setupPath, {
+        deviceId: getDeviceId(),
+      });
+      const lock = lockFrom(answer);
+      if (lock !== null) {
+        setLockedElsewhere(lock.lockedElsewhere);
+        setCanRelease(lock.canRelease);
+      }
+    } catch {
+      // Offline: the plain "läuft auf einem anderen Gerät" message stands.
+    }
+  };
+
   const runStart = async (force = false): Promise<void> => {
     if (inFlight.current || loading || finished) {
       return;
@@ -825,7 +859,40 @@ export default function GameSetupScreen({
       setError(described.message);
       if (described.readOnly) {
         setReadOnly(true);
+        void refreshLock();
       }
+    }
+  };
+
+  /**
+   * Staff take-over before kickoff: lift the lock, then claim the game for
+   * this device (the first id written after a release wins). The start itself
+   * stays a separate, confirmed step — this only makes it possible.
+   */
+  const runTakeOver = async (): Promise<void> => {
+    if (inFlight.current) {
+      return;
+    }
+    inFlight.current = true;
+    setTakingOver(true);
+    setTakeOverError(null);
+    try {
+      await takeOver(id);
+      setLockedElsewhere(false);
+      setCanRelease(false);
+      setReadOnly(false);
+      setError(null);
+    } catch (takeOverFailure) {
+      setTakeOverError(
+        errorMessage(
+          takeOverFailure,
+          "Übernehmen hat nicht geklappt. Bitte erneut versuchen.",
+        ),
+      );
+    } finally {
+      inFlight.current = false;
+      setTakingOver(false);
+      disarm();
     }
   };
 
@@ -978,6 +1045,45 @@ export default function GameSetupScreen({
                 von hier werden abgelehnt, bis die Turnierleitung die Sperre
                 freigibt – oder dieses Gerät das Spiel übernimmt.
               </p>
+              {confirming ? (
+                <p className="devicewarn-sub">
+                  Das andere Gerät kann danach nicht mehr schreiben. Nur
+                  übernehmen, wenn es ausgefallen ist.
+                </p>
+              ) : !canRelease ? (
+                <p className="devicewarn-sub">
+                  Die Turnierleitung kann die Gerätesperre aufheben.
+                </p>
+              ) : null}
+              {takeOverError === null ? null : (
+                <p className="devicewarn-sub" role="alert">
+                  {takeOverError}
+                </p>
+              )}
+              {canRelease ? (
+                <button
+                  className={
+                    confirming
+                      ? "devicewarn-btn is-armed"
+                      : "devicewarn-btn"
+                  }
+                  disabled={takingOver}
+                  onClick={() => {
+                    if (!confirming) {
+                      arm("takeover");
+                      return;
+                    }
+                    void runTakeOver();
+                  }}
+                  type="button"
+                >
+                  {takingOver
+                    ? "Übernehmen …"
+                    : confirming
+                      ? "Übernehmen"
+                      : "Spiel übernehmen"}
+                </button>
+              ) : null}
             </div>
           ) : null}
 

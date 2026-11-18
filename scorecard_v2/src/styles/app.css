@@ -1281,6 +1281,8 @@ button.game-row:active {
 
 /* A warning, not an error: the game is fine, another device holds it. */
 .devicewarn {
+  display: grid;
+  gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   font-size: var(--fs-md);
   line-height: 1.5;
@@ -1288,6 +1290,34 @@ button.game-row:active {
   background: color-mix(in srgb, var(--warning) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
   border-radius: var(--radius-lg);
+}
+
+.devicewarn p {
+  margin: 0;
+}
+
+/* The second line (the confirmation or the "turnierleitung" hint) is quieter
+   than the headline, and the take-over button is a real target on the phone. */
+.devicewarn-sub {
+  font-size: var(--fs-sm);
+  color: var(--ink-muted);
+}
+
+.devicewarn-btn {
+  justify-self: start;
+  min-height: var(--touch);
+  padding: 0 var(--space-4);
+  font-weight: 700;
+  color: var(--on-action);
+  background: var(--action);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.devicewarn-btn.is-armed {
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 12%, var(--surface));
+  box-shadow: inset 0 0 0 1px var(--warning);
 }
 
 .setupfoot {
