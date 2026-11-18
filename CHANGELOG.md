@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.16.2](https://github.com/dachrisch/leaguesphere/compare/v5.16.1...v5.16.2) (2026-11-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mysqlclient to v2.3.2 ([#2439](https://github.com/dachrisch/leaguesphere/issues/2439)) ([fafa8ea](https://github.com/dachrisch/leaguesphere/commit/fafa8ea1c552a7749b793fa1587c9af24d763944))
+
 ## [5.16.1](https://github.com/dachrisch/leaguesphere/compare/v5.16.0...v5.16.1) (2026-11-18)
 
 
