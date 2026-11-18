@@ -109,7 +109,13 @@ services:
       start_period: 90s
 
   db:
-    image: mariadb:latest
+    # Pinned to the MINOR, the patch floats (D1): `mariadb:13.0` lets
+    # watchtower's `db` scope deliver 13.0.x fixes in the daily 06:00 window
+    # with health-gated rollback (see the scope label below), while a
+    # 13.x -> 14.x move is a reviewed PR. `latest` re-pointed across minors with
+    # no PR at all - that is how 13.0.2 arrived unannounced. Plan:
+    # infrastructure `docs/plans/2026-11-17_db-tier-topology.md`, Phase 0.
+    image: mariadb:13.0
     container_name: ${COMPOSE_PROJECT_NAME}.db
     restart: unless-stopped
     # Ceiling (was unlimited; 73M resident + 233M in swap measured 2026-10-29).
@@ -141,7 +147,13 @@ services:
     labels:
       - traefik.enable=false
       - io.portainer.accesscontrol.teams=leaguesphere
-      - com.centurylinklabs.watchtower.scope=prod
+      # Database server: the `db` watchtower scope (D15), NOT `prod`. Patches
+      # then arrive in the single daily 06:00 window, health-check gated with
+      # automatic rollback, instead of the 2-hourly prod poll that could restart
+      # this server mid-dump. Accepted consequence: the high tier restarts for
+      # ~1-2 min when a 13.0 patch lands. Scope `db` also removes this container
+      # from watchtower-prod's set, so nothing is updated twice.
+      - com.centurylinklabs.watchtower.scope=db
 
   # Loopback-only TCP endpoint for the shared dbeaver_tunnel SSH account.
   # Deliberately a separate service: adding `ports:` to `db` recreates the prod
@@ -174,7 +186,10 @@ services:
   # auto-swapping a container with this privilege is a supply-chain hole.
   # It talks to the app only through rows in the application schema.
   db-access:
-    image: mariadb:latest
+    # Client, not a server: it runs the mariadb CLI against `db`, so it carries
+    # the same minor pin (D1) - a floating `latest` here would drift the client
+    # across minors independently of the server it talks to.
+    image: mariadb:13.0
     container_name: ${COMPOSE_PROJECT_NAME}.db-access
     restart: unless-stopped
     entrypoint: ["/bin/sh", "/opt/dba/tick.sh"]

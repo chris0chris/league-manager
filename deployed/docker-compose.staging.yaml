@@ -1,7 +1,12 @@
 name: ${SERVICE_NAME}
 services:
   mysql:
-    image: mariadb:latest
+    # Pinned to the MINOR, the patch floats (D1, Phase 0 of the infrastructure
+    # db-tier plan): same line as prod's `db`, so a restored prod copy always
+    # lands on a server of the same version. Deliberately NOT in the
+    # watchtower `db` scope yet: staging/demo are disposable and move into the
+    # `db-nonprod` tier in a later package, which brings its own scope.
+    image: mariadb:13.0
     container_name: ${COMPOSE_PROJECT_NAME}.mysql
     restart: unless-stopped
     # Ceiling (was unlimited, 146M of it sat in swap on 2026-10-29). The dataset
@@ -58,7 +63,9 @@ services:
   # temporary accounts for this stack. No socat of its own - db-tunnel above
   # is the one the SSH tunnel lands on.
   db-access:
-    image: mariadb:latest
+    # Client of `mysql`, pinned to the same minor (D1) so the CLI never drifts
+    # across minors independently of the server.
+    image: mariadb:13.0
     container_name: ${COMPOSE_PROJECT_NAME}.db-access
     restart: unless-stopped
     entrypoint: ["/bin/sh", "/opt/dba/tick.sh"]

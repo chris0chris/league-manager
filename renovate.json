@@ -82,6 +82,20 @@
       "automerge": true,
       "semanticCommitType": "fix",
       "semanticCommitScope": "deps"
+    },
+    {
+      "description": "Database patches belong to watchtower, not Renovate (db-tier plan, D1/D15): a database tag names the MINOR and floats the patch (mariadb:13.0), so Renovate must never rewrite it to a concrete 13.0.x - that would fence the server off from every later fix. Patches arrive through the watchtower `db` scope in the daily 06:00 window. Placed LAST on purpose: later packageRules win, and the repo's global 'majors automerge' rule above would otherwise re-enable them.",
+      "matchPackageNames": ["mariadb", "mongo", "postgres"],
+      "matchUpdateTypes": ["patch"],
+      "enabled": false
+    },
+    {
+      "description": "Database minor/major bumps are a reviewed step (D1/D15): never automerged (this overrides the global 'majors automerge' rule above), gated behind the dependency dashboard, grouped so one approval is one reviewed change. A 13.x -> 14.x move also needs the datadir/backup evidence the db-tier plan asks for.",
+      "matchPackageNames": ["mariadb", "mongo", "postgres"],
+      "matchUpdateTypes": ["minor", "major"],
+      "automerge": false,
+      "dependencyDashboardApproval": true,
+      "groupName": "database minor/major"
     }
   ]
 }

@@ -1,7 +1,12 @@
 name: ${SERVICE_NAME}
 services:
   mysql:
-    image: mariadb:latest
+    # Pinned to the MINOR, the patch floats (D1, Phase 0 of the infrastructure
+    # db-tier plan): the nightly reset rebuilds this schema from the prod dump,
+    # so the server must be on prod's line. Deliberately NOT in the watchtower
+    # `db` scope yet - demo is disposable and moves into the `db-nonprod` tier
+    # in a later package, which brings its own scope.
+    image: mariadb:13.0
     container_name: ${COMPOSE_PROJECT_NAME}.mysql
     restart: unless-stopped
     # Ceiling (was unlimited). Small demo dataset, so 512m matches prod/staging.
