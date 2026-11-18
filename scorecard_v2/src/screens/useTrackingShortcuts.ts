@@ -1,10 +1,23 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 
+import type { PlayResult, PlayType } from "../components/sheets/PlaySheet";
+
 interface TrackingShortcutHandlers {
   onTouchdown: () => void;
-  /** Open the play-by-play entry (Pass/Run/Sack). */
-  onPlay: () => void;
-  onAction: (index: number) => void;
+  /** Open the Spielzug sheet (keys S). */
+  onSpielzug: () => void;
+  /** A play entry straight from its key: 1–4, P for a pass. */
+  onPlay: (type: PlayType, result?: PlayResult) => void;
+  /** Strafe (5). */
+  onPenalty: () => void;
+  /** Spielzeit (6). */
+  onTime: () => void;
+  /** 1st Down (8). */
+  onFirstDown: () => void;
+  /** Turnover (9). */
+  onTurnover: () => void;
+  /** Safety (0). */
+  onSafety: () => void;
   onSwitchPossession: () => void;
   onUndo: () => void;
   readOnly: boolean;
@@ -21,6 +34,12 @@ function editing(element: Element | null): boolean {
 /**
  * Desktop keys for the tracking cockpit; buttons remain the accessible path.
  *
+ * 1–4 still open the play wizard on Pass/Run/Sack/Interception without the
+ * Spielzug sheet, because that is the entry of almost every snap; S opens the
+ * sheet for everything else. 5, 6, 8, 9 and 0 keep the tiles they always had —
+ * only the 7 that opened the old Mehr menu is gone, since the Spielzug sheet
+ * replaced it.
+ *
  * The listener stays subscribed and reads the handlers of the latest render
  * from a ref, updated during the commit. Re-subscribing with each render's
  * handlers left the previous listener live until the effect ran, so a key
@@ -29,8 +48,13 @@ function editing(element: Element | null): boolean {
  */
 export function useTrackingShortcuts({
   onTouchdown,
+  onSpielzug,
   onPlay,
-  onAction,
+  onPenalty,
+  onTime,
+  onFirstDown,
+  onTurnover,
+  onSafety,
   onSwitchPossession,
   onUndo,
   readOnly,
@@ -38,16 +62,26 @@ export function useTrackingShortcuts({
 }: TrackingShortcutHandlers): void {
   const handlers = useRef({
     onTouchdown,
+    onSpielzug,
     onPlay,
-    onAction,
+    onPenalty,
+    onTime,
+    onFirstDown,
+    onTurnover,
+    onSafety,
     onSwitchPossession,
     onUndo,
   });
   useLayoutEffect(() => {
     handlers.current = {
       onTouchdown,
+      onSpielzug,
       onPlay,
-      onAction,
+      onPenalty,
+      onTime,
+      onFirstDown,
+      onTurnover,
+      onSafety,
       onSwitchPossession,
       onUndo,
     };
@@ -77,8 +111,18 @@ export function useTrackingShortcuts({
         return;
       }
 
-      const { onTouchdown, onPlay, onAction, onSwitchPossession, onUndo } =
-        handlers.current;
+      const {
+        onTouchdown,
+        onSpielzug,
+        onPlay,
+        onPenalty,
+        onTime,
+        onFirstDown,
+        onTurnover,
+        onSafety,
+        onSwitchPossession,
+        onUndo,
+      } = handlers.current;
       const key = event.key.toLowerCase();
       let handled = true;
       if ((event.ctrlKey || event.metaKey) && key === "z" && !event.shiftKey) {
@@ -87,15 +131,30 @@ export function useTrackingShortcuts({
         return;
       } else if (key === "t") {
         onTouchdown();
+      } else if (key === "s") {
+        onSpielzug();
       } else if (key === "p") {
-        onPlay();
+        onPlay("pass");
       } else if (key === "b") {
         onSwitchPossession();
-      } else if (/^[1-9]$/.test(key)) {
-        onAction(Number(key) - 1);
+      } else if (key === "1") {
+        onPlay("pass");
+      } else if (key === "2") {
+        onPlay("run");
+      } else if (key === "3") {
+        onPlay("sack");
+      } else if (key === "4") {
+        onPlay("pass", "interception");
+      } else if (key === "5") {
+        onPenalty();
+      } else if (key === "6") {
+        onTime();
+      } else if (key === "8") {
+        onFirstDown();
+      } else if (key === "9") {
+        onTurnover();
       } else if (key === "0") {
-        // The tenth tile (Safety) sits after the digits 1–9.
-        onAction(9);
+        onSafety();
       } else {
         handled = false;
       }

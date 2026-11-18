@@ -25,9 +25,9 @@ React/TypeScript field-entry app. Run `npm ci`, then `npm run test:run`,
 - `Sheet wide` (the penalty form) opens ~960px wide in two columns from
   `1280px`; every other dialog stays 680px.
 - At `1280px`, Tracking adds the Spielinfo column and moves the log to the
-  right. Fine-pointer desktops also show keyboard hints: **T**, **1–8**, **B**
-  and **Ctrl/Cmd+Z**. `useTrackingShortcuts` guards dialogs, form fields and
-  read-only games.
+  right. Fine-pointer desktops also show keyboard hints: **T**, **S**, **1–6**,
+  **8–0**, **B** and **Ctrl/Cmd+Z**. `useTrackingShortcuts` guards dialogs, form
+  fields and read-only games.
 - The action tiles keep their own height (`--action-tile`, 104px / 116px) and
   only shrink on short windows; the free height of a tall screen stays below
   the controls instead of stretching them.

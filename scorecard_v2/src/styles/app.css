@@ -2384,6 +2384,53 @@ button.game-row:active {
   height: 18px;
 }
 
+/* Spielzug: one large tile for the snap's entry, spanning the grid like the
+   touchdown above it. Pass/Run/Sack/Interception and the entries the old
+   **Mehr** menu held sit one tap deeper, in its sheet. Neutral, so it never
+   competes with the team-coloured touchdown. */
+.tracking .action.spielzug {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  gap: var(--space-2);
+  min-height: 64px;
+  padding: 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  background: var(--surface);
+  border: 2px solid var(--line-strong);
+}
+
+.tracking .action.spielzug .action-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* The Spielzug sheet's entries: two across on a phone, as many as fit on a
+   desktop sheet. */
+.spielzuggrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+@media (min-width: 900px) {
+  .spielzuggrid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
+
+/* The number that picks a tile from the keyboard: only a device with a
+   keyboard shows it, as the board's own hints do. */
+.spielzugkey {
+  display: none;
+  margin-top: var(--space-1);
+  font-family: ui-monospace, monospace;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--muted);
+}
+
 .actions .halfbtn {
   min-height: 40px;
 }
@@ -4937,6 +4984,11 @@ button.syncbadge {
     font-size: 24px;
   }
 
+  .tracking .action.spielzug {
+    min-height: var(--touch);
+    font-size: var(--fs-lg);
+  }
+
   .tracking .tracking-end {
     --end-button: 48px;
   }
@@ -4952,6 +5004,10 @@ button.syncbadge {
   .tracking .playbtn,
   .tracking .possbtn {
     position: relative;
+  }
+
+  .spielzugkey {
+    display: block;
   }
 
   .tracking .shortcut-hint {
@@ -5455,6 +5511,11 @@ button.syncbadge {
   .tracking .playbtn,
   .tracking .action {
     min-height: var(--touch);
+  }
+
+  .tracking .action.spielzug {
+    min-height: 56px;
+    font-size: var(--fs-lg);
   }
 
   .tracking .actions {

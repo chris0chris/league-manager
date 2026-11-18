@@ -29,16 +29,16 @@ wie die bisherige Scorecard
    **Süd** (die Seitenlinie verläuft Ost–West); der Pfeil zeigt auf die
    Endzone, die angegriffen wird.
 3. Erfasse im laufenden Spiel (oben stehen Feld und Runde) jeden Spielzug
-   über die Kacheln **Pass**, **Run** oder **Sack** – der Assistent fragt in
-   dieser Reihenfolge: **Spielzug** → **Ergebnis** → **Quarterback und
-   Trikotnummer** (ein Schritt) → **Defense** → **Feldposition** (zuletzt).
-   Übersprungene Schritte (kein QB beim Lauf, kein Tackle beim Sack, kein
-   Tackler beim Touchdown) fallen weg. Im Schritt **Feldposition** trägst du
-   den Raumgewinn als **Yards** oder über die **Feldposition** (A/B + 0–25)
-   ein; darunter steht die Vorschau, z. B. **2nd & M · A19** oder bei einem
-   scheiternden vierten Versuch **Turnover on downs**. Die Vorschau ist grün
-   hinterlegt wie das Ergebnis beim Münzwurf – sie zeigt nur, was der Eintrag
-   bewirkt.
+   über die Kachel **Spielzug** und dort **Pass**, **Run** oder **Sack** – der
+   Assistent fragt in dieser Reihenfolge: **Spielzug** → **Ergebnis** →
+   **Quarterback und Trikotnummer** (ein Schritt) → **Defense** →
+   **Feldposition** (zuletzt). Übersprungene Schritte (kein QB beim Lauf,
+   kein Tackle beim Sack, kein Tackler beim Touchdown) fallen weg. Im Schritt
+   **Feldposition** trägst du den Raumgewinn als **Yards** oder über die
+   **Feldposition** (A/B + 0–25) ein; darunter steht die Vorschau, z. B.
+   **2nd & M · A19** oder bei einem scheiternden vierten Versuch **Turnover
+   on downs**. Die Vorschau ist grün hinterlegt wie das Ergebnis beim
+   Münzwurf – sie zeigt nur, was der Eintrag bewirkt.
    **Touchdown** trägt die Distanz bis zur Endzone
    ein und blendet den Verlust-Schalter aus; **Safety** (bei Run, Sack und
    Pass) trägt den Weg bis zur eigenen Endzone ein.
@@ -56,9 +56,11 @@ wie die bisherige Scorecard
    den Ball ab und schreibt eine eigene **Turnover**-Zeile in den
    Spielverlauf.
 
-   **Mehr** öffnet die übrigen Einträge: **Turnover**, **1st Down**,
-   **Safety**, **Overtime**, **Challenge**, **Feldposition** und
-   **Touchdown (Kurzform)** für ein Spiel ohne Spielzug-Erfassung. Die
+   **Spielzug** sammelt die Einträge zum Spielzug: **Pass**, **Run**, **Sack**
+   und **Interception** öffnen den Assistenten; darunter stehen **Touchdown
+   (Kurzform)** für ein Spiel ohne Spielzug-Erfassung, **Turnover**, **1st
+   Down**, **Safety** und **Challenge**. Die **Spielphase** darunter bietet
+   **Overtime** und **Feldposition**. Die
    **Feldposition** setzt A/B + 0–25 und hält über Reloads, weil sie als
    Eintrag im Spielverlauf steht; sie setzt auch **Down** (1–4) und **Line to
    gain** (**M** oder **G**), wenn du sie von Hand korrigierst. **Challenge**
@@ -93,7 +95,7 @@ wie die bisherige Scorecard
    **1st Down** und **Turnover** werden sofort gespeichert; bei **1st Down**
    trägst du die Trikotnummer nach, wenn du die Kachel innerhalb von 10
    Sekunden noch einmal tippst (**Nr. ergänzen**). Eine **Interception** läuft
-   über den Spielzug-Assistenten (**Pass** → **Interception**).
+   über **Spielzug** → **Interception**.
 
    Bei **Strafe** stehen die fünf häufigsten oben, der Rest alphabetisch.
    **Yardage** und **Nächster Versuch** (Wiederholung, First Down, Loss of
@@ -160,9 +162,10 @@ Auf Tablets im Querformat steht der Spielverlauf neben den Eingaben. Die
 Spieleliste zeigt bei mehreren Feldern einen Feldplan mit gemeinsamen
 Anstoßzeiten. Auf dem Desktop kommen Spielinfo und Halbzeitenstände hinzu.
 
-Dort kannst du mit **T** einen Touchdown öffnen, mit **P** einen Spielzug
-(Pass), mit **1–4** Pass/Run/Sack/Interception, mit **5** die Strafe, mit
-**6** die Spielzeit und mit **7** **Mehr** öffnen; **8–0** lösen 1st Down,
+Dort kannst du mit **T** einen Touchdown öffnen, mit **S** die Kachel
+**Spielzug**; darin wählen **1–0** die Einträge. **P** öffnet einen Pass auch
+ohne die Kachel, **1–4** Pass/Run/Sack/Interception, mit **5** die Strafe, mit
+**6** die Spielzeit; **8–0** lösen 1st Down,
 Turnover und Safety aus. Mit **B** wechselt der Ballbesitz, mit **Strg+Z**
 (Mac: **Cmd+Z**) nimmst du den letzten Eintrag zurück. Die Tastenkürzel sind deaktiviert, solange ein
 Dialog oder ein Eingabefeld aktiv ist oder das Spiel nur gelesen werden darf.

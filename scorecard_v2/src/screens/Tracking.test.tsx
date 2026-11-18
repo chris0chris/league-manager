@@ -1572,12 +1572,14 @@ async function openSheet(
   return screen.findByRole("dialog");
 }
 
-/** The board's play tile opens the wizard on that type. */
+/** The Spielzug tile opens the sheet, and its play tile opens the wizard. */
 async function openPlay(
   user: ReturnType<typeof userEvent.setup>,
   name: "Pass" | "Run" | "Sack" | "Interception",
 ): Promise<HTMLElement> {
-  await user.click(screen.getByRole("button", { name }));
+  await user.click(screen.getByRole("button", { name: "Spielzug" }));
+  const menu = await screen.findByRole("dialog", { name: "Spielzug" });
+  await user.click(within(menu).getByRole("button", { name }));
   return screen.findByRole("dialog", { name: "Spielzug · Ravens" });
 }
 
@@ -1959,9 +1961,9 @@ describe("Tracking challenge", () => {
     renderTracking();
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("button", { name: "Mehr" }));
+    await user.click(screen.getByRole("button", { name: "Spielzug" }));
     await user.click(
-      within(screen.getByRole("dialog", { name: "Mehr" })).getByRole(
+      within(screen.getByRole("dialog", { name: "Spielzug" })).getByRole(
         "button",
         { name: "Challenge" },
       ),
@@ -2383,9 +2385,9 @@ describe("Tracking wide layout", () => {
     ).not.toBeNull();
 
     const actions = screen.getByRole("region", { name: "Einträge" });
-    // the four play tiles, penalty, Spielzeit, Auszeit, Mehr and the
-    // short-form entries
-    expect(actions.querySelectorAll(".action-grid > .action")).toHaveLength(12);
+    // the large Spielzug tile, penalty, Spielzeit, Auszeit and the short-form
+    // entries — Pass/Run/Sack/Interception and the old Mehr menu live in it
+    expect(actions.querySelectorAll(".action-grid > .action")).toHaveLength(8);
     const end = screen.getByRole("group", { name: "Spielabschluss" });
     expect(end).toHaveClass("tracking-end");
     expect(within(end).getByRole("button", { name: "Halbzeit" })).toBeInTheDocument();
@@ -2489,7 +2491,7 @@ describe("Tracking wide layout", () => {
         document.querySelectorAll(".action-grid > .action > kbd"),
         (hint) => hint.getAttribute("data-key"),
       ),
-    ).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]);
+    ).toEqual(["S", "5", "6", "8", "9", "0"]);
     for (const name of ["Ravens", "Wolves"]) {
       expect(
         screen
@@ -2520,7 +2522,7 @@ describe("Tracking wide layout", () => {
     await waitFor(() => expect(sentPossessions()).toEqual(["away"]));
   });
 
-  it("starts overtime with the 7 key", async () => {
+  it("starts overtime with the S key and its sheet tile", async () => {
     vi.stubGlobal(
       "matchMedia",
       vi.fn((query: string) => ({
@@ -2532,9 +2534,9 @@ describe("Tracking wide layout", () => {
     answerAppend(makeLog({ inPossession: "Ravens" }));
     renderTracking();
 
-    fireEvent.keyDown(window, { key: "7" });
-    // Mehr opens; the Overtime row starts the period.
-    const menu = await screen.findByRole("dialog", { name: "Mehr" });
+    fireEvent.keyDown(window, { key: "s" });
+    // Spielzug opens; the Overtime tile starts the period.
+    const menu = await screen.findByRole("dialog", { name: "Spielzug" });
     fireEvent.click(within(menu).getByRole("button", { name: "Overtime" }));
 
     await waitFor(() =>
@@ -2547,7 +2549,7 @@ describe("Tracking wide layout", () => {
     );
   });
 
-  it("opens the +1 XP step with the 7 key in overtime", async () => {
+  it("opens the +1 XP step from the Spielzug tile in overtime", async () => {
     vi.stubGlobal(
       "matchMedia",
       vi.fn((query: string) => ({
@@ -2565,8 +2567,8 @@ describe("Tracking wide layout", () => {
     answerAppend(otLog);
     renderTracking({ log: otLog });
 
-    fireEvent.keyDown(window, { key: "7" });
-    const menu = await screen.findByRole("dialog", { name: "Mehr" });
+    fireEvent.keyDown(window, { key: "s" });
+    const menu = await screen.findByRole("dialog", { name: "Spielzug" });
     fireEvent.click(within(menu).getByRole("button", { name: "Overtime" }));
 
     expect(
@@ -2988,6 +2990,7 @@ describe("Tracking composer state", () => {
     renderTracking({ game: { ...GAME, status: "beendet" } });
 
     expect(screen.getByRole("button", { name: /^Touchdown Ravens$/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Spielzug" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "1st Down" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Strafe" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Safety" })).toBeDisabled();
@@ -3002,6 +3005,7 @@ describe("Tracking composer state", () => {
     renderTracking({ log: makeLog({ inPossession: null }) });
 
     expect(screen.getByRole("button", { name: /^Touchdown$/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Spielzug" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Turnover" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Strafe" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Safety" })).toBeDisabled();
@@ -4419,9 +4423,9 @@ describe("Tracking header and action icons", () => {
     expect(touchdown).toHaveTextContent(/^Touchdown Ravens$/);
 
     for (const name of [
+      "Spielzug",
       "1st Down",
       "Turnover",
-      "Interception",
       "Spielzeit",
       "Strafe",
       "Safety",
@@ -5201,7 +5205,7 @@ describe("Tracking key shortcuts", () => {
       ["4", "Spielzug · Ravens"],
       ["5", "Strafe"],
       ["6", "Spielzeit"],
-      ["7", "Mehr"],
+      ["s", "Spielzug"],
       ["0", "Safety"],
     ] as const) {
       fireEvent.keyDown(window, { key });
@@ -5209,6 +5213,16 @@ describe("Tracking key shortcuts", () => {
       fireEvent.click(within(dialog).getByRole("button", { name: "Schließen" }));
       await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     }
+  });
+
+  it("has no key left for the removed Mehr menu", async () => {
+    desktopKeys();
+    routeGets();
+    renderTracking();
+
+    fireEvent.keyDown(window, { key: "7" });
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
   it("records a turnover from the 9 key", async () => {
@@ -5235,22 +5249,67 @@ describe("Tracking key shortcuts", () => {
   });
 });
 
-describe("Tracking Mehr menu", () => {
+describe("Tracking Spielzug sheet", () => {
+  it("replaces the play tiles and the Mehr menu with one button", () => {
+    renderTracking();
+
+    expect(screen.getByRole("button", { name: "Spielzug" })).toBeEnabled();
+    for (const gone of ["Pass", "Run", "Sack", "Interception", "Mehr"]) {
+      expect(screen.queryByRole("button", { name: gone })).toBeNull();
+    }
+  });
+
+  it("keeps every entry of the old Mehr menu reachable", async () => {
+    renderTracking();
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("button", { name: "Spielzug" }));
+
+    const menu = screen.getByRole("dialog", { name: "Spielzug" });
+    for (const label of [
+      "Pass",
+      "Run",
+      "Sack",
+      "Interception",
+      "Touchdown (Kurzform)",
+      "Turnover",
+      "1st Down",
+      "Safety",
+      "Overtime",
+      "Challenge",
+      "Feldposition",
+    ]) {
+      expect(within(menu).getByRole("button", { name: label })).toBeEnabled();
+    }
+    expect(
+      within(menu).getByRole("heading", { name: "Spielphase" }),
+    ).toBeInTheDocument();
+  });
+
+  it("disables the sheet while a write is in flight", async () => {
+    renderTracking({ game: { ...GAME, status: "beendet" } });
+
+    const spielzug = screen.getByRole("button", { name: "Spielzug" });
+    expect(spielzug).toBeDisabled();
+  });
+
   it.each([
+    ["Pass", "Spielzug · Ravens"],
     ["Turnover", "Turnover"],
     ["1st Down", "First Down"],
     ["Safety", "Safety"],
     ["Feldposition", "Feldposition · Ravens"],
     ["Touchdown (Kurzform)", "Wer hat gepunktet?"],
-  ])("opens %s", async (item, title) => {
+    ["Challenge", "Challenge · Ravens"],
+  ])("opens %s from the sheet", async (item, title) => {
     apiGetMock.mockResolvedValue(ROSTER);
     answerAppend(makeLog({ inPossession: "Ravens" }));
     renderTracking();
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("button", { name: "Mehr" }));
+    await user.click(screen.getByRole("button", { name: "Spielzug" }));
     await user.click(
-      within(screen.getByRole("dialog", { name: "Mehr" })).getByRole(
+      within(screen.getByRole("dialog", { name: "Spielzug" })).getByRole(
         "button",
         { name: item },
       ),

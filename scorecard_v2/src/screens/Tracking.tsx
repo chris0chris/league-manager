@@ -5,7 +5,6 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
-  type ComponentType,
 } from "react";
 
 import { RULES_PATH, type GameRules } from "../api/rules";
@@ -61,7 +60,6 @@ import {
   Clock,
   Flag,
   Football,
-  Interception,
   Pause,
   Play,
   PlusCircle,
@@ -69,12 +67,11 @@ import {
   Stopwatch,
   SwapArrows,
   User,
-  type IconProps,
 } from "../components/icons";
 import MoreSheet, { type MoreMode } from "../components/sheets/MoreSheet";
-import MoreMenuSheet, {
-  type MorePick,
-} from "../components/sheets/MoreMenuSheet";
+import SpielzugSheet, {
+  type SpielzugPick,
+} from "../components/sheets/SpielzugSheet";
 import PenaltySheet, {
   type UnsportsmanlikeRecord,
   unsportsmanlikeRecord,
@@ -155,7 +152,7 @@ type SheetState =
   | { kind: "series"; mode: SeriesMode }
   | { kind: "penalty" }
   | { kind: "more"; mode: MoreMode }
-  | { kind: "moremenu" };
+  | { kind: "spielzug" };
 
 /** The log's event name for each one-tap entry, to find the row it wrote. */
 const ONE_TAP_EVENT: Partial<Record<SeriesMode, string>> = {
@@ -1319,8 +1316,8 @@ export default function TrackingScreen({
     setSheet(next);
   };
 
-  /** A row of the **Mehr** menu opens the sheet it replaces. */
-  const pickFromMenu = (pick: MorePick): void => {
+  /** A tile of the **Spielzug** sheet runs the handler its old row ran. */
+  const pickFromSpielzug = (pick: SpielzugPick): void => {
     if (pick === "overtime") {
       setSheet(null);
       if (overtime) {
@@ -1872,51 +1869,39 @@ export default function TrackingScreen({
         openSheet({ kind: "touchdown" });
       }
     },
-    onPlay: () => {
+    onPlay: (type, result) => {
       if (!composerDisabled) {
-        openSheet({ kind: "play", type: "pass" });
+        openSheet({ kind: "play", type, result });
       }
     },
-    onAction: (index) => {
-      // Only the penalty (index 4) stays reachable while the try is open (a
-      // foul during the try is enforced on it); every other entry waits.
-      if (composerDisabled && index !== 4) {
-        return;
+    onSpielzug: () => {
+      if (!composerDisabled) {
+        openSheet({ kind: "spielzug" });
       }
-      if (index === 0) {
-        openSheet({ kind: "play", type: "pass" });
-      } else if (index === 1) {
-        openSheet({ kind: "play", type: "run" });
-      } else if (index === 2) {
-        openSheet({ kind: "play", type: "sack" });
-      } else if (index === 3) {
-        openSheet({
-          kind: "play",
-          type: "pass",
-          result: "interception",
-        });
-      } else if (index === 4) {
-        if (!penaltyDisabled) {
-          openSheet({ kind: "penalty" });
-        }
-      } else if (index === 5) {
+    },
+    onPenalty: () => {
+      if (!penaltyDisabled) {
+        openSheet({ kind: "penalty" });
+      }
+    },
+    onTime: () => {
+      if (!composerDisabled) {
         openSheet({ kind: "series", mode: "time" });
-      } else if (index === 6) {
-        openSheet({ kind: "moremenu" });
-      } else if (index === 7) {
+      }
+    },
+    onFirstDown: () => {
+      if (!composerDisabled) {
         tapSeriesTile("first", true);
-      } else if (index === 8) {
+      }
+    },
+    onTurnover: () => {
+      if (!composerDisabled) {
         tapSeriesTile("turnover", true);
-      } else if (index === 9) {
+      }
+    },
+    onSafety: () => {
+      if (!composerDisabled) {
         openSheet({ kind: "more", mode: "safety" });
-      } else if (index === 10) {
-        if (overtime) {
-          openSinglePat();
-        } else if (armed === "overtime") {
-          void startOvertime();
-        } else {
-          arm("overtime");
-        }
       }
     },
     onSwitchPossession: () => {
@@ -2132,42 +2117,16 @@ export default function TrackingScreen({
           </button>
         )}
         <div className="action-grid">
-          {(
-            [
-              { type: "pass", label: "Pass", Icon: Play },
-              { type: "run", label: "Run", Icon: ArrowRight },
-              { type: "sack", label: "Sack", Icon: Shield },
-              {
-                type: "pass",
-                result: "interception",
-                label: "Interception",
-                Icon: Interception,
-              },
-            ] as {
-              type: PlayType;
-              result?: PlayResult;
-              label: string;
-              Icon: ComponentType<IconProps>;
-            }[]
-          ).map(({ type, result, label, Icon }, index) => (
-            <button
-              className="action"
-              disabled={composerDisabled}
-              key={label}
-              onClick={() =>
-                openSheet({ kind: "play", type, result })
-              }
-              type="button"
-            >
-              <Icon className="action-icon" size={20} />
-              <span>{label}</span>
-              <kbd
-                aria-hidden="true"
-                className="shortcut-hint"
-                data-key={index + 1}
-              />
-            </button>
-          ))}
+          <button
+            className="action spielzug"
+            disabled={composerDisabled}
+            onClick={() => openSheet({ kind: "spielzug" })}
+            type="button"
+          >
+            <Play className="action-icon" size={24} />
+            <span>Spielzug</span>
+            <kbd aria-hidden="true" className="shortcut-hint" data-key="S" />
+          </button>
           <button
             className="action"
             disabled={penaltyDisabled}
@@ -2201,16 +2160,6 @@ export default function TrackingScreen({
                 {timeoutText(possessionTimeouts)}
               </span>
             )}
-          </button>
-          <button
-            className="action"
-            disabled={composerDisabled}
-            onClick={() => openSheet({ kind: "moremenu" })}
-            type="button"
-          >
-            <PlusCircle className="action-icon" size={20} />
-            <span>Mehr</span>
-            <kbd aria-hidden="true" className="shortcut-hint" data-key="7" />
           </button>
           <button
             className={armed === "first" ? "action is-armed" : "action"}
@@ -2425,7 +2374,7 @@ export default function TrackingScreen({
       possessionName !== null &&
       (sheet.kind === "touchdown" ||
         sheet.kind === "series" ||
-        sheet.kind === "moremenu" ||
+        sheet.kind === "spielzug" ||
         opponentName !== null) ? (
         sheet.kind === "play" ? (
           <PlaySheet
@@ -2514,11 +2463,14 @@ export default function TrackingScreen({
             side={possessionSide}
             teamName={possessionName}
           />
-        ) : sheet.kind === "moremenu" ? (
-          <MoreMenuSheet
+        ) : sheet.kind === "spielzug" ? (
+          <SpielzugSheet
             disabled={composerDisabled}
             onClose={() => setSheet(null)}
-            onPick={pickFromMenu}
+            onPick={pickFromSpielzug}
+            onPlay={(type, result) =>
+              openSheet({ kind: "play", type, result })
+            }
           />
         ) : (
           <MoreSheet
