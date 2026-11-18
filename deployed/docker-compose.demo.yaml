@@ -1,36 +1,9 @@
 name: ${SERVICE_NAME}
 services:
-  mysql:
-    # Pinned to the MINOR, the patch floats (D1, Phase 0 of the infrastructure
-    # db-tier plan): the nightly reset rebuilds this schema from the prod dump,
-    # so the server must be on prod's line. Deliberately NOT in the watchtower
-    # `db` scope yet - demo is disposable and moves into the `db-nonprod` tier
-    # in a later package, which brings its own scope.
-    image: mariadb:13.0
-    container_name: ${COMPOSE_PROJECT_NAME}.mysql
-    restart: unless-stopped
-    # Ceiling (was unlimited). Small demo dataset, so 512m matches prod/staging.
-    mem_limit: 512m
-    command: >
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_unicode_ci
-    volumes:
-      - "./mysql-data:/var/lib/mysql"
-      - "./mysql-init:/docker-entrypoint-initdb.d:ro"
-    env_file: ls.env.demo
-    networks:
-      - backend
-    healthcheck:
-      test: ["CMD", "sh", "-c", "mariadb -h localhost --skip-ssl -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
-      interval: 15s
-      timeout: 5s
-      retries: 15
-      start_period: 90s
-    labels:
-      - traefik.enable=false
-      # portainer team
-      - io.portainer.accesscontrol.teams=leaguesphere
-
+  # WP-4: the demo database lives on the nonprod DB tier (db-nonprod.mariadb,
+  # infrastructure repo db-nonprod/docker-compose.yml). The app-owned `mysql:`
+  # server was removed here; its ./mysql-data bind mount on the host is kept
+  # untouched as the one-week rollback.
   www:
     image: leaguesphere/frontend:demo
     env_file: .env.demo
@@ -116,16 +89,18 @@ services:
     networks:
       - backend
       - egress
+      - db_nonprod_backend
     volumes:
       - media:/app/league_manager/media
-    depends_on:
-      mysql:
-        condition: service_healthy
     restart: unless-stopped
 
 networks:
   backend:
     internal: true
+  # WP-4: created by the infrastructure repo's db-nonprod project.
+  db_nonprod_backend:
+    external: true
+    name: db_nonprod_backend
   egress:
     internal: false
   proxy:

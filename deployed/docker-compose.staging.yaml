@@ -1,43 +1,9 @@
 name: ${SERVICE_NAME}
 services:
-  mysql:
-    # Pinned to the MINOR, the patch floats (D1, Phase 0 of the infrastructure
-    # db-tier plan): same line as prod's `db`, so a restored prod copy always
-    # lands on a server of the same version. Deliberately NOT in the
-    # watchtower `db` scope yet: staging/demo are disposable and move into the
-    # `db-nonprod` tier in a later package, which brings its own scope.
-    image: mariadb:13.0
-    container_name: ${COMPOSE_PROJECT_NAME}.mysql
-    restart: unless-stopped
-    # Ceiling (was unlimited, 146M of it sat in swap on 2026-10-29). The dataset
-    # is a restored copy of prod, so this is the same 512m as prod's db.
-    mem_limit: 512m
-    command: >
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_unicode_ci
-    volumes:
-      - "./mysql-data:/var/lib/mysql"
-      - "./mysql-init:/docker-entrypoint-initdb.d:ro"
-      # Same config as prod: binlog + statement audit. A directory mount, so a
-      # `git pull` cannot leave the container reading a dead inode.
-      - "./mysql-conf:/etc/mysql/conf.d:ro"
-    env_file: ls.env.staging
-    ports:
-      - "127.0.0.1:33062:3306"
-    networks:
-      - backend
-      - db_access
-    healthcheck:
-      test: ["CMD", "sh", "-c", "mariadb -h localhost --skip-ssl -u root -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
-      interval: 15s
-      timeout: 5s
-      retries: 15
-      start_period: 90s
-    labels:
-      - traefik.enable=false
-      # portainer team
-      - io.portainer.accesscontrol.teams=leaguesphere
-
+  # WP-4: the staging database lives on the nonprod DB tier
+  # (db-nonprod.mariadb, infrastructure repo db-nonprod/docker-compose.yml).
+  # The app-owned `mysql:` server was removed here; its ./mysql-data bind mount
+  # on the host is kept untouched as the one-week rollback.
   # Loopback-only TCP endpoint for the shared dbeaver_stage SSH account.
   # Mirrors prod's db-tunnel, and for the same measured reason: publishing the
   # mysql port directly (33062) delivers the *host's* address, so a forwarded
@@ -49,11 +15,14 @@ services:
     image: alpine/socat:1.8.1.3
     container_name: ${COMPOSE_PROJECT_NAME}.db-tunnel
     restart: unless-stopped
-    command: TCP-LISTEN:33064,fork,reuseaddr TCP:mysql:3306
+    # WP-4: the tier's mariadb, reached over db_nonprod_backend. The minted
+    # `dbeaver_prod_<person>` accounts are granted from that subnet
+    # (192.168.16.%, derived from the network in the infrastructure repo).
+    command: TCP-LISTEN:33064,fork,reuseaddr TCP:db-nonprod.mariadb:3306
     ports:
       - "127.0.0.1:33064:33064"
     networks:
-      - backend
+      - db_nonprod_backend
       - tunnel
     labels:
       - traefik.enable=false
@@ -80,7 +49,7 @@ services:
       # see the note in docker-compose.yaml.
       - "./dba:/opt/dba:ro"
     networks:
-      - backend
+      - db_nonprod_backend
     read_only: true
     tmpfs:
       - /tmp
@@ -140,6 +109,7 @@ services:
       - com.centurylinklabs.watchtower.update-strategy=blue-green
     networks:
       - backend
+      - db_nonprod_backend
       - proxy
     depends_on:
       staging-app:
@@ -180,17 +150,22 @@ services:
       RUN_MIGRATIONS: true
     networks:
       - backend
+      - db_nonprod_backend
       - egress
     volumes:
       - media:/app/league_manager/media
-    depends_on:
-      mysql:
-        condition: service_healthy
+    # The container starts before the tier's mariadb may be reachable; the app
+    # retries a DB connection on boot, and the tier is a shared, always-on
+    # service rather than a per-stack container that has to be sequenced.
     restart: unless-stopped
 
 networks:
   backend:
     internal: true
+  # WP-4: created by the infrastructure repo's db-nonprod project.
+  db_nonprod_backend:
+    external: true
+    name: db_nonprod_backend
   db_access:
     internal: false
   egress:
