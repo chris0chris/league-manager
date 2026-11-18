@@ -1,7 +1,12 @@
 import { useEffect, useId, useRef, useState } from "react";
 
 import type { GameLogEventInput, RosterPlayer } from "../../api/types";
-import { FIELD_LENGTH, MIDFIELD, spotText } from "../../app/drive";
+import {
+  FIELD_LENGTH,
+  MIDFIELD,
+  interceptionReturnSpot,
+  spotText,
+} from "../../app/drive";
 import { spotValue } from "./FieldPositionSheet";
 import JerseyPicker, { jerseyOptions } from "../JerseyPicker";
 import { errorMessage } from "./errors";
@@ -116,9 +121,12 @@ export function seriesEvent(
  *
  * R 5-1-1 puts the new series at the dead-ball spot, so the entry has to carry
  * it: without it the engine falls back to the own 5 (a touchback - correct for
- * a catch in the end zone, wrong for a 30-yard return). The spot is optional
- * because a lower-league operator may only know "we have the ball"; the return
- * yards are optional statistics and never move the ball.
+ * a catch in the end zone, wrong for a 30-yard return). `deadBall` is already
+ * the *new* offence's own-goal-based spot: the sheet takes the catch and the
+ * return in the throwing offence's orientation and mirrors them
+ * (`interceptionReturnSpot`), because the field only turns with the new
+ * series. The spot is optional because a lower-league operator may only know
+ * "we have the ball"; the return yards are stored for the statistics.
  */
 export function interceptionEvent(
   jersey: number | null,
@@ -221,14 +229,18 @@ export default function SeriesSheet({
   const minutesId = useId();
   const secondsId = useId();
   const yardsId = useId();
-  const deadBallId = useId();
+  const catchId = useId();
   const returnId = useId();
 
   const [jersey, setJersey] = useState<number | null>(null);
   const [yards, setYards] = useState("");
-  /** Where the interception's return ended (own-goal-based spot). */
-  const [deadBallSide, setDeadBallSide] = useState<"A" | "B">("A");
-  const [deadBallYards, setDeadBallYards] = useState("");
+  /**
+   * Where the interception was caught and how far it was returned, both in
+   * the throwing offence's orientation: A its own half, B the half it
+   * attacked.
+   */
+  const [catchSide, setCatchSide] = useState<"A" | "B">("A");
+  const [catchYards, setCatchYards] = useState("");
   const [returnYards, setReturnYards] = useState("");
   const [minutes, setMinutes] = useState("");
   const [seconds, setSeconds] = useState("");
@@ -271,18 +283,23 @@ export default function SeriesSheet({
   const options = jerseyOptions(players);
   const loading = roster === null;
   const validation = time ? timeError(mode, minutes, seconds) : null;
-  const deadBallLine = spotValue(deadBallYards);
-  const deadBallInvalid =
+  const catchLine = spotValue(catchYards);
+  const catchInvalid =
     intercepts &&
-    deadBallLine !== null &&
-    (deadBallLine < 0 || deadBallLine > MIDFIELD);
-  const deadBall =
-    deadBallLine === null
+    catchLine !== null &&
+    (catchLine < 0 || catchLine > MIDFIELD);
+  const catchSpot =
+    catchLine === null
       ? null
       : Math.round(
-          (deadBallSide === "A" ? deadBallLine : FIELD_LENGTH - deadBallLine) * 10,
+          (catchSide === "A" ? catchLine : FIELD_LENGTH - catchLine) * 10,
         ) / 10;
-  const ready = !posting && validation === null && !deadBallInvalid;
+  // The catch and the return are entered before the field turns; the row keeps
+  // the dead ball the way the new offence reads it (`interceptionReturnSpot`).
+  const deadBall = intercepts
+    ? interceptionReturnSpot(catchSpot, yardsValue(returnYards))
+    : null;
+  const ready = !posting && validation === null && !catchInvalid;
 
   const save = async (): Promise<void> => {
     if (saving.current || !ready) {
@@ -473,56 +490,58 @@ export default function SeriesSheet({
 
       {intercepts ? (
         <>
-          <h3 className="sheetsection">Ballbesitz ab (optional)</h3>
+          <h3 className="sheetsection">Gefangen an (optional)</h3>
           <div aria-label="Feldhälfte" className="seg" role="group">
             <button
-              aria-pressed={deadBallSide === "A"}
-              className={deadBallSide === "A" ? "sel" : undefined}
+              aria-pressed={catchSide === "A"}
+              className={catchSide === "A" ? "sel" : undefined}
               disabled={posting}
-              onClick={() => setDeadBallSide("A")}
+              onClick={() => setCatchSide("A")}
               type="button"
             >
               A · eigene
             </button>
             <button
-              aria-pressed={deadBallSide === "B"}
-              className={deadBallSide === "B" ? "sel" : undefined}
+              aria-pressed={catchSide === "B"}
+              className={catchSide === "B" ? "sel" : undefined}
               disabled={posting}
-              onClick={() => setDeadBallSide("B")}
+              onClick={() => setCatchSide("B")}
               type="button"
             >
               B · gegnerische
             </button>
           </div>
           <div className="sheetfield">
-            <label className="sheetlabel" htmlFor={deadBallId}>
-              Yardlinie, wo der Return endete (0–25)
+            <label className="sheetlabel" htmlFor={catchId}>
+              Feldposition (0–25)
             </label>
             <input
               autoComplete="off"
               className="sheetinput sheetinput-num"
               disabled={posting}
-              id={deadBallId}
+              id={catchId}
               inputMode="decimal"
-              onChange={(changeEvent) => setDeadBallYards(changeEvent.target.value)}
+              onChange={(changeEvent) => setCatchYards(changeEvent.target.value)}
               pattern="[0-9.,]*"
               type="text"
-              value={deadBallYards}
+              value={catchYards}
             />
           </div>
-          {deadBallInvalid ? (
+          {catchInvalid ? (
             <p className="sheetwarn" role="alert">
-              Die Yardlinie liegt zwischen 0 und 25.
+              Die Feldposition liegt zwischen 0 und 25.
             </p>
           ) : (
             <p className="sheetnote">
-              Ohne Angabe beginnt der neue Angriff an der eigenen 5 (Touchback).
+              Fangstelle und Return aus Sicht des werfenden Teams: A eigene
+              Hälfte, B angegriffene. Ohne Angabe beginnt der neue Angriff an
+              der eigenen 5 (Touchback).
               {deadBall === null ? "" : ` Ballbesitz ab ${spotText(deadBall)}.`}
             </p>
           )}
           <div className="sheetfield">
             <label className="sheetlabel" htmlFor={returnId}>
-              Return-Yards (optional, nur Statistik)
+              Return-Yards (optional)
             </label>
             <input
               autoComplete="off"

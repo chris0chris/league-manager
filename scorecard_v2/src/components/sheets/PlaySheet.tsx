@@ -4,10 +4,10 @@ import type { GameLogEventInput, RosterPlayer } from "../../api/types";
 import {
   advance,
   DEFAULT_GEOMETRY,
+  driveSpotText,
   driveText,
-  FIELD_LENGTH,
+  interceptionReturnSpot,
   isTurnoverOnDowns,
-  MIDFIELD,
   type DriveState,
   type Geometry,
   spotText,
@@ -246,9 +246,6 @@ type Step =
 
 export function stepsFor(type: PlayType, result: PlayResult): Step[] {
   const steps: Step[] = ["type", "result"];
-  if (result === "gain" || result === "touchdown" || result === "safety") {
-    steps.push("distance");
-  }
   if (result === "interception") {
     // The defender's sheet follows; the passer is the only jersey still asked.
     if (type === "pass") {
@@ -272,6 +269,12 @@ export function stepsFor(type: PlayType, result: PlayResult): Step[] {
       steps.push("defender");
     }
   }
+  // The field position comes last (scorer feedback, 2026-11-17): the numbers
+  // are typed first, the spot confirms the result — and the preview under it
+  // shows the down & distance before the save.
+  if (result === "gain" || result === "touchdown" || result === "safety") {
+    steps.push("distance");
+  }
   return steps;
 }
 
@@ -284,12 +287,29 @@ function resultLabel(type: PlayType, result: PlayResult): string {
 }
 
 /** `A12` / `B4,5` for a spot; the wizard's live preview uses `spotText`. */
-function spotFrom(side: "A" | "B", raw: string): number | null {
+function spotFrom(
+  side: "A" | "B",
+  raw: string,
+  g: Geometry = DEFAULT_GEOMETRY,
+): number | null {
   const distance = spotValue(raw);
-  if (distance === null || distance < 0 || distance > MIDFIELD) {
+  if (distance === null || distance < 0 || distance > g.middle) {
     return null;
   }
-  return side === "A" ? distance : FIELD_LENGTH - distance;
+  return side === "A" ? distance : g.fieldLength - distance;
+}
+
+/**
+ * The half a spot is on, in the A/B language of the spot pickers.
+ *
+ * The wizard opens on the half the ball is on: past the middle is the
+ * opponent's (B), everything before it — and the middle itself — the own (A).
+ */
+function halfOf(
+  ballOn: number | null,
+  g: Geometry = DEFAULT_GEOMETRY,
+): "A" | "B" {
+  return ballOn !== null && ballOn > g.middle ? "B" : "A";
 }
 
 interface PlaySheetProps {
@@ -316,16 +336,22 @@ interface PlaySheetProps {
 }
 
 /**
- * The play-by-play entry as a wizard: **type → result → distance → QB and
- * receiver → tackler**, each step only when it applies.
+ * The play-by-play entry as a wizard: **type → result → QB/receiver (or
+ * runner) → tackler → field position**, each step only when it applies.
  *
- * The passer and the receiver share one step (the same QB throws 95% of the
- * passes); an interception keeps the passer alone because the defender's
- * details follow. The distance can be typed as yards or as the field line
- * (A/B + yard line), and the sheet previews the resulting down & distance from
- * the same `advance` the board uses. A touchdown prefills the distance to the
- * goal line and hides the loss switch; a safety prefills the run to the own
- * goal line. An interception asks for the defender, the dead-ball spot and an
+ * The numbers come first and the field position last (scorer feedback,
+ * 2026-11-17): the spot is what confirms the play, and its preview shows the
+ * resulting down & distance right above the save button. The passer and the
+ * receiver share one step (the same QB throws 95% of the passes); an
+ * interception keeps the passer alone because the defender's details follow.
+ * The distance can be typed as yards or as a **Feldposition** (A/B + yard
+ * line), and the sheet previews the resulting down & distance from the same
+ * `advance` the board uses. A touchdown prefills the distance to the goal line
+ * and hides the loss switch; a safety prefills the run to the own goal line.
+ *
+ * An interception asks for the defender, the catch spot and the return — both
+ * in the throwing offence's orientation, because the field only turns when the
+ * intercepting team's series starts (`interceptionReturnSpot`) — and an
  * optional pick six.
  */
 export default function PlaySheet({
@@ -351,10 +377,16 @@ export default function PlaySheet({
   const [yardsText, setYardsText] = useState("0");
   const [loss, setLoss] = useState(false);
   const [distanceMode, setDistanceMode] = useState<"yards" | "end">("yards");
-  const [endSide, setEndSide] = useState<"A" | "B">("A");
+  // Both spot pickers open on the half the ball is on: the operator only
+  // confirms the line instead of also choosing the side (scorer feedback).
+  const [endSide, setEndSide] = useState<"A" | "B">(() =>
+    halfOf(drive?.ballOn ?? null, geometry),
+  );
   const [endYards, setEndYards] = useState("");
-  const [deadBallSide, setDeadBallSide] = useState<"A" | "B">("A");
-  const [deadBallYards, setDeadBallYards] = useState("");
+  const [catchSide, setCatchSide] = useState<"A" | "B">(() =>
+    halfOf(drive?.ballOn ?? null, geometry),
+  );
+  const [catchYards, setCatchYards] = useState("");
   const [returnYards, setReturnYards] = useState("");
   const [pickSix, setPickSix] = useState(false);
   const [posting, setPosting] = useState(false);
@@ -371,7 +403,7 @@ export default function PlaySheet({
   const step = steps[index];
 
   const magnitude = Math.abs(yardsValue(yardsText) ?? 0);
-  const endSpot = spotFrom(endSide, endYards);
+  const endSpot = spotFrom(endSide, endYards, geometry);
   const typedSpot =
     distanceMode === "end" && endSpot !== null && drive?.ballOn != null
       ? endSpot - drive.ballOn
@@ -384,7 +416,12 @@ export default function PlaySheet({
   if (result === "safety") {
     playYards = -Math.abs(playYards);
   }
-  const deadBall = spotFrom(deadBallSide, deadBallYards);
+  const catchSpot = spotFrom(catchSide, catchYards, geometry);
+  const catchInvalid = catchYards.trim() !== "" && catchSpot === null;
+  // A pick six is a touchdown, not a spot: its ball is dead in the end zone.
+  const deadBall = pickSix
+    ? null
+    : interceptionReturnSpot(catchSpot, yardsValue(returnYards), geometry);
   const distanceMissing =
     distanceMode === "end"
       ? endSpot === null || drive?.ballOn == null
@@ -405,18 +442,16 @@ export default function PlaySheet({
           ? "Turnover on downs"
           : next === null
             ? null
-            : `${driveText(next)}${
-                spotText(next.ballOn, geometry) === null
-                  ? ""
-                  : ` · ${spotText(next.ballOn, geometry)}`
-              }`;
+            : `${driveText(next)}${driveSpotText(next, geometry)}`;
 
   const stepReady =
     step === "distance"
       ? !distanceMissing
       : step === "qb" || step === "qbplayer"
         ? !qbMissing
-        : true;
+        : step === "interception"
+          ? !catchInvalid
+          : true;
 
   const changeType = (option: PlayType): void => {
     setType(option);
@@ -459,7 +494,11 @@ export default function PlaySheet({
     try {
       const interception =
         result === "interception"
-          ? { deadBall, returnYards: yardsValue(returnYards), pickSix }
+          ? {
+              deadBall,
+              returnYards: pickSix ? null : yardsValue(returnYards),
+              pickSix,
+            }
           : null;
       await onSubmit(
         playEvents({
@@ -604,7 +643,7 @@ export default function PlaySheet({
               onClick={() => setDistanceMode("end")}
               type="button"
             >
-              Spielfeldlinie
+              Feldposition
             </button>
           </div>
 
@@ -652,7 +691,7 @@ export default function PlaySheet({
               </div>
               <div className="sheetfield">
                 <label className="sheetlabel" htmlFor="play-end">
-                  Spielfeldlinie (0–25)
+                  Feldposition (0–25)
                 </label>
                 <input
                   autoComplete="off"
@@ -787,56 +826,60 @@ export default function PlaySheet({
             players={defenders}
             value={defender}
           />
-          <h3 className="sheetsection">Ballbesitz ab (optional)</h3>
+          <h3 className="sheetsection">Gefangen an (optional)</h3>
           <div aria-label="Feldhälfte" className="seg" role="group">
             <button
-              aria-pressed={deadBallSide === "A"}
-              className={deadBallSide === "A" ? "sel" : undefined}
+              aria-pressed={catchSide === "A"}
+              className={catchSide === "A" ? "sel" : undefined}
               disabled={posting}
-              onClick={() => setDeadBallSide("A")}
+              onClick={() => setCatchSide("A")}
               type="button"
             >
               A · eigene
             </button>
             <button
-              aria-pressed={deadBallSide === "B"}
-              className={deadBallSide === "B" ? "sel" : undefined}
+              aria-pressed={catchSide === "B"}
+              className={catchSide === "B" ? "sel" : undefined}
               disabled={posting}
-              onClick={() => setDeadBallSide("B")}
+              onClick={() => setCatchSide("B")}
               type="button"
             >
               B · gegnerische
             </button>
           </div>
           <div className="sheetfield">
-            <label className="sheetlabel" htmlFor="interception-spot">
-              Yardlinie, wo der Return endete (0–25)
+            <label className="sheetlabel" htmlFor="interception-catch">
+              Feldposition (0–25)
             </label>
             <input
               autoComplete="off"
               className="sheetinput sheetinput-num"
               disabled={posting}
-              id="interception-spot"
+              id="interception-catch"
               inputMode="decimal"
-              onChange={(event) => setDeadBallYards(event.target.value)}
+              onChange={(event) => setCatchYards(event.target.value)}
               pattern="[0-9.,]*"
               type="text"
-              value={deadBallYards}
+              value={catchYards}
             />
           </div>
-          {deadBallYards !== "" && deadBall === null ? (
+          {catchInvalid ? (
             <p className="sheetwarn" role="alert">
-              Die Yardlinie liegt zwischen 0 und 25.
+              Die Feldposition liegt zwischen 0 und 25.
             </p>
           ) : (
             <p className="sheetnote">
-              Ohne Angabe beginnt der neue Angriff an der eigenen 5 (Touchback).
-              {deadBall === null ? "" : ` Ballbesitz ab ${spotText(deadBall)}.`}
+              Fangstelle und Return aus Sicht des werfenden Teams: A eigene
+              Hälfte, B angegriffene. Ohne Angabe beginnt der neue Angriff an
+              der eigenen 5 (Touchback).
+              {deadBall === null
+                ? ""
+                : ` Ballbesitz ab ${spotText(deadBall, geometry)}.`}
             </p>
           )}
           <div className="sheetfield">
             <label className="sheetlabel" htmlFor="interception-return">
-              Return-Yards (optional, nur Statistik)
+              Return-Yards (optional)
             </label>
             <input
               autoComplete="off"

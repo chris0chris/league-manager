@@ -30,6 +30,7 @@ import {
 import {
   advance,
   driveAfter,
+  driveSpotText,
   driveText,
   geometryOf,
   isTurnoverOnDowns,
@@ -1557,7 +1558,7 @@ export default function TrackingScreen({
     // with the offence, so they are written in a second submission.
     const changesHands = rest.some((event) => event.payload?.defense === true);
     const written: GameLogEventInput[] = [
-      { ...play, input: `${detail}${driveText(next)}` },
+      { ...play, input: `${detail}${driveText(next)}${driveSpotText(next, geometry)}` },
       ...rest,
     ];
     if (turnover && !changesHands) {

@@ -1115,15 +1115,15 @@ describe("Tracking play-by-play", () => {
 
     const sheet = await openPlay(user, "Pass");
     await wizardNext(user); // type → result
-    await wizardNext(user); // result → distance
-    const yards = within(sheet).getByRole("textbox", { name: /Raumgewinn/ });
-    await user.clear(yards);
-    await user.type(yards, "8");
-    await wizardNext(user); // distance → qb + receiver
+    await wizardNext(user); // result → qb + receiver
     await user.click(
       await within(sheet).findByRole("button", { name: "Trikot 7, Meier" }),
     );
-    await wizardNext(user); // player → defender
+    await wizardNext(user); // receiver → defender
+    await wizardNext(user); // defender → field position
+    const yards = within(sheet).getByRole("textbox", { name: /Raumgewinn/ });
+    await user.clear(yards);
+    await user.type(yards, "8");
     await user.click(
       within(sheet).getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -1138,7 +1138,7 @@ describe("Tracking play-by-play", () => {
             player: 7,
             period: 1,
             payload: {
-              input: "8 Yards · QB #12 · 2nd & M",
+              input: "8 Yards · QB #12 · 2nd & M · A13",
               yards: 8,
               complete: true,
               qb: 12,
@@ -1151,12 +1151,48 @@ describe("Tracking play-by-play", () => {
     // A play is the snap, not a change of possession.
     expect(sentPossessions()).toEqual([]);
     expect(
-      await screen.findByText(/Pass gespeichert · 8 Yards · QB #12 · 2nd & M/),
+      await screen.findByText(/Pass gespeichert · 8 Yards · QB #12 · 2nd & M · A13/),
     ).toBeInTheDocument();
     // The thrower is remembered for the next pass of this side.
     expect(globalThis.localStorage.getItem("scorecard:v2:qb:42:home")).toBe(
       "12",
     );
+  });
+
+  it("preselects the default quarterback again after one play changed it", async () => {
+    // The pre-game setup named #7. A trick play's #23 belongs to that play: the
+    // next pass starts from the default again (scorer feedback, 2026-11-17).
+    globalThis.localStorage.setItem("scorecard:v2:qb:42:home", "7");
+    apiGetMock.mockResolvedValue(ROSTER);
+    answerAppend(makeLog({ inPossession: "Ravens" }));
+    renderTracking();
+    const user = userEvent.setup();
+
+    const sheet = await openPlay(user, "Pass");
+    await wizardNext(user); // type → result
+    await wizardNext(user); // result → qb + receiver
+    expect(within(sheet).getByText("#7")).toBeInTheDocument();
+    await user.click(within(sheet).getByRole("button", { name: "ändern" }));
+    await user.click(
+      within(
+        within(sheet).getByRole("group", { name: "Trikotnummer Quarterback" }),
+      ).getByRole("button", { name: "QB 23, Schulz" }),
+    );
+    await user.click(within(sheet).getByRole("button", { name: "Weiter" }));
+    await user.click(within(sheet).getByRole("button", { name: "Weiter" }));
+    await user.click(
+      within(sheet).getByRole("button", { name: "Spielzug speichern" }),
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    );
+
+    const second = await openPlay(user, "Pass");
+    await wizardNext(user); // type → result
+    await wizardNext(user); // result → qb + receiver
+
+    expect(within(second).getByText("#7")).toBeInTheDocument();
+    expect(globalThis.localStorage.getItem("scorecard:v2:qb:42:home")).toBe("7");
   });
 
   it("shows the down & distance the log derives", () => {
@@ -1318,15 +1354,15 @@ describe("Tracking play-by-play", () => {
     expect(screen.getByText(/4th & M/)).toBeInTheDocument();
     const sheet = await openPlay(user, "Run");
     await wizardNext(user); // type → result
-    await wizardNext(user); // result → distance
-    const yards = within(sheet).getByRole("textbox", { name: /Raumgewinn/ });
-    await user.clear(yards);
-    await user.type(yards, "1");
-    await wizardNext(user); // distance → player
+    await wizardNext(user); // result → player
     await user.click(
       await within(sheet).findByRole("button", { name: "Trikot 23, Schulz" }),
     );
     await wizardNext(user); // player → defender
+    await wizardNext(user); // defender → field position
+    const yards = within(sheet).getByRole("textbox", { name: /Raumgewinn/ });
+    await user.clear(yards);
+    await user.type(yards, "1");
     await user.click(
       within(sheet).getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -1340,7 +1376,7 @@ describe("Tracking play-by-play", () => {
             side: "home",
             player: 23,
             period: 1,
-            payload: { input: "1 Yards · 1st & M", yards: 1 },
+            payload: { input: "1 Yards · 1st & M · A5", yards: 1 },
           },
           {
             type: "possession",
@@ -1365,15 +1401,15 @@ describe("Tracking play-by-play", () => {
 
     const sheet = await openPlay(user, "Run");
     await wizardNext(user); // type → result
-    await wizardNext(user); // result → distance
-    const yards = within(sheet).getByRole("textbox", { name: /Raumgewinn/ });
-    await user.clear(yards);
-    await user.type(yards, "14");
-    await wizardNext(user); // distance → player
+    await wizardNext(user); // result → player
     await user.click(
       await within(sheet).findByRole("button", { name: "Trikot 23, Schulz" }),
     );
     await wizardNext(user); // player → defender
+    await wizardNext(user); // defender → field position
+    const yards = within(sheet).getByRole("textbox", { name: /Raumgewinn/ });
+    await user.clear(yards);
+    await user.type(yards, "14");
     await user.click(
       within(sheet).getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -1387,7 +1423,7 @@ describe("Tracking play-by-play", () => {
             side: "home",
             player: 23,
             period: 1,
-            payload: { input: "14 Yards · 2nd & M", yards: 14 },
+            payload: { input: "14 Yards · 2nd & M · A19", yards: 14 },
           },
         ],
         client_id: expect.any(String),
@@ -2060,7 +2096,7 @@ describe("Tracking extra point after the try", () => {
     await openPlay(user, "Run");
     await wizardNext(user); // type → result
     await user.click(screen.getByRole("button", { name: "Touchdown" }));
-    await wizardNext(user, 2); // distance → player (no tackler on a touchdown)
+    await wizardNext(user, 2); // result → player (no number) → field position
     await user.click(screen.getByRole("button", { name: "Spielzug speichern" }));
 
     // The six points stand without a name, so the try must still be asked —
@@ -4074,11 +4110,12 @@ describe("a scoring play", () => {
     const sheet = await openPlay(user, "Pass");
     await wizardNext(user); // type → result
     await user.click(within(sheet).getByRole("button", { name: "Touchdown" }));
-    await wizardNext(user, 2); // distance → qb + receiver
+    await wizardNext(user); // result → qb + receiver
     await user.click(
       await within(sheet).findByRole("button", { name: "Trikot 23, Schulz" }),
     );
-    // The player is the last step: a touchdown has no tackler.
+    // A touchdown has no tackler: the field position is the last step.
+    await wizardNext(user); // receiver → field position
     await user.click(
       within(sheet).getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -4168,11 +4205,12 @@ describe("plays that change hands", () => {
     const sheet = await openPlay(user, "Run");
     await wizardNext(user); // type → result
     await user.click(within(sheet).getByRole("button", { name: "Safety" }));
-    await wizardNext(user, 2); // distance → player
+    await wizardNext(user); // result → player
     await user.click(
       await within(sheet).findByRole("button", { name: "Trikot 23, Schulz" }),
     );
     await wizardNext(user); // player → defender
+    await wizardNext(user); // defender → field position
     await user.click(
       within(sheet).getByRole("button", { name: "Spielzug speichern" }),
     );

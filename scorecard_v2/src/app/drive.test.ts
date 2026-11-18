@@ -6,6 +6,7 @@ import {
   applyPenalty,
   DEFAULT_GEOMETRY,
   driveAfter,
+  driveSpotText,
   driveText,
   FIRST_AND_TEN,
   enforceSpot,
@@ -14,6 +15,7 @@ import {
   pastMiddle,
   type Geometry,
   isTurnoverOnDowns,
+  interceptionReturnSpot,
   mirror,
   seriesAt,
   seriesToGoal,
@@ -696,6 +698,103 @@ describe("R 5-1-1: an interception starts at the dead-ball spot", () => {
     ]);
 
     expect(state).toEqual(FIRST_AND_TEN);
+  });
+});
+
+describe("the interception is entered before the field turns (R 5-1-1)", () => {
+  // The catch and the return are entered in the pre-turnover orientation: A is
+  // the throwing offence's own half, B the half it was attacking. The new
+  // offence reads the same dead ball from the mirror side.
+  it("starts the new series on the own 9 after a catch at B4 and a 5-yard return", () => {
+    // B4 = 46 from the throwing offence's own goal line; the return gains the
+    // other way, to B9 = 41. The intercepting team's own 9 is A9.
+    const deadBall = interceptionReturnSpot(46, 5);
+
+    expect(deadBall).toBe(9);
+    expect(spotText(deadBall)).toBe("A9");
+
+    const state = driveAfter(
+      [
+        row({ event: "Interception", team: "Wolves", payload: { deadBall } }),
+        row({ event: "Pass", team: "Ravens", payload: { yards: 5 } }),
+      ],
+      DEFAULT_GEOMETRY,
+      "Wolves",
+    );
+
+    expect(state).toEqual({ down: 1, toGo: 16, ballOn: 9, goal: false });
+    expect(driveText(state)).toBe("1st & M");
+  });
+
+  it("keeps the catch spot when no return yards are entered", () => {
+    // caught at B4 and immediately downed: the new offence starts on A4
+    expect(interceptionReturnSpot(46, null)).toBe(4);
+    expect(spotText(interceptionReturnSpot(46, 0))).toBe("A4");
+  });
+
+  it("has no dead-ball spot without a catch spot (a touchback)", () => {
+    expect(interceptionReturnSpot(null, 5)).toBeNull();
+  });
+
+  it("clamps a return that would leave the field behind the new goal line", () => {
+    // caught at B30 and carried 20 yards the other way: the ball is dead in
+    // the end zone the throwing offence defended — a pick six the sheet
+    // records as a touchdown, not as a spot
+    expect(interceptionReturnSpot(20, 20)).toBe(50);
+    expect(spotText(interceptionReturnSpot(20, 20))).toBe("B0");
+    expect(interceptionReturnSpot(20, 30)).toBe(50);
+  });
+
+  it("turns the field only after a pick six's touchdown", () => {
+    const state = driveAfter([
+      row({ event: "Touchdown", team: "Wolves", payload: { defense: true } }),
+      row({ event: "Interception", team: "Wolves", payload: { deadBall: 50 } }),
+      row({ event: "Pass", team: "Ravens", payload: { yards: 5 } }),
+    ]);
+
+    // the scoring defence's try, still from the same orientation
+    expect(state).toEqual(tryAt(45));
+    expect(driveText(state)).toBe("Versuch");
+  });
+
+  it("starts a goal-to-go series when the return crosses midfield", () => {
+    // caught at B20 (30 from the throwing offence's goal line), returned 20
+    // yards the other way to B10 (10) — A10 for the new offence, past midfield
+    const deadBall = interceptionReturnSpot(30, 20);
+
+    expect(deadBall).toBe(40);
+    expect(spotText(deadBall)).toBe("B10");
+
+    const state = driveAfter([
+      row({ event: "Interception", team: "Wolves", payload: { deadBall } }),
+      row({ event: "Pass", team: "Ravens", payload: { yards: 5 } }),
+    ]);
+
+    expect(state).toEqual({ down: 1, toGo: 10, ballOn: 40, goal: true });
+    expect(driveText(state)).toBe("1st & G");
+  });
+});
+
+describe("the spot in a play row's text", () => {
+  it("appends the spot with the row's separator", () => {
+    expect(driveSpotText({ down: 3, toGo: 10, ballOn: 11, goal: false })).toBe(
+      " · A11",
+    );
+    expect(driveSpotText({ down: 1, toGo: 10, ballOn: 25, goal: false })).toBe(
+      " · M",
+    );
+  });
+
+  it("shows half yards the German way", () => {
+    expect(driveSpotText({ down: 2, toGo: 5, ballOn: 4.5, goal: false })).toBe(
+      " · A4,5",
+    );
+  });
+
+  it("adds nothing while the spot is unknown", () => {
+    expect(driveSpotText({ down: 1, toGo: 20, ballOn: null, goal: false })).toBe(
+      "",
+    );
   });
 });
 

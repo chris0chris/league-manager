@@ -30,14 +30,15 @@ wie die bisherige Scorecard
    Endzone, die angegriffen wird.
 3. Erfasse im laufenden Spiel (oben stehen Feld und Runde) jeden Spielzug
    über die Kacheln **Pass**, **Run** oder **Sack** – der Assistent fragt in
-   dieser Reihenfolge: **Spielzug** → **Ergebnis** → **Distanz** →
-   **Quarterback und Trikotnummer** (ein Schritt) → **Defense**. Übersprungene
-   Schritte (kein QB beim Lauf, kein Tackle beim Sack, kein Tackler beim
-   Touchdown) fallen weg. Im Schritt **Distanz** trägst du den Raumgewinn als
-   **Yards** oder als **Spielfeldlinie** (A/B + 0–25) ein; darunter steht die
-   Vorschau, z. B. **2nd & M · A19** oder bei einem scheiternden vierten
-   Versuch **Turnover on downs**. Die Vorschau ist grün hinterlegt wie das
-   Ergebnis beim Münzwurf – sie zeigt nur, was der Eintrag bewirkt.
+   dieser Reihenfolge: **Spielzug** → **Ergebnis** → **Quarterback und
+   Trikotnummer** (ein Schritt) → **Defense** → **Feldposition** (zuletzt).
+   Übersprungene Schritte (kein QB beim Lauf, kein Tackle beim Sack, kein
+   Tackler beim Touchdown) fallen weg. Im Schritt **Feldposition** trägst du
+   den Raumgewinn als **Yards** oder über die **Feldposition** (A/B + 0–25)
+   ein; darunter steht die Vorschau, z. B. **2nd & M · A19** oder bei einem
+   scheiternden vierten Versuch **Turnover on downs**. Die Vorschau ist grün
+   hinterlegt wie das Ergebnis beim Münzwurf – sie zeigt nur, was der Eintrag
+   bewirkt.
    **Touchdown** trägt die Distanz bis zur Endzone
    ein und blendet den Verlust-Schalter aus; **Safety** (bei Run, Sack und
    Pass) trägt den Weg bis zur eigenen Endzone ein.

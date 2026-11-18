@@ -176,18 +176,19 @@ describe("PlaySheet helpers", () => {
   });
 
   it("skips the steps that do not apply", () => {
+    // The field position is the last step: numbers first, then the spot.
     expect(stepsFor("run", "gain")).toEqual([
       "type",
       "result",
-      "distance",
       "player",
       "defender",
+      "distance",
     ]);
     expect(stepsFor("sack", "gain")).toEqual([
       "type",
       "result",
-      "distance",
       "player",
+      "distance",
     ]);
     expect(stepsFor("pass", "interception")).toEqual([
       "type",
@@ -199,19 +200,25 @@ describe("PlaySheet helpers", () => {
     expect(stepsFor("run", "touchdown")).toEqual([
       "type",
       "result",
-      "distance",
       "player",
+      "distance",
     ]);
     expect(stepsFor("pass", "touchdown")).toEqual([
       "type",
       "result",
-      "distance",
       "qbplayer",
+      "distance",
     ]);
     expect(stepsFor("pass", "gain")).toEqual([
       "type",
       "result",
+      "qbplayer",
+      "defender",
       "distance",
+    ]);
+    expect(stepsFor("pass", "incomplete")).toEqual([
+      "type",
+      "result",
       "qbplayer",
       "defender",
     ]);
@@ -232,11 +239,12 @@ describe("PlaySheet wizard", () => {
     const user = userEvent.setup();
     const { onSubmit, onClose } = renderSheet({ lastQuarterback: 12 });
 
-    await next(user, 2); // type → result → distance
-    await setYards(user, "8");
-    await next(user); // distance → qb + receiver
+    await next(user); // type → result
+    await next(user); // result → qb + receiver
     await user.click(screen.getByRole("button", { name: "Trikot 7, Meier" }));
     await next(user); // receiver → defender
+    await next(user); // defender → field position
+    await setYards(user, "8");
     await user.click(
       screen.getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -256,8 +264,7 @@ describe("PlaySheet wizard", () => {
     const user = userEvent.setup();
     renderSheet({ lastQuarterback: 12 });
 
-    await next(user, 2);
-    await next(user); // distance
+    await next(user, 2); // type → result → qb + receiver
 
     expect(screen.getByText("#12")).toBeInTheDocument();
     expect(
@@ -269,7 +276,7 @@ describe("PlaySheet wizard", () => {
     const user = userEvent.setup();
     renderSheet();
 
-    await next(user, 3); // type → result → distance → qb
+    await next(user, 2); // type → result → qb
 
     expect(screen.getByText("Bitte den Quarterback wählen.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Weiter" })).toBeDisabled();
@@ -279,12 +286,12 @@ describe("PlaySheet wizard", () => {
     const user = userEvent.setup();
     const { onSubmit } = renderSheet({ lastQuarterback: 12 });
 
-    await next(user, 2);
+    await next(user, 2); // type → result → qb + receiver
+    await user.click(screen.getByRole("button", { name: "Trikot 7, Meier" }));
+    await next(user); // receiver → defender
+    await next(user); // defender → field position
     await setYards(user, "4");
     await user.click(screen.getByRole("button", { name: "Verlust" }));
-    await next(user);
-    await user.click(screen.getByRole("button", { name: "Trikot 7, Meier" }));
-    await next(user);
     await user.click(
       screen.getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -305,11 +312,11 @@ describe("PlaySheet wizard", () => {
 
     await user.click(screen.getByRole("button", { name: "Run" }));
     await next(user); // type → result
-    await next(user); // result → distance
-    await setYards(user, "14");
-    await next(user); // distance → player
+    await next(user); // result → player
     await user.click(screen.getByRole("button", { name: "Trikot 23, Schulz" }));
     await next(user); // player → defender
+    await next(user); // defender → field position
+    await setYards(user, "14");
     await user.click(
       screen.getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -352,10 +359,11 @@ describe("PlaySheet wizard", () => {
     const { onSubmit } = renderSheet();
 
     await user.click(screen.getByRole("button", { name: "Sack" }));
-    await next(user, 2); // type → result → distance
-    await setYards(user, "5");
-    await next(user); // distance → player (no QB, no defender)
+    await next(user); // type → result
+    await next(user); // result → player (no QB, no defender)
     await user.click(screen.getByRole("button", { name: "Trikot 12, Kern" }));
+    await next(user); // player → field position
+    await setYards(user, "5");
     await user.click(
       screen.getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -374,13 +382,14 @@ describe("PlaySheet wizard", () => {
     const user = userEvent.setup();
     const { onSubmit } = renderSheet({ lastQuarterback: 12 });
 
-    await next(user, 2);
-    await next(user); // distance → qb + receiver
+    await next(user); // type → result
+    await next(user); // result → qb + receiver
     await user.click(
       await screen.findByRole("button", { name: "Trikot 7, Meier" }),
     );
     await next(user); // receiver → defender
     await user.click(screen.getByRole("button", { name: "Defense 11, Wolf" }));
+    await next(user); // defender → field position
     await user.click(
       screen.getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -435,8 +444,7 @@ describe("PlaySheet wizard", () => {
     renderSheet();
 
     await user.click(screen.getByRole("button", { name: "Sack" }));
-    await next(user, 2); // type → result → distance
-    await next(user); // distance → player
+    await next(user, 2); // type → result → player
 
     expect(screen.queryByRole("group", { name: "Deflection" })).toBeNull();
     expect(
@@ -449,8 +457,10 @@ describe("PlaySheet wizard", () => {
     renderSheet({ drive: FIRST_AND_TEN });
 
     await user.click(screen.getByRole("button", { name: "Run" }));
-    await next(user);
-    await next(user); // distance
+    await next(user); // type → result
+    await next(user); // result → player
+    await next(user); // player → defender
+    await next(user); // defender → field position
     await setYards(user, "14");
 
     expect(screen.getByRole("status")).toHaveTextContent("2nd & M · A19");
@@ -461,17 +471,17 @@ describe("PlaySheet wizard", () => {
     const { onSubmit } = renderSheet({ drive: FIRST_AND_TEN });
 
     await user.click(screen.getByRole("button", { name: "Run" }));
-    await next(user);
-    await next(user); // distance
-    await user.click(screen.getByRole("button", { name: "Spielfeldlinie" }));
+    await next(user); // type → result
+    await next(user); // result → player
+    await user.click(screen.getByRole("button", { name: "Trikot 23, Schulz" }));
+    await next(user); // player → defender
+    await next(user); // defender → field position
+    await user.click(screen.getByRole("button", { name: "Feldposition" }));
     await user.click(screen.getByRole("button", { name: "B · gegnerische" }));
-    await user.type(screen.getByRole("textbox", { name: /Spielfeldlinie/ }), "20");
+    await user.type(screen.getByRole("textbox", { name: /Feldposition/ }), "20");
 
     expect(screen.getByRole("status")).toHaveTextContent("1st & G · B20");
 
-    await next(user);
-    await user.click(screen.getByRole("button", { name: "Trikot 23, Schulz" }));
-    await next(user);
     await user.click(
       screen.getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -492,7 +502,8 @@ describe("PlaySheet wizard", () => {
     await user.click(screen.getByRole("button", { name: "Run" }));
     await next(user);
     await user.click(screen.getByRole("button", { name: "Touchdown" }));
-    await next(user); // distance
+    await next(user); // result → player
+    await next(user); // player → field position
 
     expect(
       screen.getByRole("textbox", { name: /Raumgewinn/ }),
@@ -508,7 +519,9 @@ describe("PlaySheet wizard", () => {
 
     await user.click(screen.getByRole("button", { name: "Run" }));
     await next(user); // type → result
-    await next(user); // result → distance
+    await next(user); // result → player
+    await next(user); // player → defender
+    await next(user); // defender → field position
     await setYards(user, "3");
 
     expect(screen.getByRole("status")).toHaveTextContent(
@@ -523,13 +536,13 @@ describe("PlaySheet wizard", () => {
     await user.click(screen.getByRole("button", { name: "Run" }));
     await next(user);
     await user.click(screen.getByRole("button", { name: "Safety" }));
-    await next(user); // distance
+    await next(user); // result → player
+    await user.click(screen.getByRole("button", { name: "Trikot 23, Schulz" }));
+    await next(user); // player → defender
+    await next(user); // defender → field position
     expect(screen.getByRole("textbox", { name: /Raumverlust/ })).toHaveValue(
       "5",
     );
-    await next(user); // player
-    await user.click(screen.getByRole("button", { name: "Trikot 23, Schulz" }));
-    await next(user); // player → defender
     await user.click(
       screen.getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -549,13 +562,13 @@ describe("PlaySheet wizard", () => {
 
     await next(user); // type → result
     await user.click(screen.getByRole("button", { name: "Safety" }));
-    await next(user); // distance
+    await next(user); // result → qb + receiver
+    await user.click(screen.getByRole("button", { name: "Trikot 23, Schulz" }));
+    await next(user); // receiver → defender
+    await next(user); // defender → field position
     expect(screen.getByRole("textbox", { name: /Raumverlust/ })).toHaveValue(
       "5",
     );
-    await next(user); // qb + receiver
-    await user.click(screen.getByRole("button", { name: "Trikot 23, Schulz" }));
-    await next(user); // receiver → defender
     await user.click(
       screen.getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -602,9 +615,12 @@ describe("PlaySheet wizard", () => {
 
   it("selects the prefilled zero so the next number replaces it", async () => {
     const user = userEvent.setup();
-    renderSheet({ drive: FIRST_AND_TEN });
+    renderSheet({ drive: FIRST_AND_TEN, lastQuarterback: 12 });
 
-    await next(user, 2); // type → result → distance
+    await next(user); // type → result
+    await next(user); // result → qb + receiver
+    await next(user); // receiver → defender
+    await next(user); // defender → field position
     const yards = screen.getByRole("textbox", {
       name: /Raumgewinn \/ Verlust/,
     });
@@ -616,7 +632,7 @@ describe("PlaySheet wizard", () => {
     expect(yards).toHaveProperty("selectionEnd", 1);
   });
 
-  it("records an interception with the defender, spot and pick six", async () => {
+  it("records an interception with the catch spot and the return", async () => {
     const user = userEvent.setup();
     const { onSubmit } = renderSheet({ lastQuarterback: 12 });
 
@@ -625,11 +641,64 @@ describe("PlaySheet wizard", () => {
     await next(user, 2); // result → qb → interception
     expect(screen.getByText("Trikotnummer Verteidiger (optional)")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Defense 11, Wolf" }));
+    // Caught at B4 — in the throwing offence's orientation — and carried 5
+    // yards the other way, to B9. The new offence starts on its own 9.
     await user.click(screen.getByRole("button", { name: "B · gegnerische" }));
     await user.type(
-      screen.getByRole("textbox", { name: /Yardlinie, wo der Return endete/ }),
+      screen.getByRole("textbox", { name: /Feldposition/ }),
+      "4",
+    );
+    await user.type(
+      screen.getByRole("textbox", { name: /Return-Yards/ }),
+      "5",
+    );
+
+    expect(screen.getByText(/Ballbesitz ab A9/)).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Spielzug speichern" }),
+    );
+
+    expect(onSubmit).toHaveBeenCalledWith([
+      expect.objectContaining({ name: "Pass unvollständig" }),
+      expect.objectContaining({
+        name: "Interception",
+        player: 11,
+        payload: expect.objectContaining({
+          deadBall: 9,
+          returnYards: 5,
+          defense: true,
+        }),
+      }),
+    ]);
+  });
+
+  it("lists the interception's spot from the new offence's side", async () => {
+    const user = userEvent.setup();
+    renderSheet({ lastQuarterback: 12 });
+
+    await next(user); // type
+    await user.click(screen.getByRole("button", { name: "Interception" }));
+    await next(user, 2); // result → qb → interception
+    await user.click(screen.getByRole("button", { name: "B · gegnerische" }));
+    await user.type(
+      screen.getByRole("textbox", { name: /Feldposition/ }),
       "20",
     );
+
+    // caught at B20 (the half the throwing offence was attacking) and downed
+    // there: the intercepting team's own 20 is A20
+    expect(screen.getByText(/Ballbesitz ab A20/)).toBeInTheDocument();
+  });
+
+  it("records a pick six without a dead-ball spot", async () => {
+    const user = userEvent.setup();
+    const { onSubmit } = renderSheet({ lastQuarterback: 12 });
+
+    await next(user); // type
+    await user.click(screen.getByRole("button", { name: "Interception" }));
+    await next(user, 2); // result → qb → interception
+    await user.click(screen.getByRole("button", { name: "Defense 11, Wolf" }));
     await user.click(
       screen.getByRole("button", { name: "Pick six (Touchdown)" }),
     );
@@ -642,7 +711,7 @@ describe("PlaySheet wizard", () => {
       expect.objectContaining({
         name: "Interception",
         player: 11,
-        payload: expect.objectContaining({ deadBall: 30, defense: true }),
+        payload: { defense: true },
       }),
       { name: "Touchdown", player: 11, payload: { defense: true } },
     ]);
@@ -679,11 +748,13 @@ describe("PlaySheet wizard", () => {
 
   it("switches back from the end spot to yards and between halves", async () => {
     const user = userEvent.setup();
-    renderSheet({ drive: FIRST_AND_TEN });
+    renderSheet({ drive: FIRST_AND_TEN, lastQuarterback: 12 });
 
     await next(user); // type → result
-    await next(user); // result → distance
-    await user.click(screen.getByRole("button", { name: "Spielfeldlinie" }));
+    await next(user); // result → qb + receiver
+    await next(user); // receiver → defender
+    await next(user); // defender → field position
+    await user.click(screen.getByRole("button", { name: "Feldposition" }));
     await user.click(screen.getByRole("button", { name: "B · gegnerische" }));
     await user.click(screen.getByRole("button", { name: "A · eigene" }));
     await user.click(screen.getByRole("button", { name: "Yards" }));
@@ -698,7 +769,9 @@ describe("PlaySheet wizard", () => {
     renderSheet({ lastQuarterback: 12 });
 
     await next(user); // type → result
-    await next(user); // result → distance
+    await next(user); // result → qb + receiver
+    await next(user); // receiver → defender
+    await next(user); // defender → field position
     await user.click(screen.getByRole("button", { name: "Verlust" }));
     await user.click(screen.getByRole("button", { name: "Gewinn" }));
 
@@ -714,16 +787,79 @@ describe("PlaySheet wizard", () => {
     });
     renderSheet({ lastQuarterback: 12, onSubmit });
 
-    await next(user, 2);
-    await next(user); // distance → qb + receiver
+    await next(user); // type → result
+    await next(user); // result → qb + receiver
     await user.click(screen.getByRole("button", { name: "Trikot 7, Meier" }));
-    await next(user);
+    await next(user); // receiver → defender
+    await next(user); // defender → field position
     await user.click(
       screen.getByRole("button", { name: "Spielzug speichern" }),
     );
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Der Spielzug konnte nicht gespeichert werden",
+    );
+  });
+
+  it("calls the distance step Feldposition without saying Spielfeldlinie", async () => {
+    const user = userEvent.setup();
+    renderSheet({ lastQuarterback: 12 });
+
+    await next(user); // type → result
+    await next(user); // result → qb + receiver
+    await next(user); // receiver → defender
+    await next(user); // defender → field position
+
+    expect(
+      screen.getByRole("button", { name: "Feldposition" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Spielfeldlinie/)).toBeNull();
+  });
+
+  it("preselects the half the ball is on for the field position", async () => {
+    const user = userEvent.setup();
+    renderSheet({ drive: seriesAt(30), lastQuarterback: 12 });
+
+    await next(user); // type → result
+    await next(user); // result → qb + receiver
+    await next(user); // receiver → defender
+    await next(user); // defender → field position
+    await user.click(screen.getByRole("button", { name: "Feldposition" }));
+
+    expect(
+      screen.getByRole("button", { name: "B · gegnerische" }),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("preselects the own half for a ball in the own half, and A on midfield", async () => {
+    const user = userEvent.setup();
+    renderSheet({ drive: seriesAt(10), lastQuarterback: 12 });
+
+    await next(user); // type → result
+    await next(user); // result → qb + receiver
+    await next(user); // receiver → defender
+    await next(user); // defender → field position
+    await user.click(screen.getByRole("button", { name: "Feldposition" }));
+
+    expect(screen.getByRole("button", { name: "A · eigene" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("keeps A on exactly midfield", async () => {
+    const user = userEvent.setup();
+    renderSheet({ drive: seriesAt(25), lastQuarterback: 12 });
+
+    await next(user); // type → result
+    await next(user); // result → qb + receiver
+    await next(user); // receiver → defender
+    await next(user); // defender → field position
+    await user.click(screen.getByRole("button", { name: "Feldposition" }));
+
+    expect(screen.getByRole("button", { name: "A · eigene" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
     );
   });
 });
@@ -735,10 +871,10 @@ describe("the touchdown is the play's result", () => {
 
     await next(user); // type
     await user.click(screen.getByRole("button", { name: "Touchdown" }));
-    await next(user); // distance
-    await next(user); // qb + receiver
+    await next(user); // result → qb + receiver
     await user.click(screen.getByRole("button", { name: "Trikot 7, Meier" }));
-    // The receiver is the last step: a touchdown has no tackler.
+    await next(user); // receiver → field position
+    // The field position is the last step: it saves.
     expect(
       screen.queryByRole("button", { name: "Weiter" }),
     ).not.toBeInTheDocument();
@@ -759,7 +895,7 @@ describe("the touchdown is the play's result", () => {
     await user.click(screen.getByRole("button", { name: "Run" }));
     await next(user); // type
     await user.click(screen.getByRole("button", { name: "Touchdown" }));
-    await next(user, 2); // distance → player (no tackler on a touchdown)
+    await next(user, 2); // result → player → field position
     await user.click(
       screen.getByRole("button", { name: "Spielzug speichern" }),
     );
@@ -778,9 +914,10 @@ describe("the touchdown is the play's result", () => {
     await next(user);
     await user.click(screen.getByRole("button", { name: "Touchdown" }));
     await user.click(screen.getByRole("button", { name: "Complete" }));
-    await next(user, 2); // distance → qb + receiver
+    await next(user); // result → qb + receiver
     await user.click(screen.getByRole("button", { name: "Trikot 7, Meier" }));
     await next(user); // receiver → defender
+    await next(user); // defender → field position
     await user.click(
       screen.getByRole("button", { name: "Spielzug speichern" }),
     );

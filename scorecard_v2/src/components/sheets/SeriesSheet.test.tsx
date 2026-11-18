@@ -434,9 +434,13 @@ describe("the interception sheet takes the spot and the return", () => {
     await user.click(
       await screen.findByRole("button", { name: "Trikot 11, Wolf" }),
     );
+    // Caught at B20 — 20 yards from the intercepting team's own goal line —
+    // and carried 15 yards the other way, to B35 in the pre-turnover
+    // orientation. The new offence starts 35 yards from its own goal line,
+    // which is B15 in the orientation that now counts.
     await user.click(screen.getByRole("button", { name: "B · gegnerische" }));
     await user.type(
-      screen.getByRole("textbox", { name: /Yardlinie, wo der Return endete/ }),
+      screen.getByRole("textbox", { name: /Feldposition/ }),
       "20",
     );
     await user.type(
@@ -449,9 +453,34 @@ describe("the interception sheet takes the spot and the return", () => {
       {
         name: "Interception",
         player: 11,
-        input: "bis B20 · 15 Yards Return",
-        payload: { deadBall: 30, returnYards: 15 },
+        input: "bis B15 · 15 Yards Return",
+        payload: { deadBall: 35, returnYards: 15 },
       },
+    ]);
+  });
+
+  it("shows the spot the new offence starts on before the save", async () => {
+    const onSubmit = vi.fn<Submit>(async () => undefined);
+    renderSheet("interception", onSubmit);
+    const user = userEvent.setup();
+
+    // caught at B4 and returned 5 yards: the new offence starts on A9
+    await user.click(screen.getByRole("button", { name: "B · gegnerische" }));
+    await user.type(
+      screen.getByRole("textbox", { name: /Feldposition/ }),
+      "4",
+    );
+    await user.type(
+      screen.getByRole("textbox", { name: /Return-Yards/ }),
+      "5",
+    );
+
+    expect(screen.getByText(/Ballbesitz ab A9/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Speichern" }));
+
+    expect(onSubmit).toHaveBeenCalledWith([
+      expect.objectContaining({ payload: { deadBall: 9, returnYards: 5 } }),
     ]);
   });
 });
@@ -465,13 +494,14 @@ describe("the interception spot can change sides", () => {
     await user.click(await screen.findByRole("button", { name: "B · gegnerische" }));
     await user.click(screen.getByRole("button", { name: "A · eigene" }));
     await user.type(
-      screen.getByRole("textbox", { name: /Yardlinie, wo der Return endete/ }),
+      screen.getByRole("textbox", { name: /Feldposition/ }),
       "20",
     );
     await user.click(screen.getByRole("button", { name: "Speichern" }));
 
+    // caught on A's 20: the intercepting team's own 20 is 30 yards away
     expect(onSubmit).toHaveBeenCalledWith([
-      expect.objectContaining({ payload: { deadBall: 20 } }),
+      expect.objectContaining({ payload: { deadBall: 30 } }),
     ]);
   });
 });

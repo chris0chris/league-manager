@@ -657,6 +657,31 @@ export function interceptionSpot(
   return g.seriesStart;
 }
 
+/**
+ * The dead-ball spot of an interception, from the *new* offence's view.
+ *
+ * The catch and the return are entered in the pre-turnover orientation: A is
+ * the throwing offence's own half and B the half it was attacking, so a catch
+ * at `B4` is 46 yards from the throwing offence's own goal line. The return
+ * gains ground the other way (towards A), so five return yards end the play at
+ * `B9` (41) — and the intercepting team, now the offence, starts on its own
+ * 9-yard line (`A9`). Only here does the field turn: the dead ball is mirrored
+ * into the new offence's view.
+ *
+ * `null` when the catch spot is unknown (a touchback, or a pick six whose ball
+ * is dead in the end zone).
+ */
+export function interceptionReturnSpot(
+  catchOn: number | null,
+  returnYards: number | null,
+  g: Geometry = DEFAULT_GEOMETRY,
+): number | null {
+  if (catchOn === null) {
+    return null;
+  }
+  return mirror(clampSpot(catchOn - (returnYards ?? 0), g), g);
+}
+
 /** The structured yards of one row; a missing payload counts as no gain. */
 export function yardsOf(row: LogRow): number {
   const yards = row.payload?.yards;
@@ -669,6 +694,20 @@ export function driveText(state: DriveState): string {
     return "Versuch";
   }
   return `${ordinal(state.down)} & ${state.goal ? "G" : "M"}`;
+}
+
+/**
+ * The spot suffix of a row's text: `" · A11"`, or `""` before it is set.
+ *
+ * A play row reads `3rd & M · A11` in the log and the ticker, so the official
+ * and the viewer see where the ball is without a second look at the board.
+ */
+export function driveSpotText(
+  state: DriveState,
+  g: Geometry = DEFAULT_GEOMETRY,
+): string {
+  const spot = spotText(state.ballOn, g);
+  return spot === null ? "" : ` · ${spot}`;
 }
 
 /**
