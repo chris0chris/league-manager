@@ -49,6 +49,40 @@ describe("fieldPositionEvent", () => {
     });
   });
 
+  it("writes the down and the spot officials see into the text", () => {
+    expect(fieldPositionEvent("A", 4, { down: 1, goal: false })).toEqual({
+      name: "Feldposition",
+      input: "1st & M · A4",
+      payload: { ballOn: 4, input: "1st & M · A4", down: 1, goal: false },
+    });
+    expect(fieldPositionEvent("B", 20, { down: 3, goal: true })).toEqual({
+      name: "Feldposition",
+      input: "3rd & G · B20",
+      payload: { ballOn: 30, input: "3rd & G · B20", down: 3, goal: true },
+    });
+  });
+
+  it("defaults a partially given situation to the first down", () => {
+    expect(fieldPositionEvent("A", 12, { goal: true })).toEqual({
+      name: "Feldposition",
+      input: "1st & G · A12",
+      payload: { ballOn: 12, input: "1st & G · A12", goal: true },
+    });
+  });
+
+  it("derives the line to gain from the spot when it is not set", () => {
+    expect(fieldPositionEvent("A", 12, { down: 2 })).toEqual({
+      name: "Feldposition",
+      input: "2nd & M · A12",
+      payload: { ballOn: 12, input: "2nd & M · A12", down: 2 },
+    });
+    expect(fieldPositionEvent("B", 20, { down: 2 })).toEqual({
+      name: "Feldposition",
+      input: "2nd & G · B20",
+      payload: { ballOn: 30, input: "2nd & G · B20", down: 2 },
+    });
+  });
+
   it("reads a German or English decimal", () => {
     expect(spotValue("4,5")).toBe(4.5);
     expect(spotValue("4.5")).toBe(4.5);
@@ -69,8 +103,8 @@ describe("FieldPositionSheet", () => {
 
     expect(onSubmit).toHaveBeenCalledWith({
       name: "Feldposition",
-      input: "A5",
-      payload: { ballOn: 5, input: "A5", down: 1, goal: false },
+      input: "1st & M · A5",
+      payload: { ballOn: 5, input: "1st & M · A5", down: 1, goal: false },
     });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -87,8 +121,8 @@ describe("FieldPositionSheet", () => {
 
     expect(onSubmit).toHaveBeenCalledWith({
       name: "Feldposition",
-      input: "A20",
-      payload: { ballOn: 20, input: "A20", down: 3, goal: true },
+      input: "3rd & G · A20",
+      payload: { ballOn: 20, input: "3rd & G · A20", down: 3, goal: true },
     });
   });
 
@@ -129,8 +163,8 @@ describe("FieldPositionSheet", () => {
 
     expect(onSubmit).toHaveBeenCalledWith({
       name: "Feldposition",
-      input: "A4,5",
-      payload: { ballOn: 4.5, input: "A4,5", down: 1, goal: false },
+      input: "1st & M · A4,5",
+      payload: { ballOn: 4.5, input: "1st & M · A4,5", down: 1, goal: false },
     });
   });
 

@@ -452,7 +452,14 @@ class GamedayGameService:
     @staticmethod
     def _format_event_with_player(row: pd.Series) -> str:
         if row.event in ["1-Extra-Punkt", "2-Extra-Punkte"] and row.value == 0:
-            return f"<s>{row.event}</s>"
+            # A missed try keeps its strike-through and tells why it failed
+            # (`nicht verwandelt · Tackle #2`), like the liveticker does.
+            parts = [f"<s>{row.event}</s>"]
+            for key in ("player", "input"):
+                value = row.get(key)
+                if value is not None and not pd.isna(value) and str(value).strip():
+                    parts.append(str(value).strip())
+            return " ".join(parts)
 
         row_input = "" if pd.isna(row.input) else row.input
 

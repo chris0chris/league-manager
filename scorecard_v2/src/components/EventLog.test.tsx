@@ -734,6 +734,255 @@ describe("EventLog — Nur Punkte", () => {
   });
 });
 
+describe("the Feldposition row", () => {
+  it("names the down, the line to gain and the spot", () => {
+    expect(
+      describeRow(
+        row({
+          event: "Feldposition",
+          input: "1st & M · A4",
+          payload: { ballOn: 4, down: 1, goal: false },
+        }),
+      ),
+    ).toEqual({
+      kind: "note",
+      primary: "Feldposition 1st & M · A4",
+      secondary: null,
+    });
+  });
+
+  it("renders a goal-to-go row from its structured payload", () => {
+    expect(
+      describeRow(
+        row({
+          event: "Feldposition",
+          payload: { ballOn: 45, down: 3, goal: true },
+        }),
+      ),
+    ).toEqual({
+      kind: "note",
+      primary: "Feldposition 3rd & G · B5",
+      secondary: null,
+    });
+  });
+
+  it("keeps a row the old app wrote without the structured down", () => {
+    expect(
+      describeRow(row({ event: "Feldposition", input: "A4" })),
+    ).toEqual({
+      kind: "note",
+      primary: "Feldposition",
+      secondary: "A4",
+    });
+  });
+
+  it("defaults a partially structured row to the first down", () => {
+    expect(
+      describeRow(
+        row({
+          event: "Feldposition",
+          payload: { ballOn: 20, goal: true },
+        }),
+      ),
+    ).toEqual({
+      kind: "note",
+      primary: "Feldposition 1st & G · A20",
+      secondary: null,
+    });
+  });
+
+  it("derives the line to gain from the spot when the row has none", () => {
+    expect(
+      describeRow(
+        row({
+          event: "Feldposition",
+          payload: { ballOn: 12, down: 3 },
+        }),
+      ),
+    ).toEqual({
+      kind: "note",
+      primary: "Feldposition 3rd & M · A12",
+      secondary: null,
+    });
+  });
+
+  it("renders the whole situation as one line", () => {
+    render(
+      <EventLog
+        onUndo={vi.fn()}
+        rows={[
+          row({
+            event: "Feldposition",
+            input: "1st & M · A4",
+            payload: { ballOn: 4, down: 1, goal: false },
+          }),
+        ]}
+      />,
+    );
+
+    expect(
+      screen.getByText("Feldposition 1st & M · A4"),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("a missed extra point", () => {
+  it("names the receiver and the defence instead of the points", () => {
+    expect(
+      describeRow(
+        row({
+          event: "1-Extra-Punkt",
+          player: 3,
+          input: "nicht verwandelt · Deflection #2",
+          payload: {
+            missed: true,
+            qb: 23,
+            defense: { player: 2, deflection: true },
+          },
+        }),
+      ),
+    ).toEqual({
+      kind: "pat",
+      primary: "1 Extrapunkt nicht verwandelt Ravens",
+      secondary: "#3 · Deflection #2",
+      missed: true,
+    });
+  });
+
+  it("reads as a miss without a receiver or details", () => {
+    expect(
+      describeRow(
+        row({
+          event: "2-Extra-Punkte",
+          input: "nicht verwandelt",
+          payload: { missed: true },
+        }),
+      ),
+    ).toEqual({
+      kind: "pat",
+      primary: "2 Extrapunkte nicht verwandelt Ravens",
+      secondary: null,
+      missed: true,
+    });
+  });
+
+  it("recognises the miss in the visible text, not only in the payload", () => {
+    const described = describeRow(
+      row({
+        event: "1-Extra-Punkt",
+        player: 3,
+        input: "nicht verwandelt · Tackle #2",
+      }),
+    );
+
+    expect(described).toMatchObject({
+      primary: "1 Extrapunkt nicht verwandelt Ravens",
+      missed: true,
+    });
+    expect(described.secondary).toBe("#3 · Tackle #2");
+  });
+
+  it("shows a miss the payload names without any visible detail", () => {
+    expect(
+      describeRow(
+        row({
+          event: "1-Extra-Punkt",
+          payload: { missed: true },
+        }),
+      ),
+    ).toEqual({
+      kind: "pat",
+      primary: "1 Extrapunkt nicht verwandelt Ravens",
+      secondary: null,
+      missed: true,
+    });
+  });
+
+  it("keeps a detail that does not spell out the miss", () => {
+    expect(
+      describeRow(
+        row({
+          event: "1-Extra-Punkt",
+          player: 3,
+          input: "Deflection #2",
+          payload: { missed: true },
+        }),
+      ),
+    ).toEqual({
+      kind: "pat",
+      primary: "1 Extrapunkt nicht verwandelt Ravens",
+      secondary: "#3 · Deflection #2",
+      missed: true,
+    });
+  });
+
+  it("keeps a converted try a scoring row", () => {
+    const converted = row({
+      event: "1-Extra-Punkt",
+      player: 3,
+      payload: { qb: 23 },
+    });
+
+    expect(describeRow(converted)).toMatchObject({
+      primary: "1 Extrapunkt Ravens",
+      secondary: "#3",
+    });
+    expect(describeRow(converted).missed).toBeUndefined();
+  });
+
+  it("renders the miss with its receiver and the defence", () => {
+    render(
+      <EventLog
+        onUndo={vi.fn()}
+        rows={[
+          row({
+            event: "1-Extra-Punkt",
+            player: 3,
+            input: "nicht verwandelt · Deflection #2",
+            payload: { missed: true },
+          }),
+        ]}
+      />,
+    );
+
+    expect(
+      screen.getByText("1 Extrapunkt nicht verwandelt Ravens"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("#3 · Deflection #2")).toBeInTheDocument();
+  });
+
+  it("is not counted as points in the Nur Punkte view", async () => {
+    const user = userEvent.setup();
+    render(
+      <EventLog
+        onUndo={vi.fn()}
+        rows={[
+          row({
+            key: "a",
+            event: "Touchdown",
+            player: 23,
+            payload: { yards: 8 },
+          }),
+          row({
+            key: "b",
+            event: "1-Extra-Punkt",
+            input: "nicht verwandelt · Deflection #2",
+            payload: { missed: true },
+          }),
+        ]}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Nur Punkte" }));
+
+    expect(screen.getByText("1 Einträge")).toBeInTheDocument();
+    expect(screen.getByText("Touchdown Ravens")).toBeInTheDocument();
+    expect(
+      screen.queryByText("1 Extrapunkt nicht verwandelt Ravens"),
+    ).not.toBeInTheDocument();
+  });
+});
+
 describe("the interception's row", () => {
   it("shows the return detail beside the defender's number", () => {
     const rows = [

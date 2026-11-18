@@ -2,6 +2,14 @@ import { useState, type ComponentType } from "react";
 
 import type { GameLog, GameLogEvent, LogEntry } from "../api/types";
 import {
+  MIDFIELD,
+  driveText,
+  downOf,
+  goalOf,
+  spotOf,
+  spotText,
+} from "../app/drive";
+import {
   ArrowRight,
   Clock,
   Flag,
@@ -233,7 +241,49 @@ const SCORING_EVENTS = new Set([
 
 /** True for the events that put points on the board. */
 export function isScoring(row: LogRow): boolean {
-  return SCORING_EVENTS.has(row.event);
+  return SCORING_EVENTS.has(row.event) && !isMissedTry(row);
+}
+
+/** The two-point try's and the one-point try's words, as the log names them. */
+const TRY_EVENTS = new Set(["1-Extra-Punkt", "2-Extra-Punkte"]);
+
+/** The visible detail a missed try starts with (see the write contract). */
+const MISSED_TRY = "nicht verwandelt";
+
+/**
+ * True when a conversion row means the try failed.
+ *
+ * A miss is a real row: it carries the attempted receiver (or none) and the
+ * detail (`nicht verwandelt · Tackle #2`). The event payload says so with
+ * `missed: true`; the visible text starts with `nicht verwandelt`. A converted
+ * try carries neither. Rows the old app wrote before the event store cannot be
+ * told apart here — their `value` is not part of the events payload — so they
+ * keep rendering as today.
+ */
+export function isMissedTry(row: LogRow): boolean {
+  if (!TRY_EVENTS.has(row.event)) {
+    return false;
+  }
+  if (row.payload?.missed === true) {
+    return true;
+  }
+  return (row.input ?? "").trim().startsWith(MISSED_TRY);
+}
+
+/** The detail after the leading `nicht verwandelt`, or the whole detail. */
+function missedDetail(input: string | null): string | null {
+  const text = (input ?? "").trim();
+  if (text === "") {
+    return null;
+  }
+  if (!text.startsWith(MISSED_TRY)) {
+    return text;
+  }
+  const rest = text
+    .slice(MISSED_TRY.length)
+    .replace(/^[\s·]+/, "")
+    .trim();
+  return rest === "" ? null : rest;
 }
 
 function jersey(value: unknown): number | null {
@@ -368,6 +418,8 @@ interface Described {
   kind: EventKind;
   primary: string;
   secondary: string | null;
+  /** True for a conversion that failed: shown, never counted as points. */
+  missed?: boolean;
 }
 
 /** The row's one-line label plus its optional detail line. */
@@ -381,17 +433,23 @@ export function describeRow(row: LogRow): Described {
         secondary: join(jerseyText(row.player), row.input),
       };
     case "1-Extra-Punkt":
+    case "2-Extra-Punkte": {
+      const label =
+        row.event === "1-Extra-Punkt" ? "1 Extrapunkt" : "2 Extrapunkte";
+      if (isMissedTry(row)) {
+        return {
+          kind: "pat",
+          primary: `${label} nicht verwandelt ${team}`,
+          secondary: join(jerseyText(row.player), missedDetail(row.input)),
+          missed: true,
+        };
+      }
       return {
         kind: "pat",
-        primary: `1 Extrapunkt ${team}`,
+        primary: `${label} ${team}`,
         secondary: jerseyText(row.player),
       };
-    case "2-Extra-Punkte":
-      return {
-        kind: "pat",
-        primary: `2 Extrapunkte ${team}`,
-        secondary: jerseyText(row.player),
-      };
+    }
     case "Overtime":
       return {
         kind: "pat",
@@ -450,6 +508,30 @@ export function describeRow(row: LogRow): Described {
           jerseyText(row.player),
         ),
       };
+    }
+    case "Feldposition": {
+      // The row sets the spot and, since the sheet asks, the down and the line
+      // to gain: the officials read the whole situation (`Feldposition 1st &
+      // M · A4`), not only the yard line. A row the old app wrote carries none
+      // of the structured data and keeps its text.
+      const spot = spotOf(row);
+      const down = downOf(row);
+      const goal = goalOf(row);
+      if (spot !== null && (down !== null || goal !== null)) {
+        const line = driveText({
+          down: down ?? 1,
+          toGo: 0,
+          ballOn: spot,
+          goal: goal ?? spot >= MIDFIELD,
+        });
+        return {
+          kind: "note",
+          // A set spot always has a label; `spotText` is only `null` without one.
+          primary: `Feldposition ${line} · ${spotText(spot)!}`,
+          secondary: null,
+        };
+      }
+      return { kind: "note", primary: "Feldposition", secondary: row.input };
     }
     case "Auszeit":
       return {
@@ -577,7 +659,13 @@ export default function EventLog({
               onUndo !== undefined && isUndoable(row);
             return (
               <li
-                className={row.isDeleted ? "row deleted" : "row"}
+                className={
+                  row.isDeleted
+                    ? "row deleted"
+                    : described.missed
+                      ? "row miss"
+                      : "row"
+                }
                 key={row.key}
               >
                 <span

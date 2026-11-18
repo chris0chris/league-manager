@@ -21,14 +21,20 @@ _EVENTS_WITH_INPUT = frozenset(
     }
 )
 
+# The two conversions. A conversion with ``value`` 0 is a miss: it says so and
+# names the defender, so its input belongs to the story too.
+_TRY_EVENTS = frozenset({"1-Extra-Punkt", "2-Extra-Punkte"})
+_MISSED_TRY = "nicht verwandelt"
+
 
 class TeamlogSerializer(Serializer):
     EVENT = "event"
     PLAYER = "player"
     INPUT = "input"
+    VALUE = "value"
     CREATED_TIME = "created_time"
     TEAM_NAME = "team__name"
-    ALL_VALUE_FIELDS = [EVENT, PLAYER, INPUT, CREATED_TIME, TEAM_NAME]
+    ALL_VALUE_FIELDS = [EVENT, PLAYER, INPUT, VALUE, CREATED_TIME, TEAM_NAME]
 
     text = SerializerMethodField()
     team = SerializerMethodField()
@@ -39,10 +45,35 @@ class TeamlogSerializer(Serializer):
         self.home_team = home_team
         self.ref_now = ref_now
 
+    @staticmethod
+    def _missed_try_text(obj: dict):
+        """The miss detail of a conversion row, or ``None`` for a converted one.
+
+        The write contract: a missed try stores ``value`` 0 and an input that
+        starts with ``nicht verwandelt``. A legacy row (value 0, no input) is a
+        miss too; an older row that kept its detail without the prefix still
+        gets the prefix, so the ticker never shows a bare detail for a miss.
+        """
+        if obj.get(TeamlogSerializer.EVENT) not in _TRY_EVENTS:
+            return None
+        detail = (obj.get(TeamlogSerializer.INPUT) or "").strip()
+        if obj.get(TeamlogSerializer.VALUE) != 0 and not detail.startswith(_MISSED_TRY):
+            return None
+        if detail == "":
+            return _MISSED_TRY
+        if detail.startswith(_MISSED_TRY):
+            return detail
+        return f"{_MISSED_TRY} · {detail}"
+
     def get_text(self, obj: dict):
         text = obj[self.EVENT]
         if obj[self.PLAYER] is not None:
             text = f"{text}: #{obj[self.PLAYER]}"
+        missed = self._missed_try_text(obj)
+        if missed is not None:
+            # No ": -" placeholder for a missing jersey: the miss itself is the
+            # story. Converted tries keep their slot.
+            return f"{text} - {missed}"
         if obj[self.PLAYER] is None and "Extra" in obj[self.EVENT]:
             text = f"{text}: -"
         if obj[self.EVENT] in _EVENTS_WITH_INPUT and obj[self.INPUT]:

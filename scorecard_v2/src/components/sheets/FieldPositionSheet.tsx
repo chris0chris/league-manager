@@ -5,7 +5,9 @@ import {
   FIELD_LENGTH,
   MIDFIELD,
   SERIES_START,
+  driveText,
   formatYards,
+  spotText,
 } from "../../app/drive";
 import { errorMessage } from "./errors";
 import Sheet from "./Sheet";
@@ -31,7 +33,8 @@ export function spotValue(raw: string): number | null {
  *
  * `ballOn` is the machine value: the offence's own goal line is 0, midfield 25
  * and the opponent's goal line 50, so a play can simply add its yards. The
- * text is the visible detail ("A12", "B20").
+ * text is the visible detail (`1st & M · A12`, or just `A12` when the caller
+ * only corrects the spot).
  */
 export function fieldPositionEvent(
   side: FieldSide,
@@ -39,7 +42,7 @@ export function fieldPositionEvent(
   options: { down?: number; goal?: boolean } = {},
 ): GameLogEventInput {
   const ballOn = side === "A" ? yards : FIELD_LENGTH - yards;
-  const text = `${side}${formatYards(yards)}`;
+  const text = fieldPositionText(ballOn, options);
   const payload: Record<string, unknown> = { ballOn, input: text };
   if (options.down !== undefined) {
     payload.down = options.down;
@@ -52,6 +55,26 @@ export function fieldPositionEvent(
     input: text,
     payload,
   };
+}
+
+/**
+ * What the row says: the whole situation when the sheet set the down and the
+ * line to gain (`1st & M · A4`), the plain yard line for a spot-only
+ * correction (the edit sheet). The liveticker prints this text, so the down
+ * travels in it too.
+ */
+function fieldPositionText(
+  ballOn: number,
+  options: { down?: number; goal?: boolean },
+): string {
+  // A set spot always has a label; `spotText` is only `null` without one.
+  const spot = spotText(ballOn)!;
+  if (options.down === undefined && options.goal === undefined) {
+    return spot;
+  }
+  const down = options.down ?? 1;
+  const goal = options.goal ?? ballOn >= MIDFIELD;
+  return `${driveText({ down, toGo: 0, ballOn, goal })} · ${spot}`;
 }
 
 interface FieldPositionSheetProps {

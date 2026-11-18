@@ -9,11 +9,19 @@ from liveticker.api.serializers import (
 class TestTeamlogSerializer:
     @staticmethod
     def create_some_teamlog(**kwargs):
-        allowed_keys = ["event", "player", "input", "created_time", "team__name"]
+        allowed_keys = [
+            "event",
+            "player",
+            "input",
+            "value",
+            "created_time",
+            "team__name",
+        ]
         defaults = {
             "event": "Touchdown",
             "player": None,
             "input": None,
+            "value": 1,
             "created_time": datetime.now(),
             "team__name": "name of team",
         }
@@ -115,6 +123,57 @@ class TestTeamlogSerializer:
         )
         assert serializer.data[0]["team"] == "home"
         assert serializer.data[1]["team"] == "away"
+
+
+class TestTeamlogSerializerMissedTry:
+    """A conversion that failed is a story of its own: it says so and why."""
+
+    def test_the_row_value_is_part_of_the_query_fields(self):
+        # ``get_text`` decides "missed" from ``value``, so the service's
+        # ``.values()`` has to fetch it.
+        assert "value" in TeamlogSerializer.ALL_VALUE_FIELDS
+
+    @staticmethod
+    def text_for(event, player, input_value, value):
+        entry = TestTeamlogSerializer.create_some_teamlog(
+            event=event, player=player, input=input_value, value=value
+        )
+        serializer = TeamlogSerializer(instance=[entry], home_team=None, many=True)
+        return serializer.data[0]["text"]
+
+    def test_a_missed_extra_point_names_the_receiver_and_the_deflection(self):
+        assert (
+            self.text_for("1-Extra-Punkt", 3, "nicht verwandelt · Deflection #2", 0)
+            == "1-Extra-Punkt: #3 - nicht verwandelt · Deflection #2"
+        )
+
+    def test_a_missed_extra_point_without_a_receiver_skips_the_player_slot(self):
+        assert (
+            self.text_for("1-Extra-Punkt", None, "nicht verwandelt · Tackle #2", 0)
+            == "1-Extra-Punkt - nicht verwandelt · Tackle #2"
+        )
+
+    def test_a_missed_two_point_try_names_its_own_event(self):
+        assert (
+            self.text_for("2-Extra-Punkte", 7, "nicht verwandelt", 0)
+            == "2-Extra-Punkte: #7 - nicht verwandelt"
+        )
+
+    def test_a_legacy_miss_without_input_still_says_nicht_verwandelt(self):
+        assert (
+            self.text_for("2-Extra-Punkte", None, None, 0)
+            == "2-Extra-Punkte - nicht verwandelt"
+        )
+
+    def test_a_miss_without_the_prefix_still_says_nicht_verwandelt(self):
+        assert (
+            self.text_for("1-Extra-Punkt", 3, "Deflection #2", 0)
+            == "1-Extra-Punkt: #3 - nicht verwandelt · Deflection #2"
+        )
+
+    def test_a_converted_try_is_unchanged(self):
+        assert self.text_for("1-Extra-Punkt", 3, None, 1) == "1-Extra-Punkt: #3"
+        assert self.text_for("2-Extra-Punkte", 7, None, 2) == "2-Extra-Punkte: #7"
 
 
 class TestLivetickerSerializer:

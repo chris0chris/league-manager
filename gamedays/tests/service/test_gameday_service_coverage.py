@@ -35,5 +35,18 @@ class TestGamedayServiceCoverage:
             GamedayGameService._format_event_with_player(row) == "<s>1-Extra-Punkt</s>"
         )
 
+        # A missed try keeps the strike-through and tells why it failed.
+        missed = pd.Series(
+            {
+                "event": "1-Extra-Punkt",
+                "value": 0,
+                "player": "#3",
+                "input": "nicht verwandelt · Deflection #2",
+            }
+        )
+        assert GamedayGameService._format_event_with_player(missed) == (
+            "<s>1-Extra-Punkt</s> #3 nicht verwandelt · Deflection #2"
+        )
+
         # Line 450: format_time_string no colon
         assert GamedayGameService._format_time_string("1000") == "1000"

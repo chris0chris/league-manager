@@ -1245,13 +1245,14 @@ describe("Tracking play-by-play", () => {
             side: "home",
             player: null,
             period: 1,
-            payload: { ballOn: 12, input: "A12", down: 1, goal: false },
+            payload: { ballOn: 12, input: "1st & M · A12", down: 1, goal: false },
           },
         ],
         client_id: expect.any(String),
       }),
     );
-    expect(await screen.findByText(/1st & M · A12/)).toBeInTheDocument();
+    // The drive line and the "saved" note both name the new spot.
+    expect((await screen.findAllByText(/1st & M · A12/)).length).toBeGreaterThan(0);
   });
 
   it("keeps the down when the field position is corrected", async () => {
@@ -1291,7 +1292,7 @@ describe("Tracking play-by-play", () => {
     );
 
     // The spot moves, the series does not restart.
-    expect(await screen.findByText(/2nd & M · A15/)).toBeInTheDocument();
+    expect((await screen.findAllByText(/2nd & M · A15/)).length).toBeGreaterThan(0);
   });
 
   it("shows goal-to-go once the ball is in B territory", () => {
