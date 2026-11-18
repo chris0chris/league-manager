@@ -25,7 +25,7 @@ dependencies = [
     "Pillow==13.0.0",
     "django-rest-knox==5.1.1",
     "python-dotenv==1.2.4",
-    "mysqlclient==2.3.1",
+    "mysqlclient==2.3.2",
     "requests==2.34.2",
     "openpyxl==3.1.5",
     # Temporary DB access: Fernet for the one-time credential reveal.
