@@ -294,7 +294,10 @@ export interface GameLogHalf {
 /**
  * `GET /api/game/<gameId>/roster` — jersey plus surname for both teams.
  * Pass numbers never leave the server. `name` is `null` when the person has
- * neither a surname nor a first name.
+ * neither a surname nor a first name, and for a team whose passcheck was never
+ * recorded for this gameday: only a confirmed roster ties a number to a name,
+ * so the pad shows plain numbers rather than a surname that may belong to
+ * another jersey.
  */
 export interface RosterPlayer {
   side: "home" | "away";

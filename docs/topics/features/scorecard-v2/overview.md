@@ -169,7 +169,11 @@ no reload.
    the grid). Every sheet that may name a player picks the jersey in the same
    tile grid — touchdown, safety/overtime, first down, interception and
    penalty — and one whose entry may name nobody leads the grid with an
-   **Ohne Nummer** / **Ganzes Team** tile. The touchdown
+   **Ohne Nummer** / **Ganzes Team** tile. A name is only shown for a team
+   whose passcheck was done: without it the pad shows the numbers alone
+   (never a surname borrowed from another jersey). The number buttons carry
+   the colour of the side they belong to (home red, guests green), so a
+   defender entry turns green even while the home team has the ball. The touchdown
    is saved alone; the extra point is asked **after the try** in place of the
    touchdown button (+1 / +2 / nicht verwandelt, nothing pre-selected),
    credited to the scoring team; **+1**/**+2** open the jersey step with the
@@ -232,7 +236,8 @@ queue. Without the device header the setup body is unchanged (old app).
 What the backend had to grow (all additive):
 
 - `GET /api/game/<id>/roster` — jersey + surname per side, `[]` for a bracket
-  placeholder;
+  placeholder (a name only for a team whose passcheck was recorded; otherwise
+  `name: null`);
 - `GET /api/officials/search/list` — progressive, database-wide person search
   for the crew picker (one name part is enough, a `team` param only ranks that
   team first, "nobody" is an empty list);

@@ -8,6 +8,49 @@ export interface JerseyOption {
   name: string | null;
 }
 
+/** The two teams of a game; the picker colours itself by the one it serves. */
+type Side = RosterPlayer["side"];
+
+/**
+ * The side whose jerseys are on offer.
+ *
+ * The picker is reused for the offence, the defender, an interception and a
+ * penalty, so the side cannot come from ball possession: every caller filters
+ * the roster to the team the number belongs to, and the roster itself says
+ * which one that is. A roster that mixes both sides (or none) has no side and
+ * stays neutral rather than colouring the pad wrong.
+ */
+export function rosterSide(players: RosterPlayer[]): Side | null {
+  const [first] = players;
+  if (first === undefined) {
+    return null;
+  }
+  return players.every((player) => player.side === first.side)
+    ? first.side
+    : null;
+}
+
+/**
+ * The class list of one number control: its own class, an extra state class
+ * and the team tone (`"choice choice-home sel"`). Without a side the control
+ * keeps the neutral styling.
+ */
+function sideClass({
+  base,
+  extra,
+  side,
+  tone,
+}: {
+  base: string;
+  extra?: string;
+  side: Side | null;
+  tone: string;
+}): string {
+  return [base, extra, side === null ? null : `${tone}-${side}`]
+    .filter((name): name is string => Boolean(name))
+    .join(" ");
+}
+
 /**
  * One option per jersey number.
  *
@@ -149,6 +192,7 @@ function JerseyKeypad({
   optionalLabel,
   optionalSelected,
   trailing,
+  side,
 }: {
   options: JerseyOption[];
   value: number | null;
@@ -160,6 +204,7 @@ function JerseyKeypad({
   optionalLabel?: string;
   optionalSelected?: boolean;
   trailing?: JerseyPickerProps["trailing"];
+  side: Side | null;
 }) {
   const digits = value === null ? "" : String(value);
   const match = options.find((option) => option.jersey === value) ?? null;
@@ -171,8 +216,15 @@ function JerseyKeypad({
   let tone = "";
   if (value !== null && match === null) {
     note = strict ? "nicht im bestätigten Kader" : "nicht im Kader";
-    tone = strict ? " bad" : " warn";
+    tone = strict ? "bad" : "warn";
   }
+  const displayClass = [
+    "keypaddisp",
+    side === null ? null : `keypad-${side}`,
+    tone === "" ? null : tone,
+  ]
+    .filter((name): name is string => name !== null)
+    .join(" ");
 
   return (
     <div className="keypadwrap">
@@ -187,7 +239,7 @@ function JerseyKeypad({
           />
         </div>
       )}
-      <p aria-label={label} className={`keypaddisp${tone}`} role="status">
+      <p aria-label={label} className={displayClass} role="status">
         <span className="keypadnum">{digits === "" ? "–" : digits}</span>
         {match?.name?.trim() ? (
           <span className="keypadname">{match.name.trim()}</span>
@@ -201,7 +253,7 @@ function JerseyKeypad({
           ) : (
             <button
               aria-label={key}
-              className="keypadkey"
+              className={sideClass({ base: "keypadkey", side, tone: "keypad" })}
               disabled={disabled || (key === "Löschen" ? digits === "" : digits.length >= 2)}
               key={key}
               onClick={() => press(key)}
@@ -239,6 +291,11 @@ function JerseyKeypad({
  * numbers. A game whose passcheck never ran (or whose roster request failed)
  * still gets a numeric field, otherwise the touchdown could not be recorded at
  * all and the game would need a paper sheet.
+ *
+ * The number buttons carry the colour of the side whose number is entered
+ * (home red, guest green) — the referee sees which team he is typing for
+ * without reading the sheet, which matters most on the defender picker where
+ * the numbers belong to the team *without* the ball.
  */
 export default function JerseyPicker({
   players,
@@ -256,6 +313,7 @@ export default function JerseyPicker({
   const inputId = useId();
   const options = jerseyOptions(players);
   const group = groupLabel ?? label;
+  const side = rosterSide(players);
 
   if (options.length > KEYPAD_ABOVE) {
     return (
@@ -267,6 +325,7 @@ export default function JerseyPicker({
         optionalLabel={optionalLabel}
         optionalSelected={optionalSelected}
         options={options}
+        side={side}
         strict={strict}
         trailing={trailing}
         value={value}
@@ -328,7 +387,12 @@ export default function JerseyPicker({
                 : `${label} ${option.jersey}, ${name}`
             }
             aria-pressed={selected}
-            className={selected ? "choice sel" : "choice"}
+            className={sideClass({
+              base: "choice",
+              extra: selected ? "sel" : undefined,
+              side,
+              tone: "choice",
+            })}
             disabled={disabled}
             key={option.jersey}
             onClick={() => onChange(option.jersey)}

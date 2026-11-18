@@ -339,3 +339,22 @@ class TestSeedDemoDataFinals:
                     }
                     actual = {row["jersey"] for row in rows if row["side"] == side}
                     assert actual == expected, (game_snapshot["pk"], side)
+
+    def test_finals_roster_names_a_jersey_uniquely(self, client, django_user_model):
+        """The picker shows a surname under the number: it must not repeat.
+
+        A whole team with one surname reads as "every number is the same
+        player" — the field feedback on Walldorf vs Düsseldorf. The verified
+        passcheck of the finals keeps serving names, so this test also proves
+        the roster gate does not strip them.
+        """
+        call_command("seed_demo_data")
+        client.force_login(django_user_model.objects.create_user("finals-names"))
+
+        for snapshot in FINALS_GAMEDAYS:
+            for game_snapshot in snapshot["games"]:
+                rows = client.get(f"/api/game/{game_snapshot['pk']}/roster").json()
+                for side in ("home", "away"):
+                    names = [row["name"] for row in rows if row["side"] == side]
+                    assert names, (game_snapshot["pk"], side)
+                    assert len(names) == len(set(names)), (game_snapshot["pk"], side)

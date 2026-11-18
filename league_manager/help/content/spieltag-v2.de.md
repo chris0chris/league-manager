@@ -106,6 +106,12 @@ wie die bisherige Scorecard
    Versuch stehen – **1st** gibt es erst, wenn die Mittellinie (in Goal-to-go
    die Endzone) erreicht ist oder das Team wechselt.
 
+   Die Trikotwahl zeigt Namen nur aus dem **bestätigten Passcheck** des
+   Spieltags; ohne Passcheck stehen die Nummern ohne Namen da. Die
+   Nummerntasten tragen die Farbe des Teams, dessen Nummer du eingibst – Rot
+   für die Heim-, Grün für die Gastmannschaft –, auch bei der
+   Verteidiger-Nummer, wenn das Heimteam den Ball hat.
+
    **Halbzeit** öffnet einen Dialog mit Spielstand, **Ballbesitz 2.
    Halbzeit** und der gedrehten **Spielrichtung**; **Halbzeit starten** wechselt
    die Halbzeit und startet die Pause (Standard 2 Minuten, aus der

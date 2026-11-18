@@ -4,13 +4,29 @@ import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { RosterPlayer } from "../api/types";
-import JerseyPicker, { jerseyDigits, jerseyOptions } from "./JerseyPicker";
+import JerseyPicker, {
+  jerseyDigits,
+  jerseyOptions,
+  rosterSide,
+} from "./JerseyPicker";
 
 const ROSTER: RosterPlayer[] = [
   { side: "home", jersey: 23, name: "Schulz" },
   { side: "home", jersey: 7, name: "Meier" },
   { side: "home", jersey: 23, name: "Doppelt" },
   { side: "home", jersey: 42, name: null },
+];
+
+/** The same numbers, but the guests' side: the defender picker on a home pass. */
+const AWAY_ROSTER: RosterPlayer[] = [
+  { side: "away", jersey: 7, name: "Meier" },
+  { side: "away", jersey: 42, name: null },
+];
+
+/** A checked roster never sends a name twice, but a broken one may: no name then. */
+const NAMELESS_ROSTER: RosterPlayer[] = [
+  { side: "home", jersey: 7, name: null },
+  { side: "home", jersey: 9, name: null },
 ];
 
 /** Controlled wrapper: the number field only works with a live `value`. */
@@ -202,6 +218,88 @@ describe("JerseyPicker", () => {
     ).toHaveAttribute("aria-pressed", "true");
   });
 
+  it("colours the number tiles with the home team", () => {
+    render(<JerseyPicker onChange={vi.fn()} players={ROSTER} value={23} />);
+
+    const tile = screen.getByRole("button", { name: "Trikotnummer 23, Schulz" });
+    expect(tile).toHaveClass("choice-home");
+    // The picked number fills the surface, so colour is not the only signal.
+    expect(tile).toHaveClass("sel");
+    expect(
+      screen.getByRole("button", { name: "Trikotnummer 7, Meier" }),
+    ).toHaveClass("choice-home");
+  });
+
+  it("colours the number tiles with the guests' team", () => {
+    // The defender picker on a pass by the home side: the numbers belong to
+    // the away team, so the pad must read green even though home has the ball.
+    render(
+      <JerseyPicker onChange={vi.fn()} players={AWAY_ROSTER} value={null} />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Trikotnummer 7, Meier" }),
+    ).toHaveClass("choice-away");
+    expect(
+      screen.getByRole("button", { name: "Trikotnummer 42" }),
+    ).toHaveClass("choice-away");
+  });
+
+  it("keeps the nobody tile neutral: it names no jersey", () => {
+    render(
+      <JerseyPicker
+        onChange={vi.fn()}
+        optionalLabel="Ohne Nummer"
+        players={ROSTER}
+        value={null}
+      />,
+    );
+
+    const none = screen.getByRole("button", { name: "Ohne Nummer" });
+    expect(none).not.toHaveClass("choice-home");
+    expect(none).not.toHaveClass("choice-away");
+  });
+
+  it("colours the keypad with the side as well", () => {
+    const big: RosterPlayer[] = Array.from({ length: 30 }, (_, index) => ({
+      side: "away" as const,
+      jersey: index + 1,
+      name: `Spieler${index + 1}`,
+    }));
+    render(
+      <JerseyPicker onChange={vi.fn()} players={big} value={null} />,
+    );
+
+    const keys = within(screen.getByRole("group", { name: "Ziffern" }));
+    expect(keys.getByRole("button", { name: "7" })).toHaveClass("keypad-away");
+  });
+
+  it("stays neutral when the roster names no single side", () => {
+    render(
+      <JerseyPicker
+        onChange={vi.fn()}
+        players={[{ side: "home", jersey: 7, name: "Meier" }, ...AWAY_ROSTER]}
+        value={null}
+      />,
+    );
+
+    const tile = screen.getByRole("button", { name: "Trikotnummer 7, Meier" });
+    expect(tile).not.toHaveClass("choice-home");
+    expect(tile).not.toHaveClass("choice-away");
+  });
+
+  it("shows a number without a name when the passcheck has none for it", () => {
+    // A roster without a passcheck comes back without names (the server sends
+    // `name: null`): the pad shows the plain numbers and never a borrowed name.
+    render(
+      <JerseyPicker onChange={vi.fn()} players={NAMELESS_ROSTER} value={7} />,
+    );
+
+    const tile = screen.getByRole("button", { name: "Trikotnummer 7" });
+    expect(tile).toHaveTextContent(/^7$/);
+    expect(tile).toHaveClass("sel");
+  });
+
   it("offers the optional choice in keypad mode too", async () => {
     const big: RosterPlayer[] = Array.from({ length: 30 }, (_, index) => ({
       side: "home" as const,
@@ -226,8 +324,7 @@ describe("JerseyPicker", () => {
   });
 });
 
-describe("jerseyOptions", () => {
-  it("keeps the first row of a duplicated number", () => {
+describe("jerseyOptions", () => {  it("keeps the first row of a duplicated number", () => {
     expect(jerseyOptions(ROSTER)).toEqual([
       { jersey: 7, name: "Meier" },
       { jersey: 23, name: "Schulz" },
@@ -239,5 +336,17 @@ describe("jerseyOptions", () => {
     expect(jerseyDigits("5a1")).toBe("51");
     expect(jerseyDigits("123")).toBe("12");
     expect(jerseyDigits("")).toBe("");
+  });
+});
+
+describe("rosterSide", () => {
+  it("reads the side off the roster the caller already filtered", () => {
+    expect(rosterSide(ROSTER)).toBe("home");
+    expect(rosterSide(AWAY_ROSTER)).toBe("away");
+  });
+
+  it("has no side without players, or with a roster of both teams", () => {
+    expect(rosterSide([])).toBeNull();
+    expect(rosterSide([...ROSTER, ...AWAY_ROSTER])).toBeNull();
   });
 });

@@ -5574,3 +5574,49 @@ button.syncbadge {
   line-height: 1.35;
   color: var(--amber);
 }
+
+/* -------------------------------------------- team-coloured jersey pad -- */
+
+/* The jersey picker serves both teams — offence, defender, interception and
+   penalty — so its number buttons carry the colour of the side the number
+   belongs to, not of the team in possession: red for home, green for the
+   guests. The same tokens as the coin-toss switch (tinted surface, team colour
+   as the label, filled surface when picked), so the refs read one colour
+   language. The "nobody" tiles ("Ohne Nummer", "Ganzes Team") stay neutral:
+   they name no jersey. Dark and "Sonne" inherit their own `--home`/`--away`,
+   and `--home-text`/`--away-text` keep the label AA in every theme. */
+.choice.choice-home,
+.keypadkey.keypad-home {
+  color: var(--home-text);
+  background: var(--home-wash);
+  border-color: color-mix(in srgb, var(--home) 30%, transparent);
+}
+
+.choice.choice-away,
+.keypadkey.keypad-away {
+  color: var(--away-text);
+  background: var(--away-wash);
+  border-color: color-mix(in srgb, var(--away) 30%, transparent);
+}
+
+.choice.choice-home.sel {
+  color: var(--on-strong);
+  background: var(--home);
+  border-color: var(--home);
+}
+
+.choice.choice-away.sel {
+  color: var(--on-strong);
+  background: var(--away);
+  border-color: var(--away);
+}
+
+/* The keypad confirms the typed number with the roster name: the name follows
+   the side's colour instead of a fixed green that fits only one team. */
+.keypaddisp.keypad-home .keypadname {
+  color: var(--home-text);
+}
+
+.keypaddisp.keypad-away .keypadname {
+  color: var(--away-text);
+}

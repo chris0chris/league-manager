@@ -748,6 +748,14 @@ class GameRosterAPIView(APIView):
     The ``PlayerlistGameday`` snapshot pins the roster to this day. Duplicate
     jersey numbers are returned as they are — the passcheck validation flags
     that data problem, and hiding a duplicate here would mask it.
+
+    A name is only served for a team whose passcheck was actually done
+    (``PasscheckVerification`` for that team and gameday). Without it the rows
+    keep the jersey but answer ``name: null``: the snapshot may hold a roster
+    the passcheck never confirmed (a seeded gameday, a check-in cancelled
+    later), and a number with the wrong surname — field feedback: every number
+    of a team showed the same name — is worse than a number with none. The pad
+    then shows plain numbers the official types against the paper sheet.
     """
 
     permission_classes = [IsAuthenticated]
@@ -767,6 +775,14 @@ class GameRosterAPIView(APIView):
         if not sides:  # bracket placeholder: both teams are still unknown
             return Response([])
 
+        # One query for both sides, so the roster stays flat however many
+        # players it lists.
+        verified = set(
+            PasscheckVerification.objects.filter(
+                gameday_id=game.gameday_id, team_id__in=sides
+            ).values_list("team_id", flat=True)
+        )
+
         rows = (
             PlayerlistGameday.objects.filter(
                 gameday_id=game.gameday_id,
@@ -784,7 +800,11 @@ class GameRosterAPIView(APIView):
                 {
                     "side": sides[row.playerlist.team_id],
                     "jersey": row.gameday_jersey,
-                    "name": self._display_name(row.playerlist.player.person),
+                    "name": (
+                        self._display_name(row.playerlist.player.person)
+                        if row.playerlist.team_id in verified
+                        else None
+                    ),
                 }
                 for row in sorted(
                     rows,

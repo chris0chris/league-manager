@@ -1698,6 +1698,20 @@ class TestGameRosterAPIView(APITestCase):
     def _roster(self, game):
         return self.client.get(reverse("api-game-roster", kwargs={"pk": game.pk}))
 
+    def _verify(self, *teams):
+        """Record the passcheck of a team for this gameday.
+
+        Only a verified team's jersey numbers are tied to names; without this
+        row the roster answers the numbers alone.
+        """
+        for team in teams:
+            PasscheckVerification.objects.create(
+                gameday=self.gameday,
+                team=team,
+                official_name="Test Official",
+                user=self.gameday.author,
+            )
+
     def _placeholder_game(self):
         placeholder = Gameinfo.objects.create(
             gameday=self.gameday,
@@ -1715,6 +1729,7 @@ class TestGameRosterAPIView(APITestCase):
         self._add_player(self.home, 7, "Muster")
         self._add_player(self.home, 9, "", first_name="NurVorname")
         self._add_player(self.away, 11, "Testmann")
+        self._verify(self.home, self.away)
 
         # Left before the gameday: snapshotted, but no longer eligible.
         self._add_player(
@@ -1766,6 +1781,7 @@ class TestGameRosterAPIView(APITestCase):
     def test_game_roster_name_falls_back_to_first_name_then_null(self):
         self._add_player(self.home, 7, "", first_name="")
         self._add_player(self.home, 9, "", first_name="NurVorname")
+        self._verify(self.home)
 
         response = self._roster(self.game)
 
@@ -1774,11 +1790,56 @@ class TestGameRosterAPIView(APITestCase):
             {"side": "home", "jersey": 9, "name": "NurVorname"},
         ]
 
+    def test_game_roster_names_nobody_without_a_passcheck(self):
+        """The field bug: every number carried the same surname.
+
+        A gameday whose teams were checked in (or seeded) without a passcheck
+        has jersey numbers but no verified name per number. The pad must then
+        show the numbers alone — a name that may belong to any other jersey is
+        worse than no name at all.
+        """
+        for jersey in (1, 2, 3):
+            self._add_player(self.home, jersey, "Conrad")
+            self._add_player(self.away, jersey, "Albrecht")
+
+        response = self._roster(self.game)
+
+        assert response.status_code == HTTPStatus.OK
+        # The numbers stay: the officials still enter one of them.
+        assert [row["jersey"] for row in response.data] == [1, 2, 3, 1, 2, 3]
+        assert all(row["name"] is None for row in response.data)
+
+    def test_game_roster_names_only_the_verified_side(self):
+        self._add_player(self.home, 7, "Muster")
+        self._add_player(self.away, 11, "Testmann")
+        self._verify(self.home)
+
+        response = self._roster(self.game)
+
+        assert response.data == [
+            {"side": "home", "jersey": 7, "name": "Muster"},
+            {"side": "away", "jersey": 11, "name": None},
+        ]
+
+    def test_game_roster_names_are_not_shared_between_jerseys(self):
+        # Two players, two numbers, two names: the picker gets the name of the
+        # number it asks for, never the first one of the team.
+        self._add_player(self.home, 7, "Meier")
+        self._add_player(self.home, 9, "Schulz")
+        self._verify(self.home)
+
+        response = self._roster(self.game)
+
+        assert {row["jersey"]: row["name"] for row in response.data} == {
+            7: "Meier",
+            9: "Schulz",
+        }
+
     def test_game_roster_query_count_is_flat(self):
         url = reverse("api-game-roster", kwargs={"pk": self.game.pk})
 
         pin_request_path_caches()
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             response = self.client.get(url)
         assert response.status_code == HTTPStatus.OK
 
@@ -1786,7 +1847,7 @@ class TestGameRosterAPIView(APITestCase):
             self._add_player(self.home, jersey, f"Spieler{jersey}")
 
         pin_request_path_caches()
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             response = self.client.get(url)
         assert len(response.data) == 40
 
