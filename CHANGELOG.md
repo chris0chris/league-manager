@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.16.3](https://github.com/dachrisch/leaguesphere/compare/v5.16.2...v5.16.3) (2026-11-18)
+
+
+### Documentation
+
+* **history:** scorecard v2 field feedback release 5.16.0 ([37f3ee9](https://github.com/dachrisch/leaguesphere/commit/37f3ee927538c93b49d4c16ab990b3da054090bd))
+
 ## [5.16.2](https://github.com/dachrisch/leaguesphere/compare/v5.16.1...v5.16.2) (2026-11-18)
 
 
