@@ -899,6 +899,55 @@ def test_the_canonical_result_table_equals_the_legacy_result_table(client, case)
 
 
 @pytest.mark.django_db
+def test_a_missed_try_is_a_value_zero_row(client):
+    # "nicht verwandelt" is a row of its own (the statistics read the thrower,
+    # the intended receiver and the defender) but it must not score: the
+    # attempt keeps the try's name and says in `payload.missed` that it failed.
+    game, _home, _away = make_game("missed-try")
+    login(client)
+    assert (
+        post_events(
+            client,
+            game,
+            {
+                "events": [envelope(code="touchdown", player=23)],
+                "client_id": sub_id(1),
+            },
+        ).status_code
+        == 201
+    )
+
+    response = post_events(
+        client,
+        game,
+        {
+            "events": [
+                envelope(
+                    code="pat1",
+                    player=23,
+                    payload={
+                        "missed": True,
+                        "qb": 7,
+                        "defense": {"player": 11, "deflection": True},
+                        "input": "nicht verwandelt · QB #7 · Deflection #11",
+                    },
+                )
+            ],
+            "client_id": sub_id(2),
+        },
+    )
+
+    assert response.status_code == 201
+    # The six points of the touchdown stand; the miss adds nothing.
+    assert response.json()["state"]["score_home"] == 6
+    row = TeamLog.objects.get(gameinfo=game, event="1-Extra-Punkt")
+    assert row.value == 0
+    assert row.player == 23
+    assert row.input == "nicht verwandelt · QB #7 · Deflection #11"
+    assert Gameresult.objects.get(gameinfo=game, isHome=True).fh == 6
+
+
+@pytest.mark.django_db
 def test_a_canonical_submission_updates_the_result_table(client):
     game, _home, _away = make_game("canonical-result")
     login(client)

@@ -46,6 +46,12 @@ interface TouchdownSheetProps {
   /** Jerseys that already scored or moved the chains this game, newest first. */
   recent?: number[];
   /**
+   * The yards from the spot to the goal line, i.e. the gain the touchdown is
+   * worth (T4). The sheet pre-fills its yards field with it, so the row shows
+   * the Raumgewinn even when the official only confirms.
+   */
+  gain?: number | null;
+  /**
    * Writes the events and resolves once the server answered with the new log.
    * Rejects on failure — the sheet then stays open and shows the message.
    */
@@ -64,11 +70,15 @@ export default function TouchdownSheet({
   roster,
   passcheck = false,
   recent = [],
+  gain = null,
   onSubmit,
   onClose,
 }: TouchdownSheetProps) {
   const [jersey, setJersey] = useState<number | null>(null);
-  const [yards, setYards] = useState("");
+  // The remaining yards are the gain: starting from the spot, the ball has to
+  // cross the goal line. Pre-filled, still editable — a return can score from
+  // anywhere.
+  const [yards, setYards] = useState(gain === null ? "" : String(gain));
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Ref, not state: a synchronous double tap both see `posting === false`

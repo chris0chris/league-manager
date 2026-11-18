@@ -97,6 +97,8 @@ import { errorMessage, IgnoredWrite } from "../components/sheets/errors";
 import TouchdownSheet from "../components/sheets/TouchdownSheet";
 import TimeoutSheet from "../components/sheets/TimeoutSheet";
 import HalftimeSheet from "../components/sheets/HalftimeSheet";
+import MissedPatSheet from "../components/sheets/MissedPatSheet";
+import { yardsText } from "../components/sheets/yards";
 import { cachedGet, cachedGetMeta, snapshotKey } from "../offline/snapshot";
 import {
   createGameSession,
@@ -105,7 +107,11 @@ import {
 import { getDeviceId } from "../device";
 import { lockFrom, takeOver, type LockAnswer } from "../session/lock";
 import { getRuntime } from "../session/runtime";
-import { undoPossessionTeamOfGroup } from "../session/possessionUndo";
+import {
+  undoPossessionTeamOfGroup,
+  undoneTry,
+  undoneTouchdown,
+} from "../session/possessionUndo";
 import { eventOfRow } from "../session/events";
 import { isStranded, strandedNotice } from "../session/stranded";
 import { useSyncStatus, type SyncStatus } from "../session/useSyncStatus";
@@ -191,6 +197,8 @@ export function trackingSubtitle(
 
 const CONFIRMATION: Record<string, string> = {
   Touchdown: "Touchdown gespeichert",
+  "1-Extra-Punkt": "Extrapunkt gespeichert",
+  "2-Extra-Punkte": "2 Extrapunkte gespeichert",
   "First Down": "1st Down gespeichert",
   Turnover: "Turnover gespeichert",
   Interception: "Interception gespeichert",
@@ -558,6 +566,12 @@ export default function TrackingScreen({
     jersey: number | null;
     /** The touchdown's write op, so the try's flip is linked to it. */
     originId?: string;
+    /**
+     * The submission the touchdown was written in. Undoing that entry has to
+     * close the prompt it opened; the event ids differ from row to row, the
+     * group is what names the submission.
+     */
+    group?: number | null;
   } | null>(null);
   /**
    * The try being answered: its team, its points and the default jersey (the
@@ -569,12 +583,23 @@ export default function TrackingScreen({
     points: 1 | 2;
     defaultJersey: number | null;
   } | null>(null);
+  /**
+   * The missed try's details: an incomplete pass asks for the same facts
+   * (thrower, intended receiver, defender with Deflection or Tackle), so a
+   * miss is one tap away from the result choice but can still be recorded.
+   */
+  const [patMiss, setPatMiss] = useState<{
+    team: string;
+    defaultJersey: number | null;
+  } | null>(null);
   const [patJersey, setPatJersey] = useState<number | null>(null);
   /** The try's quarterback; a team may change it just for the conversion. */
   const [patQb, setPatQb] = useState<number | null>(null);
   const [patBusy, setPatBusy] = useState(false);
   /** The try's first answer: focus lands here when the touchdown tile gives way. */
   const patFirst = useRef<HTMLButtonElement>(null);
+  /** The last answered try: undoing it reopens the try with the same flip origin. */
+  const patOrigin = useRef<{ team: string; originId?: string } | null>(null);
   const [patError, setPatError] = useState<string | null>(null);
   const [finishBlocked, setFinishBlocked] = useState(false);
   /** The one-tap row a jersey sheet replaces once it saves. */
@@ -886,6 +911,10 @@ export default function TrackingScreen({
     disarm();
     setUndoKey(row.key);
     setUndoError(null);
+    // What this undo removes, read before the log changes: the touchdown whose
+    // prompt it closes, the try whose prompt it reopens.
+    const entryTouchdown = undoneTouchdown(row, rows);
+    const entryTry = undoneTry(row, rows);
     try {
       // A row with a synthetic (negative) id never reached the server: the
       // session drops that queued op locally and never sends `DELETE`.
@@ -911,6 +940,22 @@ export default function TrackingScreen({
         setPossession(session.getLog().inPossession ?? null);
       } else if (restore !== null) {
         setPossession(restore);
+      }
+      // The extra point follows the entry it belongs to: a touchdown that is
+      // undone takes its unanswered prompt with it, a try that is undone asks
+      // again (the ball just went back to the scoring team).
+      if (pendingPat !== null) {
+        const undone = entryTouchdown;
+        const closes =
+          undone !== null &&
+          (pendingPat.group !== null && pendingPat.group !== undefined
+            ? row.groupSequence === pendingPat.group
+            : undone.team === pendingPat.team);
+        if (closes) {
+          closePat();
+        }
+      } else if (entryTry !== null) {
+        reopenPat(entryTry, keepPossession);
       }
     } catch (failure) {
       setUndoError(
@@ -1060,6 +1105,16 @@ export default function TrackingScreen({
   const overtime = rows.some(
     (row) => !row.isDeleted && row.event === "Overtime startet",
   );
+
+  /**
+   * What a touchdown from the current spot is worth: the yards left to the
+   * goal line. The touchdown sheet pre-fills its yards field with it, so the
+   * row shows the Raumgewinn even when the official just confirms.
+   */
+  const touchdownGain =
+    drive.ballOn === null
+      ? null
+      : Math.max(0, geometry.fieldLength - drive.ballOn);
 
   /**
    * Start overtime: a marker event, no score and no new half. The tile then
@@ -1355,7 +1410,46 @@ export default function TrackingScreen({
     setReplacing(null);
   };
 
-  /** The touchdown sheet's write; on success the extra point is asked next. */
+  /**
+   * A paused extra point: the touchdown's team, the scorer as the default
+   * jersey (he often converts too) and the op the try's flip names, so undoing
+   * the touchdown takes that flip with it.
+   */
+  const openPat = (
+    team: string,
+    jersey: number | null,
+    originId?: string,
+    group?: number | null,
+  ): void => {
+    setPendingPat({ team, jersey, originId, group: group ?? null });
+    setPatTry(null);
+    setPatMiss(null);
+    setPatJersey(null);
+    setPatQb(readQuarterback(game.id, patSideOf(team)));
+    setPatError(null);
+    setFinishBlocked(false);
+  };
+
+  /**
+   * The submission the just-written touchdown belongs to.
+   *
+   * Read from the log the write answered with: `TeamLog.sequence` names the
+   * submission, and it is what tells the undo of that entry (the official may
+   * tap the play row instead of the touchdown) from the undo of an older
+   * score.
+   */
+  const touchdownGroupOf = (team: string): number | null => {
+    const fresh = logRows(session.getLog());
+    const touchdown = fresh.find(
+      (entry) =>
+        !entry.isDeleted &&
+        entry.event === "Touchdown" &&
+        entry.team === team &&
+        entry.groupSequence !== 0,
+    );
+    return touchdown === undefined ? null : touchdown.groupSequence;
+  };
+
   /**
    * The touchdown sheet's write; on success the extra point is asked next —
    * also for a team touchdown entered without a number (IFAF R 8-1-1).
@@ -1368,16 +1462,12 @@ export default function TrackingScreen({
     const originId = session.lastOpId() ?? undefined;
     const jersey = events[0]?.player;
     if (team !== null) {
-      setPendingPat({
+      openPat(
         team,
-        jersey: typeof jersey === "number" ? jersey : null,
+        typeof jersey === "number" ? jersey : null,
         originId,
-      });
-      setPatTry(null);
-      setPatJersey(null);
-      setPatQb(readQuarterback(game.id, patSideOf(team)));
-      setPatError(null);
-      setFinishBlocked(false);
+        touchdownGroupOf(team),
+      );
     }
   };
 
@@ -1385,9 +1475,56 @@ export default function TrackingScreen({
   const closePat = (): void => {
     setPendingPat(null);
     setPatTry(null);
+    setPatMiss(null);
     setPatJersey(null);
     setPatQb(null);
     setFinishBlocked(false);
+  };
+
+  /** The op a written try's flip behind it names, for a later undo. */
+  const rememberPatOrigin = (): void => {
+    patOrigin.current =
+      pendingPat === null
+        ? null
+        : { team: pendingPat.team, originId: pendingPat.originId };
+  };
+
+  /**
+   * Ask again after an undone conversion: the scorer mis-tapped the result, so
+   * the same prompt comes back — same team, same default jersey, same flip
+   * origin — as long as the touchdown it belongs to is still in the log.
+   */
+  const reopenPat = (tryRow: LogRow, keepPossession: boolean): void => {
+    if (keepPossession) {
+      // An in-place correction already wrote the replacement; it is no mis-tap.
+      return;
+    }
+    // The try's own row names the team the ball goes back to: the offence that
+    // scored, also for a defensive try (which is credited to the defence).
+    const team = undoPossessionTeamOfGroup(tryRow, rows, log);
+    if (team === null) {
+      return;
+    }
+    const fresh = logRows(session.getLog());
+    const touchdown =
+      fresh.find(
+        (entry) =>
+          !entry.isDeleted &&
+          entry.event === "Touchdown" &&
+          entry.team === team,
+      ) ?? null;
+    if (touchdown === null) {
+      return;
+    }
+    const remembered = patOrigin.current;
+    openPat(
+      team,
+      touchdown.player ?? tryRow.player,
+      remembered !== null && remembered.team === team
+        ? remembered.originId
+        : undefined,
+      touchdown.groupSequence,
+    );
   };
 
   /** Write the conversion for the chosen jersey, or for nobody. */
@@ -1407,6 +1544,7 @@ export default function TrackingScreen({
       if (patQb !== null) {
         event.payload = { qb: patQb };
       }
+      rememberPatOrigin();
       await submit([event], patTry.team, {
         flipOrigin: pendingPat?.originId,
       });
@@ -1424,23 +1562,45 @@ export default function TrackingScreen({
   };
 
   /**
-   * The try's result. `nicht verwandelt` ends the try and hands the ball over
-   * without a row (the miss itself is no game event); +1/+2 open the jersey
-   * step, pre-selected with the touchdown's scorer.
+   * "nicht verwandelt": the try is over, but the record is not. The sheet asks
+   * the same facts an incomplete pass does (all optional), so the miss is a
+   * row with value 0 instead of nothing at all.
+   */
+  const writeMissedPat = async (
+    events: GameLogEventInput[],
+  ): Promise<void> => {
+    if (patMiss === null || pendingPat === null || patBusy) {
+      throw new IgnoredWrite("Der Extrapunkt wird gerade gespeichert.");
+    }
+    setPatBusy(true);
+    try {
+      rememberPatOrigin();
+      await submit(events, patMiss.team, {
+        flipOrigin: pendingPat.originId,
+      });
+      closePat();
+    } finally {
+      setPatBusy(false);
+    }
+  };
+
+  /**
+   * The try's result. `nicht verwandelt` opens the miss step (its flip is
+   * written with the row), +1/+2 open the jersey step, pre-selected with the
+   * touchdown's scorer.
    */
   const answerPat = (points: 0 | 1 | 2): void => {
     if (pendingPat === null || patBusy) {
       return;
     }
     if (points === 0) {
-      // The flip is the only record a missed try leaves - linked to the
-      // touchdown's op, so undoing the touchdown also puts the ball back. The
-      // prompt closes at once; the switch itself paints optimistically.
-      const originId = pendingPat.originId;
-      closePat();
-      if (opponentName !== null) {
-        void takePossession(opponentName, originId);
-      }
+      // The prompt stays behind the sheet: closing the miss step without
+      // saving returns to the result choice.
+      setPatMiss({
+        team: pendingPat.team,
+        defaultJersey: pendingPat.jersey,
+      });
+      setPatError(null);
       return;
     }
     setPatTry({
@@ -1469,6 +1629,7 @@ export default function TrackingScreen({
     setPatBusy(true);
     setPatError(null);
     try {
+      rememberPatOrigin();
       await submit(
         [
           {
@@ -1499,6 +1660,7 @@ export default function TrackingScreen({
       return;
     }
     setPatTry({ team: possessionName, points: 1, defaultJersey: null });
+    setPatMiss(null);
     setPatJersey(null);
     setPatQb(readQuarterback(game.id, possessionSide ?? patSideOf(possessionName)));
     setPatError(null);
@@ -1574,7 +1736,26 @@ export default function TrackingScreen({
     const defense = written.filter(
       (event) => event.payload?.defense === true,
     );
-    await submit(offense);
+    const gain =
+      typeof play.payload?.yards === "number"
+        ? Math.abs(play.payload.yards)
+        : null;
+    await submit(
+      offense.map((event) =>
+        // The touchdown row carries the gain of the play that scored: from the
+        // spot the ball had to reach the goal line (field feedback: the log
+        // shows the Raumgewinn after the entry, not only in the wizard).
+        event.name === "Touchdown" &&
+        gain !== null &&
+        event.payload?.yards === undefined
+          ? {
+              ...event,
+              input: event.input ?? yardsText(gain),
+              payload: { ...(event.payload ?? {}), yards: gain },
+            }
+          : event,
+      ),
+    );
     // A play that scored carries its own touchdown row, so the try is asked
     // right away - the same prompt a touchdown tile produces. A team score
     // without a number still asks: the six points stand (IFAF R 8-1-1).
@@ -1582,16 +1763,12 @@ export default function TrackingScreen({
     if (scored !== undefined && scoringTeam !== null) {
       const jersey =
         typeof scored.player === "number" ? scored.player : play.player;
-      setPendingPat({
-        team: scoringTeam,
-        jersey: typeof jersey === "number" ? jersey : null,
-        originId: session.lastOpId() ?? undefined,
-      });
-      setPatTry(null);
-      setPatJersey(null);
-      setPatQb(readQuarterback(game.id, patSideOf(scoringTeam)));
-      setPatError(null);
-      setFinishBlocked(false);
+      openPat(
+        scoringTeam,
+        typeof jersey === "number" ? jersey : null,
+        session.lastOpId() ?? undefined,
+        touchdownGroupOf(scoringTeam),
+      );
     }
     if (defense.length > 0 && opponentName !== null) {
       await submit(defense, opponentName);
@@ -1604,16 +1781,12 @@ export default function TrackingScreen({
           typeof defensiveScore.player === "number"
             ? defensiveScore.player
             : null;
-        setPendingPat({
-          team: opponentName,
+        openPat(
+          opponentName,
           jersey,
-          originId: session.lastOpId() ?? undefined,
-        });
-        setPatTry(null);
-        setPatJersey(null);
-        setPatQb(readQuarterback(game.id, patSideOf(opponentName)));
-        setPatError(null);
-        setFinishBlocked(false);
+          session.lastOpId() ?? undefined,
+          touchdownGroupOf(opponentName),
+        );
       }
     }
   };
@@ -1690,6 +1863,7 @@ export default function TrackingScreen({
     sheetOpen:
       sheet !== null ||
       pendingPat !== null ||
+      patMiss !== null ||
       editing !== null ||
       timeoutTeam !== null ||
       halftimeOpen,
@@ -2212,6 +2386,19 @@ export default function TrackingScreen({
         </Sheet>
       ) : null}
 
+      {patMiss !== null ? (
+        <MissedPatSheet
+          initialJersey={patMiss.defaultJersey}
+          lastQuarterback={patQb}
+          onClose={() => setPatMiss(null)}
+          onSubmit={writeMissedPat}
+          opponentName={opponentName ?? "Gegner"}
+          roster={roster}
+          side={patSideOf(patMiss.team)}
+          teamName={patMiss.team}
+        />
+      ) : null}
+
       {editing !== null ? (
         <EditSheet
           // A second edit of another row starts from that row, not the last one.
@@ -2271,6 +2458,7 @@ export default function TrackingScreen({
           />
         ) : sheet.kind === "touchdown" ? (
           <TouchdownSheet
+            gain={touchdownGain}
             onClose={() => setSheet(null)}
             onSubmit={submitTouchdown}
             passcheck={game.passcheck === true}

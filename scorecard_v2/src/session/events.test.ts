@@ -266,6 +266,22 @@ describe("displayOf", () => {
     expect(displayOf({ type: "score", code: "safety" }).event).toBeNull();
   });
 
+  it("keeps the missed try's name but promises no points", () => {
+    // The row is worth 0 (the server reads `payload.missed`), so the
+    // optimistic score must not add a point that never happened.
+    expect(
+      displayOf({ type: "score", code: "pat1", payload: { missed: true } }),
+    ).toMatchObject({ event: "1-Extra-Punkt", value: 0 });
+    expect(
+      displayOf({ type: "score", code: "pat2", payload: { missed: true } }),
+    ).toMatchObject({ event: "2-Extra-Punkte", value: 0 });
+    // A converted try still scores.
+    expect(displayOf({ type: "score", code: "pat1" })).toMatchObject({
+      event: "1-Extra-Punkt",
+      value: 1,
+    });
+  });
+
   it("names the remaining plays the sheets can submit", () => {
     expect(displayOf({ type: "possession", code: "interception" })).toMatchObject(
       { event: "Interception", cop: true, value: 0 },

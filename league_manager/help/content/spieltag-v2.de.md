@@ -66,12 +66,17 @@ wie die bisherige Scorecard
 
    Ein **Touchdown** zählt fürs Team auch **ohne Trikotnummer** (**Ohne
    Nummer**) – die Nummer ist Statistik, nicht die Bedingung für die sechs
-   Punkte. Nach einem Touchdown bleibt der Ball bei der Mannschaft, die den
-   Versuch spielt; **+1** oder **+2** öffnet die Trikotwahl – der
+   Punkte. Seine Zeile trägt den **Raumgewinn bis zur Endzone** als Yards (aus
+   dem aktuellen Ballpunkt vorbelegt, änderbar). Nach einem Touchdown bleibt
+   der Ball bei der Mannschaft, die den Versuch spielt; **+1** oder **+2**
+   öffnet die Trikotwahl – der
    Touchdown-Schütze ist vorausgewählt, du kannst aber den tatsächlichen
    Verwandler wählen (ohne eingetragenen Schützen wählst du frei). Der
    **Quarterback** steht im Versuch als Nummer mit **ändern** daneben;
-   **nicht verwandelt** beendet den Versuch und gibt den Ball ab. Eine
+   **nicht verwandelt** beendet den Versuch und gibt den Ball ab: Der Schritt
+   dafür fragt wie ein unvollständiger Pass optional **Quarterback**,
+   **Empfänger/Läufer** und **Verteidiger** (**Deflection**/**Tackle**) –
+   **Nicht verwandelt speichern** ohne Angabe ist ein Tipp. Eine
    **Strafe** bleibt auch während des Versuchs erreichbar und wiederholt ihn
    vom verschobenen Punkt.
 
@@ -124,10 +129,15 @@ wie die bisherige Scorecard
    Zurücknehmen auch mit **Strg Z**. Auch ein versehentlich gestarteter
    **Halbzeit**- oder **Overtime**-Eintrag lässt sich so zurücknehmen: Das
    Spiel steht danach wieder in der ersten Halbzeit bzw. vor der Overtime. Ein Eintrag, der den Ballbesitz gedreht
-   hat (**Turnover**, **Interception**, **Safety**), nimmt dabei auch diese
-   Drehung zurück – auch wenn er noch nicht gesendet wurde. Der Touchdown
+   hat (**Turnover**, **Interception**, **Safety**, ein **Versuch**), nimmt
+   dabei auch diese Drehung zurück – auch wenn er noch nicht gesendet wurde.
+   Der Touchdown
    selbst dreht den Ball nicht mehr: erst der Versuch (**+1**, **+2**,
-   **nicht verwandelt** oder **Gegner +2**) gibt ihn ab.
+   **nicht verwandelt** oder **Gegner +2**) gibt ihn ab. Nimmst du den
+   **Touchdown** zurück, schließt sich die offene Extrapunkt-Abfrage; nimmst du
+   eine **Extrapunkt**-Zeile zurück, kommt sie mit derselben Mannschaft und
+   derselben vorausgewählten Nummer wieder – ein falscher Tipp ist damit einen
+   Tipp entfernt. Andere Einträge lassen den Ballbesitz, wo er ist.
    **Nur Punkte** blendet alles aus, was keine
    Punkte gebracht hat, damit ein falscher Spielstand schnell zu finden ist.
    **Halbzeit**

@@ -72,7 +72,7 @@ class GameLogCreator(object):
             teamlog.player = self._coerce_player(entry.get("player"))
             # A scoring row is worth its points whether or not it names a
             # player: the score belongs to the team (IFAF R 8-1-1).
-            teamlog.value = self._getValue(entry.get("name"))
+            teamlog.value = self._getValue(entry.get("name"), entry.get("payload"))
             teamlog.half = self.half
             teamlog.author = self.user
             teamlog.save()
@@ -86,8 +86,13 @@ class GameLogCreator(object):
             return entryWithLatestSequence.sequence + 1
         return 1
 
-    def _getValue(self, name):
+    def _getValue(self, name, payload=None):
         # ToDo deleteMe ... info should come via API request
+        # A missed try keeps its name ("1-Extra-Punkt"/"2-Extra-Punkte") but is
+        # worth nothing: the client marks it in the payload, so the value is
+        # never derived from the name alone (a miss must not score).
+        if isinstance(payload, dict) and payload.get("missed") is True:
+            return 0
         return SCORING_EVENT_VALUES.get(name, 0)
 
     @staticmethod

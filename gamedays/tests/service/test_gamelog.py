@@ -301,6 +301,40 @@ class TestGamelogCreator(TestCase):
         assert teamlog.value == 6
         assert teamlog.half == 1
 
+    def test_a_missed_try_is_stored_with_value_zero(self):
+        # "nicht verwandelt" keeps the try's name (the row still says which try
+        # was attempted) but must not score: the client marks the miss in the
+        # payload, and the value follows that, not the name.
+        DBSetup().g62_status_empty()
+        game = Gameinfo.objects.first()
+        team = Team.objects.first()
+        user = User.objects.first()
+        GameLogCreator(
+            game,
+            team,
+            [
+                {
+                    "name": "1-Extra-Punkt",
+                    "player": "23",
+                    "input": "nicht verwandelt · QB #7",
+                    "payload": {"missed": True, "qb": 7},
+                },
+                {"name": "2-Extra-Punkte", "player": "19"},
+            ],
+            user,
+        ).create()
+
+        missed = TeamLog.objects.get(event="1-Extra-Punkt")
+        assert missed.value == 0
+        assert missed.input == "nicht verwandelt · QB #7"
+        assert missed.player == 23
+        # The rows share one submission: the converted try still scores.
+        assert TeamLog.objects.get(event="2-Extra-Punkte").value == 2
+        assert (
+            sum(TeamLog.objects.filter(gameinfo=game).values_list("value", flat=True))
+            == 2
+        )
+
 
 class TestScoringEvents:
     def test_scoring_events_match_the_point_values(self):

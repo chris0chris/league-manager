@@ -950,6 +950,14 @@ class Phone:
         expect(pat).to_be_visible(timeout=20000)
         if extra == "miss":
             pat.get_by_role("button", name="nicht verwandelt", exact=True).click()
+            # Since the field feedback the miss is a row of its own: its
+            # (optional) details are the step right after the result, and
+            # saving it without touching anything is the tap this driver takes.
+            miss_sheet = page.get_by_role(
+                "dialog", name=re.compile(r"nicht verwandelt")
+            )
+            expect(miss_sheet).to_be_visible(timeout=20000)
+            miss_sheet.get_by_role("button", name="Nicht verwandelt speichern").click()
         else:
             pat.get_by_role("button", name=extra, exact=True).click()
             pat_sheet = page.get_by_role("dialog", name=re.compile(r"^Extrapunkt "))

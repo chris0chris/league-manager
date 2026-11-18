@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import type { GameLog } from "../api/types";
 import type { LogRow } from "../components/EventLog";
-import { undoPossessionTeam, undoPossessionTeamOfGroup } from "./possessionUndo";
+import { undoPossessionTeam, undoPossessionTeamOfGroup, undoGroup, undoneTouchdown, undoneTry } from "./possessionUndo";
 
 function log(): GameLog {
   const team = (id: number, name: string) => ({
@@ -48,10 +48,21 @@ describe("undoPossessionTeam", () => {
     expect(undoPossessionTeam(row(), log())).toBe("Ravens");
   });
 
-  it("returns the ball to the scoring team after a touchdown", () => {
+  it("leaves the ball alone after a touchdown: only the try moves it", () => {
+    // The six points do not hand the ball over; the try's result does. So
+    // undoing a touchdown must not pull the ball to the team that scored it —
+    // the kickoff may already have given it to the opponent.
+    expect(undoPossessionTeam(row({ event: "Touchdown" }), log())).toBeNull();
+  });
+
+  it("leaves the ball alone after a pick-six touchdown", () => {
+    // The interception moved the ball; the defensive touchdown did not.
     expect(
-      undoPossessionTeam(row({ event: "Touchdown" }), log()),
-    ).toBe("Ravens");
+      undoPossessionTeam(
+        row({ event: "Touchdown", team: "Wolves", payload: { defense: true } }),
+        log(),
+      ),
+    ).toBeNull();
   });
 
   it("returns the ball to the opponent after an interception", () => {
@@ -65,17 +76,6 @@ describe("undoPossessionTeam", () => {
     expect(
       undoPossessionTeam(row({ event: "Safety (+2)" }), log()),
     ).toBe("Wolves");
-  });
-
-  it("puts the ball back with the opponent of a pick-six touchdown", () => {
-    // The touchdown is credited to the defence (Wolves); before the pick the
-    // ball was with Ravens.
-    expect(
-      undoPossessionTeam(
-        row({ event: "Touchdown", team: "Wolves", payload: { defense: true } }),
-        log(),
-      ),
-    ).toBe("Ravens");
   });
 
   it("puts the ball back with the try's team after a conversion", () => {
@@ -110,11 +110,36 @@ describe("undoPossessionTeam", () => {
 });
 
 describe("a group written by one submission", () => {
-  it("takes the flip from the touchdown row when the play row is undone", () => {
-    // A scoring play and its touchdown are one **submission**: the play wrote
-    // its own event and the touchdown another, so their event ids differ while
-    // the group id matches. Only the touchdown carries the flip, so undoing the
-    // play row (the one with the yards) must still put the ball back.
+  it("takes the flip from the turnover row when the play row is undone", () => {
+    // A failed fourth down writes the play and its Turnover row as one
+    // **submission**: the play wrote its own event and the turnover another, so
+    // their event ids differ while the group id matches. Only the turnover row
+    // moved the ball, so undoing the play row (the one with the yards) must
+    // still put it back.
+    const play = row({
+      key: "p",
+      eventSeq: 9,
+      groupSequence: 9,
+      team: "Wolves",
+      event: "Pass",
+    });
+    const turnover = row({
+      key: "t",
+      eventSeq: 10,
+      groupSequence: 9,
+      team: "Ravens",
+      event: "Turnover",
+    });
+
+    expect(undoPossessionTeam(play, log())).toBeNull();
+    expect(undoPossessionTeamOfGroup(play, [turnover, play], log())).toBe(
+      "Ravens",
+    );
+  });
+
+  it("leaves the ball alone when the group only scored", () => {
+    // The play and its touchdown are one submission, but neither hands the ball
+    // over: the try does that later, in its own submission.
     const play = row({
       key: "p",
       eventSeq: 9,
@@ -130,10 +155,57 @@ describe("a group written by one submission", () => {
       event: "Touchdown",
     });
 
-    expect(undoPossessionTeam(play, log())).toBeNull();
-    expect(undoPossessionTeamOfGroup(play, [touchdown, play], log())).toBe(
-      "Ravens",
-    );
+    expect(undoPossessionTeamOfGroup(play, [touchdown, play], log())).toBeNull();
+  });
+
+  it("finds the touchdown and the try one undo removes", () => {
+    const play = row({
+      key: "p",
+      eventSeq: 9,
+      groupSequence: 9,
+      team: "Ravens",
+      event: "Pass",
+    });
+    const touchdown = row({
+      key: "t",
+      eventSeq: 10,
+      groupSequence: 9,
+      team: "Ravens",
+      event: "Touchdown",
+    });
+    const conversion = row({
+      key: "c",
+      eventSeq: 12,
+      groupSequence: 12,
+      event: "1-Extra-Punkt",
+    });
+
+    expect(undoneTouchdown(play, [touchdown, play, conversion])?.key).toBe("t");
+    expect(undoneTouchdown(conversion, [touchdown, play, conversion])).toBeNull();
+    expect(undoneTry(conversion, [touchdown, play, conversion])?.key).toBe("c");
+    expect(undoneTry(play, [touchdown, play, conversion])).toBeNull();
+  });
+
+  it("does not read a deleted row's group", () => {
+    const play = row({
+      key: "p",
+      eventSeq: 9,
+      groupSequence: 9,
+      team: "Wolves",
+      event: "Pass",
+    });
+    const turnover = row({
+      key: "t",
+      eventSeq: 10,
+      groupSequence: 9,
+      team: "Ravens",
+      event: "Turnover",
+      isDeleted: true,
+    });
+
+    expect(undoGroup(play, [turnover, play]).map((entry) => entry.key)).toEqual([
+      "p",
+    ]);
   });
 
   it("does not group rows of different submissions", () => {

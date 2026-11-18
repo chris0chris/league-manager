@@ -346,6 +346,12 @@ function inputOf(envelope: EventEnvelope): string | null {
 
 /** The points an existing row contributes; a jersey is optional detail. */
 function pointsOfRow(event: GameLogEvent): number {
+  // A missed try keeps the try's name but is worth nothing (the server stored
+  // value 0 from `payload.missed`), so a correction of that row must not take
+  // a point off the score.
+  if (event.payload?.missed === true) {
+    return 0;
+  }
   return SCORING_VALUES[event.event] ?? 0;
 }
 

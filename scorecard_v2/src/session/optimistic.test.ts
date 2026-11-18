@@ -148,6 +148,36 @@ describe("replayOps", () => {
     expect(shown.home.score).toBe(0);
   });
 
+  it("does not take a point back when a missed try is corrected", () => {
+    // The miss is on the board as a row worth nothing (the server stored value
+    // 0); undoing it must leave the six points of the touchdown alone.
+    const base = log({
+      events: [
+        event({
+          id: 11,
+          sequence: 2,
+          seq: 2,
+          event: "1-Extra-Punkt",
+          player: 23,
+          input: "nicht verwandelt",
+          payload: { missed: true },
+        }),
+        event({ id: 10, sequence: 1, seq: 1, player: 23 }),
+      ],
+      home: team({ score: 6, firsthalf: { score: 6, entries: [] } }),
+    });
+
+    const { log: shown } = replayOps(base, [
+      play(
+        [{ type: "correction", code: "undo", payload: { undo_of: 2 } }],
+        { kind: "correction" },
+      ),
+    ]);
+
+    expect(shown.home.score).toBe(6);
+    expect(shown.events?.find((entry) => entry.seq === 2)?.isDeleted).toBe(true);
+  });
+
   it("ignores a correction whose target is not in the base log", () => {
     const base = log({ home: team({ score: 6 }) });
 

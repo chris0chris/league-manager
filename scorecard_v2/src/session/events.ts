@@ -299,6 +299,12 @@ export function displayOf(
       if (name === undefined) {
         return none();
       }
+      // A missed try keeps the try's name but is worth nothing: the server
+      // derives the row's value from `payload.missed`, so the optimistic score
+      // must not promise the points (gamelog.py, projector.py `_apply_score`).
+      if (envelope.payload?.missed === true) {
+        return { ...none(), event: name };
+      }
       return { ...none(), event: name, value: scoring[name] ?? 0 };
     }
     case "penalty":

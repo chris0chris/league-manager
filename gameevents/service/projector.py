@@ -364,8 +364,15 @@ def _apply_play(state: GameStateValue, event: GameEventValue) -> Projection:
 
 
 def _apply_score(state: GameStateValue, event: GameEventValue) -> Projection:
+    payload = event.payload or {}
+    # A missed try keeps the try's name but scores nothing: the official records
+    # who threw, who was meant and who deflected/tackled it, and the six points
+    # of the touchdown must not be followed by a phantom point. The client sends
+    # `payload.missed` (see `MissedPatSheet`), so the value never comes from the
+    # name alone.
+    missed = event.code in ("pat1", "pat2") and payload.get("missed") is True
     if event.code == "safety":
-        points = event.payload.get("points")
+        points = payload.get("points")
         if points not in (1, 2):
             raise UnsupportedEventCode(
                 f"safety needs payload.points 1 or 2, got {points!r}"
@@ -388,15 +395,20 @@ def _apply_score(state: GameStateValue, event: GameEventValue) -> Projection:
     # A score is a team score (IFAF R 8-1-1): the jersey is optional detail,
     # never a condition for the points. v1 stored value 0 without a number,
     # which made a team safety or a defensive score unreachable.
-    row_value = value
+    row_value = 0 if missed else value
     row = _row(
         event,
         name,
         side=side,
         player=event.player,
         value=row_value,
-        input=_play_detail(event) if name == "Touchdown" else None,
+        # A missed try's text ("nicht verwandelt · QB #23") is the record the
+        # statistics read; the touchdown keeps its yards.
+        input=(_play_detail(event) if name == "Touchdown" or missed else None),
     )
+
+    if row_value == 0:
+        return _projection(_advance(state, event), [row])
 
     changes: dict[str, Any] = {}
     if side == "home":

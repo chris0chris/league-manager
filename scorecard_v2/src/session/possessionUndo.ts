@@ -12,8 +12,15 @@ import type { GameLog } from "../api/types";
 import type { LogRow } from "../components/EventLog";
 import { sideOfName } from "./events";
 
-/** Rows whose `team` was the offence *before* the ball moved. */
-const OLD_POSSESSION = new Set(["Turnover", "Touchdown", "Overtime"]);
+/**
+ * Rows whose `team` was the offence *before* the ball moved.
+ *
+ * A touchdown is **not** one of them: since the try belongs to the scoring
+ * team, only the try's result hands the ball over. Undoing a touchdown must
+ * therefore leave the marker alone — the ball is where the last entry put it,
+ * which may well be the opponent after the kickoff.
+ */
+const OLD_POSSESSION = new Set(["Turnover", "Overtime"]);
 
 /** The try's rows: they end the try and hand the ball to the other team. */
 const TRY_ROWS = new Set(["1-Extra-Punkt", "2-Extra-Punkte"]);
@@ -40,11 +47,6 @@ export function undoPossessionTeam(row: LogRow, log: GameLog): string | null {
     return null;
   }
   if (OLD_POSSESSION.has(row.event)) {
-    // A pick-six touchdown is credited to the defence; the ball was with the
-    // offence before the interception.
-    if (row.event === "Touchdown" && row.payload?.defense === true) {
-      return side === "home" ? log.away.name : log.home.name;
-    }
     return row.team;
   }
   if (TRY_ROWS.has(row.event)) {
@@ -67,12 +69,10 @@ export function undoPossessionTeam(row: LogRow, log: GameLog): string | null {
 /**
  * The same answer for a **group** of rows written by one submission.
  *
- * A scoring play is two rows since the touchdown became the play's result
- * (meeting 2026-11-05, 53:05): the play and its touchdown share one
- * `groupSequence` and undoing either removes both. Only the touchdown row
- * carries the flip, so asking the row alone would leave the ball with the other
- * team when the operator undoes the play row - the one the log shows with the
- * yards.
+ * A failed fourth down writes the play and its **Turnover** row in one
+ * submission (meeting 2026-11-05, 53:05): they share one `groupSequence` and
+ * undoing either removes both. Only the turnover row moved the ball, so asking
+ * the play row alone would leave the ball with the other team.
  *
  * The two rows have **different** `eventSeq` values (their own events); they
  * are one group by `groupSequence`. Grouping by the event id found no sibling
@@ -90,18 +90,50 @@ export function undoPossessionTeamOfGroup(
   if (direct !== null || row.groupSequence === 0) {
     return direct;
   }
-  for (const sibling of rows) {
-    // by key, not identity: the screen rebuilds the row objects on every log
-    if (
-      sibling.key !== row.key &&
-      !sibling.isDeleted &&
-      sibling.groupSequence === row.groupSequence
-    ) {
-      const team = undoPossessionTeam(sibling, log);
-      if (team !== null) {
-        return team;
-      }
+  for (const sibling of undoGroup(row, rows)) {
+    if (sibling.key === row.key) {
+      continue;
+    }
+    const team = undoPossessionTeam(sibling, log);
+    if (team !== null) {
+      return team;
     }
   }
   return null;
+}
+
+/**
+ * Every row one undo removes: the row itself plus the live siblings of its
+ * submission.
+ *
+ * A scoring play writes the play and its touchdown in one submission, so
+ * undoing either removes both. The rows are grouped by `groupSequence` (the
+ * `TeamLog.sequence`), never by the event id: the two rows carry different
+ * events. A row in the shared bucket (0) has no group of its own.
+ */
+export function undoGroup(row: LogRow, rows: LogRow[]): LogRow[] {
+  if (row.groupSequence === 0) {
+    return [row];
+  }
+  return rows.filter(
+    (entry) => !entry.isDeleted && entry.groupSequence === row.groupSequence,
+  );
+}
+
+/** The touchdown row one undo removes, or `null` for an entry without one. */
+export function undoneTouchdown(row: LogRow, rows: LogRow[]): LogRow | null {
+  return (
+    undoGroup(row, rows).find((entry) => entry.event === "Touchdown") ?? null
+  );
+}
+
+/**
+ * The try row one undo removes, or `null`.
+ *
+ * A conversion is written as its own submission after the touchdown, so this
+ * is the row that says the try has been played: undoing it reopens the
+ * extra-point prompt.
+ */
+export function undoneTry(row: LogRow, rows: LogRow[]): LogRow | null {
+  return undoGroup(row, rows).find((entry) => TRY_ROWS.has(entry.event)) ?? null;
 }

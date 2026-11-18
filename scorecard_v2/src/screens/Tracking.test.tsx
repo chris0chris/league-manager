@@ -958,6 +958,503 @@ describe("Tracking undo", () => {
   });
 });
 
+describe("undo keeps the team in focus", () => {
+  it("leaves the ball with the team that has it when another team's row is undone", async () => {
+    // Ravens have the ball; the log still holds an earlier Wolves touchdown.
+    // Undoing it must not pull the ball to Wolves (field feedback: the focus
+    // stays with the current team).
+    const original = makeLog({
+      inPossession: "Ravens",
+      events: [
+        logEvent({
+          id: 11,
+          sequence: 2,
+          seq: 2,
+          event: "Turnover",
+          team: "Wolves",
+          cop: true,
+        }),
+        logEvent({
+          id: 10,
+          sequence: 1,
+          seq: 1,
+          event: "Touchdown",
+          team: "Wolves",
+          player: 11,
+        }),
+      ],
+    });
+    routeGets({ log: original });
+    answerAppend(original);
+    renderTracking({ log: original });
+
+    await clickUndo(/Rückgängig: Touchdown Wolves/);
+
+    await waitFor(() => expect(apiPostMock).toHaveBeenCalled());
+    expect(sentPossessions()).toEqual([]);
+    expect(screen.getByRole("button", { name: /^Ravens/ })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("puts the ball back when the undone row handed it over", async () => {
+    const original = makeLog({
+      inPossession: "Wolves",
+      events: [
+        logEvent({
+          id: 11,
+          sequence: 2,
+          seq: 2,
+          event: "Turnover",
+          team: "Ravens",
+          cop: true,
+        }),
+      ],
+    });
+    routeGets({ log: original });
+    answerAppend(original);
+    renderTracking({ log: original });
+
+    await clickUndo(/Rückgängig: Turnover Ravens/);
+
+    await waitFor(() => expect(sentPossessions()).toEqual(["home"]));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /^Ravens/ })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      ),
+    );
+  });
+});
+
+describe("undoing the touchdown that opened the extra point", () => {
+  /** A log whose newest row is the touchdown the prompt belongs to. */
+  function scoredLog(): GameLog {
+    return makeLog({
+      inPossession: "Ravens",
+      events: [
+        logEvent({
+          id: 20,
+          sequence: 3,
+          seq: 20,
+          event: "Touchdown",
+          team: "Ravens",
+          player: 23,
+        }),
+      ],
+    });
+  }
+
+  async function score() {
+    const user = userEvent.setup();
+    await openSheet(user, /^Touchdown Ravens$/);
+    await pickJersey(user, 23);
+    await user.click(screen.getByRole("button", { name: "Speichern" }));
+    await screen.findByRole("group", { name: "Extrapunkt Ravens" });
+    return user;
+  }
+
+  it("closes the prompt", async () => {
+    apiGetMock.mockResolvedValue(ROSTER);
+    const log = scoredLog();
+    routeGets({ log });
+    answerAppend(log);
+    renderTracking();
+    await score();
+
+    await clickUndo(/Rückgängig: Touchdown Ravens/);
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("group", { name: "Extrapunkt Ravens" }),
+      ).toBeNull(),
+    );
+    // The touchdown tile is back and the composer is free again.
+    expect(
+      screen.getByRole("button", { name: /^Touchdown Ravens$/ }),
+    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Halbzeit" })).toBeEnabled();
+  });
+
+  it("closes an open jersey step with it", async () => {
+    apiGetMock.mockResolvedValue(ROSTER);
+    const log = scoredLog();
+    routeGets({ log });
+    answerAppend(log);
+    renderTracking();
+    const user = await score();
+    await user.click(
+      within(
+        screen.getByRole("group", { name: "Extrapunkt Ravens" }),
+      ).getByRole("button", { name: "+1" }),
+    );
+    expect(
+      screen.getByRole("dialog", { name: "Extrapunkt Ravens" }),
+    ).toBeInTheDocument();
+
+    await clickUndo(/Rückgängig: Touchdown Ravens/);
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    );
+    expect(
+      screen.queryByRole("group", { name: "Extrapunkt Ravens" }),
+    ).toBeNull();
+  });
+
+  it("keeps the prompt when another entry is undone", async () => {
+    // The prompt belongs to the newest touchdown; undoing an older score of the
+    // other team must not close it (the ball and the try are untouched).
+    const log = makeLog({
+      inPossession: "Ravens",
+      events: [
+        logEvent({
+          id: 20,
+          sequence: 2,
+          seq: 20,
+          event: "Touchdown",
+          team: "Ravens",
+          player: 23,
+        }),
+        logEvent({
+          id: 10,
+          sequence: 1,
+          seq: 10,
+          event: "Touchdown",
+          team: "Wolves",
+          player: 11,
+        }),
+      ],
+    });
+    apiGetMock.mockResolvedValue(ROSTER);
+    routeGets({ log });
+    answerAppend(log);
+    renderTracking();
+    await score();
+
+    await clickUndo(/Rückgängig: Touchdown Wolves/);
+
+    expect(
+      screen.getByRole("group", { name: "Extrapunkt Ravens" }),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("undoing an extra point asks again", () => {
+  function tryLog(row: GameLogEvent): GameLog {
+    return makeLog({
+      inPossession: "Wolves",
+      events: [
+        row,
+        logEvent({
+          id: 20,
+          sequence: 2,
+          seq: 20,
+          event: "Touchdown",
+          team: "Ravens",
+          player: 23,
+        }),
+      ],
+    });
+  }
+
+  it("reopens the prompt for a converted try", async () => {
+    const original = tryLog(
+      logEvent({
+        id: 21,
+        sequence: 3,
+        seq: 21,
+        event: "1-Extra-Punkt",
+        team: "Ravens",
+        player: 23,
+      }),
+    );
+    routeGets({ log: original });
+    answerAppend(original);
+    renderTracking({ log: original });
+
+    await clickUndo(/Rückgängig: 1 Extrapunkt Ravens/);
+
+    // Mis-tapped? The result choice comes back with the same team and the same
+    // default jersey, and the ball returns to the scoring team for the retry.
+    expect(
+      await screen.findByRole("group", { name: "Extrapunkt Ravens" }),
+    ).toHaveTextContent("#23");
+    await waitFor(() => expect(sentPossessions()).toEqual(["home"]));
+  });
+
+  it("reopens the prompt for a missed try", async () => {
+    const original = tryLog(
+      logEvent({
+        id: 21,
+        sequence: 3,
+        seq: 21,
+        event: "1-Extra-Punkt",
+        team: "Ravens",
+        player: 23,
+        input: "nicht verwandelt",
+        payload: { missed: true },
+      }),
+    );
+    routeGets({ log: original });
+    answerAppend(original);
+    renderTracking({ log: original });
+
+    // A miss is named as one in the log ("… nicht verwandelt …"), so the undo
+    // button that reopens the prompt carries that label.
+    await clickUndo(/Rückgängig: 1 Extrapunkt nicht verwandelt Ravens/);
+
+    expect(
+      await screen.findByRole("group", { name: "Extrapunkt Ravens" }),
+    ).toBeInTheDocument();
+    await waitFor(() => expect(sentPossessions()).toEqual(["home"]));
+  });
+
+  it("reopens the scoring team's prompt after a defensive try", async () => {
+    const original = tryLog(
+      logEvent({
+        id: 21,
+        sequence: 3,
+        seq: 21,
+        event: "2-Extra-Punkte",
+        team: "Wolves",
+        input: "Gegner",
+        payload: { try_defense: true },
+      }),
+    );
+    routeGets({ log: original });
+    answerAppend(original);
+    renderTracking({ log: original });
+
+    await clickUndo(/Rückgängig: 2 Extrapunkte Wolves/);
+
+    expect(
+      await screen.findByRole("group", { name: "Extrapunkt Ravens" }),
+    ).toHaveTextContent("#23");
+  });
+
+  it("does not reopen when the touchdown is no longer in the log", async () => {
+    // A legacy row without its score: there is no team to ask for.
+    const original = makeLog({
+      inPossession: "Wolves",
+      events: [
+        logEvent({
+          id: 21,
+          sequence: 3,
+          seq: 21,
+          event: "1-Extra-Punkt",
+          team: "Ravens",
+          player: 23,
+        }),
+      ],
+    });
+    routeGets({ log: original });
+    answerAppend(original);
+    renderTracking({ log: original });
+
+    await clickUndo(/Rückgängig: 1 Extrapunkt Ravens/);
+
+    await waitFor(() => expect(sentPossessions()).toEqual(["home"]));
+    expect(
+      screen.queryByRole("group", { name: /^Extrapunkt/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the flip origin of the try it reopens", async () => {
+    // The try was written in this session, so undoing it asks again with the
+    // touchdown's op as the flip origin - a new flip then stays linked to it.
+    const original = makeLog({
+      inPossession: "Ravens",
+      events: [
+        logEvent({
+          id: 21,
+          sequence: 3,
+          seq: 21,
+          event: "1-Extra-Punkt",
+          team: "Ravens",
+          player: 23,
+        }),
+        logEvent({
+          id: 20,
+          sequence: 2,
+          seq: 20,
+          event: "Touchdown",
+          team: "Ravens",
+          player: 23,
+        }),
+      ],
+    });
+    routeGets({ log: original });
+    answerAppend(original);
+    renderTracking({ log: original });
+    const user = userEvent.setup();
+
+    await openSheet(user, /^Touchdown Ravens$/);
+    await pickJersey(user, 7);
+    await user.click(screen.getByRole("button", { name: "Speichern" }));
+    const prompt = await screen.findByRole("group", {
+      name: "Extrapunkt Ravens",
+    });
+    await user.click(within(prompt).getByRole("button", { name: "+1" }));
+    await user.click(
+      within(
+        screen.getByRole("dialog", { name: "Extrapunkt Ravens" }),
+      ).getByRole("button", { name: "Speichern" }),
+    );
+
+    await clickUndo(/Rückgängig: 1 Extrapunkt Ravens/);
+
+    // Same team, same squad number, and the prompt is the one that was open.
+    expect(
+      await screen.findByRole("group", { name: "Extrapunkt Ravens" }),
+    ).toHaveTextContent("#23");
+  });
+
+  it("does not reopen for an in-place correction", async () => {
+    const original = tryLog(
+      logEvent({
+        id: 21,
+        sequence: 3,
+        seq: 21,
+        event: "1-Extra-Punkt",
+        team: "Ravens",
+        player: 23,
+      }),
+    );
+    routeGets({ log: original });
+    answerAppend(original);
+    renderTracking({ log: original });
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("button", { name: "Ändern: 1 Extrapunkt Ravens" }),
+    );
+    await user.click(
+      await within(
+        screen.getByRole("dialog", { name: "1-Extra-Punkt ändern" }),
+      ).findByRole("button", { name: "Trikot 7, Meier" }),
+    );
+    await user.click(screen.getByRole("button", { name: "Änderung speichern" }));
+
+    // The correction wrote the replacement; asking again would invite a second
+    // conversion for the same try.
+    await waitFor(() => expect(apiPostMock).toHaveBeenCalledTimes(2));
+    expect(screen.queryByRole("group", { name: /^Extrapunkt/ })).toBeNull();
+  });
+
+  it("keeps the miss step open when its write is refused", async () => {
+    apiGetMock.mockResolvedValue(ROSTER);
+    answerAppend(makeLog({ inPossession: "Ravens" }));
+    renderTracking();
+    const user = userEvent.setup();
+
+    await openSheet(user, /^Touchdown Ravens$/);
+    await pickJersey(user, 23);
+    await user.click(screen.getByRole("button", { name: "Speichern" }));
+    const pat = await screen.findByRole("group", { name: "Extrapunkt Ravens" });
+    await user.click(within(pat).getByRole("button", { name: "nicht verwandelt" }));
+    apiPostMock.mockRejectedValueOnce(
+      new ApiError(500, { detail: "Server weg" }, "Server weg"),
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Nicht verwandelt speichern" }),
+    );
+
+    expect(await screen.findByText("Server weg")).toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: /nicht verwandelt/ }),
+    ).toBeInTheDocument();
+    // Nothing was decided: the result choice is still behind the sheet.
+    expect(
+      within(pat).getByRole("button", { name: "nicht verwandelt" }),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("the touchdown's Raumgewinn", () => {
+  const spotLog = (): GameLog =>
+    makeLog({
+      inPossession: "Ravens",
+      events: [
+        logEvent({
+          id: 5,
+          sequence: 1,
+          seq: 1,
+          event: "Feldposition",
+          team: "Ravens",
+          input: "B14",
+          payload: { ballOn: 36, down: 1, goal: true },
+        }),
+      ],
+    });
+
+  it("pre-fills the sheet from the remaining yards and saves them", async () => {
+    apiGetMock.mockResolvedValue(ROSTER);
+    const log = spotLog();
+    routeGets({ log });
+    answerAppend(log);
+    renderTracking({ log });
+    const user = userEvent.setup();
+
+    await openSheet(user, /^Touchdown Ravens$/);
+    // B14: crossing the goal line is worth 14 yards.
+    expect(screen.getByRole("textbox", { name: /Raumgewinn/ })).toHaveValue(
+      "14",
+    );
+    await pickJersey(user, 23);
+    await user.click(screen.getByRole("button", { name: "Speichern" }));
+
+    expect(apiPostMock).toHaveBeenCalledWith("/api/game/42/events", {
+      events: [
+        {
+          type: "score",
+          code: "touchdown",
+          side: "home",
+          player: 23,
+          period: 1,
+          payload: { yards: 14, input: "14 Yards" },
+        },
+      ],
+      client_id: expect.any(String),
+    });
+  });
+
+  it("gives the touchdown row of a scoring play the gain", async () => {
+    apiGetMock.mockResolvedValue(ROSTER);
+    const log = spotLog();
+    routeGets({ log });
+    answerAppend(log);
+    renderTracking({ log });
+    const user = userEvent.setup();
+
+    const sheet = await openPlay(user, "Run");
+    await wizardNext(user); // type → result
+    await user.click(within(sheet).getByRole("button", { name: "Touchdown" }));
+    await wizardNext(user); // result → player (the field position comes last)
+    await user.click(
+      await within(sheet).findByRole("button", { name: "Trikot 23, Schulz" }),
+    );
+    await wizardNext(user); // player → field position, pre-filled with the gain
+    await user.click(
+      within(sheet).getByRole("button", { name: "Spielzug speichern" }),
+    );
+
+    await waitFor(() => expect(apiPostMock).toHaveBeenCalled());
+    const bodies = apiPostMock.mock.calls.map(
+      (call) => call[1] as { events?: { code?: string; payload?: unknown }[] },
+    );
+    const append = bodies.find((body) =>
+      body.events?.some((event) => event.code === "run"),
+    );
+    // The play carries the yards; the touchdown row shows the same gain.
+    expect(append?.events?.[1]).toMatchObject({
+      code: "touchdown",
+      payload: { yards: 14, input: "14 Yards" },
+    });
+  });
+});
+
 describe("Tracking finalize", () => {
   it("hands the finalise flow to the caller", async () => {
     const onFinalize = vi.fn();
@@ -1101,6 +1598,28 @@ async function pickJersey(
   await user.click(
     await screen.findByRole("button", {
       name: new RegExp(`^Trikotnummer ${jersey}`),
+    }),
+  );
+}
+
+/**
+ * Answer the open extra point as missed.
+ *
+ * "nicht verwandelt" opens the miss step (the same facts an incomplete pass
+ * records, all optional); its save button is the one tap that skips them.
+ */
+async function missTry(
+  user: ReturnType<typeof userEvent.setup>,
+): Promise<void> {
+  await user.click(
+    within(await screen.findByRole("group", { name: /^Extrapunkt/ })).getByRole(
+      "button",
+      { name: "nicht verwandelt" },
+    ),
+  );
+  await user.click(
+    await screen.findByRole("button", {
+      name: "Nicht verwandelt speichern",
     }),
   );
 }
@@ -1516,7 +2035,16 @@ describe("Tracking touchdown entry", () => {
 
     expect(apiPostMock).toHaveBeenCalledWith("/api/game/42/events", {
       events: [
-        { type: "score", code: "touchdown", side: "home", player: 23, period: 1 },
+        {
+          type: "score",
+          code: "touchdown",
+          side: "home",
+          player: 23,
+          period: 1,
+          // The spot was the own 5: the remaining 45 yards are the gain the
+          // row shows.
+          payload: { yards: 45, input: "45 Yards" },
+        },
       ],
       client_id: expect.any(String),
     });
@@ -2250,7 +2778,94 @@ describe("Tracking extra point after the try", () => {
     expect(apiPostMock.mock.calls.length).toBe(writes);
   });
 
-  it("writes no entry for a missed try, but hands the ball over", async () => {
+  it("records the missed try in a value-0 row and hands the ball over", async () => {
+    apiGetMock.mockResolvedValue(ROSTER);
+    answerAppend(makeLog({ inPossession: "Ravens" }));
+    renderTracking();
+    const user = userEvent.setup();
+
+    const pat = await scoreTouchdown(user);
+    await user.click(within(pat).getByRole("button", { name: "nicht verwandelt" }));
+
+    // The miss step: the try is over, its details are optional.
+    expect(
+      await screen.findByRole("dialog", { name: /nicht verwandelt/ }),
+    ).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Nicht verwandelt speichern" }),
+    );
+
+    await waitFor(() =>
+      expect(apiPostMock).toHaveBeenCalledWith("/api/game/42/events", {
+        events: [
+          {
+            type: "score",
+            code: "pat1",
+            side: "home",
+            player: 23,
+            period: 1,
+            payload: { missed: true, input: "nicht verwandelt" },
+          },
+        ],
+        client_id: expect.any(String),
+      }),
+    );
+    // The try ends: the kickoff hands the ball over, and the prompt closes.
+    await waitFor(() => expect(sentPossessions()).toEqual(["away"]));
+    expect(
+      screen.queryByRole("group", { name: "Extrapunkt Ravens" }),
+    ).toBeNull();
+  });
+
+  it("keeps the miss details: thrower, receiver and defender", async () => {
+    apiGetMock.mockResolvedValue(ROSTER);
+    answerAppend(makeLog({ inPossession: "Ravens" }));
+    globalThis.localStorage.setItem("scorecard:v2:qb:42:home", "7");
+    renderTracking();
+    const user = userEvent.setup();
+
+    const pat = await scoreTouchdown(user);
+    await user.click(within(pat).getByRole("button", { name: "nicht verwandelt" }));
+    const sheet = await screen.findByRole("dialog", {
+      name: /nicht verwandelt/,
+    });
+    // The two-point try that was attempted, the intended receiver and the
+    // defender who deflected it — the same facts as an incomplete pass.
+    await user.click(within(sheet).getByRole("button", { name: "2 Punkte" }));
+    await user.click(
+      within(sheet).getByRole("button", { name: /^Trikot 23, Schulz/ }),
+    );
+    await user.click(within(sheet).getByRole("button", { name: "Deflection" }));
+    await user.click(
+      within(sheet).getByRole("button", { name: /^Defense 11, Wolf/ }),
+    );
+    await user.click(
+      within(sheet).getByRole("button", { name: "Nicht verwandelt speichern" }),
+    );
+
+    await waitFor(() =>
+      expect(apiPostMock).toHaveBeenCalledWith("/api/game/42/events", {
+        events: [
+          {
+            type: "score",
+            code: "pat2",
+            side: "home",
+            player: 23,
+            period: 1,
+            payload: {
+              missed: true,
+              qb: 7,
+              defense: { player: 11, deflection: true },
+              input: "nicht verwandelt · QB #7 · Deflection #11",
+            },
+          },
+        ],
+        client_id: expect.any(String),
+      }),
+    );
+  });
+
+  it("returns to the result choice when the miss step is closed", async () => {
     apiGetMock.mockResolvedValue(ROSTER);
     answerAppend(makeLog({ inPossession: "Ravens" }));
     renderTracking();
@@ -2259,11 +2874,17 @@ describe("Tracking extra point after the try", () => {
     const pat = await scoreTouchdown(user);
     const writes = sentWrites().length;
     await user.click(within(pat).getByRole("button", { name: "nicht verwandelt" }));
+    await user.click(
+      within(
+        screen.getByRole("dialog", { name: /nicht verwandelt/ }),
+      ).getByRole("button", { name: "Schließen" }),
+    );
 
-    expect(screen.queryByRole("group", { name: "Extrapunkt Ravens" })).toBeNull();
+    // Nothing written, nothing decided: the try is still open.
+    expect(
+      within(pat).getByRole("button", { name: "nicht verwandelt" }),
+    ).toBeInTheDocument();
     expect(sentWrites().length).toBe(writes);
-    // The miss writes no row; the possession change is its only record.
-    await waitFor(() => expect(sentPossessions()).toEqual(["away"]));
   });
 
   it("locks the entries until the extra point is answered", async () => {
@@ -2281,6 +2902,9 @@ describe("Tracking extra point after the try", () => {
     expect(screen.getByRole("button", { name: "Halbzeit" })).toBeDisabled();
 
     await user.click(within(pat).getByRole("button", { name: "nicht verwandelt" }));
+    await user.click(
+      screen.getByRole("button", { name: "Nicht verwandelt speichern" }),
+    );
     expect(screen.getByRole("button", { name: "1st Down" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Halbzeit" })).toBeEnabled();
   });
@@ -2305,6 +2929,9 @@ describe("Tracking extra point after the try", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Extrapunkt");
 
     await user.click(within(pat).getByRole("button", { name: "nicht verwandelt" }));
+    await user.click(
+      screen.getByRole("button", { name: "Nicht verwandelt speichern" }),
+    );
     await user.click(screen.getByRole("button", { name: "Spiel beenden" }));
     expect(onFinalize).toHaveBeenCalledTimes(1);
   });
@@ -2459,12 +3086,7 @@ describe("Tracking entry lifecycle", () => {
     await pickJersey(user, 23);
     await user.click(screen.getByRole("button", { name: "Speichern" }));
     // The try is played: no conversion, so the touchdown tile comes back.
-    await user.click(
-      within(await screen.findByRole("group", { name: /^Extrapunkt/ })).getByRole(
-        "button",
-        { name: "nicht verwandelt" },
-      ),
-    );
+    await missTry(user);
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
     );
@@ -2482,10 +3104,22 @@ describe("Tracking entry lifecycle", () => {
     await pickJersey(user, 11);
     await user.click(screen.getByRole("button", { name: "Speichern" }));
 
-    await waitFor(() => expect(sentWrites()).toHaveLength(2));
-    expect(sentWrites()[1]).toEqual({
+    await waitFor(() => expect(sentWrites()).toHaveLength(3));
+    // The missed try is a row of its own between the two touchdowns.
+    expect(
+      (sentWrites()[1] as { events: { payload?: Record<string, unknown> }[] })
+        .events[0].payload,
+    ).toMatchObject({ missed: true });
+    expect(sentWrites()[2]).toEqual({
       events: [
-        { type: "score", code: "touchdown", side: "away", player: 11, period: 1 },
+        {
+          type: "score",
+          code: "touchdown",
+          side: "away",
+          player: 11,
+          period: 1,
+          payload: { yards: 45, input: "45 Yards" },
+        },
       ],
       client_id: expect.any(String),
     });
@@ -2504,7 +3138,14 @@ describe("Tracking entry lifecycle", () => {
 
     expect(apiPostMock).toHaveBeenCalledWith("/api/game/42/events", {
       events: [
-        { type: "score", code: "touchdown", side: "home", player: 51, period: 1 },
+        {
+          type: "score",
+          code: "touchdown",
+          side: "home",
+          player: 51,
+          period: 1,
+          payload: { yards: 45, input: "45 Yards" },
+        },
       ],
       client_id: expect.any(String),
     });
@@ -2608,12 +3249,7 @@ describe("Tracking possession flip", () => {
     await pickJersey(user, 23);
     await user.click(screen.getByRole("button", { name: "Speichern" }));
     // The try is played: no conversion, so the touchdown tile comes back.
-    await user.click(
-      within(await screen.findByRole("group", { name: /^Extrapunkt/ })).getByRole(
-        "button",
-        { name: "nicht verwandelt" },
-      ),
-    );
+    await missTry(user);
 
     expect(apiPostMock).toHaveBeenCalledWith("/api/game/42/events", {
       events: [{ type: "possession", code: "away", side: "away" }],
@@ -2784,12 +3420,7 @@ describe("Tracking possession flip", () => {
     await pickJersey(user, 23);
     await user.click(screen.getByRole("button", { name: "Speichern" }));
     // The try is played: no conversion, so the touchdown tile comes back.
-    await user.click(
-      within(await screen.findByRole("group", { name: /^Extrapunkt/ })).getByRole(
-        "button",
-        { name: "nicht verwandelt" },
-      ),
-    );
+    await missTry(user);
 
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent(
@@ -2845,12 +3476,7 @@ describe("Tracking possession flip", () => {
     await pickJersey(user, 23);
     await user.click(screen.getByRole("button", { name: "Speichern" }));
     // The try is played: no conversion, so the touchdown tile comes back.
-    await user.click(
-      within(await screen.findByRole("group", { name: /^Extrapunkt/ })).getByRole(
-        "button",
-        { name: "nicht verwandelt" },
-      ),
-    );
+    await missTry(user);
 
     await waitFor(() =>
       expect(
@@ -2861,8 +3487,9 @@ describe("Tracking possession flip", () => {
     await user.click(screen.getByRole("button", { name: "1st Down" }));
     await screen.findByRole("status", { name: "Gespeichert" });
 
-    // The play, the rejected flip and the next play: three appends.
-    await waitFor(() => expect(apiPostMock).toHaveBeenCalledTimes(3));
+    // The play, the missed try, the rejected flip and the next play: four
+    // appends.
+    await waitFor(() => expect(apiPostMock).toHaveBeenCalledTimes(4));
     expect(apiPostMock).toHaveBeenLastCalledWith("/api/game/42/events", {
       events: [
         {
@@ -2933,17 +3560,17 @@ describe("Tracking possession flip", () => {
     await pickJersey(user, 23);
     await user.click(screen.getByRole("button", { name: "Speichern" }));
     // The try is open; its miss is what moves the ball to Wolves.
-    await user.click(
-      within(await screen.findByRole("group", { name: /^Extrapunkt/ })).getByRole(
-        "button",
-        { name: "nicht verwandelt" },
-      ),
-    );
+    await missTry(user);
 
-    const tile = await screen.findByRole("button", {
-      name: /^Touchdown Wolves$/,
-    });
-    expect(tile).toBeDisabled();
+    // The ball is with Wolves while the flip is still unanswered, and the
+    // miss sheet waits for that write instead of pretending it is done.
+    expect(screen.getByRole("button", { name: /^Wolves/ })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(
+      screen.getByRole("dialog", { name: /nicht verwandelt/ }),
+    ).toHaveAttribute("aria-busy", "true");
     expect(screen.getByRole("button", { name: "Strafe" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Safety" })).toBeDisabled();
   });
@@ -4289,9 +4916,9 @@ describe("editing a scoring play's group", () => {
 });
 
 describe("undoing a scoring play", () => {
-  it("puts the ball back when the play row is undone, not only its touchdown", async () => {
+  it("undoes the play and its touchdown without moving the ball", async () => {
     const original = makeLog({
-      inPossession: "Ravens",
+      inPossession: "Wolves",
       events: [
         logEvent({
           id: 10,
@@ -4324,21 +4951,72 @@ describe("undoing a scoring play", () => {
       screen.getByRole("button", { name: /^Rückgängig: Pass/ }),
     );
 
-    await waitFor(() => expect(apiPostMock).toHaveBeenCalledTimes(2));
+    // One correction names the play's own event (9), not its sibling's (10):
+    // the server removes the whole submission.
+    await waitFor(() => expect(apiPostMock).toHaveBeenCalledTimes(1));
     const bodies = apiPostMock.mock.calls.map(
       (call) => call[1] as { events: { type: string; code?: string; payload?: unknown }[] },
     );
     expect(bodies[0].events[0]).toMatchObject({
       type: "correction",
       code: "undo",
-      // the play row's own event (9), not its sibling's (10)
       payload: { undo_of: 9 },
     });
-    // the ball comes back with the group, though the play row carried no flip
-    expect(bodies[1].events[0]).toMatchObject({
-      type: "possession",
-      code: "home",
+    // A touchdown does not hand the ball over (the try does), so undoing the
+    // scoring play leaves the marker where it is — with Wolves, who received.
+    expect(sentPossessions()).toEqual([]);
+    expect(screen.getByRole("button", { name: /^Wolves/ })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+});
+
+describe("undoing a failed fourth down", () => {
+  it("puts the ball back when the play row is undone, not only its turnover", async () => {
+    // The play and its Turnover row are one submission: only the turnover row
+    // moved the ball, so undoing the play row (the one with the yards) must
+    // still put it back.
+    const original = makeLog({
+      inPossession: "Wolves",
+      events: [
+        logEvent({
+          id: 10,
+          seq: 10,
+          sequence: 9,
+          event: "Turnover",
+          team: "Ravens",
+          cop: true,
+          half: 1,
+        }),
+        logEvent({
+          id: 9,
+          seq: 9,
+          sequence: 9,
+          event: "Pass",
+          team: "Ravens",
+          player: 23,
+          half: 1,
+          payload: { yards: 2, complete: true, qb: 7 },
+        }),
+      ],
     });
+    routeGets({ log: original });
+    answerAppend(original);
+    renderTracking({ log: original });
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("button", { name: /^Rückgängig: Pass/ }),
+    );
+
+    await waitFor(() => expect(sentPossessions()).toEqual(["home"]));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /^Ravens/ })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      ),
+    );
   });
 });
 

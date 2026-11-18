@@ -20,6 +20,7 @@ function renderSheet(
     side?: RosterPlayer["side"];
     roster?: RosterPlayer[] | null;
     passcheck?: boolean;
+    gain?: number | null;
     onSubmit?: Submit;
   } = {},
 ) {
@@ -27,6 +28,7 @@ function renderSheet(
   const onClose = vi.fn();
   render(
     <TouchdownSheet
+      gain={overrides.gain}
       onClose={onClose}
       onSubmit={onSubmit}
       passcheck={overrides.passcheck ?? false}
@@ -51,6 +53,48 @@ function saveButton(): HTMLElement {
 }
 
 describe("TouchdownSheet", () => {
+  it("pre-fills the remaining yards as the gain and sends them", async () => {
+    const { onSubmit } = renderSheet({ gain: 14 });
+    const user = userEvent.setup();
+
+    // The ball was on B14: crossing the goal line is worth 14 yards, and the
+    // official only has to confirm (field feedback: the row shows it).
+    expect(screen.getByRole("textbox", { name: /Raumgewinn/ })).toHaveValue(
+      "14",
+    );
+    await pick(7);
+    await user.click(saveButton());
+
+    expect(onSubmit).toHaveBeenCalledWith([
+      {
+        name: "Touchdown",
+        player: 7,
+        input: "14 Yards",
+        payload: { yards: 14 },
+      },
+    ]);
+  });
+
+  it("keeps a typed gain instead of the pre-filled one", async () => {
+    const { onSubmit } = renderSheet({ gain: 14 });
+    const user = userEvent.setup();
+
+    const yards = screen.getByRole("textbox", { name: /Raumgewinn/ });
+    await user.clear(yards);
+    await user.type(yards, "3");
+    await pick(7);
+    await user.click(saveButton());
+
+    expect(onSubmit).toHaveBeenCalledWith([
+      {
+        name: "Touchdown",
+        player: 7,
+        input: "3 Yards",
+        payload: { yards: 3 },
+      },
+    ]);
+  });
+
   it("carries the yards of the scoring play", async () => {
     const { onSubmit } = renderSheet();
     const user = userEvent.setup();
