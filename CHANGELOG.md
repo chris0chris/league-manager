@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.16.0](https://github.com/dachrisch/leaguesphere/compare/v5.15.11...v5.16.0) (2026-11-18)
+
+
+### Features
+
+* **scorecard_v2:** full field position label and missed extra point in log & liveticker ([#2425](https://github.com/dachrisch/leaguesphere/issues/2425)) ([968e0ac](https://github.com/dachrisch/leaguesphere/commit/968e0ac883fc0d20ec9b146ce2ccbed15262fe57))
+* **scorecard_v2:** one Spielzug button replaces the play tiles and Mehr ([#2426](https://github.com/dachrisch/leaguesphere/issues/2426)) ([c7dc457](https://github.com/dachrisch/leaguesphere/commit/c7dc4570d2b29bbda15e79d7597999a31d2004e1))
+* **scorecard_v2:** play wizard order, default QB and interception orientation ([#2428](https://github.com/dachrisch/leaguesphere/issues/2428)) ([d66f751](https://github.com/dachrisch/leaguesphere/commit/d66f75149675f479ec2a44eb525b259fdf1ceff8))
+* **scorecard:** undo keeps the team and the extra point records itself ([#2430](https://github.com/dachrisch/leaguesphere/issues/2430)) ([77ede2e](https://github.com/dachrisch/leaguesphere/commit/77ede2e6337d4257421a8b25c511d85514802ec5))
+
+
+### Bug Fixes
+
+* **scorecard_v2:** polish sheets, time entry, finalize and halftime ([#2429](https://github.com/dachrisch/leaguesphere/issues/2429)) ([c3da965](https://github.com/dachrisch/leaguesphere/commit/c3da9653278359fc984e5304d230d689a4fb96ba))
+* **scorecard-v2:** roster names from the passcheck, team-coloured number pad ([#2427](https://github.com/dachrisch/leaguesphere/issues/2427)) ([640b967](https://github.com/dachrisch/leaguesphere/commit/640b967bedb8a3607b5632c4c39cb2e1b763f05a))
+
 ## [5.15.11](https://github.com/dachrisch/leaguesphere/compare/v5.15.10...v5.15.11) (2026-11-18)
 
 
