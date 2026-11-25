@@ -9,7 +9,7 @@ from gamedays.tests.setup_factories.factories import (
     GameOfficialFactory,
     TeamFactory,
 )
-from officials.constants import MOODLE_LOGGED_IN_USER
+from officials.constants import MOODLE_LOGGED_IN_USER, MOODLE_REMEMBER_COOKIE
 from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 from officials.tests.setup_factories.factories_officials import OfficialFactory
 
@@ -765,3 +765,63 @@ class TestStaffExternalFormValues(SelfServiceTestBase):
         assert 'value="2026-05-26"' in content
         assert 'value="Melder Max"' in content
         assert f'value="{self.official.pk}"' in content
+
+
+class TestStaffExternalFieldsAreSaved(SelfServiceTestBase):
+    def test_staff_edit_saves_notification_date_and_reporter_name(self):
+        DbSetupOfficials.create_production_associations()
+        entry = _external_entry(self.official)
+        client = Client()
+        client.force_login(_staff_user())
+
+        client.post(
+            reverse(EXTERNAL_EDIT_URL_NAME, kwargs={"pk": entry.pk}),
+            _external_form_data(
+                notification_date="2026-06-03", reporter_name="Staff Melder"
+            ),
+        )
+
+        entry.refresh_from_db()
+        assert str(entry.notification_date) == "2026-06-03"
+        assert entry.reporter_name == "Staff Melder"
+
+
+class TestOwnOpenRowHighlight(SelfServiceTestBase):
+    def test_only_the_matching_open_row_is_highlighted(self):
+        gameinfo, matching = _game_with_row(name="Max Mustermann")
+        gameinfo, foreign = _game_with_row(name="Jemand Anders")
+        self.login_moodle()
+
+        content = self.client.get(reverse(LIST_URL_NAME)).content.decode()
+
+        assert content.count("table-info") == 1
+        own_marker = f'<tr class="table-info">'
+        after_marker = content.split(own_marker, 1)[1]
+        assert f'<th scope="row">{matching.pk}</th>' in after_marker[:80]
+        assert f'<th scope="row">{foreign.pk}</th>' not in after_marker[:80]
+
+
+class TestRememberCookieRotationOnWriteViews(SelfServiceTestBase):
+    def test_write_view_rotates_the_remember_cookie(self):
+        from officials.service.remember_me import RememberMeService
+
+        client = Client()
+        client.cookies[MOODLE_REMEMBER_COOKIE] = RememberMeService.issue(
+            self.official.pk
+        )
+
+        response = client.get(reverse(ASSIGNMENT_URL_NAME))
+
+        assert client.session.get(MOODLE_LOGGED_IN_USER) == self.official.pk
+        rotated = response.cookies[MOODLE_REMEMBER_COOKIE]
+        assert rotated.value
+        assert rotated["path"] == "/officials/"
+
+
+class TestAddAssignmentInputRobustness(SelfServiceTestBase):
+    def test_unknown_gameday_parameter_does_not_crash(self):
+        self.login_moodle()
+
+        response = self.client.get(reverse(ASSIGNMENT_URL_NAME), {"gameday": "abc"})
+
+        assert response.status_code == 200

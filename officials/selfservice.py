@@ -11,6 +11,7 @@ import re
 from datetime import date, datetime
 from urllib.parse import urlencode, urlsplit
 
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
@@ -19,11 +20,41 @@ from django.urls import reverse
 from django.views import View
 
 from gamedays.models import GameOfficial
-from officials.constants import MOODLE_LOGGED_IN_USER, MOODLE_REMEMBER_COOKIE
-from officials.forms_selfservice import AddAssignmentForm, ExternalGameFormSet
-from officials.forms_selfservice import ExternalGameForm
+from officials.constants import (
+    MOODLE_LOGGED_IN_USER,
+    MOODLE_REMEMBER_COOKIE,
+    REMEMBER_COOKIE_PATH,
+)
+from officials.forms_selfservice import (
+    AddAssignmentForm,
+    ExternalGameForm,
+    ExternalGameFormSet,
+)
 from officials.models import Official, OfficialExternalGames
-from officials.service.remember_me import RememberMeService, RestoreResult
+from officials.service.remember_me import (
+    REMEMBER_ME_MAX_AGE,
+    RememberMeService,
+    RestoreResult,
+)
+
+
+def set_remember_cookie(response, value) -> None:
+    """Issue/rotate the remember-me cookie. Lives here so both the list views
+    (via ``views.py``) and this module's gate can set it."""
+    response.set_cookie(
+        MOODLE_REMEMBER_COOKIE,
+        value,
+        max_age=int(REMEMBER_ME_MAX_AGE.total_seconds()),
+        httponly=True,
+        secure=not settings.DEBUG,
+        samesite="Lax",
+        path=REMEMBER_COOKIE_PATH,
+    )
+
+
+def delete_remember_cookie(response) -> None:
+    response.delete_cookie(MOODLE_REMEMBER_COOKIE, path=REMEMBER_COOKIE_PATH)
+
 
 RECLAIM_ERROR = "Dieser Eintrag wurde bereits zugeordnet."
 
@@ -143,16 +174,23 @@ class SelfServiceWriteMixin:
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and request.user.is_staff:
             return super().dispatch(request, *args, **kwargs)
+        restored = RestoreResult(official_id=None, cookie_value=None, matched=False)
         if acting_official_id(request) is None:
             restored = restore_moodle_session(request)
             if restored.official_id is not None:
                 request.session[MOODLE_LOGGED_IN_USER] = restored.official_id
         if acting_official_id(request) is None:
-            return redirect(login_url_for(request))
-        if self.staff_only:
+            response = redirect(login_url_for(request))
+        elif self.staff_only:
             messages.error(request, "Nur Staff kann diese Aktion ausführen.")
-            return redirect(assignments_return_url(request))
-        return super().dispatch(request, *args, **kwargs)
+            response = redirect(assignments_return_url(request))
+        else:
+            response = super().dispatch(request, *args, **kwargs)
+        if restored.cookie_value:
+            # The restore already rotated the token server-side; hand the new
+            # value back or the browser keeps a validator that no longer matches.
+            set_remember_cookie(response, restored.cookie_value)
+        return response
 
     def target_official(self, request) -> Official:
         """The official a write applies to.
@@ -525,7 +563,10 @@ class ExternalGameMultiAddView(SelfServiceWriteMixin, View):
         data = request.POST
         if "add_row" in request.POST:
             data = request.POST.copy()
-            total = int(data.get("form-TOTAL_FORMS") or 1)
+            try:
+                total = int(data.get("form-TOTAL_FORMS") or 1)
+            except (TypeError, ValueError):
+                total = 1
             data["form-TOTAL_FORMS"] = str(total + 1)
             return self._render(
                 request,

@@ -1,6 +1,6 @@
 # Officials self-service duty management
 
-**Status:** In development (branch `feat/officials-selfservice`)
+**Status:** Implemented on `feat/officials-selfservice` (awaiting the user's review, not yet pushed)
 
 Officials can now look after their own duties without a staff member: they log in
 with their offd.de (Moodle) account, claim the `?` rows in `/officials/einsaetze/`

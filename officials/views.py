@@ -63,10 +63,12 @@ from officials.selfservice import (
     UNASSIGN_URL_NAME,
     acting_official_id,
     can_edit_official,
+    delete_remember_cookie,
     name_matches_official,
     restore_moodle_session,
     safe_next,
     selfservice_banner_context,
+    set_remember_cookie,
 )
 
 logger = logging.getLogger(__name__)
@@ -77,20 +79,8 @@ NO_OFFICIAL_FOR_MOODLE_USER = (
 )
 
 
-def _set_remember_cookie(response, value):
-    response.set_cookie(
-        MOODLE_REMEMBER_COOKIE,
-        value,
-        max_age=int(REMEMBER_ME_MAX_AGE.total_seconds()),
-        httponly=True,
-        secure=not settings.DEBUG,
-        samesite="Lax",
-        path=REMEMBER_COOKIE_PATH,
-    )
-
-
-def _delete_remember_cookie(response):
-    response.delete_cookie(MOODLE_REMEMBER_COOKIE, path=REMEMBER_COOKIE_PATH)
+_set_remember_cookie = set_remember_cookie
+_delete_remember_cookie = delete_remember_cookie
 
 
 class AllTeamsCardListView(View):
@@ -338,23 +328,28 @@ class GameOfficialListView(View):
     def _rows_with_flags(
         game_officials_object_list, *, team_name, is_staff, acting_official
     ):
-        rows = GameOfficialAllInfoSerializer(
-            instance=game_officials_object_list.values(
+        raw_rows = list(
+            game_officials_object_list.values(
                 *GameOfficialAllInfoSerializer.ALL_VALUE_FIELDS
-            ),
+            )
+        )
+        rows = GameOfficialAllInfoSerializer(
+            instance=raw_rows,
             display_names_for_team=team_name,
             is_staff=is_staff,
             many=True,
         ).data
-        for row in rows:
+        for raw, row in zip(raw_rows, rows):
             row_official_id = int(row["official_id"]) if row["official_id"] else None
             row["is_own_row"] = (
                 acting_official is not None and row_official_id == acting_official.pk
             )
+            # The typed name, not the obfuscated display name: matching the
+            # obfuscated one ("M****M****") could never equal a real name.
             row["is_own_open_row"] = (
                 acting_official is not None
                 and row_official_id is None
-                and name_matches_official(row["name"], acting_official)
+                and name_matches_official(raw["name"], acting_official)
             )
             if row["is_own_row"]:
                 # The visitor's own row shows the name; every other row keeps

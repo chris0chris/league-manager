@@ -33,7 +33,11 @@ is progressive enhancement against the staff search API.
                     const item = document.createElement('button');
                     item.type = 'button';
                     item.className = 'list-group-item list-group-item-action';
-                    item.textContent = official.name || official.display_name || official.id;
+                    const label = [official.first_name, official.last_name]
+                        .filter(Boolean).join(' ');
+                    item.textContent = official.team
+                        ? label + ' (' + official.team + ')'
+                        : label || String(official.id);
                     item.addEventListener('click', function () {
                         idField.value = official.id;
                         results.innerHTML = '';

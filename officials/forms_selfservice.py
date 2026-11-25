@@ -60,7 +60,10 @@ class AddAssignmentForm(forms.Form):
             self.configure_games(gameday_id)
 
     def configure_games(self, gameday_id) -> None:
-        gameday = Gameday.objects.filter(pk=gameday_id).first()
+        try:
+            gameday = Gameday.objects.filter(pk=gameday_id).first()
+        except (TypeError, ValueError):
+            gameday = None
         if gameday is None:
             return
         self.fields["gameinfo"].queryset = Gameinfo.objects.filter(
@@ -152,6 +155,21 @@ class ExternalGameForm(forms.ModelForm):
         if self.staff and cleaned.get("notification_date") is None and self.instance.pk:
             cleaned["notification_date"] = self.instance.notification_date
         return cleaned
+
+    def save(self, commit=True):
+        # ``notification_date``/``reporter_name`` are staff-only fields added
+        # in __init__, i.e. not part of Meta.fields, so ModelForm's
+        # construct_instance would drop them; write them by hand.
+        entry = super().save(commit=False)
+        if self.staff:
+            entry.notification_date = (
+                self.cleaned_data.get("notification_date")
+                or self.instance.notification_date
+            )
+            entry.reporter_name = self.cleaned_data.get("reporter_name") or ""
+        if commit:
+            entry.save()
+        return entry
 
 
 ExternalGameFormSet = forms.formset_factory(ExternalGameForm, extra=1)
