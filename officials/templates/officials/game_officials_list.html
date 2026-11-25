@@ -25,6 +25,7 @@
                href="?{% if not mine_filter %}mine=1{% endif %}">
                 {% if mine_filter %}Alle Einträge zeigen{% else %}Nur meine Einträge{% endif %}
             </a>
+            <a class="btn btn-sm btn-outline-primary" href="{{ add_assignment_url }}">Einsatz nachtragen</a>
         </p>
         {% endif %}
         {% include 'utils/year_filter.html' %}
@@ -63,7 +64,12 @@
                     {% if not official.official_id %}
                     <a class="btn btn-sm btn-outline-primary"
                        href="{% url claim_url_name pk=official.id %}?next={{ request.get_full_path|urlencode }}">
-                        {% if is_staff %}Zuordnen{% else %}{% if official.is_own_open_row %}Mir zuordnen{% else %}Mir zuordnen{% endif %}{% endif %}
+                        {% if is_staff %}Zuordnen{% else %}Mir zuordnen{% endif %}
+                    </a>
+                    {% elif is_staff %}
+                    <a class="btn btn-sm btn-outline-danger"
+                       href="{% url unassign_url_name pk=official.id %}?next={{ request.get_full_path|urlencode }}">
+                        Zuordnung aufheben
                     </a>
                     {% endif %}
                 </td>

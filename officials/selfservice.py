@@ -7,9 +7,9 @@ another official's data. Every write view added on top of this mixin inherits
 that rule instead of repeating it.
 """
 
-from urllib.parse import urlencode, urlsplit
-
 import re
+from datetime import datetime
+from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
@@ -18,6 +18,7 @@ from django.views import View
 
 from gamedays.models import GameOfficial
 from officials.constants import MOODLE_LOGGED_IN_USER, MOODLE_REMEMBER_COOKIE
+from officials.forms_selfservice import AddAssignmentForm
 from officials.models import Official
 from officials.service.remember_me import RememberMeService, RestoreResult
 
@@ -130,8 +131,11 @@ class SelfServiceWriteMixin:
     """Gate every self-service write: staff, or a Moodle-logged-in official.
 
     Anonymous visitors - and team accounts, which only ever had read access -
-    are sent to the Moodle login with ``?next=`` pointing back here.
+    are sent to the Moodle login with ``?next=`` pointing back here. Set
+    ``staff_only = True`` on a view that even a logged-in official may not use.
     """
+
+    staff_only = False
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and request.user.is_staff:
@@ -142,6 +146,9 @@ class SelfServiceWriteMixin:
                 request.session[MOODLE_LOGGED_IN_USER] = restored.official_id
         if acting_official_id(request) is None:
             return redirect(login_url_for(request))
+        if self.staff_only:
+            messages.error(request, "Nur Staff kann diese Aktion ausführen.")
+            return redirect(assignments_return_url(request))
         return super().dispatch(request, *args, **kwargs)
 
     def target_official(self, request) -> Official:
@@ -221,3 +228,114 @@ class ClaimGameOfficialView(SelfServiceWriteMixin, View):
             "is_mapped": row.official_id is not None,
             **selfservice_banner_context(request),
         }
+
+
+ADD_ASSIGNMENT_URL_NAME = "view-officials-selfservice-add-assignment"
+UNASSIGN_URL_NAME = "view-officials-selfservice-unassign"
+
+
+def _form_error_message(form) -> str:
+    """First field error with its label, so the message names the field."""
+    for field_name, messages in form.errors.items():
+        label = (
+            form.fields[field_name].label if field_name in form.fields else field_name
+        )
+        return f"{label}: {messages[0]}".strip()
+    return "Bitte Eingaben prüfen."
+
+
+class AddAssignmentView(SelfServiceWriteMixin, View):
+    """Put oneself (staff: any official) on a game that has no entry yet."""
+
+    template_name = "officials/selfservice/add_assignment.html"
+
+    def get(self, request):
+        gameday_id = request.GET.get("gameday") or None
+        form = AddAssignmentForm(season=datetime.today().year, gameday_id=gameday_id)
+        return render(
+            request, self.template_name, self._context(request, form, gameday_id)
+        )
+
+    def post(self, request):
+        form = AddAssignmentForm(
+            request.POST,
+            season=datetime.today().year,
+            gameday_id=request.POST.get("gameday") or None,
+        )
+        if not form.is_valid():
+            messages.error(request, _form_error_message(form))
+            return render(
+                request,
+                self.template_name,
+                self._context(request, form, request.POST.get("gameday")),
+            )
+
+        gameinfo = form.cleaned_data["gameinfo"]
+        position = form.cleaned_data["position"]
+        try:
+            target = self.target_official(request)
+        except Official.DoesNotExist:
+            messages.error(request, "Bitte eine Offizielle-ID angeben.")
+            return render(
+                request,
+                self.template_name,
+                self._context(request, form, request.POST.get("gameday")),
+            )
+
+        if GameOfficial.objects.filter(gameinfo=gameinfo, official=target).exists():
+            messages.error(
+                request, "Für dieses Spiel ist bereits ein Einsatz eingetragen."
+            )
+            return render(
+                request,
+                self.template_name,
+                self._context(request, form, request.POST.get("gameday")),
+            )
+        if GameOfficial.objects.filter(gameinfo=gameinfo, position=position).exists():
+            messages.error(
+                request,
+                "Diese Position ist bereits besetzt. "
+                'Bitte übernimm den vorhandenen Eintrag über "Mir zuordnen".',
+            )
+            return render(
+                request,
+                self.template_name,
+                self._context(request, form, request.POST.get("gameday")),
+            )
+
+        GameOfficial.objects.create(
+            gameinfo=gameinfo, official=target, position=position
+        )
+        messages.success(
+            request,
+            f"Einsatz als {position} für {target.first_name} {target.last_name} nachgetragen.",
+        )
+        return redirect(assignments_return_url(request))
+
+    def _context(self, request, form, gameday_id):
+        return {
+            "form": form,
+            "gameday_id": gameday_id,
+            **selfservice_banner_context(request),
+        }
+
+
+class UnassignGameOfficialView(SelfServiceWriteMixin, View):
+    """Staff-only: clear the official of a row, keeping the typed name."""
+
+    template_name = "officials/selfservice/unassign_confirm.html"
+    staff_only = True
+
+    def get(self, request, pk):
+        row = get_object_or_404(GameOfficial, pk=pk)
+        return render(
+            request,
+            self.template_name,
+            {"row": row, **selfservice_banner_context(request)},
+        )
+
+    def post(self, request, pk):
+        row = get_object_or_404(GameOfficial, pk=pk)
+        GameOfficial.objects.filter(pk=row.pk).update(official=None)
+        messages.success(request, "Zuordnung aufgehoben - der Name bleibt erhalten.")
+        return redirect(assignments_return_url(request))

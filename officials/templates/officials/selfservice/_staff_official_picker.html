@@ -1,0 +1,47 @@
+{% comment %}
+Staff-only target picker. The numeric field is the actual input; the search box
+is progressive enhancement against the staff search API.
+{% endcomment %}
+<div class="mb-3">
+    <label class="form-label" for="official-search">Offizielle suchen</label>
+    <input class="form-control" id="official-search" type="search" autocomplete="off"
+           placeholder="Vor- oder Nachname">
+    <ul class="list-group mt-2" id="official-results"></ul>
+    <label class="form-label mt-3" for="official-id">Offizielle-ID</label>
+    <input class="form-control" id="official-id" name="official_id" type="number" required>
+    <div class="form-text">
+        Für Staff: der Einsatz wird der hier eingetragenen Person zugeordnet.
+    </div>
+</div>
+<script>
+    (function () {
+        const search = document.getElementById('official-search');
+        const results = document.getElementById('official-results');
+        const idField = document.getElementById('official-id');
+        if (!search || !results || !idField) return;
+        let timer = null;
+        search.addEventListener('input', function () {
+            clearTimeout(timer);
+            const term = search.value.trim();
+            results.innerHTML = '';
+            if (term.length < 2) return;
+            timer = setTimeout(async function () {
+                const response = await fetch('/api/officials/search/list?name=' + encodeURIComponent(term));
+                if (!response.ok) return;
+                const officials = await response.json();
+                officials.slice(0, 10).forEach(function (official) {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'list-group-item list-group-item-action';
+                    item.textContent = official.name || official.display_name || official.id;
+                    item.addEventListener('click', function () {
+                        idField.value = official.id;
+                        results.innerHTML = '';
+                        search.value = item.textContent;
+                    });
+                    results.appendChild(item);
+                });
+            }, 250);
+        });
+    })();
+</script>

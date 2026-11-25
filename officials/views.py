@@ -58,7 +58,9 @@ from officials.service.signup_service import (
 )
 from officials.service.remember_me import RememberMeService, REMEMBER_ME_MAX_AGE
 from officials.selfservice import (
+    ADD_ASSIGNMENT_URL_NAME,
     CLAIM_URL_NAME,
+    UNASSIGN_URL_NAME,
     acting_official_id,
     name_matches_official,
     restore_moodle_session,
@@ -321,6 +323,8 @@ class GameOfficialListView(View):
             ),
             "mine_filter": mine,
             "claim_url_name": CLAIM_URL_NAME,
+            "add_assignment_url": reverse(ADD_ASSIGNMENT_URL_NAME),
+            "unassign_url_name": UNASSIGN_URL_NAME,
             "page_obj": game_officials_page,
         }
         context.update(selfservice_banner_context(request))

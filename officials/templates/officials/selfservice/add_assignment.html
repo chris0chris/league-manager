@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section">
+    <h1>Einsatz nachtragen</h1>
+    <p>
+        Trage hier ein Spiel nach, für das noch kein Eintrag existiert. Ist die Position schon
+        besetzt, übernimm stattdessen den vorhandenen Eintrag über <em>Mir zuordnen</em>.
+    </p>
+    {% include 'officials/selfservice/_banner.html' %}
+
+    <form method="get" class="mb-4">
+        <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+        <label class="form-label" for="id_gameday_step">Spieltag</label>
+        <select class="form-select" id="id_gameday_step" name="gameday">
+            <option value="">– bitte wählen –</option>
+            {% for gameday in form.fields.gameday.queryset %}
+            <option value="{{ gameday.pk }}"
+                    {% if gameday_id|stringformat:"s" == gameday.pk|stringformat:"s" %}selected{% endif %}>
+                {{ gameday.date|date:"d.m.Y" }} – {{ gameday.name }}
+            </option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-outline-secondary mt-2" type="submit">Spiel anzeigen</button>
+    </form>
+
+    {% if gameday_id %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="gameday" value="{{ gameday_id }}">
+        <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.gameinfo.id_for_label }}">Spiel</label>
+            {{ form.gameinfo }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.position.id_for_label }}">Position</label>
+            {{ form.position }}
+        </div>
+        {% if is_staff %}
+        {% include 'officials/selfservice/_staff_official_picker.html' %}
+        {% else %}
+        <p>Der Einsatz wird deinem eigenen Konto zugeordnet.</p>
+        {% endif %}
+        <button class="btn btn-primary" type="submit">Einsatz nachtragen</button>
+        <a class="btn btn-outline-secondary" href="{% url 'view-officials-game-officials-appearance' %}">Abbrechen</a>
+    </form>
+    {% endif %}
+</div>
+{% endblock content %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section">
+    <h1>Zuordnung aufheben</h1>
+    <p>
+        Die Zuordnung dieses Eintrags wird entfernt. Der eingetragene Name bleibt erhalten,
+        der Eintrag kann danach neu zugeordnet werden.
+    </p>
+    <table class="table table-sm">
+        <tbody>
+        <tr>
+            <th scope="row">Spieltag</th>
+            <td>{{ row.gameinfo.gameday.name }} ({{ row.gameinfo.gameday.date|date:"d.m.Y" }})</td>
+        </tr>
+        <tr>
+            <th scope="row">Spiel</th>
+            <td>Spiel #{{ row.gameinfo.pk }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Position</th>
+            <td>{{ row.position }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Zugeordnet</th>
+            <td>{% if row.official %}{{ row.official.first_name }} {{ row.official.last_name }}{% else %}–{% endif %}</td>
+        </tr>
+        <tr>
+            <th scope="row">Eingetragener Name</th>
+            <td>{{ row.name|default:"–" }}</td>
+        </tr>
+        </tbody>
+    </table>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+        <button class="btn btn-danger" type="submit">Zuordnung aufheben</button>
+        <a class="btn btn-outline-secondary" href="{% url 'view-officials-game-officials-appearance' %}">Abbrechen</a>
+    </form>
+</div>
+{% endblock content %}

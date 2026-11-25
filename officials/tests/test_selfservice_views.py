@@ -223,3 +223,131 @@ class TestNameMatcher(TestCase):
         assert name_matches_official("Erika Musterfrau", official) is False
         assert name_matches_official("", official) is False
         assert name_matches_official(None, official) is False
+
+
+ASSIGNMENT_URL_NAME = "view-officials-selfservice-add-assignment"
+UNASSIGN_URL_NAME = "view-officials-selfservice-unassign"
+
+
+class TestAddAssignment(SelfServiceTestBase):
+    def setUp(self):
+        super().setUp()
+        self.gameday = GamedayFactory(date="2026-06-01", name="Spieltag Nachtragen")
+        self.gameinfo = GameinfoFactory(gameday=self.gameday)
+
+    def _post(self, client=None, **data):
+        client = client or self.client
+        payload = {
+            "gameday": str(self.gameday.pk),
+            "gameinfo": str(self.gameinfo.pk),
+            "position": "Referee",
+        }
+        payload.update(data)
+        return client.post(reverse(ASSIGNMENT_URL_NAME), payload, follow=True)
+
+    def test_add_assignment_creates_row(self):
+        self.login_moodle()
+
+        response = self._post()
+
+        row = GameOfficial.objects.get(gameinfo=self.gameinfo)
+        assert response.status_code == 200
+        assert row.official == self.official
+        assert row.position == "Referee"
+
+    def test_add_blocked_when_official_already_on_game(self):
+        GameOfficialFactory(
+            gameinfo=self.gameinfo, official=self.official, position="Side Judge"
+        )
+        self.login_moodle()
+
+        response = self._post()
+
+        assert GameOfficial.objects.filter(gameinfo=self.gameinfo).count() == 1
+        assert any("bereits" in m for m in self.messages(response))
+
+    def test_add_blocked_when_position_occupied(self):
+        GameOfficialFactory(gameinfo=self.gameinfo, official=None, position="Referee")
+        self.login_moodle()
+
+        response = self._post()
+
+        assert GameOfficial.objects.filter(gameinfo=self.gameinfo).count() == 1
+        assert any("besetzt" in m for m in self.messages(response))
+
+    def test_staff_add_requires_official_picker(self):
+        client = Client()
+        client.force_login(_staff_user())
+
+        response = self._post(client=client)
+
+        assert GameOfficial.objects.filter(gameinfo=self.gameinfo).count() == 0
+        assert any("Offizielle" in m for m in self.messages(response))
+
+    def test_staff_add_uses_posted_official(self):
+        client = Client()
+        client.force_login(_staff_user())
+
+        self._post(client=client, official_id=str(self.other.pk))
+
+        row = GameOfficial.objects.get(gameinfo=self.gameinfo)
+        assert row.official == self.other
+
+    def test_moodle_add_ignores_posted_official(self):
+        self.login_moodle()
+
+        self._post(official_id=str(self.other.pk))
+
+        row = GameOfficial.objects.get(gameinfo=self.gameinfo)
+        assert row.official == self.official
+
+    def test_position_choices_exclude_scorecard_judge(self):
+        self.login_moodle()
+
+        content = self.client.get(
+            reverse(ASSIGNMENT_URL_NAME), {"gameday": str(self.gameday.pk)}
+        ).content.decode()
+
+        assert "Referee" in content
+        assert "Scorecard Judge" not in content
+
+    def test_unknown_position_is_rejected(self):
+        self.login_moodle()
+
+        response = self._post(position="Scorecard Judge")
+
+        assert GameOfficial.objects.filter(gameinfo=self.gameinfo).count() == 0
+        assert any("Position" in m for m in self.messages(response))
+
+
+class TestUnassign(SelfServiceTestBase):
+    def test_unassign_staff_only(self):
+        gameinfo, row = _game_with_row(official=self.other)
+        client = Client()
+        client.force_login(_staff_user())
+
+        client.post(reverse(UNASSIGN_URL_NAME, kwargs={"pk": row.pk}), follow=True)
+
+        row.refresh_from_db()
+        assert row.official is None
+        assert row.name == "Max Mustermann"
+
+    def test_moodle_user_cannot_unassign(self):
+        gameinfo, row = _game_with_row(official=self.official)
+        self.login_moodle()
+
+        response = self.client.post(
+            reverse(UNASSIGN_URL_NAME, kwargs={"pk": row.pk}), follow=True
+        )
+
+        row.refresh_from_db()
+        assert row.official == self.official
+        assert response.status_code == 200
+
+    def test_anonymous_unassign_redirects_to_login(self):
+        gameinfo, row = _game_with_row(official=self.other)
+
+        response = self.client.post(reverse(UNASSIGN_URL_NAME, kwargs={"pk": row.pk}))
+
+        assert response.status_code == 302
+        assert response.url.startswith(reverse("view-officials-moodle-login"))
