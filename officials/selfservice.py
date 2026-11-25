@@ -530,6 +530,7 @@ class ExternalGameMultiAddView(SelfServiceWriteMixin, View):
             return self._render(
                 request,
                 ExternalGameFormSet(data, form_kwargs={"staff": request.user.is_staff}),
+                adding_row=True,
             )
 
         formset = ExternalGameFormSet(
@@ -561,11 +562,15 @@ class ExternalGameMultiAddView(SelfServiceWriteMixin, View):
         messages.success(request, f"{len(filled)} Einträge gespeichert.")
         return redirect(profile_gamelist_url(target, date.today().year))
 
-    def _render(self, request, formset):
+    def _render(self, request, formset, adding_row=False):
         return render(
             request,
             self.template_name,
-            {"formset": formset, **selfservice_banner_context(request)},
+            {
+                "formset": formset,
+                "adding_row": adding_row,
+                **selfservice_banner_context(request),
+            },
         )
 
 

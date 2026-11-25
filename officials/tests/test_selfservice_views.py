@@ -746,3 +746,22 @@ class TestExternalGameMultiAdd(SelfServiceTestBase):
 
         assert content.count('name="form-0-association"') == 1
         assert "<select" in content
+
+
+class TestStaffExternalFormValues(SelfServiceTestBase):
+    def test_staff_form_shows_the_current_values(self):
+        DbSetupOfficials.create_production_associations()
+        entry = _external_entry(self.official)
+        entry.notification_date = "2026-05-26"
+        entry.reporter_name = "Melder Max"
+        entry.save()
+        client = Client()
+        client.force_login(_staff_user())
+
+        content = client.get(
+            reverse(EXTERNAL_EDIT_URL_NAME, kwargs={"pk": entry.pk})
+        ).content.decode()
+
+        assert 'value="2026-05-26"' in content
+        assert 'value="Melder Max"' in content
+        assert f'value="{self.official.pk}"' in content

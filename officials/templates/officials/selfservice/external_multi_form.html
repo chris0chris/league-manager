@@ -13,34 +13,36 @@
         {% if is_staff %}
         {% include 'officials/selfservice/_staff_official_picker.html' %}
         {% endif %}
-        <table class="table align-middle">
-            <thead>
-            <tr>
-                <th scope="col">Datum</th>
-                <th scope="col">#Spiele</th>
-                <th scope="col">Position</th>
-                <th scope="col">Verband</th>
-                <th scope="col">Halbzeitdauer</th>
-                <th scope="col">Clock Control</th>
-                <th scope="col">International</th>
-                <th scope="col">Kommentar</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for form in formset %}
-            <tr>
-                <td>{{ form.date }}{{ form.date.errors }}</td>
-                <td>{{ form.number_games }}{{ form.number_games.errors }}</td>
-                <td>{{ form.position }}{{ form.position.errors }}</td>
-                <td>{{ form.association }}{{ form.association.errors }}</td>
-                <td>{{ form.halftime_duration }}{{ form.halftime_duration.errors }}</td>
-                <td>{{ form.has_clockcontrol }}{{ form.has_clockcontrol.errors }}</td>
-                <td>{{ form.is_international }}{{ form.is_international.errors }}</td>
-                <td>{{ form.comment }}{{ form.comment.errors }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th scope="col" style="min-width: 9rem;">Datum</th>
+                    <th scope="col" style="min-width: 6rem;">#Spiele</th>
+                    <th scope="col" style="min-width: 10rem;">Position</th>
+                    <th scope="col" style="min-width: 12rem;">Verband</th>
+                    <th scope="col" style="min-width: 7rem;">Halbzeitdauer</th>
+                    <th scope="col" style="min-width: 4rem;">Clock Control</th>
+                    <th scope="col" style="min-width: 5rem;">International</th>
+                    <th scope="col" style="min-width: 12rem;">Kommentar</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for form in formset %}
+                <tr>
+                    <td>{{ form.date }}{% if not adding_row %}{{ form.date.errors }}{% endif %}</td>
+                    <td>{{ form.number_games }}{% if not adding_row %}{{ form.number_games.errors }}{% endif %}</td>
+                    <td>{{ form.position }}{% if not adding_row %}{{ form.position.errors }}{% endif %}</td>
+                    <td>{{ form.association }}{% if not adding_row %}{{ form.association.errors }}{% endif %}</td>
+                    <td>{{ form.halftime_duration }}{% if not adding_row %}{{ form.halftime_duration.errors }}{% endif %}</td>
+                    <td>{{ form.has_clockcontrol }}{% if not adding_row %}{{ form.has_clockcontrol.errors }}{% endif %}</td>
+                    <td>{{ form.is_international }}{% if not adding_row %}{{ form.is_international.errors }}{% endif %}</td>
+                    <td>{{ form.comment }}{% if not adding_row %}{{ form.comment.errors }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
         <button class="btn btn-outline-secondary" type="submit" name="add_row" value="1">Weitere Zeile hinzufügen</button>
         <button class="btn btn-primary" type="submit" name="save" value="1">Alle speichern</button>
         <a class="btn btn-outline-secondary" href="{% url 'view-officials-game-officials-appearance' %}">Abbrechen</a>

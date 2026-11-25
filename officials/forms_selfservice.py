@@ -54,6 +54,8 @@ class AddAssignmentForm(forms.Form):
             date__year=season
         ).order_by("-date", "name")
         self.fields["gameday"].label_from_instance = _gameday_label
+        self.fields["gameinfo"].widget.attrs["class"] = "form-select"
+        self.fields["position"].widget.attrs["class"] = "form-select"
         if gameday_id:
             self.configure_games(gameday_id)
 
@@ -96,12 +98,33 @@ class ExternalGameForm(forms.ModelForm):
     class Meta:
         model = OfficialExternalGames
         fields = EXTERNAL_FORM_FIELDS
+        labels = {
+            "date": "Datum",
+            "number_games": "Anzahl Spiele",
+            "position": "Position",
+            "association": "Verband",
+            "halftime_duration": "Halbzeitdauer (Minuten)",
+            "has_clockcontrol": "Clock Control",
+            "is_international": "Internationales Turnier",
+            "comment": "Kommentar",
+        }
         widgets = {"date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
 
     def __init__(self, *args, staff=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.staff = staff
         self.fields["date"].input_formats = ["%Y-%m-%d"]
+        # Bootstrap classes, so the formset rows (rendered by hand) match the
+        # crispy-rendered single form.
+        for name, css in (
+            ("date", "form-control form-control-sm"),
+            ("number_games", "form-control form-control-sm"),
+            ("position", "form-select form-select-sm"),
+            ("association", "form-select form-select-sm"),
+            ("halftime_duration", "form-control form-control-sm"),
+            ("comment", "form-control form-control-sm"),
+        ):
+            self.fields[name].widget.attrs["class"] = css
         if staff:
             self.fields["notification_date"] = forms.DateField(
                 label="Meldedatum",
@@ -115,6 +138,12 @@ class ExternalGameForm(forms.ModelForm):
             self.fields["official_id"] = forms.IntegerField(
                 label="Offizielle-ID", required=False, min_value=1
             )
+            if self.instance.pk:
+                self.fields["notification_date"].initial = (
+                    self.instance.notification_date
+                )
+                self.fields["reporter_name"].initial = self.instance.reporter_name
+                self.fields["official_id"].initial = self.instance.official_id
 
     def clean(self):
         cleaned = super().clean()
