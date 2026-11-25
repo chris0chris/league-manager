@@ -220,32 +220,70 @@ def assignments_return_url(request) -> str:
     return safe_next(request, default=reverse(ASSIGNMENTS_URL_NAME))
 
 
-class ClaimGameOfficialView(SelfServiceWriteMixin, View):
-    """Claim an unassigned (``?``) row for oneself (staff: for any official).
+def can_reclaim_official(request, row: GameOfficial, target: Official) -> bool:
+    """May ``target`` take over an already-mapped row?
 
-    The write is ``UPDATE … WHERE official IS NULL``, so two people claiming
-    the same row at the same moment produce exactly one winner; the loser gets
-    a message and no exception. The typed name is kept as it was - it is the
-    sheet's text, not a name field of the official.
+    For a Moodle official only when the typed scorecard name looks like them;
+    otherwise this would be an open IDOR on other people's assignments. Staff
+    may reassign anyone's row explicitly.
+    """
+    if request.user.is_authenticated and request.user.is_staff:
+        return True
+    return name_matches_official(row.name, target)
+
+
+class ClaimGameOfficialView(SelfServiceWriteMixin, View):
+    """Claim an unassigned ``?`` row - or take over a mapped row whose typed
+    name matches the Moodle official (staff: any row, any official).
+
+    Unassigned rows use ``UPDATE … WHERE official IS NULL`` so two concurrent
+    claims have exactly one winner; mapped rows are updated conditionally on
+    their old official id. The typed name is never changed.
     """
 
     template_name = "officials/selfservice/claim_confirm.html"
 
     def get(self, request, pk):
         row = get_object_or_404(GameOfficial, pk=pk)
-        return render(request, self.template_name, self._context(request, row))
+        target = self._target_or_error(request)
+        return render(
+            request,
+            self.template_name,
+            self._context(
+                request,
+                row,
+                can_reclaim=target is not None
+                and (
+                    row.official_id is None
+                    or can_reclaim_official(request, row, target)
+                ),
+            ),
+        )
 
     def post(self, request, pk):
         row = get_object_or_404(GameOfficial, pk=pk)
-        try:
-            target = self.target_official(request)
-        except Official.DoesNotExist:
-            messages.error(request, "Bitte eine Offizielle-ID angeben.")
+        target = self._target_or_error(request)
+        if target is None:
             return redirect(request.get_full_path())
+        is_mapped = row.official_id is not None
+        if is_mapped and not can_reclaim_official(request, row, target):
+            messages.error(
+                request,
+                "Dieser Eintrag ist einer anderen Person zugeordnet. "
+                "Bitte wende dich an Staff.",
+            )
+            return redirect(assignments_return_url(request))
 
-        claimed = GameOfficial.objects.filter(pk=row.pk, official__isnull=True).update(
-            official=target
-        )
+        if is_mapped:
+            # Conditional on the old id: a concurrent change makes this
+            # write a no-op instead of silently stealing the row.
+            claimed = GameOfficial.objects.filter(
+                pk=row.pk, official_id=row.official_id
+            ).update(official=target)
+        else:
+            claimed = GameOfficial.objects.filter(
+                pk=row.pk, official__isnull=True
+            ).update(official=target)
         if claimed:
             messages.success(
                 request,
@@ -255,7 +293,14 @@ class ClaimGameOfficialView(SelfServiceWriteMixin, View):
             messages.error(request, RECLAIM_ERROR)
         return redirect(assignments_return_url(request))
 
-    def _context(self, request, row):
+    def _target_or_error(self, request):
+        try:
+            return self.target_official(request)
+        except Official.DoesNotExist:
+            messages.error(request, "Bitte eine Offizielle-ID angeben.")
+            return None
+
+    def _context(self, request, row, can_reclaim=True):
         game = row.gameinfo
         return {
             "row": row,
@@ -267,6 +312,7 @@ class ClaimGameOfficialView(SelfServiceWriteMixin, View):
             .values_list("team__description", flat=True)
             .first(),
             "is_mapped": row.official_id is not None,
+            "can_reclaim": can_reclaim,
             **selfservice_banner_context(request),
         }
 

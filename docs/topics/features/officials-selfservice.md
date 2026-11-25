@@ -3,7 +3,7 @@
 **Status:** Implemented on `feat/officials-selfservice` (awaiting the user's review, not yet pushed)
 
 Officials can now look after their own duties without a staff member: they log in
-with their offd.de (Moodle) account, claim the `?` rows in `/officials/einsaetze/`
+with their offd.de (Moodle) account, claim `?` rows in `/officials/einsaetze/` and take over mapped rows whose typed name is their own
 that belong to them, add themselves to a game that has no entry yet, and manage
 their own "Spiele außerhalb der DFFL" entries in their profile — add, edit and
 delete, including several rows at once. Staff keep full access to everything and
@@ -103,7 +103,7 @@ All self-service routes live under `officials/urls.py` with the
 
 | Route | Purpose | Who |
 | --- | --- | --- |
-| `gameofficial/<id>/claim/` | confirm + claim an unassigned row | staff, Moodle |
+| `gameofficial/<id>/claim/` | confirm + claim an unassigned row, or take over a mapped row with a matching typed name | staff, Moodle |
 | `gameofficial/add-assignment/` | gameday → game → position picker | staff, Moodle |
 | `gameofficial/<id>/unassign/` | clear the official, keep the name | staff |
 | `gameofficial/<id>/delete/` | delete a DFFL assignment (future-game warning) | staff, owner |
@@ -113,8 +113,10 @@ All self-service routes live under `officials/urls.py` with the
 
 ## Behaviour notes
 
-- The claim is an `UPDATE … WHERE official IS NULL`: a race produces one winner,
-  the loser reads "Dieser Eintrag wurde bereits zugeordnet." and nothing changes.
+- An unassigned row is claimed with `UPDATE … WHERE official IS NULL`: a race has
+  one winner. A mapped row can be taken over by the official whose name matches
+  the typed scorecard name ("Das war ich"); a mismatched name is rejected with
+  no write. Staff can reassign any row with the official picker.
 - Adding an assignment is refused when the official is already on the game or
   the `(game, position)` slot is taken — the scorecard's upsert corrupts on
   duplicate slots, so the user is pointed at "Mir zuordnen" instead.

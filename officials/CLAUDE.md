@@ -69,7 +69,7 @@ after logging in with their offd.de account (session key
 Moodle-logged-in official through and sends everyone else to the Moodle login
 with a validated `?next=`. A Moodle user is always pinned to their own `Official`
 row — a posted `official_id` is ignored — and `can_edit_official()` is re-checked
-per row. Views: claim an unassigned (`?`) row
+per row. Views: claim an unassigned (`?`) row or take over a mapped row whose typed name matches
 (`UPDATE … WHERE official IS NULL`, so a race has exactly one winner),
 add an assignment (gameday → game → position, blocked when the official is
 already on the game or the position is occupied), staff-only unassign (keeps the

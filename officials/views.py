@@ -352,6 +352,13 @@ class GameOfficialListView(View):
                 and row_official_id is None
                 and name_matches_official(raw["name"], acting_official)
             )
+            # A mapped row whose typed name looks like this official can be
+            # taken over ("Das war ich"); staff can reassign any mapped row.
+            row["can_reclaim"] = is_staff or (
+                acting_official is not None
+                and row_official_id is not None
+                and name_matches_official(raw["name"], acting_official)
+            )
             if row["is_own_row"]:
                 # The visitor's own row shows the name; every other row keeps
                 # the obfuscated form.

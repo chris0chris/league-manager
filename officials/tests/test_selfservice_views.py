@@ -75,7 +75,8 @@ class TestClaimAssignment(SelfServiceTestBase):
         assert row.name == "Max Mustermann"
 
     def test_claim_already_mapped_fails(self):
-        gameinfo, row = _game_with_row(official=self.other)
+        # A mapped row whose typed name is somebody else's must not be stolen.
+        gameinfo, row = _game_with_row(official=self.other, name="Jemand Anders")
         self.login_moodle()
 
         response = self.client.post(
@@ -84,11 +85,13 @@ class TestClaimAssignment(SelfServiceTestBase):
 
         row.refresh_from_db()
         assert row.official == self.other
-        assert any("bereits zugeordnet" in m for m in self.messages(response))
+        assert any("anderen Person" in m for m in self.messages(response))
 
     def test_claim_race_single_winner(self):
         gameinfo, row = _game_with_row()
-        client_two = self.login_moodle(client=Client())
+        # The second official's name does not match the typed name, so once
+        # the first claim has mapped the row she cannot take it over.
+        client_two = self.login_moodle(official=self.other, client=Client())
         self.login_moodle()
 
         self.client.post(reverse(CLAIM_URL_NAME, kwargs={"pk": row.pk}))
@@ -99,7 +102,7 @@ class TestClaimAssignment(SelfServiceTestBase):
         row.refresh_from_db()
         assert response.status_code == 200
         assert row.official == self.official
-        assert any("bereits zugeordnet" in m for m in self.messages(response))
+        assert any("anderen Person" in m for m in self.messages(response))
 
     def test_moodle_claim_other_row_allowed(self):
         # Decision 1: any unmapped row may be claimed, no name check.
@@ -852,3 +855,72 @@ class TestSelfServiceButtons(SelfServiceTestBase):
             content = client.get(url).content.decode()
             assert ">Abbrechen<" in content
             assert "btn btn-outline-danger" in content, url
+
+
+class TestReclaimMappedAssignment(SelfServiceTestBase):
+    def _mapped_row_for(self, typed_name, mapped_to):
+        self.official.first_name = "Bastian"
+        self.official.last_name = "Danz"
+        self.official.save()
+        return _game_with_row(official=mapped_to, name=typed_name)
+
+    def test_official_reclaims_mapped_row_with_matching_typed_name(self):
+        gameinfo, row = self._mapped_row_for("Bastian Danz", self.other)
+        self.login_moodle()
+
+        response = self.client.post(
+            reverse(CLAIM_URL_NAME, kwargs={"pk": row.pk}), follow=True
+        )
+
+        row.refresh_from_db()
+        assert row.official == self.official
+        assert any("zugeordnet" in m for m in self.messages(response))
+
+    def test_official_cannot_reclaim_a_row_of_someone_else(self):
+        gameinfo, row = self._mapped_row_for("Jemand Anders", self.other)
+        self.login_moodle()
+
+        response = self.client.post(
+            reverse(CLAIM_URL_NAME, kwargs={"pk": row.pk}), follow=True
+        )
+
+        row.refresh_from_db()
+        assert row.official == self.other
+        assert any("anderen Person" in m for m in self.messages(response))
+
+    def test_staff_can_reassign_a_mapped_row(self):
+        gameinfo, row = self._mapped_row_for("Jemand Anders", self.other)
+        client = Client()
+        client.force_login(_staff_user())
+
+        client.post(
+            reverse(CLAIM_URL_NAME, kwargs={"pk": row.pk}),
+            {"official_id": str(self.official.pk)},
+        )
+
+        row.refresh_from_db()
+        assert row.official == self.official
+
+    def test_confirm_page_offers_the_form_for_a_matching_mapped_row(self):
+        gameinfo, row = self._mapped_row_for("Bastian Danz", self.other)
+        self.login_moodle()
+
+        content = self.client.get(
+            reverse(CLAIM_URL_NAME, kwargs={"pk": row.pk})
+        ).content.decode()
+
+        assert "Einsatz übernehmen" in content
+        assert "nicht überschrieben" not in content
+
+    def test_list_offers_reclaim_only_for_matching_mapped_rows(self):
+        gameinfo, own = self._mapped_row_for("Bastian Danz", self.other)
+        gameinfo, foreign = _game_with_row(official=self.other, name="Jemand Anders")
+        self.login_moodle()
+
+        content = self.client.get(reverse(LIST_URL_NAME)).content.decode()
+
+        assert content.count("Das war ich") == 1
+        own_link = reverse(CLAIM_URL_NAME, kwargs={"pk": own.pk})
+        foreign_link = reverse(CLAIM_URL_NAME, kwargs={"pk": foreign.pk})
+        assert own_link in content
+        assert foreign_link not in content

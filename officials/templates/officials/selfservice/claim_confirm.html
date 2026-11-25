@@ -3,8 +3,8 @@
 <div class="content-section">
     <h1>Einsatz zuordnen</h1>
     <p>
-        Du bist dabei, den folgenden <strong>nicht zugeordneten</strong> Einsatz zu übernehmen.
-        Der eingetragene Name bleibt unverändert erhalten.
+        Du bist dabei, diesen Einsatz zu übernehmen. Der eingetragene Name bleibt
+        unverändert erhalten.
     </p>
     <table class="table table-sm">
         <tbody>
@@ -27,11 +27,17 @@
         </tbody>
     </table>
 
-    {% if is_mapped %}
+    {% if is_mapped and not can_reclaim %}
     <div class="alert alert-warning">
-        Dieser Einsatz ist bereits zugeordnet. Zuordnungen können nicht überschrieben werden.
+        Dieser Einsatz ist einer anderen Person zugeordnet. Bitte wende dich an Staff.
     </div>
     {% else %}
+    {% if is_mapped %}
+    <div class="alert alert-info">
+        Dieser Einsatz ist derzeit einer anderen Person zugeordnet. Mit
+        <strong>Einsatz übernehmen</strong> wird er dir zugeordnet.
+    </div>
+    {% endif %}
     <form method="post">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">

@@ -9,8 +9,9 @@ meldest du dich mit deinem offd.de-Konto an – Staff kann dasselbe für alle tu
 1. **Anmelden**: Auf [Alle Einsätze](/officials/einsaetze/) auf **Über offd.de
    anmelden** klicken und die Moodle-Zugangsdaten eingeben. Deine eigenen Zeilen
    sind danach farbig markiert.
-2. **Offenen Eintrag übernehmen**: Bei einer Zeile mit **?** auf **Mir zuordnen**
-   klicken und den Einsatz auf der Bestätigungsseite übernehmen.
+2. **Einsatz übernehmen**: Bei einer Zeile mit **?** auf **Mir zuordnen** klicken.
+   Steht dein Name in einer bereits zugeordneten Zeile, kannst du sie über
+   **Das war ich** ebenfalls übernehmen.
 3. **Fehlenden Einsatz nachtragen**: Auf **Einsatz nachtragen** klicken, Spieltag
    wählen, dann Spiel und Position. Ist die Position schon besetzt, übernimm
    stattdessen den vorhandenen Eintrag über **Mir zuordnen**.
