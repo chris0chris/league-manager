@@ -8,7 +8,7 @@ that rule instead of repeating it.
 """
 
 import re
-from datetime import datetime
+from datetime import date, datetime
 from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
@@ -439,3 +439,55 @@ class ExternalGameDeleteView(_ExternalEntryMixin, View):
         entry.delete()
         messages.success(request, "Eintrag gelöscht.")
         return redirect(profile_gamelist_url(official, season))
+
+
+DFFL_DELETE_URL_NAME = "view-officials-selfservice-dffl-delete"
+
+
+class DfflGameDeleteView(SelfServiceWriteMixin, View):
+    """Delete one of the official's own DFFL assignments.
+
+    The scorecard stays authoritative: the row is deleted for real, and if the
+    scorecard is saved for a future game afterwards it may create an empty slot
+    again - the confirmation says so.
+    """
+
+    template_name = "officials/selfservice/delete_confirm.html"
+
+    def get(self, request, pk):
+        row = self._get_row(request, pk)
+        game = row.gameinfo
+        return render(
+            request,
+            self.template_name,
+            {
+                "row": row,
+                "game": game,
+                "home": game.gameresult_set.filter(isHome=True)
+                .values_list("team__description", flat=True)
+                .first(),
+                "away": game.gameresult_set.filter(isHome=False)
+                .values_list("team__description", flat=True)
+                .first(),
+                "future_warning": game.gameday.date > date.today(),
+                **selfservice_banner_context(request),
+            },
+        )
+
+    def post(self, request, pk):
+        row = self._get_row(request, pk)
+        official = row.official
+        season = row.gameinfo.gameday.date.year
+        row.delete()
+        messages.success(request, "Einsatz gelöscht.")
+        return redirect(profile_gamelist_url(official, season))
+
+    @staticmethod
+    def _get_row(request, pk) -> GameOfficial:
+        row = get_object_or_404(
+            GameOfficial.objects.select_related("gameinfo__gameday", "official"),
+            pk=pk,
+        )
+        if not can_edit_official(request, row.official_id):
+            raise PermissionDenied("Dieser Eintrag gehört einer anderen Person.")
+        return row

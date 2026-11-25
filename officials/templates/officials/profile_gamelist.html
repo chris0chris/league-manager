@@ -55,6 +55,9 @@
         <th scope="col">Position</th>
         <th scope="col">Spiel</th>
         <th scope="col">Platzierung</th>
+        {% if can_edit_profile %}
+        <th scope="col">Aktion</th>
+        {% endif %}
     </tr>
     </thead>
     <tbody>
@@ -71,6 +74,12 @@
         <td>{{official.position}}</td>
         <td>{{official.vs}} (#{{official.gameinfo_id}})</td>
         <td>{{official.standing}}</td>
+        {% if can_edit_profile %}
+        <td>
+            <a class="btn btn-sm btn-outline-danger"
+               href="{% url 'view-officials-selfservice-dffl-delete' pk=official.game_official_id %}">Löschen</a>
+        </td>
+        {% endif %}
     </tr>
     {% endfor %}
     </tbody>

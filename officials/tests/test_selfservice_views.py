@@ -2,7 +2,7 @@ from django.contrib.messages import get_messages
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from gamedays.models import GameOfficial
+from gamedays.models import Gameinfo, GameOfficial
 from gamedays.tests.setup_factories.factories import (
     GamedayFactory,
     GameinfoFactory,
@@ -541,3 +541,68 @@ class TestExternalGameDelete(SelfServiceTestBase):
         from officials.models import OfficialExternalGames
 
         assert not OfficialExternalGames.objects.filter(pk=self.entry.pk).exists()
+
+
+DFFL_DELETE_URL_NAME = "view-officials-selfservice-dffl-delete"
+
+
+class TestDfflGameDelete(SelfServiceTestBase):
+    def test_owner_deletes_dffl_entry(self):
+        gameinfo, row = _game_with_row(official=self.official)
+        self.login_moodle()
+
+        response = self.client.post(
+            reverse(DFFL_DELETE_URL_NAME, kwargs={"pk": row.pk}), follow=True
+        )
+
+        assert response.status_code == 200
+        assert not GameOfficial.objects.filter(pk=row.pk).exists()
+        assert Gameinfo.objects.filter(pk=gameinfo.pk).exists()
+
+    def test_other_official_forbidden(self):
+        gameinfo, row = _game_with_row(official=self.other)
+        self.login_moodle()
+
+        response = self.client.post(
+            reverse(DFFL_DELETE_URL_NAME, kwargs={"pk": row.pk})
+        )
+
+        assert response.status_code == 403
+        assert GameOfficial.objects.filter(pk=row.pk).exists()
+
+    def test_anonymous_redirects(self):
+        gameinfo, row = _game_with_row(official=self.official)
+
+        response = self.client.get(reverse(DFFL_DELETE_URL_NAME, kwargs={"pk": row.pk}))
+
+        assert response.status_code == 302
+        assert response.url.startswith(reverse("view-officials-moodle-login"))
+
+    def test_staff_deletes_any(self):
+        gameinfo, row = _game_with_row(official=self.other)
+        client = Client()
+        client.force_login(_staff_user())
+
+        client.post(reverse(DFFL_DELETE_URL_NAME, kwargs={"pk": row.pk}))
+
+        assert not GameOfficial.objects.filter(pk=row.pk).exists()
+
+    def test_future_game_delete_shows_warning(self):
+        future_gameday = GamedayFactory(date="2027-05-01", name="Zukunftsspieltag")
+        future_game = GameinfoFactory(gameday=future_gameday)
+        future_row = GameOfficialFactory(
+            gameinfo=future_game, official=self.official, position="Referee"
+        )
+        gameinfo, past_row = _game_with_row(official=self.official)
+        self.login_moodle()
+
+        future_content = self.client.get(
+            reverse(DFFL_DELETE_URL_NAME, kwargs={"pk": future_row.pk})
+        ).content.decode()
+        past_content = self.client.get(
+            reverse(DFFL_DELETE_URL_NAME, kwargs={"pk": past_row.pk})
+        ).content.decode()
+
+        assert "Zukunft" in future_content
+        assert "Scorecard" in future_content
+        assert "Zukunft" not in past_content

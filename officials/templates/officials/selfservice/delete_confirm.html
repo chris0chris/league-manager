@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="content-section">
-    <h1>Eintrag löschen</h1>
+    <h1>{% if entry %}Eintrag löschen{% else %}Einsatz löschen{% endif %}</h1>
+    {% if entry %}
     <p>
         Dieser Einsatz außerhalb der DFFL wird gelöscht. Das kann nicht rückgängig
         gemacht werden.
@@ -36,5 +37,38 @@
         <a class="btn btn-outline-secondary"
            href="{% url 'view-officials-profile-gamelist' pk=entry.official_id season=entry.date.year %}">Abbrechen</a>
     </form>
+    {% else %}
+    <p>
+        Dieser DFFL-Einsatz wird gelöscht. Das Spiel selbst bleibt bestehen.
+    </p>
+    {% if future_warning %}
+    <div class="alert alert-warning">
+        <strong>Achtung:</strong> Das Spiel liegt in der Zukunft. Beim nächsten Speichern der
+        <strong>Scorecard</strong> kann für diese Position wieder ein leerer Eintrag angelegt werden.
+    </div>
+    {% endif %}
+    <table class="table table-sm">
+        <tbody>
+        <tr>
+            <th scope="row">Spieltag</th>
+            <td>{{ game.gameday.name }} ({{ game.gameday.date|date:"d.m.Y" }})</td>
+        </tr>
+        <tr>
+            <th scope="row">Spiel</th>
+            <td>{% if home and away %}{{ home }} vs {{ away }}{% else %}Spiel #{{ game.pk }}{% endif %} (#{{ game.pk }})</td>
+        </tr>
+        <tr>
+            <th scope="row">Position</th>
+            <td>{{ row.position }}</td>
+        </tr>
+        </tbody>
+    </table>
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">Endgültig löschen</button>
+        <a class="btn btn-outline-secondary"
+           href="{% url 'view-officials-profile-gamelist' pk=row.official_id season=game.gameday.date.year %}">Abbrechen</a>
+    </form>
+    {% endif %}
 </div>
 {% endblock content %}

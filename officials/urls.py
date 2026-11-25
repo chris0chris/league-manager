@@ -24,6 +24,7 @@ from officials.views import (
 from officials.selfservice import (
     AddAssignmentView,
     ClaimGameOfficialView,
+    DfflGameDeleteView,
     ExternalGameDeleteView,
     ExternalGameEditView,
     UnassignGameOfficialView,
@@ -62,6 +63,7 @@ OFFICIALS_SELF_SERVICE_ADD_ASSIGNMENT = "view-officials-selfservice-add-assignme
 OFFICIALS_SELF_SERVICE_UNASSIGN = "view-officials-selfservice-unassign"
 OFFICIALS_SELF_SERVICE_EXTERNAL_EDIT = "view-officials-selfservice-external-edit"
 OFFICIALS_SELF_SERVICE_EXTERNAL_DELETE = "view-officials-selfservice-external-delete"
+OFFICIALS_SELF_SERVICE_DFFL_DELETE = "view-officials-selfservice-dffl-delete"
 # OFFICIALS_STATISTICS / OFFICIALS_STATISTICS_FOR_SEASON live in
 # officials/constants.py (imported above) since OfficialsStatisticsView
 # also needs them and can't import from this module without a circular
@@ -148,6 +150,11 @@ urlpatterns = [
         "external/<int:pk>/delete/",
         ExternalGameDeleteView.as_view(),
         name=OFFICIALS_SELF_SERVICE_EXTERNAL_DELETE,
+    ),
+    path(
+        "gameofficial/<int:pk>/delete/",
+        DfflGameDeleteView.as_view(),
+        name=OFFICIALS_SELF_SERVICE_DFFL_DELETE,
     ),
     path(
         "gameofficial/import/upload/",
