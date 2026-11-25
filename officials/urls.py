@@ -28,6 +28,7 @@ from officials.selfservice import (
     ExternalGameDeleteView,
     ExternalGameEditView,
     ExternalGameMultiAddView,
+    MyAssignmentsView,
     UnassignGameOfficialView,
 )
 
@@ -36,6 +37,8 @@ OFFICIALS_LIST_FOR_TEAM_AND_YEAR = "view-officials-list-for-team-and-year"
 OFFICIALS_LIST_FOR_ALL_TEAMS = "view-officials-list-for-all-teams"
 OFFICIALS_LIST_FOR_ALL_TEAMS_AND_YEAR = "view-officials-list-for-all-teams-and-year"
 OFFICIALS_GAME_OFFICIALS_APPEARANCE = "view-officials-game-officials-appearance"
+OFFICIALS_GAME_OFFICIALS_MINE = "view-officials-game-officials-mine"
+OFFICIALS_MY_ASSIGNMENTS_NAV = "view-officials-my-assignments-navigation"
 OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_YEAR = (
     "view-officials-game-officials-appearance-for-year"
 )
@@ -104,6 +107,17 @@ urlpatterns = [
         "einsaetze/",
         GameOfficialListView.as_view(),
         name=OFFICIALS_GAME_OFFICIALS_APPEARANCE,
+    ),
+    path(
+        "einsaetze/meine/",
+        GameOfficialListView.as_view(),
+        {"mine": True},
+        name=OFFICIALS_GAME_OFFICIALS_MINE,
+    ),
+    path(
+        "meine-einsaetze/",
+        MyAssignmentsView.as_view(),
+        name=OFFICIALS_MY_ASSIGNMENTS_NAV,
     ),
     path(
         "einsaetze/<int:season>/",

@@ -31,7 +31,7 @@ rules - when a topic is required, and what "short" means - are in
 
 Refer to the specialized guides for detailed protocols:
 - **[Architecture Overview](docs/topics/architecture/architecture-overview.md)**: System design and tech stack.
-- **[Coding Standards](docs/topics/guides/coding-standards.md)**: Python (Django) and TypeScript (React) conventions.
+- **[Coding Standards](docs/topics/guides/coding-standards.md)**: Python (Django) and TypeScript (React) conventions. For UI work also follow the **[UI Button Patterns](docs/topics/guides/ui-button-patterns.md)** (primary CTA full width, cancel `btn-outline-danger`).
 - **[Infrastructure Policy](docs/topics/deployment/infrastructure-policy.md)**: Deployment safety and Ansible rules.
 - **[Scoped CI](docs/topics/deployment/scoped-ci.md)**: Path-scoped CircleCI pipeline. CI changes require updating `.circleci/scope-mapping.txt`/`scope-exclude.txt` (runs `scripts/check_scope_coverage.py` safety net); dependency/build changes may widen the tests a push runs.
 - **[Setup Guide](docs/topics/guides/setup-guide.md)**: Local environment configuration.

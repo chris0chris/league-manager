@@ -5,6 +5,7 @@ from officials.urls import (
     OFFICIALS_GAME_OFFICIALS_APPEARANCE,
     OFFICIALS_GAMEOFFICIAL_IMPORT_UPLOAD,
     OFFICIALS_LICENSE_CHECK,
+    OFFICIALS_MY_ASSIGNMENTS_NAV,
 )
 
 
@@ -56,9 +57,8 @@ class OfficialsMenu(BaseMenu):
             [
                 MenuDivider.create(),
                 MenuItem.create(
-                    name="Einsätze melden",
-                    url="https://offd.de/mod/page/view.php?id=315",
-                    is_static=True,
+                    name="Meine Einsätze",
+                    url=OFFICIALS_MY_ASSIGNMENTS_NAV,
                 ),
             ]
         )

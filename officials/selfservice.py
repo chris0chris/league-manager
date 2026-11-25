@@ -143,15 +143,24 @@ def login_url_for(request) -> str:
 
 
 def selfservice_banner_context(request, official: Official | None = None) -> dict:
-    """Banner data for the two list pages (login button / logged-in state)."""
+    """Banner data for the two list pages (login button / logged-in state).
+
+    ``official`` is the *profile owner* on the gamelist page. It may only be
+    used as a fallback for resolving a name when the session points at an
+    official whose row no longer exists: with a session the banner must name
+    the acting official, not the person whose profile happens to be open.
+    Anonymous visitors get no name at all, so they keep seeing the login
+    button instead of being told they are "angemeldet als" somebody else.
+    """
     moodle_official_id = acting_official_id(request)
     acting_name = None
     if request.user.is_authenticated and request.user.is_staff:
         acting_name = request.user.username
     elif moodle_official_id is not None:
-        official = official or Official.objects.filter(pk=moodle_official_id).first()
-        if official is not None:
-            acting_name = f"{official.first_name} {official.last_name}"
+        session_official = Official.objects.filter(pk=moodle_official_id).first()
+        display_official = session_official or official
+        if display_official is not None:
+            acting_name = f"{display_official.first_name} {display_official.last_name}"
     return {
         "moodle_official_id": moodle_official_id,
         "is_staff": request.user.is_staff,
@@ -447,6 +456,29 @@ def profile_gamelist_url(official: Official, season: int) -> str:
         "view-officials-profile-gamelist",
         kwargs={"pk": official.pk, "season": season},
     )
+
+
+class MyAssignmentsView(SelfServiceWriteMixin, View):
+    """Internal target of the "Meine Einsätze" menu item.
+
+    The shared gate already sends visitors without a Moodle session to the
+    login with ``?next=`` pointing back here. A logged-in official lands on
+    their own gamelist for the current season, so the menu never has to link
+    to the external offd.de page again.
+    """
+
+    def get(self, request):
+        official_id = acting_official_id(request)
+        official = (
+            Official.objects.filter(pk=official_id).first()
+            if official_id is not None
+            else None
+        )
+        if official is None:
+            # Staff pass through the gate without a Moodle session; they still
+            # need one to have an "own" gamelist to land on.
+            return redirect(login_url_for(request))
+        return redirect(profile_gamelist_url(official, datetime.today().year))
 
 
 class _ExternalEntryMixin(SelfServiceWriteMixin):

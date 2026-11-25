@@ -316,6 +316,7 @@ For detailed protocols and standards, refer to:
 - **[Contributor Guide](docs/topics/guides/contributor-guide.md)**: Build, test, code style, and safety guidelines (primary reference)
 - **[Architecture Overview](docs/topics/architecture/architecture-overview.md)**: System design and tech stack decisions
 - **[Coding Standards](docs/topics/guides/coding-standards.md)**: Python, TypeScript, and CSS conventions
+- **[UI Button Patterns](docs/topics/guides/ui-button-patterns.md)**: Mandatory primary-CTA / cancel-button layout for self-service forms (agents must follow this for UI work)
 - **[Infrastructure Policy](docs/topics/deployment/infrastructure-policy.md)**: Deployment safety and Ansible rules
 - **[Setup Guide](docs/topics/guides/setup-guide.md)**: Local environment configuration
 - **[AGENTS.md](AGENTS.md)**: Universal guidelines for all autonomous agents

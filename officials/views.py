@@ -260,7 +260,12 @@ class GameOfficialListView(View):
         acting_official = (
             Official.objects.filter(pk=acting).first() if acting is not None else None
         )
-        mine = request.GET.get("mine") == "1" and acting_official is not None
+        # The canonical /einsaetze/meine/ route passes mine=True as a URL
+        # kwarg; ?mine=1 stays supported for existing links/bookmarks. Both
+        # only apply to someone with an acting Moodle official.
+        mine = (
+            kwargs.get("mine", False) or request.GET.get("mine") == "1"
+        ) and acting_official is not None
         if mine:
             # Own mapped rows plus unassigned rows whose typed name looks like
             # this official. The name match is a Python-side best effort (see

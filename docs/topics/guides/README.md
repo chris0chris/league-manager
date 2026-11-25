@@ -12,6 +12,7 @@ Step-by-step how-to guides, setup instructions, and workflows.
 - [Scorecard Event Store](./scorecard-events-operations.md) — Feed endpoint and the projection check/rebuild commands
 - [Code Scanning Alert Triage](./security-alert-triage.md) — Which CodeQL/ESLint alerts to fix, which to dismiss, and how
 - [Code Style Guides](./code-style/) — Language-specific coding standards
+- [UI Button Patterns](./ui-button-patterns.md) — Full-width primary action, `btn-outline-danger` cancel, one shared button row
 - [Product Guidelines](./product.md) — Product philosophy and principles
 
 ## Overview
