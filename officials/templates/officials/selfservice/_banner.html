@@ -1,0 +1,18 @@
+{% comment %}
+Login state above the two self-service pages (Einsätze list and the official
+profile). Only rendered for pages that bypass the anonymous cache, so it can
+carry per-visitor content.
+{% endcomment %}
+{% if acting_name %}
+<div class="alert alert-info d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <span>Angemeldet als <strong>{{ acting_name }}</strong></span>
+    {% if moodle_official_id %}
+    <a class="btn btn-sm btn-outline-secondary" href="{{ logout_url }}">Abmelden</a>
+    {% endif %}
+</div>
+{% else %}
+<div class="mb-3">
+    <a class="btn btn-outline-primary" href="{{ login_url }}">Über offd.de anmelden</a>
+    <span class="text-muted small">Melde dich an, um deine eigenen Einsätze zu verwalten.</span>
+</div>
+{% endif %}

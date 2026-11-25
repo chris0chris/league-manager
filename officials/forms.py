@@ -29,6 +29,7 @@ class MoodleLoginForm(forms.Form):
         required=False,
         label="Angemeldet bleiben",
     )
+    next = forms.CharField(required=False, widget=forms.HiddenInput)
 
 
 class GameOfficialImportUploadForm(forms.Form):

@@ -12,7 +12,6 @@ from django.db.models import Subquery, OuterRef, Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.utils.decorators import method_decorator
 from django.utils.html import format_html, format_html_join
 from django.views import View
 from django.views.decorators.cache import cache_page
@@ -27,7 +26,12 @@ from officials.api.serializers import (
     OfficialGamelistSerializer,
     prefetch_official_license_history,
 )
-from officials.constants import OFFICIALS_STATISTICS_FOR_SEASON
+from officials.constants import (
+    MOODLE_LOGGED_IN_USER,
+    MOODLE_REMEMBER_COOKIE,
+    OFFICIALS_STATISTICS_FOR_SEASON,
+    REMEMBER_COOKIE_PATH,
+)
 from officials.forms import (
     AddExternalGameOfficialEntryForm,
     AddInternalGameOfficialEntryForm,
@@ -53,18 +57,18 @@ from officials.service.signup_service import (
     MaxSignupError,
 )
 from officials.service.remember_me import RememberMeService, REMEMBER_ME_MAX_AGE
+from officials.selfservice import (
+    restore_moodle_session,
+    safe_next,
+    selfservice_banner_context,
+)
 
 logger = logging.getLogger(__name__)
-
-MOODLE_LOGGED_IN_USER = "moodle_logged_in_user"
 
 NO_OFFICIAL_FOR_MOODLE_USER = (
     "Für diesen Moodle-Account ist kein Official hinterlegt. "
     "Bitte wende dich an die Turnierleitung."
 )
-
-MOODLE_REMEMBER_COOKIE = "officials_remember"
-REMEMBER_COOKIE_PATH = "/officials/gameday/sign-up/"
 
 
 def _set_remember_cookie(response, value):
@@ -197,11 +201,33 @@ class OfficialsTeamListView(View):
         return self.request.user.username == team.name
 
 
+GAME_OFFICIALS_LIST_CACHE_SECONDS = 60 * 60 * 24
+
+
 class GameOfficialListView(View):
     template_name = "officials/game_officials_list.html"
 
-    @method_decorator(cache_page(60 * 60 * 24))
     def get(self, request, **kwargs):
+        # Only the logged-out page may come from the shared cache. Everything
+        # with a session (staff, Moodle official, team account) or a
+        # remember-me cookie is rendered per visitor, so one visitor's
+        # banner/buttons can never be stored and served to another.
+        if (
+            request.user.is_authenticated
+            or request.session.get(MOODLE_LOGGED_IN_USER)
+            or request.COOKIES.get(MOODLE_REMEMBER_COOKIE)
+        ):
+            return self._render(request, **kwargs)
+        return cache_page(GAME_OFFICIALS_LIST_CACHE_SECONDS)(self._render)(
+            request, **kwargs
+        )
+
+    def _render(self, request, **kwargs):
+        restored = restore_moodle_session(request)
+        if restored.official_id is not None:
+            # Sliding ~2h session on the self-service pages.
+            request.session.set_expiry(7200)
+            request.session.modified = True
         year_str = kwargs.get("season", datetime.today().year)
         year = int(year_str) if year_str else None
         team_id = kwargs.get("pk")
@@ -275,7 +301,11 @@ class GameOfficialListView(View):
             ).data,
             "page_obj": game_officials_page,
         }
-        return render(request, self.template_name, context)
+        context.update(selfservice_banner_context(request))
+        response = render(request, self.template_name, context)
+        if restored.cookie_value:
+            _set_remember_cookie(response, restored.cookie_value)
+        return response
 
     # noinspection PyMethodMayBeStatic
     def _get_subquery(self, is_home: bool):
@@ -817,6 +847,10 @@ class OfficialProfileGamelistView(View):
     template_name = "officials/profile_gamelist.html"
 
     def get(self, request, *args, **kwargs):
+        restored = restore_moodle_session(request)
+        if restored.official_id is not None:
+            request.session.set_expiry(7200)
+            request.session.modified = True
         year = datetime.today().year
         season = kwargs.get("season", year)
         license_id = kwargs.get("pk")
@@ -830,27 +864,28 @@ class OfficialProfileGamelistView(View):
         ).data
         from officials.urls import OFFICIALS_PROFILE_GAMELIST
 
-        return render(
-            request,
-            self.template_name,
-            context={
-                "url_pattern": OFFICIALS_PROFILE_GAMELIST,
-                "pk": license_id,
-                "team_id": official.team_id,
-                "current_year": year,
-                "years": official.gameofficial_set.all()
-                .values_list("gameinfo__gameday__date__year", flat=True)
-                .order_by("-gameinfo__gameday__date__year")
-                .distinct(),
-                "season": season,
-                "official_info": official_info,
-                "needed_games_for_license": 4
-                - (
-                    official_info["external_games"]["number_games"]
-                    + official_info["dffl_games"]["number_games"]
-                ),
-            },
-        )
+        context = {
+            "url_pattern": OFFICIALS_PROFILE_GAMELIST,
+            "pk": license_id,
+            "team_id": official.team_id,
+            "current_year": year,
+            "years": official.gameofficial_set.all()
+            .values_list("gameinfo__gameday__date__year", flat=True)
+            .order_by("-gameinfo__gameday__date__year")
+            .distinct(),
+            "season": season,
+            "official_info": official_info,
+            "needed_games_for_license": 4
+            - (
+                official_info["external_games"]["number_games"]
+                + official_info["dffl_games"]["number_games"]
+            ),
+        }
+        context.update(selfservice_banner_context(request, official))
+        response = render(request, self.template_name, context)
+        if restored.cookie_value:
+            _set_remember_cookie(response, restored.cookie_value)
+        return response
 
 
 class OfficialAssociationListView(View):
@@ -906,7 +941,11 @@ class MoodleLoginView(View):
     form_class = MoodleLoginForm
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name, {"form": MoodleLoginForm()})
+        return render(
+            request,
+            self.template_name,
+            {"form": MoodleLoginForm(initial={"next": request.GET.get("next", "")})},
+        )
 
     def post(self, request, *args, **kwargs):
         form = MoodleLoginForm(request.POST)
@@ -918,9 +957,7 @@ class MoodleLoginView(View):
                 official_id = moodle_service.login(username, password)
                 request.session[MOODLE_LOGGED_IN_USER] = official_id
 
-                from officials.urls import OFFICIALS_SIGN_UP_LIST
-
-                response = redirect(reverse(OFFICIALS_SIGN_UP_LIST))
+                response = redirect(safe_next(request))
                 if form.cleaned_data.get("remember_me"):
                     _set_remember_cookie(response, RememberMeService.issue(official_id))
                 return response
@@ -940,16 +977,13 @@ class OfficialSignUpListView(View):
         official_id = request.session.get(MOODLE_LOGGED_IN_USER)
         restored_cookie = None
         if official_id is None:
-            result = RememberMeService.restore(
-                request.COOKIES.get(MOODLE_REMEMBER_COOKIE)
-            )
-            if result.official_id is not None:
-                official_id = result.official_id
-                request.session[MOODLE_LOGGED_IN_USER] = official_id
-                restored_cookie = result.cookie_value
+            restored = restore_moodle_session(request)
+            if restored.official_id is not None:
+                official_id = restored.official_id
+                restored_cookie = restored.cookie_value
             else:
                 response = redirect(reverse(OFFICIALS_MOODLE_LOGIN))
-                if result.matched:
+                if restored.matched:
                     _delete_remember_cookie(response)
                 return response
         if settings.DEBUG:
