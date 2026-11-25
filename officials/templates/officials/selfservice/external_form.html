@@ -11,9 +11,15 @@
     <form method="post">
         {% csrf_token %}
         {{ form|crispy }}
-        <button class="btn btn-primary" type="submit">Speichern</button>
-        <a class="btn btn-outline-danger"
-           href="{% url 'view-officials-profile-gamelist' pk=entry.official_id season=entry.date.year %}">Abbrechen</a>
+        <div class="row g-2">
+            <div class="col">
+                <button class="btn btn-primary w-100" type="submit">Speichern</button>
+            </div>
+            <div class="col-auto">
+                <a class="btn btn-outline-danger"
+                   href="{% url 'view-officials-profile-gamelist' pk=entry.official_id season=entry.date.year %}">Abbrechen</a>
+            </div>
+        </div>
     </form>
 </div>
 {% endblock content %}

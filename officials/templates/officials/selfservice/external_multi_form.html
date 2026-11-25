@@ -1,5 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+    /* Small screens: stack the formset rows instead of scrolling sideways. */
+    @media (max-width: 767.98px) {
+        .external-games-table,
+        .external-games-table tbody,
+        .external-games-table tr,
+        .external-games-table td {
+            display: block;
+            width: 100%;
+        }
+        .external-games-table thead { display: none; }
+        .external-games-table tr { border-bottom: 1px solid #dee2e6; padding: .75rem 0; }
+        .external-games-table td { border: 0; padding: .25rem 0; }
+    }
+</style>
 <div class="content-section">
     <h1>Spiele außerhalb der DFFL melden</h1>
     <p>
@@ -14,38 +29,80 @@
         {% include 'officials/selfservice/_staff_official_picker.html' %}
         {% endif %}
         <div class="table-responsive">
-            <table class="table align-middle">
+            <table class="table align-middle external-games-table">
                 <thead>
                 <tr>
-                    <th scope="col" style="min-width: 9rem;">Datum</th>
-                    <th scope="col" style="min-width: 6rem;">#Spiele</th>
-                    <th scope="col" style="min-width: 10rem;">Position</th>
-                    <th scope="col" style="min-width: 12rem;">Verband</th>
-                    <th scope="col" style="min-width: 7rem;">Halbzeitdauer</th>
-                    <th scope="col" style="min-width: 4rem;">Clock Control</th>
-                    <th scope="col" style="min-width: 5rem;">International</th>
-                    <th scope="col" style="min-width: 12rem;">Kommentar</th>
+                    <th scope="col">Datum</th>
+                    <th scope="col">#Spiele</th>
+                    <th scope="col">Position</th>
+                    <th scope="col">Verband</th>
+                    <th scope="col">Halbzeitdauer</th>
+                    <th scope="col">Clock Control</th>
+                    <th scope="col">International</th>
+                    <th scope="col">Kommentar</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for form in formset %}
                 <tr>
-                    <td>{{ form.date }}{% if not adding_row %}{{ form.date.errors }}{% endif %}</td>
-                    <td>{{ form.number_games }}{% if not adding_row %}{{ form.number_games.errors }}{% endif %}</td>
-                    <td>{{ form.position }}{% if not adding_row %}{{ form.position.errors }}{% endif %}</td>
-                    <td>{{ form.association }}{% if not adding_row %}{{ form.association.errors }}{% endif %}</td>
-                    <td>{{ form.halftime_duration }}{% if not adding_row %}{{ form.halftime_duration.errors }}{% endif %}</td>
-                    <td>{{ form.has_clockcontrol }}{% if not adding_row %}{{ form.has_clockcontrol.errors }}{% endif %}</td>
-                    <td>{{ form.is_international }}{% if not adding_row %}{{ form.is_international.errors }}{% endif %}</td>
-                    <td>{{ form.comment }}{% if not adding_row %}{{ form.comment.errors }}{% endif %}</td>
+                    <td>
+                        <span class="d-md-none fw-bold">Datum:</span>
+                        {{ form.date }}
+                        {% if not adding_row %}{% for error in form.date.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
+                    </td>
+                    <td>
+                        <span class="d-md-none fw-bold">#Spiele:</span>
+                        {{ form.number_games }}
+                        {% if not adding_row %}{% for error in form.number_games.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
+                    </td>
+                    <td>
+                        <span class="d-md-none fw-bold">Position:</span>
+                        {{ form.position }}
+                        {% if not adding_row %}{% for error in form.position.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
+                    </td>
+                    <td>
+                        <span class="d-md-none fw-bold">Verband:</span>
+                        {{ form.association }}
+                        {% if not adding_row %}{% for error in form.association.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
+                    </td>
+                    <td>
+                        <span class="d-md-none fw-bold">Halbzeitdauer:</span>
+                        {{ form.halftime_duration }}
+                        {% if not adding_row %}{% for error in form.halftime_duration.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
+                    </td>
+                    <td>
+                        <span class="d-md-none fw-bold">Clock Control:</span>
+                        {{ form.has_clockcontrol }}
+                        {% if not adding_row %}{% for error in form.has_clockcontrol.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
+                    </td>
+                    <td>
+                        <span class="d-md-none fw-bold">International:</span>
+                        {{ form.is_international }}
+                        {% if not adding_row %}{% for error in form.is_international.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
+                    </td>
+                    <td>
+                        <span class="d-md-none fw-bold">Kommentar:</span>
+                        {{ form.comment }}
+                        {% if not adding_row %}{% for error in form.comment.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
                 </tbody>
             </table>
         </div>
-        <button class="btn btn-outline-secondary" type="submit" name="add_row" value="1">Weitere Zeile hinzufügen</button>
-        <button class="btn btn-primary" type="submit" name="save" value="1">Alle speichern</button>
-        <a class="btn btn-outline-danger" href="{% url 'view-officials-game-officials-appearance' %}">Abbrechen</a>
+        <div class="row mb-2">
+            <div class="col-12">
+                <button class="btn btn-outline-secondary" type="submit" name="add_row" value="1">Weitere Zeile hinzufügen</button>
+            </div>
+        </div>
+        <div class="row g-2">
+            <div class="col">
+                <button class="btn btn-primary w-100" type="submit" name="save" value="1">Alle speichern</button>
+            </div>
+            <div class="col-auto">
+                <a class="btn btn-outline-danger" href="{% url 'view-officials-game-officials-appearance' %}">Abbrechen</a>
+            </div>
+        </div>
     </form>
 </div>
 {% endblock content %}
