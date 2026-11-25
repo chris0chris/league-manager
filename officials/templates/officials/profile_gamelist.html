@@ -115,6 +115,9 @@
             <div data-bs-title="Durch wen wurde der Eintrag gemeldet?" data-bs-toggle="tooltip">Meldename</div>
         </th>
         <th scope="col">Kommentar</th>
+        {% if can_edit_profile %}
+        <th scope="col">Aktion</th>
+        {% endif %}
     </tr>
     </thead>
     <tbody>
@@ -135,6 +138,14 @@
         <td>{{entry.notification_date}}</td>
         <td>{{entry.reporter_name}}</td>
         <td>{{entry.comment}}</td>
+        {% if can_edit_profile %}
+        <td>
+            <a class="btn btn-sm btn-outline-primary"
+               href="{% url 'view-officials-selfservice-external-edit' pk=entry.id %}">Bearbeiten</a>
+            <a class="btn btn-sm btn-outline-danger"
+               href="{% url 'view-officials-selfservice-external-delete' pk=entry.id %}">Löschen</a>
+        </td>
+        {% endif %}
     </tr>
     {% endfor %}
     </tbody>

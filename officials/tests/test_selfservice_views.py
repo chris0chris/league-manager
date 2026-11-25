@@ -10,6 +10,7 @@ from gamedays.tests.setup_factories.factories import (
     TeamFactory,
 )
 from officials.constants import MOODLE_LOGGED_IN_USER
+from officials.tests.setup_factories.db_setup_officials import DbSetupOfficials
 from officials.tests.setup_factories.factories_officials import OfficialFactory
 
 LIST_URL_NAME = "view-officials-game-officials-appearance"
@@ -351,3 +352,192 @@ class TestUnassign(SelfServiceTestBase):
 
         assert response.status_code == 302
         assert response.url.startswith(reverse("view-officials-moodle-login"))
+
+
+EXTERNAL_EDIT_URL_NAME = "view-officials-selfservice-external-edit"
+EXTERNAL_DELETE_URL_NAME = "view-officials-selfservice-external-delete"
+
+
+def _external_entry(official, association_abbr="AFCVHH", date="2026-05-24"):
+    from officials.models import OfficialExternalGames
+    from gamedays.models import Association
+
+    association, _created = Association.objects.get_or_create(
+        abbr=association_abbr, defaults={"name": association_abbr}
+    )
+    return OfficialExternalGames.objects.create(
+        official=official,
+        number_games=2,
+        date=date,
+        notification_date=date,
+        position="Referee",
+        association=association,
+        halftime_duration=20,
+        has_clockcontrol=True,
+        is_international=False,
+        reporter_name="Melder",
+        comment="",
+    )
+
+
+def _external_form_data(**overrides):
+    from gamedays.models import Association
+
+    association = Association.objects.get(abbr="AFCVT")
+    data = {
+        "date": "2026-06-02",
+        "number_games": "3",
+        "position": "Side Judge",
+        "association": str(association.pk),
+        "halftime_duration": "25",
+        "comment": "geändert",
+    }
+    data.update(overrides)
+    return data
+
+
+class TestExternalGameEdit(SelfServiceTestBase):
+    def setUp(self):
+        super().setUp()
+        DbSetupOfficials.create_production_associations()
+        self.entry = _external_entry(self.official)
+
+    def test_owner_edits_external_entry(self):
+        self.login_moodle()
+
+        response = self.client.post(
+            reverse(EXTERNAL_EDIT_URL_NAME, kwargs={"pk": self.entry.pk}),
+            _external_form_data(),
+            follow=True,
+        )
+
+        self.entry.refresh_from_db()
+        assert response.status_code == 200
+        assert self.entry.number_games == 3
+        assert self.entry.position == "Side Judge"
+        assert self.entry.association.abbr == "AFCVT"
+        assert self.entry.comment == "geändert"
+        assert self.entry.is_international is False
+
+    def test_other_official_cannot_edit(self):
+        self.login_moodle(self.other)
+
+        response = self.client.post(
+            reverse(EXTERNAL_EDIT_URL_NAME, kwargs={"pk": self.entry.pk}),
+            _external_form_data(),
+        )
+
+        self.entry.refresh_from_db()
+        assert response.status_code == 403
+        assert self.entry.number_games == 2
+
+    def test_anonymous_redirects(self):
+        response = self.client.get(
+            reverse(EXTERNAL_EDIT_URL_NAME, kwargs={"pk": self.entry.pk})
+        )
+
+        assert response.status_code == 302
+        assert response.url.startswith(reverse("view-officials-moodle-login"))
+
+    def test_staff_edits_any(self):
+        client = Client()
+        client.force_login(_staff_user())
+
+        client.post(
+            reverse(EXTERNAL_EDIT_URL_NAME, kwargs={"pk": self.entry.pk}),
+            _external_form_data(),
+        )
+
+        self.entry.refresh_from_db()
+        assert self.entry.number_games == 3
+
+    def test_staff_can_reassign_official(self):
+        client = Client()
+        client.force_login(_staff_user())
+
+        client.post(
+            reverse(EXTERNAL_EDIT_URL_NAME, kwargs={"pk": self.entry.pk}),
+            _external_form_data(official_id=str(self.other.pk)),
+        )
+
+        self.entry.refresh_from_db()
+        assert self.entry.official == self.other
+
+    def test_owner_form_hides_staff_fields(self):
+        self.login_moodle()
+
+        content = self.client.get(
+            reverse(EXTERNAL_EDIT_URL_NAME, kwargs={"pk": self.entry.pk})
+        ).content.decode()
+
+        assert 'name="notification_date"' not in content
+        assert 'name="reporter_name"' not in content
+        assert 'name="official_id"' not in content
+
+    def test_association_is_a_dropdown(self):
+        from django import forms
+
+        from officials.forms_selfservice import ExternalGameForm
+
+        field = ExternalGameForm().fields["association"]
+
+        assert isinstance(field, forms.ModelChoiceField)
+
+    def test_free_text_association_is_rejected(self):
+        self.login_moodle()
+
+        response = self.client.post(
+            reverse(EXTERNAL_EDIT_URL_NAME, kwargs={"pk": self.entry.pk}),
+            _external_form_data(association="Fantasie-Verband"),
+        )
+
+        self.entry.refresh_from_db()
+        assert response.status_code == 200
+        assert "association" in response.context["form"].errors
+        assert self.entry.number_games == 2
+
+
+class TestExternalGameDelete(SelfServiceTestBase):
+    def setUp(self):
+        super().setUp()
+        DbSetupOfficials.create_production_associations()
+        self.entry = _external_entry(self.official)
+
+    def test_delete_owner(self):
+        self.login_moodle()
+
+        confirm = self.client.get(
+            reverse(EXTERNAL_DELETE_URL_NAME, kwargs={"pk": self.entry.pk})
+        )
+        assert confirm.status_code == 200
+        assert "24.05.2026" in confirm.content.decode()
+
+        self.client.post(
+            reverse(EXTERNAL_DELETE_URL_NAME, kwargs={"pk": self.entry.pk})
+        )
+
+        from officials.models import OfficialExternalGames
+
+        assert not OfficialExternalGames.objects.filter(pk=self.entry.pk).exists()
+
+    def test_delete_other_forbidden(self):
+        self.login_moodle(self.other)
+
+        response = self.client.post(
+            reverse(EXTERNAL_DELETE_URL_NAME, kwargs={"pk": self.entry.pk})
+        )
+
+        from officials.models import OfficialExternalGames
+
+        assert response.status_code == 403
+        assert OfficialExternalGames.objects.filter(pk=self.entry.pk).exists()
+
+    def test_delete_staff(self):
+        client = Client()
+        client.force_login(_staff_user())
+
+        client.post(reverse(EXTERNAL_DELETE_URL_NAME, kwargs={"pk": self.entry.pk}))
+
+        from officials.models import OfficialExternalGames
+
+        assert not OfficialExternalGames.objects.filter(pk=self.entry.pk).exists()

@@ -62,6 +62,7 @@ from officials.selfservice import (
     CLAIM_URL_NAME,
     UNASSIGN_URL_NAME,
     acting_official_id,
+    can_edit_official,
     name_matches_official,
     restore_moodle_session,
     safe_next,
@@ -938,6 +939,7 @@ class OfficialProfileGamelistView(View):
             ),
         }
         context.update(selfservice_banner_context(request, official))
+        context["can_edit_profile"] = can_edit_official(request, official.pk)
         response = render(request, self.template_name, context)
         if restored.cookie_value:
             _set_remember_cookie(response, restored.cookie_value)

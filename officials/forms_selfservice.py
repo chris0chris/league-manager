@@ -7,8 +7,10 @@ audience.
 
 from django import forms
 
-from gamedays.models import Gameday, Gameinfo
+from gamedays.models import Association, Gameday, Gameinfo
+from officials.models import OfficialExternalGames
 from officials.service.crew_positions import crew_positions_for_league
+from officials.service.game_official_entries import EXTERNAL_ALLOWED_POSITIONS
 
 
 def _gameday_label(gameday: Gameday) -> str:
@@ -64,3 +66,60 @@ class AddAssignmentForm(forms.Form):
         ).prefetch_related("gameresult_set__team")
         self.fields["gameinfo"].label_from_instance = _game_label
         self.fields["position"].choices = allowed_position_choices(gameday)
+
+
+#: The fields an official may edit on their own external game. Staff get
+#: ``notification_date``, ``reporter_name`` and the official picker on top.
+EXTERNAL_FORM_FIELDS = [
+    "date",
+    "number_games",
+    "position",
+    "association",
+    "halftime_duration",
+    "has_clockcontrol",
+    "is_international",
+    "comment",
+]
+
+
+class ExternalGameForm(forms.ModelForm):
+    association = forms.ModelChoiceField(
+        queryset=Association.objects.order_by("name"),
+        label="Verband",
+        help_text="Der Verband, unter dem das Spiel stattgefunden hat.",
+    )
+    position = forms.ChoiceField(
+        choices=[(position, position) for position in EXTERNAL_ALLOWED_POSITIONS],
+        label="Position",
+    )
+
+    class Meta:
+        model = OfficialExternalGames
+        fields = EXTERNAL_FORM_FIELDS
+        widgets = {"date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
+
+    def __init__(self, *args, staff=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.staff = staff
+        self.fields["date"].input_formats = ["%Y-%m-%d"]
+        if staff:
+            self.fields["notification_date"] = forms.DateField(
+                label="Meldedatum",
+                required=False,
+                widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+                input_formats=["%Y-%m-%d"],
+            )
+            self.fields["reporter_name"] = forms.CharField(
+                label="Meldename", required=False
+            )
+            self.fields["official_id"] = forms.IntegerField(
+                label="Offizielle-ID", required=False, min_value=1
+            )
+
+    def clean(self):
+        cleaned = super().clean()
+        # An omitted Meldedatum means "unchanged", not "clear it" - the
+        # column is not nullable.
+        if self.staff and cleaned.get("notification_date") is None and self.instance.pk:
+            cleaned["notification_date"] = self.instance.notification_date
+        return cleaned

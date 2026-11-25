@@ -12,6 +12,7 @@ from datetime import datetime
 from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
@@ -19,7 +20,8 @@ from django.views import View
 from gamedays.models import GameOfficial
 from officials.constants import MOODLE_LOGGED_IN_USER, MOODLE_REMEMBER_COOKIE
 from officials.forms_selfservice import AddAssignmentForm
-from officials.models import Official
+from officials.forms_selfservice import ExternalGameForm
+from officials.models import Official, OfficialExternalGames
 from officials.service.remember_me import RememberMeService, RestoreResult
 
 RECLAIM_ERROR = "Dieser Eintrag wurde bereits zugeordnet."
@@ -339,3 +341,101 @@ class UnassignGameOfficialView(SelfServiceWriteMixin, View):
         GameOfficial.objects.filter(pk=row.pk).update(official=None)
         messages.success(request, "Zuordnung aufgehoben - der Name bleibt erhalten.")
         return redirect(assignments_return_url(request))
+
+
+EXTERNAL_EDIT_URL_NAME = "view-officials-selfservice-external-edit"
+EXTERNAL_DELETE_URL_NAME = "view-officials-selfservice-external-delete"
+
+
+def profile_gamelist_url(official: Official, season: int) -> str:
+    return reverse(
+        "view-officials-profile-gamelist",
+        kwargs={"pk": official.pk, "season": season},
+    )
+
+
+class _ExternalEntryMixin(SelfServiceWriteMixin):
+    """Shared lookup for the external-game write views: the owner or staff."""
+
+    def get_entry(self, request, pk) -> OfficialExternalGames:
+        entry = get_object_or_404(
+            OfficialExternalGames.objects.select_related("official", "association"),
+            pk=pk,
+        )
+        if not can_edit_official(request, entry.official_id):
+            raise PermissionDenied("Dieser Eintrag gehört einer anderen Person.")
+        return entry
+
+
+class ExternalGameEditView(_ExternalEntryMixin, View):
+    """Edit one external game. Owners see the subset of fields they may change;
+    staff additionally get the official, the notification date and the
+    reporter name."""
+
+    template_name = "officials/selfservice/external_form.html"
+
+    def get(self, request, pk):
+        entry = self.get_entry(request, pk)
+        return self._render(
+            request,
+            entry,
+            ExternalGameForm(instance=entry, staff=request.user.is_staff),
+        )
+
+    def post(self, request, pk):
+        entry = self.get_entry(request, pk)
+        form = ExternalGameForm(
+            request.POST, instance=entry, staff=request.user.is_staff
+        )
+        if form.is_valid():
+            self._apply_staff_target(request, form)
+        if form.errors:
+            return self._render(request, entry, form)
+
+        entry = form.save()
+        if request.user.is_staff and form.cleaned_data.get("official_id"):
+            entry.official_id = form.cleaned_data["official_id"]
+            entry.save(update_fields=["official"])
+        messages.success(request, "Eintrag gespeichert.")
+        return redirect(profile_gamelist_url(entry.official, entry.date.year))
+
+    @staticmethod
+    def _apply_staff_target(request, form) -> None:
+        posted_id = form.cleaned_data.get("official_id")
+        if not posted_id:
+            return
+        if not Official.objects.filter(pk=posted_id).exists():
+            form.add_error("official_id", "Offizielle-ID nicht gefunden.")
+
+    def _render(self, request, entry, form):
+        return render(
+            request,
+            self.template_name,
+            {
+                "form": form,
+                "entry": entry,
+                **selfservice_banner_context(request),
+            },
+        )
+
+
+class ExternalGameDeleteView(_ExternalEntryMixin, View):
+    """Hard-delete one external game (confirm first; no soft delete)."""
+
+    template_name = "officials/selfservice/delete_confirm.html"
+
+    def get(self, request, pk):
+        entry = self.get_entry(request, pk)
+        return render(
+            request,
+            self.template_name,
+            {"entry": entry, **selfservice_banner_context(request)},
+        )
+
+    def post(self, request, pk):
+        entry = self.get_entry(request, pk)
+        official = entry.official
+        season = entry.date.year
+        entry.delete()
+        messages.success(request, "Eintrag gelöscht.")
+        return redirect(profile_gamelist_url(official, season))

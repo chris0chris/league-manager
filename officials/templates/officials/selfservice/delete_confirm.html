@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section">
+    <h1>Eintrag löschen</h1>
+    <p>
+        Dieser Einsatz außerhalb der DFFL wird gelöscht. Das kann nicht rückgängig
+        gemacht werden.
+    </p>
+    <table class="table table-sm">
+        <tbody>
+        <tr>
+            <th scope="row">Datum</th>
+            <td>{{ entry.date|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Anzahl Spiele</th>
+            <td>{{ entry.number_games }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Position</th>
+            <td>{{ entry.position }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Verband</th>
+            <td>{{ entry.association.abbr }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Kommentar</th>
+            <td>{{ entry.comment|default:"–" }}</td>
+        </tr>
+        </tbody>
+    </table>
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">Endgültig löschen</button>
+        <a class="btn btn-outline-secondary"
+           href="{% url 'view-officials-profile-gamelist' pk=entry.official_id season=entry.date.year %}">Abbrechen</a>
+    </form>
+</div>
+{% endblock content %}
