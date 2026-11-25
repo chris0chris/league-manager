@@ -34,7 +34,7 @@
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
         <button class="btn btn-danger" type="submit">Zuordnung aufheben</button>
-        <a class="btn btn-outline-secondary" href="{% url 'view-officials-game-officials-appearance' %}">Abbrechen</a>
+        <a class="btn btn-outline-danger" href="{% url 'view-officials-game-officials-appearance' %}">Abbrechen</a>
     </form>
 </div>
 {% endblock content %}

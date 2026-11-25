@@ -825,3 +825,30 @@ class TestAddAssignmentInputRobustness(SelfServiceTestBase):
         response = self.client.get(reverse(ASSIGNMENT_URL_NAME), {"gameday": "abc"})
 
         assert response.status_code == 200
+
+
+class TestSelfServiceButtons(SelfServiceTestBase):
+    def test_claim_button_fills_width_and_has_no_cancel_link(self):
+        DbSetupOfficials.create_production_associations()
+        gameinfo, row = _game_with_row()
+        self.login_moodle()
+
+        content = self.client.get(
+            reverse(CLAIM_URL_NAME, kwargs={"pk": row.pk})
+        ).content.decode()
+
+        assert 'btn btn-primary w-100" type="submit">Einsatz übernehmen' in content
+        assert ">Abbrechen<" not in content
+
+    def test_cancel_links_use_outline_danger(self):
+        DbSetupOfficials.create_production_associations()
+        client = Client()
+        client.force_login(_staff_user())
+
+        for url in (
+            reverse(ASSIGNMENT_URL_NAME) + "?gameday=930",
+            reverse(MULTI_ADD_URL_NAME),
+        ):
+            content = client.get(url).content.decode()
+            assert ">Abbrechen<" in content
+            assert "btn btn-outline-danger" in content, url

@@ -34,7 +34,7 @@
     <form method="post">
         {% csrf_token %}
         <button class="btn btn-danger" type="submit">Endgültig löschen</button>
-        <a class="btn btn-outline-secondary"
+        <a class="btn btn-outline-danger"
            href="{% url 'view-officials-profile-gamelist' pk=entry.official_id season=entry.date.year %}">Abbrechen</a>
     </form>
     {% else %}
@@ -66,7 +66,7 @@
     <form method="post">
         {% csrf_token %}
         <button class="btn btn-danger" type="submit">Endgültig löschen</button>
-        <a class="btn btn-outline-secondary"
+        <a class="btn btn-outline-danger"
            href="{% url 'view-officials-profile-gamelist' pk=row.official_id season=game.gameday.date.year %}">Abbrechen</a>
     </form>
     {% endif %}
