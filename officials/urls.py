@@ -21,6 +21,7 @@ from officials.views import (
     OfficialSignOutView,
     LicenseCheckForOfficials,
 )
+from officials.selfservice import ClaimGameOfficialView
 
 OFFICIALS_LIST_FOR_TEAM = "view-officials-list-for-team"
 OFFICIALS_LIST_FOR_TEAM_AND_YEAR = "view-officials-list-for-team-and-year"
@@ -50,6 +51,7 @@ OFFICIALS_SIGN_UP_LIST = "view-officials-sign-up-list"
 OFFICIALS_SIGN_UP_FOR_GAMEDAY = "view-officials-sign-up-for-gameday"
 OFFICIALS_SIGN_UP_CANCEL_FOR_GAMEDAY = "view-officials-sign-up-cancel-for-gameday"
 OFFICIALS_SIGN_OUT = "view-officials-sign-out"
+OFFICIALS_SELF_SERVICE_CLAIM = "view-officials-selfservice-claim"
 # OFFICIALS_STATISTICS / OFFICIALS_STATISTICS_FOR_SEASON live in
 # officials/constants.py (imported above) since OfficialsStatisticsView
 # also needs them and can't import from this module without a circular
@@ -111,6 +113,11 @@ urlpatterns = [
         "gameofficial/external/create/",
         AddExternalGameOfficialUpdateView.as_view(),
         name=OFFICIALS_GAMEOFFICIAL_EXTERNAL_CREATE,
+    ),
+    path(
+        "gameofficial/<int:pk>/claim/",
+        ClaimGameOfficialView.as_view(),
+        name=OFFICIALS_SELF_SERVICE_CLAIM,
     ),
     path(
         "gameofficial/import/upload/",

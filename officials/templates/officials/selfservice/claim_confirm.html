@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section">
+    <h1>Einsatz zuordnen</h1>
+    <p>
+        Du bist dabei, den folgenden <strong>nicht zugeordneten</strong> Einsatz zu übernehmen.
+        Der eingetragene Name bleibt unverändert erhalten.
+    </p>
+    <table class="table table-sm">
+        <tbody>
+        <tr>
+            <th scope="row">Spieltag</th>
+            <td>{{ game.gameday.name }} ({{ game.gameday.date|date:"d.m.Y" }})</td>
+        </tr>
+        <tr>
+            <th scope="row">Spiel</th>
+            <td>{% if home and away %}{{ home }} vs {{ away }}{% else %}Spiel #{{ game.pk }}{% endif %} (#{{ game.pk }})</td>
+        </tr>
+        <tr>
+            <th scope="row">Position</th>
+            <td>{{ row.position }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Eingetragener Name</th>
+            <td>{% if row.name %}{{ row.name }}{% else %}<em>kein Name eingetragen</em>{% endif %}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    {% if is_mapped %}
+    <div class="alert alert-warning">
+        Dieser Einsatz ist bereits zugeordnet. Zuordnungen können nicht überschrieben werden.
+    </div>
+    {% else %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+        {% if is_staff %}
+        <div class="mb-3">
+            <label class="form-label" for="official-search">Offizielle suchen</label>
+            <input class="form-control" id="official-search" type="search" autocomplete="off"
+                   placeholder="Vor- oder Nachname">
+            <ul class="list-group mt-2" id="official-results"></ul>
+            <label class="form-label mt-3" for="official-id">Offizielle-ID</label>
+            <input class="form-control" id="official-id" name="official_id" type="number" required>
+            <div class="form-text">
+                Für Staff: der Einsatz wird der hier eingetragenen Person zugeordnet.
+            </div>
+        </div>
+        {% else %}
+        <p>Der Einsatz wird deinem eigenen Konto zugeordnet.</p>
+        {% endif %}
+        <button class="btn btn-primary" type="submit">Einsatz übernehmen</button>
+        <a class="btn btn-outline-secondary" href="{% url 'view-officials-game-officials-appearance' %}">Abbrechen</a>
+    </form>
+    {% endif %}
+</div>
+
+{% if is_staff %}
+<script>
+    // Progressive enhancement only: the numeric field above stays the actual
+    // input, this just fills it from the staff search API while typing.
+    (function () {
+        const search = document.getElementById('official-search');
+        const results = document.getElementById('official-results');
+        const idField = document.getElementById('official-id');
+        if (!search || !results || !idField) return;
+        let timer = null;
+        search.addEventListener('input', function () {
+            clearTimeout(timer);
+            const term = search.value.trim();
+            results.innerHTML = '';
+            if (term.length < 2) return;
+            timer = setTimeout(async function () {
+                const response = await fetch('/api/officials/search/list?name=' + encodeURIComponent(term));
+                if (!response.ok) return;
+                const officials = await response.json();
+                officials.slice(0, 10).forEach(function (official) {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'list-group-item list-group-item-action';
+                    item.textContent = official.name || official.display_name || official.id;
+                    item.addEventListener('click', function () {
+                        idField.value = official.id;
+                        results.innerHTML = '';
+                        search.value = item.textContent;
+                    });
+                    results.appendChild(item);
+                });
+            }, 250);
+        });
+    })();
+</script>
+{% endif %}
+{% endblock content %}

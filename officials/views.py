@@ -58,6 +58,9 @@ from officials.service.signup_service import (
 )
 from officials.service.remember_me import RememberMeService, REMEMBER_ME_MAX_AGE
 from officials.selfservice import (
+    CLAIM_URL_NAME,
+    acting_official_id,
+    name_matches_official,
     restore_moodle_session,
     safe_next,
     selfservice_banner_context,
@@ -259,6 +262,25 @@ class GameOfficialListView(View):
                 .distinct()
             )
             team = None
+        acting = acting_official_id(request)
+        acting_official = (
+            Official.objects.filter(pk=acting).first() if acting is not None else None
+        )
+        mine = request.GET.get("mine") == "1" and acting_official is not None
+        if mine:
+            # Own mapped rows plus unassigned rows whose typed name looks like
+            # this official. The name match is a Python-side best effort (see
+            # name_matches_official), so the SQL side only narrows by pk.
+            matching_open_ids = [
+                row.pk
+                for row in game_officials.filter(official__isnull=True).only(
+                    "pk", "name"
+                )
+                if name_matches_official(row.name, acting_official)
+            ]
+            game_officials = game_officials.filter(
+                Q(official_id=acting_official.pk) | Q(pk__in=matching_open_ids)
+            )
         game_officials = game_officials.order_by("gameinfo__gameday__date")
         is_staff = request.user.is_staff
         team_name = request.user.username
@@ -291,14 +313,14 @@ class GameOfficialListView(View):
                 else OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_YEAR
             ),
             "pk": team_id,
-            "object_list": GameOfficialAllInfoSerializer(
-                instance=game_officials_object_list.values(
-                    *GameOfficialAllInfoSerializer.ALL_VALUE_FIELDS
-                ),
-                display_names_for_team=team_name,
+            "object_list": self._rows_with_flags(
+                game_officials_object_list,
+                team_name=team_name,
                 is_staff=is_staff,
-                many=True,
-            ).data,
+                acting_official=acting_official,
+            ),
+            "mine_filter": mine,
+            "claim_url_name": CLAIM_URL_NAME,
             "page_obj": game_officials_page,
         }
         context.update(selfservice_banner_context(request))
@@ -306,6 +328,36 @@ class GameOfficialListView(View):
         if restored.cookie_value:
             _set_remember_cookie(response, restored.cookie_value)
         return response
+
+    @staticmethod
+    def _rows_with_flags(
+        game_officials_object_list, *, team_name, is_staff, acting_official
+    ):
+        rows = GameOfficialAllInfoSerializer(
+            instance=game_officials_object_list.values(
+                *GameOfficialAllInfoSerializer.ALL_VALUE_FIELDS
+            ),
+            display_names_for_team=team_name,
+            is_staff=is_staff,
+            many=True,
+        ).data
+        for row in rows:
+            row_official_id = int(row["official_id"]) if row["official_id"] else None
+            row["is_own_row"] = (
+                acting_official is not None and row_official_id == acting_official.pk
+            )
+            row["is_own_open_row"] = (
+                acting_official is not None
+                and row_official_id is None
+                and name_matches_official(row["name"], acting_official)
+            )
+            if row["is_own_row"]:
+                # The visitor's own row shows the name; every other row keeps
+                # the obfuscated form.
+                row["name"] = (
+                    f"{row['official_first_name']} {row['official_last_name']}"
+                )
+        return rows
 
     # noinspection PyMethodMayBeStatic
     def _get_subquery(self, is_home: bool):

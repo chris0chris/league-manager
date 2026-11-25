@@ -318,6 +318,7 @@ class GameOfficialAllInfoSerializer(Serializer):
     OFFICIAL_FIRST_NAME_C = "official__first_name"
     OFFICIAL_LAST_NAME_C = "official__last_name"
     OFFICIAL_TEAM_NAME_C = "official__team__name"
+    OFFICIAL_ID_C = "official_id"
     ALL_VALUE_FIELDS = [
         ID_C,
         HOME_C,
@@ -334,10 +335,12 @@ class GameOfficialAllInfoSerializer(Serializer):
         OFFICIAL_FIRST_NAME_C,
         OFFICIAL_LAST_NAME_C,
         OFFICIAL_TEAM_NAME_C,
+        OFFICIAL_ID_C,
     ]
 
     name = SerializerMethodField("obfuscate_name")
     id = CharField()
+    official_id = CharField(allow_null=True)
     gameday_name = CharField(source=GAMEDAY_NAME_C)
     gameday_date = SerializerMethodField()
     gameinfo_id = CharField()
@@ -368,10 +371,16 @@ class GameOfficialAllInfoSerializer(Serializer):
         ):
             name = official_name["name"]
         else:
-            name = Obfuscator.obfuscate(*official_name[self.NAME_C].split(" ")[:2])
+            # A row can carry neither an official nor a typed name (the
+            # scorecard leaves such rows behind). Splitting None used to 500
+            # the whole list for every non-staff visitor.
+            typed_name = official_name[self.NAME_C] or ""
+            name = (
+                Obfuscator.obfuscate(*typed_name.split(" ")[:2]) if typed_name else ""
+            )
         if official_name["is_mapped"]:
             return name
-        return f"{name} ?"
+        return f"{name} ?".strip()
 
     def _get_official_name(self, game_official: dict) -> dict:
         if game_official.get(self.OFFICIAL_FIRST_NAME_C) is not None:
