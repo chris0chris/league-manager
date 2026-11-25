@@ -14,6 +14,7 @@ Current features:
 - [Personal Home](./personal-home/overview.md) — `/home/`: next gameday, checks, season break, official and staff states
 - [Share Widget](./share-widget/) — Embeddable scores/fixtures/standings for club sites
 - [Public API](./public-api/) — `/api/snapshot/`, the only public, cross-origin readable endpoint
+- [Officials Self-Service](./officials-selfservice.md) — officials claim/add their own assignments and manage their external games
 
 ## Overview
 
