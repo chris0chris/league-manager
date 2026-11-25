@@ -75,7 +75,7 @@ association rows; **no new associations are created**:
 | `AFCVSAA` | AFCVSAA |
 | `Ausland`, `Scrimmage`, `Natio` | OHNE |
 
-Name lookups (e.g. `Hamburg` for `AFVHH`) still work case-insensitively for
+Name lookups (e.g. `Hamburg` for `AFCVHH`) still work case-insensitively for
 imports written with the long form.
 
 ## Coexistence with the scorecard
