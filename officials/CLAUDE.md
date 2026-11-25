@@ -53,7 +53,33 @@ without rows behaves like today.
   independently drift.
 - `official_profile.py` — shared official-profile-URL helper, used by both `moodle/moodle_service.py`
   and matchreport's `model_wrapper.py`.
+- `association_resolution.py` — `resolve_association()` / `UnknownAssociationError` /
+  `ASSOCIATION_ALIASES`: the single source of truth for turning the external-game
+  sheet's free-text "Verband" values into `gamedays.Association` rows (used by
+  migration `0017`, the import and the self-service forms). 21 production values
+  map onto 19 rows; no association is created.
 - `moodle/` — external Moodle license-report integration.
+
+## Self-service (`selfservice.py`, `forms_selfservice.py`)
+
+Officials manage their own duties on `/officials/einsaetze/` and in their profile
+after logging in with their offd.de account (session key
+`MOODLE_LOGGED_IN_USER`, remember-me cookie `officials_remember`, path
+`/officials/`). One gate, `SelfServiceWriteMixin`, lets staff or the
+Moodle-logged-in official through and sends everyone else to the Moodle login
+with a validated `?next=`. A Moodle user is always pinned to their own `Official`
+row — a posted `official_id` is ignored — and `can_edit_official()` is re-checked
+per row. Views: claim an unassigned (`?`) row
+(`UPDATE … WHERE official IS NULL`, so a race has exactly one winner),
+add an assignment (gameday → game → position, blocked when the official is
+already on the game or the position is occupied), staff-only unassign (keeps the
+typed name), edit/delete external games (association dropdown), delete own DFFL
+rows, and a multi-row formset for external games.
+
+The Einsätze list is only cached for anonymous visitors; any session, staff user
+or remember-me cookie renders uncached so per-visitor banners/buttons never
+enter the shared cache. Delegation/authorization details for the module live in
+[docs/topics/features/officials-selfservice.md](../docs/topics/features/officials-selfservice.md).
 
 ## API & routes
 - `api/` (`views.py`, `serializers.py`, `urls.py`) — official data endpoints,

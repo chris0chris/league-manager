@@ -14,7 +14,7 @@
         </tr>
         <tr>
             <th scope="row">Spiel</th>
-            <td>Spiel #{{ row.gameinfo.pk }}</td>
+            <td>{% if home and away %}{{ home }} vs {{ away }}{% else %}Spiel #{{ row.gameinfo.pk }}{% endif %} (#{{ row.gameinfo.pk }})</td>
         </tr>
         <tr>
             <th scope="row">Position</th>

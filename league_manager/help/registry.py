@@ -225,6 +225,17 @@ HELP_TOPICS = [
         video="https://www.youtube.com/embed/g9QuDwGZhK8",
     ),
     HelpTopic(
+        slug="offizielle-einsaetze",
+        group="spielbetrieb",
+        title={"de": "Einsätze selbst verwalten", "en": "Manage your own duties"},
+        summary={
+            "de": "Offene Einsätze übernehmen, fehlende Spiele nachtragen und eigene Meldungen pflegen.",
+            "en": "Claim open assignments, add missing games and maintain your own reports.",
+        },
+        icon="bi-person-check",
+        order=42,
+    ),
+    HelpTopic(
         slug="dbaccess",
         group="staff",
         title={"de": "Temporärer Datenbankzugang", "en": "Temporary database access"},

@@ -38,7 +38,8 @@ Short, task-oriented howtos for administrators and referees, grouped by area. Co
 - [Teams & Offizielle](https://leaguesphere.app/help/teams-offizielle/): Kader, Pässe und Schiedsrichter-Einsätze.
 - [Ergebnisse erfassen](https://leaguesphere.app/help/ergebnisse-erfassen/): Auf dem Platz Ergebnisse eintragen: Offizielle, Spielzüge, Halbzeit und Abschluss.
 - [Scorecard v2](https://leaguesphere.app/help/spieltag-v2/): Beta: die neue Erfassung am Feld – vom Spieltag über die Vorbereitung bis zum Ergebnis, auch offline.
-- [Offizielle: Übersicht & Statistik](https://leaguesphere.app/help/offizielle-statistik/): Wer welche Spiele geleitet hat – Übersicht, Bestenliste und alle Einsätze.
+- [Offizielle: Übersicht & Statistik](https://leaguesphere.app/help/offizielle-statistik/): Wer welche Spiele geleitet hat - Übersicht, Bestenliste und alle Einsätze.
+- [Einsätze selbst verwalten](https://leaguesphere.app/help/offizielle-einsaetze/): Offene Einsätze übernehmen, fehlende Spiele nachtragen und eigene Meldungen pflegen.
 - [Website einbinden](https://leaguesphere.app/help/share-widget/): Spielplan, Ergebnisse und Tabellen per Widget auf der eigenen Website zeigen.
 - [Gameday Designer](https://leaguesphere.app/help/gameday-designer/): Spielpläne mit geführtem Start und wiederverwendbaren Vorlagen erstellen.
 - [Schiedsrichter-Meldungen importieren](https://leaguesphere.app/help/referee-import/): Selbst gemeldete Spiele der Offiziellen prüfen und importieren.

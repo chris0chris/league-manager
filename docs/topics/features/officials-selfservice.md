@@ -95,3 +95,31 @@ may recreate an empty slot. For future games the delete confirmation says so.
   add-assignment form.
 - `officials/migrations/0017_officialexternalgames_association_fk.py` — the
   association migration (reversible).
+
+## Routes
+
+All self-service routes live under `officials/urls.py` with the
+`view-officials-selfservice-*` prefix:
+
+| Route | Purpose | Who |
+| --- | --- | --- |
+| `gameofficial/<id>/claim/` | confirm + claim an unassigned row | staff, Moodle |
+| `gameofficial/add-assignment/` | gameday → game → position picker | staff, Moodle |
+| `gameofficial/<id>/unassign/` | clear the official, keep the name | staff |
+| `gameofficial/<id>/delete/` | delete a DFFL assignment (future-game warning) | staff, owner |
+| `external/<id>/edit/` | edit one external game | staff, owner |
+| `external/<id>/delete/` | delete one external game | staff, owner |
+| `external/multi-add/` | add several external games at once | staff, owner |
+
+## Behaviour notes
+
+- The claim is an `UPDATE … WHERE official IS NULL`: a race produces one winner,
+  the loser reads "Dieser Eintrag wurde bereits zugeordnet." and nothing changes.
+- Adding an assignment is refused when the official is already on the game or
+  the `(game, position)` slot is taken — the scorecard's upsert corrupts on
+  duplicate slots, so the user is pointed at "Mir zuordnen" instead.
+- The official's own rows reveal their name; every other row keeps the existing
+  obfuscation.
+- Deleting a DFFL row of a future game warns that the next scorecard save may
+  recreate an empty slot. Scorecard stays authoritative, last write wins.
+- The help topic is `/help/offizielle-einsaetze/`.

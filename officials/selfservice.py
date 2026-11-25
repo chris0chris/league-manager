@@ -331,10 +331,20 @@ class UnassignGameOfficialView(SelfServiceWriteMixin, View):
 
     def get(self, request, pk):
         row = get_object_or_404(GameOfficial, pk=pk)
+        game = row.gameinfo
         return render(
             request,
             self.template_name,
-            {"row": row, **selfservice_banner_context(request)},
+            {
+                "row": row,
+                "home": game.gameresult_set.filter(isHome=True)
+                .values_list("team__description", flat=True)
+                .first(),
+                "away": game.gameresult_set.filter(isHome=False)
+                .values_list("team__description", flat=True)
+                .first(),
+                **selfservice_banner_context(request),
+            },
         )
 
     def post(self, request, pk):
