@@ -35,6 +35,7 @@ from officials.forms import (
     MoodleLoginForm,
 )
 from officials.models import Official, OfficialLicenseHistory
+from officials.service.association_resolution import UnknownAssociationError
 from officials.service.boff_license_calculation import LicenseStrategy
 from officials.service.game_official_entries import AmbiguousGameOfficialError
 from officials.service.game_official_import import (
@@ -386,7 +387,7 @@ class AddExternalGameOfficialUpdateView(LoginRequiredMixin, UserPassesTestMixin,
                         dict(zip(EXTERNAL_MANUAL_ENTRY_FIELDS, values))
                     )
                 )
-        except (TypeError, ValueError) as error:
+        except (TypeError, ValueError, UnknownAssociationError) as error:
             all_lines = [current_line] + all_lines
             form.add_error("entries", _entry_error_message(error))
         except Official.DoesNotExist:
@@ -459,6 +460,8 @@ def _entry_error_message(error: Exception) -> str:
         return "gameinfo_id nicht gefunden!"
     if isinstance(error, Official.DoesNotExist):
         return "official_id nicht gefunden!"
+    if isinstance(error, UnknownAssociationError):
+        return "Unbekannter Verband - Zeile nicht importiert"
     if isinstance(error, DatabaseError):
         # Real production data has rows a model field can't hold as-is
         # (e.g. a free-text comment longer than 100 chars) - surfaced as
@@ -711,6 +714,7 @@ class GameOfficialImportConfirmView(LoginRequiredMixin, UserPassesTestMixin, Vie
                 Gameinfo.DoesNotExist,
                 Official.DoesNotExist,
                 AmbiguousGameOfficialError,
+                UnknownAssociationError,
                 DatabaseError,
             ) as error:
                 if isinstance(error, DatabaseError):

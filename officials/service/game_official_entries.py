@@ -1,7 +1,8 @@
 from datetime import date
 
-from gamedays.models import Gameinfo, GameOfficial
+from gamedays.models import Association, Gameinfo, GameOfficial
 from officials.models import Official, OfficialExternalGames
+from officials.service.association_resolution import resolve_association
 
 # Closed set of positions an official can be assigned - shared by
 # check_for_allowed_value() (used by both InternalGameOfficialEntry and
@@ -149,6 +150,15 @@ class ExternalGameOfficialEntry:
 
     def save(self) -> str:
         official = Official.objects.get(pk=self.official_id)
+        # ``association`` is a FK since migration 0017; imports and the
+        # manual staff entry still produce the free-text value from the
+        # sheet, so resolve it through the shared resolver. An Association
+        # instance (self-service forms) passes through untouched.
+        association = (
+            self.association
+            if isinstance(self.association, Association)
+            else resolve_association(self.association)
+        )
         external_official_game_entry = OfficialExternalGames.objects.create(
             official=official,
             number_games=self.number_games,
@@ -156,7 +166,7 @@ class ExternalGameOfficialEntry:
             notification_date=self.notification_date or date.today(),
             reporter_name=self.reporter_name,
             position=self.position,
-            association=self.association,
+            association=association,
             halftime_duration=self.halftime_duration,
             has_clockcontrol=self.has_clockcontrol,
             is_international=self.is_international,

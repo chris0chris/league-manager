@@ -1,34 +1,23 @@
 import pytest
 
 from gamedays.models import Association
+from gamedays.tests.setup_factories.factories import TeamFactory
+from officials.api.serializers import OfficialExternalGamesSerializer
+from officials.models import OfficialExternalGames
 from officials.service.association_resolution import (
     ASSOCIATION_ALIASES,
     UnknownAssociationError,
     resolve_association,
 )
-
-# The 19 association rows that exist in production (abbr, name).
-ASSOCIATIONS = [
-    ("AFVBY", "Bayern"),
-    ("OHNE", "-"),
-    ("AFCVBW", "Baden-Württemberg"),
-    ("AFCVBB", "Berlin-Brandenburg"),
-    ("AFCVHH", "Hamburg"),
-    ("AFCVMV", "Mecklenburg-Vorpommern"),
-    ("AFCVN", "Niedersachsen"),
-    ("AFCVNORD", "Nord"),
-    ("AFCVNRW", "Nordrhein-Westfalen"),
-    ("AFCVRLP", "Rheinland-Pfalz"),
-    ("AFCVSAA", "Saarland"),
-    ("AFCVSH", "Schleswig-Holstein"),
-    ("AFCVT", "Thüringen"),
-    ("AFVH", "Hessen"),
-    ("AFVS", "Sachsen"),
-    ("AFVSA", "Sachsen-Anhalt"),
-    ("LUX", "Luxemburg"),
-    ("SAFV", "Schweiz"),
-    ("BAFL", "Belgien"),
-]
+from officials.service.game_official_entries import ExternalGameOfficialEntry
+from officials.tests.setup_factories.db_setup_officials import (
+    PRODUCTION_ASSOCIATIONS,
+    DbSetupOfficials,
+)
+from officials.tests.setup_factories.factories_officials import (
+    OfficialExternalGamesFactory,
+    OfficialFactory,
+)
 
 # Every distinct value found in the production dump's free-text association
 # column, mapped onto the association it must resolve to (user-fixed mapping:
@@ -60,8 +49,7 @@ PRODUCTION_VALUES = [
 
 @pytest.fixture
 def associations(db):
-    for abbr, name in ASSOCIATIONS:
-        Association.objects.create(abbr=abbr, name=name)
+    DbSetupOfficials.create_production_associations()
 
 
 class TestAssociationResolution:
@@ -92,3 +80,56 @@ class TestAssociationResolution:
 
     def test_unknown_error_is_a_value_error(self):
         assert issubclass(UnknownAssociationError, ValueError)
+
+
+class TestExternalGameAssociationIntegration:
+    """The column used to be free text; entry save and the API have to keep
+    working with both the old string inputs and the new FK."""
+
+    def _entry(self, official, association):
+        return ExternalGameOfficialEntry(
+            official_id=official.pk,
+            number_games=2,
+            date="2024-05-01",
+            position="Referee",
+            association=association,
+            halftime_duration=20,
+        )
+
+    def test_entry_save_resolves_association_string(self, associations):
+        team = TeamFactory(name="Test Team")
+        official = OfficialFactory(first_name="Franzi", last_name="Fedora", team=team)
+
+        self._entry(official, "AFCVTH").save()
+
+        assert OfficialExternalGames.objects.get().association.abbr == "AFCVT"
+
+    def test_entry_save_unknown_association_raises(self, associations):
+        team = TeamFactory(name="Test Team")
+        official = OfficialFactory(first_name="Franzi", last_name="Fedora", team=team)
+
+        with pytest.raises(UnknownAssociationError):
+            self._entry(official, "Fantasie").save()
+
+        assert OfficialExternalGames.objects.count() == 0
+
+    def test_serializer_keeps_abbr_wire_format(self, associations):
+        team = TeamFactory(name="Test Team")
+        official = OfficialFactory(first_name="Franzi", last_name="Fedora", team=team)
+        row = OfficialExternalGamesFactory(
+            official=official,
+            number_games=2,
+            date="2024-05-01",
+            notification_date="2024-05-01",
+            position="Referee",
+            association=Association.objects.get(abbr="OHNE"),
+            halftime_duration=20,
+            has_clockcontrol=False,
+            is_international=False,
+            reporter_name="",
+            comment="",
+        )
+
+        data = OfficialExternalGamesSerializer(instance=row).data
+
+        assert data["association"] == "OHNE"

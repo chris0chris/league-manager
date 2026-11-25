@@ -23,6 +23,10 @@ import pandas as pd
 
 from gamedays.models import GameOfficial
 from officials.models import Official, OfficialExternalGames
+from officials.service.association_resolution import (
+    UnknownAssociationError,
+    resolve_association,
+)
 from officials.service.game_official_entries import (
     ALLOWED_POSITIONS,
     EXTERNAL_ALLOWED_POSITIONS,
@@ -330,11 +334,26 @@ def _resolve_existing_external_keys(external_parsed) -> set:
     }
     if not official_ids:
         return set()
+    # association is a FK since migration 0017 - compare the stable
+    # abbreviation, which is also what the stored suggestion carries.
     return set(
         OfficialExternalGames.objects.filter(official_id__in=official_ids).values_list(
-            "official_id", "date", "position", "association", "number_games"
+            "official_id", "date", "position", "association__abbr", "number_games"
         )
     )
+
+
+def _resolve_associations_by_value(external_parsed) -> dict:
+    """Resolve every distinct sheet value once, so an unknown association is
+    a per-row error at upload time (not a 500 or a silent NULL at confirm)."""
+    values = {parsed["association"] for parsed in external_parsed}
+    resolved = {}
+    for value in values:
+        try:
+            resolved[value] = resolve_association(value)
+        except UnknownAssociationError:
+            resolved[value] = None
+    return resolved
 
 
 def _resolve_game_official_matches(internal_fix_parsed) -> dict:
@@ -360,7 +379,7 @@ def _resolve_game_official_matches(internal_fix_parsed) -> dict:
 
 
 def _build_external_suggestion(
-    parsed: dict, officials_by_id: dict, existing_keys: set
+    parsed: dict, officials_by_id: dict, existing_keys: set, associations_by_value: dict
 ) -> ExternalGameSuggestion:
     errors = list(parsed["errors"])
     official_id = parsed["official_id"]
@@ -370,13 +389,17 @@ def _build_external_suggestion(
         if not official_display:
             errors.append(f"Official mit ID {official_id} wurde nicht gefunden.")
 
+    association = associations_by_value.get(parsed["association"])
+    if association is None:
+        errors.append(f"Unbekannter Verband: '{parsed['association']}'.")
+
     is_duplicate = False
     if not errors:
         key = (
             official_id,
             parsed["date"],
             parsed["position"],
-            parsed["association"],
+            association.abbr,
             parsed["number_games"],
         )
         is_duplicate = key in existing_keys
@@ -509,10 +532,13 @@ def build_import_result(df: pd.DataFrame) -> ParsedImportResult:
     }
     officials_by_id = _resolve_officials_by_id(official_ids)
     existing_keys = _resolve_existing_external_keys(external_parsed)
+    associations_by_value = _resolve_associations_by_value(external_parsed)
     matches_by_key = _resolve_game_official_matches(internal_fix_parsed)
 
     external_suggestions = [
-        _build_external_suggestion(parsed, officials_by_id, existing_keys)
+        _build_external_suggestion(
+            parsed, officials_by_id, existing_keys, associations_by_value
+        )
         for parsed in external_parsed
     ]
     internal_fix_suggestions = [

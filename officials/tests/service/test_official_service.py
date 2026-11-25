@@ -109,6 +109,9 @@ class TestGetAllTeamsWithLicenseBreakdown(TestCase):
 
 
 class TestCreateExternalOfficialEntry(TestCase):
+    def setUp(self):
+        DbSetupOfficials.create_production_associations()
+
     def test_creates_an_official_external_games_row_from_a_dict(self):
         team = TeamFactory(name="Test Team")
         official = OfficialFactory(first_name="Franzi", last_name="Fedora", team=team)

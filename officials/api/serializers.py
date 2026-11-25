@@ -46,6 +46,7 @@ class OfficialExternalGamesSerializer(ModelSerializer):
     notification_date = DateField(format="%d.%m.%Y")
     calculated_number_games = FloatField(read_only=True)
     reporter_name = SerializerMethodField("get_reporter_name")
+    association = CharField(source="association.abbr", read_only=True)
 
     class Meta:
         model = OfficialExternalGames

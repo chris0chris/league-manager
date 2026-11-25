@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from gamedays.models import Team, Gameinfo
+from gamedays.models import Association, Team, Gameinfo
 from gamedays.tests.setup_factories.db_setup import DBSetup
 from gamedays.tests.setup_factories.factories import TeamFactory
 from officials.models import Official
@@ -11,8 +11,40 @@ from officials.tests.setup_factories.factories_officials import (
     OfficialExternalGamesFactory,
 )
 
+# The 19 association rows that exist in production (abbr, name). The import
+# and the self-service forms resolve free-text values (e.g. "Hamburg") by
+# name, so a test that exercises those paths needs these rows.
+PRODUCTION_ASSOCIATIONS = [
+    ("AFVBY", "Bayern"),
+    ("OHNE", "-"),
+    ("AFCVBW", "Baden-Württemberg"),
+    ("AFCVBB", "Berlin-Brandenburg"),
+    ("AFCVHH", "Hamburg"),
+    ("AFCVMV", "Mecklenburg-Vorpommern"),
+    ("AFCVN", "Niedersachsen"),
+    ("AFCVNORD", "Nord"),
+    ("AFCVNRW", "Nordrhein-Westfalen"),
+    ("AFCVRLP", "Rheinland-Pfalz"),
+    ("AFCVSAA", "Saarland"),
+    ("AFCVSH", "Schleswig-Holstein"),
+    ("AFCVT", "Thüringen"),
+    ("AFVH", "Hessen"),
+    ("AFVS", "Sachsen"),
+    ("AFVSA", "Sachsen-Anhalt"),
+    ("LUX", "Luxemburg"),
+    ("SAFV", "Schweiz"),
+    ("BAFL", "Belgien"),
+]
+
 
 class DbSetupOfficials:
+    @staticmethod
+    def create_production_associations() -> dict[str, Association]:
+        return {
+            abbr: DBSetup().create_new_association(abbr=abbr, name=name)
+            for abbr, name in PRODUCTION_ASSOCIATIONS
+        }
+
     def create_multiple_officials(self, number: int, team: Team = None):
         if team is None:
             team_name = "Test Team"
@@ -98,12 +130,18 @@ class DbSetupOfficials:
     def create_external_officials_entries(self):
         current_year = datetime.today()
         last_year = current_year - timedelta(days=3 * 365)
+        association_a = DBSetup().create_new_association(
+            abbr="EXA", name="association A"
+        )
+        association_b = DBSetup().create_new_association(
+            abbr="EXB", name="association B"
+        )
         OfficialExternalGamesFactory(
             official=Official.objects.first(),
             number_games=4,
             date=current_year,
             position="Mix",
-            association="association A",
+            association=association_a,
             is_international=False,
             has_clockcontrol=1,
             halftime_duration=15,
@@ -116,7 +154,7 @@ class DbSetupOfficials:
             number_games=6,
             date=current_year,
             position="Mix",
-            association="association A",
+            association=association_a,
             is_international=False,
             has_clockcontrol=0,
             halftime_duration=15,
@@ -129,7 +167,7 @@ class DbSetupOfficials:
             number_games=6,
             date=last_year,
             position="Mix",
-            association="association A",
+            association=association_a,
             is_international=False,
             has_clockcontrol=1,
             halftime_duration=15,
@@ -142,7 +180,7 @@ class DbSetupOfficials:
             number_games=7,
             date=current_year,
             position="Referee",
-            association="association B",
+            association=association_b,
             is_international=True,
             has_clockcontrol=1,
             halftime_duration=15,
@@ -155,7 +193,7 @@ class DbSetupOfficials:
             number_games=5,
             date=last_year,
             position="Referee",
-            association="association B",
+            association=association_b,
             is_international=True,
             has_clockcontrol=0,
             halftime_duration=15,

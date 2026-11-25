@@ -60,6 +60,9 @@ class TestAllowedPositions(TestCase):
 
 
 class TestExternalGameOfficialEntry(TestCase):
+    def setUp(self):
+        DbSetupOfficials.create_production_associations()
+
     def test_all_ten_fields_are_persisted_correctly_not_just_seven(self):
         # Regression test: ExternalGameOfficialEntry used to build
         # OfficialExternalGames(None, *self.constructor_values), passing
@@ -88,7 +91,7 @@ class TestExternalGameOfficialEntry(TestCase):
         assert saved.number_games == 3
         assert str(saved.date) == "2024-05-01"
         assert saved.position == "Referee"
-        assert saved.association == "Hamburg"
+        assert saved.association.abbr == "AFCVHH"
         assert saved.halftime_duration == 20
         assert saved.has_clockcontrol is True
         assert saved.is_international is True

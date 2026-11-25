@@ -418,6 +418,9 @@ class TestToPosition(TestCase):
 
 
 class TestExternalClassification(TestCase):
+    def setUp(self):
+        self.association = DbSetupOfficials.create_production_associations()["AFCVHH"]
+
     def test_valid_row_is_ready_and_included_by_default(self):
         team = TeamFactory(name="Test Team")
         official = OfficialFactory(first_name="Franzi", last_name="Fedora", team=team)
@@ -488,6 +491,27 @@ class TestExternalClassification(TestCase):
         assert suggestion.include_default is False
         assert "999999" in suggestion.reason
 
+    def test_unknown_association_is_needs_attention(self):
+        team = TeamFactory(name="Test Team")
+        official = OfficialFactory(first_name="Franzi", last_name="Fedora", team=team)
+        row = _external_row(
+            official_id=official.pk,
+            number_games="2",
+            event_date="01.05.2024",
+            position="Referee",
+            association="Fantasie-Verband",
+            halftime_duration="20",
+        )
+        upload = _csv_upload([row])
+        df = parse_uploaded_file(upload)
+
+        result = build_import_result(df)
+
+        suggestion = result.external[0]
+        assert suggestion.status == "needs_attention"
+        assert suggestion.include_default is False
+        assert "Unbekannter Verband" in suggestion.reason
+
     def test_duplicate_external_row_defaults_unchecked(self):
         team = TeamFactory(name="Test Team")
         official = OfficialFactory(first_name="Franzi", last_name="Fedora", team=team)
@@ -497,7 +521,7 @@ class TestExternalClassification(TestCase):
             date=date(2024, 5, 1),
             notification_date=date(2024, 5, 1),
             position="Referee",
-            association="Hamburg",
+            association=self.association,
             halftime_duration=20,
             has_clockcontrol=False,
             is_international=False,
@@ -551,7 +575,7 @@ class TestExternalClassification(TestCase):
             date=date(2024, 5, 1),
             notification_date=date(2024, 5, 1),
             position="Referee",
-            association="Hamburg",
+            association=self.association,
             halftime_duration=20,
             has_clockcontrol=False,
             is_international=False,
@@ -582,6 +606,9 @@ class TestExternalClassificationWithXlsxNativeDateCells(TestCase):
     format, this builds a workbook with genuine datetime.date /
     datetime.datetime typed cells - the shape that reproduced the
     production bug and that the previous test suite never exercised."""
+
+    def setUp(self):
+        DbSetupOfficials.create_production_associations()
 
     def test_row_with_native_date_and_datetime_cells_is_ready(self):
         team = TeamFactory(name="Test Team")

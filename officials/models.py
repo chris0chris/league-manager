@@ -135,7 +135,7 @@ class OfficialExternalGames(models.Model):
     notification_date = models.DateField()
     reporter_name: str = models.CharField(max_length=100, default=None, blank=True)
     position: str = models.CharField(max_length=100)
-    association: str = models.CharField(max_length=100)
+    association: Association = models.ForeignKey(Association, on_delete=models.PROTECT)
     halftime_duration: int = models.PositiveSmallIntegerField()
     has_clockcontrol: bool = models.BooleanField(default=False)
     is_international: bool = models.BooleanField(default=False)

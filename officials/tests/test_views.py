@@ -526,7 +526,7 @@ class TestOfficialsStatisticsView(WebTest):
             date="2024-06-01",
             notification_date="2024-06-01",
             position="Referee",
-            association="External Association",
+            association=association,
             is_international=False,
             has_clockcontrol=True,
             halftime_duration=15,
@@ -963,6 +963,9 @@ def _internal_fix_import_row(gameinfo_id, official_id, position):
 
 
 class TestGameOfficialImportUploadView(WebTest):
+    def setUp(self):
+        self.association = DbSetupOfficials.create_production_associations()["AFCVHH"]
+
     def test_non_staff_denied(self):
         user = DBSetup().create_new_user("some user")
         self.app.set_user(user)
@@ -1061,7 +1064,7 @@ class TestGameOfficialImportUploadView(WebTest):
             date=date(2024, 5, 1),
             notification_date=date(2024, 5, 1),
             position="Referee",
-            association="Hamburg",
+            association=self.association,
             halftime_duration=20,
             has_clockcontrol=False,
             is_international=False,
@@ -1092,6 +1095,9 @@ class TestGameOfficialImportUploadView(WebTest):
 
 
 class TestGameOfficialImportConfirmView(WebTest):
+    def setUp(self):
+        DbSetupOfficials.create_production_associations()
+
     def _upload(self, rows):
         user = DBSetup().create_new_user("staff", is_staff=True)
         self.app.set_user(user)
@@ -1394,6 +1400,9 @@ class TestGameOfficialImportConfirmView(WebTest):
 
 
 class TestAddExternalGameOfficialUpdateView(WebTest):
+    def setUp(self):
+        DbSetupOfficials.create_production_associations()
+
     def test_non_staff_denied(self):
         user = DBSetup().create_new_user("some user")
         self.app.set_user(user)
