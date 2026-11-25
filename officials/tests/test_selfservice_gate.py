@@ -263,3 +263,18 @@ class TestEinsaetzePageCacheAndBanner(WebTest):
             in content
         )
         assert "Abmelden" in content
+
+
+class TestMoodleLoginWithBrokenConfig(TestCase):
+    def test_misconfigured_moodle_url_shows_form_error_instead_of_500(self):
+        from django.test import override_settings
+
+        with override_settings(MOODLE_URL="None"):
+            response = self.client.post(
+                reverse("view-officials-moodle-login"),
+                {"username": "leaguesphere_bot", "password": "secret"},
+            )
+
+        assert response.status_code == 200
+        assert "offd.de" in response.content.decode()
+        assert "nicht möglich" in response.content.decode()

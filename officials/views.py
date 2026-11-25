@@ -49,6 +49,7 @@ from officials.service.game_official_import import (
 )
 from officials.service.moodle.moodle_api import MoodleApiException
 from officials.service.moodle.moodle_service import MoodleService
+from requests import RequestException
 from officials.service.official_service import OfficialService
 from officials.service.officials_repository_service import OfficialsRepositoryService
 from officials.service.signup_service import (
@@ -1018,6 +1019,15 @@ class MoodleLoginView(View):
             form.add_error("", f"{error}")
         except Official.DoesNotExist:
             form.add_error("", NO_OFFICIAL_FOR_MOODLE_USER)
+        except RequestException as error:
+            # A stale/missing MOODLE_URL (or an unreachable offd.de) used to
+            # raise e.g. MissingSchema out of requests and 500 the login page.
+            logger.warning("Moodle login could not be reached: %s", error)
+            form.add_error(
+                "",
+                "Die Anmeldung über offd.de ist derzeit nicht möglich. "
+                "Bitte versuche es später erneut.",
+            )
         return render(request, self.template_name, {"form": form})
 
 
