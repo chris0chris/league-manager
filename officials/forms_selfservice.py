@@ -123,3 +123,6 @@ class ExternalGameForm(forms.ModelForm):
         if self.staff and cleaned.get("notification_date") is None and self.instance.pk:
             cleaned["notification_date"] = self.instance.notification_date
         return cleaned
+
+
+ExternalGameFormSet = forms.formset_factory(ExternalGameForm, extra=1)

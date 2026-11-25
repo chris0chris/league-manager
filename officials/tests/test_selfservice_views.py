@@ -606,3 +606,143 @@ class TestDfflGameDelete(SelfServiceTestBase):
         assert "Zukunft" in future_content
         assert "Scorecard" in future_content
         assert "Zukunft" not in past_content
+
+
+MULTI_ADD_URL_NAME = "view-officials-selfservice-external-multi-add"
+
+
+def _formset_data(rows, **overrides):
+    from gamedays.models import Association
+
+    association = Association.objects.get(abbr="AFCVT")
+    data = {
+        "form-TOTAL_FORMS": str(len(rows)),
+        "form-INITIAL_FORMS": "0",
+        "form-MIN_NUM_FORMS": "0",
+        "form-MAX_NUM_FORMS": "1000",
+    }
+    for index, row in enumerate(rows):
+        values = {
+            "date": "2026-06-02",
+            "number_games": "2",
+            "position": "Referee",
+            "association": str(association.pk),
+            "halftime_duration": "20",
+            "comment": "",
+        }
+        values.update(row)
+        for field, value in values.items():
+            data[f"form-{index}-{field}"] = value
+    data.update(overrides)
+    return data
+
+
+class TestExternalGameMultiAdd(SelfServiceTestBase):
+    def setUp(self):
+        super().setUp()
+        DbSetupOfficials.create_production_associations()
+
+    def test_multi_add_three_rows_atomic(self):
+        self.login_moodle()
+
+        response = self.client.post(
+            reverse(MULTI_ADD_URL_NAME),
+            _formset_data(
+                [
+                    {"number_games": "2"},
+                    {"number_games": "3", "position": "Mix"},
+                    {"number_games": "4", "comment": "letzte Zeile"},
+                ]
+            ),
+            follow=True,
+        )
+
+        from datetime import date
+
+        from officials.models import OfficialExternalGames
+
+        entries = OfficialExternalGames.objects.filter(official=self.official)
+        assert response.status_code == 200
+        assert entries.count() == 3
+        assert sorted(entries.values_list("number_games", flat=True)) == [2, 3, 4]
+        assert all(entry.notification_date == date.today() for entry in entries)
+        assert all(entry.reporter_name == "Max Mustermann" for entry in entries)
+
+    def test_invalid_row_rolls_back_all(self):
+        self.login_moodle()
+
+        response = self.client.post(
+            reverse(MULTI_ADD_URL_NAME),
+            _formset_data(
+                [{"number_games": "2"}, {"position": "Unfug"}],
+            ),
+        )
+
+        from officials.models import OfficialExternalGames
+
+        assert response.status_code == 200
+        assert OfficialExternalGames.objects.count() == 0
+        assert response.context["formset"].errors
+
+    def test_add_row_grows_formset(self):
+        self.login_moodle()
+
+        response = self.client.post(
+            reverse(MULTI_ADD_URL_NAME),
+            _formset_data([{"number_games": "7"}], add_row="1"),
+        )
+
+        from officials.models import OfficialExternalGames
+
+        assert response.status_code == 200
+        assert len(response.context["formset"].forms) == 2
+        assert response.context["formset"].forms[0]["number_games"].value() == "7"
+        assert OfficialExternalGames.objects.count() == 0
+
+    def test_staff_requires_official_picker(self):
+        client = Client()
+        client.force_login(_staff_user())
+
+        response = client.post(
+            reverse(MULTI_ADD_URL_NAME), _formset_data([{"number_games": "2"}])
+        )
+
+        from officials.models import OfficialExternalGames
+
+        assert OfficialExternalGames.objects.count() == 0
+        assert any("Offizielle" in m for m in self.messages(response))
+
+    def test_staff_uses_posted_official(self):
+        client = Client()
+        client.force_login(_staff_user())
+
+        client.post(
+            reverse(MULTI_ADD_URL_NAME),
+            _formset_data([{"number_games": "2"}], official_id=str(self.other.pk)),
+        )
+
+        from officials.models import OfficialExternalGames
+
+        entry = OfficialExternalGames.objects.get()
+        assert entry.official == self.other
+        assert entry.reporter_name == "staff"
+
+    def test_moodle_target_fixed_to_self(self):
+        self.login_moodle()
+
+        self.client.post(
+            reverse(MULTI_ADD_URL_NAME),
+            _formset_data([{"number_games": "2"}], official_id=str(self.other.pk)),
+        )
+
+        from officials.models import OfficialExternalGames
+
+        assert OfficialExternalGames.objects.get().official == self.official
+
+    def test_association_dropdown_in_every_row(self):
+        self.login_moodle()
+
+        content = self.client.get(reverse(MULTI_ADD_URL_NAME)).content.decode()
+
+        assert content.count('name="form-0-association"') == 1
+        assert "<select" in content

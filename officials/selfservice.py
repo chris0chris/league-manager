@@ -13,13 +13,14 @@ from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
 
 from gamedays.models import GameOfficial
 from officials.constants import MOODLE_LOGGED_IN_USER, MOODLE_REMEMBER_COOKIE
-from officials.forms_selfservice import AddAssignmentForm
+from officials.forms_selfservice import AddAssignmentForm, ExternalGameFormSet
 from officials.forms_selfservice import ExternalGameForm
 from officials.models import Official, OfficialExternalGames
 from officials.service.remember_me import RememberMeService, RestoreResult
@@ -491,3 +492,74 @@ class DfflGameDeleteView(SelfServiceWriteMixin, View):
         if not can_edit_official(request, row.official_id):
             raise PermissionDenied("Dieser Eintrag gehört einer anderen Person.")
         return row
+
+
+MULTI_ADD_URL_NAME = "view-officials-selfservice-external-multi-add"
+
+
+class ExternalGameMultiAddView(SelfServiceWriteMixin, View):
+    """Report several external games in one submission, all-or-nothing.
+
+    "Weitere Zeile hinzufügen" is a plain submit button that rebuilds the
+    formset with one more row, so the whole flow works without JavaScript.
+    """
+
+    template_name = "officials/selfservice/external_multi_form.html"
+
+    def get(self, request):
+        return self._render(
+            request, ExternalGameFormSet(form_kwargs={"staff": request.user.is_staff})
+        )
+
+    def post(self, request):
+        data = request.POST
+        if "add_row" in request.POST:
+            data = request.POST.copy()
+            total = int(data.get("form-TOTAL_FORMS") or 1)
+            data["form-TOTAL_FORMS"] = str(total + 1)
+            return self._render(
+                request,
+                ExternalGameFormSet(data, form_kwargs={"staff": request.user.is_staff}),
+            )
+
+        formset = ExternalGameFormSet(
+            data, form_kwargs={"staff": request.user.is_staff}
+        )
+        if not formset.is_valid():
+            messages.error(request, "Bitte die markierten Zeilen prüfen.")
+            return self._render(request, formset)
+
+        filled = [form for form in formset if form.has_changed()]
+        if not filled:
+            messages.error(request, "Bitte mindestens eine Zeile ausfüllen.")
+            return self._render(request, formset)
+
+        try:
+            target = self.target_official(request)
+        except Official.DoesNotExist:
+            messages.error(request, "Bitte eine Offizielle-ID angeben.")
+            return self._render(request, formset)
+
+        reporter = _reporter_name(request, target)
+        with transaction.atomic():
+            for form in filled:
+                entry = form.save(commit=False)
+                entry.official = target
+                entry.notification_date = date.today()
+                entry.reporter_name = reporter
+                entry.save()
+        messages.success(request, f"{len(filled)} Einträge gespeichert.")
+        return redirect(profile_gamelist_url(target, date.today().year))
+
+    def _render(self, request, formset):
+        return render(
+            request,
+            self.template_name,
+            {"formset": formset, **selfservice_banner_context(request)},
+        )
+
+
+def _reporter_name(request, target: Official) -> str:
+    if request.user.is_authenticated and request.user.is_staff:
+        return request.user.username
+    return f"{target.first_name} {target.last_name}"

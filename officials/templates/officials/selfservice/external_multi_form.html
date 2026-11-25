@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section">
+    <h1>Spiele außerhalb der DFFL melden</h1>
+    <p>
+        Trage hier mehrere Spiele auf einmal ein. Jede Zeile wird einzeln gespeichert;
+        ist eine Zeile fehlerhaft, wird keine der Zeilen gespeichert.
+    </p>
+    {% include 'officials/selfservice/_banner.html' %}
+    <form method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        {% if is_staff %}
+        {% include 'officials/selfservice/_staff_official_picker.html' %}
+        {% endif %}
+        <table class="table align-middle">
+            <thead>
+            <tr>
+                <th scope="col">Datum</th>
+                <th scope="col">#Spiele</th>
+                <th scope="col">Position</th>
+                <th scope="col">Verband</th>
+                <th scope="col">Halbzeitdauer</th>
+                <th scope="col">Clock Control</th>
+                <th scope="col">International</th>
+                <th scope="col">Kommentar</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for form in formset %}
+            <tr>
+                <td>{{ form.date }}{{ form.date.errors }}</td>
+                <td>{{ form.number_games }}{{ form.number_games.errors }}</td>
+                <td>{{ form.position }}{{ form.position.errors }}</td>
+                <td>{{ form.association }}{{ form.association.errors }}</td>
+                <td>{{ form.halftime_duration }}{{ form.halftime_duration.errors }}</td>
+                <td>{{ form.has_clockcontrol }}{{ form.has_clockcontrol.errors }}</td>
+                <td>{{ form.is_international }}{{ form.is_international.errors }}</td>
+                <td>{{ form.comment }}{{ form.comment.errors }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <button class="btn btn-outline-secondary" type="submit" name="add_row" value="1">Weitere Zeile hinzufügen</button>
+        <button class="btn btn-primary" type="submit" name="save" value="1">Alle speichern</button>
+        <a class="btn btn-outline-secondary" href="{% url 'view-officials-game-officials-appearance' %}">Abbrechen</a>
+    </form>
+</div>
+{% endblock content %}
