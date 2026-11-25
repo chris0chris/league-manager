@@ -55,9 +55,18 @@
                 <td>
                     <a href="{% url 'view-officials-game-officials-appearance-for-team-and-year' pk=official.team_official_id season=season %}">{{official.team_name}}</a>
                 </td>
-                <td>{{official.name}}</td>
+                <td>
+                    {% if official.official_id %}
+                    <a href="/officials/profile/{{ official.official_id }}/gamelist/{{ season }}/">{{official.name}}</a>
+                    {% else %}
+                    {{official.name}}
+                    {% endif %}
+                </td>
                 <td>{{official.position}}</td>
-                <td>{{official.home}} vs {{official.away}} (#{{official.gameinfo_id}})</td>
+                <td>
+                    <a href="/gamedays/gameday/{{ official.gameday_id }}/">{{official.home}} vs
+                        {{official.away}} (#{{official.gameinfo_id}})</a>
+                </td>
                 <td>{{official.standing}}</td>
                 {% if moodle_official_id or is_staff %}
                 <td>
@@ -66,6 +75,9 @@
                        href="{% url claim_url_name pk=official.id %}?next={{ request.get_full_path|urlencode }}">
                         {% if is_staff %}Zuordnen{% else %}Mir zuordnen{% endif %}
                     </a>
+                    {% elif official.is_own_row %}
+                    <a class="btn btn-sm btn-outline-danger"
+                       href="{% url 'view-officials-selfservice-dffl-delete' pk=official.id %}">Löschen</a>
                     {% elif official.can_reclaim %}
                     <a class="btn btn-sm btn-outline-primary"
                        href="{% url claim_url_name pk=official.id %}?next={{ request.get_full_path|urlencode }}">

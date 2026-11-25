@@ -310,6 +310,7 @@ class GameOfficialAllInfoSerializer(Serializer):
     POSITION_C = "position"
     GAMEINFO_ID_C = "gameinfo_id"
     GAMEINFO_STANDING_C = "gameinfo__standing"
+    GAMEDAY_ID_C = "gameinfo__gameday_id"
     GAMEDAY_NAME_C = "gameinfo__gameday__name"
     GAMEDAY_DATE_C = "gameinfo__gameday__date"
     GAMEINFO_OFFICIALS_ID_C = "gameinfo__officials_id"
@@ -327,6 +328,7 @@ class GameOfficialAllInfoSerializer(Serializer):
         POSITION_C,
         GAMEINFO_ID_C,
         GAMEINFO_STANDING_C,
+        GAMEDAY_ID_C,
         GAMEDAY_DATE_C,
         GAMEDAY_NAME_C,
         GAMEINFO_OFFICIALS_ID_C,
@@ -344,6 +346,9 @@ class GameOfficialAllInfoSerializer(Serializer):
     gameday_name = CharField(source=GAMEDAY_NAME_C)
     gameday_date = SerializerMethodField()
     gameinfo_id = CharField()
+    # Optional so manually built dicts (serializer unit tests) keep their old
+    # wire shape; real list rows always carry the id from ALL_VALUE_FIELDS.
+    gameday_id = CharField(source=GAMEDAY_ID_C, required=False)
     home = CharField()
     away = CharField()
     position = CharField()

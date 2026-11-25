@@ -45,6 +45,9 @@
 <br/>
 {% include 'officials/selfservice/_banner.html' %}
 {% include 'utils/year_filter.html' %}
+<p>
+    Fehlende Einsätze kannst du in der <a href="/officials/einsaetze/">Einsätze-Liste</a> überprüfen.
+</p>
 <h2>{{ season }} DFFL Spiele (und Ligen mit Scorecard)</h2>
 <table class="table table-hover">
     <thead>
@@ -87,7 +90,7 @@
 <h2>{{ season }} Spiele außerhalb der DFFL</h2>
 {% if can_edit_profile %}
 <p>
-    <a class="btn btn-sm btn-outline-primary"
+    <a class="btn btn-primary"
        href="{% url 'view-officials-selfservice-external-multi-add' %}">Spiele melden</a>
 </p>
 {% endif %}
@@ -98,9 +101,6 @@
     Eine Beschreibung der Spalten findest du, wenn du mit der Maus über den Spaltennamen fährst.<br/>
     Ab wann ein Spiel als Lizenzspiel zählt, wird <a href="https://offd.de/mod/page/view.php?id=315"
                                                      target="_blank">hier</a> beschrieben.
-</p>
-<p>
-    <strong>Letzte Aktualisierung:</strong> {{ official_info.external_games.last_update }}
 </p>
 <table class="table table-hover">
     <thead>
@@ -165,16 +165,6 @@
     {% endfor %}
     </tbody>
 </table>
-<h2>Anmerkungen</h2>
-<p>
-    Sollten Spiele fehlen, kannst du <a href="{% url 'view-officials-game-officials-appearance' %}">hier</a>
-    überprüfen, ob dein Einsatz in der DFFL gezählt wurde.
-</p>
-<p>
-    Bei fehlenden Einsätzen, unabhänig ob DFFL, außerhalb der Liga oder Flag & Fun Turnieren, kannst du diese <a
-        href="https://forms.gle/F9dSrMoodipfbys79" target="_blank">hier</a> nachmelden.<br/>
-    Bei Fragen wende dich bitte an Chris: c.kaempfe@afvd.de
-</p>
 {% include 'utils/tooltip_init.html' %}
 {% endif %}
 {% endblock gamelist %}
