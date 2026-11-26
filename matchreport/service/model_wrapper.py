@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import pandas as pd
 from django.db.models import OuterRef, Subquery
+from django.urls import reverse
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 
@@ -18,6 +19,11 @@ from gamedays.models import (
 from officials.models import OfficialLicenseHistory
 from officials.service.license_validity import validity_lower_bound
 from passcheck.models import PasscheckVerification, PlayerlistGameday
+
+# Global (unnamespaced) self-service URL names - the claim/unassign views
+# themselves live in officials/selfservice.py; this report only links to them.
+SELF_SERVICE_CLAIM_URL_NAME = "view-officials-selfservice-claim"
+SELF_SERVICE_UNASSIGN_URL_NAME = "view-officials-selfservice-unassign"
 
 PLAYER_PASSCHECK_COLUMN_MAPPING = {
     "gameday_jersey": "Trikotnr.",
@@ -210,12 +216,13 @@ class MachtreportModelWrapper:
             "position": "Position",
             "license_cell": "Lizenz",
             "license_number_cell": "Lizenznummer",
+            "action_cell": "Aktion",
         }
         # Not part of column_mapping directly - fetched alongside it but
-        # consumed by _license_number_cell()/_license_cell() to build the
-        # "Lizenznummer"/"Lizenz" columns, not rendered as columns of their
-        # own.
-        extra_fields = ["official_id"]
+        # consumed by _license_number_cell()/_license_cell() and
+        # _official_action_cell() to build the "Lizenznummer"/"Lizenz"/
+        # "Aktion" columns, not rendered as columns of their own.
+        extra_fields = ["official_id", "id"]
 
         # Correlated subquery so every official's license is resolved in the
         # same query as the officials table, instead of one query per
@@ -299,6 +306,13 @@ class MachtreportModelWrapper:
                 lambda row: self._license_number_cell(
                     row["official_id"],
                     self.gameday_date.year,
+                ),
+                axis=1,
+            )
+            officials_df["action_cell"] = officials_df.apply(
+                lambda row: self._official_action_cell(
+                    row["id"],
+                    row["official_id"],
                 ),
                 axis=1,
             )
@@ -400,6 +414,40 @@ class MachtreportModelWrapper:
             profile_url,
             official_id,
         )
+
+    @staticmethod
+    def _official_action_cell(game_official_id, official_id):
+        # "Aktion" column of the officials table, which reaches the template
+        # via |safe. Both URLs are resolved with reverse() from the GameOfficial
+        # row's own pk - the write logic stays in the self-service views. The
+        # free-text GameOfficial.name never enters this cell, so there is no
+        # injection path from it; format_html() still escapes the URLs.
+        game_official_id = int(game_official_id)
+        claim_url = reverse(
+            SELF_SERVICE_CLAIM_URL_NAME, kwargs={"pk": game_official_id}
+        )
+        links = [
+            format_html(
+                '<a class="btn btn-sm btn-outline-primary" href="{}">Zuordnen</a>',
+                claim_url,
+            )
+        ]
+        if not pd.isna(official_id):
+            # Only an assigned row can be unassigned; a free-text-only entry
+            # has no official to clear.
+            unassign_url = reverse(
+                SELF_SERVICE_UNASSIGN_URL_NAME, kwargs={"pk": game_official_id}
+            )
+            links.append(
+                format_html(
+                    '<a class="btn btn-sm btn-outline-danger" href="{}">'
+                    "Zuordnung aufheben</a>",
+                    unassign_url,
+                )
+            )
+        # str.join drops SafeString's safety marker, so restore it before the
+        # cell is handed to pandas' to_html(escape=False).
+        return mark_safe(" ".join(str(link) for link in links))
 
     def get_gameday_match_report(self, render_config: dict):
         games = []
