@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="content-section">
-    <h1>{% if entry %}Eintrag löschen{% else %}Einsatz löschen{% endif %}</h1>
+    <h1>{% if entry %}Eintrag löschen{% else %}Zuordnung aufheben{% endif %}</h1>
     {% if entry %}
     <p>
         Dieser Einsatz außerhalb der DFFL wird gelöscht. Das kann nicht rückgängig
@@ -39,14 +39,13 @@
     </form>
     {% else %}
     <p>
-        Dieser DFFL-Einsatz wird gelöscht. Das Spiel selbst bleibt bestehen.
+        Dieser DFFL-Einsatz wird entfernt. Der Eintrag bleibt mit dem eingegebenen Namen
+        bestehen und ist danach keiner Offiziellen mehr zugeordnet. Das Spiel selbst bleibt
+        ebenfalls bestehen.
     </p>
-    {% if future_warning %}
-    <div class="alert alert-warning">
-        <strong>Achtung:</strong> Das Spiel liegt in der Zukunft. Beim nächsten Speichern der
-        <strong>Scorecard</strong> kann für diese Position wieder ein leerer Eintrag angelegt werden.
+    <div class="alert alert-info">
+        Der Eintrag bleibt mit Name und Position bestehen und ist danach keiner Offiziellen mehr zugeordnet.
     </div>
-    {% endif %}
     <table class="table table-sm">
         <tbody>
         <tr>
@@ -65,7 +64,7 @@
     </table>
     <form method="post">
         {% csrf_token %}
-        <button class="btn btn-danger" type="submit">Endgültig löschen</button>
+        <button class="btn btn-danger" type="submit">Zuordnung aufheben</button>
         <a class="btn btn-outline-danger"
            href="{% url 'view-officials-profile-gamelist' pk=row.official_id season=game.gameday.date.year %}">Abbrechen</a>
     </form>

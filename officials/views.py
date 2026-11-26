@@ -926,6 +926,10 @@ class OfficialProfileGamelistView(View):
             is_staff=PermissionHelper.has_staff_or_user_permission(
                 request, official.team.pk
             ),
+            # The Moodle session (or a restored remember-me cookie) pins the
+            # visitor to one Official. On their own profile they may see all
+            # values unobfuscated; everybody else keeps the obfuscated view.
+            is_self=acting_official_id(request) == official.pk,
         ).data
         from officials.urls import OFFICIALS_PROFILE_GAMELIST
 

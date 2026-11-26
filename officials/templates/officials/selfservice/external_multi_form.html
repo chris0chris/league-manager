@@ -46,43 +46,59 @@
                 {% for form in formset %}
                 <tr>
                     <td>
-                        <span class="d-md-none fw-bold">Datum:</span>
-                        {{ form.date }}
+                        <div class="mb-2">
+                            <span class="d-md-none fw-bold d-block">Datum:</span>
+                            {{ form.date }}
+                        </div>
                         {% if not adding_row %}{% for error in form.date.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
                     </td>
                     <td>
-                        <span class="d-md-none fw-bold">#Spiele:</span>
-                        {{ form.number_games }}
+                        <div class="mb-2">
+                            <span class="d-md-none fw-bold d-block">#Spiele:</span>
+                            {{ form.number_games }}
+                        </div>
                         {% if not adding_row %}{% for error in form.number_games.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
                     </td>
                     <td>
-                        <span class="d-md-none fw-bold">Position:</span>
-                        {{ form.position }}
+                        <div class="mb-2">
+                            <span class="d-md-none fw-bold d-block">Position:</span>
+                            {{ form.position }}
+                        </div>
                         {% if not adding_row %}{% for error in form.position.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
                     </td>
                     <td>
-                        <span class="d-md-none fw-bold">Verband:</span>
-                        {{ form.association }}
+                        <div class="mb-2">
+                            <span class="d-md-none fw-bold d-block">Verband:</span>
+                            {{ form.association }}
+                        </div>
                         {% if not adding_row %}{% for error in form.association.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
                     </td>
                     <td>
-                        <span class="d-md-none fw-bold">Halbzeitdauer:</span>
-                        {{ form.halftime_duration }}
+                        <div class="mb-2">
+                            <span class="d-md-none fw-bold d-block">Halbzeitdauer:</span>
+                            {{ form.halftime_duration }}
+                        </div>
                         {% if not adding_row %}{% for error in form.halftime_duration.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
                     </td>
                     <td>
-                        <span class="d-md-none fw-bold">Clock Control:</span>
-                        {{ form.has_clockcontrol }}
+                        <div class="mb-2">
+                            <span class="d-md-none fw-bold d-block">Clock Control:</span>
+                            {{ form.has_clockcontrol }}
+                        </div>
                         {% if not adding_row %}{% for error in form.has_clockcontrol.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
                     </td>
                     <td>
-                        <span class="d-md-none fw-bold">International:</span>
-                        {{ form.is_international }}
+                        <div class="mb-2">
+                            <span class="d-md-none fw-bold d-block">International:</span>
+                            {{ form.is_international }}
+                        </div>
                         {% if not adding_row %}{% for error in form.is_international.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
                     </td>
                     <td>
-                        <span class="d-md-none fw-bold">Kommentar:</span>
-                        {{ form.comment }}
+                        <div class="mb-2">
+                            <span class="d-md-none fw-bold d-block">Kommentar:</span>
+                            {{ form.comment }}
+                        </div>
                         {% if not adding_row %}{% for error in form.comment.errors %}<span class="text-danger d-block">{{ error }}</span>{% endfor %}{% endif %}
                     </td>
                 </tr>
@@ -90,9 +106,9 @@
                 </tbody>
             </table>
         </div>
-        <div class="row mb-2">
+        <div class="row mb-4">
             <div class="col-12">
-                <button class="btn btn-outline-secondary" type="submit" name="add_row" value="1">Weitere Zeile hinzufügen</button>
+                <button class="btn btn-outline-secondary w-100" type="submit" name="add_row" value="1">Weitere Zeile hinzufügen</button>
             </div>
         </div>
         <div class="row g-2">

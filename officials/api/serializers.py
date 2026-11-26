@@ -52,12 +52,13 @@ class OfficialExternalGamesSerializer(ModelSerializer):
         model = OfficialExternalGames
         exclude = ("official",)
 
-    def __init__(self, is_staff=False, *args, **kwargs):
+    def __init__(self, is_staff=False, is_self=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.is_staff = is_staff
+        self.is_self = is_self
 
     def get_reporter_name(self, obj: OfficialExternalGames):
-        if self.is_staff:
+        if self.is_staff or self.is_self:
             return obj.reporter_name
         return Obfuscator.obfuscate(*obj.reporter_name.split(" ")[:2])
 
@@ -257,10 +258,23 @@ class OfficialGamelistSerializer(OfficialSerializer):
     dffl_games = SerializerMethodField("get_dffl_games")
     external_games = SerializerMethodField("get_external_games")
 
-    def __init__(self, season, is_staff=False, *args, **kwargs):
+    def __init__(self, season, is_staff=False, is_self=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.is_staff = is_staff
+        self.is_self = is_self
         self.season = season
+
+    def _obfuscate_text_if_needed(self, text: str) -> str:
+        # The Moodle-logged-in official sees their own unobfuscated data,
+        # without gaining any of staff's other privileges.
+        if self.is_staff or self.is_self:
+            return text
+        return Obfuscator.obfuscate(text)
+
+    def get_name(self, obj: Official):
+        return Obfuscator.reveal_unless_obfuscated(
+            self.is_staff or self.is_self, obj.first_name, obj.last_name
+        )
 
     def get_external_games(self, obj: Official):
         all_official_entries: QuerySet[OfficialExternalGames] = (
@@ -268,7 +282,10 @@ class OfficialGamelistSerializer(OfficialSerializer):
         )
         return {
             "all_games": OfficialExternalGamesSerializer(
-                instance=all_official_entries, many=True, is_staff=self.is_staff
+                instance=all_official_entries,
+                many=True,
+                is_staff=self.is_staff,
+                is_self=self.is_self,
             ).data,
             "number_games": sum(
                 entry.calculated_number_games for entry in all_official_entries
@@ -295,6 +312,7 @@ class OfficialGamelistSerializer(OfficialSerializer):
             "position": obj.position,
             "game_official_id": obj.pk,
             "gameinfo_id": obj.gameinfo.pk,
+            "gameday_id": obj.gameinfo.gameday_id,
             "gameday": obj.gameinfo.gameday.name,
             "date": obj.gameinfo.gameday.date.strftime("%d.%m.%Y"),
             "vs": home + " vs " + away,
