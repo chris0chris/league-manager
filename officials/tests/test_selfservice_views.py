@@ -559,7 +559,11 @@ class TestDfflGameDelete(SelfServiceTestBase):
         )
 
         assert response.status_code == 200
-        assert not GameOfficial.objects.filter(pk=row.pk).exists()
+        row.refresh_from_db()
+        assert row.official is None
+        assert row.name == "Max Mustermann"
+        assert row.position == "Referee"
+        assert row.gameinfo_id == gameinfo.pk
         assert Gameinfo.objects.filter(pk=gameinfo.pk).exists()
 
     def test_other_official_forbidden(self):
@@ -588,9 +592,12 @@ class TestDfflGameDelete(SelfServiceTestBase):
 
         client.post(reverse(DFFL_DELETE_URL_NAME, kwargs={"pk": row.pk}))
 
-        assert not GameOfficial.objects.filter(pk=row.pk).exists()
+        row.refresh_from_db()
+        assert row.official is None
+        assert row.name == "Max Mustermann"
+        assert row.gameinfo_id == gameinfo.pk
 
-    def test_future_game_delete_shows_warning(self):
+    def test_unassign_confirm_states_the_row_is_kept_for_past_and_future_games(self):
         future_gameday = GamedayFactory(date="2027-05-01", name="Zukunftsspieltag")
         future_game = GameinfoFactory(gameday=future_gameday)
         future_row = GameOfficialFactory(
@@ -606,9 +613,12 @@ class TestDfflGameDelete(SelfServiceTestBase):
             reverse(DFFL_DELETE_URL_NAME, kwargs={"pk": past_row.pk})
         ).content.decode()
 
-        assert "Zukunft" in future_content
-        assert "Scorecard" in future_content
-        assert "Zukunft" not in past_content
+        # No scorecard warning is needed: the row stays with official=NULL, so
+        # a later scorecard save fills it instead of creating an empty slot.
+        assert "Der Eintrag bleibt" in future_content
+        assert "Zuordnung aufheben" in future_content
+        assert "Der Eintrag bleibt" in past_content
+        assert "kann für diese Position wieder ein leerer Eintrag" not in future_content
 
 
 MULTI_ADD_URL_NAME = "view-officials-selfservice-external-multi-add"
@@ -831,7 +841,7 @@ class TestAddAssignmentInputRobustness(SelfServiceTestBase):
 
 
 class TestSelfServiceButtons(SelfServiceTestBase):
-    def test_claim_button_fills_width_and_has_no_cancel_link(self):
+    def test_claim_button_fills_width_and_cancel_is_outline_danger(self):
         DbSetupOfficials.create_production_associations()
         gameinfo, row = _game_with_row()
         self.login_moodle()
@@ -841,7 +851,8 @@ class TestSelfServiceButtons(SelfServiceTestBase):
         ).content.decode()
 
         assert 'btn btn-primary w-100" type="submit">Einsatz übernehmen' in content
-        assert ">Abbrechen<" not in content
+        assert "btn btn-outline-danger" in content
+        assert ">Abbrechen<" in content
 
     def test_cancel_links_use_outline_danger(self):
         DbSetupOfficials.create_production_associations()

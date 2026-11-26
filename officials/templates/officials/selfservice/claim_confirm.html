@@ -46,7 +46,15 @@
         {% else %}
         <p>Der Einsatz wird deinem eigenen Konto zugeordnet.</p>
         {% endif %}
-        <button class="btn btn-primary w-100" type="submit">Einsatz übernehmen</button>
+        <div class="row g-2">
+            <div class="col">
+                <button class="btn btn-primary w-100" type="submit">Einsatz übernehmen</button>
+            </div>
+            <div class="col">
+                <a class="btn btn-outline-danger w-100"
+                   href="{% url 'view-officials-game-officials-appearance' %}">Abbrechen</a>
+            </div>
+        </div>
     </form>
     {% endif %}
 </div>

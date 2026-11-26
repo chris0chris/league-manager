@@ -254,20 +254,28 @@ class ClaimGameOfficialView(SelfServiceWriteMixin, View):
 
     def get(self, request, pk):
         row = get_object_or_404(GameOfficial, pk=pk)
-        target = self._target_or_error(request)
         return render(
             request,
             self.template_name,
             self._context(
-                request,
-                row,
-                can_reclaim=target is not None
-                and (
-                    row.official_id is None
-                    or can_reclaim_official(request, row, target)
-                ),
+                request, row, can_reclaim=self._can_reclaim_now(request, row)
             ),
         )
+
+    def _can_reclaim_now(self, request, row) -> bool:
+        """Can the confirm page offer the write form right now?
+
+        Staff may overwrite any row, so they get the picker without having
+        posted an ``official_id`` yet. A Moodle official needs a resolved
+        target and - for a mapped row - a typed name that proves it is theirs.
+        """
+        if request.user.is_authenticated and request.user.is_staff:
+            return True
+        try:
+            target = self.target_official(request)
+        except Official.DoesNotExist:
+            return False
+        return row.official_id is None or can_reclaim_official(request, row, target)
 
     def post(self, request, pk):
         row = get_object_or_404(GameOfficial, pk=pk)
@@ -330,6 +338,22 @@ ADD_ASSIGNMENT_URL_NAME = "view-officials-selfservice-add-assignment"
 UNASSIGN_URL_NAME = "view-officials-selfservice-unassign"
 
 
+def season_from_request(request) -> int:
+    """Season of the Einsätze list the visitor came from, defaulting to today.
+
+    The list link carries ``?season=<year>``; the add-assignment page passes it
+    on through the gameday step and the final POST so both steps stay in the
+    same season. An absent or malformed value falls back to the current year.
+    """
+    raw = request.GET.get("season") or request.POST.get("season")
+    if raw:
+        try:
+            return int(raw)
+        except (TypeError, ValueError):
+            pass
+    return datetime.today().year
+
+
 def _form_error_message(form) -> str:
     """First field error with its label, so the message names the field."""
     for field_name, messages in form.errors.items():
@@ -346,24 +370,29 @@ class AddAssignmentView(SelfServiceWriteMixin, View):
     template_name = "officials/selfservice/add_assignment.html"
 
     def get(self, request):
+        season = season_from_request(request)
         gameday_id = request.GET.get("gameday") or None
-        form = AddAssignmentForm(season=datetime.today().year, gameday_id=gameday_id)
+        form = AddAssignmentForm(season=season, gameday_id=gameday_id)
         return render(
-            request, self.template_name, self._context(request, form, gameday_id)
+            request,
+            self.template_name,
+            self._context(request, form, gameday_id, season),
         )
 
     def post(self, request):
+        season = season_from_request(request)
+        gameday_id = request.POST.get("gameday") or None
         form = AddAssignmentForm(
             request.POST,
-            season=datetime.today().year,
-            gameday_id=request.POST.get("gameday") or None,
+            season=season,
+            gameday_id=gameday_id,
         )
         if not form.is_valid():
             messages.error(request, _form_error_message(form))
             return render(
                 request,
                 self.template_name,
-                self._context(request, form, request.POST.get("gameday")),
+                self._context(request, form, gameday_id, season),
             )
 
         gameinfo = form.cleaned_data["gameinfo"]
@@ -375,7 +404,7 @@ class AddAssignmentView(SelfServiceWriteMixin, View):
             return render(
                 request,
                 self.template_name,
-                self._context(request, form, request.POST.get("gameday")),
+                self._context(request, form, gameday_id, season),
             )
 
         if GameOfficial.objects.filter(gameinfo=gameinfo, official=target).exists():
@@ -385,7 +414,7 @@ class AddAssignmentView(SelfServiceWriteMixin, View):
             return render(
                 request,
                 self.template_name,
-                self._context(request, form, request.POST.get("gameday")),
+                self._context(request, form, gameday_id, season),
             )
         if GameOfficial.objects.filter(gameinfo=gameinfo, position=position).exists():
             messages.error(
@@ -396,7 +425,7 @@ class AddAssignmentView(SelfServiceWriteMixin, View):
             return render(
                 request,
                 self.template_name,
-                self._context(request, form, request.POST.get("gameday")),
+                self._context(request, form, gameday_id, season),
             )
 
         GameOfficial.objects.create(
@@ -408,10 +437,11 @@ class AddAssignmentView(SelfServiceWriteMixin, View):
         )
         return redirect(assignments_return_url(request))
 
-    def _context(self, request, form, gameday_id):
+    def _context(self, request, form, gameday_id, season):
         return {
             "form": form,
             "gameday_id": gameday_id,
+            "season": season,
             **selfservice_banner_context(request),
         }
 
@@ -572,11 +602,11 @@ DFFL_DELETE_URL_NAME = "view-officials-selfservice-dffl-delete"
 
 
 class DfflGameDeleteView(SelfServiceWriteMixin, View):
-    """Delete one of the official's own DFFL assignments.
+    """Remove the official from one of their own DFFL assignments.
 
-    The scorecard stays authoritative: the row is deleted for real, and if the
-    scorecard is saved for a future game afterwards it may create an empty slot
-    again - the confirmation says so.
+    The scorecard row itself is kept: only ``official`` is cleared, so name,
+    position and game stay 1:1 and a later scorecard save cannot silently
+    create a duplicate slot.
     """
 
     template_name = "officials/selfservice/delete_confirm.html"
@@ -605,8 +635,10 @@ class DfflGameDeleteView(SelfServiceWriteMixin, View):
         row = self._get_row(request, pk)
         official = row.official
         season = row.gameinfo.gameday.date.year
-        row.delete()
-        messages.success(request, "Einsatz gelöscht.")
+        # The scorecard entry stays authoritative: clear only the assignment,
+        # keeping name, position, game and every other value 1:1.
+        GameOfficial.objects.filter(pk=row.pk).update(official=None)
+        messages.success(request, "Zuordnung aufgehoben - der Einsatz bleibt erhalten.")
         return redirect(profile_gamelist_url(official, season))
 
     @staticmethod

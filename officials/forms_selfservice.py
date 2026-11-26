@@ -90,6 +90,7 @@ class AddAssignmentForm(forms.Form):
 
     def __init__(self, *args, season=None, gameday_id=None, **kwargs):
         super().__init__(*args, **kwargs)
+        season = season or date.today().year
         self.fields["gameday"].queryset = Gameday.objects.filter(
             date__year=season
         ).order_by("-date", "name")

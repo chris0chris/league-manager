@@ -16,7 +16,7 @@
             Personen die ein <b>Fragezeichen</b> (<b>?</b>) hinter dem Namen haben, deren Spiele werden nicht gezählt,
             da für diese kein Eintrag gefunden wurde. Entweder haben diese keine Lizenz oder
             der Name wurde nicht über die Scorecard ausgewählt / gesucht.<br/>
-            Bei Fragen bitte an Chris wenden: c.kaempfe@afvd.de
+            Bei Fragen bitte an die Turnierleitung wenden.
         </p>
         {% include 'officials/selfservice/_banner.html' %}
         {% if moodle_official_id %}
@@ -25,7 +25,8 @@
                href="?{% if not mine_filter %}mine=1{% endif %}">
                 {% if mine_filter %}Alle Einträge zeigen{% else %}Nur meine Einträge{% endif %}
             </a>
-            <a class="btn btn-sm btn-outline-primary" href="{{ add_assignment_url }}">Einsatz nachtragen</a>
+            <a class="btn btn-sm btn-outline-primary"
+               href="{{ add_assignment_url }}?season={{ season }}">Einsatz nachtragen</a>
         </p>
         {% endif %}
         {% include 'utils/year_filter.html' %}
@@ -51,7 +52,9 @@
             <tr class="{% if official.is_own_row or official.is_own_open_row %}table-info{% endif %}">
                 <th scope="row">{{official.id}}</th>
                 <td>{{official.gameday_date}}</td>
-                <td>{{official.gameday_name}}</td>
+                <td>
+                    <a href="/gamedays/gameday/{{ official.gameday_id }}/">{{official.gameday_name}}</a>
+                </td>
                 <td>
                     <a href="{% url 'view-officials-game-officials-appearance-for-team-and-year' pk=official.team_official_id season=season %}">{{official.team_name}}</a>
                 </td>
@@ -63,10 +66,7 @@
                     {% endif %}
                 </td>
                 <td>{{official.position}}</td>
-                <td>
-                    <a href="/gamedays/gameday/{{ official.gameday_id }}/">{{official.home}} vs
-                        {{official.away}} (#{{official.gameinfo_id}})</a>
-                </td>
+                <td>{{official.home}} vs {{official.away}} (#{{official.gameinfo_id}})</td>
                 <td>{{official.standing}}</td>
                 {% if moodle_official_id or is_staff %}
                 <td>

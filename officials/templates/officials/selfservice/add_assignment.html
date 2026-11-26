@@ -10,6 +10,7 @@
 
     <form method="get" class="mb-4">
         <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+        <input type="hidden" name="season" value="{{ season }}">
         <label class="form-label" for="id_gameday_step">Spieltag</label>
         <select class="form-select" id="id_gameday_step" name="gameday">
             <option value="">– bitte wählen –</option>
@@ -28,6 +29,7 @@
         {% csrf_token %}
         <input type="hidden" name="gameday" value="{{ gameday_id }}">
         <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+        <input type="hidden" name="season" value="{{ season }}">
         <div class="mb-3">
             <label class="form-label" for="{{ form.gameinfo.id_for_label }}">Spiel</label>
             {{ form.gameinfo }}
