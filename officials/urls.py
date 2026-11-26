@@ -38,6 +38,7 @@ OFFICIALS_LIST_FOR_ALL_TEAMS = "view-officials-list-for-all-teams"
 OFFICIALS_LIST_FOR_ALL_TEAMS_AND_YEAR = "view-officials-list-for-all-teams-and-year"
 OFFICIALS_GAME_OFFICIALS_APPEARANCE = "view-officials-game-officials-appearance"
 OFFICIALS_GAME_OFFICIALS_MINE = "view-officials-game-officials-mine"
+OFFICIALS_GAME_OFFICIALS_OPEN = "view-officials-game-officials-open"
 OFFICIALS_MY_ASSIGNMENTS_NAV = "view-officials-my-assignments-navigation"
 OFFICIALS_GAME_OFFICIALS_APPEARANCE_FOR_YEAR = (
     "view-officials-game-officials-appearance-for-year"
@@ -113,6 +114,12 @@ urlpatterns = [
         GameOfficialListView.as_view(),
         {"mine": True},
         name=OFFICIALS_GAME_OFFICIALS_MINE,
+    ),
+    path(
+        "einsaetze/offen/",
+        GameOfficialListView.as_view(),
+        {"open": True},
+        name=OFFICIALS_GAME_OFFICIALS_OPEN,
     ),
     path(
         "meine-einsaetze/",

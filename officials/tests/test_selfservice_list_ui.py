@@ -174,12 +174,12 @@ class TestEinsaetzeListUi(SelfServiceUiTestBase):
 
         assert f'href="/gamedays/gameday/{gameday.pk}/"' in content
 
-    def test_mine_filter_toggle_is_unchanged(self):
+    def test_mine_filter_toggle_uses_canonical_url(self):
         self.login()
 
         content = self.page()
 
-        assert 'href="?mine=1"' in content
+        assert 'href="/officials/einsaetze/meine/"' in content
         assert "Nur meine Einträge" in content
 
 

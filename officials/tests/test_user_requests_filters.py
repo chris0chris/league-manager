@@ -148,14 +148,15 @@ class OpenFilterTest(TestCase):
     def test_open_toggle_activates_and_restores_the_normal_list(self):
         normal = self._page().content.decode()
         activate = _toggle_href(normal)
-        assert "open=1" in activate
+        assert activate == "/officials/einsaetze/offen/"
 
-        active = self.client.get(LIST_URL + activate).content.decode()
-        assert self._row_ids(self._page({"open": "1"})) == {self.open_row.pk}
+        active_response = self.client.get(activate)
+        active = active_response.content.decode()
+        assert self._row_ids(active_response) == {self.open_row.pk}
         restore = _toggle_href(active)
-        assert "open=1" not in restore
+        assert restore == "/officials/einsaetze/"
 
-        restored = self.client.get(LIST_URL + restore)
+        restored = self.client.get(restore)
         assert restored.context["open_filter"] is False
         assert self._row_ids(restored) == {
             self.own_mapped.pk,

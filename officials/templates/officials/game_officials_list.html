@@ -23,14 +23,14 @@
         <p>
             {% if moodle_official_id %}
             <a class="btn btn-sm {% if mine_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}"
-               href="?{% if not mine_filter %}mine=1{% endif %}">
+               href="{% if mine_filter %}{% url 'view-officials-game-officials-appearance' %}{% else %}{% url 'view-officials-game-officials-mine' %}{% endif %}">
                 {% if mine_filter %}Alle Einträge zeigen{% else %}Nur meine Einträge{% endif %}
             </a>
             <a class="btn btn-sm btn-outline-primary"
                href="{{ add_assignment_url }}?season={{ season }}">Einsatz nachtragen</a>
             {% endif %}
             <a class="btn btn-sm {% if open_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}"
-               href="?{% if not open_filter %}open=1{% endif %}">Nur ? Einträge</a>
+               href="{% if open_filter %}{% url 'view-officials-game-officials-appearance' %}{% else %}{% url 'view-officials-game-officials-open' %}{% endif %}">Nur ? Einträge</a>
         </p>
         {% endif %}
         {% include 'utils/year_filter.html' %}

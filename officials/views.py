@@ -280,9 +280,11 @@ class GameOfficialListView(View):
             game_officials = game_officials.filter(
                 Q(official_id=acting_official.pk) | Q(pk__in=matching_open_ids)
             )
-        # "Nur ? Einträge": intersect with the mine filter above, so
-        # ?mine=1&open=1 still shows unmapped rows only.
-        open_filter = request.GET.get("open") == "1"
+        # The canonical /einsaetze/offen/ route passes open=True as a URL
+        # kwarg; ?open=1 stays supported for existing links/bookmarks. Like
+        # the mine filter, it intersects with the other filter above, so the
+        # composable query-param form (?mine=1&open=1) keeps working.
+        open_filter = bool(kwargs.get("open")) or request.GET.get("open") == "1"
         if open_filter:
             game_officials = game_officials.filter(official__isnull=True)
         game_officials = game_officials.order_by("gameinfo__gameday__date")
