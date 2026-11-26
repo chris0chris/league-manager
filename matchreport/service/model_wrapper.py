@@ -4,6 +4,7 @@ import pandas as pd
 from django.db.models import OuterRef, Subquery
 from django.urls import reverse
 from django.utils.html import escape, format_html
+from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 
 from league_manager.utils.html import escape_cell
@@ -415,16 +416,28 @@ class MachtreportModelWrapper:
             official_id,
         )
 
-    @staticmethod
-    def _official_action_cell(game_official_id, official_id):
+    def _official_action_cell(self, game_official_id, official_id):
         # "Aktion" column of the officials table, which reaches the template
         # via |safe. Both URLs are resolved with reverse() from the GameOfficial
         # row's own pk - the write logic stays in the self-service views. The
         # free-text GameOfficial.name never enters this cell, so there is no
         # injection path from it; format_html() still escapes the URLs.
+        #
+        # Both links carry the gameday detail page as a urlencoded ?next= so
+        # the self-service confirm page - and the redirect after the write or
+        # "Abbrechen" - returns here instead of to the Einsätze list.
         game_official_id = int(game_official_id)
-        claim_url = reverse(
-            SELF_SERVICE_CLAIM_URL_NAME, kwargs={"pk": game_official_id}
+        next_query = urlencode(
+            {
+                "next": reverse(
+                    "matchreport-gameday-detail",
+                    kwargs={"pk": int(self.gameday_pk)},
+                )
+            }
+        )
+        claim_url = (
+            f"{reverse(SELF_SERVICE_CLAIM_URL_NAME, kwargs={'pk': game_official_id})}"
+            f"?{next_query}"
         )
         links = [
             format_html(
@@ -435,8 +448,9 @@ class MachtreportModelWrapper:
         if not pd.isna(official_id):
             # Only an assigned row can be unassigned; a free-text-only entry
             # has no official to clear.
-            unassign_url = reverse(
-                SELF_SERVICE_UNASSIGN_URL_NAME, kwargs={"pk": game_official_id}
+            unassign_url = (
+                f"{reverse(SELF_SERVICE_UNASSIGN_URL_NAME, kwargs={'pk': game_official_id})}"
+                f"?{next_query}"
             )
             links.append(
                 format_html(

@@ -119,16 +119,19 @@ def restore_moodle_session(request) -> RestoreResult:
 
 
 def safe_next(request, default: str | None = None) -> str:
-    """The ``next`` target if it is a page inside ``/officials/``, else the
-    sign-up list.
+    """The ``next`` target if it is a page inside ``/officials/`` or
+    ``/matchreport/``, else the sign-up list.
 
     Anything absolute (``https://…``, protocol-relative ``//host``) or outside
     the app (``/admin/``) is discarded, so the login page cannot be used as an
-    open redirect.
+    open redirect. Matchreport gameday pages are allowed because the
+    "Zuordnen"/"Zuordnung aufheben" links there pass their detail URL along.
     """
     fallback = default or reverse("view-officials-sign-up-list")
     target = (request.POST.get("next") or request.GET.get("next") or "").strip()
-    if not target.startswith("/officials/") or target.startswith("//"):
+    if not (
+        target.startswith("/officials/") or target.startswith("/matchreport/")
+    ) or target.startswith("//"):
         return fallback
     parsed = urlsplit(target)
     if parsed.scheme or parsed.netloc:
@@ -330,6 +333,9 @@ class ClaimGameOfficialView(SelfServiceWriteMixin, View):
             .first(),
             "is_mapped": row.official_id is not None,
             "can_reclaim": can_reclaim,
+            # Validated target for the "Abbrechen" link; the hidden POST field
+            # is revalidated by safe_next() when the form is submitted.
+            "next_url": safe_next(request, default=reverse(ASSIGNMENTS_URL_NAME)),
             **selfservice_banner_context(request),
         }
 
@@ -466,6 +472,7 @@ class UnassignGameOfficialView(SelfServiceWriteMixin, View):
                 "away": game.gameresult_set.filter(isHome=False)
                 .values_list("team__description", flat=True)
                 .first(),
+                "next_url": safe_next(request, default=reverse(ASSIGNMENTS_URL_NAME)),
                 **selfservice_banner_context(request),
             },
         )
@@ -601,6 +608,21 @@ class ExternalGameDeleteView(_ExternalEntryMixin, View):
 DFFL_DELETE_URL_NAME = "view-officials-selfservice-dffl-delete"
 
 
+def dffl_return_url(request, official: Official | None, season: int) -> str:
+    """Where a DFFL unassign returns: the validated ``next``, else the profile.
+
+    The profile gamelist is the historical destination, so flows without a
+    ``next`` (e.g. the profile page's own "Zuordnung aufheben" button) keep
+    behaving exactly as before.
+    """
+    fallback = (
+        profile_gamelist_url(official, season)
+        if official is not None
+        else reverse(ASSIGNMENTS_URL_NAME)
+    )
+    return safe_next(request, default=fallback)
+
+
 class DfflGameDeleteView(SelfServiceWriteMixin, View):
     """Remove the official from one of their own DFFL assignments.
 
@@ -627,6 +649,9 @@ class DfflGameDeleteView(SelfServiceWriteMixin, View):
                 .values_list("team__description", flat=True)
                 .first(),
                 "future_warning": game.gameday.date > date.today(),
+                "next_url": dffl_return_url(
+                    request, row.official, game.gameday.date.year
+                ),
                 **selfservice_banner_context(request),
             },
         )
@@ -639,7 +664,7 @@ class DfflGameDeleteView(SelfServiceWriteMixin, View):
         # keeping name, position, game and every other value 1:1.
         GameOfficial.objects.filter(pk=row.pk).update(official=None)
         messages.success(request, "Zuordnung aufgehoben - der Einsatz bleibt erhalten.")
-        return redirect(profile_gamelist_url(official, season))
+        return redirect(dffl_return_url(request, official, season))
 
     @staticmethod
     def _get_row(request, pk) -> GameOfficial:

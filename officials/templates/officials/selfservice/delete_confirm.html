@@ -64,9 +64,10 @@
     </table>
     <form method="post">
         {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next_url }}">
         <button class="btn btn-danger" type="submit">Zuordnung aufheben</button>
         <a class="btn btn-outline-danger"
-           href="{% url 'view-officials-profile-gamelist' pk=row.official_id season=game.gameday.date.year %}">Abbrechen</a>
+           href="{{ next_url }}">Abbrechen</a>
     </form>
     {% endif %}
 </div>
