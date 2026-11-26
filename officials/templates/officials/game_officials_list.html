@@ -16,17 +16,21 @@
             Personen die ein <b>Fragezeichen</b> (<b>?</b>) hinter dem Namen haben, deren Spiele werden nicht gezählt,
             da für diese kein Eintrag gefunden wurde. Entweder haben diese keine Lizenz oder
             der Name wurde nicht über die Scorecard ausgewählt / gesucht.<br/>
-            Bei Fragen bitte an die Turnierleitung wenden.
+            Zum Anpassen bitte über den folgenden Button anmelden.
         </p>
         {% include 'officials/selfservice/_banner.html' %}
-        {% if moodle_official_id %}
+        {% if moodle_official_id or is_staff %}
         <p>
+            {% if moodle_official_id %}
             <a class="btn btn-sm {% if mine_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}"
                href="?{% if not mine_filter %}mine=1{% endif %}">
                 {% if mine_filter %}Alle Einträge zeigen{% else %}Nur meine Einträge{% endif %}
             </a>
             <a class="btn btn-sm btn-outline-primary"
                href="{{ add_assignment_url }}?season={{ season }}">Einsatz nachtragen</a>
+            {% endif %}
+            <a class="btn btn-sm {% if open_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+               href="?{% if not open_filter %}open=1{% endif %}">Nur ? Einträge</a>
         </p>
         {% endif %}
         {% include 'utils/year_filter.html' %}

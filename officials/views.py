@@ -280,6 +280,11 @@ class GameOfficialListView(View):
             game_officials = game_officials.filter(
                 Q(official_id=acting_official.pk) | Q(pk__in=matching_open_ids)
             )
+        # "Nur ? Einträge": intersect with the mine filter above, so
+        # ?mine=1&open=1 still shows unmapped rows only.
+        open_filter = request.GET.get("open") == "1"
+        if open_filter:
+            game_officials = game_officials.filter(official__isnull=True)
         game_officials = game_officials.order_by("gameinfo__gameday__date")
         is_staff = request.user.is_staff
         team_name = request.user.username
@@ -319,6 +324,7 @@ class GameOfficialListView(View):
                 acting_official=acting_official,
             ),
             "mine_filter": mine,
+            "open_filter": open_filter,
             "claim_url_name": CLAIM_URL_NAME,
             "add_assignment_url": reverse(ADD_ASSIGNMENT_URL_NAME),
             "unassign_url_name": UNASSIGN_URL_NAME,

@@ -308,7 +308,7 @@ class TestNeutralGermanCopy(UserRequestTestBase):
         content = self.client.get(reverse(LIST_URL_NAME)).content.decode()
 
         assert "c.kaempfe@afvd.de" not in content
-        assert "Bei Fragen" in content
+        assert "Zum Anpassen" in content
 
     def test_403_page_has_no_personal_contact_address(self):
         content = render_to_string("403.html")
